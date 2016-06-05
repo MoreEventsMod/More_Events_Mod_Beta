@@ -1,0 +1,275 @@
+namespace = war_events_sk
+
+
+#######################################################
+#               CODER: SHIROKITSUNE                   #
+#													  #
+#               RESERVED NAMESPACE!					  #
+#		                                              #
+#######################################################
+
+
+#TRIGGERED FROM ON MONTHLY BOMBARDMENT, THIS = PLANET FROM = ENEMY EMPIRE, CAN USE IN PLANET LIMIT orbital_bombardment = limited, orbital_bombardment = full, orbital_bombardment = soft
+planet_event = {
+	id = war_events_sk.200
+
+	is_triggered_only = yes
+	
+	hide_window = yes
+	
+	trigger = {
+		owner = { is_country_type = default }
+		FROM = { is_country_type = default }
+	}
+	
+	#FLAG AND CHECKS
+	immediate = {
+		if = {
+			limit = {
+				orbital_bombardment = soft
+			}
+			remove_planet_flag = had_soft_bombardment
+			remove_planet_flag = had_limited_bombardment
+			remove_planet_flag = had_full_bombardment
+			set_timed_planet_flag = {
+				flag = had_soft_bombardment
+				days = 90
+			}
+		}
+		if = {
+			limit = {
+				orbital_bombardment = limited
+			}
+			remove_planet_flag = had_soft_bombardment
+			remove_planet_flag = had_limited_bombardment
+			remove_planet_flag = had_full_bombardment
+			set_timed_planet_flag = {
+				flag = had_limited_bombardment
+				days = 90
+			}
+		}
+		if = {
+			limit = {
+				orbital_bombardment = full
+			}
+			remove_planet_flag = had_soft_bombardment
+			remove_planet_flag = had_limited_bombardment
+			remove_planet_flag = had_full_bombardment
+			set_timed_planet_flag = {
+				flag = had_full_bombardment
+				days = 90
+			}
+		}
+		random = {
+			chance = 3
+			planet_event = { id = war_events_sk.205 }
+		}
+	}
+}
+
+planet_event = {
+	id = war_events_sk.205
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		ROOT = { save_event_target_as = planet_bombarded }
+		owner = { save_event_target_as = planet_bombarded_owner }
+		FROMFROM = { save_event_target_as = planet_bombarder }
+		
+		if = {
+			limit = { #IF THE PLANET CONTROLLER IS STILL THE OWNER
+				controller = { is_country = event_target:planet_bombarded_owner }
+			}
+			planet_event = { id = war_events_sk.210 }
+		}
+	}
+}
+
+#PLANET BOMBARDED EVENT
+planet_event = {
+	id = war_events_sk.210
+	title = war_events_sk.210.name
+	desc = {
+		trigger = {
+			switch = {
+				trigger = has_planet_flag
+				had_soft_bombardment = { text = war_events_sk.210.soft.desc }
+				had_limited_bombardment = { text = war_events_sk.210.limited.desc }
+				had_full_bombardment = { text = war_events_sk.210.full.desc }
+			}
+		}
+	}
+	picture = GFX_evt_burning_settlement
+	show_sound = event_planetary_riot
+	location = THIS
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = {
+			has_planet_flag = war_events_sk_bombarded
+		}
+	}
+	
+	immediate = {
+		set_timed_planet_flag = {
+			flag = war_events_sk_bombarded
+			days = 3600
+		}
+	}
+	
+	option = {
+		name = war_events_sk.210.a #FIGHT! FOR YOUR FFFFAMILY! AND FOR ME.
+		trigger = {
+			OR = {
+				owner = { has_ethic = ethic_fanatic_militarist }
+				owner = { has_ethic = ethic_militarist }
+				AND = {
+					has_planet_flag = had_full_bombardment
+					NOR = {
+						owner = { has_ethic = ethic_pacifist }
+						owner = { has_ethic = ethic_fanatic_pacifist }
+					}
+				}
+			}
+			NOT = { has_planet_flag = recent_pop_army }
+		}
+		hidden_effect = {
+			set_timed_planet_flag = {
+				flag = recent_pop_army
+				days = 3600
+			}
+		}
+		create_army = {
+			name = random
+			owner = event_target:planet_bombarded_owner
+			species = owner_main_species
+			type = "rebel_army"
+		}
+		if = {
+			limit = {
+				num_pops > 4
+			}
+			create_army = {
+				name = random
+				owner = event_target:planet_bombarded_owner
+				species = owner_main_species
+				type = "rebel_army"
+			}
+		}
+		if = {
+			limit = {
+				num_pops > 8
+			}
+			create_army = {
+				name = random
+				owner = event_target:planet_bombarded_owner
+				species = owner_main_species
+				type = "rebel_army"
+			}
+		}
+		if = {
+			limit = {
+				num_pops > 12
+			}
+			create_army = {
+				name = random
+				owner = event_target:planet_bombarded_owner
+				species = owner_main_species
+				type = "rebel_army"
+			}
+		}
+		if = {
+			limit = {
+				num_pops > 16
+			}
+			create_army = {
+				name = random
+				owner = event_target:planet_bombarded_owner
+				species = owner_main_species
+				type = "rebel_army"
+			}
+		}
+		if = {
+			limit = {
+				num_pops > 20
+			}
+			create_army = {
+				name = random
+				owner = event_target:planet_bombarded_owner
+				species = owner_main_species
+				type = "rebel_army"
+			}
+		}
+		if = {
+			limit = {
+				num_pops > 24
+			}
+			create_army = {
+				name = random
+				owner = event_target:planet_bombarded_owner
+				species = owner_main_species
+				type = "rebel_army"
+			}
+		}
+	}
+	
+	option = {
+		name = war_events_sk.210.b #ENDURE! THE WAR WILL END ANYTIME... MAYBE.
+	}
+
+	option = {
+		name = war_events_sk.210.c #UNDERSTOOD. SUBMIT PEACEFULLY TO THEM...
+		trigger = {
+			OR = {
+				AND = {
+					NOR = {
+						owner = { has_ethic = ethic_fanatic_militarist }
+						owner = { has_ethic = ethic_militarist }
+					}
+					has_planet_flag = had_full_bombardment
+				}
+				AND = {
+					OR = {
+						owner = { has_ethic = ethic_pacifist }
+						owner = { has_ethic = ethic_fanatic_pacifist }
+					}
+					has_planet_flag = had_limited_bombardment
+				}
+			}
+			NOT = { has_planet_flag = recent_pop_army }
+		}
+		every_planet_army = {
+			remove_army = yes
+		}
+		set_controller = event_target:planet_bombarder
+		hidden_effect = {
+			set_timed_planet_flag = {
+				flag = voluntary_surrender_210_sk
+				days = 90
+			}
+			event_target:planet_bombarder = {
+				country_event = { id = war_events_sk.215 }
+			}
+		}
+	}
+}
+
+#NOTIFICATION, PLANET BOMBARDED HAS SUBMITTED
+country_event = {
+	id = war_events_sk.215
+	title = war_events_sk.215.name
+	desc = war_events_sk.215.desc
+	picture = GFX_evt_burning_settlement
+	show_sound = event_radio_chatter_03
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = war_events_sk.215.a #VERY GOOD
+	}
+	
+}
