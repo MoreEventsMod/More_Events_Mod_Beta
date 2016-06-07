@@ -11,13 +11,30 @@ planet_event = {
 	
 	hide_window = yes
 	
+	trigger = {
+#		any_pop = {
+#			has_modifier = pop_recently_conquered 
+#		}
+#		FROM = { NOT = { is_at_war_with = FROMFROM } }
+		NOT = { has_planet_flag = recently_occupied }
+		FROM = { is_standard_country = yes }
+		FROMFROM = { is_standard_country = yes }
+	}
+	
 	#FLAG AND CHECKS
 	immediate = {
+#		if = {
+#			limit = {
+#				FROM = { is_at_war_with = FROMFROM }
+#			}
+#			break = yes
+#		}
 		if = {
 			limit = {
 				any_pop = {
-					has_modifier = pop_recently_conquered
+					has_modifier = pop_recently_conquered 
 				}
+#				FROM = { NOT = { is_at_war_with = FROMFROM } } #BBUGGED
 			}
 			ROOT = { save_event_target_as = planet_occupied }
 			FROM = { save_event_target_as = planet_owner }
@@ -47,22 +64,34 @@ planet_event = {
 country_event = {
 	id = information_events_sk.100
 	hide_window = yes
+#	title = TESTTITLE
+#	desc = TESTDESC
 	is_triggered_only = yes
 	
+#	option = {
+#		name = TEST
+#	}
+	
 	trigger = {
+		THIS = { is_standard_country = yes } #IF THE COUNTRIES ARE DEFAULT OR FALLEN EMPIRE
+		FROM = { is_standard_country = yes }
 		OR = {
-			THIS = {
+			THIS = { #IF THE PLANET OWNER IS THE ATTACKER OR THE OWNER ALLY
 				OR = {
 					is_country = FROM
 					is_in_alliance_with = FROM
 					is_in_federation_with = FROM
 				}
-			}
+			} #...OR IF THE ATTACKER IS AT WAR IS THE OWNER
 			THIS = { is_at_war_with = FROM }
 		}
 	}
 	
 	immediate = {
+		set_timed_planet_flag = {
+			flag = recently_occupied
+			days = 2
+		}
 		if = {
 			limit = {
 				THIS = { is_at_war_with = FROM }
@@ -99,7 +128,7 @@ country_event = {
 							}
 						}
 					}
-					ROOT = { save_event_target_as = planet_ex_conqueror }
+					FROMFROM.controller = { save_event_target_as = planet_ex_conqueror }
 					FROMFROM = { save_event_target_as = planet_liberated }
 					FROMFROM.owner = { save_event_target_as = planet_owner }
 					FROMFROM = {
@@ -112,11 +141,12 @@ country_event = {
 						limit = {
 							has_country_edict = extra_information_sk
 							OR = {
-								has_communications = ROOT
+								has_communications = FROMFROM.controller
 								has_communications = FROMFROM.owner
 							}
-							NOT = { is_country = ROOT }
+							NOT = { is_country = FROMFROM.controller }
 							NOT = { is_country = FROMFROM.owner }
+							NOT = { is_at_war_with = FROMFROM.owner }
 						}
 						country_event = { id = information_events_sk.120 }
 					}
@@ -175,7 +205,6 @@ planet_event = {
 			}
 		}
 	}
-	
 }
 
 #NOTIFICATION OF PLANET OCCUPIED		
@@ -528,61 +557,47 @@ planet_event = {
 	is_triggered_only = yes
 	
 	immediate = {
-		while = {
+		every_country = {
 			limit = {
+				is_ai = no
+				NOT = { is_country = ROOT.owner }
+				has_communications = ROOT.owner
+				has_country_edict = extra_information_sk
+				NOT = { has_country_flag = colonization_informed }	
 				OR = {
-					owner = {
-						any_neighbor_country = {
-							is_ai = no
-							has_communications = ROOT.owner
-							has_country_edict = extra_information_sk
-							NOT = { has_country_flag = colonization_informed }
-						}
+					ROOT = {
+						is_planet_class = pc_gaia
+						planet_size > 19
 					}
-					AND = {
-						ROOT = {
-							is_planet_class = pc_gaia
-							planet_size > 19
-						}
-						any_country = {
-							is_ai = no
-							has_communications = ROOT.owner
-							has_country_edict = extra_information_sk
-							NOT = { has_country_flag = colonization_informed }						
-						}
+					any_owned_planet = {
+						distance = {
+							source = ROOT
+							max_distance = 120
+							min_distance = 1
+						}										
 					}
 				}
 			}
-			owner = {
-				random_neighbor_country = {
-					limit = {
-						is_ai = no
-						has_communications = ROOT.owner
-						has_country_edict = extra_information_sk
-						NOT = { has_country_flag = colonization_informed }
-					}
-					set_timed_country_flag = {
-						flag = colonization_informed
-						days = 2
-					}
-					ROOT = {
-						random_pop = {
-							save_event_target_as = first_pop
-						}
-					}
-					ROOT = {
-						switch = {
-							trigger = is_planet_class
-							pc_desert = { PREV = { country_event = { id = information_events_sk.201 } } }
-							pc_tropical = { PREV = { country_event = { id = information_events_sk.202 } } }
-							pc_arid = { PREV = { country_event = { id = information_events_sk.203 } } }
-							pc_continental = { PREV = { country_event = { id = information_events_sk.204 } } }
-							pc_ocean = { PREV = { country_event = { id = information_events_sk.205 } } }
-							pc_tundra = { PREV = { country_event = { id = information_events_sk.206 } } }
-							pc_arctic = { PREV = { country_event = { id = information_events_sk.207 } } }
-							pc_gaia = { PREV = { country_event = { id = information_events_sk.208 } } }
-						}
-					}
+			set_timed_country_flag = {
+				flag = colonization_informed
+				days = 1
+			}
+			ROOT = {
+				random_pop = {
+					save_event_target_as = first_pop
+				}
+			}
+			ROOT = {
+				switch = {
+					trigger = is_planet_class
+					pc_desert = { PREV = { country_event = { id = information_events_sk.201 } } }
+					pc_tropical = { PREV = { country_event = { id = information_events_sk.202 } } }
+					pc_arid = { PREV = { country_event = { id = information_events_sk.203 } } }
+					pc_continental = { PREV = { country_event = { id = information_events_sk.204 } } }
+					pc_ocean = { PREV = { country_event = { id = information_events_sk.205 } } }
+					pc_tundra = { PREV = { country_event = { id = information_events_sk.206 } } }
+					pc_arctic = { PREV = { country_event = { id = information_events_sk.207 } } }
+					pc_gaia = { PREV = { country_event = { id = information_events_sk.208 } } }
 				}
 			}
 		}
@@ -1300,40 +1315,6 @@ country_event = {
 		name = information_events_sk.201.d
 	}
 }
-
-#TRIGGERS FROM on_full_orbital_bombardment
-country_event = {
-	id = information_events_sk.300
-	hide_window = yes
-	is_triggered_only = yes
-	
-	immediate = {
-		every_country = {
-			limit = {
-				is_ai = no
-				has_country_edict = extra_information_sk
-				has_communications = FROM.owner
-				NOT = { is_at_war_with = FROM.owner }
-			}	
-			country_event = { id = information_events_sk.310 } #NOTIFICATION OF PLANET FULLY BOMBARDED
-		}
-	}
-}
-
-country_event = {
-	id = information_events_sk.310
-	title = information_events_sk.310.name
-	desc = information_events_sk.310.desc
-	picture = GFX_evt_nuclear_explosion
-	location = FROMFROM
-	
-	is_triggered_only = yes
-	
-	option = {
-		name = OK
-	}
-}
-
 
 planet_event = {
 	id = information_events_sk.400
