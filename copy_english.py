@@ -12,7 +12,7 @@ for filename in os.listdir('localisation')[:]:
 	for target in targetLanguages:
 		newFilename = filename.replace(sourceLanguage, target)
 		if newFilename == filename: continue	#Only copy files that actually contained l_english
-		if os.path.isfile(newFilename) and not overwrite: continue
+		if os.path.isfile('localisation/' + newFilename) and not overwrite: continue
 		targetFile = open('localisation/' + newFilename, 'w+')
 		for line in sourceFile:
 			targetFile.write(line.replace(sourceLanguage + ':', target + ':'))
