@@ -25,7 +25,7 @@ for opt, val in options:
 		print("    e.g. -i l_braz_por,l_french")
 		print("-o, --overwrite :")
 		print("    If this option is set, will overwrite all localisation files in")
-		print("    non-ignored, non-source languages.")
+		print("    non-ignored, non-source languages (even if they already exist).")
 		print("-s, --source= :")
 		print("    The language to export from. Default is l_english.")
 	elif opt in ("-o", "--overwrite"):
