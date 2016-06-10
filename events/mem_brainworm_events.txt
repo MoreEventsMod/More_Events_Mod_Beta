@@ -163,7 +163,7 @@ country_event = {
                 any_pop = { has_pop_flag = mem_brainworm_thrall }
             }
             random_list = {
-                10 = {
+                100 = {
                     random_pop = {
                         limit = {
                             NOT = { has_pop_flag = mem_brainworm_thrall }
@@ -171,7 +171,7 @@ country_event = {
                         set_pop_flag = mem_brainworm_thrall
                     }
                 }
-                90 = {
+                0 = {
                 }
             }
         }
@@ -183,10 +183,10 @@ country_event = {
                 }
             }
             random_list = {
-                5 = {
+                100 = {
                     random_pop = { set_pop_flag = mem_brainworm_thrall }
                 }
-                95 ={
+                0 ={
                 }
             }
         }
@@ -576,6 +576,8 @@ country_event = {
     picture = GFX_evt_brainworm
     show_sound = event_red_alert
     is_triggered_only = yes
+
+
     immediate = {
         #Setup Brainworm Species and Country
         if = {
@@ -610,24 +612,41 @@ country_event = {
                         }
                     }
                 }
-                create_country = {
+                #Create mindworm country
+                create_rebels = {
                     name = "Ephialtes Thralldom"
                     government = transcendent_empire
                     species = last_created_species
                     name_list = random
                     flag = random
-                    type = adversary
+                    type = faction
                     ethos = {
                         ethic = "ethic_spiritualist"
                         ethic = "ethic_militarist"
                         ethic = "ethic_collectivist"
                     }
                 }
-                while = {
-                    limit = { any_pop = { NOT = { is_same_species = last_created } } }
-                    random_pop = {
-                        limit = { NOT = { is_same_species = last_created } }
-                        change_pop_species = last_created
+                last_created_country = {
+                    add_war_demand = {
+                    type = "liberate_country"
+                    parameter:country = this
+                    warscore_cost = 50
+                    target = this
+                    }
+                }
+                #Change all of the pops on this planet to mindworm pops
+                every_owned_pop = {
+                    limit = {
+                        NOT = { is_same_species = last_created }
+                    }
+                    change_pop_species = last_created
+                    PREV = {
+                        create_army = {
+                            name = "Ephialtes Mindthralls"
+                            type = "gene_warrior_army"
+                            species = last_created
+                            owner = last_created
+                        }
                     }
                 }
             }
@@ -637,61 +656,50 @@ country_event = {
 			}
             last_created_country = { set_country_flag = mem_brainworm_nation }
         }
+######### End of brainworm species setup ##############
+
+
+
+
         #Insurrections Happen
         every_owned_planet = {
             limit = { 
                 is_capital = no
                 any_pop = { has_pop_flag = mem_brainworm_thrall }
             }
-            while = {
-                limit = { 
-                    any_pop = { 
-                        AND = { 
-                            has_pop_flag = mem_brainworm_thrall
-                            NOT = { is_same_species = last_created }
+            #Every infected pop on the planet is changed to the mindworm species.
+            every_owned_pop = {
+                IF = {
+                    limit = {
+                        has_pop_flag = mem_brainworm_thrall
+                        NOT = { is_same_species = last_created }
+                    }
+                    change_pop_species = last_created
+                    set_pop_flag = mem_brainworm_thrall
+
+                    #Create armies proportional to mindwormed citizens.
+                    #Most will probably fail in their attacks but will give a nice shock.
+                    PREV = {
+                        create_army = {
+                            name = "Ephialtes Mindthralls"
+                            type = "gene_warrior_army"
+                            species = last_created
+                            owner = last_created
+                        }
+                        create_army = {
+                            name = "Ephialtes Mindthralls"
+                            type = "gene_warrior_army"
+                            species = last_created
+                            owner = last_created
+                        }
+                        create_army = {
+                            name = "Ephialtes Mindthralls"
+                            type = "gene_warrior_army"
+                            species = last_created
+                            owner = last_created
                         }
                     }
                 }
-                random_pop = {
-                    limit = { has_pop_flag = mem_brainworm_thrall }
-                    change_pop_species = last_created
-                }
-            }
-            create_army = {
-                name = "Ephialtes Mindthralls"
-                type = "assault_army"
-                species = last_created
-                owner = last_created
-            }
-            create_army = {
-                name = "Ephialtes Mindthralls"
-                type = "assault_army"
-                species = last_created
-                owner = last_created
-            }
-            create_army = {
-                name = "Ephialtes Mindthralls"
-                type = "assault_army"
-                species = last_created
-                owner = last_created
-            }
-            create_army = {
-                name = "Ephialtes Mindthralls"
-                type = "assault_army"
-                species = last_created
-                owner = last_created
-            }
-            create_army = {
-                name = "Ephialtes Mindthralls"
-                type = "assault_army"
-                species = last_created
-                owner = last_created
-            }
-            create_army = {
-                name = "Ephialtes Mindthralls"
-                type = "assault_army"
-                species = last_created
-                owner = last_created
             }
 		}
         #Fleet Sabotage
