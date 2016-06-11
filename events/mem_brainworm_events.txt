@@ -45,6 +45,9 @@ namespace = mem_brainworm_event
 @tier4researchmin = 150
 @tier4researchmax = 500
 
+################################################################################
+################################################################################
+################################################################################
 #Initial Brainworm Anomaly Event
 ship_event = {
 	id = mem_brainworm_event.1
@@ -110,7 +113,13 @@ ship_event = {
 		}
 	}
 }
+################################################################################
+################################################################################
+################################################################################
 
+################################################################################
+##################### YEARLY PULSE EVENTS ######################################
+################################################################################
 #Brainworm Infection Checks
 #Yearly Pulse
 event = {
@@ -255,8 +264,8 @@ country_event = {
         name = "mem_brainworm_event.501.c"
         hidden_effect = {
             random_list = {
-                90 = { country_event = { id = mem_brainworm_event.5013 days = 30 random = 15 } }
-                10 = { country_event = { id = mem_brainworm_event.5014 days = 30 random = 15 } }
+                90 = { country_event = { id = mem_brainworm_event.5013 days = 30 random = 15 } } #Investigation fails
+                10 = { country_event = { id = mem_brainworm_event.5014 days = 30 random = 15 } } #Investigation success, brainworms revealed.
             }
         }
     }
@@ -344,7 +353,13 @@ country_event = {
         name = TERRIBLE
     }
 }
+################################################################################
+################################################################################
+################################################################################
 
+################################################################################
+#################### DISCOVERY OF BRAINWORMS ###################################
+################################################################################
 #Brainworms Discovered
 country_event = {
     id = mem_brainworm_event.504
@@ -722,7 +737,100 @@ country_event = {
     }
 }
 
+
+############ CLEARING EVENT ##############
+
 #Clearing Brainworms Off A Planet Trigger
 #planet_event = {
 #    
 #has_ground_combat = no
+
+#Give clear opportunity
+planet_event = {
+    id = mem_brainworm_event.1000
+    title = "Reconquest"
+    desc = "We have regained control of a [Root.GetName] attacked by the mindworms. What should we do with the still infected population?"
+    picture = GFX_evt_brainworm
+    is_triggered_only = yes
+
+    option = {
+        name = "We must terminate them. All of them."
+        every_owned_pop = {
+            purge = yes
+        }
+    }
+    IF = {
+        limit = { NOT = { has_country_flag = perfected_brainworm_extraction } }
+        option = {
+            name = "Figure out how to extract these parasites."
+            enable_special_project = {
+                name = "BRAINWORM_EXTRACTION_PROJECT"
+                location = FROM
+            }
+        }
+    ELSE = {
+        option = {
+            name = "Set up extraction facilities."
+            enable_special_project = {
+                name = "BRAINWORM_EXTRACTION_PROJECT"
+                location = FROM
+            }
+        }
+    }
+    }
+
+    option = {
+        name = "They are living beings too. Let them live."
+    }
+}
+
+
+
+#Scientists sucessfully extract the worm
+planet_event = {
+    id = mem_brainworm_event.1010 
+    title = "Successfull Extraction!"
+    desc = "Our scientists at [Root.GetName] has successfully extracted one of the worms! We will now be able to cure all of our infected citizens"
+    option = {
+        name = EXCELLENT
+        hidden_effect = {
+            owner = { set_country_flag = perfected_brainworm_extraction }
+        }
+    }
+}
+#Scientists fail to extract the worm
+planet_event = {
+    id = mem_brainworm_event.1010 
+    title = "Failed Extraction!"
+    desc = "Our scientists at [Root.GetName] failed at extracting one of the worms! The life of the infected citizen could not be saved."
+    option = {
+        random_list = {
+            33 = {
+                name = TERRIBLE
+            }
+            33 = {
+                name = UNFORTUNATE
+            }
+            33 = {
+                name = OOPS
+            }
+        }
+    }
+}
+
+#Scientists clear the planet
+planet_event = {
+    id = mem_brainworm_event.1010 
+    title = "Planet Cured!"
+    desc = "Our scientists at [Root.GetName] has completely cured the planet!"
+    immediate = {
+        every_owned_pop = {
+            limit = {
+                change_pop_species = owner.owner_species #Might have to change this depending on if species that are not the main species get infected.
+            }
+        }
+    }
+    option = {
+        name = EXCELLENT
+    }
+}
