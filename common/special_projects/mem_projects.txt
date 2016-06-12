@@ -52,15 +52,18 @@ special_project = {
 # Clearing pops of infestation
 special_project = {
 	key = "BRAINWORM_EXTRACTION_PROJECT"
-	event_chain = "specimen_procurement_chain"
+	#event_chain = "ephialtes_worm_chain"
 	cost = 0
 	days_to_research = 3 #90
 	tech_department = society_technology
-	
 	event_scope = planet_event
 	
 	
 	on_success = {
+		IF = {
+			limit = { check_variable = { which = extraction_attempts value < 1 } }
+			set_variable = { which = extraction_attempts value = 0 }
+		}
 		IF ={
 			#Until the country has completed an extraction
 			#They are very likely to fail with it killing one of the ephialtes pops
@@ -76,14 +79,22 @@ special_project = {
 				}
 				#Failed to extract worm
 				80 = {
-					planet_event = { id = mem_brainworm_event.1011 }
+					IF = {
+						#digit is how many failed attempts can preceed this before succeding
+						#essentially a 'practice makes perfect' variable
+						limit = { check_variable = { which = extraction_attempts value < 4 } }
+						planet_event = { id = mem_brainworm_event.1011 }
+					ELSE = {
+						planet_event = { id = mem_brainworm_event.1010 }
+					}
+					}
 				}
 			}
 		ELSE = {
 			planet_event = { id = mem_brainworm_event.1012 }
 		}
 		}
-		
+		change_variable = { which = extraction_attempts value = 1 }
 	}
 	on_fail = {
 	}
