@@ -819,7 +819,7 @@ country_event = {
 planet_event = {
     id = mem_brainworm_event.1000
     title = "Reconquest"
-    desc = "We have regained control of a [Root.GetName] attacked by the mindworms. What should we do with the still infected population?"
+    desc = "We have regained control of [Root.GetName] which was attacked by the mindworms. What should we do with the still infected population?"
     picture = GFX_evt_brainworm
     is_triggered_only = yes
 
@@ -829,24 +829,28 @@ planet_event = {
             purge = yes
         }
     }
-    IF = {
-        limit = { NOT = { has_country_flag = perfected_brainworm_extraction } }
-        option = {
-            name = "Figure out how to extract these parasites."
-            enable_special_project = {
-                name = "BRAINWORM_EXTRACTION_PROJECT"
-                location = FROM
-            }
-        }
-    ELSE = {
-        option = {
-            name = "Set up extraction facilities."
-            enable_special_project = {
-                name = "BRAINWORM_EXTRACTION_PROJECT"
-                location = FROM
-            }
+    option = {
+    	trigger = { 
+    		NOT = { 
+    			owner = { has_country_flag = perfected_brainworm_extraction } 
+    		}
+    	 }
+        name = "Figure out how to extract these parasites."
+        enable_special_project = {
+            name = "BRAINWORM_EXTRACTION_PROJECT"
+            location = ROOT
         }
     }
+    option = {
+    	trigger = { 
+    		owner = { has_country_flag = perfected_brainworm_extraction }
+    	}
+        name = "Set up extraction facilities."
+        enable_special_project = {
+            name = "BRAINWORM_EXTRACTION_PROJECT"
+            location = ROOT
+        }
+      
     }
 
     option = {
@@ -859,6 +863,7 @@ planet_event = {
 #Scientists sucessfully extract the worm
 planet_event = {
     id = mem_brainworm_event.1010 
+    is_triggered_only = yes
     title = "Successfull Extraction!"
     desc = "Our scientists at [Root.GetName] has successfully extracted one of the worms! We will now be able to cure all of our infected citizens"
     option = {
@@ -870,34 +875,46 @@ planet_event = {
 }
 #Scientists fail to extract the worm
 planet_event = {
-    id = mem_brainworm_event.1010 
+    id = mem_brainworm_event.1011 
+    is_triggered_only = yes
     title = "Failed Extraction!"
     desc = "Our scientists at [Root.GetName] failed at extracting one of the worms! The life of the infected citizen could not be saved."
     option = {
-        random_list = {
-            33 = {
-                name = TERRIBLE
-            }
-            33 = {
-                name = UNFORTUNATE
-            }
-            33 = {
-                name = OOPS
-            }
+    	name = "We must keep trying!"
+	    #    random_list = {
+	    #        33 = {
+	    #            text = 
+	    #        }
+	    #        33 = {
+	    #            text = UNFORTUNATE
+	    #        }
+	    #        33 = {
+	    #            text = OOPS
+	    #        }
+	    #    }
+        #
+        random_pop = {
+        	kill_pop = yes
+        }
+        enable_special_project = {
+            name = "BRAINWORM_EXTRACTION_PROJECT"
+            location = ROOT
         }
     }
 }
 
 #Scientists clear the planet
 planet_event = {
-    id = mem_brainworm_event.1010 
+    id = mem_brainworm_event.1012 
+    is_triggered_only = yes
     title = "Planet Cured!"
-    desc = "Our scientists at [Root.GetName] has completely cured the planet!"
+    desc = "Our scientists at [Root.Get +Name] has completely cured the planet!"
     immediate = {
         every_owned_pop = {
             limit = {
-                change_pop_species = owner.owner_species #Might have to change this depending on if species that are not the main species get infected.
+                is_species = "Ephialtes Worm"
             }
+            change_pop_species = owner.owner_species #Might have to change this depending on if species that are not the main species get infected.
         }
     }
     option = {
