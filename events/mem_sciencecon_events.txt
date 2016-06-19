@@ -1,0 +1,863 @@
+################### MEM Science Convention ######################
+### More Events Mod
+###
+### The Science Convention
+### Original Idea by PossessedLemon
+### Script by binaryferret. <Twitter: @binaryferret>
+### Writing by Briv
+#################################################################
+
+namespace = mem_sciencecon_event
+
+#Days it takes to prep the convention. Should take a year to prep.
+@mem_sciencecon_prep_time = 365
+
+#Days it takes for aliens to reply. Min/Max this?
+@mem_sciencecon_invite_time = 10
+
+#Material / Energy Cost Need balancing?
+@mem_sciencecon_cost_check = 249
+@mem_sciencecon_cost_minerals = 250
+@mem_sciencecon_cost_energy = 250
+@mem_sciencecon_cost_influence = 50
+@mem_sciencecon_cost_minerals_neg = -250
+@mem_sciencecon_cost_energy_neg = -250
+@mem_sciencecon_cost_influence_neg = -50
+
+#Reward for a success Are these enough?
+@mem_sciencecon_reward_1 = 150 #on your own
+@mem_sciencecon_reward_2 = 175 #1 or more
+@mem_sciencecon_reward_3 = 200 #3 or more
+@mem_sciencecon_reward_4 = 250 #6 or more
+
+# FLAGS
+# mem_sciencecon_started - event has been started. If started by someone, can not be started by someone else etc.
+# mem_sciencecon_denied - event went so bad, that all other science conventions are off the table. 
+# mem_sciencecon_invited - country has been invited. 
+# mem_sciencecon_attending - country has accepted invite and will be attending.
+# mem_sciencecon_host - country is the host of the event
+# mem_sciencecon_someone_accepted - SOMEONE anyone accepted an invite. Used to determine what text to display on complete.
+
+# Event Target
+# invite_sender - the player that sent that original invite.
+
+
+
+################### mem_sciencecon_event.1 ######################
+### Start Event
+#################################################################
+country_event = { 
+  id = mem_sciencecon_event.1
+  title = "mem_sciencecon.1.name"
+  desc = "mem_sciencecon.1.desc"
+  picture = GFX_evt_galactic_senate
+  show_sound = event_default
+  
+  mean_time_to_happen = {
+    months = 600
+  }
+
+  trigger = {
+    is_ai = no
+    num_owned_planets > 3
+    is_at_war = no
+    NOT = {
+      OR = {
+        has_country_flag = mem_sciencecon_denied
+        has_country_flag = mem_sciencecon_started
+      }
+    }
+  }
+
+  immediate = {
+    set_country_flag = mem_sciencecon_started
+    set_variable = {
+      which = mem_sciencecon_attended_count
+      value = 0
+    }
+  }
+
+  #Yes, but keeps it to our own people. 
+  option = {
+    name = mem_sciencecon.1.ayes
+    custom_tooltip = mem_sciencecon_1.a.tooltip
+    trigger = { 
+      energy > @mem_sciencecon_cost_check
+      has_country_resource = {
+          type = minerals
+          amount > @mem_sciencecon_cost_check
+      }
+    }
+
+    add_energy = @mem_sciencecon_cost_energy_neg
+    add_minerals = @mem_sciencecon_cost_minerals_neg
+        
+    hidden_effect = {
+      country_event = {id = mem_sciencecon_event.2 days = @mem_sciencecon_prep_time}
+      set_country_flag = mem_sciencecon_attending
+    }
+  }
+
+  #Displayed if we do not have enough resources
+  option = { 
+    name = mem_sciencecon.1.ano
+    custom_tooltip = mem_sciencecon_1.c.tooltip
+    trigger = { 
+      OR = { 
+        energy < @mem_sciencecon_cost_energy
+        has_country_resource = {
+          type = minerals
+          amount < @mem_sciencecon_cost_minerals
+        }
+      }
+    }
+    hidden_effect = {
+      ##Just clean up
+      country_event = {id = mem_sciencecon_event.999 days = 1}
+    }
+  }
+
+  #Yes, tries to include other empires/countries.
+  option = {
+    name = mem_sciencecon.1.b
+    custom_tooltip = mem_sciencecon_1.b.tooltip
+    trigger = {
+      ##Make sure we have enough energy, minerals.
+      energy > @mem_sciencecon_cost_check
+      has_country_resource = {
+        type = minerals 
+        amount > @mem_sciencecon_cost_check
+      }
+      has_country_resource = {
+        type = influence
+        amount > 49
+      }
+      ##Make sure we at least have communications with 1 other empire.
+      num_communications > 0
+    }
+    #Subtract the values NEGative
+    add_energy = @mem_sciencecon_cost_energy_neg
+    add_minerals = @mem_sciencecon_cost_minerals_neg
+    add_influence = @mem_sciencecon_cost_influence_neg
+
+    hidden_effect = {
+      set_country_flag = mem_sciencecon_attending
+      country_event = { id = mem_sciencecon_event.2 days = @mem_sciencecon_prep_time }
+      country_event = { id = mem_sciencecon_event.7 days = @mem_sciencecon_invite_time}
+    }
+  }
+
+  #No, does nothing but cancels the event.
+  option = {
+    name = mem_sciencecon.1.c
+    trigger = {
+      energy > @mem_sciencecon_cost_check
+      has_country_resource = {
+        type = minerals
+        amount > @mem_sciencecon_cost_check
+      }
+    }
+    hidden_effect = {
+      #just clean up.
+      country_event = {id = mem_sciencecon_event.999}
+    }
+  }
+}
+
+################### mem_sciencecon_event.2 ######################
+### Display Preperation of the con complete.
+### This determines if we have CRIT Success, 
+### Success, Failed, or Crit failed
+#################################################################
+country_event = { 
+  id = mem_sciencecon_event.2
+  title = "mem_sciencecon.2.name"
+  desc = "mem_sciencecon.2.desc"
+  picture = GFX_evt_galactic_senate
+  show_sound = event_default
+  is_triggered_only = yes
+  
+  immediate = {
+    set_country_flag = mem_sciencecon_host
+    random_list = {
+      #Crit Success
+      12 = {
+        set_variable = {
+          which = mem_sciencecon_result
+          value = 1
+        }
+      }
+      #Success
+      65 = {
+        set_variable = {
+          which = mem_sciencecon_result
+          value = 2
+        }
+      }
+      #Fail
+      20 = {
+        set_variable = {
+          which = mem_sciencecon_result
+          value = 3
+        }
+      }
+      #Crit Fail
+      2 = {
+        set_variable = {
+          which = mem_sciencecon_result
+          value = 4
+        }
+      }
+    }
+    every_country = {
+      limit = {
+        has_country_flag = mem_sciencecon_attending
+      }
+      #Crit Success
+      if = {
+        limit = {
+          check_variable = {
+            which = mem_sciencecon_result
+            value = 1
+          }
+        }
+        country_event = { id = mem_sciencecon_event.3 days = 3}
+      }
+      #Success
+      if = {
+        limit = {
+          check_variable = {
+            which = mem_sciencecon_result
+            value = 2
+          }
+        }
+        country_event = { id = mem_sciencecon_event.4 days = 3}
+      }
+      #Fail
+      if = {
+        limit = {
+          check_variable = {
+            which = mem_sciencecon_result
+            value = 3
+          }
+        }
+        country_event = { id = mem_sciencecon_event.5 days = 3}
+      }
+      #Crit Fail
+      if = {
+        limit = {
+          check_variable = {
+            which = mem_sciencecon_result
+            value = 4
+          }
+        }
+        country_event = { id = mem_sciencecon_event.6 days = 3}
+      }
+    }
+  }
+
+  option = {
+    name = mem_sciencecon.2.a
+    ai_chance = {
+      factor = 100
+    }
+  }
+}
+
+################### mem_sciencecon_event.3 ######################
+### ON CRIT SUCCESS this will be called
+### This event is hidden, it is used to determine
+### which branch of science will be used as a reward
+### for giving a large progress amount to. 
+###
+### Please note due to the API not providing any means
+### to choose a 'what you are currently researching' and
+### 'complete what you are currently reseraching' I had 
+### to go through a fairly convuluted way to providing
+### this functionality in a semi random manner. 
+###
+### I hope they provide means to do this in the future.
+### SEE mem_sciencecon_critsuccess_events.txt for the rest
+#################################################################
+country_event = { 
+  id = mem_sciencecon_event.3
+  hide_window = yes
+  is_triggered_only = yes  
+  immediate = {
+    if = {
+      limit = {
+        has_country_flag = mem_sciencecon_host
+      }
+      country_event = { id=mem_sciencecon_event.999 days = 3}
+      every_country = {
+        limit = {
+          has_country_flag = mem_sciencecon_attending
+        }
+        add_opinion_modifier = {
+          who = ROOT
+          modifier = opinion_mem_sciencecon_fantastic_time
+        }
+      }
+    }
+    random_list = {      
+      34 = { country_event = {id = mem_sciencecon_event.91 } }
+      33 = { country_event = {id = mem_sciencecon_event.92 } }
+      33 = { country_event = {id = mem_sciencecon_event.93 } }
+    }    
+  }
+}
+
+################### mem_sciencecon_event.7 ######################
+### Send out Invites
+###
+### Goes through list of every country that root has coms with. 
+### If they do, then we set a flag to indicate they have been 
+### invited to the science convention. We then trigger a 
+### diplomatic event on them. 
+#################################################################
+country_event = {
+  id = mem_sciencecon_event.7
+  hide_window = yes
+
+  is_triggered_only = yes
+  trigger = {
+    is_ai = no
+  }
+  immediate = {
+    save_event_target_as = invite_sender
+    every_country = {
+      limit = {
+        is_country_type = default
+        has_communications = ROOT
+        NOT = {
+          is_country = ROOT
+        }
+      }
+      set_country_flag = mem_sciencecon_invited
+      country_event = {id = mem_sciencecon_event.8}
+    }
+  }
+}
+
+################### mem_sciencecon_event.8 ######################
+### Invited Diplomatic View
+#################################################################
+country_event = {
+
+  id = mem_sciencecon_event.8
+  title = mem_sciencecon.8.name
+  desc = mem_sciencecon.8.desc
+  diplomatic = yes
+
+  is_triggered_only = yes
+
+  trigger = {
+    has_country_flag = mem_sciencecon_invited
+  }
+
+  picture_event_data = {
+    portrait = from
+    planet_background = from
+    graphical_culture = from
+    city_level = from
+    room = from
+  }
+  
+  #Yes always available
+  option = {
+    name = mem_sciencecon.8.a
+    ai_chance = {
+      factor = 60
+      modifier = {
+        factor = 70
+        has_ethic = ethic_materialist
+      }
+      modifier = {
+        factor = 80
+        has_ethic = ethic_fanatic_materialist
+      }
+      modifier = {
+        factor = 10
+        has_ethic = ethic_spiritualist
+      }
+      modifier = {
+        factor = 0
+        has_ethic = ethic_fanatic_spiritualist
+      }
+      modifier = {
+        factor = 20
+        has_ethic = ethic_xenophobe
+      }
+      modifier = {
+        factor = 0
+        has_ethic = ethic_fanatic_xenophobe
+      }
+    }
+    hidden_effect = {
+      remove_country_flag = mem_sciencecon_invited
+      set_country_flag = mem_sciencecon_attending
+      event_target:invite_sender = {
+        country_event = { id = mem_sciencecon_event.11 }
+      }
+    }
+  }
+
+  #No. Normal response if not Xenophobic or Spiritualist
+  option = {
+    name = mem_sciencecon.8.b
+    trigger = {
+      NOT = {
+        has_ethic = ethic_xenophobe
+        has_ethic = ethic_fanatic_xenophobe
+        has_ethic = ethic_spiritualist
+        has_ethic = ethic_fanatic_spiritualist
+      }
+    }
+    ai_chance = {
+      factor = 40
+    }
+    hidden_effect = {
+      remove_country_flag = mem_sciencecon_invited
+      event_target:invite_sender = {
+        country_event = { id = mem_sciencecon_event.12 }
+      }
+    }
+  }
+
+  #Xenophobic
+  option = {
+    name = mem_sciencecon.8.c
+    trigger = {
+      OR = {
+        has_ethic = ethic_xenophobe
+        has_ethic = ethic_fanatic_xenophobe
+      }
+    }
+  }
+  #Spiritualist
+  option = {
+    name = mem_sciencecon.8.d
+    trigger = {
+      OR = {
+        has_ethic = ethic_spiritualist
+        has_ethic = ethic_fanatic_spiritualist
+      }
+    }
+  }
+} 
+
+################### mem_sciencecon_event.11 #####################
+### Diplomatic - Host gets positive resposne from an invited.
+#################################################################
+country_event = {
+
+  id = mem_sciencecon_event.11
+  title = mem_sciencecon.11.name
+  #Erudite explorers
+  desc = {
+    text = mem_sciencecon.11.a.desc
+    trigger = {
+      from = {
+        has_ai_personality = erudite_explorers
+      }
+    }
+  }
+  #Federation Builders
+  desc = {
+    text = mem_sciencecon.11.b.desc
+    trigger = {
+      from = {
+        has_ai_personality = federation_builders
+      }
+    }
+  }  
+  #Fanatical Befrienders
+  desc = {
+    text = mem_sciencecon.11.c.desc
+    trigger = {
+      from = {
+        has_ai_personality = fanatic_befrienders
+      }
+    }
+  }
+  #Peaceful Traders
+  desc = {
+    text = mem_sciencecon.11.d.desc
+    trigger = {
+      from = {
+        has_ai_personality = peaceful_traders
+      }      
+    }
+  }
+  #Normal desc
+  desc = {
+    text = mem_sciencecon.11.desc
+    trigger = {
+    from = {
+      NOT = {
+          has_ai_personality = erudite_explorers
+          has_ai_personality = federation_builders
+          has_ai_personality = fanatic_befrienders
+          has_ai_personality = peaceful_traders
+        }
+      }
+    }
+  }
+  diplomatic = yes
+
+  is_triggered_only = yes
+
+  picture_event_data = {
+    portrait = from
+    planet_background = from
+    graphical_culture = from
+    city_level = from
+    room = from
+  }
+
+  immediate = {
+    set_country_flag = mem_sciencecon_someone_accepted
+    change_variable = {
+      which = mem_sciencecon_attended_count
+      value = 1
+    }
+  }
+
+  option = {
+    name = mem_sciencecon.11.a
+  }
+}
+
+################### mem_sciencecon_event.12 #####################
+### Diplomatic - Host gets negative resposne from an invited.
+#################################################################
+country_event = {
+
+  id = mem_sciencecon_event.12
+  title = mem_sciencecon.12.name
+  #Democratic Crusaders
+  desc = {
+    text = mem_sciencecon.12.a.desc
+    trigger = {
+      from = {
+        has_ai_personality = democratic_crusaders
+      }
+    }
+  }
+  #Xenophobic Isolationists
+  desc = {
+    text = mem_sciencecon.12.b.desc
+    trigger = {
+      from = {
+        has_ai_personality = xenophobic_isolationists
+      }
+    }
+  }
+  #Fanatical Purifiers
+  desc = {
+    text = mem_sciencecon.12.c.desc
+    trigger = {
+      from = {
+        has_ai_personality = fanatic_purifiers
+      }
+    }
+  }
+  #Normal
+  desc = {
+    text = mem_sciencecon.12.desc
+    trigger = {
+      from = {
+        NOT = {
+          has_ai_personality = democratic_crusaders
+          has_ai_personality = xenophobic_isolationists
+          has_ai_personality = fanatic_purifiers
+        }
+      }
+    }
+  }
+  diplomatic = yes
+
+  is_triggered_only = yes
+
+  picture_event_data = {
+    portrait = from
+    planet_background = from
+    graphical_culture = from
+    city_level = from
+    room = from
+  }
+
+  option = {
+    name = mem_sciencecon.12.a
+  }
+}
+
+################### mem_sciencecon_event.4 ######################
+### Success Event
+#################################################################
+country_event = { 
+  id = mem_sciencecon_event.4
+  title = "mem_sciencecon.4.name"
+  desc = "mem_sciencecon.4.desc"
+  desc = {
+    text = mem_sciencecon.4.desc
+    trigger = {
+      has_country_flag = mem_sciencecon_host
+    }
+  }
+  desc = {
+    text = mem_sciencecon.4.a.desc
+    trigger = {
+      NOT = {
+        has_country_flag = mem_sciencecon_host
+      }
+    }
+  }
+  picture = GFX_evt_galactic_senate
+  show_sound = event_default
+  is_triggered_only = yes
+
+  immediate = {
+    if = {
+      limit = {
+        has_country_flag = mem_sciencecon_host
+      }
+      country_event = { id=mem_sciencecon_event.999 days = 3}
+      every_country = {
+        limit = {
+          has_country_flag = mem_sciencecon_attending
+        }        
+        add_opinion_modifier = {
+          who = ROOT
+          modifier = opinion_mem_sciencecon_good_time
+        }
+      }
+    }
+  }
+
+  option = {
+    name = mem_sciencecon.4.a
+    trigger = {
+      check_variable = {
+        which = mem_sciencecon_attended_count
+        value = 0
+      }
+    }
+    add_physics_research = @mem_sciencecon_reward_1
+    add_society_research = @mem_sciencecon_reward_1
+    add_engineering_research = @mem_sciencecon_reward_1
+  }
+
+  option = {
+    name = mem_sciencecon.4.a
+    trigger = {
+      check_variable = {
+        which = mem_sciencecon_attended_count
+        value = 1
+      }
+    }
+    add_physics_research = @mem_sciencecon_reward_2
+    add_society_research = @mem_sciencecon_reward_2
+    add_engineering_research = @mem_sciencecon_reward_2
+  }
+
+  option = {
+    name = mem_sciencecon.4.a
+    trigger = {
+      check_variable = {
+        which = mem_sciencecon_attended_count
+        value > 1
+      }
+      #AND
+      check_variable = {
+        which = mem_sciencecon_attended_count
+        value < 6
+      }
+    }
+    add_physics_research = @mem_sciencecon_reward_3
+    add_society_research = @mem_sciencecon_reward_3
+    add_engineering_research = @mem_sciencecon_reward_3
+  }
+
+  option = {
+    name = mem_sciencecon.4.a
+    trigger = {
+      check_variable = {
+        which = mem_sciencecon_attended_count
+        value > 5
+      }
+    }
+    add_physics_research = @mem_sciencecon_reward_4
+    add_society_research = @mem_sciencecon_reward_4
+    add_engineering_research = @mem_sciencecon_reward_4
+  }  
+}
+
+################### mem_sciencecon_event.5 ######################
+### Fail Event
+#################################################################
+country_event = { 
+  id = mem_sciencecon_event.5
+  title = "mem_sciencecon.5.name"
+  desc = {
+    text = mem_sciencecon.5.desc 
+    trigger = {
+      has_country_flag = mem_sciencecon_host
+    }
+  }
+  desc = {
+    text = mem_sciencecon.5.a.desc
+    trigger = {
+      NOT = {
+        has_country_flag = mem_sciencecon_host
+      }
+      
+    }
+  }
+  picture = GFX_evt_galactic_senate
+  show_sound = event_default
+  is_triggered_only = yes
+
+  immediate = {
+    if = {
+      limit = {
+        has_country_flag = mem_sciencecon_host
+      }
+      country_event = { id=mem_sciencecon_event.999 days = 3}
+      every_country = {
+        limit = {
+          has_country_flag = mem_sciencecon_attending
+        }
+        add_opinion_modifier = {
+          who = ROOT
+          modifier = opinion_mem_sciencecon_waste_of_time
+        }
+      }
+    }
+  }
+
+  option = {
+    name = mem_sciencecon.5.a    
+  }
+} 
+
+################### mem_sciencecon_event.6 ######################
+### Critical Fail Event
+#################################################################
+country_event = { 
+  id = mem_sciencecon_event.6
+  title = "mem_sciencecon.6.name"
+  desc = {
+    text = mem_sciencecon.6.desc
+    trigger = {
+      has_country_flag = mem_sciencecon_host
+      NOT = {
+        has_country_flag = mem_sciencecon_someone_accepted
+      }
+    }
+  }
+  desc = {
+    text = mem_sciencecon.6.a.desc
+    trigger = {
+      has_country_flag = mem_sciencecon_host  
+      has_country_flag = mem_sciencecon_someone_accepted
+    }
+  }
+  desc = {
+    text = mem_sciencecon.6.b.desc
+    trigger = {
+      NOT = {
+        has_country_flag = mem_sciencecon_host
+      }
+    }
+  }
+  picture = GFX_evt_galactic_senate
+  show_sound = event_default
+  is_triggered_only = yes
+
+  immediate = {    
+    if = {
+      limit = {
+        has_country_flag = mem_sciencecon_host
+      }
+      country_event = { id=mem_sciencecon_event.999 days = 3}
+      #Host country will never host another one.
+      set_country_flag = mem_sciencecon_denied
+      every_country = {
+        limit = {
+          has_country_flag = mem_sciencecon_attending
+        }
+        add_opinion_modifier = {
+          who = ROOT
+          modifier = opinion_mem_sciencecon_sciencetist_dead
+        }
+      }
+    }
+  }
+
+  #Host looses a scientist. 
+  option = {
+    name = mem_sciencecon.6.a
+    trigger = {
+      has_country_flag = host
+    }
+    random_owned_leader = {
+      limit = {
+        OR = {
+          is_researching_area = engineering
+          is_researching_area = physics
+          is_researching_area = society
+        }
+      }
+      kill_leader = { 
+        show_notification = no
+        type = scientist 
+      }
+    }
+  }
+  
+  #All those that attended but did not host
+  option = {
+    name = mem_sciencecon.6.a
+    trigger = {
+      NOT =  {
+        has_country_flag = host
+      }
+    }
+  }
+}
+
+################### mem_sciencecon_event.999 ####################
+### This event just handles the clean up. Should be called at the 
+### end of the event from the Root of the events. 
+#################################################################
+country_event = {
+  id = mem_sciencecon_event.999
+  is_triggered_only = yes
+  hide_window = yes
+
+  immediate = {
+
+    #Remove flags
+    remove_country_flag = mem_sciencecon_started
+    remove_country_flag = mem_sciencecon_host
+    remove_country_flag = mem_sciencecon_someone_accepted
+
+    #Clean up other countries flags.
+    every_country = {
+      limit = {
+        is_country_type = default
+      }
+      remove_country_flag = mem_sciencecon_invited
+      remove_country_flag = mem_sciencecon_attending
+    }
+
+    #Clear up event targets
+      # Could not find a way to do this.
+      # invite_sender
+    #Clear up Variables
+      # Could not find a way to do this.
+      # mem_sciencecon_result
+      # mem_sciencecon_rnd
+  }
+}

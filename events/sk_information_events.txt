@@ -1,0 +1,1422 @@
+namespace = information_events_sk
+
+# A planets controller becomes a country not the same as the owner.
+# Root = Planet
+# From = Planet Owner
+# FromFrom = Planet Controller (the one occupying)
+planet_event = {
+	id = information_events_sk.10
+
+	is_triggered_only = yes
+	
+	hide_window = yes
+	
+	trigger = {
+#		any_pop = {
+#			has_modifier = pop_recently_conquered 
+#		}
+#		FROM = { NOT = { is_at_war_with = FROMFROM } }
+		NOT = { has_planet_flag = recently_occupied }
+		FROM = { is_standard_country = yes }
+		FROMFROM = { is_standard_country = yes }
+	}
+	
+	#FLAG AND CHECKS
+	immediate = {
+#		if = {
+#			limit = {
+#				FROM = { is_at_war_with = FROMFROM }
+#			}
+#			break = yes
+#		}
+		if = {
+			limit = {
+				any_pop = {
+					has_modifier = pop_recently_conquered 
+				}
+#				FROM = { NOT = { is_at_war_with = FROMFROM } } #BBUGGED
+			}
+			ROOT = { save_event_target_as = planet_occupied }
+			FROM = { save_event_target_as = planet_owner }
+			FROMFROM = { save_event_target_as = planet_conqueror }
+			every_country = {
+				limit = {
+					is_country_type = default
+					has_country_edict = extra_information_sk
+					OR = {
+						has_communications = event_target:planet_conqueror
+						has_communications = event_target:planet_owner					
+					}
+					NOT = { is_country = FROM }
+					NOT = { is_country = FROMFROM }
+				}	
+				country_event = { id = information_events_sk.130 } #NOTIFICATION OF PLANET CONQUERED
+			}
+		}
+	}
+}
+
+
+# Triggers country_event for the defender upon defeat
+# This = country, planet owner
+# From = country, attack leader
+# FromFrom = planet
+country_event = {
+	id = information_events_sk.100
+	hide_window = yes
+#	title = TESTTITLE
+#	desc = TESTDESC
+	is_triggered_only = yes
+	
+#	option = {
+#		name = TEST
+#	}
+	
+	trigger = {
+		THIS = { is_standard_country = yes } #IF THE COUNTRIES ARE DEFAULT OR FALLEN EMPIRE
+		FROM = { is_standard_country = yes }
+		OR = {
+			THIS = { #IF THE PLANET OWNER IS THE ATTACKER OR THE OWNER ALLY
+				OR = {
+					is_country = FROM
+					is_in_alliance_with = FROM
+					is_in_federation_with = FROM
+				}
+			} #...OR IF THE ATTACKER IS AT WAR IS THE OWNER
+			THIS = { is_at_war_with = FROM }
+		}
+	}
+	
+	immediate = {
+        FROMFROM = {
+            set_timed_planet_flag = {
+                flag = recently_occupied
+                days = 2
+            }
+        }
+		if = {
+			limit = {
+				THIS = { is_at_war_with = FROM }
+			}
+			FROMFROM = {
+				planet_event = { id = information_events_sk.105 days = 1 }
+			}
+			FROM = { save_event_target_as = planet_conqueror }
+			FROMFROM = { save_event_target_as = planet_occupied }
+			FROMFROM.owner = { save_event_target_as = planet_owner }
+			every_country = {
+				limit = {
+					OR = {
+						is_ai = yes
+						has_country_edict = extra_information_sk
+					}
+					OR = {
+						has_communications = FROM
+						has_communications = FROMFROM.owner
+					}
+					NOT = { is_country = FROM }
+					NOT = { is_country = FROMFROM.owner }
+				}
+				country_event = { id = information_events_sk.110 }
+			}
+			else = {
+				if = {
+					limit = {
+						THIS = {
+							OR = {
+								is_country = FROM
+								is_in_alliance_with = FROM
+								is_in_federation_with = FROM
+							}
+						}
+					}
+					FROMFROM.controller = { save_event_target_as = planet_ex_conqueror }
+					FROMFROM = { save_event_target_as = planet_liberated }
+					FROMFROM.owner = { save_event_target_as = planet_owner }
+					FROMFROM = {
+						set_timed_planet_flag = {
+							flag = recently_liberated
+							days = 7
+						}
+					}
+					every_country = {
+						limit = {
+							has_country_edict = extra_information_sk
+							OR = {
+								has_communications = FROMFROM.controller
+								has_communications = FROMFROM.owner
+							}
+							NOT = { is_country = FROMFROM.controller }
+							NOT = { is_country = FROMFROM.owner }
+							NOT = { is_at_war_with = FROMFROM.owner }
+						}
+						country_event = { id = information_events_sk.120 }
+					}
+				}	
+			}
+		}
+	}
+}
+
+planet_event = {
+	id = information_events_sk.105
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		if = {
+			limit = {
+				NOT = { ROOT.controller = { is_country = ROOT.owner } }
+			}
+			planet_event = { id = information_events_sk.105 days = 1 }
+			else = {
+				if = {
+					limit = {
+						any_pop = {
+							has_modifier = pop_recently_conquered
+						}
+					}
+					ROOT = { save_event_target_as = planet_occupied }
+					ROOT.owner = { save_event_target_as = planet_conqueror }
+					every_country = {
+						limit = {
+							has_country_edict = extra_information_sk
+							has_communications = ROOT.owner
+							NOT = { is_country = ROOT.owner }
+						}					
+						country_event = { id = information_events_sk.131 } #CONQUERED
+					}
+					else = {
+						if = {
+							limit = {
+								ROOT = { NOT = { has_planet_flag = recently_liberated } }
+							}
+							ROOT = { save_event_target_as = planet_liberated }
+							ROOT.owner = { save_event_target_as = planet_owner }
+							every_country = {
+								limit = {
+									has_country_edict = extra_information_sk
+									has_communications = ROOT.owner
+									NOT = { is_country = ROOT.owner }
+								}
+								country_event = { id = information_events_sk.121 } #LIBERATED
+							}		
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+#NOTIFICATION OF PLANET OCCUPIED		
+country_event = {
+	id = information_events_sk.110
+	title = information_events_sk.110.name
+	picture = GFX_evt_ground_combat
+	show_sound = event_ground_battle
+	
+	desc = {
+		text = information_events_sk.110.default.soft.desc
+		trigger = {
+			event_target:planet_occupied = { 
+				is_capital = no 
+				has_planet_flag = had_soft_bombardment
+				NOT = { has_planet_flag = voluntary_surrender_210_sk }
+			}
+		}
+	}
+	desc = {
+		text = information_events_sk.110.default.limited.desc
+		trigger = {
+			event_target:planet_occupied = { 
+				is_capital = no 
+				has_planet_flag = had_limited_bombardment
+				NOT = { has_planet_flag = voluntary_surrender_210_sk }
+			}
+		}
+	}	
+	desc = {
+		text = information_events_sk.110.default.full.desc
+		trigger = {
+			event_target:planet_occupied = { 
+				is_capital = no 
+				has_planet_flag = had_full_bombardment
+				NOT = { has_planet_flag = voluntary_surrender_210_sk }
+			}
+		}
+	}
+	desc = {
+		text = information_events_sk.110.capital.soft.desc
+		trigger = {
+			event_target:planet_occupied = { 
+				is_capital = yes
+				has_planet_flag = had_soft_bombardment
+				NOT = { has_planet_flag = voluntary_surrender_210_sk }
+			}
+		}
+	}	
+	desc = {
+		text = information_events_sk.110.capital.limited.desc
+		trigger = {
+			event_target:planet_occupied = { 
+				is_capital = yes
+				has_planet_flag = had_limited_bombardment
+				NOT = { has_planet_flag = voluntary_surrender_210_sk }
+			}
+		}
+	}
+	desc = {
+		text = information_events_sk.110.capital.full.desc
+		trigger = {
+			event_target:planet_occupied = { 
+				is_capital = yes
+				has_planet_flag = had_full_bombardment
+				NOT = { has_planet_flag = voluntary_surrender_210_sk }
+			}
+		}
+	}	
+	desc = {
+		text = information_events_sk.110.capital.voluntary.desc
+		trigger = {
+			event_target:planet_occupied = { 
+				is_capital = yes
+				has_planet_flag = voluntary_surrender_210_sk
+			}
+		}
+	}
+	desc = {
+		text = information_events_sk.110.default.voluntary.desc
+		trigger = {
+			event_target:planet_occupied = { 
+				is_capital = no
+				has_planet_flag = voluntary_surrender_210_sk
+			}
+		}
+	}
+	location = event_target:planet_occupied
+
+	is_triggered_only = yes
+	
+	trigger = {
+		OR = {
+			event_target:planet_occupied = { 
+				NOT = { has_planet_flag = voluntary_surrender_210_sk } 
+			}
+			AND = {
+				event_target:planet_occupied = { has_planet_flag = voluntary_surrender_210_sk }
+				NOT = { is_country = event_target:planet_conqueror }
+			}
+		}
+	}
+	
+	option = {
+		name = information_events_sk.110.neutral.a #NEUTRAL POSITION
+		trigger = {
+			NOR = {
+				is_in_alliance_with = event_target:planet_conqueror
+				is_in_federation_with = event_target:planet_conqueror		
+				is_rival = event_target:planet_conqueror
+				is_wary_to = event_target:planet_conqueror
+				is_unfriendly_to = event_target:planet_conqueror
+				is_threatened_to = event_target:planet_conqueror
+				is_hostile_to = event_target:planet_conqueror			
+				is_at_war_with = event_target:planet_conqueror				
+			}
+		}
+	}
+	
+	option = {
+		name = information_events_sk.110.ally.b #ALLY POSITION
+		trigger = {
+			OR = {
+				is_in_alliance_with = event_target:planet_conqueror
+				is_in_federation_with = event_target:planet_conqueror
+				is_country = event_target:planet_conqueror
+			}
+		}
+	}
+	
+	option = {
+		name = information_events_sk.110.hostile.c #HOSTILE POSITION
+		trigger = {
+			OR = {
+				is_rival = event_target:planet_conqueror
+				is_wary_to = event_target:planet_conqueror
+				is_unfriendly_to = event_target:planet_conqueror
+				is_threatened_to = event_target:planet_conqueror
+				is_hostile_to = event_target:planet_conqueror
+			}
+		}
+	}
+	
+	option = {
+		name = information_events_sk.110.enemy.d #ENEMY POSITION
+		trigger = {
+			is_at_war_with = event_target:planet_conqueror
+			event_target:planet_occupied = {
+				 NOT = { has_planet_flag = voluntary_surrender_210_sk }
+			}
+		}
+	}
+	
+	option = {
+		name = information_events_sk.110.enemy.e #ENEMY POSITION
+		trigger = {
+			is_at_war_with = event_target:planet_conqueror
+			event_target:planet_occupied = {
+				 has_planet_flag = voluntary_surrender_210_sk
+			}
+		}
+	}
+	
+	option = {
+		name = information_events_sk.110.ally.f #ALLY POSITION, CONGRATULATE
+		trigger = {
+			NOT = { is_country = event_target:planet_conqueror }
+			OR = {
+				is_in_alliance_with = event_target:planet_conqueror
+				is_in_federation_with = event_target:planet_conqueror
+			}
+			opinion = {
+				who = event_target:planet_conqueror
+				value > 200
+			}
+		}
+		hidden_effect = {
+			event_target:planet_conqueror = {
+				country_event = { id = information_events_sk.111 days = 2 }
+			}
+		}
+	}
+}
+
+#ALLY CONGRATULATE WITH CONQUEROR
+country_event = {
+	id = information_events_sk.111
+	title = information_events_sk.111.name
+	desc = information_events_sk.111.desc
+	
+	diplomatic = yes
+	
+	is_triggered_only = yes
+	
+	picture_event_data = {
+		portrait = FROM
+		planet_background = FROM
+		graphical_culture = FROM
+		city_level = FROM
+		room = FROM
+	}	
+	
+	option = {
+		name = information_events_sk.111.a
+		hidden_effect = {
+			FROM = {
+				country_event = { id = information_events_sk.112 days = 2 }
+			}
+		}
+	}
+}
+
+#CONQUEROR ANSWERS
+country_event = {
+	id = information_events_sk.112
+	title = information_events_sk.112.name
+	desc = information_events_sk.112.desc
+	
+	diplomatic = yes
+	
+	is_triggered_only = yes
+	
+	picture_event_data = {
+		portrait = FROM
+		planet_background = FROM
+		graphical_culture = FROM
+		city_level = FROM
+		room = FROM
+	}	
+	
+	option = {
+		name = information_events_sk.112.a
+	}
+}
+
+
+#PLANET LIBERATED
+country_event = {
+	id = information_events_sk.120
+	title = information_events_sk.120.name
+	picture = GFX_evt_federation_fleet
+	show_sound = event_ground_battle
+	
+	desc = {
+		text = information_events_sk.120.default.desc		
+		trigger = {
+			event_target:planet_liberated = { is_capital = no }
+		}
+	}
+	desc = {
+		text = information_events_sk.120.capital.desc		
+		trigger = {
+			event_target:planet_liberated = { is_capital = yes }
+		}
+	}	
+	location = event_target:planet_liberated
+
+	is_triggered_only = yes
+	
+	option = {
+		name = information_events_sk.120.a
+	}
+}
+
+#PLANET LIBERATED
+country_event = {
+	id = information_events_sk.121
+	title = information_events_sk.121.name
+	picture = GFX_evt_federation_fleet
+	show_sound = event_ground_battle
+	
+	desc = {
+		text = information_events_sk.121.default.desc		
+		trigger = {
+			event_target:planet_liberated = { is_capital = no }
+		}
+	}
+	desc = {
+		text = information_events_sk.121.capital.desc		
+		trigger = {
+			event_target:planet_liberated = { is_capital = yes }
+		}
+	}	
+	location = event_target:planet_liberated
+
+	is_triggered_only = yes
+	
+	option = {
+		name = information_events_sk.121.a
+	}
+}
+
+#PLANET CONQUERED, NOTIFICATION THE SAME DAY
+country_event = {
+	id = information_events_sk.130
+	title = information_events_sk.130.name
+	desc = {
+		text = information_events_sk.130.default.desc #COUNTRY STILL EXIST
+		trigger = {
+			event_target:planet_owner = { num_owned_planets > 0 }
+		}
+	}
+	desc = {
+		text = information_events_sk.130.nomore.desc #COUNTRY WILL DISAPPEAR A DAY AFTER
+		trigger = {
+			event_target:planet_owner = { num_owned_planets = 0 }
+		}
+	}
+	picture = GFX_evt_burning_settlement
+	show_sound = event_ground_battle	
+	location = event_target:planet_occupied
+
+	is_triggered_only = yes
+	
+	option = {
+		trigger = {
+			event_target:planet_owner = { num_owned_planets > 0 } #COUNTRY STILL EXIST
+		}		
+		name = information_events_sk.130.default.a
+	}
+	option = {
+		trigger = {
+			event_target:planet_owner = { num_owned_planets = 0 } #COUNTRY WILL DISAPPEAR A DAY AFTER
+		}		
+		name = information_events_sk.130.nomore.b
+	}
+}
+
+#PLANET CONQUERED, FIRED WHEN THE EX COUNTRY MIGHT NOT EXIST ANYMORE, SO NO REFERENCE IS POSSIBLE HERE 
+country_event = {
+	id = information_events_sk.131
+	title = information_events_sk.131.name
+	desc = information_events_sk.131.desc
+	picture = GFX_evt_burning_settlement
+	show_sound = event_ground_battle	
+	location = event_target:planet_occupied
+
+	is_triggered_only = yes
+	
+	option = {	
+		name = information_events_sk.131.a
+	}
+
+}
+
+#TRIGGERS FROM ON_COLONIZATION
+planet_event = {
+	id = information_events_sk.200
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		every_country = {
+			limit = {
+				is_ai = no
+				NOT = { is_country = ROOT.owner }
+				has_communications = ROOT.owner
+				has_country_edict = extra_information_sk
+				NOT = { has_country_flag = colonization_informed }	
+				OR = {
+					ROOT = {
+						is_planet_class = pc_gaia
+						planet_size > 19
+					}
+					any_owned_planet = {
+						distance = {
+							source = ROOT
+							max_distance = 120
+							min_distance = 1
+						}										
+					}
+				}
+			}
+			set_timed_country_flag = {
+				flag = colonization_informed
+				days = 1
+			}
+			ROOT = {
+				random_pop = {
+					save_event_target_as = first_pop
+				}
+			}
+			ROOT = {
+				switch = {
+					trigger = is_planet_class
+					pc_desert = { PREV = { country_event = { id = information_events_sk.201 } } }
+					pc_tropical = { PREV = { country_event = { id = information_events_sk.202 } } }
+					pc_arid = { PREV = { country_event = { id = information_events_sk.203 } } }
+					pc_continental = { PREV = { country_event = { id = information_events_sk.204 } } }
+					pc_ocean = { PREV = { country_event = { id = information_events_sk.205 } } }
+					pc_tundra = { PREV = { country_event = { id = information_events_sk.206 } } }
+					pc_arctic = { PREV = { country_event = { id = information_events_sk.207 } } }
+					pc_gaia = { PREV = { country_event = { id = information_events_sk.208 } } }
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = information_events_sk.201
+	title = information_events_sk.201.name
+	desc = {
+		trigger = {
+			FROM = { planet_size < 10 }
+		}
+		text = information_events_sk.201.small.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 15 }
+			FROM = { planet_size > 9 }
+		}
+		text = information_events_sk.201.medium.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 20 }
+			FROM = { planet_size > 14 }
+		}
+		text = information_events_sk.201.big.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 25 }
+			FROM = { planet_size > 19 }
+		}
+		text = information_events_sk.201.huge.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size = 25 }
+		}
+		text = information_events_sk.201.perfect.desc
+	}
+	picture = GFX_evt_desert
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		trigger = {
+			NOR = {
+				is_in_alliance_with = FROM.owner
+				is_in_federation_with = FROM.owner
+				is_rival = FROM.owner
+				is_wary_to = FROM.owner
+				is_unfriendly_to = FROM.owner
+				is_threatened_to = FROM.owner
+				is_hostile_to = FROM.owner			
+				is_at_war_with = FROM.owner				
+			}
+		}
+		name = information_events_sk.201.a
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				is_in_alliance_with = FROM.owner
+				is_in_federation_with = FROM.owner
+			}
+		}
+		name = information_events_sk.201.b
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				is_rival = FROM.owner
+				is_wary_to = FROM.owner
+				is_unfriendly_to = FROM.owner
+				is_threatened_to = FROM.owner
+				is_hostile_to = FROM.owner
+			}
+			NOT = { is_at_war_with = FROM.owner }
+		}
+		name = information_events_sk.201.c
+	}
+	
+	option = {
+		trigger = {
+			is_at_war_with = FROM.owner
+		}
+		name = information_events_sk.201.d
+	}
+}
+
+country_event = {
+	id = information_events_sk.202
+	title = information_events_sk.201.name
+	desc = {
+		trigger = {
+			FROM = { planet_size < 10 }
+		}
+		text = information_events_sk.202.small.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 15 }
+			FROM = { planet_size > 9 }
+		}
+		text = information_events_sk.202.medium.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 20 }
+			FROM = { planet_size > 14 }
+		}
+		text = information_events_sk.202.big.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 25 }
+			FROM = { planet_size > 19 }
+		}
+		text = information_events_sk.202.huge.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size = 25 }
+		}
+		text = information_events_sk.202.perfect.desc
+	}
+	picture = GFX_evt_tropical
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		trigger = {
+			NOR = {
+				is_in_alliance_with = FROM.owner
+				is_in_federation_with = FROM.owner
+				is_rival = FROM.owner
+				is_wary_to = FROM.owner
+				is_unfriendly_to = FROM.owner
+				is_threatened_to = FROM.owner
+				is_hostile_to = FROM.owner			
+				is_at_war_with = FROM.owner				
+			}
+		}
+		name = information_events_sk.201.a
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				is_in_alliance_with = FROM.owner
+				is_in_federation_with = FROM.owner
+			}
+		}
+		name = information_events_sk.201.b
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				is_rival = FROM.owner
+				is_wary_to = FROM.owner
+				is_unfriendly_to = FROM.owner
+				is_threatened_to = FROM.owner
+				is_hostile_to = FROM.owner
+			}
+			NOT = { is_at_war_with = FROM.owner }
+		}
+		name = information_events_sk.201.c
+	}
+	
+	option = {
+		trigger = {
+			is_at_war_with = FROM.owner
+		}
+		name = information_events_sk.201.d
+	}
+}
+
+country_event = {
+	id = information_events_sk.203
+	title = information_events_sk.201.name
+	desc = {
+		trigger = {
+			FROM = { planet_size < 10 }
+		}
+		text = information_events_sk.203.small.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 15 }
+			FROM = { planet_size > 9 }
+		}
+		text = information_events_sk.203.medium.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 20 }
+			FROM = { planet_size > 14 }
+		}
+		text = information_events_sk.203.big.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 25 }
+			FROM = { planet_size > 19 }
+		}
+		text = information_events_sk.203.huge.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size = 25 }
+		}
+		text = information_events_sk.203.perfect.desc
+	}
+	picture = GFX_evt_arid
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		trigger = {
+			NOR = {
+				is_in_alliance_with = FROM.owner
+				is_in_federation_with = FROM.owner
+				is_rival = FROM.owner
+				is_wary_to = FROM.owner
+				is_unfriendly_to = FROM.owner
+				is_threatened_to = FROM.owner
+				is_hostile_to = FROM.owner			
+				is_at_war_with = FROM.owner				
+			}
+		}
+		name = information_events_sk.201.a
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				is_in_alliance_with = FROM.owner
+				is_in_federation_with = FROM.owner
+			}
+		}
+		name = information_events_sk.201.b
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				is_rival = FROM.owner
+				is_wary_to = FROM.owner
+				is_unfriendly_to = FROM.owner
+				is_threatened_to = FROM.owner
+				is_hostile_to = FROM.owner
+			}
+			NOT = { is_at_war_with = FROM.owner }
+		}
+		name = information_events_sk.201.c
+	}
+	
+	option = {
+		trigger = {
+			is_at_war_with = FROM.owner
+		}
+		name = information_events_sk.201.d
+	}
+}
+
+country_event = {
+	id = information_events_sk.204
+	title = information_events_sk.201.name
+	desc = {
+		trigger = {
+			FROM = { planet_size < 10 }
+		}
+		text = information_events_sk.204.small.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 15 }
+			FROM = { planet_size > 9 }
+		}
+		text = information_events_sk.204.medium.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 20 }
+			FROM = { planet_size > 14 }
+		}
+		text = information_events_sk.204.big.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 25 }
+			FROM = { planet_size > 19 }
+		}
+		text = information_events_sk.204.huge.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size = 25 }
+		}
+		text = information_events_sk.204.perfect.desc
+	}
+	picture = GFX_evt_continental
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		trigger = {
+			NOR = {
+				is_in_alliance_with = FROM.owner
+				is_in_federation_with = FROM.owner
+				is_rival = FROM.owner
+				is_wary_to = FROM.owner
+				is_unfriendly_to = FROM.owner
+				is_threatened_to = FROM.owner
+				is_hostile_to = FROM.owner			
+				is_at_war_with = FROM.owner				
+			}
+		}
+		name = information_events_sk.201.a
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				is_in_alliance_with = FROM.owner
+				is_in_federation_with = FROM.owner
+			}
+		}
+		name = information_events_sk.201.b
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				is_rival = FROM.owner
+				is_wary_to = FROM.owner
+				is_unfriendly_to = FROM.owner
+				is_threatened_to = FROM.owner
+				is_hostile_to = FROM.owner
+			}
+			NOT = { is_at_war_with = FROM.owner }
+		}
+		name = information_events_sk.201.c
+	}
+	
+	option = {
+		trigger = {
+			is_at_war_with = FROM.owner
+		}
+		name = information_events_sk.201.d
+	}
+}
+
+country_event = {
+	id = information_events_sk.205
+	title = information_events_sk.201.name
+	desc = {
+		trigger = {
+			FROM = { planet_size < 10 }
+		}
+		text = information_events_sk.205.small.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 15 }
+			FROM = { planet_size > 9 }
+		}
+		text = information_events_sk.205.medium.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 20 }
+			FROM = { planet_size > 14 }
+		}
+		text = information_events_sk.205.big.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 25 }
+			FROM = { planet_size > 19 }
+		}
+		text = information_events_sk.205.huge.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size = 25 }
+		}
+		text = information_events_sk.205.perfect.desc
+	}
+	picture = GFX_evt_ocean
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		trigger = {
+			NOR = {
+				is_in_alliance_with = FROM.owner
+				is_in_federation_with = FROM.owner
+				is_rival = FROM.owner
+				is_wary_to = FROM.owner
+				is_unfriendly_to = FROM.owner
+				is_threatened_to = FROM.owner
+				is_hostile_to = FROM.owner			
+				is_at_war_with = FROM.owner				
+			}
+		}
+		name = information_events_sk.201.a
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				is_in_alliance_with = FROM.owner
+				is_in_federation_with = FROM.owner
+			}
+		}
+		name = information_events_sk.201.b
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				is_rival = FROM.owner
+				is_wary_to = FROM.owner
+				is_unfriendly_to = FROM.owner
+				is_threatened_to = FROM.owner
+				is_hostile_to = FROM.owner
+			}
+			NOT = { is_at_war_with = FROM.owner }
+		}
+		name = information_events_sk.201.c
+	}
+	
+	option = {
+		trigger = {
+			is_at_war_with = FROM.owner
+		}
+		name = information_events_sk.201.d
+	}
+}
+
+country_event = {
+	id = information_events_sk.206
+	title = information_events_sk.201.name
+	desc = {
+		trigger = {
+			FROM = { planet_size < 10 }
+		}
+		text = information_events_sk.206.small.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 15 }
+			FROM = { planet_size > 9 }
+		}
+		text = information_events_sk.206.medium.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 20 }
+			FROM = { planet_size > 14 }
+		}
+		text = information_events_sk.206.big.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 25 }
+			FROM = { planet_size > 19 }
+		}
+		text = information_events_sk.206.huge.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size = 25 }
+		}
+		text = information_events_sk.206.perfect.desc
+	}
+	picture = GFX_evt_tundra
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		trigger = {
+			NOR = {
+				is_in_alliance_with = FROM.owner
+				is_in_federation_with = FROM.owner
+				is_rival = FROM.owner
+				is_wary_to = FROM.owner
+				is_unfriendly_to = FROM.owner
+				is_threatened_to = FROM.owner
+				is_hostile_to = FROM.owner			
+				is_at_war_with = FROM.owner				
+			}
+		}
+		name = information_events_sk.201.a
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				is_in_alliance_with = FROM.owner
+				is_in_federation_with = FROM.owner
+			}
+		}
+		name = information_events_sk.201.b
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				is_rival = FROM.owner
+				is_wary_to = FROM.owner
+				is_unfriendly_to = FROM.owner
+				is_threatened_to = FROM.owner
+				is_hostile_to = FROM.owner
+			}
+			NOT = { is_at_war_with = FROM.owner }
+		}
+		name = information_events_sk.201.c
+	}
+	
+	option = {
+		trigger = {
+			is_at_war_with = FROM.owner
+		}
+		name = information_events_sk.201.d
+	}
+}
+
+country_event = {
+	id = information_events_sk.207
+	title = information_events_sk.201.name
+	desc = {
+		trigger = {
+			FROM = { planet_size < 10 }
+		}
+		text = information_events_sk.207.small.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 15 }
+			FROM = { planet_size > 9 }
+		}
+		text = information_events_sk.207.medium.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 20 }
+			FROM = { planet_size > 14 }
+		}
+		text = information_events_sk.207.big.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 25 }
+			FROM = { planet_size > 19 }
+		}
+		text = information_events_sk.207.huge.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size = 25 }
+		}
+		text = information_events_sk.207.perfect.desc
+	}
+	picture = GFX_evt_arctic
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		trigger = {
+			NOR = {
+				is_in_alliance_with = FROM.owner
+				is_in_federation_with = FROM.owner
+				is_rival = FROM.owner
+				is_wary_to = FROM.owner
+				is_unfriendly_to = FROM.owner
+				is_threatened_to = FROM.owner
+				is_hostile_to = FROM.owner			
+				is_at_war_with = FROM.owner				
+			}
+		}
+		name = information_events_sk.201.a
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				is_in_alliance_with = FROM.owner
+				is_in_federation_with = FROM.owner
+			}
+		}
+		name = information_events_sk.201.b
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				is_rival = FROM.owner
+				is_wary_to = FROM.owner
+				is_unfriendly_to = FROM.owner
+				is_threatened_to = FROM.owner
+				is_hostile_to = FROM.owner
+			}
+			NOT = { is_at_war_with = FROM.owner }
+		}
+		name = information_events_sk.201.c
+	}
+	
+	option = {
+		trigger = {
+			is_at_war_with = FROM.owner
+		}
+		name = information_events_sk.201.d
+	}
+}
+
+country_event = {
+	id = information_events_sk.208
+	title = information_events_sk.208.name
+	desc = {
+		trigger = {
+			FROM = { planet_size < 10 }
+		}
+		text = information_events_sk.208.small.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 15 }
+			FROM = { planet_size > 9 }
+		}
+		text = information_events_sk.208.medium.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 20 }
+			FROM = { planet_size > 14 }
+		}
+		text = information_events_sk.208.big.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size < 25 }
+			FROM = { planet_size > 19 }
+		}
+		text = information_events_sk.208.huge.desc
+	}
+	desc = {
+		trigger = {
+			FROM = { planet_size = 25 }
+		}
+		text = information_events_sk.208.perfect.desc
+	}
+	picture = GFX_evt_animal_wildlife
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		trigger = {
+			NOR = {
+				is_in_alliance_with = FROM.owner
+				is_in_federation_with = FROM.owner
+				is_rival = FROM.owner
+				is_wary_to = FROM.owner
+				is_unfriendly_to = FROM.owner
+				is_threatened_to = FROM.owner
+				is_hostile_to = FROM.owner			
+				is_at_war_with = FROM.owner				
+			}
+		}
+		name = information_events_sk.201.a
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				is_in_alliance_with = FROM.owner
+				is_in_federation_with = FROM.owner
+			}
+		}
+		name = information_events_sk.201.b
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				is_rival = FROM.owner
+				is_wary_to = FROM.owner
+				is_unfriendly_to = FROM.owner
+				is_threatened_to = FROM.owner
+				is_hostile_to = FROM.owner
+			}
+			NOT = { is_at_war_with = FROM.owner }
+		}
+		name = information_events_sk.201.c
+	}
+	
+	option = {
+		trigger = {
+			is_at_war_with = FROM.owner
+		}
+		name = information_events_sk.201.d
+	}
+}
+
+planet_event = {
+	id = information_events_sk.400
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		every_country = {
+			limit = {
+				is_ai = no
+				has_country_edict = extra_information_sk
+				has_communications = ROOT.owner
+				NOT = { is_country = ROOT.owner }
+			}	
+			country_event = { id = information_events_sk.410 } #NOTIFICATION OF UPLIFTING
+		}
+	}
+}
+
+country_event = {
+	id = information_events_sk.410
+	title = information_events_sk.410.name
+	desc = information_events_sk.410.desc
+	picture = GFX_evt_modification
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = information_events_sk.410.a
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
+			}
+		}
+	}
+	option = {
+		name = information_events_sk.410.b
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_xenophile
+			}
+		}
+	}
+	
+	option = {
+		name = information_events_sk.410.b
+		trigger = {
+			NOR = {
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_xenophile
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe				
+			}
+		}
+	}
+}
+
+# This = Pop scope
+# From = Planet
+pop_event = {
+	id = information_events_sk.500
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		is_robot_pop = no
+	}
+	
+	immediate = {
+		every_country = {
+			limit = {
+				is_ai = no
+				has_country_edict = extra_information_sk
+				has_communications = ROOT.owner
+				NOT = { is_country = ROOT.owner }
+				NOT = { has_country_flag = purge_notified }
+			}	
+			set_timed_country_flag = {
+				flag = purge_notified
+				days = 2
+			}
+			FROM.Controller = { save_event_target_as = planet_purger }
+			country_event = { id = information_events_sk.510 } #NOTIFICATION OF PURGE
+		}
+	}
+}
+
+country_event = {
+	id = information_events_sk.510
+	title = information_events_sk.510.name
+	desc = information_events_sk.510.desc
+	picture = GFX_evt_burning_settlement
+	location = FROM.planet
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = information_events_sk.510.a
+	}
+}
