@@ -2,7 +2,7 @@
 # Spiritualists Pilgrimage
 # Original idea by: Deltasquid
 # Code by:          Tuttu
-# Writing by:       Malthus
+# Writing by:       Elimdur
 ################################
 
 namespace = spiritualists_pilgrimage
@@ -27,8 +27,6 @@ country_event = {
 	title = "spiritualists_pilgrimage.2.name"
 	desc = "spiritualists_pilgrimage.2.desc"
 	
-	fire_only_once = yes
-	
 	diplomatic = yes
 	picture_event_data = { 
 		portrait = event_target:pilgrims_origin
@@ -40,7 +38,11 @@ country_event = {
 	
 	trigger = {		
 		has_global_flag = 35_years_passed
-		NOT = {	has_global_flag = pilgrimage_in_progress }			
+		NOR = {	
+			has_global_flag = pilgrimage_in_progress 
+			has_country_flag = pilgrims_received
+		}
+		#NOT = { has_country_flag = pilgrims_received }
 		any_neighbor_country = {
 			OR = {
 				has_ethic = "ethic_spiritualist"
@@ -68,6 +70,7 @@ country_event = {
 
 	immediate = {		
 		set_global_flag = pilgrimage_in_progress		
+		ROOT = { set_country_flag = pilgrims_received }
 		#ROOT = {
 		#	random_owned_planet = {
 		#		save_event_target_as = pilgrims_destination
@@ -87,16 +90,15 @@ country_event = {
 			}
 			save_event_target_as = pilgrims_origin
 			set_country_flag = spiritualists_pilgrimage_ongoing
+			
 			closest_system = { 
 				limit = { 
 					is_owned_by = ROOT 
-					#any_planet = { 
-					#	is_owned_by = ROOT 
-					#} 
-				} 
+				}
+				min_steps = 1
 				random_planet = { 
 					limit = { 
-						is_owned_by = ROOT
+						is_owned_by = ROOT 
 						is_capital = no
 					} 
 				save_event_target_as = pilgrims_destination 
