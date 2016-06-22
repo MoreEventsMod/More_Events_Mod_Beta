@@ -1,3 +1,14 @@
+#####################################################################
+# copy_english.py
+# By Tim Carrell (LamilLerran)
+# Copies English into localization files for other languages
+#####################################################################
+
+#If you don't know how to get started using this script, start with:
+#python copy_english.py --help
+#from the command line of this directory.
+#You will need to have python installed.
+
 import os, sys, getopt
 
 #default to exporting from English to all other languages and not overwriting pre-existing files
@@ -28,6 +39,7 @@ for opt, val in options:
 		print("    non-ignored, non-source languages (even if they already exist).")
 		print("-s, --source= :")
 		print("    The language to export from. Default is l_english.")
+		sys.exit(0)
 	elif opt in ("-o", "--overwrite"):
 		overwrite = True
 		print('Overwriting existing files.')
