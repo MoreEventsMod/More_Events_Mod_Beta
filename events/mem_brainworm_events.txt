@@ -1,0 +1,964 @@
+########################
+# More Events Mod
+# Brainworms Events
+# Written by Mourn
+########################
+
+namespace = mem_brainworm_event
+
+@tier1materialreward = 6
+@tier1materialmin = 100
+@tier1materialmax = 500
+@tier2materialreward = 12
+@tier2materialmin = 150
+@tier2materialmax = 1000
+@tier3materialreward = 18
+@tier3materialmin = 250
+@tier3materialmax = 1500
+@tier4materialreward = 24
+@tier4materialmin = 350
+@tier4materialmax = 2000
+
+@tier1influencereward = 6
+@tier1influencemin = 40
+@tier1influencemax = 100
+@tier2influencereward = 12
+@tier2influencemin = 80
+@tier2influencemax = 175
+@tier3influencereward = 18
+@tier3influencemin = 125
+@tier3influencemax = 250
+@tier4influencereward = 24
+@tier4influencemin = 150
+@tier4influencemax = 300
+
+@tier1researchreward = 6
+@tier1researchmin = 60
+@tier1researchmax = 150
+@tier2researchreward = 12
+@tier2researchmin = 90
+@tier2researchmax = 250
+@tier3researchreward = 18
+@tier3researchmin = 120
+@tier3researchmax = 350
+@tier4researchreward = 24
+@tier4researchmin = 150
+@tier4researchmax = 500
+
+################################################################################
+################################################################################
+################################################################################
+#Initial Brainworm Anomaly Event
+ship_event = {
+    id = mem_brainworm_event.1
+    title = "mem_brainworm_event.1.name"
+    desc = "mem_brainworm_event.1.desc"
+    picture = GFX_evt_alien_nature
+    show_sound = event_scanner
+    location = FROM
+    
+    is_triggered_only = yes
+
+    immediate = {
+        
+        from = { 
+
+            orbital_deposit_tile = { clear_deposits = yes } 
+            orbital_deposit_tile = { add_deposit = d_vast_society_deposit }
+        }
+    }
+    
+    option = {
+        name = FASCINATING
+        enable_special_project = {
+            name = "BRAINWORM_EXPEDITION_PROJECT"
+            location = FROM
+        }
+    }
+}
+
+#Brainworm Project Completed
+ship_event = {
+    id = mem_brainworm_event.2
+    title = "PROJECT_COMPLETE"
+    desc = "mem_brainworm_event.2.desc"
+    picture = GFX_evt_big_landing_ship
+    show_sound = event_laboratory_sound
+    location = FROMFROMFROM
+    
+    is_triggered_only = yes
+    
+    option = {
+        name = INTERESTING
+        hidden_effect = {
+            FROMFROMFROM = {
+                add_modifier = {
+                    modifier = "lush_planet"
+                    days = -1
+                }
+            }
+            leader = {
+                set_leader_flag = mem_brainworm_thrall
+            }
+            set_global_flag = mem_brainworm_found
+        }
+        leader = { 
+            add_experience = 200
+        }
+        owner = {
+            add_monthly_resource_mult = {
+                resource = society_research
+                value = @tier2researchreward
+                min = @tier2researchmin
+                max = @tier2researchmax
+            }
+        }
+    }
+}
+################################################################################
+################################################################################
+################################################################################
+
+################################################################################
+##################### YEARLY PULSE EVENTS ######################################
+################################################################################
+#Brainworm Infection Checks
+#Yearly Pulse
+event = {
+    id = mem_brainworm_event.4
+    hide_window = yes
+    is_triggered_only = yes
+    
+    immediate = {
+        every_country = {
+            limit = {
+                is_ai = no
+                any_owned_pop = { has_pop_flag = mem_brainworm_thrall }
+                any_owned_leader = { has_leader_flag = mem_brainworm_thrall }
+            }
+            country_event = { id = mem_brainworm_event.5 }
+        }
+    }
+}
+
+#Brainworm Infection Checks
+#Infection Spreads
+country_event = {
+    id = mem_brainworm_event.5
+    hide_window = yes
+    is_triggered_only = yes
+    
+    immediate = {
+        if = { limit = { has_global_flag = mem_brainworm_found }
+        #Leader Infection (5 percent chance)
+        if = {
+            limit = { 
+                any_owned_leader = { has_leader_flag = mem_brainworm_thrall }
+            }
+            random_list = {
+                5 = {
+                    random_owned_leader = {
+                        limit = {
+                            NOT = { has_leader_flag = mem_brainworm_thrall }
+                        }
+                        set_leader_flag = mem_brainworm_thrall
+                    }
+                }
+                95 = {
+                }
+            }
+        }
+        #Pop Infection (10 percent chance on each planet with an infected pop)
+        every_planet = {
+            limit = {
+                any_pop = { has_pop_flag = mem_brainworm_thrall }
+            }
+            random_list = {
+                100 = {
+                    random_pop = {
+                        limit = {
+                            NOT = { has_pop_flag = mem_brainworm_thrall }
+                        }
+                        set_pop_flag = mem_brainworm_thrall
+                    }
+                }
+                0 = {
+                }
+            }
+        }
+        #Pop Infection (Spread to a new planet, 5 percent chance)
+        random_owned_planet = {
+            limit = {
+                NOT = {
+                    any_pop = { has_pop_flag = mem_brainworm_thrall }
+                }
+            }
+            random_list = {
+                100 = {
+                    random_pop = { set_pop_flag = mem_brainworm_thrall }
+                }
+                0 ={
+                }
+            }
+        }
+        #Ship Infection (10 percent chance)
+        random_list = {
+            10 = {
+                random_owned_ship = {
+                    limit = {
+                        is_ship_class = shipclass_military
+                        NOT = { has_ship_flag = mem_brainworm_thrall }
+                    }
+                    set_ship_flag = mem_brainworm_thrall
+                }
+            }
+            90 = {
+            }
+        }
+        #Pre-Detection Mishap Chance (2 percent chance)
+        if = {
+            limit = {
+                is_ai = no
+                NOT = { has_global_flag = mem_ephialtes_exist }
+            }
+            random_list = {
+                2 = {
+                    random_list = {
+                        #Conspiracy Theorist Arrested
+                        32 = { country_event = { id = mem_brainworm_event.501 days = 50 random = 25 } }
+                        #Smuggler Ship Destroyed
+                        32 = { country_event = { id = mem_brainworm_event.502 days = 50 random = 25 } }
+                        #Medical Lab Scandal
+                        32 = { country_event = { id = mem_brainworm_event.503 days = 50 random = 25 } }
+                        #Worm Research Discovered
+                        4 = { country_event = { id = mem_brainworm_event.504 days = 50 random = 25 } }
+                    }
+                }
+                98 = {
+                }
+            }
+        }
+        }
+    }
+}
+
+#Conspiracy Theorists Arrested
+country_event = {
+    id = mem_brainworm_event.501
+    title = "mem_brainworm_event.501.name"
+    desc = "mem_brainworm_event.501.desc"
+    picture = GFX_evt_smugglers_in_bar
+    show_sound = event_planetary_riot
+    is_triggered_only = yes
+    option = {
+        name = "mem_brainworm_event.501.a"
+        hidden_effect = {
+            country_event = { id = mem_brainworm_event.5011 days = 10 random = 5 }
+        }
+    }
+    option = {
+        name = "mem_brainworm_event.501.b"
+        hidden_effect = {
+            country_event = { id = mem_brainworm_event.5012 days = 10 random = 5 }
+        }
+    }
+    option = {
+        name = "mem_brainworm_event.501.c"
+        hidden_effect = {
+            random_list = {
+                90 = { country_event = { id = mem_brainworm_event.5013 days = 30 random = 15 } } #Investigation fails
+                10 = { country_event = { id = mem_brainworm_event.5014 days = 30 random = 15 } } #Investigation success, brainworms revealed.
+            }
+        }
+    }
+}
+
+#Conspiracy Theorists Executed
+country_event = {
+    id = mem_brainworm_event.5011
+    title = "mem_brainworm_event.5011.name"
+    desc = "mem_brainworm_event.5011.desc"
+    picture = GFX_evt_metropolis
+    show_sound = event_planetary_riot
+    is_triggered_only = yes
+    option = {
+        name = "mem_brainworm_event.5011.a"
+    }
+}
+
+#Conspiracy Theorists Released
+country_event = {
+    id = mem_brainworm_event.5012
+    title = "mem_brainworm_event.5012.name"
+    desc = "mem_brainworm_event.5012.desc"
+    picture = GFX_evt_metropolis
+    show_sound = event_planetary_riot
+    is_triggered_only = yes
+    option = {
+        name = "mem_brainworm_event.5012.a"
+    }
+}
+
+#Conspiracy Investigation Failure
+country_event = {
+    id = mem_brainworm_event.5013
+    title = "mem_brainworm_event.5013.name"
+    desc = "mem_brainworm_event.5013.desc"
+    picture = GFX_evt_metropolis
+    show_sound = event_planetary_riot
+    is_triggered_only = yes
+    option = {
+        name = "mem_brainworm_event.5013.a"
+    }
+}
+
+#Conspiracy Investigation Success
+country_event = {
+    id = mem_brainworm_event.5014
+    title = "mem_brainworm_event.5014.name"
+    desc = "mem_brainworm_event.5014.desc"
+    picture = GFX_evt_brainworm
+    show_sound = event_laboratory_sound
+    is_triggered_only = yes
+    option = {
+        name = "mem_brainworm_event.5014.a"
+        enable_special_project = {
+            name = "BRAINWORM_INFILTRATION_PROJECT"
+            location = capital_scope
+            owner = ROOT
+        }
+    }
+}
+
+#Smuggler Ship Event
+country_event = {
+    id = mem_brainworm_event.502
+    title = "mem_brainworm_event.502.name"
+    desc = "mem_brainworm_event.502.desc"
+    picture = GFX_evt_exploding_ship
+    show_sound = event_space_battle
+    is_triggered_only = yes
+    option = {
+        name = CURIOUS
+    }
+}
+
+#Medical Lab Scandal
+country_event = {
+    id = mem_brainworm_event.503
+    title = "mem_brainworm_event.503.name"
+    desc = "mem_brainworm_event.503.desc"
+    picture = GFX_evt_society_research
+    show_sound = event_laboratory_sound_03
+    is_triggered_only = yes
+    option = {
+        name = TERRIBLE
+    }
+}
+################################################################################
+################################################################################
+################################################################################
+
+################################################################################
+#################### DISCOVERY OF BRAINWORMS ###################################
+################################################################################
+#Brainworms Discovered
+country_event = {
+    id = mem_brainworm_event.504
+    title = "mem_brainworm_event.504.name"
+    desc = "mem_brainworm_event.504.desc"
+    picture = GFX_evt_brainworm
+    show_sound = event_laboratory_sound_03
+    is_triggered_only = yes
+    option = {
+        name = "mem_brainworm_event.504.a"
+        enable_special_project = {
+            name = "BRAINWORM_INFILTRATION_PROJECT"
+            location = capital_scope
+            owner = ROOT
+        }
+    }
+}
+
+#Leader Death Check
+country_event = {
+    id = mem_brainworm_event.5041
+    hide_window = yes
+    is_triggered_only = yes
+    immediate = {
+        if = {
+            limit = {
+                FROM = { has_leader_flag = mem_brainworm_thrall }
+            }
+            country_event = { id = mem_brainworm_event.504 days = 10 random = 5 }
+        }
+    }
+}
+
+#Brainworms Revealed
+country_event = {
+    id = mem_brainworm_event.6
+    title = "mem_brainworm_event.6.name"
+    desc = "mem_brainworm_event.6.desc"
+    picture = GFX_evt_brainworm_02
+    show_sound = event_laboratory_sound_03
+    is_triggered_only = yes
+
+    option = {
+        name = mem_brainworm_event.6.a
+        trigger = {
+            OR = {
+                has_government = theocratic_republic
+                has_government = transcendent_republic
+                has_government = theocratic_oligarchy
+                has_government = transcendent_oligarchy
+                has_government = divine_mandate
+                has_government = transcendent_empire
+            }
+            NOT = {
+                has_ethic = "ethic_fanatic_individualist"
+                has_ethic = "ethic_fanatic_collectivist"
+                has_ethic = "ethic_fanatic_xenophile"
+                has_ethic = "ethic_fanatic_xenophobe"
+            }
+        }
+        begin_event_chain = {
+            event_chain = "ephialtes_worm_chain"
+            target = ROOT
+        }
+    }
+    option = {
+        name = mem_brainworm_event.6.b
+        trigger = {
+            OR = {
+                has_government = military_dictatorship
+                has_government = martial_empire
+                has_government = military_junta
+                has_government = ordered_stratocracy
+                has_government = military_republic
+                has_government = martial_demarchy
+            }
+            NOT = {
+                has_ethic = "ethic_fanatic_individualist"
+                has_ethic = "ethic_fanatic_collectivist"
+                has_ethic = "ethic_fanatic_xenophile"
+                has_ethic = "ethic_fanatic_xenophobe"
+            }
+        }
+        begin_event_chain = {
+            event_chain = "ephialtes_worm_chain"
+            target = ROOT
+        }
+    }
+    option = {
+        name = mem_brainworm_event.6.c
+        trigger = {
+            OR = {
+                has_government = despotic_hegemony
+                has_government = ai_overlordship
+                has_government = science_directorate
+                has_government = illuminated_technocracy
+                has_government = direct_democracy
+                has_government = subconscious_consensus
+            }
+            NOT = {
+                has_ethic = "ethic_fanatic_individualist"
+                has_ethic = "ethic_fanatic_collectivist"
+                has_ethic = "ethic_fanatic_xenophile"
+                has_ethic = "ethic_fanatic_xenophobe"
+            }
+        }
+        begin_event_chain = {
+            event_chain = "ephialtes_worm_chain"
+            target = ROOT
+        }
+    }
+    option = {
+        name = mem_brainworm_event.6.d
+        trigger = {
+            OR = {
+                has_government = moral_democracy
+                has_government = irenic_democracy
+                has_government = peaceful_bureaucracy
+                has_government = irenic_protectorate
+                has_government = enlightened_monarchy
+                has_government = irenic_monarchy
+            }
+            NOT = {
+                has_ethic = "ethic_fanatic_individualist"
+                has_ethic = "ethic_fanatic_collectivist"
+                has_ethic = "ethic_fanatic_xenophile"
+                has_ethic = "ethic_fanatic_xenophobe"
+            }
+        }
+        begin_event_chain = {
+            event_chain = "ephialtes_worm_chain"
+            target = ROOT
+        }
+    }
+    option = {
+        name = mem_brainworm_event.6.e
+        trigger = {
+            OR = {
+                has_government = plutocratic_oligarchy
+                has_government = mega_corporation
+            }
+            NOT = {
+                has_ethic = "ethic_fanatic_individualist"
+                has_ethic = "ethic_fanatic_collectivist"
+                has_ethic = "ethic_fanatic_xenophile"
+                has_ethic = "ethic_fanatic_xenophobe"
+            }
+        }
+        begin_event_chain = {
+            event_chain = "ephialtes_worm_chain"
+            target = ROOT
+        }
+    }
+    option = {
+        name = mem_brainworm_event.6.f
+        trigger = {
+            OR = {
+                has_government = despotic_empire
+                has_government = star_empire
+                has_government = indirect_democracy
+                has_government = democratic_utopia
+            }
+            NOT = {
+                has_ethic = "ethic_fanatic_individualist"
+                has_ethic = "ethic_fanatic_collectivist"
+                has_ethic = "ethic_fanatic_xenophile"
+                has_ethic = "ethic_fanatic_xenophobe"
+            }
+        }
+        begin_event_chain = {
+            event_chain = "ephialtes_worm_chain"
+            target = ROOT
+        }
+    }
+    option = {
+        name = mem_brainworm_event.6.g
+        trigger = {
+            has_ethic = "ethic_fanatic_xenophobe"
+        }
+        begin_event_chain = {
+            event_chain = "ephialtes_worm_chain"
+            target = ROOT
+        }
+    }
+    option = {
+        name = mem_brainworm_event.6.h
+        trigger = {
+            has_ethic = "ethic_fanatic_xenophile"
+        }
+        begin_event_chain = {
+            event_chain = "ephialtes_worm_chain"
+            target = ROOT
+        }
+    }
+    option = {
+        name = mem_brainworm_event.6.i
+        trigger = {
+            has_ethic = "ethic_fanatic_collectivist"
+        }
+        begin_event_chain = {
+            event_chain = "ephialtes_worm_chain"
+            target = ROOT
+        }
+    }
+    option = {
+        name = mem_brainworm_event.6.j
+        trigger = {
+            has_ethic = "ethic_fanatic_individualist"
+        }
+        begin_event_chain = {
+            event_chain = "ephialtes_worm_chain"
+            target = ROOT
+        }
+    }
+    option = {
+        name = mem_brainworm_event.6.k
+        begin_event_chain = {
+            event_chain = "ephialtes_worm_chain"
+            target = ROOT
+        }
+    }
+}
+
+#Brainworm Coup
+country_event = {
+    id = mem_brainworm_event.7
+    title = "mem_brainworm_event.7.name"
+    desc = "mem_brainworm_event.7.desc"
+    picture = GFX_evt_brainworm
+    show_sound = event_red_alert
+    is_triggered_only = yes
+
+
+    immediate = {
+        #Setup Brainworm Species and Country
+        if = {
+            limit = { NOT = { has_global_flag = mem_ephialtes_exist } }
+            set_global_flag = mem_ephialtes_exist
+            save_event_target_as = brainworm_victim_country
+            random_owned_planet = {
+                limit = { 
+                    is_capital = no
+                    #count_pops = { 
+                    #    limit = { 
+                    #        has_pop_flag = mem_brainworm_thrall
+                    #        is_same_species = owner_species
+                    #    } 
+                    #    count > 4
+                    #}
+                }
+                random_pop = {
+                    limit = { is_same_species = owner_species }
+                    planet = {
+                        root = {
+                            create_species = {
+                                name = "Ephialtes Worm"
+                                class = this
+                                portrait = this
+                                traits = {
+                                    trait = trait_pc_tropical_preference
+                                    trait = random_trait
+                                    trait = random_trait
+                                }
+                                homeworld = planet
+                            }
+                        }
+                    }
+                }
+                #Create mindworm country
+                create_rebels = {
+                    name = "Ephialtes Thralldom"
+                    government = transcendent_empire
+                    species = last_created
+
+                    name_list = random
+                    flag = random
+                    type = faction
+                    ethos = {
+                        ethic = "ethic_spiritualist"
+                        ethic = "ethic_militarist"
+                        ethic = "ethic_collectivist"
+                    }
+                }
+                last_created_country = {
+                    add_war_demand = {
+                    type = "liberate_country"
+                    parameter:country = this
+                    warscore_cost = 50
+                    target = this
+                    }
+                }
+                #Change all of the pops on this planet to mindworm pops
+                every_owned_pop = {
+                    limit = {
+                        NOT = { is_same_species = last_created }
+                    }
+                    change_pop_species = last_created
+                    PREV = {
+                        create_army = {
+                            name = "Ephialtes Mindthralls"
+                            type = "gene_warrior_army"
+                            species = last_created
+                            owner = last_created
+                        }
+                    }
+                }
+            }
+            every_country = {
+                limit = { is_country_type = default }
+                establish_communications_no_message = last_created_country
+            }
+            last_created_country = { set_country_flag = mem_brainworm_nation }
+        }
+######### End of brainworm species setup ##############
+
+
+
+
+        #Insurrections Happen
+        every_owned_planet = {
+            limit = { 
+                is_capital = no
+                any_pop = { has_pop_flag = mem_brainworm_thrall }
+            }
+            #Every infected pop on the planet is changed to the mindworm species.
+            every_owned_pop = {
+                IF = {
+                    limit = {
+                        has_pop_flag = mem_brainworm_thrall
+                        NOT = { is_same_species = last_created }
+                    }
+                    change_pop_species = last_created
+                    set_pop_flag = mem_brainworm_thrall
+
+                    #Create armies proportional to mindwormed citizens.
+                    #Most will probably fail in their attacks but will give a nice shock.
+                    PREV = {
+                        #Currently super powered so they can actually capture stuff
+                        create_army = {
+                            name = "Ephialtes Mindthralls"
+                            type = "gene_warrior_army"
+                            species = last_created
+                            owner = last_created
+                        }
+                        create_army = {
+                            name = "Ephialtes Mindthralls"
+                            type = "gene_warrior_army"
+                            species = last_created
+                            owner = last_created
+                        }
+                        create_army = {
+                            name = "Ephialtes Mindthralls"
+                            type = "gene_warrior_army"
+                            species = last_created
+                            owner = last_created
+                        }
+                    }
+                }
+            }
+        }
+        #Fleet Sabotage
+        every_owned_ship = {
+            limit = { has_ship_flag = mem_brainworm_thrall }
+            random_list = {
+                60 = { reduce_hp_percent = 100 }
+                30 = { reduce_hp_percent = 90 }
+                10 = { reduce_hp_percent = 75 }
+            }
+        }
+        #Leaders Defect
+        every_owned_leader = {
+            limit = {has_leader_flag = mem_brainworm_thrall }
+            kill_leader = { show_notification = no }
+        }
+    }
+    option = {
+        name = "mem_brainworm_event.7.a"
+    }
+}
+
+
+############ CLEARING EVENT ##############
+
+#Clearing Brainworms Off A Planet Trigger
+#planet_event = {
+#    
+#has_ground_combat = no
+
+# Root = Planet
+# From = Planet Owner
+# FromFrom = Planet Controller (the one occupying)
+planet_event = {
+    id = mem_brainworm_event.989
+    hide_window = no
+    is_triggered_only = yes
+    title = "Planet captured by mindworms"
+    trigger = {
+        FromFrom = {
+            is_brainworm_nation = yes
+        }
+    }
+    option = {
+        name = OK
+    }
+}
+
+# Triggers country_event for the attacker upon victory
+# This = country, leader attacker
+# From = country, planet owner
+# FromFrom = planet
+
+#Reclaimed control of planet
+country_event = {
+    id = mem_brainworm_event.990
+    is_triggered_only = yes
+    hide_window = yes
+    title = "Planet reclaimed"
+    trigger = { 
+        #There's a brainworm species on the planet
+        FromFrom = {
+            has_brainworm_infestation = yes
+        }
+     }
+    immediate = { 
+         FromFrom = {
+            #Fire clear opportunity
+            planet_event = { id = mem_brainworm_event.1000 }
+         }
+     }
+     option = {
+        name = OK
+    }
+}
+
+# Triggers country_event for the defender upon victory
+# This = country, planet owner
+# From = country, attack leader
+# FromFrom = planet
+#Fought off ephialtes uprising
+country_event = {
+    id = mem_brainworm_event.991
+    is_triggered_only = yes
+    hide_window = no
+    title = "Attackers fought off"
+    trigger = { 
+        FromFrom = {
+            has_brainworm_infestation = yes
+        }
+     }
+    immediate = { 
+         FromFrom = {
+            #Fire clear opportunity
+            planet_event = { id = mem_brainworm_event.1000 }
+         }
+     }
+     option = {
+        name = OK
+    }
+}
+
+#Give clear opportunity
+planet_event = {
+    id = mem_brainworm_event.1000
+    title = "Reconquest"
+    desc = "We have regained control of [Root.GetName] which was attacked by the mindworms. What should we do with the still infected population?"
+    picture = GFX_evt_brainworm
+    is_triggered_only = yes
+
+    option = {
+        name = "We must terminate them. All of them."
+        every_owned_pop = {
+            purge = yes
+        }
+    }
+    option = {
+        trigger = { 
+            NOT = { 
+                owner = { has_country_flag = perfected_brainworm_extraction } 
+            }
+         }
+        name = "Figure out how to extract these parasites."
+        enable_special_project = {
+            name = "BRAINWORM_EXTRACTION_PROJECT"
+            location = ROOT
+        }
+    }
+    option = {
+        trigger = { 
+            owner = { has_country_flag = perfected_brainworm_extraction }
+        }
+        name = "Set up extraction facilities."
+        enable_special_project = {
+            name = "BRAINWORM_EXTRACTION_PROJECT"
+            location = ROOT
+        }
+      
+    }
+
+    option = {
+        name = "They are living beings too. Let them live."
+    }
+}
+
+#Scientists sucessfully extract the worm
+planet_event = {
+    id = mem_brainworm_event.1010 
+    is_triggered_only = yes
+    title = "Successfull Extraction!"
+    desc = "Our scientists at [Root.GetName] has successfully extracted one of the worms! We will now be able to cure all of our infected citizens"
+    option = {
+        name = EXCELLENT
+        hidden_effect = {
+            owner = { set_country_flag = perfected_brainworm_extraction }
+            random_pop = {
+                limit = {
+                    is_species = "Ephialtes Worm"
+                }
+                #This just seems to turn the pops into some kind of invisible unknown species.
+                kill_pop = yes
+                root = {
+                    create_pop = { 
+                        species = owner_main_species
+                        ethos = owner 
+                    }
+                }
+            }
+            enable_special_project = {
+                name = "BRAINWORM_EXTRACTION_PROJECT"
+                location = ROOT
+            }
+        }
+    }
+}
+
+#Scientists fail to extract the worm
+planet_event = {
+    id = mem_brainworm_event.1011 
+    is_triggered_only = yes
+    title = "Failed Extraction!"
+    desc = {
+        trigger = {
+            has_brainworm_infestation = yes
+            }
+        text = "Our scientists at [Root.GetName] failed at extracting one of the worms! The life of the infected citizen could not be saved."
+    }
+    desc = {
+        trigger = { 
+            has_brainworm_infestation = no
+         }
+         text = "The last infected [Root.GetName] has succumbed as our scientists failed extracting their worm. We have at least regained full control of the planet."
+    }
+
+    option = {
+        name = "We must keep trying!"
+        trigger = { 
+            has_brainworm_infestation = yes 
+        }
+        random_pop = {
+            limit = { has_brainworm = yes }
+            kill_pop = yes
+        }
+        enable_special_project = {
+            name = "BRAINWORM_EXTRACTION_PROJECT"
+            location = ROOT
+        }
+    }
+
+    option = {
+        name = UNFORTUNATE
+        trigger = {
+            has_brainworm_infestation = no
+        }
+    }
+}
+
+#Scientists clear the planet
+planet_event = {
+    id = mem_brainworm_event.1012 
+    is_triggered_only = yes
+    title = "Planet Cured!"
+    desc = "Our scientists at [Root.GetName] has completely cured the planet!"
+    immediate = {
+        every_owned_pop = {
+            limit = {
+                is_species = "Ephialtes Worm"
+            }
+            kill_pop = yes
+            root = {
+                create_pop = { 
+                    species = owner_main_species
+                    ethos = owner 
+                }
+            }
+
+        }
+    }
+    option = {
+        name = EXCELLENT
+    }
+}
