@@ -1,0 +1,495 @@
+namespace = ancient_robots
+
+# This is a utility event to make the event sequence easier to test. To test, load the 
+# game, open the console, and type event ancient_robots.0 in; this will trigger the sequence on
+# your homeworld.
+
+country_event = {
+	id = ancient_robots.0
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		capital_scope = {
+			random_tile = {
+				limit = {
+					has_blocker = yes
+				}
+				remove_blocker = yes
+				set_blocker = tb_mountain_range
+			}
+			planet_event = { id = ancient_robots.201 }
+		}
+	}
+}
+
+# Start of event sequence
+
+planet_event = {
+	id = ancient_robots.201
+	title = ancient_robots.201.name
+	desc = ancient_robots.201.desc
+	picture = GFX_evt_archaeological_dig
+	
+	trigger = {
+		has_owner = yes
+		original_owner = yes
+#		is_homeworld = no # UNCOMMENT THESE LINES FOR FINAL RELEASE
+#		is_capital = no
+		has_ground_combat = no
+		num_pops > 0
+		owner = {
+			is_ai = no
+			NOT = { has_country_flag = ancient_robots_fired }
+		}
+		NOT = {
+			has_planet_flag = colony_event
+		}
+		any_tile = {
+			has_blocker = tb_mountain_range
+		}
+	}
+	
+	immediate = {
+		set_planet_flag = colony_event # This flag is used to tell the game not to trigger other colony events here
+		set_planet_flag = ancient_robot_world # Used to keep track of which world this is happening on
+		owner = { # Robots have fired, don't create a second copy somewhere else.
+			set_country_flag = ancient_robots_fired
+		}
+		random_tile = { # Replace a mountain range with a strange mountain
+			limit = {
+				has_blocker = tb_mountain_range
+			}
+			remove_blocker = yes
+			set_blocker = tb_strange_mountain
+		}
+	}
+	
+	option = {
+		name = ancient_robots.201.a
+		owner = {
+			enable_special_project = { # Create special project to study the mountain
+				name = ANCIENT_ROBOTS_PROJECT
+				location = prev
+				owner = root
+			}
+		}
+	}
+}
+
+# Finish special project studying the mountain
+
+ship_event = {
+	id = ancient_robots.203
+	title = ancient_robots.203.name
+	desc = ancient_robots.203.desc
+	picture = GFX_evt_archaeological_dig
+	
+	is_triggered_only = yes
+	
+	option = { # Do it - eats 200 energy + minerals, adds project
+		trigger = {
+			owner = {
+				energy > 199
+				minerals > 199
+			}
+		}
+		name = ancient_robots.203.a
+		owner = {
+			add_energy = -200
+			add_minerals = -200
+		}
+		from = {
+			enable_special_project = {
+				name = ANCIENT_ROBOTS_PROJECT_2
+				location = this
+				owner = root
+			}
+		}
+	}
+	
+	option = { # Ask again later
+		name = ancient_robots.203.b
+		hidden_effect = {
+			from = {
+				planet_event = { id = ancient_robots.204 days = 180 } # Ask again in 180 days
+			}
+		}
+	}
+	
+	option = { # No, and don't ask again
+		name = ancient_robots.203.c
+		hidden_effect = {
+			from = {
+				planet_event = { id = ancient_robots.207 days = 1800 random = 900 } Trigger private excavation event in 5-7.5 years
+			}
+		}
+	}
+}
+
+# Ask again about excavation:
+
+planet_event = {
+	id = ancient_robots.204
+	title = ancient_robots.204.name
+	desc = ancient_robots.204.desc
+	picture = GFX_evt_archaeological_dig
+	is_triggered_only = yes
+	
+	option = { # Yes, do it
+		trigger = {
+			owner = {
+				energy > 199
+				minerals > 199
+			}
+		}
+		name = ancient_robots.204.a
+		owner = {
+			add_energy = -200
+			add_minerals = -200
+			enable_special_project = {
+				name = ANCIENT_ROBOTS_PROJECT_2
+				location = prev
+				owner = root
+			}
+		}
+	}
+	
+	option = { # Ask me again later
+		name = ancient_robots.204.b
+		hidden_effect = {
+			fromfrom = {
+				planet_event = { id = ancient_robots.204 days = 180 }
+			}
+		}
+	}
+	
+	option = { # No, don't ask again
+		name = ancient_robots.204.c
+		hidden_effect = {
+			fromfrom = {
+				planet_event = { id = ancient_robots.207 days = 1800 random = 900 }
+			}
+		}
+	}
+}
+
+# Excavation Completed:
+
+planet_event = {
+	id = ancient_robots.206
+	title = ancient_robots.206.name
+	desc = ancient_robots.206.desc
+	picture = GFX_evt_robot_assembly_plant
+	is_triggered_only = yes
+	
+	option = {
+		name = ancient_robots.206.a
+		owner = {
+			enable_special_project = { # Enable special project to study robot parts
+				name = ANCIENT_ROBOTS_PROJECT_3
+				location = prev
+				owner = root
+			}
+			add_monthly_resource_mult = { # Give engineering points
+				resource = engineering_research
+				value = 18
+				min = 120
+				max = 350
+			}
+		}	
+		hidden_effect = { # Set up next event
+			random_list = {
+				1 = { planet_event = { id = ancient_robots.208 days = 30 } }
+				1 = { planet_event = { id = ancient_robots.209 days = 30 } }
+			}
+		}
+	}
+}
+
+# Excavation performed by someone else:
+
+planet_event = {
+	id = ancient_robots.207
+	title = ancient_robots.207.name
+	desc = ancient_robots.207.desc
+	picture = GFX_evt_alien_ruins
+	is_triggered_only = yes
+	
+	option = {
+		name = ancient_robots.207.a
+		owner = { # Enable special project to study robot parts
+			enable_special_project = {
+				name = ANCIENT_ROBOTS_PROJECT_3
+				location = prev
+				owner = root
+			}
+		}	
+		hidden_effect = {
+			random_list = { # Set up next event
+				1 = { planet_event = { id = ancient_robots.208 days = 30 } }
+				1 = { planet_event = { id = ancient_robots.209 days = 30 } }
+			}
+		}
+	}
+}
+
+# AI is (initially) friendly:
+
+planet_event = {
+	id = ancient_robots.208
+	name = ancient_robots.208.name
+	desc = ancient_robots.208.desc
+	picture = GFX_evt_sentient_AI
+	is_triggered_only = yes
+	
+	immediate = {
+		random_tile = { # Change the strange mountain into an AI factory
+			limit = {
+				has_blocker = tb_strange_mountain
+			}
+			remove_blocker = yes
+			set_building = building_ai_factory
+		}
+	}
+	
+	option = {
+		name = ancient_robots.208.a
+		hidden_effect = { # Set up later event where it goes rogue
+			planet_event = { id = ancient_robots.210 days = 1080 random = 1440 }
+		}
+	}
+}
+
+# Evil robots swarm out after you power up the complex:
+
+planet_event = {
+	id = ancient_robots.209
+	name = ancient_robots.209.name
+	desc = ancient_robots.209.desc
+	picture = GFX_evt_ground_combat
+	is_triggered_only = yes
+	
+	immediate = { # This creates the EVIL ROBOT ARMIES:
+		planet_event = { id = ancient_robots.221 }
+	}
+	
+	option = {
+		name = ancient_robots.209.a
+	}
+}
+
+# AI goes rogue after a period of friendliness:
+
+planet_event = {
+	id = ancient_robots.210
+	name = ancient_robots.210.name
+	desc = ancient_robots.210.desc
+	picture = GFX_evt_ground_combat
+	is_triggered_only = yes
+	
+	immediate = { # This creates the EVIL ROBOT ARMIES:
+		planet_event = { id = ancient_robots.221 }
+	}
+	
+	option = {
+		name = ancient_robots.210.a
+	}
+}
+
+# Victory over initial robot armies:
+
+planet_event = {
+	id = ancient_robots.211
+	title = ancient_robots.211.name
+	desc = ancient_robots.211.desc
+	picture = GFX_evt_ground_combat
+	
+	trigger = {
+		has_planet_flag = super_robot_attack
+	}
+	
+	immediate = {
+		remove_planet_flag = super_robot_attack
+	}
+	
+	option = {
+		name = ancient_robots.211.a
+		owner = { # Set up special project to lay siege to the AI
+			enable_special_project = {
+				name = SIEGE_PROJECT
+				location = prev
+				owner = root
+			}
+		}
+	}
+}
+
+# Robots swarm out, round two:
+
+planet_event = {
+	id = ancient_robots.213
+	title = ancient_robots.213.name
+	desc = ancient_robots.213.desc
+	picture = GFX_evt_ground_combat
+	is_triggered_only = yes
+	
+	immediate = {
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:evil_robots
+			species = robot
+			type = super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:evil_robots
+			species = robot
+			type = super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:evil_robots
+			species = robot
+			type = super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:evil_robots
+			species = robot
+			type = super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:evil_robots
+			species = robot
+			type = super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:evil_robots
+			species = robot
+			type = super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:evil_robots
+			species = robot
+			type = super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:evil_robots
+			species = robot
+			type = super_robot_army
+		}
+	}
+	
+	option = {
+		name = ancient_robots.213.a
+	}
+}
+
+# Complete robot unit analysis:
+
+planet_event = {
+	id = ancient_robots.220
+	title = ancient_robots.220.name
+	desc = ancient_robots.220.desc
+	picture = GFX_evt_robot_assembly_plant
+	is_triggered_only = yes
+	
+	option = {
+		name = ancient_robots.220.a
+		owner = {
+			if = {
+				limit = {
+					has_technology = tech_droid_workers
+				}
+				add_monthly_resource_mult = {
+					resource = engineering_research
+					value = 18
+					min = 120
+					max = 350
+				}
+				else = {
+					add_tech_progress = {
+						tech = tech_droid_workers
+						progress = 0.10
+					}
+				}
+			}
+		}
+	}
+}
+
+# Generate EVIL ROBOT armies:
+
+planet_event = {
+	id = ancient_robots.221
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		set_planet_flag = super_robot_attack
+		owner = {
+			save_event_target_as = ancient_robots_planet_owner
+		}
+		create_country = {
+			name = "Ancient Robots"
+			type = adversary
+			species = robot
+			ethos = random
+			auto_delete = no
+			flag = {
+				icon = {
+					category = "zoological"
+					file = "flag_zoological_10.dds"
+				}
+				background= {
+					category = "backgrounds"
+					file = "new_dawn.dds"
+				}
+				colors={
+					"red"
+					"black"
+					"null"
+					"null"
+				}
+			}
+		}
+		last_created_country = {
+			save_event_target_as = evil_robots
+			establish_contact = {
+				who = event_target:ancient_robots_planet_owner
+				location = root
+			}
+			establish_communications_no_message = root
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:evil_robots
+			species = robot
+			type = super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:evil_robots
+			species = robot
+			type = super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:evil_robots
+			species = robot
+			type = super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:evil_robots
+			species = robot
+			type = super_robot_army
+		}
+	}
+}
+
