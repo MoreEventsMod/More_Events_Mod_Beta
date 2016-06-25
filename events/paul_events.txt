@@ -1,0 +1,373 @@
+
+namespace = paul_star_survey
+#############
+#code for Star studies event by P_aul
+#writing by Infel & P_aul
+#original idea by P_aul
+#############
+#Star survey request
+country_event = {
+	id = paul_star_survey.1
+	title = "paul_star_survey.1.name"
+	desc = "paul_star_survey.1.desc"
+	picture = GFX_evt_star_chart
+	show_sound = event_laboratory_sound
+	trigger = {
+		is_ai = no
+		NOT = { has_country_flag = paul_star_survey }	
+	}
+	
+	mean_time_to_happen = {
+		months = 60
+	}
+	
+	immediate = {
+		set_country_flag = paul_star_survey
+	}
+
+	option = {
+		name = "paul_star_survey.1.a"
+		begin_event_chain = {
+			event_chain = "paul_star_chain"
+			target = root
+		}
+		hidden_effect = {
+			closest_system = {
+				limit = {
+					is_star_class = sc_a
+				}
+				random_system_planet = {
+					limit = {
+						is_planet_class = pc_a_star
+					} 
+					save_event_target_as = ASTAR
+					enable_special_project = {
+						name = "A_STAR_SURVEY"
+						location = this
+						owner = root
+					}		 
+				}
+				
+			}
+			closest_system = {
+				limit = {
+					is_star_class = sc_k
+				}
+				random_system_planet = {
+					limit = {
+						is_planet_class = pc_k_star
+					} 
+					enable_special_project = {
+						name = "K_STAR_SURVEY"
+						location = this
+						owner = root
+					}		 
+				}
+				
+			}
+			closest_system = {
+				limit = {
+					is_star_class = sc_m
+				}
+				random_system_planet = {
+					limit = {
+						is_planet_class = pc_m_star
+					} 
+					enable_special_project = {
+						name = "M_STAR_SURVEY"
+						location = this
+						owner = root
+					}		 
+				}
+				
+			}
+			closest_system = {
+				limit = {
+					OR = {
+						is_star_class = sc_black_hole
+						is_star_class = sc_pulsar
+						is_star_class = sc_neutron_star
+					}
+					
+				}
+				random_system_planet = {
+					limit = {
+						OR = {
+							is_planet_class = pc_neutron_star
+							is_planet_class = pc_black_hole
+							is_planet_class = pc_pulsar
+						}
+						
+					} 
+					enable_special_project = {
+						name = "RARE_STAR_SURVEY"
+						location = this
+						owner = root
+					}		 
+				}
+				
+			}
+		}
+	}
+	option = {
+		name = "paul_star_survey.1.b"
+	}
+}
+
+#A-class star researched
+ship_event = {
+	id = paul_star_survey.2
+	title = "paul_star_survey.2.name"
+	desc = "paul_star_survey.2.desc"
+	picture = GFX_evt_star_white
+	show_sound = event_laboratory_sound
+	location = ASTAR
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "paul_star_survey.2.a"
+		owner = {
+			add_event_chain_counter = { 
+				event_chain = "paul_star_chain" 
+				counter = "paul_stars_surveyed" 
+				amount = 1 
+			}
+		}
+		event_target:ASTAR = { 
+			hidden_effect = {orbital_deposit_tile = { clear_deposits = yes } }
+			orbital_deposit_tile = {
+				add_deposit = d_vast_energy_deposit
+			}
+		}
+	}
+	option = {
+		name = "paul_star_survey.2.b"
+		owner = {
+			add_event_chain_counter = { 
+				event_chain = "paul_star_chain" 
+				counter = "paul_stars_surveyed" 
+				amount = 1 
+			}
+		}
+		event_target:ASTAR = { 
+			hidden_effect = { orbital_deposit_tile = { clear_deposits = yes } }
+			orbital_deposit_tile = {
+				add_deposit = d_vast_physics_deposit
+			}
+		}
+		
+	}
+}
+
+#K-class star researched
+ship_event = {
+	id = paul_star_survey.3
+	title = "paul_star_survey.3.name"
+	desc = "paul_star_survey.3.desc"
+	picture = GFX_evt_star_yellow
+	show_sound = event_laboratory_sound
+	
+	is_triggered_only = yes
+	
+	
+	option = {
+		name = "OK"
+		owner = {
+			add_event_chain_counter = { 
+				event_chain = "paul_star_chain" 
+				counter = "paul_stars_surveyed" 
+				amount = 1 
+			}
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = 5
+				min = 40
+				max = 100
+			}
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = 8
+				min = 80
+				max = 160
+			}
+		}
+		
+	}
+	
+}
+
+#M star
+ship_event = {
+	id = paul_star_survey.4
+	title = "paul_star_survey.4.name"
+	desc = "paul_star_survey.4.desc"
+	picture = GFX_evt_physics_research
+	show_sound = event_laboratory_sound
+	
+	is_triggered_only = yes
+	
+	
+	option = {
+		name = "BREAKTHROUGH"
+		owner = {
+			add_event_chain_counter = { 
+				event_chain = "paul_star_chain" 
+				counter = "paul_stars_surveyed" 
+				amount = 1 
+			}
+			if = {
+				limit = {
+					has_technology = tech_fusion_power
+				}
+				add_monthly_resource_mult = {
+					resource = physics_research
+					value = 8
+					min = 80
+					max = 160
+				}
+				else = {
+					if = {
+						limit = {
+							has_tech_option = tech_fusion_power
+						}
+						add_tech_progress = {
+							tech = tech_fusion_power
+							progress = 0.50
+						}
+						else = {
+							add_research_option = tech_fusion_power
+							add_tech_progress = {
+								tech = tech_fusion_power
+								progress = 0.25
+							}
+						}
+					}
+				}
+			}
+		}
+		
+	}
+	
+}
+
+#Rare star
+ship_event = {
+	id = paul_star_survey.5
+	title = "paul_star_survey.5.name"
+	desc = "paul_star_survey.5.desc"
+	picture = GFX_evt_physics_research
+	show_sound = event_laboratory_sound
+	
+	is_triggered_only = yes
+	
+	
+	option = {
+		name = "GOOD"
+		owner = {
+			add_event_chain_counter = { 
+				event_chain = "paul_star_chain" 
+				counter = "paul_stars_surveyed" 
+				amount = 1 
+			}
+		}
+		leader = {
+			add_trait = leader_trait_expertise_particles
+		}
+		
+	}
+	
+}
+
+#all star projects completed
+country_event = {
+	id = paul_star_survey.6
+	title = "paul_star_survey.6.name"
+	picture = GFX_evt_star_chart
+	show_sound = event_laboratory_sound
+	desc = {
+		trigger={
+			switch = {
+				trigger = has_ethic
+				ethic_spiritualist = {text = "paul_star_survey.6.desc.spirit"}
+				ethic_fanatic_spiritualist = {text = "paul_star_survey.6.desc.spirit"}
+				ethic_individualist = {text = "paul_star_survey.6.desc.mat"}
+				ethic_fanatic_individualist = {text = "paul_star_survey.6.desc.mat"}
+				ethic_materialist = {text = "paul_star_survey.6.desc.mat"}
+				ethic_fanatic_materialist = {text = "paul_star_survey.6.desc.mat"}
+				default = {text = "paul_star_survey.6.desc.default"}
+			}
+		}
+	}
+	
+	trigger = {
+		has_completed_event_chain_counter = {
+			event_chain = "paul_star_chain" 
+			counter = "paul_stars_surveyed" 
+		}
+		NOT = { has_country_flag = paul_completed_star_survey }
+	}
+	
+	mean_time_to_happen = {
+		days = 1
+	}
+	
+	immediate = {
+		set_country_flag = paul_completed_star_survey
+	}
+	#boost physics (everyone BUT spiritualists)
+	option = {
+		name = "paul_star_survey.6.a"
+		end_event_chain = "paul_star_chain"
+		trigger = {
+			NOT = {
+				has_ethic = ethic_fanatic_spiritualist
+				has_ethic = ethic_spiritualist
+			}
+		}
+		root = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = 12
+				min = 90
+				max = 250
+			}
+		}
+	}
+	#boost energy (materialists/individualists NOT spiritualists)
+	option = {
+        trigger = {
+            OR = {
+				has_ethic = ethic_materialist
+				has_ethic = ethic_fanatic_materialist
+				has_ethic = ethic_fanatic_individualist
+				has_ethic = ethic_individualist
+            }
+			NOT = {
+				has_ethic = ethic_fanatic_spiritualist
+				has_ethic = ethic_spiritualist
+			}
+        }
+        name = "paul_star_survey.6.b"
+		end_event_chain = "paul_star_chain"
+        add_modifier = {
+            modifier = paul_powerplant_tuning
+            days = 1800
+        }
+    }
+	#boost happiness (spiritualists)
+	option = {
+        trigger = {
+            OR = {
+				has_ethic = ethic_fanatic_spiritualist
+				has_ethic = ethic_spiritualist
+            }
+        }
+        name = "paul_star_survey.6.c"
+		end_event_chain = "paul_star_chain"
+        add_modifier = {
+            modifier = paul_star_pictures
+            days = 900
+        }
+    }
+}

@@ -1,0 +1,892 @@
+################################
+# Spiritualists Pilgrimage
+# Original idea by: Deltasquid
+# Code by:          Tuttu
+# Writing by:       Elimdur
+################################
+
+namespace = spiritualists_pilgrimage
+
+# Waiting Mid-game to trigger the event (+35 years)
+country_event = {
+	id = spiritualists_pilgrimage.1
+	hide_window = yes
+	
+	trigger = {
+		years_passed = 35
+	}
+	
+	immediate = {
+		set_global_flag = 35_years_passed
+	}
+}
+
+# Spiritualist pilgrimage started
+country_event = {
+	id = spiritualists_pilgrimage.2
+	title = "spiritualists_pilgrimage.2.name"
+	desc = "spiritualists_pilgrimage.2.desc"
+	
+	diplomatic = yes
+	picture_event_data = { 
+		portrait = event_target:pilgrims_origin
+		planet_background = event_target:pilgrims_origin 
+		graphical_culture = event_target:pilgrims_origin 
+		city_level = event_target:pilgrims_origin 
+		room = event_target:pilgrims_origin 
+	}
+	
+	trigger = {		
+		has_global_flag = 35_years_passed
+		NOR = {	
+			has_global_flag = pilgrimage_in_progress 
+			has_country_flag = pilgrims_received
+		}
+		#NOT = { has_country_flag = pilgrims_received }
+		any_neighbor_country = {
+			OR = {
+				has_ethic = "ethic_spiritualist"
+				has_ethic = "ethic_fanatic_spiritualist"
+			}
+			NOR = {			
+				# Prevent the same country to do the pilgrimage again
+					has_country_flag = spiritualists_pilgrimage_ongoing
+					has_country_flag = spiritualists_pilgrimage_done
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		months = 70
+		modifier = {
+			# 10 more time if xenophobic
+			factor = 10
+			OR = {
+				has_ethic = "ethic_xenophobe"
+				has_ethic = "ethic_fanatic_xenophobe"
+			}
+		}
+	}
+
+	immediate = {		
+		set_global_flag = pilgrimage_in_progress		
+		ROOT = { set_country_flag = pilgrims_received }
+		#ROOT = {
+		#	random_owned_planet = {
+		#		save_event_target_as = pilgrims_destination
+		#	}
+		#}
+		random_neighbor_country = {
+			limit = {
+				OR = {
+					has_ethic = "ethic_spiritualist"
+					has_ethic = "ethic_fanatic_spiritualist"
+				}
+				NOR = {			
+					# Prevent the same country to do the pilgrimage again
+						has_country_flag = spiritualists_pilgrimage_ongoing
+						has_country_flag = spiritualists_pilgrimage_done		
+				}
+			}
+			save_event_target_as = pilgrims_origin
+			set_country_flag = spiritualists_pilgrimage_ongoing
+			
+			closest_system = { 
+				limit = { 
+					is_owned_by = ROOT 
+				}
+				min_steps = 1
+				random_planet = { 
+					limit = { 
+						is_owned_by = ROOT 
+						is_capital = no
+					} 
+				save_event_target_as = pilgrims_destination 
+				} 
+			}
+		}
+	}
+
+	option = {
+		name = "spiritualists_pilgrimage.2.a"
+		trigger = {
+			NOR = {				
+					has_ethic = "ethic_xenophobe"
+					has_ethic = "ethic_fanatic_xenophobe"
+			}
+		}
+				
+		if = {
+			limit = {
+				ROOT = {
+					OR = {
+						has_ethic = "ethic_xenophile"
+						has_ethic = "ethic_fanatic_xenophile"
+					}
+				}
+			}
+			hidden_effect = {
+				random_list = {
+					10 = { country_event = { id = spiritualists_pilgrimage.3 days = 30 random = 5 } }
+					7 = { country_event = { id = spiritualists_pilgrimage.4 days = 30 random = 5 } }
+					10 = { country_event = { id = spiritualists_pilgrimage.5 days = 30 random = 5 } }
+					10 = { country_event = { id = spiritualists_pilgrimage.7 days = 30 random = 5 } }
+					5 = { country_event = { id = spiritualists_pilgrimage.8 days = 30 random = 5 } }
+				}
+			}
+			else = {
+				if = {
+					limit = {
+						ROOT = {
+							OR = {
+								has_ethic = "ethic_spiritualist"
+								has_ethic = "ethic_fanatic_spiritualist"
+							}
+						}
+					}
+					hidden_effect = {
+						random_list = {
+							10 = { country_event = { id = spiritualists_pilgrimage.3 days = 30 random = 5 } }
+							7 = { country_event = { id = spiritualists_pilgrimage.4 days = 30 random = 5 } }
+							10 = { country_event = { id = spiritualists_pilgrimage.6 days = 30 random = 5 } }
+							10 = { country_event = { id = spiritualists_pilgrimage.7 days = 30 random = 5 } }
+							5 = { country_event = { id = spiritualists_pilgrimage.8 days = 30 random = 5 } }
+						}
+					}	
+					else = {
+						hidden_effect = {
+							random_list = {
+								7 = { country_event = { id = spiritualists_pilgrimage.4 days = 30 random = 5 } }
+								10 = { country_event = { id = spiritualists_pilgrimage.7 days = 30 random = 5 } }
+								5 = { country_event = { id = spiritualists_pilgrimage.8 days = 30 random = 5 } }	
+							}
+						}
+					}
+				}
+			}
+		}							
+	}
+	
+	option = {
+		name = "spiritualists_pilgrimage.2.b"
+		trigger = {
+			OR = {
+				has_ethic = "ethic_xenophobe"
+				has_ethic = "ethic_fanatic_xenophobe"
+			}
+		}
+		hidden_effect = {
+			random_list = {
+				10 = { country_event = { id = spiritualists_pilgrimage.10 days = 30 random = 5 } }
+				10 = { country_event = { id = spiritualists_pilgrimage.11 days = 30 random = 5 } }
+				5 = { country_event = { id = spiritualists_pilgrimage.12 days = 30 random = 5 } }			
+			}
+		}
+	}
+	
+	option = {
+		name = "spiritualists_pilgrimage.2.c"
+		hidden_effect = { country_event = { id = spiritualists_pilgrimage.13 days = 2 } }
+	}
+}
+
+# Not Xenophobe branching
+## Positive outcome
+### If [Fanatic] Xenophile or [Fanatic] Spiritualist 
+country_event = {
+	id = spiritualists_pilgrimage.3
+	title = "spiritualists_pilgrimage.3.name"
+	desc = "spiritualists_pilgrimage.3.desc"
+	picture = GFX_evt_smugglers_in_bar
+		
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:pilgrims_origin = {
+			remove_country_flag = spiritualists_pilgrimage_ongoing
+			set_country_flag = spiritualists_pilgrimage_done
+			remove_global_flag = pilgrimage_in_progress
+		}	
+	}
+	
+	option = {
+		name = "spiritualists_pilgrimage.3.a"		
+		event_target:pilgrims_origin = {
+			add_opinion_modifier = {
+				who = from
+				modifier = "opinion_very_pleased_pilgrims"
+			}
+		}
+	}
+}
+
+### Standard
+country_event = {
+	id = spiritualists_pilgrimage.4
+	title = "spiritualists_pilgrimage.4.name"
+	desc = "spiritualists_pilgrimage.4.desc"
+	picture = GFX_evt_smugglers_in_bar
+		
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:pilgrims_origin = {
+			remove_country_flag = spiritualists_pilgrimage_ongoing
+			set_country_flag = spiritualists_pilgrimage_done
+			remove_global_flag = pilgrimage_in_progress
+		}	
+	}
+	
+	option = {
+		name = "spiritualists_pilgrimage.4.a"
+		event_target:pilgrims_origin = {
+			add_opinion_modifier = {
+				who = from
+				modifier = "opinion_pleased_pilgrims"
+			}
+		}
+	}
+}
+
+## Light negative outcome
+### If [Fanatic] Xenophile
+country_event = {
+	id = spiritualists_pilgrimage.5
+	title = "spiritualists_pilgrimage.5.name"
+	desc = "spiritualists_pilgrimage.5.desc"
+	picture = GFX_evt_star_chart
+		
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:pilgrims_origin = {
+			remove_country_flag = spiritualists_pilgrimage_ongoing
+			set_country_flag = spiritualists_pilgrimage_done
+			remove_global_flag = pilgrimage_in_progress
+		}	
+	}
+	
+	option = {
+		name = "spiritualists_pilgrimage.5.a"
+	}
+}
+
+### If [Fanatic] Spiritualist
+country_event = {
+	id = spiritualists_pilgrimage.6
+	title = "spiritualists_pilgrimage.6.name"
+	desc = "spiritualists_pilgrimage.6.desc"
+	picture = GFX_evt_smugglers_in_bar
+		
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:pilgrims_origin = {
+			remove_country_flag = spiritualists_pilgrimage_ongoing
+			set_country_flag = spiritualists_pilgrimage_done
+			remove_global_flag = pilgrimage_in_progress
+		}	
+	}
+	
+	option = {
+		name = "spiritualists_pilgrimage.6.a"
+		event_target:pilgrims_origin = {
+			add_opinion_modifier = {
+				who = from
+				modifier = "opinion_bad_hosts"
+			}
+		}
+		event_target:pilgrims_destination = {
+			every_owned_pop = {
+				add_modifier = {
+					modifier = "strange_guests"
+					days = 180
+				}
+			}			
+		}
+	}
+}
+
+### Standard
+country_event = {
+	id = spiritualists_pilgrimage.7
+	title = "spiritualists_pilgrimage.7.name"
+	desc = "spiritualists_pilgrimage.7.desc"
+	picture = GFX_evt_smugglers_in_bar
+		
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:pilgrims_origin = {
+			remove_country_flag = spiritualists_pilgrimage_ongoing
+			set_country_flag = spiritualists_pilgrimage_done
+			remove_global_flag = pilgrimage_in_progress
+		}	
+	}
+	
+	option = {
+		name = "spiritualists_pilgrimage.7.a"
+		event_target:pilgrims_origin = {
+			add_opinion_modifier = {
+				who = from
+				modifier = "opinion_bad_hosts"
+			}
+		}		
+	}
+}
+
+## Hard negative outcome
+### If not rival with Pilgrim
+country_event = {
+	id = spiritualists_pilgrimage.8
+	title = "spiritualists_pilgrimage.8.name"
+	desc = "spiritualists_pilgrimage.8.desc"
+	picture = GFX_evt_burning_settlement
+		
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:pilgrims_origin = {
+			remove_country_flag = spiritualists_pilgrimage_ongoing
+			set_country_flag = spiritualists_pilgrimage_done
+			remove_global_flag = pilgrimage_in_progress
+		}	
+	}
+	
+	option = {
+		name = "spiritualists_pilgrimage.8.a"
+		event_target:pilgrims_destination = {
+			random_tile = {
+				limit = {
+					OR = {  
+						has_building = "building_colony_shelter"
+						has_building = "building_capital_1"
+						has_building = "building_capital_2"
+						has_building = "building_capital_3"
+					}
+				}
+				set_ruined = yes
+			}
+		}
+		event_target:pilgrims_destination = {
+			every_owned_pop = {
+				add_modifier = {
+					modifier = "terrorism"
+					days = 730
+				}
+			}			
+		}
+		event_target:pilgrims_origin = {
+			add_opinion_modifier = {
+				who = from
+				modifier = "opinion_accused_of_terrorism"
+			}
+		}		
+	}
+}
+
+### Standard
+#country_event = {
+#	id = spiritualists_pilgrimage.9
+#	title = "spiritualists_pilgrimage.9.name"
+#	desc = "spiritualists_pilgrimage.9.desc"
+#	picture = GFX_evt_burning_settlement
+		
+#	is_triggered_only = yes
+
+#	immediate = {
+#		event_target:pilgrims_origin = {
+#			remove_country_flag = spiritualists_pilgrimage_ongoing
+#			set_country_flag = spiritualists_pilgrimage_done
+#			remove_global_flag = pilgrimage_in_progress
+#		}	
+#	}
+	
+#	option = {
+#		name = "spiritualists_pilgrimage.9.a"
+#		event_target:pilgrims_destination = {
+#			random_tile = {
+#				limit = {
+#					OR = {  
+#						has_building = "building_colony_shelter"
+#						has_building = "building_capital_1"
+#						has_building = "building_capital_2"
+#						has_building = "building_capital_3"
+#					}
+#				}
+#				set_ruined = yes
+#			}
+#		}
+#		event_target:pilgrims_destination = {
+#			every_owned_pop = {
+#				add_modifier = {
+#					modifier = "terrorism"
+#					days = 730
+#				}
+#			}			
+#		}
+#	}
+#}
+
+# Xenophobe branching
+## Positive outcome
+country_event = {
+	id = spiritualists_pilgrimage.10
+	title = "spiritualists_pilgrimage.10.name"
+	desc = "spiritualists_pilgrimage.10.desc"
+	picture = GFX_evt_interior_battle
+		
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:pilgrims_origin = {
+			remove_country_flag = spiritualists_pilgrimage_ongoing
+			set_country_flag = spiritualists_pilgrimage_done
+			remove_global_flag = pilgrimage_in_progress
+		}	
+	}
+	
+	option = {
+		name = "spiritualists_pilgrimage.10.a"
+		root = {
+			add_influence = 50
+		}
+	}
+}
+
+## Light negative outcome
+country_event = {
+	id = spiritualists_pilgrimage.11
+	title = "spiritualists_pilgrimage.11.name"
+	desc = "spiritualists_pilgrimage.11.desc"
+	picture = GFX_evt_interior_battle
+		
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:pilgrims_origin = {
+			remove_country_flag = spiritualists_pilgrimage_ongoing
+			set_country_flag = spiritualists_pilgrimage_done
+			remove_global_flag = pilgrimage_in_progress
+		}	
+	}
+	
+	option = {
+		name = "spiritualists_pilgrimage.11.a"
+	}
+}
+
+## Hard negative outcome
+country_event = {
+	id = spiritualists_pilgrimage.12
+	title = "spiritualists_pilgrimage.12.name"
+	desc = "spiritualists_pilgrimage.12.desc"
+	picture = GFX_evt_burning_settlement
+		
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:pilgrims_origin = {
+			remove_country_flag = spiritualists_pilgrimage_ongoing
+			set_country_flag = spiritualists_pilgrimage_done
+			remove_global_flag = pilgrimage_in_progress
+		}	
+	}
+	
+	option = {
+		name = "spiritualists_pilgrimage.12.a"
+		event_target:pilgrims_destination = {
+			random_tile = {
+				limit = {
+					OR = {  
+						has_building = "building_colony_shelter"
+						has_building = "building_capital_1"
+						has_building = "building_capital_2"
+						has_building = "building_capital_3"
+					}
+				}
+				set_ruined = yes
+			}
+		}
+		event_target:pilgrims_destination = {
+			every_owned_pop = {
+				add_modifier = {
+					modifier = "terrorism"
+					days = 730
+				}
+			}			
+		}
+	}
+}
+
+# Governor branching
+country_event = {
+	id = spiritualists_pilgrimage.13
+	title = "spiritualists_pilgrimage.13.name"
+	desc = "spiritualists_pilgrimage.13.desc"
+	picture = GFX_evt_throne_room
+		
+	is_triggered_only = yes
+
+	option = {
+		name = "spiritualists_pilgrimage.13.a"
+		hidden_effect = {
+			random_list = {
+				10 = { country_event = { id = spiritualists_pilgrimage.14 days = 30 random = 5 } }
+				10 = { country_event = { id = spiritualists_pilgrimage.15 days = 30 random = 5 } }
+				5 = { country_event = { id = spiritualists_pilgrimage.16 days = 30 random = 5 } }			
+			}
+		}
+	}
+	
+	option = {
+		name = "spiritualists_pilgrimage.13.b"
+		hidden_effect = { country_event = { id = spiritualists_pilgrimage.17 days = 5 } }
+	}
+	
+	option = {
+		name = "spiritualists_pilgrimage.13.c"
+		if = {
+			limit = {
+				ROOT = {
+					OR = {
+						has_ethic = "ethic_xenophile"
+						has_ethic = "ethic_fanatic_xenophile"
+					}
+				}
+			}
+			hidden_effect = {
+				random_list = {
+					10 = { country_event = { id = spiritualists_pilgrimage.18 days = 30 random = 5 } }
+					7 = { country_event = { id = spiritualists_pilgrimage.19 days = 30 random = 5 } }
+					10 = { country_event = { id = spiritualists_pilgrimage.20 days = 30 random = 5 } }
+					10 = { country_event = { id = spiritualists_pilgrimage.22 days = 30 random = 5 } }
+					5 = { country_event = { id = spiritualists_pilgrimage.23 days = 30 random = 5 } }
+				}
+			}
+			else = {
+				if = {
+					limit = {
+						ROOT = {
+							OR = {
+								has_ethic = "ethic_spiritualist"
+								has_ethic = "ethic_fanatic_spiritualist"
+							}
+						}
+					}
+					hidden_effect = {
+						random_list = {
+							10 = { country_event = { id = spiritualists_pilgrimage.18 days = 30 random = 5 } }
+							7 = { country_event = { id = spiritualists_pilgrimage.19 days = 30 random = 5 } }
+							10 = { country_event = { id = spiritualists_pilgrimage.21 days = 30 random = 5 } }
+							10 = { country_event = { id = spiritualists_pilgrimage.22 days = 30 random = 5 } }
+							5 = { country_event = { id = spiritualists_pilgrimage.23 days = 30 random = 5 } }						
+						}
+					}
+					else = {
+						hidden_effect = {
+							random_list = {
+								7 = { country_event = { id = spiritualists_pilgrimage.19 days = 30 random = 5 } }
+								10 = { country_event = { id = spiritualists_pilgrimage.22 days = 30 random = 5 } }
+								5 = { country_event = { id = spiritualists_pilgrimage.23 days = 30 random = 5 } }							
+							}
+						}	
+					}
+				}
+			}
+		}
+	}
+}
+
+## Trap
+### Positive Outcome
+country_event = {
+	id = spiritualists_pilgrimage.14
+	title = "spiritualists_pilgrimage.14.name"
+	desc = "spiritualists_pilgrimage.14.desc"
+	picture = GFX_evt_throne_room
+		
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:pilgrims_origin = {
+			remove_country_flag = spiritualists_pilgrimage_ongoing
+			set_country_flag = spiritualists_pilgrimage_done
+			remove_global_flag = pilgrimage_in_progress
+		}	
+	}
+	
+	option = {
+		name = "spiritualists_pilgrimage.14.a"
+		root = {
+			add_influence = 50
+		}
+	}
+}
+
+### Negative Outcome
+country_event = {
+	id = spiritualists_pilgrimage.15
+	title = "spiritualists_pilgrimage.15.name"
+	desc = "spiritualists_pilgrimage.15.desc"
+	picture = GFX_evt_smugglers_in_bar
+		
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:pilgrims_origin = {
+			remove_country_flag = spiritualists_pilgrimage_ongoing
+			set_country_flag = spiritualists_pilgrimage_done
+			remove_global_flag = pilgrimage_in_progress
+		}	
+	}
+	
+	option = {
+		name = "spiritualists_pilgrimage.15.a"
+	}
+}
+
+### Hard Negative Outcome
+country_event = {
+	id = spiritualists_pilgrimage.16
+	title = "spiritualists_pilgrimage.16.name"
+	desc = "spiritualists_pilgrimage.16.desc"
+	picture = GFX_evt_interior_battle
+		
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:pilgrims_origin = {
+			remove_country_flag = spiritualists_pilgrimage_ongoing
+			set_country_flag = spiritualists_pilgrimage_done
+			remove_global_flag = pilgrimage_in_progress
+		}	
+	}
+	
+	option = {
+		name = "spiritualists_pilgrimage.16.a"
+		event_target:pilgrims_origin = {
+			add_opinion_modifier = {
+				who = from
+				modifier = "opinion_assassins"
+			}
+		}
+	}
+}
+
+## They shall not pass
+country_event = {
+	id = spiritualists_pilgrimage.17
+	title = "spiritualists_pilgrimage.17.name"
+	desc = "spiritualists_pilgrimage.17.desc"
+	picture = GFX_evt_star_chart
+		
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:pilgrims_origin = {
+			remove_country_flag = spiritualists_pilgrimage_ongoing
+			set_country_flag = spiritualists_pilgrimage_done
+			remove_global_flag = pilgrimage_in_progress
+		}	
+	}
+	
+	option = {
+		name = "spiritualists_pilgrimage.17.a"
+		event_target:pilgrims_origin = {
+			add_opinion_modifier = {
+				who = from
+				modifier = "opinion_bad_hosts"
+			}
+		}
+	}
+}
+
+## Paranoid governor
+### Positive outcome
+#### If [Fanatic] Xenophile or [Fanatic] Spiritualist 
+country_event = {
+	id = spiritualists_pilgrimage.18
+	title = "spiritualists_pilgrimage.18.name"
+	desc = "spiritualists_pilgrimage.18.desc"
+	picture = GFX_evt_smugglers_in_bar
+		
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:pilgrims_origin = {
+			remove_country_flag = spiritualists_pilgrimage_ongoing
+			set_country_flag = spiritualists_pilgrimage_done
+			remove_global_flag = pilgrimage_in_progress
+		}	
+	}
+	
+	option = {
+		name = "spiritualists_pilgrimage.18.a"
+		event_target:pilgrims_origin = {
+			add_opinion_modifier = {
+				who = from
+				modifier = "opinion_very_pleased_pilgrims"
+			}
+		}
+	}
+}
+
+#### Standard outcome
+country_event = {
+	id = spiritualists_pilgrimage.19
+	title = "spiritualists_pilgrimage.19.name"
+	desc = "spiritualists_pilgrimage.19.desc"
+	picture = GFX_evt_smugglers_in_bar
+		
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:pilgrims_origin = {
+			remove_country_flag = spiritualists_pilgrimage_ongoing
+			set_country_flag = spiritualists_pilgrimage_done
+			remove_global_flag = pilgrimage_in_progress
+		}	
+	}
+	
+	option = {
+		name = "spiritualists_pilgrimage.19.a"
+		event_target:pilgrims_origin = {
+			add_opinion_modifier = {
+				who = from
+				modifier = "opinion_pleased_pilgrims"
+			}
+		}
+	}
+}
+
+### Light negative outcome
+#### If [Fanatic] Xenophile
+country_event = {
+	id = spiritualists_pilgrimage.20
+	title = "spiritualists_pilgrimage.20.name"
+	desc = "spiritualists_pilgrimage.20.desc"
+	picture = GFX_evt_smugglers_in_bar
+		
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:pilgrims_origin = {
+			remove_country_flag = spiritualists_pilgrimage_ongoing
+			set_country_flag = spiritualists_pilgrimage_done
+			remove_global_flag = pilgrimage_in_progress
+		}	
+	}
+	
+	option = {
+		name = "spiritualists_pilgrimage.20.a"
+	}
+}
+
+#### If [Fanatic] Spiritualist
+country_event = {
+	id = spiritualists_pilgrimage.21
+	title = "spiritualists_pilgrimage.21.name"
+	desc = "spiritualists_pilgrimage.21.desc"
+	picture = GFX_evt_smugglers_in_bar
+		
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:pilgrims_origin = {
+			remove_country_flag = spiritualists_pilgrimage_ongoing
+			set_country_flag = spiritualists_pilgrimage_done
+			remove_global_flag = pilgrimage_in_progress
+		}	
+	}
+	
+	option = {
+		name = "spiritualists_pilgrimage.21.a"
+		event_target:pilgrims_origin = {
+			add_opinion_modifier = {
+				who = from
+				modifier = "opinion_bad_hosts"
+			}
+		}
+	}
+}
+
+#### Standard
+country_event = {
+	id = spiritualists_pilgrimage.22
+	title = "spiritualists_pilgrimage.22.name"
+	desc = "spiritualists_pilgrimage.22.desc"
+	picture = GFX_evt_smugglers_in_bar
+		
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:pilgrims_origin = {
+			remove_country_flag = spiritualists_pilgrimage_ongoing
+			set_country_flag = spiritualists_pilgrimage_done
+			remove_global_flag = pilgrimage_in_progress
+		}	
+	}
+	
+	option = {
+		name = "spiritualists_pilgrimage.22.a"
+		event_target:pilgrims_origin = {
+			add_opinion_modifier = {
+				who = from
+				modifier = "opinion_bad_hosts"
+			}
+		}
+		event_target:pilgrims_destination = {
+			every_owned_pop = {
+				add_modifier = {
+					modifier = "strange_guests"
+					days = 365
+				}
+			}			
+		}
+	}
+}
+
+### Hard negative outcome
+#### Standard
+country_event = {
+	id = spiritualists_pilgrimage.23
+	title = "spiritualists_pilgrimage.23.name"
+	desc = "spiritualists_pilgrimage.23.desc"
+	picture = GFX_evt_burning_settlement
+		
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:pilgrims_origin = {
+			remove_country_flag = spiritualists_pilgrimage_ongoing
+			set_country_flag = spiritualists_pilgrimage_done
+			remove_global_flag = pilgrimage_in_progress
+		}	
+	}
+	
+	option = {
+		name = "spiritualists_pilgrimage.23.a"
+		event_target:pilgrims_destination = {
+			random_tile = {
+				limit = {
+					OR = {  
+						has_building = "building_colony_shelter"
+						has_building = "building_capital_1"
+						has_building = "building_capital_2"
+						has_building = "building_capital_3"
+					}
+				}
+				set_ruined = yes
+			}
+		}
+		event_target:pilgrims_destination = {
+			every_owned_pop = {
+				add_modifier = {
+					modifier = "terrorism"
+					days = 730
+				}
+			}			
+		}
+	}
+}
