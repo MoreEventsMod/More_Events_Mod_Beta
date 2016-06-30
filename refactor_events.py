@@ -19,14 +19,22 @@ import os, sys, getopt, re
 #ignoreLanguages = set([])
 #overwrite = False
 
+verbose = False
+
 try:
 	#options, extraargs = getopt.getopt(sys.argv[1:], "hi:os:",["help","ignore=","overwrite","source="])
-	options, extraargs = getopt.getopt(sys.argv[1:], "h",["help"])
+	options, extraargs = getopt.getopt(sys.argv[1:], "hv",["help", "verbose"])
 except getopt.GetoptError:
 	print('Invalid argument syntax in ' + sys.argv[0])
 	#print('Valid arguments are -h, --help, -i, --ignore=, -o, --overwrite, -s, --source=')
-	print('Valid arguments are -h, --help')
+	print('Valid arguments are -h, --help, -v, --verbose')
 	sys.exit(47)
+for opt, val in options:
+	if opt in ("-h", "--help"):
+		print("help does not yet exist. Sorry :(")
+		sys.exit(0)
+	elif opt in ("-v", "--verbose"):
+		verbose = True
 #for opt, val in options:
 #	if opt in ("-i", "--ignore"):
 #		ignoreLanguages = set(val.split(","))
@@ -68,11 +76,42 @@ except getopt.GetoptError:
 sourceNames = [
 	"paul\.(?=[1-6][^0-9])",
 	"paul\.(?=((1[0-9])|(2[01])|(3[0-6])))",
+	"ef_debug\.(?=[12])",
+	"ef_temp\.(?=[1-4])",
+	"mem_anomaly_event\.(?=[1-5][^0-9])",
+	"mem_anomaly_event\.(?=7[^0-9])",
+	"mem_anomaly_event\.(?=6[^0-9])",
+	"mem_anomaly_event\.(?=10[2-3][^0-9])",
+	"mem_anomaly_event\.(?=8[^0-9])",
+	"mem_anomaly_event\.(?=10[0-1][^0-9])",
+	"mem_anomaly_event\.(?=10[^0-9])",
+	"mem_anomaly_event\.(?=1[1-2][^0-9])",
+	"mem_anomaly_failure\.(?=[1-2][^0-9])",
+	"mem_anomaly_failure\.(?=3[^0-9])",
+	"mem_anomaly_failure\.(?=[5-6][^0-9])",
+	"mem_anomaly_failure\.102[^0-9]",
+	"mem_anomaly_failure\.(?=4[^0-9])",
+	"mem_anomaly_failure\.100[^0-9]",
 ] #TODO
-10,11,12,13,14,15,16,17,18,19,20,21,30,31,32,33,34,35,36
 goalNames = [
-	"star-survey.",
-	"elusive-carcosa."
+	"mem-star-survey.",
+	"mem-elusive-carcosa.",
+	"mem-enterprise-fallen-debug.",
+	"mem-enterprise-fallen.",
+	"mem-black-hole.",
+	"mem-dimensional-rift.",
+	"mem-dead-star.",
+	"mem-mysterious-pyramids.",
+	"mem-lost-zoo.",
+	"mem-poisoned-world.",
+	"mem-asteroid-structure.",
+	"mem-crashed-object.",
+	"mem-brainworm.10",
+	"mem-demon-ship.10",
+	"mem-dimensional-rift.10",
+	"mem-mysterious-pyramids.202",
+	"mem-dead-star.",
+	"mem-poisoned-world.200",
 ] #TODO
 directories = [
 	"events"
@@ -84,10 +123,11 @@ for src, goal in zip(sourceNames,goalNames):
 			try:
 				with open(dir + '/' + filename, 'r') as file, open(dir + '/' + filename + '-temp', 'w') as bufferfile:
 					for line in file:
-						linebuffer, count = re.subn(src, goal, line)
-						if count != 0: print(count, " in ", line, " in ", filename)
+						linebuffer, subsMade = re.subn(src, goal, line)
+						if (verbose and subsMade != 0): 
+							print(subsMade, " substitutions in ", filename, " to line")
+							print(line)
 						bufferfile.write(linebuffer)
-						#bufferfile.write(re.sub(src, goal, line))
 			except OSError:
 				print("Error during file IO.")
 				print("with '" + dir + '/' + filename + "' or '" + dir + '/' + filename + '-temp' + "'.")
