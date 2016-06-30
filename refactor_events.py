@@ -92,6 +92,18 @@ sourceNames = [
 	"mem_anomaly_failure\.102[^0-9]",
 	"mem_anomaly_failure\.(?=4[^0-9])",
 	"mem_anomaly_failure\.100[^0-9]",
+	"mem_anomaly_failure\.(?=10[^0-9])",
+	"mem_anomaly_failure\.(?=11[^0-9])",
+	"mem_dead_star_event\.(?=[1-3])",
+	"mem_demon_ship_event\.(?=[1-9])",
+	"mem_dimensional_rift_event\.(?=[1-2])",
+	"mem_ll_misc_event\.(?=1[^0-9])",
+	"mem_sciencecon_event\.(?=9[1-3][^0-9]|[1-2][0-9][0-9][^0-9]|3[0-7][0-9][^0-9]|380[^0-9])",
+	"mem_sciencecon_event\.(?=[1-8][^0-9]|1[1-2][^0-9]|999[^0-9])",
+	"spiritualists_pilgrimage\.(?=[1-9][^0-9]|1[0-9][^0-9]|2[0-3][^0-9])",
+	"squid\.(?=[1-6][^0-9])",
+	"squid\.(?=7[^0-9])",
+	"squid\.(?=[8-9][^0-9])",
 ] #TODO
 goalNames = [
 	"mem-star-survey.",
@@ -112,6 +124,18 @@ goalNames = [
 	"mem-mysterious-pyramids.202",
 	"mem-dead-star.",
 	"mem-poisoned-world.200",
+	"mem-asteroid-structure.",
+	"mem-crashed-object.",
+	"mem-dead-star.",
+	"mem-demon-ship.",
+	"mem-dimensional-rift.",
+	"mem-lost-zoo.",
+	"mem-science-convention.",
+	"mem-science-convention.",
+	"mem-spiritualists-pilgrimage.",
+	"mem-eager-traders.",
+	"mem-imperialist-intimidation.",
+	"mem-music-tour.",
 ] #TODO
 directories = [
 	"events"
