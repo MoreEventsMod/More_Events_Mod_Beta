@@ -105,9 +105,9 @@ sourceNames = [
 	"[^_]powering_abandoned_station",
 	"[^_]supernova_celebration",
 	"[^_]supernova_mourning",
-	"[^_]trait_(?=redefined_productivity|redefined_happiness)"
+	"[^_]trait_(?=redefined_productivity|redefined_happiness)",
 	"paul_opinion_trustworthy",
-	"[^_]opinion_(?=allowed_merchant_access|refused_merchant_access|mutual_scam|peaceful_trade|very_pleased_pilgrims|pleased_pilgrims|bad_hosts|assassins|accused_of_terrorism|mem_sciencecon_fantastic_time|mem_sciencecon_good_time|mem_sciencecon_waste_of_time)"
+	"[^_]opinion_(?=allowed_merchant_access|refused_merchant_access|mutual_scam|peaceful_trade|very_pleased_pilgrims|pleased_pilgrims|bad_hosts|assassins|accused_of_terrorism|mem_sciencecon_fantastic_time|mem_sciencecon_good_time|mem_sciencecon_waste_of_time)",
 	"opinion_mem_sciencecon_sciencetist_dead"
 ]
 
@@ -185,10 +185,10 @@ goalNames = [
 	"mem_powering_abandoned_station",
 	"mem_supernova_celebration",
 	"mem_supernova_mourning",
-	"mem_trait_"
-	"mem_opinion_trustworthy"
+	"mem_trait_",
+	"mem_opinion_trustworthy",
 	
-	"mem_opinion_"
+	"mem_opinion_",
 	"mem_opinion_sciencecon_scientist_dead"
 ]
 directories = [
