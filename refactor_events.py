@@ -204,6 +204,11 @@ directories = [
 	"common/traits",
 ]
 
+if verbose:
+	for dir in directories:
+		for filename in os.listdir(dir)[:]:
+			print(filename)
+
 for src, goal in zip(sourceNames,goalNames):
 	for dir in directories:
 		for filename in os.listdir(dir)[:]:		#TODO: Will this search subdirectories?
