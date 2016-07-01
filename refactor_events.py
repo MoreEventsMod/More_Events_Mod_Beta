@@ -14,22 +14,6 @@
 import os, sys, getopt, re
 
 verbose = False
-
-try:
-	options, extraargs = getopt.getopt(sys.argv[1:], "hv",["help", "verbose"])
-except getopt.GetoptError:
-	print('Invalid argument syntax in ' + sys.argv[0])
-	print('Valid arguments are -h, --help, -v, --verbose')
-	sys.exit(47)
-for opt, val in options:
-	if opt in ("-h", "--help"):
-		print("-h, --help:")
-		print("\tPrint this text and exit.")
-		print("-v", "--verbose")
-		print("\tPrint a message for each substitution made.")
-		sys.exit(0)
-	elif opt in ("-v", "--verbose"):
-		verbose = True
 		
 sourceNames = [
 	"paul\.(?=[1-6](?![0-9]))",
@@ -204,6 +188,44 @@ directories = [
 	"common/static_modifiers",
 	"common/traits",
 ]
+
+try:
+	options, extraargs = getopt.getopt(sys.argv[1:], "hvg:s:",["help", "verbose", "goal=", "source="])
+except getopt.GetoptError:
+	print('Invalid argument syntax in ' + sys.argv[0])
+	print('Valid arguments are -h, --help, -v, --verbose')
+	sys.exit(1)
+print("Options: ", options)
+try:
+	for opt, val in options:
+		if opt in ("-h", "--help"):
+			print("-h, --help:")
+			print("\tPrint this text and exit.")
+			print("-v", "--verbose")
+			print("\tPrint a message for each substitution made.")
+			print("-g", "--goal=")
+			print("\tSet text file for new names to use. Don't use without -s")
+			print("-s", "--source=")
+			print("\tSet text file for names to replace. Uses regex. Don't use without -g")
+			sys.exit(0)
+		elif opt in ("-v", "--verbose"):
+			verbose = True
+		elif opt in ("-s", "--source"):
+			with open(val) as sFile:
+				del sourceNames[:]
+				sourceNames = [line.rstrip('\n') for line in sFile]
+				print("Loading source names from " + opt)
+		elif opt in ("-g", "--goal"):
+			with open(val) as gFile:
+				del goalNames[:]
+				goalNames = [line.rstrip('\n') for line in gFile]
+				print("Loading goal names from " + opt)
+		else:
+			print("Bad argument '", opt,"'; aborting.")
+			sys.exit(2)
+except: #quit on any error
+	print("Error processing arguments; aborting")
+	sys.exit(3)
 
 if verbose:
 	for dir in directories:
