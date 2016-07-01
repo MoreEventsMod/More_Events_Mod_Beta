@@ -196,6 +196,7 @@ goalNames = [
 directories = [
 	"events",
 	"localisation",
+	"common/special_projects",
 	"common/anomalies",
 	"common/event_chains",
 	"common/on_actions",
