@@ -64,7 +64,7 @@ sourceNames = [
 	"squid\.(?=[8-9](?![0-9]))",
 	"mem_brainworm_event\.(?=[1-9])",
 	"ef_temp_category",
-	"mem_black_hole_1(?!_)",
+	"mem_black_hole_1(?![_\.])",
 	#"mem_demon_ship_category",
 	#"mem_dimensional_rift_category",
 	#"mem_mysterious_pyramids_category",
