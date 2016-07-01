@@ -106,6 +106,9 @@ sourceNames = [
 	"[^_]supernova_celebration",
 	"[^_]supernova_mourning",
 	"[^_]trait_(?=redefined_productivity|redefined_happiness)"
+	"paul_opinion_trustworthy",
+	"[^_]opinion_(?=allowed_merchant_access|refused_merchant_access|mutual_scam|peaceful_trade|very_pleased_pilgrims|pleased_pilgrims|bad_hosts|assassins|accused_of_terrorism|mem_sciencecon_fantastic_time|mem_sciencecon_good_time|mem_sciencecon_waste_of_time)"
+	"opinion_mem_sciencecon_sciencetist_dead"
 ]
 
 goalNames = [
@@ -176,13 +179,17 @@ goalNames = [
 	"mem_volunteer_surge",
 	"mem_united_front",
 	"mem_united_in_prayer",
-	"mem_foreign_(?=star_on_tour|star_denied_entry|rockstar_filth_banned|rockstar_peace_love)",
+	"mem_foreign_",
 	"mem_less_play_more_work",
 	"mem_strange_guests",
 	"mem_powering_abandoned_station",
 	"mem_supernova_celebration",
 	"mem_supernova_mourning",
-	"mem_trait_(?=redefined_productivity|redefined_happiness)"
+	"mem_trait_"
+	"mem_opinion_trustworthy"
+	
+	"mem_opinion_"
+	"mem_opinion_sciencecon_scientist_dead"
 ]
 directories = [
 	"events",
