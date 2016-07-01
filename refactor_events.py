@@ -93,7 +93,7 @@ sourceNames = [
 	"(?<!_)malicious_joy",
 	"(?<!_)booming_economy",
 	"(?<!_)busted_economy",
-	"(?<!_)pleased_by_custom_event",
+	"(?<!_|s)pleased_by_custom_event",
 	"(?<!_)displeased_by_custom_event",
 	"(?<!_)holy_order_established",
 	"(?<!_)volunteer_surge",
