@@ -96,6 +96,19 @@ sourceNames = [
 	"opinion_mem_sciencecon_sciencetist_dead",
 	"(?<!_)mem_sciencecon(?=\.[0-9])",
 	"(?<!_)mem_opinion_sciencecon",
+	
+	"(?<!mem_)castle.dds",
+	"(?<!mem_)pm_foreign_star.dds",
+	"(?<!mem_)pm_Graph_Down.dds",
+	"(?<!mem_)pm_Graph_Up.dds",
+	"(?<!mem_)pm_holy_order.dds",
+	"(?<!mem_)pm_united_front.dds",
+	"(?<!mem_)pm_united_in_prayer.dds",
+	"(?<!mem_)preacher.dds",
+	"(?<!mem_)purple-light.dds",
+	"(?<!mem_)work.dds",
+	"trait_mem_redefined_happiness.dds",
+	"trait_mem_redefined_productivity.dds",
 ]
 
 goalNames = [
@@ -180,6 +193,19 @@ goalNames = [
 	"mem_opinion_science_convention_scientist_dead",
 	"mem_science_convention",
 	"mem_opinion_science_convention",
+	
+	"mem_castle.dds",
+	"mem_pm_foreign_star.dds",
+	"mem_pm_Graph_Down.dds",
+	"mem_pm_Graph_Up.dds",
+	"mem_pm_holy_order.dds",
+	"mem_pm_united_front.dds",
+	"mem_pm_united_in_prayer.dds",
+	"mem_preacher.dds",
+	"mem_purple-light.dds",
+	"mem_work.dds",
+	"mem_trait_redefined_happiness.dds",
+	"mem_trait_redefined_productivity.dds",
 ]
 directories = [
 	"events",
