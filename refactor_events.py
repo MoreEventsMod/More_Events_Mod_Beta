@@ -42,13 +42,13 @@ sourceNames = [
 	"mem_ll_misc_event\.(?=1(?![0-9]))",
 	"mem_sciencecon_event\.(?=9[1-3](?![0-9])|[1-2][0-9][0-9](?![0-9])|3[0-7][0-9](?![0-9])|380(?![0-9]))",
 	"mem_sciencecon_event\.(?=[1-8](?![0-9])|1[1-2](?![0-9])|999(?![0-9]))",
-	"spiritualists_pilgrimage\.(?=[1-9](?![0-9])|1[0-9](?![0-9])|2[0-3](?![0-9]))",
+	"(?<!mem_)spiritualists_pilgrimage\.(?=[1-9](?![0-9])|1[0-9](?![0-9])|2[0-3](?![0-9]))",
 	"squid\.(?=[1-6](?![0-9]))",
 	"squid\.(?=7(?![0-9]))",
 	"squid\.(?=[8-9](?![0-9]))",
-	"mem_brainworm_event\.(?=[1-9])",
+	"(?<!_)mem_brainworm_event\.(?=[1-9])",
 	"ef_temp_category",
-	"mem_black_hole_1(?![_\.])",
+	"(?<!_)mem_black_hole_1(?![_\.])",
 	#"mem_demon_ship_category",
 	#"mem_dimensional_rift_category",
 	#"mem_mysterious_pyramids_category",
@@ -93,7 +93,9 @@ sourceNames = [
 	"paul_opinion_trustworthy",
 	"(?<!_)opinion_(?=allowed_merchant_access|refused_merchant_access|mutual_scam|peaceful_trade|very_pleased_pilgrims|pleased_pilgrims|bad_hosts|assassins|accused_of_terrorism)",
 	"(?<!_)opinion_mem_(?=sciencecon_fantastic_time|sciencecon_good_time|sciencecon_waste_of_time)",
-	"opinion_mem_sciencecon_sciencetist_dead"
+	"opinion_mem_sciencecon_sciencetist_dead",
+	"(?<!_)mem_sciencecon(?=\.[0-9])",
+	"(?<!_)mem_opinion_sciencecon",
 ]
 
 goalNames = [
@@ -175,7 +177,9 @@ goalNames = [
 	
 	"mem_opinion_",
 	"mem_opinion_",
-	"mem_opinion_sciencecon_scientist_dead"
+	"mem_opinion_science_convention_scientist_dead",
+	"mem_science_convention",
+	"mem_opinion_science_convention",
 ]
 directories = [
 	"events",
