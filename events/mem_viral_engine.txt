@@ -1,0 +1,435 @@
+
+namespace = mem_viral_engine
+
+@tier1materialreward = 6
+@tier1materialmin = 100
+@tier1materialmax = 500
+@tier2materialreward = 12
+@tier2materialmin = 150
+@tier2materialmax = 1000
+@tier3materialreward = 18
+@tier3materialmin = 250
+@tier3materialmax = 1500
+@tier4materialreward = 24
+@tier4materialmin = 350
+@tier4materialmax = 2000
+
+@tier1influencereward = 6
+@tier1influencemin = 40
+@tier1influencemax = 100
+@tier2influencereward = 12
+@tier2influencemin = 80
+@tier2influencemax = 175
+@tier3influencereward = 18
+@tier3influencemin = 125
+@tier3influencemax = 250
+@tier4influencereward = 24
+@tier4influencemin = 150
+@tier4influencemax = 300
+
+@tier1researchreward = 6
+@tier1researchmin = 60
+@tier1researchmax = 150
+@tier2researchreward = 12
+@tier2researchmin = 90
+@tier2researchmax = 250
+@tier3researchreward = 18
+@tier3researchmin = 120
+@tier3researchmax = 350
+@tier4researchreward = 24
+@tier4researchmin = 150
+@tier4researchmax = 500
+
+#Viral Engine
+#Writing and idea by shockedsystem
+#Code by LamilLerran
+
+#Start: Hidden Setup
+country_event = {
+	id = mem_viral_engine.9
+	hide_window = yes
+	
+	mean_time_to_happen = { months = 2400 }
+	
+	trigger = {
+		NOT = { has_country_flag = mem_viral_engine_started }
+		num_owned_planets > 9
+		any_owned_planet = { 
+			is_capital = no
+			num_pops > 4
+			NOT = { 
+				has_planet_flag = colony_event
+			}
+		}
+	}
+	
+	immediate = {
+		set_country_flag = mem_viral_engine_started
+		random_owned_planet = { 
+			limit = {
+				is_capital = no
+				num_pops > 4
+				NOT = { 
+					has_planet_flag = colony_event
+				}
+			}
+			planet_event = { id = mem_viral_engine.10 days = 1 }
+			save_event_target_as = mem_viral_engine_planet #TODO: Necessary?
+			set_planet_flag = colony_event
+		}
+	}
+}
+
+#Initial Player Event
+planet_event = {
+	id = mem_viral_engine.10
+	title = "mem_viral_engine.10.name"
+	desc = "mem_viral_engine.10.desc"
+	picture = GFX_evt_microscopic_life
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		add_modifier = {
+			modifier = "mem_mysterious_illness"
+			days = -1
+		}
+	}
+	
+	option = { #Quarantine
+		name = mem_viral_engine.10.a
+		hidden_effect = { planet_event = { id = mem_viral_engine.11 days = 120 random = 60 } }
+	}
+}
+
+#Aberrant Behavior
+planet_event = {
+	id = mem_viral_engine.11
+	title = "mem_viral_engine.11.name"
+	desc = "mem_viral_engine.11.desc"
+	picture = GFX_evt_microscopic_life
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_viral_engine.11.a
+		enable_special_project = {
+			name = "MEM_VIRAL_ENGINE_ISOLATE_PATHOGEN"
+			location = this
+			owner = owner	#TODO: Test
+		}
+	}
+	option = {
+		name = mem_viral_engine.11.b
+		set_planet_flag = mem_viral_engine_research_fail
+		hidden_effect = { planet_event = { id = mem_viral_engine.12 days = 720 random = 360 } }
+	}
+}
+
+#Successful Isolation
+planet_event = {
+	id = mem_viral_engine.14
+	title = "mem_viral_engine.14.name"
+	desc = "mem_viral_engine.14.desc"
+	picture = GFX_evt_microscopic_life
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_viral_engine.14.a
+		planet_event = { id = mem_viral_engine.12 }
+	}
+}
+
+#The Infected
+planet_event = {
+	id = mem_viral_engine.12
+	title = "mem_viral_engine.12.name"
+	desc = "mem_viral_engine.12.desc"
+	picture = GFX_evt_microscopic_life
+
+	is_triggered_only = yes
+	
+	#If this event is ever made possible to bypass, put this flag removal
+	#along the alternate route as well.
+	immediate = { remove_modifier = mem_mysterious_illness }
+	
+	option = {	#Generic
+		name = mem_viral_engine.12.generic
+		planet_event = { id = mem_viral_engine.13 }
+	}
+	option = { #Collectivist
+		trigger = {
+			OR = {
+				owner = { has_ethic = ethic_collectivist }
+				owner = { has_ethic = ethic_fanatic_collectivist }
+			}
+		}
+		name = mem_viral_engine.12.col
+		custom_tooltip = mem_viral_engine.12.col.tooltip
+		planet_event = { id = mem_viral_engine.16 }
+	}
+	option = { #Xenophobe
+		trigger = {
+			OR = {
+				owner = { has_ethic = ethic_xenophobe }
+				owner = { has_ethic = ethic_fanatic_xenophobe }
+			}
+		}
+		name = mem_viral_engine.12.phobe
+		custom_tooltip = mem_viral_engine.12.phobe.tooltip
+		planet_event = { id = mem_viral_engine.16 }
+	}
+	option = { #Materialist
+		trigger = {
+			OR = {
+				owner = { has_ethic = ethic_materialist }
+				owner = { has_ethic = ethic_fanatic_materialist }
+			}
+		}
+		name = mem_viral_engine.12.mat
+		enable_special_project = {
+			name = "MEM_VIRAL_ENGINE_RESEARCH_CURE"
+			location = this
+			owner = owner	#TODO: Test
+		}
+	}
+	option = { #Individualist
+		trigger = {
+			OR = {
+				owner = { has_ethic = ethic_individualist }
+				owner = { has_ethic = ethic_fanatic_individualist }
+			}
+		}
+		name = mem_viral_engine.12.ind
+		enable_special_project = {
+			name = "MEM_VIRAL_ENGINE_RESEARCH_CURE"
+			location = this
+			owner = owner	#TODO: Test
+		}
+	}
+	option = { #Spiritualist
+		trigger = {
+			OR = {
+				owner = { has_ethic = ethic_spiritualist }
+				owner = { has_ethic = ethic_fanatic_spiritualist }
+			}
+		}
+		name = mem_viral_engine.12.spi
+		planet_event = { id = mem_viral_engine.18 }
+	}
+	option = { #Xenophile
+		trigger = {
+			OR = {
+				owner = { has_ethic = ethic_xenophile }
+				owner = { has_ethic = ethic_fanatic_xenophile }
+			}
+		}
+		name = mem_viral_engine.12.phile
+		planet_event = { id = mem_viral_engine.18 }
+	}
+}
+
+planet_event = { #After studying infected
+	id = mem_viral_engine.13
+	title = "mem_viral_engine.13.name"
+	desc = "mem_viral_engine.13.desc"
+	picture = GFX_evt_microscopic_life
+	
+	is_triggered_only = yes
+	
+	option = { #Let them finish
+		name = mem_viral_engine.13.a
+		planet_event = { id = mem_viral_engine.18 }
+	}
+	option = { #Stop this
+		name = mem_viral_engine.13.b
+		custom_tooltip = mem_viral_engine.13.b.tooltip		#Warn that it may cause purge
+		planet_event = { id = mem_viral_engine.19 }
+	}
+}
+
+planet_event = { #Ran out of time to study infected / research cure
+	id = mem_viral_engine.15
+	title = "mem_viral_engine.15.name"
+	desc = "mem_viral_engine.15.desc"
+	picture = GFX_evt_microscopic_life
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_planet_flag = mem_viral_engine_research_fail
+	}
+	
+	option = {
+		name = mem_viral_engine.15.a
+		planet_event = { 
+			id = mem_viral_engine.18
+			days = 30 random = 30
+		}
+	}
+}
+
+#Sequester
+planet_event = {
+	id = mem_viral_engine.16
+	title = "mem_viral_engine.16.name"
+	desc = "mem_viral_engine.16.desc"
+	picture = GFX_evt_interior_battle
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		add_modifier = { modifier = "mem_grateful_populace" days = 21600 }
+		random_pop = { kill_pop = yes }
+		random_pop = { kill_pop = yes }
+	}
+	
+	option = {
+		name = mem_viral_engine.16.a
+	}
+}
+
+#Cure
+planet_event = {
+	id = mem_viral_engine.17
+	title = "mem_viral_engine.17.name"
+	desc = "mem_viral_engine.17.desc"
+	picture = GFX_evt_microscopic_life
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_viral_engine.17.a
+		add_modifier = { modifier = "mem_medical_breakthrough" days = 21600 }
+	}
+}
+
+#Viral Engine -- Determine Success/Fail
+planet_event = {
+	id = mem_viral_engine.18
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_list = {
+			40 = {
+				modifier = {
+					factor = 0.20 
+					has_planet_flag = "mem_viral_engine_research_fail"
+				}
+				planet_event = { id = mem_viral_engine.22 }
+			}
+			10 = { planet_event = { id = mem_viral_engine.20 } }
+			2  = { planet_event = { id = mem_viral_engine.21 } }
+		}
+	}
+}
+
+#Viral Engine -- Success
+planet_event = {
+	id = mem_viral_engine.22
+	title = "mem_viral_engine.22.name"
+	desc = "mem_viral_engine.22.desc"
+	picture = GFX_evt_microscopic_life
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_viral_engine.22.a
+		if = {
+			limit = {
+				any_tile = { has_building = no }
+			}
+			random_tile = {
+				limit = { has_building = no }
+				set_building = building_viral_engine
+			}
+			else = {
+				random_tile = { set_building = building_viral_engine }
+			}
+		}
+	}
+}
+
+#Emergency Purge
+planet_event = {
+	id = mem_viral_engine.19
+	title = "mem_viral_engine.19.name"
+	desc = "mem_viral_engine.19.desc"
+	picture = GFX_evt_interior_battle
+	
+	is_triggered_only = yes
+	
+	immediate = { 
+		add_modifier = {
+			modifier = "mem_viral_insurgency"
+			days = 21600
+		}
+		random_pop = { kill_pop = yes }
+	}
+	
+	option = {
+		name = mem_viral_engine.19.a
+	}
+}
+
+#Viral Transmitter
+planet_event = {
+	id = mem_viral_engine.20
+	title = "mem_viral_engine.20.name"
+	desc = "mem_viral_engine.20.desc"
+	picture = GFX_evt_microscopic_life
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_tile = { set_blocker = mem_tb_viral_transmitter }
+	}
+	
+	option = {
+		name = mem_viral_engine.20.a
+	}
+}
+
+#Viral Bomb
+planet_event = {
+	id = mem_viral_engine.21
+	title = "mem_viral_engine.21.name"
+	desc = "mem_viral_engine.21.desc"
+	picture = GFX_evt_burning_settlement
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_pop = { kill_pop = yes }
+		random_list = { 
+			1 = {}
+			8 = { random_pop = { kill_pop = yes } }
+		}
+		random_list = {
+			1 = {}
+			6 = { random_pop = { kill_pop = yes } }
+		}
+		random_list = {
+			1 = {}
+			4 = { random_pop = { kill_pop = yes } }
+		}
+		every_tile = {
+			limit = { has_building = yes }
+			random_list = {
+				3 = {}
+				2 = { set_ruined = yes }
+			}
+		}
+		add_modifier = {
+			modifier = "mem_viral_insurgency"
+			days = 21600
+		}
+	}
+	
+	option = {
+		name = mem_viral_engine.21.a
+	}
+}
