@@ -1,0 +1,177 @@
+################################
+# Enterprise of the Fallen
+# Original idea by: Talanic 
+# Code by:          Tuttu
+# Writing by:       Malthus
+################################
+
+namespace = mem_enterprise_fallen
+
+# Anomaly survey success
+ship_event = {
+	id = mem_enterprise_fallen.1
+	title = "mem_enterprise_fallen.1.name"
+	desc = "mem_enterprise_fallen.1.desc"
+	picture = "GFX_evt_archaeological_dig"
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		FROM = { 
+			orbital_deposit_tile = { clear_deposits = yes } 
+			save_event_target_as = ruins_planet
+		}
+		hidden_effect = {
+			ship_event = { id = mem_enterprise_fallen.3 days = 1800 random = 540 } # 5 years +/- 1,5 years
+			#ship_event = { id = mem_enterprise_fallen.3 days = 10 random = 2 } # 5 years +/- 1,5 years
+		}
+	}
+	
+	option = {
+		name = "INCREDIBLE"
+		FROM = { 
+			orbital_deposit_tile = { 
+				add_deposit = d_immense_society_deposit
+			}
+		}
+	}
+}
+
+# Anomaly survey failure
+ship_event = {
+	id = mem_enterprise_fallen.2
+	title = "mem_enterprise_fallen.2.name"
+	desc = "mem_enterprise_fallen.2.desc"
+	picture = GFX_evt_ship_in_orbit
+	location = FROM
+	
+	is_triggered_only = yes
+			
+	option = {
+		name = "UNFORTUNATE"
+	}
+}
+
+# ~5 years past. Requesting additionnal research
+ship_event = {
+	id = mem_enterprise_fallen.3
+	title = "mem_enterprise_fallen.3.name"
+	desc = "mem_enterprise_fallen.3.desc"
+	picture = GFX_evt_city_ruins
+	location = event_target:ruins_planet
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "mem_enterprise_fallen.3.a"
+		event_target:ruins_planet = {
+			enable_special_project = {
+				name = "MEM_ENTERPRISE_FALLEN_PROJECT"
+				owner = ROOT
+				location = event_target:ruins_planet
+			}
+		}
+	}
+}
+
+# Special project completed
+ship_event = {
+	id = mem_enterprise_fallen.4
+	title = "mem_enterprise_fallen.4.name"
+	desc = {
+		text = mem_enterprise_fallen.4.desc_default
+		trigger = {		  
+			root.owner = {
+				NOR = {   				
+					has_ethic = "ethic_xenophile"
+					has_ethic = "ethic_fanatic_xenophile"
+					has_ethic = "ethic_xenophobe"
+					has_ethic = "ethic_fanatic_xenophobe"
+				}
+			}
+		}
+	}
+	desc = {
+		text = mem_enterprise_fallen.4.desc_xenophile
+		trigger = {	
+			root.owner = {
+				OR = {        
+					has_ethic = "ethic_xenophile"
+					has_ethic = "ethic_fanatic_xenophile"
+				}
+			}
+		}
+	}
+	desc = {
+		text = mem_enterprise_fallen.4.desc_xenophobe
+		trigger = {		  
+			root.owner = {
+				OR = {        
+					has_ethic = "ethic_xenophobe"
+					has_ethic = "ethic_fanatic_xenophobe"
+				}
+			}
+		}
+	}
+	picture = GFX_evt_ship_in_orbit
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "mem_enterprise_fallen.4.a"
+		root.owner = { add_energy = 250 }
+	}
+	# Available only for Xenophile
+	option = {
+		name = "mem_enterprise_fallen.4.b"
+		trigger = {
+			root.owner = {
+				OR = {
+					has_ethic = "ethic_xenophile"
+					has_ethic = "ethic_fanatic_xenophile"
+				}
+			}		
+		}
+		custom_tooltip = mem_enterprise_fallen.4.b.tooltip
+		hidden_effect = {
+			root.owner = {
+				every_owned_pop = {
+					limit = {
+						OR = {
+							has_ethic = "ethic_xenophile"
+							has_ethic = "ethic_fanatic_xenophile"
+							has_ethic = "ethic_pacifist"
+							has_ethic = "ethic_fanatic_pacifist"
+						}
+					}
+					add_modifier = {
+						modifier = "mem_boldly_going"
+						days = 360
+					}
+				}
+			}
+		}
+	}
+	# Available only for Xenophobe
+	option = {
+		name = "mem_enterprise_fallen.4.c"
+		trigger = {
+			root.owner = {
+				OR = {
+					has_ethic = "ethic_xenophobe"
+					has_ethic = "ethic_fanatic_xenophobe"
+				}
+			}		
+		}
+		root.owner = {
+			every_owned_pop = {
+				add_modifier = {
+					modifier = "mem_malicious_joy"
+					days = 360
+				}
+			}	
+		}
+	}
+}
