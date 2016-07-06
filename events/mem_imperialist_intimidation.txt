@@ -1,0 +1,196 @@
+
+namespace = mem_imperialist_intimidation
+
+country_event = {
+	id = mem_imperialist_intimidation.7
+	title = "mem_imperialist_intimidation.7.name"
+	desc = {
+		trigger = { 
+			switch = { 
+				trigger = has_country_flag 
+				hegimpcrusader = {text = mem_imperialist_intimidation.7.desc_01} 
+				hegimpmilitarist = {text = mem_imperialist_intimidation.7.desc_02}
+				hegimpspiritualist = {text = mem_imperialist_intimidation.7.desc_04}
+				hegimpcollectivist = {text = mem_imperialist_intimidation.7.desc_03} 
+				hegimpdefault = {text = mem_imperialist_intimidation.7.desc_05} 
+			} 
+		}
+	}
+	picture = GFX_evt_fleet_evil
+	show_sound = event_ship_thrusters
+	
+	mean_time_to_happen = {
+		months = 360
+	}
+	
+	trigger = {
+		is_ai = no
+		any_neighbor_country = {
+    			has_ai_personality = hegemonic_imperialists
+				NOT = { 
+					has_country_flag = hegemonic_imperialists_met_player
+				} 
+			}
+		}
+	
+	immediate = {
+		random_neighbor_country = {
+			limit = {
+				has_ai_personality = hegemonic_imperialists
+				NOT = { 
+					has_country_flag = hegemonic_imperialists_met_player
+				}
+			}
+			set_country_flag = hegemonic_imperialists_met_player
+			save_event_target_as = hegimp
+			closest_system = { 
+				limit = { 
+					is_owned_by = ROOT 
+					any_planet = { 
+						is_owned_by = ROOT 
+					} 
+				} 
+				random_system_planet = { 
+					limit = { 
+						is_owned_by = ROOT 
+					} 
+					save_event_target_as = intimplanet
+				} 
+			}
+		}
+		IF = {
+			limit = {
+				OR = {
+					has_ethic = ethic_spiritualist
+					has_ethic = ethic_fanatic_spiritualist
+				}
+				OR = {
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
+				}
+			}
+			set_country_flag = hegimpcrusader
+			ELSE = {
+				IF = {
+					limit = {
+						OR = {
+							has_ethic = ethic_militarist
+							has_ethic = ethic_fanatic_militarist
+							has_ethic = ethic_xenophobe
+							has_ethic = ethic_fanatic_xenophobe
+						}
+					}
+					set_country_flag = hegimpmilitarist
+					ELSE = {
+						IF = {
+							limit = {
+								OR = {
+									has_ethic = ethic_spiritualist
+									has_ethic = ethic_fanatic_spiritualist
+								}
+							}
+							set_country_flag = hegimpspiritualist
+							ELSE = {
+								IF = {
+									limit = {
+										OR = {
+											has_ethic = ethic_collectivist
+											has_ethic = ethic_fanatic_collectivist
+										}
+									}
+									set_country_flag = hegimpcollectivist
+									ELSE = {
+										set_country_flag = hegimpdefault
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	option = {
+	name = mem_imperialist_intimidation.7.holyorder
+		trigger = {
+				has_country_flag = hegimpcrusader
+				}
+	event_target:intimplanet = {
+		add_modifier = {	
+			modifier = mem_holy_order_established
+			days = 1800
+			}
+		}
+	remove_country_flag = hegimpcrusader
+	}
+	option = {
+	name = mem_imperialist_intimidation.7.letthemcome
+		trigger = {
+				has_country_flag = hegimpmilitarist
+			}
+	event_target:intimplanet = {
+		add_modifier = {	
+			modifier = mem_volunteer_surge
+			days = 1800
+			}
+		}
+	remove_country_flag = hegimpmilitarist
+	}
+	option = {
+	name = mem_imperialist_intimidation.7.unitedfront
+		trigger = {
+				has_country_flag = hegimpcollectivist
+			}
+		add_modifier = {
+			modifier = mem_united_front
+			days = 360
+		}
+	remove_country_flag = hegimpcollectivist
+	}
+	option = {
+	name = mem_imperialist_intimidation.7.default
+		trigger = {
+				has_country_flag = hegimpdefault
+			}
+		random_list = {
+			33 = {
+				add_monthly_resource_mult = {
+				resource = physics_research
+				value = 2
+				min = 20
+				max = 75
+				}
+			}
+			34 = {
+				add_monthly_resource_mult = {
+				resource = society_research
+				value = 2
+				min = 20
+				max = 75
+				}
+			}
+			33 = {
+				add_monthly_resource_mult = {
+				resource = engineering_research
+				value = 2
+				min = 20
+				max = 75
+				}
+			}
+		}
+	remove_country_flag = hegimpdefault
+	}
+	option = {
+	name = mem_imperialist_intimidation.7.prayer
+		trigger = {
+				has_country_flag = hegimpspiritualist
+			}
+	event_target:intimplanet = {
+		add_modifier = {	
+			modifier = mem_united_in_prayer
+			days = 1800
+				}
+			}
+	remove_country_flag = hegimpspiritualist
+		}
+	}
