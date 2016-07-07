@@ -109,6 +109,9 @@ sourceNames = [
 	"(?<!mem_)work.dds",
 	"trait_mem_redefined_happiness.dds",
 	"trait_mem_redefined_productivity.dds",
+	"(?<!mem_)rockstar_origin",
+	"(?<!mem_)tour_location",
+	"(?<!mem_)(?=(rock|dubstep|incomprehensible|rapper|festival|metal)flag)",
 ]
 
 goalNames = [
@@ -206,6 +209,9 @@ goalNames = [
 	"mem_work.dds",
 	"mem_trait_redefined_happiness.dds",
 	"mem_trait_redefined_productivity.dds",
+	"mem_rockstar_origin",
+	"mem_tour_location",
+	"mem_",
 ]
 directories = [
 	"events",
