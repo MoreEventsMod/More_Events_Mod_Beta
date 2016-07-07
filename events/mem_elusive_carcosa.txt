@@ -1,0 +1,757 @@
+#############
+#code for Star studies event by P_aul
+#writing by Infel & P_aul
+#original idea by P_aul
+#code for Elusive Carcosa by P_aul & LamilLerran
+#writing by Briv
+#original idea by P_aul
+#############
+
+namespace = mem_elusive_carcosa
+
+#the elusive carcosa event start
+#whenever scientific leader dies rolls if the event chain starts
+country_event = {
+	id = mem_elusive_carcosa.10
+	is_triggered_only = yes
+	hide_window = yes
+	
+	trigger = {
+		is_ai = no
+		NOT = { has_country_flag = paul_elusive_carcosa }
+		num_owned_planets > 4
+		FROM = { 
+			leader_class = scientist 
+			has_trait = leader_trait_maniacal
+		}
+	}
+	
+	immediate = {
+		random_list = {
+			90 = {}
+			10 = { 
+				random_owned_planet = {
+					limit = {
+						is_colony = yes
+						is_capital = no
+					}
+					save_global_event_target_as = paul_carcosa_colony
+				}
+				country_event = { id = mem_elusive_carcosa.11 } 
+			}
+		}
+	}
+}
+
+#starting event from player perspective
+country_event = {
+	id = mem_elusive_carcosa.11
+	title = "mem_elusive_carcosa.11.name"
+	desc = "mem_elusive_carcosa.11.desc"
+	picture = GFX_evt_animal_wildlife
+	
+	is_triggered_only = yes
+	fire_only_once = yes	#since this sets global flags and we don't need more than 1/game
+	
+	immediate = {
+		set_country_flag = paul_elusive_carcosa
+		country_event = { id = mem_elusive_carcosa.33 }
+	}
+	
+	option = {
+		name = "mem_elusive_carcosa.11.a"
+		event_target:paul_carcosa_colony = {
+			enable_special_project = {
+				name = "MEM_CHASE_CARCOSA"
+				location = this
+				owner = root
+			}
+		}
+
+		hidden_effect = {
+			random_owned_planet = {
+				limit = { is_colony = yes }
+				save_global_event_target_as = paul_carcosa_colony_capture	
+			}
+		}
+	}
+	
+	option = {
+		name = "mem_elusive_carcosa.11.b"
+	}
+}
+
+#setup event targets for full chain
+country_event = {
+	id = mem_elusive_carcosa.33
+	is_triggered_only = yes
+	hide_window = yes
+	
+	immediate = { hidden_effect = {
+		random_owned_planet = {
+			limit = {
+				is_colony = yes
+				NOT = { is_same_value = event_target:paul_carcosa_colony }
+			}
+			save_global_event_target_as = paul_carcosa_colony_2
+		}
+		country_event = { id = mem_elusive_carcosa.34 }
+	} }
+}
+
+#setup event targets for full chain
+country_event = {
+	id = mem_elusive_carcosa.34
+	is_triggered_only = yes
+	hide_window = yes
+	
+	immediate = { hidden_effect = {
+		random_owned_planet = {
+			limit = {
+				is_colony = yes
+				NOR = {
+					is_same_value = event_target:paul_carcosa_colony
+					is_same_value = event_target:paul_carcosa_colony_2
+				}
+			}
+			save_global_event_target_as = paul_carcosa_colony_3
+		}
+
+		country_event = { id = mem_elusive_carcosa.35 }
+	} }
+}
+
+#setup event targets for full chain
+country_event = {
+	id = mem_elusive_carcosa.35
+	is_triggered_only = yes
+	hide_window = yes
+	
+	immediate = { hidden_effect = {
+		random_owned_planet = {
+			limit = {
+				is_colony = yes
+				NOR = { 
+					is_same_value = event_target:paul_carcosa_colony
+					is_same_value = event_target:paul_carcosa_colony_2
+					is_same_value = event_target:paul_carcosa_colony_3 
+				}
+			}
+			save_global_event_target_as = paul_carcosa_colony_4
+		}
+		
+		country_event = { id = mem_elusive_carcosa.36 }
+	} }
+}
+
+#setup event targets for full chain
+country_event = {
+	id = mem_elusive_carcosa.36
+	is_triggered_only = yes
+	hide_window = yes
+	
+	immediate = { random_owned_planet = {
+		limit = {
+			is_colony = yes
+			NOR = { 
+				is_same_value = event_target:paul_carcosa_colony
+				is_same_value = event_target:paul_carcosa_colony_2
+				is_same_value = event_target:paul_carcosa_colony_3
+				is_same_value = event_target:paul_carcosa_colony_4
+			}
+		}
+		save_global_event_target_as = paul_carcosa_colony_5
+	} }
+}
+
+#finish of the initial special project
+ship_event = {
+	id = mem_elusive_carcosa.12
+	title = "mem_elusive_carcosa.12.name"
+	desc = "mem_elusive_carcosa.12.desc"
+	picture = GFX_evt_animal_wildlife
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		owner = {
+			set_country_flag = paul_carcosa_flavour_1
+		}
+	}
+	
+	option = {
+		trigger = {
+			owner = {has_ethic = ethic_fanatic_materialist}
+		}
+		
+		name = "mem_elusive_carcosa.12.mat"
+		
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = 5
+				min = 40
+				max = 100
+			}
+		}
+	}
+	
+	option = {
+		trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_collectivist
+					has_ethic = ethic_fanatic_collectivist
+				}
+			}
+		}
+		
+		name = "mem_elusive_carcosa.12.col"
+		
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = 5
+				min = 40
+				max = 100
+			}
+		}
+	}
+	
+	option = {
+		trigger = {
+			owner = { has_ethic = ethic_fanatic_xenophobe }
+		}
+		
+		name = "mem_elusive_carcosa.12.phobe"
+		
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = 5
+				min = 40
+				max = 100
+			}
+		}
+	}
+	
+	option = {
+		trigger = {
+			owner = {
+				NOT = {
+					has_ethic = ethic_collectivist
+					has_ethic = ethic_fanatic_collectivist
+					has_ethic = ethic_fanatic_materialist
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		
+		name = "mem_elusive_carcosa.12.default"
+		
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = 5
+				min = 40
+				max = 100
+			}
+		}
+	}
+	
+}
+
+#starting project fails to find anything
+ship_event = {
+	id = mem_elusive_carcosa.31
+	title = "mem_elusive_carcosa.31.name"
+	desc = "mem_elusive_carcosa.31.desc"
+	picture = GFX_evt_animal_wildlife
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "mem_elusive_carcosa.31.a"
+	}
+}
+
+#mysterious sightings during carcosa event chain
+country_event = {
+	id = mem_elusive_carcosa.13
+	title = "mem_elusive_carcosa.13.name"
+	picture = GFX_evt_animal_wildlife
+	
+	desc = {
+		trigger = {
+			switch = {
+				trigger = has_country_flag
+				paul_carcosa_flavour_1 = { text = "mem_elusive_carcosa.13.flav1"}
+				paul_carcosa_flavour_2 = { text = "mem_elusive_carcosa.13.flav2"}
+				paul_carcosa_flavour_3 = { text = "mem_elusive_carcosa.13.flav3"}
+			}
+		}
+	}
+	
+	
+	mean_time_to_happen = {
+		months = 12
+	}
+	
+	trigger = {
+		OR = {
+			has_country_flag = paul_carcosa_flavour_1
+			has_country_flag = paul_carcosa_flavour_2
+			has_country_flag = paul_carcosa_flavour_3
+		}
+	}
+	
+	option = {
+		trigger = {
+			has_country_flag = paul_carcosa_flavour_1
+		}
+		name = "mem_elusive_carcosa.13.opt1"
+		remove_country_flag = paul_carcosa_flavour_1
+		set_country_flag = paul_carcosa_flavour_2
+	}
+	
+	option = {
+		trigger = {
+			has_country_flag = paul_carcosa_flavour_2
+		}
+		name = "mem_elusive_carcosa.13.opt2"
+		remove_country_flag = paul_carcosa_flavour_2
+		set_country_flag = paul_carcosa_flavour_3
+	}
+	
+	option = {
+		trigger = {
+			has_country_flag = paul_carcosa_flavour_3
+		}
+		name = "mem_elusive_carcosa.13.opt3"
+		remove_country_flag = paul_carcosa_flavour_3
+		hidden_effect = { country_event = {id = mem_elusive_carcosa.14 days = 30 random = 15} }
+	}
+}
+
+#event starts after three mysterious sightings
+country_event = {
+	id = mem_elusive_carcosa.14
+	title = "mem_elusive_carcosa.14.name"
+	picture = GFX_evt_animal_wildlife
+	desc = "mem_elusive_carcosa.14.desc"
+	
+	is_triggered_only = yes
+	
+	#option to ignore, ends event sequence
+	option = {
+		
+		name = "mem_elusive_carcosa.14.ignore"
+		add_modifier = {
+			modifier = paul_carcosa_ignore
+			days = 120
+		}
+		hidden_effect = { country_event = { id = mem_elusive_carcosa.15 days = 120 random = 60} }
+	}
+	
+	#option to continue, available to all
+	option = {
+		
+		name = "mem_elusive_carcosa.14.neutral"
+		add_modifier = {
+			modifier = paul_carcosa_influence
+			days = 120
+		}
+		hidden_effect = { country_event = { id = mem_elusive_carcosa.16 days = 1} }
+	}
+	#following options are for specific ethics
+	option = {
+		trigger = {
+			OR = {
+				has_ethic = ethic_collectivist
+				has_ethic = ethic_fanatic_collectivist
+			}
+		}
+		
+		name = "mem_elusive_carcosa.14.col"
+		add_modifier = {
+			modifier = paul_carcosa_mineral
+			days = 120
+		}
+		hidden_effect = { country_event = { id = mem_elusive_carcosa.16 days = 1} }
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				has_ethic = ethic_materialist
+				has_ethic = ethic_fanatic_materialist
+			}
+		}
+		
+		name = "mem_elusive_carcosa.14.mat"
+		add_modifier = {
+			modifier = paul_carcosa_physics
+			days = 120
+		}
+		hidden_effect = { country_event = { id = mem_elusive_carcosa.16 days = 1} }
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_militarist
+				has_ethic = ethic_fanatic_militarist
+			}
+		}
+		
+		name = "mem_elusive_carcosa.14.phobe"
+		add_modifier = {
+			modifier = paul_carcosa_upkeep
+			days = 120
+		}
+		hidden_effect = { country_event = { id = mem_elusive_carcosa.16 days = 1} }
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				has_ethic = ethic_xenophile
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_pacifist
+				has_ethic = ethic_fanatic_pacifist
+			}
+		}
+		
+		name = "mem_elusive_carcosa.14.phile"
+		add_modifier = {
+			modifier = paul_carcosa_sociology
+			days = 120
+		}
+		hidden_effect = { country_event = { id = mem_elusive_carcosa.16 days = 1} }
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				has_ethic = ethic_spiritualist
+				has_ethic = ethic_fanatic_spiritualist
+			}
+		}
+		
+		name = "mem_elusive_carcosa.14.spirit"
+		add_modifier = {
+			modifier = paul_carcosa_happy
+			days = 120
+		}
+		hidden_effect = { country_event = { id = mem_elusive_carcosa.16 days = 1} }
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				has_ethic = ethic_individualist
+				has_ethic = ethic_fanatic_individualist
+			}
+		}
+		
+		name = "mem_elusive_carcosa.14.ind"
+		add_modifier = {
+			modifier = paul_carcosa_energy
+			days = 120
+		}
+		hidden_effect = { country_event = { id = mem_elusive_carcosa.16 days = 1} }
+	}
+	
+}
+
+#finish the event if carcosa reports are ignored
+country_event = {
+	id = mem_elusive_carcosa.15
+	title = "mem_elusive_carcosa.15.name"
+	picture = GFX_evt_animal_wildlife
+	desc = "mem_elusive_carcosa.15.desc"
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "mem_elusive_carcosa.15.a"
+	}
+}
+
+#start special projects to find carcosa
+country_event = {
+	id = mem_elusive_carcosa.16
+	title = "mem_elusive_carcosa.16.name"
+	picture = GFX_evt_animal_wildlife
+	desc = "mem_elusive_carcosa.16.desc"
+
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_elusive_carcosa.16.a
+		begin_event_chain = {
+			event_chain = "mem_elusive_carcosa_hunt_chain"
+			target = root
+		}
+		#Note: if you modify the below targets, you need to change the localization file as well
+		event_target:paul_carcosa_colony_2 = {
+			enable_special_project = {
+				name = "MEM_CARCOSA_HUNT_1"
+				location = this
+				owner = root
+			}
+		}
+		event_target:paul_carcosa_colony_3 = {
+			enable_special_project = {
+				name = "MEM_CARCOSA_HUNT_2"
+				location = this
+				owner = root
+			}
+		}
+		event_target:paul_carcosa_colony_4 = {
+			enable_special_project = {
+				name = "MEM_CARCOSA_HUNT_3"
+				location = this
+				owner = root
+			}
+		}
+	}
+}
+
+#this will fire after finishing each carcosa hunt project
+ship_event = {
+	id = mem_elusive_carcosa.17
+	title = "mem_elusive_carcosa.17.name"
+	picture = GFX_evt_animal_wildlife
+	desc = "mem_elusive_carcosa.17.desc"
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "mem_elusive_carcosa.17.a"
+		owner = {
+			add_event_chain_counter = { 
+				event_chain = "mem_elusive_carcosa_hunt_chain" 
+				counter = "mem_carcosa_sightings_checked" 
+				amount = 1 
+			}
+		}
+	}
+}
+
+#Failed Hunt
+country_event = {
+	id = mem_elusive_carcosa.30
+	title = mem_elusive_carcosa.30.name
+	desc = mem_elusive_carcosa.30.desc
+	picture = GFX_evt_animal_wildlife
+	
+	trigger = {
+		has_completed_event_chain_counter = {
+			event_chain = "mem_elusive_carcosa_hunt_chain"
+			counter = "mem_carcosa_sightings_checked"
+		}
+		NOT = { has_country_flag = paul_completed_carcosa_hunt }
+	}
+	
+	mean_time_to_happen = { days = 5 }
+	
+	immediate = {
+		set_country_flag = paul_completed_carcosa_hunt
+		end_event_chain = mem_elusive_carcosa_hunt_chain
+	}
+	
+	option = {
+		name = mem_elusive_carcosa.30.a
+		hidden_effect = {
+			random_list = {
+				20 = {}	#carcosa chain ends
+				80 = { 
+					country_event = { id = mem_elusive_carcosa.18 days = 150 random = 120 }
+				}
+			}
+		}
+	}
+}
+
+#eureka moment ;)
+country_event = {
+	id = mem_elusive_carcosa.18
+	title = "mem_elusive_carcosa.18.name"
+	picture = GFX_evt_animal_wildlife
+	desc = "mem_elusive_carcosa.18.desc"
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "mem_elusive_carcosa.18.a"
+		custom_tooltip = "mem_elusive_carcosa.18.a.tooltip"
+		hidden_effect = { country_event = {id = mem_elusive_carcosa.19 days = 120 random = 30} }
+	}
+}
+
+#study carcosa, or finish here
+country_event = {
+	id = mem_elusive_carcosa.19
+	title = "mem_elusive_carcosa.19.name"
+	picture = GFX_evt_physics_research
+	desc = "mem_elusive_carcosa.19.desc"
+	
+	is_triggered_only = yes
+	
+	#continue research
+	option = {
+		name = "mem_elusive_carcosa.19.a"
+		this = { add_modifier = { modifier = mem_powering_memetic_overload } }
+		enable_special_project = {	
+			owner = this
+			name = "MEM_CARCOSA_QUANTUM_COMPUTER"
+			location = event_target:paul_carcosa_colony_4 
+		}
+	}
+	
+	#end now
+	option = {
+		name = "mem_elusive_carcosa.19.b"
+		add_monthly_resource_mult = {
+			resource = physics_research
+			value = 25
+			min = 750
+			max = 1500
+		}
+	}
+}
+
+#rewards for finishing final project
+country_event = {
+	id = mem_elusive_carcosa.20
+	title = "mem_elusive_carcosa.20.name"
+	desc = "mem_elusive_carcosa.20.desc"
+	picture = GFX_evt_animal_wildlife
+	
+	is_triggered_only = yes
+	
+	#research reward
+	option = {
+		name = "mem_elusive_carcosa.20.a"
+		add_monthly_resource_mult = {
+			resource = physics_research
+			value = 50
+			min = 1200
+			max = 2000
+		}
+		add_monthly_resource_mult = {
+			resource = society_research
+			value = 50
+			min = 1200
+			max = 2000
+		}
+		
+	}
+	
+	#diplo reward
+	option = {
+		name = "mem_elusive_carcosa.20.b"
+		every_country = {
+			limit = {
+				is_country_type = default
+				has_communications = ROOT
+				is_ai = yes		#A hack to prevent giving opinion modifier of self
+			}
+			add_opinion_modifier = {
+				who = root
+				modifier = mem_opinion_trustworthy
+			}
+		}
+		random_country = {
+			limit = {
+				is_country_type = fallen_empire
+				has_communications = ROOT
+			}
+			save_event_target_as = mem_carcosa_fallen_empire
+		}
+		country_event = { id = mem_elusive_carcosa.21 days = 5 random = 4 }
+	}
+	
+	#trait reward
+	option = {
+		trigger = {
+			NOT = { has_ethic = ethic_fanatic_individualist 
+					has_ethic = ethic_fanatic_collectivist
+			}
+		}
+		name = "mem_elusive_carcosa.20.c"
+		custom_tooltip = "mem_elusive_carcosa.20.c.tooltip"
+		hidden_effect = {
+			modify_species = {
+				species = root
+				add_trait = mem_trait_redefined_productivity
+			}
+		}
+	}
+	
+	#trait reward for fanatic collectivists
+	option = {
+		trigger = {
+			has_ethic = ethic_fanatic_collectivist
+		}
+		name = "mem_elusive_carcosa.20.d"
+		custom_tooltip = "mem_elusive_carcosa.20.d.tooltip"
+		hidden_effect = {
+			modify_species = {
+				species = root
+				add_trait = mem_trait_redefined_happiness
+				
+			}
+		}
+	}
+	
+	#special option for repugnant beings
+	option = {
+		trigger = {
+			has_trait = trait_repugnant
+		}
+		name = "mem_elusive_carcosa.20.e"
+		modify_species = {
+			species = root
+			remove_trait = trait_repugnant
+			add_trait = trait_charismatic
+			
+		}
+	}
+}
+
+#failure of final project
+country_event = {
+	id = mem_elusive_carcosa.32
+	title = mem_elusive_carcosa.32.name
+	desc = mem_elusive_carcosa.32.desc
+	picture = GFX_evt_animal_wildlife
+	
+	is_triggered_only = yes
+	
+	option = { name = mem_elusive_carcosa.32.a }
+}
+
+#communication from fallen empire
+country_event = {
+	id = mem_elusive_carcosa.21
+	title = "mem_elusive_carcosa.21.name"
+	desc = "mem_elusive_carcosa.21.desc"
+	
+	diplomatic = yes
+	
+	is_triggered_only = yes
+	
+	picture_event_data = {
+		portrait = event_target:mem_carcosa_fallen_empire
+		planet_background = event_target:mem_carcosa_fallen_empire
+		graphical_culture = event_target:mem_carcosa_fallen_empire
+		city_level = event_target:mem_carcosa_fallen_empire
+		room = event_target:mem_carcosa_fallen_empire
+	}
+	
+	option = { name = mem_elusive_carcosa.21.a }
+}
