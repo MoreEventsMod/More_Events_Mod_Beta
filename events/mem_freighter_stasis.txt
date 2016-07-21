@@ -1,0 +1,103 @@
+
+namespace = mem_freighter_stasis
+
+
+
+#Freighter in Stasis
+#Writing and Idea by Maria
+#Code by LamilLerran
+
+#Set up system for Freighter in Stasis refugees to come from
+event = {
+	id = mem_freighter_stasis.1
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		random_system = {
+			limit = {
+				any_planet = {
+					is_planet_class = pc_nuked
+					NOT = {
+						#Settled TODO 
+					}
+				}
+				NOT = {
+					any_planet = {
+						OR = {
+							is_planet_class = pc_tropical
+							is_planet_class = pc_continental
+							is_planet_class = pc_ocean
+							is_planet_class = pc_arctic
+							is_planet_class = pc_tundra
+							is_planet_class = pc_arid
+							is_planet_class = pc_desert
+						}
+					}
+				}
+			}
+			set_star_flag = mem_freighter_stasis_home_system
+			random_planet = {
+				limit = { is_planet_class = pc_nuked }
+				set_planet_flag = mem_freighter_stasis_homeworld
+			}
+		}
+	}
+}
+
+#Freighter in Stasis arrives in a system (this system is ROOT)
+planet_event = {
+	id = mem_freighter_stasis.2
+	hide_window = yes
+	
+	trigger = {
+		years_passed = 40
+		NOT = { has_global_flag = mem_freighter_stasis_started }
+		any_system = {
+			has_star_flag = mem_freighter_stasis_home_system
+			distance = {
+				source = root
+				min_distance = 5
+				max_distance = 60
+			}
+		}
+	}
+	
+	mean_time_to_happen = { 
+		months = 1800
+	}
+	
+	immediate = {
+		set_global_flag = mem_freighter_stasis_started
+		create_country = {
+			name = mem_freighter_stasis_faction.name	#TODO: Does this work?
+			type = faction
+		}
+		last_created_country = {
+			create_fleet = { name = mem_freighter_stasis_fleet.name } #TODO: Does this work?
+			set_country_flag = mem_freighter_stasis_refugee_country
+			last_created_fleet = {
+				set_owner = PREV
+				set_fleet_flag = mem_freighter_stasis_refugee_fleet
+				create_ship = {
+					name = mem_freighter_stasis_refugee_ship.name	#TODO: Does this work?
+					design = "MEM-Freighter-Stasis-Freighter"	#TODO: does this work?
+				}
+				set_location = {
+					target = ROOT
+					distance = 150 #TODO: Calibrate
+					angle = TODO
+				}
+				queue_actions = {
+					move_to = ROOT
+					effect = {
+						id = "mem_freighter_stasis.2.effect.1"
+						#TODO: Event on destruction through inaction?
+						destroy_fleet = this
+					}
+				}
+			}
+		}
+		#TODO: Set up an event for empire(s) in system
+	}
+}
