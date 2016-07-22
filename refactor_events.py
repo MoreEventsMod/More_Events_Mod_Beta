@@ -153,6 +153,7 @@ goalNames = [
 	#"mem_mysterious_pyramids_category",
 	#"mem_dead_star_category",
 	#"mem_poisoned_world_category",
+	"mem_asteroid_computer_category",
 	"mem_asteroid_structure_category",
 	"mem_crashed_object_category",
 	
