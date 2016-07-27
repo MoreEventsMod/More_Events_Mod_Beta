@@ -9,6 +9,10 @@
 
 namespace = mem_science_convention
 
+#Mean time to happen in months
+@mem_science_convention_mtth = 600
+@mem_science_convention_mtth_ai_factor = 0.1 #10	#this many times longer for the ai
+
 #Days it takes to prep the convention. Should take a year to prep.
 @mem_sciencecon_prep_time = 365
 
@@ -54,24 +58,33 @@ country_event = {
   show_sound = event_default
   
   mean_time_to_happen = {
-    months = 600
+    months = @mem_science_convention_mtth
+	modifier = {
+		factor = @mem_science_convention_mtth_ai_factor
+		is_ai = yes
+	}
   }
 
   trigger = {
-    is_ai = no
 	num_communications > 9
     num_owned_planets > 5
     is_at_war = no
     NOT = {
       OR = {
+		has_global_flag = mem_sciencecon_in_progress
         has_country_flag = mem_sciencecon_denied
         has_country_flag = mem_sciencecon_started
       }
     }
+	OR = {
+		is_ai = no
+		is_country_type = default
+	}
   }
 
   immediate = {
     set_country_flag = mem_sciencecon_started
+	set_global_flag = mem_sciencecon_in_progress
     set_variable = {
       which = mem_sciencecon_attended_count
       value = 0
@@ -322,9 +335,7 @@ country_event = {
   hide_window = yes
 
   is_triggered_only = yes
-  trigger = {
-    is_ai = no
-  }
+  
   immediate = {
     save_event_target_as = invite_sender
     every_country = {
@@ -841,6 +852,7 @@ country_event = {
   immediate = {
 
     #Remove flags
+	remove_global_flag = mem_sciencecon_in_progress
     remove_country_flag = mem_sciencecon_started
     remove_country_flag = mem_sciencecon_host
     remove_country_flag = mem_sciencecon_someone_accepted
