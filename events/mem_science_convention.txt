@@ -550,9 +550,9 @@ country_event = {
   }
 }
 
-################### mem_science_convention.4 ######################
+################### mem_science_convention.4 / 24 #####################
 ### Success Event
-#################################################################
+#######################################################################
 country_event = {
 	id = mem_science_convention.4
 	hide_window = yes
@@ -652,11 +652,30 @@ country_event = {
   }  
 }
 
-################### mem_science_convention.5 ######################
+################### mem_science_convention.5 / 25 #####################
 ### Fail Event
-#################################################################
+#######################################################################
+country_event = {
+	id = mem_science_convention.5
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		every_country = { country_event = { id = mem_science_convention.4705 } }	#DEBUG TODO
+		country_event = { id = mem_science_convention.999 days = 3 }
+		every_country = {
+			limit = { has_country_flag = mem_sciencecon_attending }
+			add_opinion_modifier = { 
+				who = ROOT
+				modifier = mem_opinion_science_convention_waste_of_time
+			}
+			country_event = { id = mem_science_convention.25 }
+		}
+	}
+}
+
 country_event = { 
-  id = mem_science_convention.5
+  id = mem_science_convention.25
   title = "mem_science_convention.5.name"
   desc = {
     text = mem_science_convention.5.desc 
@@ -677,35 +696,50 @@ country_event = {
   show_sound = event_default
   is_triggered_only = yes
 
-  immediate = {
-    if = {
-	  every_country = { country_event = { id = mem_science_convention.4705 } } #DEBUG TODO
-      limit = {
-        has_country_flag = mem_sciencecon_host
-      }
-      country_event = { id=mem_science_convention.999 days = 3}
-      every_country = {
-        limit = {
-          has_country_flag = mem_sciencecon_attending
-        }
-        add_opinion_modifier = {
-          who = ROOT
-          modifier = mem_opinion_science_convention_waste_of_time
-        }
-      }
-    }
-  }
-
   option = {
     name = mem_science_convention.5.a    
   }
 } 
 
-################### mem_science_convention.6 ######################
+################### mem_science_convention.6 / 26 #####################
 ### Critical Fail Event
-#################################################################
+#######################################################################
+country_event = {
+	id = mem_science_convention.6
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		every_country = { country_event = { id = mem_science_convention.4706 } }	#DEBUG TODO
+		country_event = { id = mem_science_convention.999 days = 3 }
+		#Host country will never host another one.
+		set_country_flag = mem_sciencecon_denied
+		every_country = {
+			limit = { has_country_flag = mem_sciencecon_attending }
+			add_opinion_modifier = { 
+				who = ROOT
+				modifier = mem_opinion_science_convention_scientist_dead
+			}
+			country_event = { id = mem_science_convention.26 }
+		}
+		random_owned_leader = {
+			limit = {
+				OR = {
+					is_researching_area = engineering
+					is_researching_area = physics
+					is_researching_area = society
+				}
+			}
+			kill_leader = {
+				show_notification = no
+				type = scientist
+			}
+		}
+	}
+}
+
 country_event = { 
-  id = mem_science_convention.6
+  id = mem_science_convention.26
   title = "mem_science_convention.6.name"
   desc = {
     text = mem_science_convention.6.desc
@@ -735,15 +769,12 @@ country_event = {
   show_sound = event_default
   is_triggered_only = yes
 
-  immediate = {    
-	every_country = { country_event = { id = mem_science_convention.4706 } } #DEBUG TODO
+  immediate = {
     if = {
       limit = {
         has_country_flag = mem_sciencecon_host
       }
-      country_event = { id=mem_science_convention.999 days = 3}
-      #Host country will never host another one.
-      set_country_flag = mem_sciencecon_denied
+      
       every_country = {
         limit = {
           has_country_flag = mem_sciencecon_attending
@@ -761,19 +792,6 @@ country_event = {
     name = mem_science_convention.6.a
     trigger = {
       has_country_flag = host
-    }
-    random_owned_leader = {
-      limit = {
-        OR = {
-          is_researching_area = engineering
-          is_researching_area = physics
-          is_researching_area = society
-        }
-      }
-      kill_leader = { 
-        show_notification = no
-        type = scientist 
-      }
     }
   }
   
