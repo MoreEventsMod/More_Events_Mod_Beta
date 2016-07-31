@@ -11,13 +11,15 @@ namespace = mem_science_convention
 
 #Mean time to happen in months
 @mem_science_convention_mtth = 6000
-@mem_science_convention_mtth_ai_factor = 5	#this many times longer for the ai
+@mem_science_convention_mtth_ai_factor = 5	#this many times longer for the 
 
 #Days it takes to prep the convention. Should take a year to prep.
 @mem_sciencecon_prep_time = 360
 
-#Days it takes for aliens to reply. Min/Max this?
-@mem_sciencecon_invite_time = 10	#Should be at least 2 months shorter than prep time
+#Days it takes for aliens to reply.
+#Sum of these should be at least 2 months shorter than prep time
+@mem_sciencecon_invite_time = 10
+@mem_sciencecon_rsvp_time_random = 250
 
 #Material / Energy Cost Need balancing?
 @mem_sciencecon_cost_check = 249
@@ -229,9 +231,12 @@ country_event = {
 	}
 
     hidden_effect = {
-      set_country_flag = mem_sciencecon_attending
-      country_event = { id = mem_science_convention.2 days = @mem_sciencecon_prep_time }
-      country_event = { id = mem_science_convention.7 days = @mem_sciencecon_invite_time}
+		set_country_flag = mem_sciencecon_attending
+		country_event = { id = mem_science_convention.2 days = @mem_sciencecon_prep_time }
+		country_event = { 
+			id = mem_science_convention.7
+			days = @mem_sciencecon_invite_time
+		}
     }
   }
 
@@ -377,7 +382,7 @@ country_event = {
         }
       }
       set_country_flag = mem_sciencecon_invited
-      country_event = {id = mem_science_convention.8}
+      country_event = { id = mem_science_convention.8 days = 1 random = @mem_sciencecon_rsvp_time_random }
     }
   }
 }
@@ -422,7 +427,7 @@ country_event = {
 		}
     }
     ai_chance = {
-		factor = 30
+		factor = 10	#But have a factor = 20 ignore option
 		modifier = {
 			factor = 0.1
 			opinion = { who = from  value > 200 }
@@ -482,7 +487,14 @@ country_event = {
 		}
 	}
     ai_chance = {
-		factor = 20
+		factor = 20			
+		modifier = { 
+			factor = 0
+			OR = {
+				has_ai_personality = xenophobic_isolationists
+				has_ai_personality = fanatic_purifiers
+			}
+		}
 		modifier = {
 			factor = 1.5
 			opinion = { who = from  value > 50 }
@@ -515,6 +527,13 @@ country_event = {
 	}
     ai_chance = {
 		factor = 30
+		modifier = { 
+			factor = 0
+			OR = {
+				has_ai_personality = xenophobic_isolationists
+				has_ai_personality = fanatic_purifiers
+			}
+		}
 		modifier = {
 			factor = 1.5
 			opinion = { who = from  value > 50 }
@@ -547,6 +566,13 @@ country_event = {
 	}
     ai_chance = {
 		factor = 10
+		modifier = { 
+			factor = 0
+			OR = {
+				has_ai_personality = xenophobic_isolationists
+				has_ai_personality = fanatic_purifiers
+			}
+		}
 		modifier = {
 			factor = 2
 			opinion = { who = from  value > 50 }
@@ -615,6 +641,13 @@ country_event = {
     }
     ai_chance = {
 		factor = 1
+		modifier = { 
+			factor = 0
+			OR = {
+				has_ai_personality = xenophobic_isolationists
+				has_ai_personality = fanatic_purifiers
+			}
+		}
 		modifier = {
 			factor = 1.5
 			opinion = { who = from  value > 50 }
@@ -672,6 +705,46 @@ country_event = {
       }
     }
   }
+
+	#Ignore (No). AI only. Intended to reduce number of AI replies.
+	option = {
+		name = mem_science_convention.8.ai-ignore
+		trigger = { is_ai = yes }
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 20
+				OR = { ethos = ethic_xenophobe ethos = ethic_fanatic_xenophobe }
+			}
+			modifier = {	#Want to hear the xenophobic isolationists tell player "no way"
+				factor = 0.2
+				has_ai_personality = xenophobic_isolationists
+			}
+			modifier = {
+				factor = 5
+				has_ai_personality = hegemonic_imperialists
+			}
+			modifier = {
+				factor = 0.1
+				opinion = { who = from  value > 200 }
+			}
+			modifier = {
+				factor = 0.75
+				opinion = { who = from  value > 50 }
+			}
+			modifier = {
+				factor = 1.5
+				opinion = { who = from  value < 50 }
+			}
+			modifier = {
+				factor = 10
+				opinion = { who = from  value < 200 }
+			}
+		}
+		hidden_effect = {
+			remove_country_flag = mem_sciencecon_invited
+		}
+	}
 } 
 
 ################### mem_science_convention.11 #####################
