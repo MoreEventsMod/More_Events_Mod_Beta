@@ -10,7 +10,7 @@
 namespace = mem_science_convention
 
 #Mean time to happen in months
-@mem_science_convention_mtth = 600
+@mem_science_convention_mtth = 6000
 @mem_science_convention_mtth_ai_factor = 5	#this many times longer for the ai
 
 #Days it takes to prep the convention. Should take a year to prep.
@@ -63,6 +63,38 @@ country_event = {
 		factor = @mem_science_convention_mtth_ai_factor
 		is_ai = yes
 	}
+	modifier = {
+		factor = 0.5
+		ethos = ethic_materialist
+	}
+	modifier = {
+		factor = 0.2
+		ethos = ethic_fanatic_materialist
+	}
+	modifier = {
+		factor = 1.5
+		ethos = ethic_spiritualist
+	}
+	modifier = {
+		factor = 6
+		ethos = ethic_fanatic_spiritualist
+	}
+	modifier = {
+		factor = 0.75
+		ethos = ethic_collectivist
+	}
+	modifier = {
+		factor = 0.5
+		ethos = ethic_fanatic_collectivist
+	}
+	modifier = {
+		factor = 1.2
+		ethos = ethic_individualist
+	}
+	modifier = {
+		factor = 1.5
+		ethos = ethic_fanatic_individualist
+	}
   }
 
   trigger = {
@@ -102,6 +134,8 @@ country_event = {
           amount > @mem_sciencecon_cost_check
       }
     }
+	
+	ai_chance = { factor = 3 }
 	
     add_energy = @mem_sciencecon_cost_energy_neg
     add_minerals = @mem_sciencecon_cost_minerals_neg
@@ -154,7 +188,45 @@ country_event = {
     add_minerals = @mem_sciencecon_cost_minerals_neg
     add_influence = @mem_sciencecon_cost_influence_neg
 	
-	ai_chance = { factor = 50 } #TODO: Temp -- expand to real weighting
+	ai_chance = {
+		factor = 5
+		modifier = {
+			factor = 0
+			OR = {
+				has_ai_personality = xenophobic_isolationists
+				has_ai_personality = fanatic_purifiers
+				has_ai_personality = hive_mind
+				ethos = ethic_fanatic_xenophobe
+			}
+		}
+		modifier = {
+			factor = 10
+			has_ai_personality = erudite_explorers
+		}
+		modifier = {
+			factor = 2
+			OR = {
+				has_ai_personality = democratic_crusaders
+				has_ai_personality = evangelising_zealots
+				has_ai_personality = federation_builders
+				has_ai_personality = peaceful_traders
+				has_ai_personality = harmonious_hierarchy
+				ethos = ethic_fanatic_xenophile
+			}		
+		}
+		modifier = {
+			factor = 100
+			has_ai_personality = fanatic_befrienders
+		}
+		modifier = {
+			factor = 0.5
+			has_ai_personality = slaving_despots
+		}
+		modifier = {
+			factor = 4
+			has_ai_personality = migrating_flock
+		}
+	}
 
     hidden_effect = {
       set_country_flag = mem_sciencecon_attending
@@ -173,6 +245,22 @@ country_event = {
         amount > @mem_sciencecon_cost_check
       }
     }
+	
+	ai_chance = {
+		factor = 1
+		modifier = {
+			factor = 20
+			has_ai_personality = decadent_hierarchy
+		}
+		modifier = {
+			factor = 3
+			has_ai_personality = evangelising_zealots
+		}
+		modifier = {
+			factor = 5
+			has_ai_personality = spiritual_seekers
+		}
+	}
 	
     hidden_effect = {
       #just clean up.
@@ -332,31 +420,19 @@ country_event = {
       }
     }
     ai_chance = {
-      factor = 60
-      modifier = {
-        factor = 70
-        has_ethic = ethic_materialist
-      }
-      modifier = {
-        factor = 80
-        has_ethic = ethic_fanatic_materialist
-      }
-      modifier = {
-        factor = 10
-        has_ethic = ethic_spiritualist
-      }
-      modifier = {
-        factor = 0
-        has_ethic = ethic_fanatic_spiritualist
-      }
-      modifier = {
-        factor = 20
-        has_ethic = ethic_xenophobe
-      }
-      modifier = {
-        factor = 0
-        has_ethic = ethic_fanatic_xenophobe
-      }
+		factor = 1
+		modifier = {
+			factor = 1.5
+			opinion = { who = from  value > 50 }
+		}
+		modifier = {
+			factor = 0.75
+			opinion = { who = from  value < 50 }
+		}
+		modifier = {
+			factor = 0
+			opinion = { who = from  value < 200 }
+		}
     }
     hidden_effect = {
       remove_country_flag = mem_sciencecon_invited
@@ -381,7 +457,19 @@ country_event = {
       }
     }
     ai_chance = {
-      factor = 40
+		factor = 1
+		modifier = {
+			factor = 0.75
+			opinion = { who = from  value > 50 }
+		}
+		modifier = {
+			factor = 1.5
+			opinion = { who = from  value < 50 }
+		}
+		modifier = {
+			factor = 5
+			opinion = { who = from  value < 200 }
+		}
     }
     hidden_effect = {
       remove_country_flag = mem_sciencecon_invited
@@ -391,7 +479,7 @@ country_event = {
     }
   }
 
-  #Xenophobic
+  #Xenophobic (No)
   option = {
     name = mem_science_convention.8.phobe
     trigger = {
@@ -406,8 +494,27 @@ country_event = {
 			country_event = { id = mem_science_convention.12 }
 		}
     }
+    ai_chance = {
+		factor = 30
+		modifier = {
+			factor = 0.1
+			opinion = { who = from  value > 200 }
+		}
+		modifier = {
+			factor = 0.75
+			opinion = { who = from  value > 50 }
+		}
+		modifier = {
+			factor = 1.5
+			opinion = { who = from  value < 50 }
+		}
+		modifier = {
+			factor = 10
+			opinion = { who = from  value < 200 }
+		}
+    }
   }
-  #Spiritualist
+  #Spiritualist (No)
   option = {
     name = mem_science_convention.8.spi
     trigger = {
@@ -416,6 +523,21 @@ country_event = {
         has_ethic = ethic_fanatic_spiritualist
       }
     }
+    ai_chance = {
+		factor = 10
+		modifier = {
+			factor = 0.75
+			opinion = { who = from  value > 50 }
+		}
+		modifier = {
+			factor = 1.5
+			opinion = { who = from  value < 50 }
+		}
+		modifier = {
+			factor = 5
+			opinion = { who = from  value < 200 }
+		}
+    }
 	hidden_effect = {
 		remove_country_flag = mem_sciencecon_invited
 		event_target:invite_sender = {
@@ -423,7 +545,7 @@ country_event = {
 		}
     }
   }
-  #Xenophile
+  #Xenophile (Yes)
   option = {
 	name = mem_science_convention.8.phile
 	trigger = {
@@ -432,6 +554,21 @@ country_event = {
 			has_ethic = ethic_fanatic_xenophile
 		}
 	}
+    ai_chance = {
+		factor = 20
+		modifier = {
+			factor = 1.5
+			opinion = { who = from  value > 50 }
+		}
+		modifier = {
+			factor = 0.75
+			opinion = { who = from  value < 50 }
+		}
+		modifier = {
+			factor = 0.1
+			opinion = { who = from  value < 200 }
+		}
+    }
     hidden_effect = {
       remove_country_flag = mem_sciencecon_invited
       set_country_flag = mem_sciencecon_attending
@@ -440,7 +577,7 @@ country_event = {
       }
     }
   }
-  #Materialist
+  #Materialist (Yes)
   option = {
 	name = mem_science_convention.8.mat
 	trigger = {
@@ -449,6 +586,21 @@ country_event = {
 			has_ethic = ethic_fanatic_xenophile
 		}
 	}
+    ai_chance = {
+		factor = 30
+		modifier = {
+			factor = 1.5
+			opinion = { who = from  value > 50 }
+		}
+		modifier = {
+			factor = 0.75
+			opinion = { who = from  value < 50 }
+		}
+		modifier = {
+			factor = 0.01
+			opinion = { who = from  value < 200 }
+		}
+    }
 	hidden_effect = {
       remove_country_flag = mem_sciencecon_invited
       set_country_flag = mem_sciencecon_attending
@@ -457,7 +609,7 @@ country_event = {
       }
     }
   }
-  #Collectivist
+  #Collectivist (Yes)
   option = {
 	name = mem_science_convention.8.col
 	trigger = {
@@ -466,15 +618,30 @@ country_event = {
 			has_ethic = ethic_fanatic_collectivist
 		}
 	}
-    hidden_effect = {
-      remove_country_flag = mem_sciencecon_invited
-      set_country_flag = mem_sciencecon_attending
-      event_target:invite_sender = {
-        country_event = { id = mem_science_convention.11 }
-      }
+    ai_chance = {
+		factor = 10
+		modifier = {
+			factor = 2
+			opinion = { who = from  value > 50 }
+		}
+		modifier = {
+			factor = 0.75
+			opinion = { who = from  value < 50 }
+		}
+		modifier = {
+			factor = 0
+			opinion = { who = from  value < 200 }
+		}
     }
+	hidden_effect = {
+		remove_country_flag = mem_sciencecon_invited
+		set_country_flag = mem_sciencecon_attending
+		event_target:invite_sender = {
+			country_event = { id = mem_science_convention.11 }
+		}
+	}
   }
-  #Individualist
+  #Individualist (No)
   option = {
 	name = mem_science_convention.8.ind
 	trigger = {
@@ -483,6 +650,21 @@ country_event = {
 			has_ethic = ethic_fanatic_individualist
 		}
 	}
+    ai_chance = {
+		factor = 5
+		modifier = {
+			factor = 0.75
+			opinion = { who = from  value > 50 }
+		}
+		modifier = {
+			factor = 1.5
+			opinion = { who = from  value < 50 }
+		}
+		modifier = {
+			factor = 3
+			opinion = { who = from  value < 200 }
+		}
+    }
 	hidden_effect = {
 		remove_country_flag = mem_sciencecon_invited
 		event_target:invite_sender = {
@@ -496,7 +678,6 @@ country_event = {
 ### Diplomatic - Host gets positive response from an invited.
 #################################################################
 country_event = {
-
   id = mem_science_convention.11
   title = mem_science_convention.11.name
   #Erudite explorers
