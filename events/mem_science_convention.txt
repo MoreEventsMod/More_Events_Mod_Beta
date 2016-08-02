@@ -4,16 +4,22 @@
 ### The Science Convention
 ### Original Idea by PossessedLemon
 ### Script by binaryferret. <Twitter: @binaryferret>
-### Writing by Briv
+### Writing by Briv (revisions by LamilLerran and Hoeya)
 #################################################################
 
 namespace = mem_science_convention
 
-#Days it takes to prep the convention. Should take a year to prep.
-@mem_sciencecon_prep_time = 365
+#Mean time to happen in months
+@mem_science_convention_mtth = 6000
+@mem_science_convention_mtth_ai_factor = 5	#this many times longer for the 
 
-#Days it takes for aliens to reply. Min/Max this?
+#Days it takes to prep the convention. Should take a year to prep.
+@mem_sciencecon_prep_time = 360
+
+#Days it takes for aliens to reply.
+#Sum of these should be at least 2 months shorter than prep time
 @mem_sciencecon_invite_time = 10
+@mem_sciencecon_rsvp_time_random = 250
 
 #Material / Energy Cost Need balancing?
 @mem_sciencecon_cost_check = 249
@@ -54,24 +60,65 @@ country_event = {
   show_sound = event_default
   
   mean_time_to_happen = {
-    months = 600
+    months = @mem_science_convention_mtth
+	modifier = {
+		factor = @mem_science_convention_mtth_ai_factor
+		is_ai = yes
+	}
+	modifier = {
+		factor = 0.5
+		ethos = ethic_materialist
+	}
+	modifier = {
+		factor = 0.2
+		ethos = ethic_fanatic_materialist
+	}
+	modifier = {
+		factor = 1.5
+		ethos = ethic_spiritualist
+	}
+	modifier = {
+		factor = 6
+		ethos = ethic_fanatic_spiritualist
+	}
+	modifier = {
+		factor = 0.75
+		ethos = ethic_collectivist
+	}
+	modifier = {
+		factor = 0.5
+		ethos = ethic_fanatic_collectivist
+	}
+	modifier = {
+		factor = 1.2
+		ethos = ethic_individualist
+	}
+	modifier = {
+		factor = 1.5
+		ethos = ethic_fanatic_individualist
+	}
   }
 
   trigger = {
-    is_ai = no
 	num_communications > 9
     num_owned_planets > 5
     is_at_war = no
     NOT = {
       OR = {
+		has_global_flag = mem_sciencecon_in_progress
         has_country_flag = mem_sciencecon_denied
         has_country_flag = mem_sciencecon_started
       }
     }
+	OR = {
+		is_ai = no
+		is_country_type = default
+	}
   }
 
   immediate = {
     set_country_flag = mem_sciencecon_started
+	set_global_flag = mem_sciencecon_in_progress
     set_variable = {
       which = mem_sciencecon_attended_count
       value = 0
@@ -89,6 +136,8 @@ country_event = {
           amount > @mem_sciencecon_cost_check
       }
     }
+	
+	ai_chance = { factor = 3 }
 	
     add_energy = @mem_sciencecon_cost_energy_neg
     add_minerals = @mem_sciencecon_cost_minerals_neg
@@ -140,11 +189,54 @@ country_event = {
     add_energy = @mem_sciencecon_cost_energy_neg
     add_minerals = @mem_sciencecon_cost_minerals_neg
     add_influence = @mem_sciencecon_cost_influence_neg
+	
+	ai_chance = {
+		factor = 5
+		modifier = {
+			factor = 0
+			OR = {
+				has_ai_personality = xenophobic_isolationists
+				has_ai_personality = fanatic_purifiers
+				has_ai_personality = hive_mind
+				ethos = ethic_fanatic_xenophobe
+			}
+		}
+		modifier = {
+			factor = 10
+			has_ai_personality = erudite_explorers
+		}
+		modifier = {
+			factor = 2
+			OR = {
+				has_ai_personality = democratic_crusaders
+				has_ai_personality = evangelising_zealots
+				has_ai_personality = federation_builders
+				has_ai_personality = peaceful_traders
+				has_ai_personality = harmonious_hierarchy
+				ethos = ethic_fanatic_xenophile
+			}		
+		}
+		modifier = {
+			factor = 100
+			has_ai_personality = fanatic_befrienders
+		}
+		modifier = {
+			factor = 0.5
+			has_ai_personality = slaving_despots
+		}
+		modifier = {
+			factor = 4
+			has_ai_personality = migrating_flock
+		}
+	}
 
     hidden_effect = {
-      set_country_flag = mem_sciencecon_attending
-      country_event = { id = mem_science_convention.2 days = @mem_sciencecon_prep_time }
-      country_event = { id = mem_science_convention.7 days = @mem_sciencecon_invite_time}
+		set_country_flag = mem_sciencecon_attending
+		country_event = { id = mem_science_convention.2 days = @mem_sciencecon_prep_time }
+		country_event = { 
+			id = mem_science_convention.7
+			days = @mem_sciencecon_invite_time
+		}
     }
   }
 
@@ -158,6 +250,22 @@ country_event = {
         amount > @mem_sciencecon_cost_check
       }
     }
+	
+	ai_chance = {
+		factor = 1
+		modifier = {
+			factor = 20
+			has_ai_personality = decadent_hierarchy
+		}
+		modifier = {
+			factor = 3
+			has_ai_personality = evangelising_zealots
+		}
+		modifier = {
+			factor = 5
+			has_ai_personality = spiritual_seekers
+		}
+	}
 	
     hidden_effect = {
       #just clean up.
@@ -184,76 +292,19 @@ country_event = {
     random_list = {
       #Crit Success
       12 = {
-        set_variable = {
-          which = mem_sciencecon_result
-          value = 1
-        }
+		country_event = { id = mem_science_convention.3 days = 3 }
       }
       #Success
       65 = {
-        set_variable = {
-          which = mem_sciencecon_result
-          value = 2
-        }
+		country_event = { id = mem_science_convention.4 days = 3 }
       }
       #Fail
       20 = {
-        set_variable = {
-          which = mem_sciencecon_result
-          value = 3
-        }
+		country_event = { id = mem_science_convention.5 days = 3 }
       }
       #Crit Fail
       2 = {
-        set_variable = {
-          which = mem_sciencecon_result
-          value = 4
-        }
-      }
-    }
-    every_country = {
-      limit = {
-        has_country_flag = mem_sciencecon_attending
-      }
-      #Crit Success
-      if = {
-        limit = {
-          check_variable = {
-            which = mem_sciencecon_result
-            value = 1
-          }
-        }
-        country_event = { id = mem_science_convention.3 days = 3}
-      }
-      #Success
-      if = {
-        limit = {
-          check_variable = {
-            which = mem_sciencecon_result
-            value = 2
-          }
-        }
-        country_event = { id = mem_science_convention.4 days = 3}
-      }
-      #Fail
-      if = {
-        limit = {
-          check_variable = {
-            which = mem_sciencecon_result
-            value = 3
-          }
-        }
-        country_event = { id = mem_science_convention.5 days = 3}
-      }
-      #Crit Fail
-      if = {
-        limit = {
-          check_variable = {
-            which = mem_sciencecon_result
-            value = 4
-          }
-        }
-        country_event = { id = mem_science_convention.6 days = 3}
+		country_event = { id = mem_science_convention.6 days = 3 }
       }
     }
   }
@@ -282,31 +333,28 @@ country_event = {
 ### SEE mem_sciencecon_critsuccess_events.txt for the rest
 #################################################################
 country_event = { 
-  id = mem_science_convention.3
-  hide_window = yes
-  is_triggered_only = yes  
-  immediate = {
-    if = {
-      limit = {
-        has_country_flag = mem_sciencecon_host
-      }
-      country_event = { id=mem_science_convention.999 days = 3}
-      every_country = {
-        limit = {
-          has_country_flag = mem_sciencecon_attending
-        }
-        add_opinion_modifier = {
-          who = ROOT
-          modifier = mem_opinion_science_convention_fantastic_time
-        }
-      }
-    }
-    random_list = {      
-      34 = { country_event = {id = mem_science_convention.91 } }
-      33 = { country_event = {id = mem_science_convention.92 } }
-      33 = { country_event = {id = mem_science_convention.93 } }
-    }    
-  }
+	id = mem_science_convention.3
+	hide_window = yes
+  
+	is_triggered_only = yes  
+  
+	immediate = {
+		country_event = { id=mem_science_convention.999 days = 3}
+		every_country = {
+			limit = {
+				has_country_flag = mem_sciencecon_attending
+			}
+			add_opinion_modifier = {
+				who = ROOT
+				modifier = mem_opinion_science_convention_fantastic_time
+			}
+			random_list = {      
+				33 = { country_event = {id = mem_science_convention.91 } }
+				33 = { country_event = {id = mem_science_convention.92 } }
+				33 = { country_event = {id = mem_science_convention.93 } }
+			}
+		}  
+	}
 }
 
 ################### mem_science_convention.7 ######################
@@ -322,9 +370,7 @@ country_event = {
   hide_window = yes
 
   is_triggered_only = yes
-  trigger = {
-    is_ai = no
-  }
+  
   immediate = {
     save_event_target_as = invite_sender
     every_country = {
@@ -336,7 +382,7 @@ country_event = {
         }
       }
       set_country_flag = mem_sciencecon_invited
-      country_event = {id = mem_science_convention.8}
+      country_event = { id = mem_science_convention.8 days = 1 random = @mem_sciencecon_rsvp_time_random }
     }
   }
 }
@@ -364,36 +410,256 @@ country_event = {
     city_level = from
     room = from
   }
-  
-  #Yes always available
+
+  #Xenophobic (No)
   option = {
-    name = mem_science_convention.8.a
+    name = mem_science_convention.8.phobe
+    trigger = {
+		OR = {
+			has_ethic = ethic_xenophobe
+			has_ethic = ethic_fanatic_xenophobe
+		}
+    }
+	hidden_effect = {
+		remove_country_flag = mem_sciencecon_invited
+		event_target:invite_sender = {
+			country_event = { id = mem_science_convention.12 }
+		}
+    }
     ai_chance = {
-      factor = 60
-      modifier = {
-        factor = 70
-        has_ethic = ethic_materialist
-      }
-      modifier = {
-        factor = 80
-        has_ethic = ethic_fanatic_materialist
-      }
-      modifier = {
-        factor = 10
+		factor = 10	#But have a factor = 20 ignore option
+		modifier = {
+			factor = 0.1
+			opinion = { who = from  value > 200 }
+		}
+		modifier = {
+			factor = 0.75
+			opinion = { who = from  value > 50 }
+		}
+		modifier = {
+			factor = 1.5
+			opinion = { who = from  value < 50 }
+		}
+		modifier = {
+			factor = 10
+			opinion = { who = from  value < 200 }
+		}
+    }
+  }
+  #Spiritualist (No)
+  option = {
+    name = mem_science_convention.8.spi
+    trigger = {
+      OR = {
         has_ethic = ethic_spiritualist
-      }
-      modifier = {
-        factor = 0
         has_ethic = ethic_fanatic_spiritualist
       }
-      modifier = {
-        factor = 20
-        has_ethic = ethic_xenophobe
+    }
+    ai_chance = {
+		factor = 10
+		modifier = {
+			factor = 0.75
+			opinion = { who = from  value > 50 }
+		}
+		modifier = {
+			factor = 1.5
+			opinion = { who = from  value < 50 }
+		}
+		modifier = {
+			factor = 5
+			opinion = { who = from  value < 200 }
+		}
+    }
+	hidden_effect = {
+		remove_country_flag = mem_sciencecon_invited
+		event_target:invite_sender = {
+			country_event = { id = mem_science_convention.12 }
+		}
+    }
+  }
+  #Xenophile (Yes)
+  option = {
+	name = mem_science_convention.8.phile
+	trigger = {
+		OR = {
+			has_ethic = ethic_xenophile
+			has_ethic = ethic_fanatic_xenophile
+		}
+	}
+    ai_chance = {
+		factor = 20			
+		modifier = { 
+			factor = 0
+			OR = {
+				has_ai_personality = xenophobic_isolationists
+				has_ai_personality = fanatic_purifiers
+			}
+		}
+		modifier = {
+			factor = 1.5
+			opinion = { who = from  value > 50 }
+		}
+		modifier = {
+			factor = 0.75
+			opinion = { who = from  value < 50 }
+		}
+		modifier = {
+			factor = 0.1
+			opinion = { who = from  value < 200 }
+		}
+    }
+    hidden_effect = {
+      remove_country_flag = mem_sciencecon_invited
+      set_country_flag = mem_sciencecon_attending
+      event_target:invite_sender = {
+        country_event = { id = mem_science_convention.11 }
       }
-      modifier = {
-        factor = 0
-        has_ethic = ethic_fanatic_xenophobe
+    }
+  }
+  #Materialist (Yes)
+  option = {
+	name = mem_science_convention.8.mat
+	trigger = {
+		OR = {
+			has_ethic = ethic_materialist
+			has_ethic = ethic_fanatic_materialist
+		}
+	}
+    ai_chance = {
+		factor = 30
+		modifier = { 
+			factor = 0
+			OR = {
+				has_ai_personality = xenophobic_isolationists
+				has_ai_personality = fanatic_purifiers
+			}
+		}
+		modifier = {
+			factor = 1.5
+			opinion = { who = from  value > 50 }
+		}
+		modifier = {
+			factor = 0.75
+			opinion = { who = from  value < 50 }
+		}
+		modifier = {
+			factor = 0.01
+			opinion = { who = from  value < 200 }
+		}
+    }
+	hidden_effect = {
+      remove_country_flag = mem_sciencecon_invited
+      set_country_flag = mem_sciencecon_attending
+      event_target:invite_sender = {
+        country_event = { id = mem_science_convention.11 }
       }
+    }
+  }
+  #Collectivist (Yes)
+  option = {
+	name = mem_science_convention.8.col
+	trigger = {
+		OR = {
+			has_ethic = ethic_collectivist
+			has_ethic = ethic_fanatic_collectivist
+		}
+	}
+    ai_chance = {
+		factor = 10
+		modifier = { 
+			factor = 0
+			OR = {
+				has_ai_personality = xenophobic_isolationists
+				has_ai_personality = fanatic_purifiers
+			}
+		}
+		modifier = {
+			factor = 2
+			opinion = { who = from  value > 50 }
+		}
+		modifier = {
+			factor = 0.75
+			opinion = { who = from  value < 50 }
+		}
+		modifier = {
+			factor = 0
+			opinion = { who = from  value < 200 }
+		}
+    }
+	hidden_effect = {
+		remove_country_flag = mem_sciencecon_invited
+		set_country_flag = mem_sciencecon_attending
+		event_target:invite_sender = {
+			country_event = { id = mem_science_convention.11 }
+		}
+	}
+  }
+  #Individualist (No)
+  option = {
+	name = mem_science_convention.8.ind
+	trigger = {
+		OR = {
+			has_ethic = ethic_individualist
+			has_ethic = ethic_fanatic_individualist
+		}
+	}
+    ai_chance = {
+		factor = 5
+		modifier = {
+			factor = 0.75
+			opinion = { who = from  value > 50 }
+		}
+		modifier = {
+			factor = 1.5
+			opinion = { who = from  value < 50 }
+		}
+		modifier = {
+			factor = 3
+			opinion = { who = from  value < 200 }
+		}
+    }
+	hidden_effect = {
+		remove_country_flag = mem_sciencecon_invited
+		event_target:invite_sender = {
+			country_event = { id = mem_science_convention.12 }
+		}
+    }
+  }
+  
+  #Yes (Xenophiles/Materialists/Collectivists have own version)
+  option = {
+    name = mem_science_convention.8.a
+	trigger = {
+      NOT = {
+        has_ethic = ethic_xenophile
+        has_ethic = ethic_fanatic_xenophile
+        has_ethic = ethic_materialist
+        has_ethic = ethic_fanatic_materialist
+		has_ethic = ethic_collectivist
+		has_ethic = ethic_fanatic_collectivist
+      }
+    }
+    ai_chance = {
+		factor = 1
+		modifier = { 
+			factor = 0
+			OR = {
+				has_ai_personality = xenophobic_isolationists
+				has_ai_personality = fanatic_purifiers
+			}
+		}
+		modifier = {
+			factor = 1.5
+			opinion = { who = from  value > 50 }
+		}
+		modifier = {
+			factor = 0.75
+			opinion = { who = from  value < 50 }
+		}
+		modifier = {
+			factor = 0
+			opinion = { who = from  value < 200 }
+		}
     }
     hidden_effect = {
       remove_country_flag = mem_sciencecon_invited
@@ -404,7 +670,7 @@ country_event = {
     }
   }
 
-  #No. Normal response if not Xenophobic or Spiritualist
+  #No. Normal response if not Xenophobic/Spiritualist/Individualist
   option = {
     name = mem_science_convention.8.b
     trigger = {
@@ -413,10 +679,24 @@ country_event = {
         has_ethic = ethic_fanatic_xenophobe
         has_ethic = ethic_spiritualist
         has_ethic = ethic_fanatic_spiritualist
+		has_ethic = ethic_individualist
+		has_ethic = ethic_fanatic_individualist
       }
     }
     ai_chance = {
-      factor = 40
+		factor = 1
+		modifier = {
+			factor = 0.75
+			opinion = { who = from  value > 50 }
+		}
+		modifier = {
+			factor = 1.5
+			opinion = { who = from  value < 50 }
+		}
+		modifier = {
+			factor = 5
+			opinion = { who = from  value < 200 }
+		}
     }
     hidden_effect = {
       remove_country_flag = mem_sciencecon_invited
@@ -426,33 +706,51 @@ country_event = {
     }
   }
 
-  #Xenophobic
-  option = {
-    name = mem_science_convention.8.c
-    trigger = {
-      OR = {
-        has_ethic = ethic_xenophobe
-        has_ethic = ethic_fanatic_xenophobe
-      }
-    }
-  }
-  #Spiritualist
-  option = {
-    name = mem_science_convention.8.d
-    trigger = {
-      OR = {
-        has_ethic = ethic_spiritualist
-        has_ethic = ethic_fanatic_spiritualist
-      }
-    }
-  }
+	#Ignore (No). AI only. Intended to reduce number of AI replies.
+	option = {
+		name = mem_science_convention.8.ai-ignore
+		trigger = { is_ai = yes }
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 20
+				OR = { ethos = ethic_xenophobe ethos = ethic_fanatic_xenophobe }
+			}
+			modifier = {	#Want to hear the xenophobic isolationists tell player "no way"
+				factor = 0.2
+				has_ai_personality = xenophobic_isolationists
+			}
+			modifier = {
+				factor = 5
+				has_ai_personality = hegemonic_imperialists
+			}
+			modifier = {
+				factor = 0.1
+				opinion = { who = from  value > 200 }
+			}
+			modifier = {
+				factor = 0.75
+				opinion = { who = from  value > 50 }
+			}
+			modifier = {
+				factor = 1.5
+				opinion = { who = from  value < 50 }
+			}
+			modifier = {
+				factor = 10
+				opinion = { who = from  value < 200 }
+			}
+		}
+		hidden_effect = {
+			remove_country_flag = mem_sciencecon_invited
+		}
+	}
 } 
 
 ################### mem_science_convention.11 #####################
-### Diplomatic - Host gets positive resposne from an invited.
+### Diplomatic - Host gets positive response from an invited.
 #################################################################
 country_event = {
-
   id = mem_science_convention.11
   title = mem_science_convention.11.name
   #Erudite explorers
@@ -531,7 +829,7 @@ country_event = {
 }
 
 ################### mem_science_convention.12 #####################
-### Diplomatic - Host gets negative resposne from an invited.
+### Diplomatic - Host gets negative response from an invited.
 #################################################################
 country_event = {
 
@@ -594,11 +892,29 @@ country_event = {
   }
 }
 
-################### mem_science_convention.4 ######################
+################### mem_science_convention.4 / 24 #####################
 ### Success Event
-#################################################################
+#######################################################################
+country_event = {
+	id = mem_science_convention.4
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		country_event = { id = mem_science_convention.999 days = 3 }
+		every_country = {
+			limit = { has_country_flag = mem_sciencecon_attending }
+			add_opinion_modifier = { 
+				who = ROOT
+				modifier = mem_opinion_science_convention_good_time
+			}
+			country_event = { id = mem_science_convention.24 }
+		}
+	}
+}
+
 country_event = { 
-  id = mem_science_convention.4
+  id = mem_science_convention.24
   title = "mem_science_convention.4.name"
   desc = "mem_science_convention.4.desc"
   desc = {
@@ -618,24 +934,6 @@ country_event = {
   picture = GFX_evt_galactic_senate
   show_sound = event_default
   is_triggered_only = yes
-
-  immediate = {
-    if = {
-      limit = {
-        has_country_flag = mem_sciencecon_host
-      }
-      country_event = { id=mem_science_convention.999 days = 3}
-      every_country = {
-        limit = {
-          has_country_flag = mem_sciencecon_attending
-        }        
-        add_opinion_modifier = {
-          who = ROOT
-          modifier = mem_opinion_science_convention_good_time
-        }
-      }
-    }
-  }
 
   option = {
     name = mem_science_convention.4.a
@@ -695,11 +993,29 @@ country_event = {
   }  
 }
 
-################### mem_science_convention.5 ######################
+################### mem_science_convention.5 / 25 #####################
 ### Fail Event
-#################################################################
+#######################################################################
+country_event = {
+	id = mem_science_convention.5
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		country_event = { id = mem_science_convention.999 days = 3 }
+		every_country = {
+			limit = { has_country_flag = mem_sciencecon_attending }
+			add_opinion_modifier = { 
+				who = ROOT
+				modifier = mem_opinion_science_convention_waste_of_time
+			}
+			country_event = { id = mem_science_convention.25 }
+		}
+	}
+}
+
 country_event = { 
-  id = mem_science_convention.5
+  id = mem_science_convention.25
   title = "mem_science_convention.5.name"
   desc = {
     text = mem_science_convention.5.desc 
@@ -720,34 +1036,49 @@ country_event = {
   show_sound = event_default
   is_triggered_only = yes
 
-  immediate = {
-    if = {
-      limit = {
-        has_country_flag = mem_sciencecon_host
-      }
-      country_event = { id=mem_science_convention.999 days = 3}
-      every_country = {
-        limit = {
-          has_country_flag = mem_sciencecon_attending
-        }
-        add_opinion_modifier = {
-          who = ROOT
-          modifier = mem_opinion_science_convention_waste_of_time
-        }
-      }
-    }
-  }
-
   option = {
     name = mem_science_convention.5.a    
   }
 } 
 
-################### mem_science_convention.6 ######################
+################### mem_science_convention.6 / 26 #####################
 ### Critical Fail Event
-#################################################################
+#######################################################################
+country_event = {
+	id = mem_science_convention.6
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		country_event = { id = mem_science_convention.999 days = 3 }
+		#Host country will never host another one.
+		set_country_flag = mem_sciencecon_denied
+		every_country = {
+			limit = { has_country_flag = mem_sciencecon_attending }
+			add_opinion_modifier = { 
+				who = ROOT
+				modifier = mem_opinion_science_convention_scientist_dead
+			}
+			country_event = { id = mem_science_convention.26 }
+		}
+		random_owned_leader = {
+			limit = {
+				OR = {
+					is_researching_area = engineering
+					is_researching_area = physics
+					is_researching_area = society
+				}
+			}
+			kill_leader = {
+				show_notification = no
+				type = scientist
+			}
+		}
+	}
+}
+
 country_event = { 
-  id = mem_science_convention.6
+  id = mem_science_convention.26
   title = "mem_science_convention.6.name"
   desc = {
     text = mem_science_convention.6.desc
@@ -777,45 +1108,13 @@ country_event = {
   show_sound = event_default
   is_triggered_only = yes
 
-  immediate = {    
-    if = {
-      limit = {
-        has_country_flag = mem_sciencecon_host
-      }
-      country_event = { id=mem_science_convention.999 days = 3}
-      #Host country will never host another one.
-      set_country_flag = mem_sciencecon_denied
-      every_country = {
-        limit = {
-          has_country_flag = mem_sciencecon_attending
-        }
-        add_opinion_modifier = {
-          who = ROOT
-          modifier = mem_opinion_science_convention_scientist_dead
-        }
-      }
-    }
-  }
-
   #Host looses a scientist. 
   option = {
+	trigger = {
+      has_country_flag = mem_sciencecon_host
+	}
     name = mem_science_convention.6.a
-    trigger = {
-      has_country_flag = host
-    }
-    random_owned_leader = {
-      limit = {
-        OR = {
-          is_researching_area = engineering
-          is_researching_area = physics
-          is_researching_area = society
-        }
-      }
-      kill_leader = { 
-        show_notification = no
-        type = scientist 
-      }
-    }
+	custom_tooltip = mem_science_convention.6.a.host.tooltip
   }
   
   #All those that attended but did not host
@@ -823,7 +1122,7 @@ country_event = {
     name = mem_science_convention.6.a
     trigger = {
       NOT =  {
-        has_country_flag = host
+        has_country_flag = mem_sciencecon_host
       }
     }
   }
@@ -841,6 +1140,7 @@ country_event = {
   immediate = {
 
     #Remove flags
+	remove_global_flag = mem_sciencecon_in_progress
     remove_country_flag = mem_sciencecon_started
     remove_country_flag = mem_sciencecon_host
     remove_country_flag = mem_sciencecon_someone_accepted

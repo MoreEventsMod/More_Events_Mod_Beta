@@ -61,6 +61,8 @@ sourceNames = [
 	"paul_stars_surveyed",
 	"paul_carcosa_hunt",
 	"paul_sightings_checked",
+	"paul_powerplant_tuning",
+	"paul_star_pictures",
 	"(?<!_)A_STAR_SURVEY",
 	"(?<!_)K_STAR_SURVEY",
 	"(?<!_)M_STAR_SURVEY",
@@ -109,6 +111,9 @@ sourceNames = [
 	"(?<!mem_)work.dds",
 	"trait_mem_redefined_happiness.dds",
 	"trait_mem_redefined_productivity.dds",
+	"(?<!mem_)rockstar_origin",
+	"(?<!mem_)tour_location",
+	"(?<!mem_)(?=(rock|dubstep|incomprehensible|rapper|festival|metal)flag)",
 ]
 
 goalNames = [
@@ -150,6 +155,7 @@ goalNames = [
 	#"mem_mysterious_pyramids_category",
 	#"mem_dead_star_category",
 	#"mem_poisoned_world_category",
+	"mem_asteroid_computer_category",
 	"mem_asteroid_structure_category",
 	"mem_crashed_object_category",
 	
@@ -157,6 +163,8 @@ goalNames = [
 	"mem_stars_surveyed",
 	"mem_elusive_carcosa_hunt_chain",
 	"mem_carcosa_sightings_checked",
+	"mem_star_survey_powerplant_tuning",
+	"mem_star_survey_star_pictures",
 	"MEM_A_STAR_SURVEY",
 	"MEM_K_STAR_SURVEY",
 	"MEM_M_STAR_SURVEY",
@@ -206,6 +214,9 @@ goalNames = [
 	"mem_work.dds",
 	"mem_trait_redefined_happiness.dds",
 	"mem_trait_redefined_productivity.dds",
+	"mem_rockstar_origin",
+	"mem_tour_location",
+	"mem_",
 ]
 directories = [
 	"events",
