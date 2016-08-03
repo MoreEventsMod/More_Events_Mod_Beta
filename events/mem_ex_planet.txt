@@ -1,0 +1,112 @@
+namespace = mem_ex_planet
+
+#####################################
+# Ex-Planet Project
+#####################################
+
+planet_event = {
+	id = mem_ex_planet.300
+	hide_window = yes
+	
+	mean_time_to_happen = {
+		months = 360
+	}
+	
+	trigger = {
+		has_modifier = ex_planet
+		has_mining_station = yes
+		NOT = {
+			has_planet_flag = mem_ex_planet_event_open
+		}
+		space_owner = {
+			NOT = {
+				has_country_flag = mem_ex_planet_event_fired
+			}
+		}
+	}
+	
+	immediate = {
+		set_planet_flag = mem_ex_planet_event_open
+		space_owner = {
+			country_event = { id = mem_ex_planet.301 }
+		}
+	}
+}
+
+country_event = {
+	id = mem_ex_planet.301
+	title = mem_ex_planet.301.title
+	desc = mem_ex_planet.301.desc
+	picture = GFX_evt_mining_station
+	show_sound = event_scanner
+	is_triggered_only = yes
+	
+	immediate = {
+		random_planet = {
+			limit = {
+				has_planet_flag = mem_ex_planet_event_open
+				space_owner = {
+					is_country = root
+				}
+			}
+			save_event_target_as = mem_ex_planet
+		}
+		set_country_flag = mem_ex_planet_event_fired
+	}
+	
+	option = { # Do it
+		name = mem_ex_planet.301.a
+		enable_special_project = {
+			name = MEM_EX_PLANET_PROJECT
+			location = event_target:mem_ex_planet
+			owner = root
+		}
+	}
+	
+	option = { # Forget it
+		name = mem_ex_planet.301.b
+	}
+}
+
+ship_event = {
+	id = mem_ex_planet.302
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		owner = {
+			country_event = { id = mem_ex_planet.303 }
+		}
+	}
+}
+
+country_event = {
+	id = mem_ex_planet.303
+	title = mem_ex_planet.303.title
+	desc = mem_ex_planet.303.desc
+	picture = GFX_evt_mining_station
+	show_sound = event_scanner
+	is_triggered_only = yes
+	
+	immediate = {
+		random_planet = {
+			limit = {
+				has_planet_flag = mem_ex_planet_event_open
+				space_owner = {
+					is_country = root
+				}
+			}
+			remove_planet_flag = mem_ex_planet_event_open
+			save_event_target_as = mem_ex_planet
+		}
+	}
+	
+	option = {
+		name = mem_ex_planet.303.a
+		event_target:mem_ex_planet = {
+			orbital_deposit_tile = {
+				add_deposit = mem_d_ex_planet_society_deposit
+			}
+		}
+	}
+}  
