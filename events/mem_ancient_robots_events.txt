@@ -16,10 +16,12 @@ planet_event = {
 #		is_homeworld = no # UNCOMMENT THESE LINES FOR FINAL RELEASE
 #		is_capital = no
 		has_ground_combat = no
-		num_pops > 0
+		num_pops > 1
 		owner = {
 			is_ai = no
-			NOT = { has_country_flag = mem_ancient_robots_fired }
+		}
+		NOT = {
+			has_global_flag = mem_ancient_robots_fired
 		}
 		NOT = {
 			has_planet_flag = colony_event
@@ -32,9 +34,7 @@ planet_event = {
 	immediate = {
 		set_planet_flag = colony_event # This flag is used to tell the game not to trigger other colony events here
 		set_planet_flag = mem_ancient_robot_world # Used to keep track of which world this is happening on
-		owner = { # Robots have fired, don't create a second copy somewhere else.
-			set_country_flag = mem_ancient_robots_fired
-		}
+		set_global_flag = mem_ancient_robots_fired
 		random_tile = { # Replace a mountain range with a strange mountain
 			limit = {
 				has_blocker = tb_mountain_range
@@ -378,7 +378,7 @@ planet_event = {
 	option = {
 		name = mem_ancient_robots.208.a
 		hidden_effect = { # Set up later event where it goes rogue
-			planet_event = { id = mem_ancient_robots.210 days = 60 random = 10 } # Should be 1080/1440
+			planet_event = { id = mem_ancient_robots.223 days = 60 random = 10 } # Should be 1080/1440
 		}
 	}
 }
@@ -519,7 +519,7 @@ country_event = {
 
 country_event = {
 	id = mem_ancient_robots.212
-	title = mem_ancient_robots.212.title
+	title = mem_ancient_robots.212.name
 	desc = mem_ancient_robots.212.desc
 	picture = GFX_evt_burning_settlement
 	is_triggered_only = yes
@@ -532,8 +532,16 @@ country_event = {
 	
 	immediate = {
 		FROMFROM = {
-			random_pop = {
-				purge = yes
+			if = {
+				limit = {
+					num_pops > 1
+				}
+				random_pop = {
+					purge = yes
+				}
+				else = {
+					planet_event = { id = mem_ancient_robots.212 days = 30 }
+				}
 			}
 		}
 	}
@@ -774,7 +782,7 @@ planet_event = {
 		}
 		create_country = {
 			name = "Ancient Robots"
-			type = adversary
+			type = faction
 			species = robot
 			ethos = random
 			auto_delete = no
@@ -897,4 +905,24 @@ planet_event = {
 		}
 		planet_event = { id = mem_ancient_robots.210 }
 	}	
+}
+
+# Switch for whether factory should go evil:
+
+planet_event = {
+	id = mem_ancient_robots.223
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		if = {
+			limit = {
+				num_pops > 1
+			}
+			planet_event = { id = mem_ancient_robots.210 }
+			else = {
+				planet_event = { id = mem_ancient_robots.223 days = 10 } # Set to much higher
+			}
+		}
+	}
 }
