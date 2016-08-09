@@ -1,0 +1,900 @@
+namespace = mem_ancient_robots
+
+# Start of event sequence
+
+planet_event = {
+	id = mem_ancient_robots.201
+	title = mem_ancient_robots.201.name
+	desc = mem_ancient_robots.201.desc
+	picture = GFX_evt_archaeological_dig
+	
+	mean_time_to_happen = { months = 1 }
+	
+	trigger = { # Change trigger mechanism to accord with other colony events
+		has_owner = yes
+		original_owner = yes
+#		is_homeworld = no # UNCOMMENT THESE LINES FOR FINAL RELEASE
+#		is_capital = no
+		has_ground_combat = no
+		num_pops > 0
+		owner = {
+			is_ai = no
+			NOT = { has_country_flag = mem_ancient_robots_fired }
+		}
+		NOT = {
+			has_planet_flag = colony_event
+		}
+		any_tile = {
+			has_blocker = tb_mountain_range
+		}
+	}
+	
+	immediate = {
+		set_planet_flag = colony_event # This flag is used to tell the game not to trigger other colony events here
+		set_planet_flag = mem_ancient_robot_world # Used to keep track of which world this is happening on
+		owner = { # Robots have fired, don't create a second copy somewhere else.
+			set_country_flag = mem_ancient_robots_fired
+		}
+		random_tile = { # Replace a mountain range with a strange mountain
+			limit = {
+				has_blocker = tb_mountain_range
+			}
+			remove_blocker = yes
+			set_blocker = mem_tb_unclearable_mountain
+		}
+	}
+	
+	option = {
+		name = mem_ancient_robots.201.a
+		enable_special_project = { # Create special project to study the mountain
+			name = MEM_ANCIENT_ROBOTS_PROJECT
+			location = root
+			owner = root
+		}
+	}
+}
+
+# Finish special project studying the mountain
+
+planet_event = {
+	id = mem_ancient_robots.203
+	title = mem_ancient_robots.203.name
+	desc = mem_ancient_robots.203.desc
+	picture = GFX_evt_strange_mountain
+	location = ROOT
+	
+	immediate = {
+		random_tile = {
+			limit = {
+				has_blocker = mem_tb_unclearable_mountain
+			}
+			remove_blocker = yes
+			set_blocker = mem_tb_strange_mountain
+		}
+	}
+	
+	is_triggered_only = yes
+	
+	option = { # Do it - eats 200 energy + minerals, adds project
+		trigger = {
+			owner = {
+				energy > 199
+				minerals > 199
+			}
+		}
+		name = mem_ancient_robots.203.a
+		owner = {
+			add_energy = -200
+			add_minerals = -200
+		}
+		enable_special_project = {
+			name = MEM_ANCIENT_ROBOTS_PROJECT_2
+			location = this
+			owner = root
+		}
+	}
+	
+	option = { # Ask again later
+		name = mem_ancient_robots.203.b
+		hidden_effect = {
+			planet_event = { id = mem_ancient_robots.204 days = 10 } # XX - Ask again in 180 days
+		}
+	}
+	
+	option = { # No, and don't ask again
+		name = mem_ancient_robots.203.c
+		hidden_effect = {
+			planet_event = { id = mem_ancient_robots.207 days = 10 random = 10 } # XX - Trigger private excavation event in 5-7.5 years
+		}
+	}
+}
+
+# Ask again about excavation:
+
+planet_event = {
+	id = mem_ancient_robots.204
+	title = mem_ancient_robots.204.name
+	desc = mem_ancient_robots.204.desc
+	picture = GFX_evt_strange_mountain
+	is_triggered_only = yes
+	
+	option = { # Yes, do it
+		trigger = {
+			owner = {
+				energy > 199
+				minerals > 199
+			}
+		}
+		name = mem_ancient_robots.204.a
+		owner = {
+			add_energy = -200
+			add_minerals = -200
+			enable_special_project = {
+				name = MEM_ANCIENT_ROBOTS_PROJECT_2
+				location = prev
+				owner = root
+			}
+		}
+	}
+	
+	option = { # Ask me again later
+		name = mem_ancient_robots.204.b
+		hidden_effect = {
+			fromfrom = {
+				planet_event = { id = mem_ancient_robots.204 days = 10 } # XX - Should be 180
+			}
+		}
+	}
+	
+	option = { # No, don't ask again
+		name = mem_ancient_robots.204.c
+		hidden_effect = {
+			fromfrom = {
+				planet_event = { id = mem_ancient_robots.207 days = 10 random = 10 } # XX - Should be 1800/900
+			}
+		}
+	}
+}
+
+# Excavation Completed:
+
+planet_event = {
+	id = mem_ancient_robots.206
+	title = mem_ancient_robots.206.name
+	desc = mem_ancient_robots.206.desc
+	picture = GFX_evt_ancient_factory
+	is_triggered_only = yes
+	
+	immediate = {
+		switch = {
+			trigger = is_planet_class
+			pc_arctic = {
+				random_tile = {
+					limit = { has_blocker = mem_tb_strange_mountain }
+					remove_blocker = yes
+					set_blocker = mem_tb_robot_factory_arctic
+				}
+			}
+			pc_arid = {
+				random_tile = {
+					limit = { has_blocker = mem_tb_strange_mountain }
+					remove_blocker = yes
+					set_blocker = mem_tb_robot_factory_arid
+				}
+			}
+			pc_continental = {
+				random_tile = {
+					limit = { has_blocker = mem_tb_strange_mountain }
+					remove_blocker = yes
+					set_blocker = mem_tb_robot_factory_continental
+				}
+			}
+			pc_desert = {
+				random_tile = {
+					limit = { has_blocker = mem_tb_strange_mountain }
+					remove_blocker = yes
+					set_blocker = mem_tb_robot_factory_desert
+				}
+			}
+			pc_ocean = {
+				random_tile = {
+					limit = { has_blocker = mem_tb_strange_mountain }
+					remove_blocker = yes
+					set_blocker = mem_tb_robot_factory_ocean
+				}
+			}
+			pc_tropical = {
+				random_tile = {
+					limit = { has_blocker = mem_tb_strange_mountain }
+					remove_blocker = yes
+					set_blocker = mem_tb_robot_factory_tropical
+				}
+			}
+			pc_tundra = {
+				random_tile = {
+					limit = { has_blocker = mem_tb_strange_mountain }
+					remove_blocker = yes
+					set_blocker = mem_tb_robot_factory_tundra
+				}
+			}
+			default = {
+				random_tile = {
+					limit = { has_blocker = mem_tb_strange_mountain }
+					remove_blocker = yes
+					set_blocker = mem_tb_robot_factory_gaia
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_ancient_robots.206.a
+		owner = {
+			enable_special_project = { # Enable special project to study robot parts
+				name = MEM_ANCIENT_ROBOTS_PROJECT_3
+				location = prev
+				owner = root
+			}
+			add_monthly_resource_mult = { # Give engineering points
+				resource = engineering_research
+				value = 18
+				min = 120
+				max = 350
+			}
+		}	
+		hidden_effect = { # Set up next event
+			random_list = {
+				1 = { planet_event = { id = mem_ancient_robots.208 days = 30 } }
+				1 = { planet_event = { id = mem_ancient_robots.209 days = 30 } }
+			}
+		}
+	}
+}
+
+# Excavation performed by someone else:
+
+planet_event = {
+	id = mem_ancient_robots.207
+	title = mem_ancient_robots.207.name
+	desc = mem_ancient_robots.207.desc
+	picture = GFX_evt_ancient_factory
+	is_triggered_only = yes
+	
+	immediate = {
+		switch = {
+			trigger = is_planet_class
+			pc_arctic = {
+				random_tile = {
+					limit = { has_blocker = mem_tb_strange_mountain }
+					remove_blocker = yes
+					set_blocker = mem_tb_robot_factory_arctic
+				}
+			}
+			pc_arid = {
+				random_tile = {
+					limit = { has_blocker = mem_tb_strange_mountain }
+					remove_blocker = yes
+					set_blocker = mem_tb_robot_factory_arid
+				}
+			}
+			pc_continental = {
+				random_tile = {
+					limit = { has_blocker = mem_tb_strange_mountain }
+					remove_blocker = yes
+					set_blocker = mem_tb_robot_factory_continental
+				}
+			}
+			pc_desert = {
+				random_tile = {
+					limit = { has_blocker = mem_tb_strange_mountain }
+					remove_blocker = yes
+					set_blocker = mem_tb_robot_factory_desert
+				}
+			}
+			pc_ocean = {
+				random_tile = {
+					limit = { has_blocker = mem_tb_strange_mountain }
+					remove_blocker = yes
+					set_blocker = mem_tb_robot_factory_ocean
+				}
+			}
+			pc_tropical = {
+				random_tile = {
+					limit = { has_blocker = mem_tb_strange_mountain }
+					remove_blocker = yes
+					set_blocker = mem_tb_robot_factory_tropical
+				}
+			}
+			pc_tundra = {
+				random_tile = {
+					limit = { has_blocker = mem_tb_strange_mountain }
+					remove_blocker = yes
+					set_blocker = mem_tb_robot_factory_tundra
+				}
+			}
+			default = {
+				random_tile = {
+					limit = { has_blocker = mem_tb_strange_mountain }
+					remove_blocker = yes
+					set_blocker = mem_tb_robot_factory_gaia
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_ancient_robots.207.a
+		owner = { # Enable special project to study robot parts
+			enable_special_project = {
+				name = MEM_ANCIENT_ROBOTS_PROJECT_3
+				location = prev
+				owner = root
+			}
+		}	
+		hidden_effect = {
+			random_list = { # Set up next event
+				1 = { planet_event = { id = mem_ancient_robots.208 days = 30 } }
+				1 = { planet_event = { id = mem_ancient_robots.209 days = 30 } }
+			}
+		}
+	}
+}
+
+# AI is (initially) friendly:
+
+planet_event = {
+	id = mem_ancient_robots.208
+	title = mem_ancient_robots.208.name
+	desc = mem_ancient_robots.208.desc
+	picture = GFX_evt_sentient_AI
+	is_triggered_only = yes
+	
+	immediate = {
+		random_tile = { # Change the strange mountain into an AI factory
+			limit = {
+				OR = {
+					has_blocker = mem_tb_robot_factory_arctic
+					has_blocker = mem_tb_robot_factory_arid
+					has_blocker = mem_tb_robot_factory_continental
+					has_blocker = mem_tb_robot_factory_desert
+					has_blocker = mem_tb_robot_factory_ocean
+					has_blocker = mem_tb_robot_factory_tropical
+					has_blocker = mem_tb_robot_factory_tundra
+					has_blocker = mem_tb_robot_factory_gaia
+				}
+			}
+			remove_blocker = yes
+			set_building = mem_ancient_robot_building_1
+		}
+		owner = {
+			set_variable = {
+				which = "mem_super_robot_army_count" 
+				value = 0
+			}
+		}
+		set_planet_flag = mem_ancient_robots_AI_friendly
+	}
+	
+	option = {
+		name = mem_ancient_robots.208.a
+		hidden_effect = { # Set up later event where it goes rogue
+			planet_event = { id = mem_ancient_robots.210 days = 60 random = 10 } # Should be 1080/1440
+		}
+	}
+}
+
+# Evil robots swarm out after you power up the complex:
+
+planet_event = {
+	id = mem_ancient_robots.209
+	title = mem_ancient_robots.209.name
+	desc = mem_ancient_robots.209.desc
+	picture = GFX_evt_ground_combat
+	is_triggered_only = yes
+	
+	immediate = { # This creates the EVIL ROBOT ARMIES:
+		planet_event = { id = mem_ancient_robots.221 }
+	}
+	
+	option = {
+		name = mem_ancient_robots.209.a
+	}
+}
+
+# AI goes rogue after a period of friendliness:
+
+planet_event = {
+	id = mem_ancient_robots.210
+	title = mem_ancient_robots.210.name
+	desc = mem_ancient_robots.210.desc
+	picture = GFX_evt_ground_combat
+	is_triggered_only = yes
+	
+	immediate = { # This creates the EVIL ROBOT ARMIES:
+		switch = {
+			trigger = is_planet_class
+			pc_arctic = {
+				random_tile = {
+					limit = { has_building = mem_ancient_robot_building_1 }
+					remove_building = yes
+					set_blocker = mem_tb_robot_factory_arctic
+				}
+			}
+			pc_arid = {
+				random_tile = {
+					limit = { has_building = mem_ancient_robot_building_1 }
+					remove_building = yes
+					set_blocker = mem_tb_robot_factory_arid
+				}
+			}
+			pc_continental = {
+				random_tile = {
+					limit = { has_building = mem_ancient_robot_building_1 }
+					remove_building = yes
+					set_blocker = mem_tb_robot_factory_continental
+				}
+			}
+			pc_desert = {
+				random_tile = {
+					limit = { has_building = mem_ancient_robot_building_1 }
+					remove_building = yes
+					set_blocker = mem_tb_robot_factory_desert
+				}
+			}
+			pc_ocean = {
+				random_tile = {
+					limit = { has_building = mem_ancient_robot_building_1 }
+					remove_building = yes
+					set_blocker = mem_tb_robot_factory_ocean
+				}
+			}
+			pc_tropical = {
+				random_tile = {
+					limit = { has_building = mem_ancient_robot_building_1 }
+					remove_building = yes
+					set_blocker = mem_tb_robot_factory_tropical
+				}
+			}
+			pc_tundra = {
+				random_tile = {
+					limit = { has_building = mem_ancient_robot_building_1 }
+					remove_building = yes
+					set_blocker = mem_tb_robot_factory_tundra
+				}
+			}
+			default = {
+				random_tile = {
+					limit = { has_building = mem_ancient_robot_building_1 }
+					remove_building = yes
+					set_blocker = mem_tb_robot_factory_gaia
+				}
+			}
+		}
+		planet_event = { id = mem_ancient_robots.221 }
+		remove_planet_flag = mem_ancient_robots_AI_friendly
+	}
+	
+	option = {
+		name = mem_ancient_robots.210.a
+	}
+}
+
+# Victory over initial robot armies:
+# This = country, planet owner
+# From = country, attack leader
+# FromFrom = planet
+
+country_event = {
+	id = mem_ancient_robots.211
+	title = mem_ancient_robots.211.name
+	desc = mem_ancient_robots.211.desc
+	picture = GFX_evt_ground_combat
+	is_triggered_only = yes
+	
+	trigger = {
+		is_ai = no
+		FROMFROM = {
+			has_planet_flag = mem_super_robot_attack
+		}
+	}
+	
+	immediate = {
+		FROMFROM = {
+			remove_planet_flag = mem_super_robot_attack
+		}
+	}
+	
+	option = {
+		name = mem_ancient_robots.211.a
+		# Set up special project to lay siege to the AI
+		enable_special_project = {
+			name = MEM_SIEGE_PROJECT
+			location = FROMFROM
+			owner = root
+		}
+	}
+}
+
+# Defeat by First Robot Swarm:
+
+country_event = {
+	id = mem_ancient_robots.212
+	title = mem_ancient_robots.212.title
+	desc = mem_ancient_robots.212.desc
+	picture = GFX_evt_burning_settlement
+	is_triggered_only = yes
+	
+	trigger = {
+		FROMFROM = {
+			has_planet_flag = mem_super_robot_attack
+		}
+	}
+	
+	immediate = {
+		FROMFROM = {
+			random_pop = {
+				purge = yes
+			}
+		}
+	}
+	
+	option = {
+		name = mem_ancient_robots.212.a
+	}
+}
+
+# Robots swarm out, round two:
+
+planet_event = {
+	id = mem_ancient_robots.213
+	title = mem_ancient_robots.213.name
+	desc = mem_ancient_robots.213.desc
+	picture = GFX_evt_ground_combat
+	is_triggered_only = yes
+	
+	immediate = {
+		set_planet_flag = mem_super_robot_attack_2
+		
+		random_country = {
+			limit = {
+				has_country_flag = mem_these_are_evil_robots
+			}
+			save_event_target_as = mem_evil_robots
+		}
+		
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:mem_evil_robots
+			species = robot
+			type = mem_super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:mem_evil_robots
+			species = robot
+			type = mem_super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:mem_evil_robots
+			species = robot
+			type = mem_super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:mem_evil_robots
+			species = robot
+			type = mem_super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:mem_evil_robots
+			species = robot
+			type = mem_super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:mem_evil_robots
+			species = robot
+			type = mem_super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:mem_evil_robots
+			species = robot
+			type = mem_super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:mem_evil_robots
+			species = robot
+			type = mem_super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:mem_evil_robots
+			species = robot
+			type = mem_super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:mem_evil_robots
+			species = robot
+			type = mem_super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:mem_evil_robots
+			species = robot
+			type = mem_super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:mem_evil_robots
+			species = robot
+			type = mem_super_robot_army
+		}
+	}
+	
+	option = {
+		name = mem_ancient_robots.213.a
+	}
+}
+
+# Defeat Second Set of Robot Armies:
+# This = country, planet owner
+# From = country, attack leader
+# FromFrom = planet
+
+country_event = {
+	id = mem_ancient_robots.214
+	title = mem_ancient_robots.214.name
+	desc = mem_ancient_robots.214.desc
+	picture = GFX_evt_interior_battle
+	is_triggered_only = yes
+	
+	trigger = {
+		FROMFROM = {
+			has_planet_flag = mem_super_robot_attack_2
+		}
+	}
+	
+	immediate = {
+		FROMFROM = {
+			remove_planet_flag = mem_super_robot_attack_2
+			remove_modifier = mem_under_siege
+			random_tile = {
+				limit = {
+					OR = {
+						has_blocker = mem_tb_robot_factory_arctic
+						has_blocker = mem_tb_robot_factory_arid
+						has_blocker = mem_tb_robot_factory_continental
+						has_blocker = mem_tb_robot_factory_desert
+						has_blocker = mem_tb_robot_factory_ocean
+						has_blocker = mem_tb_robot_factory_tropical
+						has_blocker = mem_tb_robot_factory_tundra
+						has_blocker = mem_tb_robot_factory_gaia
+					}
+				}
+				remove_blocker = yes
+				set_building = mem_ancient_robot_building_3
+			}
+		}
+	}
+	
+	option = {
+		name = mem_ancient_robots.214.a
+		add_monthly_resource_mult = {
+			resource = engineering_research
+			value = 18
+			min = 120
+			max = 350
+		}
+	}
+}
+
+# Defeated by Second Set of Robot Armies:
+
+country_event = {
+	id = mem_ancient_robots.215
+	title = mem_ancient_robots.215.name
+	desc = mem_ancient_robots.215.desc
+	picture = GFX_evt_nuclear_explosion
+	is_triggered_only = yes
+	
+	trigger = {
+		FROMFROM = {
+			OR = {
+				has_planet_flag = mem_super_robot_attack
+				has_planet_flag = mem_super_robot_attack_2
+			}
+		}
+	}
+	
+	immediate = {
+		FROMFROM = {
+			remove_planet_flag = mem_super_robot_attack
+			remove_planet_flag = mem_super_robot_attack_2
+			destroy_colony = yes
+			change_pc = pc_nuked
+		}
+	}
+	
+	option = {
+		name = mem_ancient_robots.215.a
+	}
+}
+
+# Complete robot unit analysis:
+
+planet_event = {
+	id = mem_ancient_robots.220
+	title = mem_ancient_robots.220.name
+	desc = mem_ancient_robots.220.desc
+	picture = GFX_evt_robot_assembly_plant
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_ancient_robots.220.a
+		owner = {
+			if = {
+				limit = {
+					has_technology = tech_droid_workers
+				}
+				add_monthly_resource_mult = {
+					resource = engineering_research
+					value = 18
+					min = 120
+					max = 350
+				}
+				else = {
+					add_research_option = tech_droid_workers
+					add_tech_progress = {
+						tech = tech_droid_workers
+						progress = 0.10
+					}
+				}
+			}
+		}
+	}
+}
+
+# Generate EVIL ROBOT armies:
+
+planet_event = {
+	id = mem_ancient_robots.221
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		set_planet_flag = mem_super_robot_attack
+		set_planet_health = 0
+		owner = {
+			save_event_target_as = mem_ancient_robots_planet_owner
+		}
+		create_country = {
+			name = "Ancient Robots"
+			type = adversary
+			species = robot
+			ethos = random
+			auto_delete = no
+			flag = {
+				icon = {
+					category = "zoological"
+					file = "flag_zoological_10.dds"
+				}
+				background= {
+					category = "backgrounds"
+					file = "new_dawn.dds"
+				}
+				colors={
+					"red"
+					"black"
+					"null"
+					"null"
+				}
+			}
+		}
+		last_created_country = {
+			save_event_target_as = mem_evil_robots
+			set_country_flag = mem_these_are_evil_robots
+			establish_contact = {
+				who = event_target:mem_ancient_robots_planet_owner
+				location = root
+			}
+			establish_communications_no_message = root
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:mem_evil_robots
+			species = robot
+			type = mem_super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:mem_evil_robots
+			species = robot
+			type = mem_super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:mem_evil_robots
+			species = robot
+			type = mem_super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:mem_evil_robots
+			species = robot
+			type = mem_super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:mem_evil_robots
+			species = robot
+			type = mem_super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:mem_evil_robots
+			species = robot
+			type = mem_super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:mem_evil_robots
+			species = robot
+			type = mem_super_robot_army
+		}
+		create_army = {
+			name = "Robot Swarm"
+			owner = event_target:mem_evil_robots
+			species = robot
+			type = mem_super_robot_army
+		}
+		
+		add_modifier = {
+			modifier = mem_under_siege
+			days = -1
+		}
+	}
+}
+
+# Purge Cycle for if You're Defeated First Time:
+
+planet_event = {
+	id = mem_ancient_robots.221
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		random_pop = {
+			purge = yes
+		}
+	}	
+}
+
+# AI Factory Dismantled During Initially Friendly Period:
+
+planet_event = {
+	id = mem_ancient_robots.222
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		has_planet_flag = mem_ancient_robots_AI_friendly
+		NOT = {
+			any_tile = {
+				has_building = mem_ancient_robot_building_1
+			}
+		}
+	}
+	
+	immediate = {
+		FROM = {
+			remove_building = yes
+			set_building = mem_ancient_robot_building_2
+		}
+		planet_event = { id = mem_ancient_robots.210 }
+	}	
+}
