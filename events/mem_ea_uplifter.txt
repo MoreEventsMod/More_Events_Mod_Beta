@@ -372,9 +372,10 @@ ship_event = {
 							is_planet_class = pc_barren
 							is_planet_class = pc_barren_cold
 						}
-					} 
+					}
+					set_planet_flag = mem_ea_homeworld_4
 					enable_special_project = {
-						name = "MEM_EA_UPLIFTER_SYSTEM_4_INVESTIGATION"
+						name = "MEM_EA_UPLIFTER_SYSTEM_4_INVESTIGATION_01"
 						location = this
 						owner = root
 					}		 
@@ -504,7 +505,77 @@ ship_event = {
 	}
 }
 
-# Finishing Project 4
+# Finishing Project 4 _01
+
+ship_event = {
+	id = mem_ea_uplifter.101
+	title = mem_ea_uplifter.101.name
+	desc = mem_ea_uplifter.101.desc
+	picture = GFX_evt_archaeological_dig
+	location = from
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		solar_system  = {
+			random_system_planet = {
+				limit = { is_star = yes }
+				save_event_target_as = MonsterLocation
+				create_crystal_country = yes
+				event_target:drone_country = {
+					create_fleet = { name = "Crystal Fleet" }
+					last_created_fleet = {
+						set_owner = prev
+						create_ship = {
+							name = "Saphirus"
+							design = "Giant Crystal Entity"
+						}
+						set_location = {
+							target = event_target:MonsterLocation
+							distance = 250
+							angle = random
+						}
+						set_fleet_stance = aggressive
+						set_aggro_range_measure_from = self
+						set_aggro_range = 2000
+						queue_actions = {
+							find_closest_planet = {
+								limit = {
+									has_planet_flag = mem_ea_homeworld_4
+								}
+								found_planet = {
+									orbit_planet = this
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_ea_uplifter.101.a
+		hidden_effect = {
+			closest_system = {
+				random_system_planet = {
+					limit = {
+						has_planet_flag = mem_ea_homeworld_4
+					}
+					enable_special_project = {
+						name = "MEM_EA_UPLIFTER_SYSTEM_4_INVESTIGATION_02"
+						location = this
+						owner = root
+					}
+					remove_planet_flag = mem_ea_homeworld_4
+				}
+			}
+		}
+	}
+}
+	
+
+	
+# Finishing Project 4 _02
 
 ship_event = {
 	id = mem_ea_uplifter.10
@@ -523,10 +594,38 @@ ship_event = {
 				amount = 1 
 			}
 		}
+		from = { orbital_deposit_tile = { clear_deposits = yes } }
 	}
 
 	option = {
 		name = mem_ea_uplifter.10.a
+		fromfrom = { 
+			orbital_deposit_tile = {
+				add_deposit = d_enormous1_mineral_deposit
+			}
+		}
+		hidden_effect = {
+			owner = {
+				if = {
+					limit = {
+						has_completed_event_chain_counter = {
+							event_chain = mem_ea_uplifter_chain
+							counter = mem_ea_uplifter_worlds_visited
+						}
+					}
+					country_event = { id = mem_ea_uplifter.11 }
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_ea_uplifter.10.b
+		fromfrom = { 
+			orbital_deposit_tile = {
+				add_deposit = d_vast_society_deposit
+				add_deposit = d_vast_physics_deposit
+			}
+		}
 		hidden_effect = {
 			owner = {
 				if = {
@@ -778,3 +877,4 @@ country_event = {
 		}
 	}
 }
+
