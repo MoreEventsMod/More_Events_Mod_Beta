@@ -7,60 +7,68 @@ namespace = mem_freighter_stasis
 #Writing and Idea by Maria
 #Code by LamilLerran
 
-#Start event
-#planet_event = {
-#	id = mem_freighter_stasis.1
-#	hide_window = yes
-#	
-#	mean_time_to_happen = {
-#		months = 2400
-#	}
-#	
-#	trigger = {
-#		years_passed > 40
-#		NOT = { has_global_flag = mem_freighter_stasis_started }
-#		has_owner = yes		#TODO: Does this ensure only one owner?
-#		NOT = {
-#			any_ship_in_system = {
-#				NOT = { owner = this.owner }	#TODO: Works?
-#			}
-#		}
-#	}
+# Start event
+planet_event = {
+	id = mem_freighter_stasis.1
+	hide_window = yes
 	
-#	immediate = {
-#		set_global_flag = mem_freighter_stasis_started
-#		create_country = {
-#			name = mem_freighter_stasis_faction.name	#TODO: Does this work?
-#			type = faction
-#		}
-#		last_created_country = {
-#			create_fleet = { name = mem_freighter_stasis_fleet.name } #TODO: Does this work?
-#			set_country_flag = mem_freighter_stasis_refugee_country
-#			last_created_fleet = {
-#				set_owner = PREV
-#				set_fleet_flag = mem_freighter_stasis_refugee_fleet
-#				create_ship = {
-#					name = mem_freighter_stasis_refugee_ship.name	#TODO: Does this work?
-#					design = "MEM-Freighter-Stasis-Freighter"	#TODO: does this work?
-#				}
-#				set_location = {
-#					target = ROOT
-#					distance = 150 #TODO: Calibrate
-#					angle = random
-#				}
-#				queue_actions = {
-#					move_to = ROOT
-#					effect = {
-#						id = "mem_freighter_stasis.2.effect.1"
-#						#TODO: Event on destruction through inaction?
-#						destroy_fleet = this
-#					}
-#				}
-#			}
-#		}
-#		#TODO: Set up an event for empire in system
-#	}
-#}
+	mean_time_to_happen = {
+		months = 2400
+	}
+	
+	trigger = {
+		years_passed > 40
+		NOT = { has_global_flag = mem_freighter_stasis_started }
+		has_owner = yes		#TODO: Does this ensure only one owner?
+		owner = { is_ai = no }
+		solar_system = { any_ship_in_system = {
+			space_owner = { NOT = { is_same_value = root.owner } }	#TODO: Works?
+		} }
+	}
+	
+	immediate = {
+		set_global_flag = mem_freighter_stasis_started
+		solar_system = {
+			random_system_planet = {
+				limit = { is_star = yes }
+				save_event_target_as = mem_freighter_stasis_star
+			}
+		}
+		create_country = {
+			name = mem_freighter_stasis_faction.name	#TODO: Does this work?
+			type = faction
+		}
+		last_created_country = {
+			create_fleet = { name = mem_freighter_stasis_fleet.name } #TODO: Does this work?
+			set_country_flag = mem_freighter_stasis_refugee_country
+			last_created_fleet = {
+				set_owner = PREV
+				set_fleet_flag = mem_freighter_stasis_refugee_fleet
+				create_ship = {
+					name = mem_freighter_stasis_refugee_ship.name	#TODO: Does this work?
+					design = "MEM-Freighter-Stasis-Freighter"	#TODO: does this work?
+				}
+				set_location = {
+					target = event_target:mem_freighter_stasis_star
+					distance = 300 #TODO: Calibrate
+					angle = random
+				}
+				set_fleet_stance = passive
+				queue_actions = {
+					move_to = event_target:mem_freighter_stasis_star
+					effect = {
+						id = "mem_freighter_stasis.2.effect.1"
+						#TODO: Event on destruction through inaction?
+						destroy_fleet = this
+					}
+				}
+			}
+			set_faction_hostility = { set_hostile = no }
+			establish_communications_no_message = root.owner
+		}
+		#TODO: Set up an event for empire in system
+	}
+}
 
 
 #TODO: Test Events
@@ -88,31 +96,37 @@ namespace = mem_freighter_stasis
 #	}
 #}
 
-country_event = {
-	id = mem_freighter_stasis.4748
-	title = "Freighter in Stasis Test Event 4748"
-	desc = "This is a test event. If you encountered it during normal play, please report this to the More Events Mod team as a bug."
-	picture = GFX_evt_medieval_alien_civilization
+
+#planet_event = {
+#	id = mem_freighter_stasis.4748
+#	title = "Freighter in Stasis Test Event 4748"
+#	desc = "This is a test event. If you encountered it during normal play, please report this to the More Events Mod team as a bug. [This.GetName]"
+#	picture = GFX_evt_medieval_alien_civilization
 	
-	is_triggered_only = yes
+#	is_triggered_only = yes
 	
-	trigger = {
-		years_passed > 40
-		any_system = {
-			NOT = { any_ship_in_system = {
-				NOT = { AND = {
-					exists = this.owner
-					this.owner = root
-				} }
-			} }
-		}
-	}
+#	trigger = {
+#		years_passed > 40
+#		NOT = { has_global_flag = mem_freighter_stasis_started }
+#		has_owner = yes		#TODO: Does this ensure only one owner?
+		#NOT = {
+#			any_ship_in_system = {
+#				owner = {
+#					root = {
+#						owner = {
+#							is_same_value = prevprev
+#						}
+#					}
+#				}
+#			}
+		#}
+#	}
 	
-	immediate = {
-		set_global_flag = mem_freighter_stasis_test_4748_flag
-	}
+#	immediate = {
+#		set_global_flag = mem_freighter_stasis_test_4748_flag
+#	}
 	
-	option = {
-		name = OK
-	}
-}
+#	option = {
+#		name = OK
+#	}
+#}
