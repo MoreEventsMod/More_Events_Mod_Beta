@@ -39,6 +39,7 @@ planet_event = {
 			random_system_planet = {
 				limit = { is_star = yes }
 				save_event_target_as = mem_freighter_stasis_star
+				set_star_flag = mem_freighter_stasis_arrival_star
 			}
 		}
 		create_country = {
@@ -106,6 +107,40 @@ country_event = {
 	
 	option = {
 		name = "mem_freighter_stasis.2.a"
+	}
+}
+
+# Another Empire sees the ship for the first time
+# As per on_action comments:
+# From = System
+fleet_event = {
+	id = mem_freighter_stasis.3
+	title = "mem_freighter_stasis.3.name"
+	desc = "mem_freighter_stasis.3.desc"
+	picture = TODO
+	is_triggered_only = yes
+	
+	trigger = {
+		has_global_flag = mem_freighter_stasis_started
+		from = { has_star_flag = mem_freighter_stasis_arrival_star }
+		owner = { NOT = { has_country_flag = mem_freighter_stasis_observed } }
+	}
+	
+	immediate = {
+		#TODO: This mimics the approach of 2. Make sure that works and these work together.
+		owner = { set_country_flag = mem_freighter_stasis_observed }
+		event_target:mem_freighter_stasis_ship = {
+			enable_special_project = {	#TODO: Make sure this tracks ship correctly
+				name = "MEM_INVESTIGATE_FREIGHTER_STASIS"
+				location = this
+				owner = root
+			}
+		}
+	}
+	
+	#TODO: Multiple options?
+	option = {
+		name = "mem_freighter_stasis.3.a"
 	}
 }
 
