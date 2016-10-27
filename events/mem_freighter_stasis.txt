@@ -1,7 +1,4 @@
-
 namespace = mem_freighter_stasis
-
-
 
 #Freighter in Stasis
 #Writing and Idea by Maria
@@ -62,21 +59,30 @@ planet_event = {
 				set_location = {
 					target = event_target:mem_freighter_stasis_star
 					distance = 250 #TODO: Calibrate -- note that systems seem to vary in size
-					angle = random
+					angle = random #TODO: Need to keep track of what angle this is; may have to select from cases
 				}
 				set_fleet_stance = passive
 				queue_actions = {
 					move_to = event_target:mem_freighter_stasis_star
 					effect = {
 						id = "mem_freighter_stasis.2.effect.1"
-						#TODO: Event on destruction through inaction?
-						root.owner = { country_event = { mem_freighter_stasis.10 } }
+						#root.owner = { country_event = { mem_freighter_stasis.10 } } #commented out b/c should be unnecessary
 						destroy_fleet = this
+						every_country = { #TODO: Test if this works
+							limit = {
+								has_country_flag = mem_freighter_stasis_observed
+							}
+							abort_special_project = {
+								name = "MEM_INVESTIGATE_FREIGHTER_STASIS"
+								location = this
+							}
+							country_event = { id = mem_freighter_stasis.10 }
+						}
 					}
 				}
 			}
 			set_faction_hostility = { set_hostile = no }
-			establish_communications_no_message = root.owner	#This may not be working correctly?
+			establish_communications_no_message = root.owner	#TODO: This may not be working correctly?
 		}
 		
 		owner = { country_event = { id = mem_freighter_stasis.2 } }
@@ -154,12 +160,23 @@ ship_event = {
 	is_triggered_only = yes
 	
 	immediate = {
-		#TODO: Cleanup, more?
+		#TODO: Any other cleanup needed?
+		every_country = { #TODO: Test if this works
+			limit = {
+				has_country_flag = mem_freighter_stasis_observed
+			}
+			abort_special_project = {
+				name = "MEM_INVESTIGATE_FREIGHTER_STASIS"
+				location = this
+			}
+			country_event = { id = mem_freighter_stasis.10 }
+		}
 	}
 	
 	option = {
 		name = "mem_freighter_stasis.9.a"
-		#TODO: Anything beyond the message?
+		ship_event = { id = mem_freighter_stasis.11 } #Spawn next planet. TODO: change type?
+		#TODO: Anything beyond the message and the next event?
 	}
 }
 
@@ -174,6 +191,14 @@ country_event = {
 	
 	immediate = {
 		#TODO: Cleanup
+		random_system = {
+			limit = { has_star_flag = mem_freighter_stasis_arrival_star }
+			remove_star_flag = mem_freighter_stasis_arrival_star
+		}
+		random_country = {
+			limit = { has_country_flag = mem_freighter_stasis_refugee_country }
+			#TODO: delete it
+		}
 	}
 	
 	option = {
@@ -181,3 +206,25 @@ country_event = {
 		#TODO: Anything beyond the message?
 	}
 }
+
+#Spawn origin system of ship w/ tomb world
+#Probably want to put a follow-up event announcing this to discoverer
+ship_event = {
+	id = mem_freighter_stasis.11
+	fire_only_once = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		solar_system = {
+			spawn_system = {
+				min_distance = 15
+				max_distance = 30
+				angle = 20	#TODO: possible?
+				initializer = "mem_freighter_stasis_home_system"
+			}
+		}
+		#TODO: Confirm .9 sufficient to announce finding
+	}
+}
+
+#TODO: Anything in the system?
