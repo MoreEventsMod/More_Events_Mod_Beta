@@ -37,7 +37,6 @@ planet_event = {
 			random_system_planet = {
 				limit = { is_star = yes }
 				save_event_target_as = mem_freighter_stasis_star
-				
 			}
 		}
 		create_country = {
@@ -67,9 +66,8 @@ planet_event = {
 					move_to = event_target:mem_freighter_stasis_star
 					effect = {
 						id = "mem_freighter_stasis.2.effect.1"
-						#root.owner = { country_event = { mem_freighter_stasis.10 } } #commented out b/c should be unnecessary
 						destroy_fleet = this
-						every_country = { #TODO: Test if this works
+						every_country = { #TODO: Test if this works for secondary observers
 							limit = {
 								has_country_flag = mem_freighter_stasis_observed
 							}
@@ -77,7 +75,7 @@ planet_event = {
 								type = MEM_INVESTIGATE_FREIGHTER_STASIS
 								location = this
 							}
-							country_event = { id = mem_freighter_stasis.10 }
+							country_event = { id = mem_freighter_stasis.9 }
 						}
 					}
 				}
@@ -105,7 +103,7 @@ country_event = {
 	immediate = {
 		set_country_flag = mem_freighter_stasis_observed
 		event_target:mem_freighter_stasis_ship = {
-			enable_special_project = {	#TODO: Make sure this tracks ship correctly
+			enable_special_project = {
 				name = "MEM_INVESTIGATE_FREIGHTER_STASIS"
 				location = this
 				owner = root
@@ -138,7 +136,7 @@ fleet_event = {
 		#TODO: This mimics the approach of 2. Make sure that works and these work together.
 		owner = { set_country_flag = mem_freighter_stasis_observed }
 		event_target:mem_freighter_stasis_ship = {
-			enable_special_project = {	#TODO: Make sure this tracks ship correctly
+			enable_special_project = {
 				name = "MEM_INVESTIGATE_FREIGHTER_STASIS"
 				location = this
 				owner = root
@@ -152,42 +150,28 @@ fleet_event = {
 	}
 }
 
-#Project Success!
-ship_event = {
-	id = mem_freighter_stasis.9
-	title = "mem_freighter_stasis.9.name"
-	desc = "mem_freighter_stasis.9.desc"
+#Someone else examined ship first
+country_event = {
+	id = mem_freighter_stasis.8
+	title = "mem_freighter_stasis.8.name"
+	desc = "mem_freighter_stasis.8.desc"
 	picture = TODO
 	is_triggered_only = yes
 	
 	immediate = {
-		#TODO: Any other cleanup needed?
-		every_country = { #TODO: Test if this works
-			limit = {
-				has_country_flag = mem_freighter_stasis_observed
-			}
-			abort_special_project = {
-				type = MEM_INVESTIGATE_FREIGHTER_STASIS
-				location = this
-			}
-			#TODO: Calling .10 in this way causes it to happen for the successful empire as well
-			country_event = { id = mem_freighter_stasis.10 }
-		}
+		#TODO: Any cleanup needed?
 	}
 	
 	option = {
-		name = "mem_freighter_stasis.9.a"
-		ship_event = { id = mem_freighter_stasis.11 } #Spawn next planet. TODO: change type?
-		#TODO: Anything beyond the message and the next event?
+		name = "mem_freighter_stasis.8.a"
 	}
 }
 
-
-#Ship plummets into star before anyone examines
+#Ship plummets into star before anyone examines it
 country_event = {
-	id = mem_freighter_stasis.10
-	title = "mem_freighter_stasis.10.name"
-	desc = "mem_freighter_stasis.10.desc"
+	id = mem_freighter_stasis.9
+	title = "mem_freighter_stasis.9.name"
+	desc = "mem_freighter_stasis.9.desc"
 	picture = TODO
 	is_triggered_only = yes
 	
@@ -204,8 +188,38 @@ country_event = {
 	}
 	
 	option = {
-		name = "mem_freighter_stasis.10.a"
+		name = "mem_freighter_stasis.9.a"
 		#TODO: Anything beyond the message?
+	}
+}
+
+#Project Success!
+ship_event = {
+	id = mem_freighter_stasis.10
+	title = "mem_freighter_stasis.10.name"
+	desc = "mem_freighter_stasis.10.desc"
+	picture = TODO
+	is_triggered_only = yes
+	
+	immediate = {
+		#TODO: Any other cleanup needed?
+		every_country = {
+			limit = {
+				has_country_flag = mem_freighter_stasis_observed
+				NOT = { is_same_value = root.owner }
+			}
+			abort_special_project = {
+				type = MEM_INVESTIGATE_FREIGHTER_STASIS
+				location = this
+			}
+			country_event = { id = mem_freighter_stasis.8 }
+		}
+	}
+	
+	option = {
+		name = "mem_freighter_stasis.10.a"
+		ship_event = { id = mem_freighter_stasis.11 } #Spawn next planet. TODO: change type?
+		#TODO: Anything beyond the message and the next event?
 	}
 }
 
@@ -227,7 +241,7 @@ ship_event = {
 			}
 		}
 		ship_event = { id = mem_freighter_stasis.4747 }
-		#TODO: Confirm .9 sufficient to announce finding
+		#TODO: Confirm .10 sufficient to announce finding
 	}
 }
 
