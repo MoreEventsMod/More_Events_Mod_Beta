@@ -1,0 +1,278 @@
+################################
+# The Ancient Signal
+# Original idea by: Matthew Betts
+# Code by: Matthew Betts         
+# Writing by: Matthew Betts       
+################################
+
+namespace = mem_the_ancient_signal
+
+@tier1materialreward = 6
+@tier1materialmin = 100
+@tier1materialmax = 500
+@tier2materialreward = 12
+@tier2materialmin = 150
+@tier2materialmax = 1000
+@tier3materialreward = 18
+@tier3materialmin = 250
+@tier3materialmax = 1500
+@tier4materialreward = 24
+@tier4materialmin = 500
+@tier4materialmax = 2000
+
+@tier1influencereward = 6
+@tier1influencemin = 40
+@tier1influencemax = 100
+@tier2influencereward = 12
+@tier2influencemin = 80
+@tier2influencemax = 175
+@tier3influencereward = 18
+@tier3influencemin = 125
+@tier3influencemax = 250
+@tier4influencereward = 24
+@tier4influencemin = 150
+@tier4influencemax = 300
+
+@tier1researchreward = 6
+@tier1researchmin = 60
+@tier1researchmax = 150
+@tier2researchreward = 12
+@tier2researchmin = 90
+@tier2researchmax = 250
+@tier3researchreward = 18
+@tier3researchmin = 120
+@tier3researchmax = 350
+@tier4researchreward = 24
+@tier4researchmin = 150
+@tier4researchmax = 500
+
+# Survey Success Effect
+ship_event = {
+	id = mem_the_ancient_signal.1
+	title = "mem_the_ancient_signal.1.name"
+	desc = "mem_the_ancient_signal.1.desc"
+	picture = "GFX_evt_archaeological_dig"
+	location = FROMFROM
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		FROM = { 
+			save_event_target_as = fauna_planet
+		}
+		hidden_effect = {
+			ship_event = { id = mem_the_ancient_signal.3 days = 180 random = 60 } #6 months + up to 3 months
+		}
+	}
+	
+	option = {
+		name = "INCREDIBLE"
+		FROM = { 
+			hidden_effect = {
+				orbital_deposit_tile = { 
+					clear_deposits = yes
+				}
+			}
+			orbital_deposit_tile = { 
+				add_deposit = d_immense_society_deposit
+			}
+		}
+	}
+}
+
+#Fail Survey Effect
+#Nothing Happens - Ends Chain
+ship_event = {
+	id = mem_the_ancient_signal.2
+	title = "mem_the_ancient_signal.2.name"
+	desc = "mem_the_ancient_signal.2.desc"
+	picture = GFX_evt_ship_in_orbit
+	location = FROMFROM
+	
+	is_triggered_only = yes
+			
+	option = {
+		name = "UNFORTUNATE"
+	}
+}
+
+#Hidden Survey Effect
+#Go back to planet and do research project
+ship_event = {
+	id = mem_the_ancient_signal.3
+	title = "mem_the_ancient_signal.3.name"
+	desc = "mem_the_ancient_signal.3.desc"
+	picture = GFX_evt_ship_in_orbit
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		leader = {
+			add_trait = leader_trait_paranoid
+		}	
+	}
+
+	option = {
+		name = "mem_the_ancient_signal.3.a"
+		event_target:fauna_planet = {
+			enable_special_project = {
+				name = "MEM_THE_ANCIENT_SIGNAL_PROJECT"
+				owner = ROOT
+				location = event_target:fauna_planet
+			}
+		}
+	}
+}
+
+#Final choice
+#Outcome depends on ethos
+ship_event = {
+	id = mem_the_ancient_signal.4
+	title = "mem_the_ancient_signal.4.name"
+	
+	#All other ethos
+	desc = {
+		text = mem_the_ancient_signal.4.desc_default
+		trigger = {		  
+			root.owner = {
+				NOR = {   				
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+	}
+	
+	#Materialits ethos
+	desc = {
+		text = mem_the_ancient_signal.4.desc_materialist
+		trigger = {	
+			root.owner = {
+				OR = {        
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+				}
+			}
+		}
+	}
+	
+	#xenophobe ethos
+	desc = {
+		text = mem_the_ancient_signal.4.desc_xenophobe
+		trigger = {	
+			root.owner = {
+				OR = {        
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+	}	
+	
+	picture = GFX_evt_ship_in_orbit
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "mem_the_ancient_signal.4.a"
+		custom_tooltip = mem_the_ancient_signal.4.a.tooltip
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+	}
+	
+	#Materialist Only
+	option = {
+		name = "mem_the_ancient_signal.4.b"
+		trigger = {
+			root.owner = {
+				OR = {        
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+				}
+			}
+		}
+		custom_tooltip = mem_the_ancient_signal.4.b.tooltip
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier4researchreward
+				min = @tier4researchmin
+				max = @tier4researchmax
+			}
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier4researchreward
+				min = @tier4researchmin
+				max = @tier4researchmax
+			}
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier4researchreward
+				min = @tier4researchmin
+				max = @tier4researchmax
+			}
+		}
+		hidden_effect = {
+			root.owner = {
+				every_owned_pop = {
+					add_modifier = {
+						modifier = "mem_amazed_pops"
+						days = 365
+					}
+				}	
+			}
+		}
+	}
+	
+	#xenophobe Only
+	option = {
+		name = "mem_the_ancient_signal.4.c"
+		custom_tooltip = mem_the_ancient_signal.4.c.tooltip
+		trigger = {
+			root.owner = {
+				OR = {        
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		root.owner = {
+			add_monthly_resource_mult = {
+				resource = minerals
+				value = @tier4materialreward
+				min = @tier4materialmin
+				max = @tier4materialmax
+			}
+		}
+		FROMFROM = {
+			change_pc = pc_toxic
+		}
+	}
+}
+
+
+
+
+

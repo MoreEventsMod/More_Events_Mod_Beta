@@ -1,0 +1,771 @@
+########################
+# Duel Ritual
+# Code by Malthus
+# Text by Drew_eire
+########################
+
+namespace = mem_duel_ritual
+
+@tier1materialreward = 6
+@tier1materialmin = 100
+@tier1materialmax = 500
+@tier2materialreward = 12
+@tier2materialmin = 150
+@tier2materialmax = 1000
+@tier3materialreward = 18
+@tier3materialmin = 250
+@tier3materialmax = 1500
+@tier4materialreward = 24
+@tier4materialmin = 350
+@tier4materialmax = 2000
+
+@tier1influencereward = 6
+@tier1influencemin = 40
+@tier1influencemax = 100
+@tier2influencereward = 12
+@tier2influencemin = 80
+@tier2influencemax = 175
+@tier3influencereward = 18
+@tier3influencemin = 125
+@tier3influencemax = 250
+@tier4influencereward = 24
+@tier4influencemin = 150
+@tier4influencemax = 300
+
+@tier1researchreward = 6
+@tier1researchmin = 60
+@tier1researchmax = 150
+@tier2researchreward = 12
+@tier2researchmin = 90
+@tier2researchmax = 250
+@tier3researchreward = 18
+@tier3researchmin = 120
+@tier3researchmax = 350
+@tier4researchreward = 24
+@tier4researchmin = 150
+@tier4researchmax = 500
+
+################################################################################
+################################################################################
+################################################################################
+ 
+ # Primitives with the right ethics and tech era have ground combat on their planet
+ # Flag is set for planet and primitive country
+country_event = {
+    id = mem_duel_ritual.1
+    hide_window = yes
+    
+    trigger = {
+        is_primitive = yes
+        NOT = {
+            has_country_flag = mem_prim_inv
+        }
+        any_owned_planet  = {
+            has_ground_combat = yes
+        }
+        any_owned_pop = {
+            OR = {
+                pop_has_ethic = ethic_xenophobe
+                pop_has_ethic = ethic_fanatic_xenophobe
+                pop_has_ethic = ethic_militarist
+                pop_has_ethic = ethic_fanatic_militarist
+            }
+        }
+		OR = {
+			has_country_flag = bronze_age
+			has_country_flag = iron_age
+			has_country_flag = late_medieval_age
+			has_country_flag = renaissance_age
+			has_country_flag = steam_age
+		}
+    }
+    
+    immediate = {
+        save_event_target_as = mem_duel_ritual_planet
+		set_country_flag = mem_prim_inv
+        every_owned_planet = {
+            set_planet_flag = mem_prim_inv
+        }
+		every_owned_pop = {
+			set_timed_pop_flag = { 
+				flag = mem_duel_ritual 
+				days = 720
+			}
+		}
+        country_event = { id = mem_duel_ritual.2 days = 120 random = 0 } # 4 months
+    }
+}
+
+ # Event to clean up the flags in case the ground fighting was either infighting between the natives (pyramid event) or invasion failed
+country_event = {
+    id = mem_duel_ritual.2
+    hide_window = yes
+    is_triggered_only = yes
+    
+    trigger = {
+        is_primitive = yes
+        has_country_flag = mem_prim_inv
+    }
+    
+    immediate = {
+        remove_country_flag = mem_prim_inv
+        every_owned_planet = {
+            remove_planet_flag = mem_prim_inv
+        }
+		every_owned_pop = {
+			remove_pop_flag = mem_duel_ritual
+		}
+    }
+}
+
+ # Event starts for the player or AI empire that has a planet which was formerly owned by primitives and was invaded
+ # the planet flag gets removed in the process so it will only fire as soon as the planet gets its new owner
+country_event = {
+    id = mem_duel_ritual.3
+    hide_window = yes
+    
+    trigger = {
+		NOT = {
+			has_country_flag = mem_duel_ritual
+		}
+        is_primitive = no
+		any_owned_planet  = {
+            has_planet_flag = mem_prim_inv
+        }
+    }
+    
+	immediate = {
+		every_owned_planet  = {
+            limit = {
+				has_planet_flag = mem_prim_inv
+			}
+			remove_planet_flag = mem_prim_inv
+			set_planet_flag = mem_duel_ritual
+			random_list = {
+                60 = { planet_event = { id = mem_duel_ritual.4 days = 180 random = 25 } }	# Event happens after some time
+                40 = { remove_planet_flag = mem_duel_ritual }	# nothing happens and event can happen after next invasion of other primitive race
+			}
+		}	
+	}
+}
+
+ # This is where the player notices for the first time that anything is happening at all
+planet_event = {
+	id = mem_duel_ritual.4
+	title = mem_duel_ritual.4.name
+	desc = mem_duel_ritual.4.desc
+	picture = GFX_evt_alien_cavemen
+	location = THIS
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			NOT = {
+				has_country_flag = mem_duel_ritual
+			}
+		}
+		has_planet_flag = mem_duel_ritual
+	}
+	
+	immediate = {
+		owner = {
+			set_country_flag = mem_duel_ritual
+		}
+		random_owned_pop = {
+			limit = {
+				has_pop_flag = mem_duel_ritual
+			}
+			save_event_target_as = mem_duel_ritual_species
+		}
+	}
+	
+	option = {
+		name = mem_duel_ritual.4.a
+		custom_tooltip = mem_duel_ritual.4.tooltip
+		trigger = { 
+			owner = {
+				NOR = {
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		hidden_effect = {
+			planet_event = { id = mem_duel_ritual.5 days = 110 random = 35 }
+			every_owned_pop = { #TODO: Someone who knows what this event is supposed to do should confirm this change
+				limit = {
+					has_pop_flag = mem_duel_ritual	
+				}
+				add_modifier = {
+					modifier = mem_suppressed_primitives_01
+					days = 1800
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_duel_ritual.4.b
+		custom_tooltip = mem_duel_ritual.4.tooltip
+		trigger = { 
+			owner = {
+				OR = {
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		hidden_effect = {
+			planet_event = { id = mem_duel_ritual.5 days = 110 random = 35 }
+			every_owned_pop = { #TODO: Someone who knows what this event is supposed to do should confirm this change
+				limit = {
+					has_pop_flag = mem_duel_ritual	
+				}
+				add_modifier = {
+					modifier = mem_suppressed_primitives_01
+					days = 1800
+				}
+			}
+		}
+	}
+}
+
+ # Primitives asking for an audience
+planet_event = {
+	id = mem_duel_ritual.5
+	title = mem_duel_ritual.5.name
+	desc = mem_duel_ritual.5.desc
+	picture = GFX_evt_alien_cavemen
+	location = THIS
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			has_country_flag = mem_duel_ritual
+		}
+		has_planet_flag = mem_duel_ritual
+	}
+	
+	option = {
+		name = mem_duel_ritual.5.a
+		hidden_effect = {
+			planet_event = { id = mem_duel_ritual.6 }
+			
+		}
+	}
+	option = {
+		name = mem_duel_ritual.5.b
+		custom_tooltip = mem_duel_ritual.5.b.tooltip
+		trigger = { 
+			owner = {
+				AND = {
+					OR = {
+						has_ethic = ethic_xenophobe
+						has_ethic = ethic_fanatic_xenophobe
+						has_ethic = ethic_militarist
+						has_ethic = ethic_fanatic_militarist
+					}
+					NOR = {
+						has_ethic = ethic_xenophile
+						has_ethic = ethic_fanatic_xenophile
+					}
+				}
+			}
+		}
+		owner = {
+			add_influence = 50
+		}
+		hidden_effect = {
+			every_pop = {
+				limit = {
+					has_modifier = mem_suppressed_primitives_01
+				}
+				remove_modifier = mem_suppressed_primitives_01
+				add_modifier = {
+					modifier = mem_suppressed_primitives_02
+					days = 1800
+				}
+			}
+		}
+	}
+}
+
+ # Audience. Duel proposal
+planet_event = {
+	id = mem_duel_ritual.6
+	title = mem_duel_ritual.6.name
+	desc = mem_duel_ritual.6.desc
+	location = THIS
+	is_triggered_only = yes
+	
+	diplomatic = yes
+	
+	is_triggered_only = yes
+	
+	picture_event_data = {
+		portrait = event_target:mem_duel_ritual_species
+		planet_background = event_target:mem_duel_ritual_species
+		graphical_culture = event_target:mem_duel_ritual_species
+		city_level = event_target:mem_duel_ritual_species
+		room = event_target:mem_duel_ritual_species
+	}
+	
+	trigger = {
+		owner = {
+			has_country_flag = mem_duel_ritual
+		}
+		has_planet_flag = mem_duel_ritual
+	}
+	
+	immediate = {
+		owner = {
+			random_owned_leader = {
+				limit = {
+					leader_class = general
+				}
+				set_leader_flag = mem_duel_ritual_champion
+				save_event_target_as = mem_duel_ritual_champion
+			}
+		}
+	}
+	
+	option = {
+		name = mem_duel_ritual.6.a
+		custom_tooltip = mem_duel_ritual.6.a.tooltip
+		trigger = { 
+			owner = {
+				any_owned_leader  = {
+					leader_class = general
+				}
+			}
+		}
+		response_text = mem_duel_ritual.6.a.response
+		hidden_effect = {
+			owner = {
+				random_owned_pop = {
+					limit = {
+						has_pop_flag = mem_duel_ritual
+					}
+					pop_event = { id = mem_duel_ritual.7 days = 30 random = 0 }
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_duel_ritual.6.b
+		custom_tooltip = mem_duel_ritual.6.b.tooltip
+		trigger = { 
+			owner = {
+				NOT = {
+					any_owned_leader  = {
+						leader_class = general
+					}
+				}
+			}
+		}
+		response_text = mem_duel_ritual.6.a.response
+		hidden_effect = {
+			owner = {
+				random_owned_pop = {
+					limit = {
+						has_pop_flag = mem_duel_ritual
+					}
+					pop_event = { id = mem_duel_ritual.10 days = 30 random = 0 }
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_duel_ritual.6.c
+		custom_tooltip = mem_duel_ritual.6.c.tooltip
+		owner = {
+			add_influence = 50
+		}
+		response_text = mem_duel_ritual.6.c.response
+		hidden_effect = {
+			every_pop = {
+				limit = {
+					has_modifier = mem_suppressed_primitives_01
+				}
+				remove_modifier = mem_suppressed_primitives_01
+				add_modifier = {
+					modifier = mem_suppressed_primitives_02
+					days = 1800
+				}
+			}
+		}
+	}	
+}
+
+ # Duel with General
+pop_event = {
+	id = mem_duel_ritual.7
+	title = mem_duel_ritual.7.name
+	picture = GFX_evt_alien_cavemen
+	location = FROM
+	is_triggered_only = yes
+	
+	desc = {
+		trigger = { 
+			switch = { 
+				trigger = is_species_class 
+				ART = {text = mem_duel_ritual.7.desc_02}
+				PLANT = {text = mem_duel_ritual.7.desc_03}
+				# for compatibility with other mods
+				default = {text = mem_duel_ritual.7.desc_01} 
+			}
+		}
+	}
+	
+	trigger = {
+		owner = {
+			has_country_flag = mem_duel_ritual
+		}
+		has_pop_flag = mem_duel_ritual
+	}
+	option = {
+		name = mem_duel_ritual.7.a
+		hidden_effect = {
+			random_list = {
+				90 = { pop_event = { id = mem_duel_ritual.8 } } # Win
+                10 = { pop_event = { id = mem_duel_ritual.9 } }	# Draw
+			}
+		}
+	}
+}
+
+ # General Fight Win
+pop_event = {
+	id = mem_duel_ritual.8
+	title = mem_duel_ritual.8.name
+	desc = mem_duel_ritual.8.desc
+	picture = GFX_evt_alien_cavemen
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			has_country_flag = mem_duel_ritual
+		}
+		has_pop_flag = mem_duel_ritual
+	}
+	option = {
+		name = mem_duel_ritual.8.a
+		custom_tooltip = mem_duel_ritual.8.a.tooltip
+		hidden_effect = {
+			owner = {
+				every_owned_pop = {
+					IF = {
+						limit = {
+							has_modifier = mem_suppressed_primitives_01
+						}
+						remove_modifier = mem_suppressed_primitives_01
+						add_modifier = {
+							modifier = mem_impressed_primitives
+							days = 1800
+						}
+					}
+					IF = {
+						limit = {
+							NOR = {
+								has_modifier = pop_enslaved
+								has_modifier = pop_purging
+								has_modifier = pop_uplifted
+								has_modifier = culture_shock_bronze_age
+								has_modifier = culture_shock_iron_age
+								has_modifier = culture_shock_late_medieval_age
+								has_modifier = culture_shock_renaissance_age
+								has_modifier = culture_shock_steam_age
+								has_modifier = culture_shock_industrial_age
+								has_modifier = culture_shock_machine_age
+								has_modifier = culture_shock_atomic_age
+								has_modifier = culture_shock_early_space_age
+							}
+						}
+						add_modifier = {
+							modifier = mem_proud_masterrace
+							days = 1800
+						}
+					}
+				}
+			}
+		}
+		owner = {
+			every_owned_leader = {
+				limit = {
+					has_leader_flag = mem_duel_ritual_champion
+					NOT = {
+						has_trait = leader_trait_glory_seeker
+					}
+				}
+				add_trait = leader_trait_glory_seeker
+			}
+		}
+	}
+}
+
+ # General Fight Draw
+pop_event = {
+	id = mem_duel_ritual.9
+	title = mem_duel_ritual.9.name
+	desc = mem_duel_ritual.9.desc
+	picture = GFX_evt_alien_cavemen
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			has_country_flag = mem_duel_ritual
+		}
+		has_pop_flag = mem_duel_ritual
+	}
+	option = {
+		name = mem_duel_ritual.9.a
+		custom_tooltip = mem_duel_ritual.9.a.tooltip
+		hidden_effect = {
+			owner = {
+				every_owned_pop = {
+					IF = {
+						limit = {
+							has_modifier = mem_suppressed_primitives_01
+						}
+						remove_modifier = mem_suppressed_primitives_01
+						add_modifier = {
+							modifier = mem_impressed_primitives
+							days = 1800
+						}
+					}
+					IF = {
+						limit = {
+							NOR = {
+								has_modifier = pop_enslaved
+								has_modifier = pop_purging
+								has_modifier = pop_uplifted
+								has_modifier = culture_shock_bronze_age
+								has_modifier = culture_shock_iron_age
+								has_modifier = culture_shock_late_medieval_age
+								has_modifier = culture_shock_renaissance_age
+								has_modifier = culture_shock_steam_age
+								has_modifier = culture_shock_industrial_age
+								has_modifier = culture_shock_machine_age
+								has_modifier = culture_shock_atomic_age
+								has_modifier = culture_shock_early_space_age
+							}
+						}
+						add_modifier = {
+							modifier = mem_humiliated_masterrace
+							days = 1800
+						}
+					}
+				}
+			} 
+		}
+		owner = {
+			every_owned_leader = {
+				limit = {
+					has_leader_flag = mem_duel_ritual_champion
+					NOT = {
+						has_trait = leader_trait_arrested_development
+					}
+				}
+				add_trait = leader_trait_arrested_development
+			}
+		}
+	}
+}
+
+ # Duel with Soldier
+pop_event = {
+	id = mem_duel_ritual.10
+	title = mem_duel_ritual.10.name
+	picture = GFX_evt_alien_cavemen
+	location = FROM
+	is_triggered_only = yes
+	
+	desc = {
+		trigger = { 
+			switch = { 
+				trigger = is_species_class 
+				ART = {text = mem_duel_ritual.10.desc_02}
+				PLANT = {text = mem_duel_ritual.10.desc_03}
+				# for compatibility with other mods
+				default = {text = mem_duel_ritual.10.desc_01} 
+			}
+		}
+	}
+	
+	trigger = {
+		owner = {
+			has_country_flag = mem_duel_ritual
+		}
+		has_pop_flag = mem_duel_ritual
+	}
+	option = {
+		name = mem_duel_ritual.10.a
+		hidden_effect = {
+			random_list = {
+				45 = { pop_event = { id = mem_duel_ritual.11 } } # Win
+                45 = { pop_event = { id = mem_duel_ritual.12 } } # Loose
+				10 = { pop_event = { id = mem_duel_ritual.13 } } # Draw
+			}
+		}
+	}
+}
+
+ # Soldier Fight Win
+pop_event = {
+	id = mem_duel_ritual.11
+	title = mem_duel_ritual.11.name
+	desc = mem_duel_ritual.11.desc
+	picture = GFX_evt_alien_cavemen
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			has_country_flag = mem_duel_ritual
+		}
+		has_pop_flag = mem_duel_ritual
+	}
+	option = {
+		name = mem_duel_ritual.11.a
+		custom_tooltip = mem_duel_ritual.11.a.tooltip
+		hidden_effect = {
+			owner = {
+				every_owned_pop = {
+					IF = {
+						limit = {
+							has_modifier = mem_suppressed_primitives_01
+						}
+						remove_modifier = mem_suppressed_primitives_01
+						add_modifier = {
+							modifier = mem_impressed_primitives
+							days = 1800
+						}
+					}
+					IF = {
+						limit = {
+							NOR = {
+								has_modifier = pop_enslaved
+								has_modifier = pop_purging
+								has_modifier = pop_uplifted
+								has_modifier = culture_shock_bronze_age
+								has_modifier = culture_shock_iron_age
+								has_modifier = culture_shock_late_medieval_age
+								has_modifier = culture_shock_renaissance_age
+								has_modifier = culture_shock_steam_age
+								has_modifier = culture_shock_industrial_age
+								has_modifier = culture_shock_machine_age
+								has_modifier = culture_shock_atomic_age
+								has_modifier = culture_shock_early_space_age
+							}
+						}
+						add_modifier = {
+							modifier = mem_proud_masterrace
+							days = 1800
+						}
+					}
+				}
+			}
+		}
+		owner = {
+			every_owned_leader = {
+				limit = {
+					has_leader_flag = mem_duel_ritual_champion
+					NOT = {
+						has_trait = leader_trait_glory_seeker
+					}
+				}
+				add_trait = leader_trait_glory_seeker
+			}
+		}
+	}
+}
+
+ # Soldier Fight Loose
+pop_event = {
+	id = mem_duel_ritual.12
+	title = mem_duel_ritual.12.name
+	desc = mem_duel_ritual.12.desc
+	picture = GFX_evt_alien_cavemen
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			has_country_flag = mem_duel_ritual
+		}
+		has_pop_flag = mem_duel_ritual
+	}
+	option = {
+		name = mem_duel_ritual.12.a
+		custom_tooltip = mem_duel_ritual.12.a.tooltip
+		hidden_effect = {
+			owner = {
+				every_owned_pop = {
+					IF = {
+						limit = {
+							has_modifier = mem_suppressed_primitives_01
+						}
+						remove_modifier = mem_suppressed_primitives_01
+						add_modifier = {
+							modifier = mem_impressed_primitives
+							days = 1800
+						}
+					}
+					IF = {
+						limit = {
+							NOR = {
+								has_modifier = pop_enslaved
+								has_modifier = pop_purging
+								has_modifier = pop_uplifted
+								has_modifier = culture_shock_bronze_age
+								has_modifier = culture_shock_iron_age
+								has_modifier = culture_shock_late_medieval_age
+								has_modifier = culture_shock_renaissance_age
+								has_modifier = culture_shock_steam_age
+								has_modifier = culture_shock_industrial_age
+								has_modifier = culture_shock_machine_age
+								has_modifier = culture_shock_atomic_age
+								has_modifier = culture_shock_early_space_age
+							}
+						}
+						add_modifier = {
+							modifier = mem_humiliated_masterrace
+							days = 1800
+						}
+					}
+				}
+			} 
+		}
+	}
+}
+
+ # Soldier Fight Draw
+pop_event = {
+	id = mem_duel_ritual.13
+	title = mem_duel_ritual.13.name
+	desc = mem_duel_ritual.13.desc
+	picture = GFX_evt_alien_cavemen
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			has_country_flag = mem_duel_ritual
+		}
+		has_pop_flag = mem_duel_ritual
+	}
+	option = {
+		name = mem_duel_ritual.13.a
+		custom_tooltip = mem_duel_ritual.13.a.tooltip
+		hidden_effect = {
+			owner = {
+				every_owned_pop = {
+					limit = {
+						has_modifier = mem_suppressed_primitives_01
+					}
+					remove_modifier = mem_suppressed_primitives_01
+					add_modifier = {
+						modifier = mem_impressed_primitives
+						days = 1800
+					}
+				}
+			}
+		}
+	}
+}

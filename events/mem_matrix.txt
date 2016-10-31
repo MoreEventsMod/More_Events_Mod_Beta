@@ -1,0 +1,168 @@
+########################
+# Tomb World Matrix
+# by Malthus
+########################
+
+namespace = mem_matrix
+
+@tier1materialreward = 6
+@tier1materialmin = 100
+@tier1materialmax = 500
+@tier2materialreward = 12
+@tier2materialmin = 150
+@tier2materialmax = 1000
+@tier3materialreward = 18
+@tier3materialmin = 250
+@tier3materialmax = 1500
+@tier4materialreward = 24
+@tier4materialmin = 350
+@tier4materialmax = 2000
+
+@tier1influencereward = 6
+@tier1influencemin = 40
+@tier1influencemax = 100
+@tier2influencereward = 12
+@tier2influencemin = 80
+@tier2influencemax = 175
+@tier3influencereward = 18
+@tier3influencemin = 125
+@tier3influencemax = 250
+@tier4influencereward = 24
+@tier4influencemin = 150
+@tier4influencemax = 300
+
+@tier1researchreward = 6
+@tier1researchmin = 60
+@tier1researchmax = 150
+@tier2researchreward = 12
+@tier2researchmin = 90
+@tier2researchmax = 250
+@tier3researchreward = 18
+@tier3researchmin = 120
+@tier3researchmax = 350
+@tier4researchreward = 24
+@tier4researchmin = 150
+@tier4researchmax = 500
+
+################################################################################
+################################################################################
+################################################################################
+
+# Matrix Anomaly Success
+
+ship_event = {
+	id = mem_matrix.1
+	title = mem_matrix.1.name
+    desc = mem_matrix.1.desc
+    picture = GFX_evt_sentient_AI
+	is_triggered_only = yes
+	location = FROM
+    
+	immediate = {
+		FROM = {
+			set_planet_flag = mem_nuke_war_site # This is used in the Tomb World Survey Quest, to make sure we're consistent about how the planet died
+			set_planet_flag = mem_matrix_site
+		}
+		owner = { set_country_flag = mem_matrix_finder }
+	}
+
+    option = {
+        name = mem_matrix.1.a
+        FROM = {
+        	enable_special_project = {
+        		name = MEM_MATRIX_INVESTIGATION
+        		location = this
+        		owner = root.owner
+        	}
+        }
+    }
+}
+
+# Matrix Anomaly Failure
+
+ship_event = {
+    id = mem_matrix.2
+    title = mem_matrix.2.name
+    desc = mem_matrix.2.desc
+    picture = GFX_evt_dead_city
+    location = FROM
+    
+    is_triggered_only = yes
+
+    option = {
+        name = mem_matrix.2.a
+    }
+}
+
+# Matrix Anomaly Critical Failure
+
+ship_event = {
+    id = mem_matrix.3
+    title = mem_matrix.3.name
+    desc = mem_matrix.3.desc
+    picture = GFX_evt_dead_city
+    location = FROM
+    
+    is_triggered_only = yes
+	
+    option = {
+        name = mem_matrix.3.a
+		
+		hidden_effect = {
+			kill_leader = {
+				type = scientist
+			}
+		}
+    }
+}
+
+# Randomize the Project Outcome
+
+ship_event = {
+	id = mem_matrix.4
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		ship_event = { id = mem_matrix.5 }
+	}
+}
+
+# Get the building and some research 
+
+ship_event = {
+    id = mem_matrix.5
+    title = mem_matrix.5.name
+    desc = mem_matrix.5.desc
+    picture = GFX_evt_sentient_AI
+    location = FROM
+	
+	is_triggered_only = yes
+	
+	# Place Matrix Building
+	immediate = {
+    	random_planet = {
+    		limit = {
+    			has_planet_flag = mem_matrix_site
+    		}
+    		random_tile = { # choose tile without tile blocker
+				limit = {
+					has_blocker = no				
+				}
+				set_building = mem_matrix_building
+			}
+		}
+	}
+	option = {
+        name = mem_matrix.5.a
+		owner = { 
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+    }
+}
+	
