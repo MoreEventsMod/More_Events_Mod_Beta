@@ -1,0 +1,1336 @@
+namespace = mem_throne_watchers
+
+# 100 THRONE WATCHERS
+# Code, idea, and writing by Frog
+
+# Entering System
+ship_event = {
+	id = mem_throne_watchers.100
+	title = "mem_throne_watchers.100"
+	desc = "mem_throne_watchers.100.desc"
+	picture = GFX_evt_fallen_empire
+	show_sound = event_red_alert
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			NOT = { has_country_flag = encountered_mem_titan }
+			OR = {
+			has_technology = "tech_sensors_4"
+			has_technology = "tech_combat_computers_3"
+			}
+			is_ai = no
+		}
+		FROM = {
+			has_star_flag = mem_ring_system
+			any_ship = { 
+				AND = {
+					is_ship_size = mem_titan
+					owner = { is_country_type = mem_ring_guardian_passive }
+				}
+			}
+		}
+	}
+	
+	immediate = {
+		FROM = { save_event_target_as = mem_titan_system }
+		owner = { 
+			set_country_flag = encountered_mem_titan
+		}
+	}		
+	
+	option = {
+		name = BATTLESTATIONS
+		hidden_effect = {
+			every_country = {
+			limit = { 
+			is_country_type = mem_ring_guardian_passive
+			}
+			set_country_type = mem_ring_guardian
+			}
+		}
+	}
+}
+
+# Guardian defeated (invisible)
+country_event = {
+	id = mem_throne_watchers.101
+	hide_window = yes
+	
+	fire_only_once = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		is_country_type = mem_ring_guardian
+		has_country_flag = mem_ring_country
+		FROMFROM = { is_ship_size = mem_titan }
+		FROM = { is_ai = no }
+	}
+	
+	immediate = {
+	    FROMFROM = {
+			solar_system = { save_event_target_as = mem_ring_system }
+			create_ambient_object = {
+						type = mem_effect_explosion_2_object
+						location = THIS
+						duration = 10
+						
+						use_3d_location = yes
+						
+						entity_offset = { min = 0 max = 0 }
+						entity_offset_angle = { min = 0 max = 0 }
+						entity_offset_height = { min = 0 max = 0 }
+						
+						entity_scale_to_size = yes
+						scale = 100
+			}
+		}
+		FROM = {
+			country_event = { id = mem_throne_watchers.102 }
+			set_country_flag = mem_titan_slayer
+			save_event_target_as = mem_titan_slayer
+		}
+		every_country = {
+			limit = { 
+				is_country_type = default
+				has_modifier = mem_ring_weakness
+			}
+			remove_modifier = "mem_ring_weakness"
+		}
+		add_threat = {
+			who = FROM
+			amount = 10
+		}
+		destroy_country = yes
+	}
+}
+
+# Guardian defeated
+country_event = {
+	id = mem_throne_watchers.102
+	title = "mem_throne_watchers.102"
+	desc = "mem_throne_watchers.102.desc"
+	picture = GFX_evt_small_space_battle
+	location = event_target:mem_ring_system
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "mem_throne_watchers.102.a"
+		event_target:mem_ring_tomb_moon = {
+			enable_special_project = {
+				name = "mem_DECODE"
+				location = THIS
+				owner = ROOT
+			}
+		}
+	}
+}
+
+# Reward
+ship_event = {
+	id = mem_throne_watchers.103
+	title = "mem_throne_watchers.103"
+	desc = "mem_throne_watchers.103.desc"
+	picture = GFX_evt_sentient_AI
+	show_sound = event_mystic_reveal
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		owner = {
+		save_event_target_as = mem_titan_pc_project_owner 
+			add_threat = {
+				who = owner 
+				amount = 10
+			}
+		}
+	}
+		
+	option = {
+		name = "mem_throne_watchers.103.a"
+		custom_tooltip = mem_throne_watchers.103.a.tooltip
+		owner = { 
+		set_country_flag = mem_UNLOCK
+		}
+		create_fleet = {
+			name = "Ancient Warform"
+			settings = {
+				spawn_debris = no 
+				is_boss = yes
+			}
+			effect = {
+				set_owner = event_target:mem_titan_pc_project_owner
+				create_ship = {
+					name = "Chamuel"
+					design = "Geburah"
+					graphical_culture = "fallen_empire_02"
+					prefix = no
+				}
+				set_location = root
+			}
+		}
+		hidden_effect = {
+		if = {
+			limit = {
+			NOT = { has_global_flag = high_awaken_chance } 
+			}
+			set_global_flag = high_awaken_chance
+			}
+			random_system = {
+				limit = {
+					has_star_flag = mem_ring_system
+				}
+				every_system_planet = {
+						limit = {
+							is_planet_class = pc_mem_ringworld_shielded
+							has_planet_flag = mem_ring_1
+							NOT = { has_planet_flag = mem_ring_1_unlocked }
+							solar_system = {
+								NOT = { has_star_flag = mem_ring_transform }
+							}
+						}
+						change_pc = pc_mem_ringworld_habitable
+						set_planet_flag = mem_ring_1_unlocked
+						set_planet_flag = fallen_empire_world
+						set_planet_flag = colony_event
+
+						add_modifier = {
+				            modifier = "gaia_world"
+				            days = -1
+			            }
+						add_modifier = {
+				            modifier = "natural_beauty"
+				            days = -1
+			            }
+						random_tile = {
+				            limit = { has_building = no has_blocker = no num_adjacent_tiles > 3 }
+				            set_building = "mem_building_ancient_ruin_2"
+				            add_resource = {
+					            resource = minerals
+					            amount = 1
+					            replace = yes
+				            }
+				            add_resource = {
+					        resource = food
+					        amount = 1
+					        replace = yes
+				            }
+                            random_neighboring_tile = {
+				                limit = { has_building = no has_blocker = no }
+				                set_building = "mem_building_ancient_ruin_1"
+				                add_resource = {
+					                resource = food
+					                amount = 1
+					                replace = yes
+				                }				
+			                }
+				            random_neighboring_tile = {
+				                limit = { has_building = no has_blocker = no }
+				                set_building = "mem_building_ancient_ruin_1"
+				                add_resource = {
+					                resource = food
+					                amount = 1
+					                replace = yes
+				                }				
+			                }
+			            }
+			            random_tile = {
+				            limit = { has_building = no has_blocker = no }
+				            set_building = "mem_building_ancient_monolith_0"
+				            add_resource = {
+					            resource = food
+					            amount = 1
+					            replace = yes
+				            }				
+			            }
+			            random_tile = {
+				            limit = { has_building = no has_blocker = no }
+				            set_building = "mem_building_ancient_ruin_1"
+				            add_resource = {
+					            resource = engineering_research
+					            amount = 1
+					            replace = yes
+				            }	
+			            }
+			            random_tile = {
+				            limit = { has_building = no has_blocker = no }
+				            set_building = "mem_building_ancient_ruin_1"
+				            add_resource = {
+					            resource = society_research
+					            amount = 1
+					            replace = yes
+				            }	
+			            }
+			            random_tile = {
+				            limit = { has_building = no has_blocker = no }
+				            set_building = "mem_building_ancient_ruin_1"
+				            add_resource = {
+					            resource = physics_research
+					            amount = 1
+					            replace = yes
+				            }	
+			            }
+			            random_tile = {
+				            limit = { has_building = no has_blocker = no }
+				            set_building = "mem_building_ancient_ruin_1"
+				            add_resource = {
+					            resource = engineering_research
+					            amount = 1
+					            replace = yes
+				            }	
+			            }
+			            random_tile = {
+				            limit = { has_building = no has_blocker = no }
+				            set_building = "mem_building_ancient_ruin_1"
+				            add_resource = {
+					            resource = society_research
+					            amount = 1
+					            replace = yes
+				            }	
+			            }
+			            random_tile = {
+				            limit = { has_building = no has_blocker = no }
+				            set_building = "mem_building_ancient_ruin_1"
+				            add_resource = {
+					            resource = physics_research
+					            amount = 1
+					            replace = yes
+				            }	
+			            }
+			            random_tile = {
+				            limit = { has_building = no has_blocker = no }
+				            set_building = "mem_building_ancient_ruin_1"
+				            add_resource = {
+					            resource = engineering_research
+					            amount = 1
+					            replace = yes
+				            }	
+			            }
+			            random_tile = {
+				            limit = { has_building = no has_blocker = no }
+				            set_building = "mem_building_ancient_ruin_1"
+				            add_resource = {
+					            resource = society_research
+					            amount = 1
+					            replace = yes
+				            }	
+			            }
+			            random_tile = {
+				            limit = { has_building = no has_blocker = no }
+				            set_building = "mem_building_ancient_ruin_1"
+				            add_resource = {
+					            resource = physics_research
+					            amount = 1
+					            replace = yes
+				            }	
+			            }
+			            random_tile = {
+				            limit = { has_building = no has_blocker = no }
+				            set_building = "mem_building_ancient_ruin_1"
+				            add_resource = {
+					            resource = engineering_research
+					            amount = 1
+					            replace = yes
+				            }	
+			            }
+			            random_tile = {
+				            limit = { has_building = no has_blocker = no }
+				            set_building = "mem_building_ancient_ruin_1"
+				            add_resource = {
+					            resource = society_research
+					            amount = 1
+					            replace = yes
+				            }	
+			            }
+			            random_tile = {
+				            limit = { has_building = no has_blocker = no }
+				            set_building = "mem_building_ancient_ruin_1"
+				            add_resource = {
+					            resource = physics_research
+					            amount = 1
+					            replace = yes
+				            }	
+			            }
+			            random_tile = {
+				            limit = { has_building = no has_blocker = no }
+				            set_building = "mem_building_ancient_ruin_1"
+				            add_resource = {
+					            resource = engineering_research
+					            amount = 1
+					            replace = yes
+				            }	
+			            }			
+			            random_tile = {
+				            limit = { has_building = no has_blocker = no }
+				            set_building = "mem_building_ancient_ruin_1"
+				            add_resource = {
+					            resource = society_research
+					            amount = 1
+					            replace = yes
+				            }	
+			            }
+			            random_tile = {
+				            limit = { has_building = no has_blocker = no }
+				            set_building = "mem_building_ancient_ruin_1"
+				            add_resource = {
+					            resource = physics_research
+					            amount = 1
+					            replace = yes
+				            }	
+			            }
+			            random_tile = {
+				            limit = { has_building = no has_blocker = no }
+				            set_building = "mem_building_ancient_ruin_1"
+				            add_resource = {
+					            resource = engineering_research
+					            amount = 1
+					            replace = yes
+				            }	
+			            }
+			            random_tile = {
+				            limit = { has_building = no has_blocker = no }
+				            set_building = "mem_building_ancient_ruin_1"
+				            add_resource = {
+					            resource = society_research
+					            amount = 1
+					            replace = yes
+				            }	
+			            }
+			            random_tile = {
+				            limit = { has_building = no has_blocker = no }
+				            set_building = "mem_building_ancient_ruin_1"
+				            add_resource = {
+					            resource = physics_research
+					            amount = 1
+					            replace = yes
+				            }	
+			            }
+			            random_tile = {
+				            limit = { has_building = no has_blocker = no }
+				            set_building = "mem_building_ancient_ruin_1"
+				            add_resource = {
+					            resource = engineering_research
+					            amount = 1
+					            replace = yes
+				            }	
+			            }
+			            random_tile = {
+				            limit = { has_building = no has_blocker = no }
+				            set_building = "mem_building_ancient_ruin_1"
+				            add_resource = {
+					            resource = society_research
+					            amount = 1
+					            replace = yes
+				            }	
+			            }
+			            random_tile = {
+				            limit = { has_building = no has_blocker = no }
+				            set_building = "mem_building_ancient_ruin_1"
+				            add_resource = {
+					            resource = physics_research
+					            amount = 1
+					            replace = yes
+				            }	
+			            }
+				}
+				every_system_planet = {
+						limit = {
+							is_planet_class = pc_mem_ringworld_shielded
+							has_planet_flag = mem_ring_2
+							NOT = { has_planet_flag = mem_ring_2_unlocked }
+							solar_system = {
+								NOT = { has_star_flag = mem_ring_transform }
+							}
+						}
+						change_pc = pc_mem_ringworld_habitable
+						set_planet_flag = mem_ring_2_unlocked
+						set_planet_flag = fallen_empire_world
+						set_planet_flag = colony_event
+
+						add_modifier = {
+				            modifier = "gaia_world"
+				            days = -1
+			            }
+						add_modifier = {
+				            modifier = "natural_beauty"
+				            days = -1
+			            }
+						random_tile = {
+				            limit = { has_building = no has_blocker = no num_adjacent_tiles > 3 }
+				            set_building = "mem_building_ancient_ruin_2"
+				            add_resource = {
+					            resource = minerals
+					            amount = 1
+					            replace = yes
+				            }
+				            add_resource = {
+					            resource = food
+					            amount = 1
+					            replace = yes
+				            }
+                            random_neighboring_tile = {
+				                limit = { has_building = no has_blocker = no }
+				                set_building = "mem_building_ancient_ruin_1"
+				                add_resource = {
+					                resource = energy
+					                amount = 1
+					                replace = yes
+				                }					
+			                }
+				            random_neighboring_tile = {
+				                limit = { has_building = no has_blocker = no }
+				                set_building = "mem_building_ancient_ruin_1"
+				                add_resource = {
+					                resource = energy
+					                amount = 1
+					                replace = yes
+				                }					
+			                }
+							random_neighboring_tile = {
+								limit = { has_building = no has_blocker = no }
+								set_building = "mem_building_ancient_ruin_1"
+								add_resource = {
+									resource = energy
+									amount = 1
+									replace = yes
+								}					
+							}
+							random_neighboring_tile = {
+								limit = { has_building = no has_blocker = no }
+								set_building = "mem_building_ancient_ruin_1"
+								add_resource = {
+									resource = energy
+									amount = 1
+									replace = yes
+								}					
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = food
+								amount = 1
+								replace = yes
+							}				
+						}			
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = food
+								amount = 1
+								replace = yes
+							}				
+						}	
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_monolith_0"
+							add_resource = {
+								resource = food
+								amount = 1
+								replace = yes
+							}				
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = energy
+								amount = 1
+								replace = yes
+							}					
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = energy
+								amount = 1
+								replace = yes
+							}					
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = energy
+								amount = 1
+								replace = yes
+							}					
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = energy
+								amount = 1
+								replace = yes
+							}					
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = energy
+								amount = 1
+								replace = yes
+							}					
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = energy
+								amount = 1
+								replace = yes
+							}					
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = energy
+								amount = 1
+								replace = yes
+							}					
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = energy
+								amount = 1
+								replace = yes
+							}					
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = energy
+								amount = 1
+								replace = yes
+							}					
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = energy
+								amount = 1
+								replace = yes
+							}					
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = energy
+								amount = 1
+								replace = yes
+							}					
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = energy
+								amount = 1
+								replace = yes
+							}					
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = energy
+								amount = 1
+								replace = yes
+							}					
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = energy
+								amount = 1
+								replace = yes
+							}					
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = energy
+								amount = 1
+								replace = yes
+							}					
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = energy
+								amount = 1
+								replace = yes
+							}					
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = energy
+								amount = 1
+								replace = yes
+							}					
+						}
+				}
+				every_system_planet = {
+						limit = {
+							is_planet_class = pc_mem_ringworld_shielded
+							has_planet_flag = mem_ring_3
+							NOT = { has_planet_flag = mem_ring_2_unlocked }
+							solar_system = {
+								NOT = { has_star_flag = mem_ring_transform }
+							}
+						}
+						change_pc = pc_mem_ringworld_habitable
+						set_planet_flag = mem_ring_3_unlocked
+						set_planet_flag = fallen_empire_world
+						set_planet_flag = colony_event
+						
+						add_modifier = {
+				            modifier = "gaia_world"
+				            days = -1
+			            }
+						add_modifier = {
+				            modifier = "natural_beauty"
+				            days = -1
+			            }
+						random_tile = {
+							limit = { has_building = no has_blocker = no num_adjacent_tiles > 3 }
+							set_building = "mem_building_ancient_ruin_2"
+							add_resource = {
+								resource = minerals
+							    amount = 1
+								replace = yes
+							}
+							add_resource = {
+								resource = food
+								amount = 1
+								replace = yes
+							}
+							random_neighboring_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = minerals
+								amount = 1
+								replace = yes
+								}	
+							}
+							random_neighboring_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = minerals
+								amount = 1
+								replace = yes
+								}	
+							}
+							random_neighboring_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = minerals
+								amount = 1
+								replace = yes
+								}	
+							}
+							random_neighboring_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = minerals
+								amount = 1
+								replace = yes
+								}	
+							}
+			            }
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = food
+								amount = 1
+								replace = yes
+							}				
+						}			
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = food
+								amount = 1
+								replace = yes
+							}				
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_monolith_0"
+							add_resource = {
+								resource = food
+								amount = 1
+								replace = yes
+							}				
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = minerals
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = minerals
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = minerals
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = minerals
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = minerals
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = minerals
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = minerals
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = minerals
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = minerals
+								amount = 1
+								replace = yes
+							}	
+						}			
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = minerals
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = minerals
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = minerals
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = minerals
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = minerals
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = minerals
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = minerals
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_building = "mem_building_ancient_ruin_1"
+							add_resource = {
+								resource = minerals
+								amount = 1
+								replace = yes
+							}	
+						}
+				}
+				solar_system = { set_star_flag = mem_ring_transform }
+			}
+		}
+	}
+}
+
+#Throne Watcher Research
+
+country_event = {
+	id = mem_throne_watchers.104
+	hide_window = yes
+	is_triggered_only = yes
+	
+	fire_only_once = yes
+
+	trigger = {
+		is_country_type = mem_ring_guardian
+		any_owned_ship = {
+			is_ship_size = mem_titan	
+			fleet = {
+				exists = solar_system
+				solar_system = {
+				has_star_flag = mem_ring_system
+				}
+			}	
+		}
+		
+		from = {
+			is_country_type = default
+			is_ai = no
+			any_owned_ship = {
+			is_ship_class = shipclass_military 
+			fleet = {
+					exists = solar_system
+					solar_system = {
+						has_star_flag = mem_ring_system
+					}
+				}	
+			}
+			OR = {
+			has_technology = "tech_shields_5"
+			has_technology = "tech_ship_armor_5"
+			has_technology = "tech_thrusters_4"
+			has_technology = "tech_sensors_4"
+			has_technology = "tech_combat_computers_3"
+			has_technology = "tech_zero_point_power"
+			}
+			OR = {
+				has_technology = "tech_jump_drive_1"
+				has_technology = "tech_psi_jump_drive_1"
+				has_technology = "tech_wormhole_generation_3"
+			    has_technology = "tech_hyper_drive_3"
+			    has_technology = "tech_warp_drive_3"
+			}
+		}
+	}
+
+	immediate = {
+		from = {
+			country_event = { id = mem_throne_watchers.105 }
+		}
+	}
+}
+
+country_event = {
+	id = mem_throne_watchers.105
+	title = "mem_throne_watchers.105"
+	desc = "mem_throne_watchers.105.desc"
+	picture = GFX_evt_exploding_ship
+	is_triggered_only = yes
+	
+	fire_only_once = yes
+
+	trigger = {
+		from = { is_country_type = mem_ring_guardian }
+		is_country_type = default
+		is_ai = no
+		NOT = { has_country_flag = mem_ring_weakness_researched }
+	}
+
+	option = {
+		name = mem_throne_watchers.105.a
+		allow = {
+			energy > 5000 
+			minerals > 5000
+			hidden_trigger = {
+				NOT = { has_modifier = mem_ring_weakness }
+			}
+		}
+		hidden_effect = { set_country_flag = mem_ring_weakness_researched }
+		capital_scope = { save_event_target_as = mem_pc_home }
+		add_energy = -5000
+		add_minerals = -5000
+		enable_special_project = {
+			name = "mem_RING_WEAKNESS_PROJECT"
+			location = event_target:mem_pc_home
+			owner = ROOT
+		}
+	}	
+	option = {
+		name = mem_throne_watchers.105.b
+		add_influence = 100
+	}
+}
+
+ country_event = {
+	id = mem_throne_watchers.106
+	title = "mem_throne_watchers.106"
+	desc = "mem_throne_watchers.106.desc"
+	picture = GFX_evt_physics_research
+	is_triggered_only = yes
+
+	option = {
+		name = mem_throne_watchers.106.a
+		add_modifier = {
+			modifier = mem_ring_weakness
+			days = 36000
+		}
+	}
+}
+
+#Bounce
+
+ship_event = {
+	id = mem_throne_watchers.107
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			NOT = {
+			has_country_flag = encountered_mem_titan
+				OR = {
+				has_technology = "tech_sensors_4"
+				has_technology = "tech_combat_computers_3"
+				}
+			}
+		}
+		FROM = {
+			has_star_flag = mem_ring_system
+			any_ship = { 
+				AND = {
+					is_ship_size = mem_titan
+					owner = { is_country_type = mem_ring_guardian_passive }
+				}
+			}
+		}
+	}
+	
+	immediate = {
+		owner = {
+			country_event = { id = mem_throne_watchers.108 }
+		}		
+		fleet = {
+			order_forced_return = yes
+			clear_orders = yes 
+		}
+	}		
+}
+
+country_event = {
+	id = mem_throne_watchers.108
+	title = "mem_throne_watchers.108"
+	desc = "mem_throne_watchers.108.desc"
+	picture = GFX_evt_fallen_empire
+	location = FROM
+	
+	is_triggered_only = yes
+	fire_only_once = yes
+	
+	option = {
+		name = "mem_throne_watchers.108.a"
+	}
+}
+
+# Watcher Upgrade
+
+country_event = {
+	id = mem_throne_watchers.109
+	title = "mem_throne_watchers.109"
+	desc = "mem_throne_watchers.109.desc"
+	picture = GFX_evt_unspeakable_horror
+	location = ROOT
+	
+	fire_only_once = yes
+	
+	trigger = {
+		is_ai = no
+		is_country_type = default
+		has_country_flag = mem_titan_slayer
+		any_owned_planet = {
+			OR = {
+				has_building = "mem_building_ancient_monolith_1"
+				has_building = "mem_building_ancient_monolith_2"
+				has_building = "mem_building_ancient_monolith_3"
+			}
+		}
+		any_owned_planet = {
+			has_building = "mem_building_ancient_monolith_4"
+		}
+		any_owned_ship = {
+			is_ship_size = mem_titan_pc
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 50
+		
+		modifier = {
+			factor = 0.5
+				any_owned_planet = {
+					has_building = "mem_building_ancient_monolith_1"
+				}
+		}
+		modifier = {
+			factor = 0.5
+				any_owned_planet = {
+					has_building = "mem_building_ancient_monolith_2"
+				}
+				
+		}
+		modifier = {
+			factor = 0.5
+				any_owned_planet = {
+					has_building = "mem_building_ancient_monolith_3"
+				}
+		}
+		modifier = {
+			factor = 0.25
+			AND = {
+				any_owned_planet = {
+					has_building = "mem_building_ancient_monolith_1"
+				}
+				any_owned_planet = {
+					has_building = "mem_building_ancient_monolith_2"
+				}
+			}
+		}
+		modifier = {
+			factor = 0.25
+			AND = {
+				any_owned_planet = {
+					has_building = "mem_building_ancient_monolith_1"
+				}
+				any_owned_planet = {
+					has_building = "mem_building_ancient_monolith_3"
+				}
+			}
+		}
+		modifier = {
+			factor = 0.25
+			AND = {
+				any_owned_planet = {
+					has_building = "mem_building_ancient_monolith_2"
+				}
+				any_owned_planet = {
+					has_building = "mem_building_ancient_monolith_3"
+				}
+			}
+		}
+		modifier = {
+			factor = 0.1
+			AND = {
+				any_owned_planet = {
+					has_building = "mem_building_ancient_monolith_1"
+				}
+				any_owned_planet = {
+					has_building = "mem_building_ancient_monolith_2"
+				}
+				any_owned_planet = {
+					has_building = "mem_building_ancient_monolith_3"
+				}
+			}	
+		}
+	}
+	
+	immediate = {
+		capital_scope = { save_event_target_as = mem_pc_home }
+	}
+
+	option = {
+		name = "mem_throne_watchers.109.a"
+		event_target:mem_pc_home = {
+			enable_special_project = {
+				name = "mem_TITAN_AWAKENING"
+				location = THIS
+				owner = ROOT
+			}
+		}
+	}
+	option = {
+		name = "mem_throne_watchers.109.b"
+		add_influence = 100
+	}
+}
+
+country_event = {
+	id = mem_throne_watchers.110
+	title = "mem_throne_watchers.110"
+	desc = "mem_throne_watchers.110.desc"
+	picture = GFX_evt_ship_in_orbit
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	trigger = {
+			is_ai = no
+			is_country_type = default
+			has_country_flag = mem_titan_slayer
+			NOT = { has_country_flag = mem_titan_awakening }
+			any_owned_ship = {
+			is_ship_size = mem_titan_pc
+			}
+		}
+
+	option = {
+		name = "mem_throne_watchers.110.a"
+		hidden_effect = { set_country_flag = mem_titan_awakening }
+	}	
+}
+
+country_event = {
+	id = mem_throne_watchers.111
+	title = "mem_throne_watchers.111"
+	desc = "mem_throne_watchers.111.desc"
+	picture = GFX_evt_small_space_battle
+	show_sound = event_mystic_reveal
+
+	fire_only_once = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		is_ai = no
+		is_country_type = default
+		has_country_flag = mem_titan_slayer
+		has_country_flag = mem_titan_awakening
+		FROMFROM = { is_ship_size = mem_titan_pc }
+	}
+	
+	immediate = {
+		add_threat = {
+			who = PREV
+			amount = 10
+		}
+		FROMFROM = {
+			save_event_target_as = mem_titan_pc_spawn
+		}
+		create_fleet = {
+			name = "Solar Envoy"
+			settings = {
+				spawn_debris = no 
+				is_boss = yes
+			}
+			effect = {
+				set_owner = PREV
+				while = {
+					count = 1
+					create_ship = {
+						name = "Metatron"
+						design = "Kether"
+						graphical_culture = "fallen_empire_03"
+						prefix = no
+					}
+				}
+                set_location = {
+					target = event_target:mem_titan_pc_spawn
+					distance = 0
+					angle = random
+					}	
+				}
+			}
+			last_created_fleet = {
+				create_ambient_object = {
+					type = mem_effect_explosion_2_object
+					location = THIS
+					duration = 10
+						
+					use_3d_location = yes
+						
+					entity_offset = { min = 0 max = 0 }
+					entity_offset_angle = { min = 0 max = 0 }
+					entity_offset_height = { min = 0 max = 0 }
+						
+					entity_scale_to_size = yes
+					scale = 100
+				}
+			}	
+	}
+	option = {
+		name = "mem_throne_watchers.111.a"
+	}
+}
