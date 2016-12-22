@@ -4,10 +4,11 @@ namespace = mem_throne_watchers
 # Code, idea, and writing by Frog
 
 # Entering System (Human Player w/ Sufficient Sensors)
+# Initial event of the main chain
 ship_event = {
-	id = mem_throne_watchers.100
-	title = "mem_throne_watchers.100"
-	desc = "mem_throne_watchers.100.desc"
+	id = mem_throne_watchers.1
+	title = "mem_throne_watchers.1"
+	desc = "mem_throne_watchers.1.desc"
 	picture = GFX_evt_fallen_empire
 	show_sound = event_red_alert
 	location = FROM
@@ -55,9 +56,9 @@ ship_event = {
 }
 
 #Bounce (Entering system: AI, or Human w/out Enough Sensors)
-
+#Locks the system from AI and too-weak human players
 ship_event = {
-	id = mem_throne_watchers.107
+	id = mem_throne_watchers.10
 	hide_window = yes
 	is_triggered_only = yes
 	
@@ -84,7 +85,7 @@ ship_event = {
 	
 	immediate = {
 		owner = {
-			country_event = { id = mem_throne_watchers.108 }
+			country_event = { id = mem_throne_watchers.11 }
 		}		
 		fleet = {
 			order_forced_return = yes
@@ -94,9 +95,9 @@ ship_event = {
 }
 
 country_event = {
-	id = mem_throne_watchers.108
-	title = "mem_throne_watchers.108"
-	desc = "mem_throne_watchers.108.desc"
+	id = mem_throne_watchers.11
+	title = "mem_throne_watchers.11"
+	desc = "mem_throne_watchers.11.desc"
 	picture = GFX_evt_fallen_empire
 	location = FROM
 	
@@ -104,13 +105,128 @@ country_event = {
 	fire_only_once = yes
 	
 	option = {
-		name = "mem_throne_watchers.108.a"
+		name = "mem_throne_watchers.11.a"
+	}
+}
+
+#Throne Watcher Research
+#When an active titan kills a fleet, owner gets a chance to research its weakness
+country_event = {
+	id = mem_throne_watchers.20
+	hide_window = yes
+	is_triggered_only = yes
+	
+	fire_only_once = yes
+
+	trigger = {
+		is_country_type = mem_ring_guardian
+		any_owned_ship = {
+			is_ship_size = mem_titan	
+			fleet = {
+				exists = solar_system
+				solar_system = {
+					has_star_flag = mem_ring_system
+				}
+			}	
+		}
+		
+		from = {
+			is_country_type = default
+			is_ai = no
+			any_owned_ship = {
+				is_ship_class = shipclass_military 
+				fleet = {
+					exists = solar_system
+					solar_system = {
+						has_star_flag = mem_ring_system
+					}
+				}	
+			}
+			OR = {
+				has_technology = "tech_shields_5"
+				has_technology = "tech_ship_armor_5"
+				has_technology = "tech_thrusters_4"
+				has_technology = "tech_sensors_4"
+				has_technology = "tech_combat_computers_3"
+				has_technology = "tech_zero_point_power"
+			}
+			OR = {
+				has_technology = "tech_jump_drive_1"
+				has_technology = "tech_psi_jump_drive_1"
+				has_technology = "tech_wormhole_generation_3"
+			    has_technology = "tech_hyper_drive_3"
+			    has_technology = "tech_warp_drive_3"
+			}
+		}
+	}
+
+	immediate = {
+		from = {
+			country_event = { id = mem_throne_watchers.21 }
+		}
+	}
+}
+
+country_event = {
+	id = mem_throne_watchers.21
+	title = "mem_throne_watchers.21"
+	desc = "mem_throne_watchers.21.desc"
+	picture = GFX_evt_exploding_ship
+	is_triggered_only = yes
+	
+	fire_only_once = yes
+
+	trigger = {
+		from = { is_country_type = mem_ring_guardian }
+		is_country_type = default
+		is_ai = no
+		NOT = { has_country_flag = mem_ring_weakness_researched }
+	}
+
+	option = {
+		name = mem_throne_watchers.21.a
+		allow = {
+			energy > 5000 
+			minerals > 5000
+			hidden_trigger = {
+				NOT = { has_modifier = mem_ring_weakness }
+			}
+		}
+		hidden_effect = { set_country_flag = mem_ring_weakness_researched }
+		capital_scope = { save_event_target_as = mem_pc_home }
+		add_energy = -5000
+		add_minerals = -5000
+		enable_special_project = {
+			name = "MEM_RING_WEAKNESS_PROJECT"
+			location = event_target:mem_pc_home
+			owner = ROOT
+		}
+	}	
+	option = {
+		name = mem_throne_watchers.21.b
+		add_influence = 100
+	}
+}
+
+country_event = {
+	id = mem_throne_watchers.22
+	title = "mem_throne_watchers.22"
+	desc = "mem_throne_watchers.22.desc"
+	picture = GFX_evt_physics_research
+	is_triggered_only = yes
+
+	option = {
+		name = mem_throne_watchers.22.a
+		add_modifier = {
+			modifier = mem_ring_weakness
+			days = 36000
+		}
 	}
 }
 
 # Guardian defeated (invisible)
 country_event = {
-	id = mem_throne_watchers.101
+	id = mem_throne_watchers.30
 	hide_window = yes
 	
 	fire_only_once = yes
@@ -142,7 +258,7 @@ country_event = {
 			}
 		}
 		FROM = {
-			country_event = { id = mem_throne_watchers.102 }
+			country_event = { id = mem_throne_watchers.31 }
 			set_country_flag = mem_titan_slayer
 			save_event_target_as = mem_titan_slayer
 		}
@@ -163,16 +279,16 @@ country_event = {
 
 # Guardian defeated
 country_event = {
-	id = mem_throne_watchers.102
-	title = "mem_throne_watchers.102"
-	desc = "mem_throne_watchers.102.desc"
+	id = mem_throne_watchers.31
+	title = "mem_throne_watchers.31"
+	desc = "mem_throne_watchers.31.desc"
 	picture = GFX_evt_small_space_battle
 	location = event_target:mem_ring_system
 	
 	is_triggered_only = yes
 	
 	option = {
-		name = "mem_throne_watchers.102.a"
+		name = "mem_throne_watchers.31.a"
 		event_target:mem_ring_tomb_moon = {
 			enable_special_project = {
 				name = "MEM_DECODE"
@@ -185,9 +301,9 @@ country_event = {
 
 # Reward
 ship_event = {
-	id = mem_throne_watchers.103
-	title = "mem_throne_watchers.103"
-	desc = "mem_throne_watchers.103.desc"
+	id = mem_throne_watchers.40
+	title = "mem_throne_watchers.40"
+	desc = "mem_throne_watchers.40.desc"
 	picture = GFX_evt_sentient_AI
 	show_sound = event_mystic_reveal
 	
@@ -204,8 +320,8 @@ ship_event = {
 	}
 		
 	option = {
-		name = "mem_throne_watchers.103.a"
-		custom_tooltip = mem_throne_watchers.103.a.tooltip
+		name = "mem_throne_watchers.40.a"
+		custom_tooltip = mem_throne_watchers.40.a.tooltip
 		owner = { 
 		set_country_flag = mem_UNLOCK
 		}
@@ -1002,127 +1118,12 @@ ship_event = {
 	}
 }
 
-#Throne Watcher Research
-#When an active titan kills a fleet, owner gets a chance to research its weakness
-country_event = {
-	id = mem_throne_watchers.104
-	hide_window = yes
-	is_triggered_only = yes
-	
-	fire_only_once = yes
-
-	trigger = {
-		is_country_type = mem_ring_guardian
-		any_owned_ship = {
-			is_ship_size = mem_titan	
-			fleet = {
-				exists = solar_system
-				solar_system = {
-					has_star_flag = mem_ring_system
-				}
-			}	
-		}
-		
-		from = {
-			is_country_type = default
-			is_ai = no
-			any_owned_ship = {
-				is_ship_class = shipclass_military 
-				fleet = {
-					exists = solar_system
-					solar_system = {
-						has_star_flag = mem_ring_system
-					}
-				}	
-			}
-			OR = {
-				has_technology = "tech_shields_5"
-				has_technology = "tech_ship_armor_5"
-				has_technology = "tech_thrusters_4"
-				has_technology = "tech_sensors_4"
-				has_technology = "tech_combat_computers_3"
-				has_technology = "tech_zero_point_power"
-			}
-			OR = {
-				has_technology = "tech_jump_drive_1"
-				has_technology = "tech_psi_jump_drive_1"
-				has_technology = "tech_wormhole_generation_3"
-			    has_technology = "tech_hyper_drive_3"
-			    has_technology = "tech_warp_drive_3"
-			}
-		}
-	}
-
-	immediate = {
-		from = {
-			country_event = { id = mem_throne_watchers.105 }
-		}
-	}
-}
-
-country_event = {
-	id = mem_throne_watchers.105
-	title = "mem_throne_watchers.105"
-	desc = "mem_throne_watchers.105.desc"
-	picture = GFX_evt_exploding_ship
-	is_triggered_only = yes
-	
-	fire_only_once = yes
-
-	trigger = {
-		from = { is_country_type = mem_ring_guardian }
-		is_country_type = default
-		is_ai = no
-		NOT = { has_country_flag = mem_ring_weakness_researched }
-	}
-
-	option = {
-		name = mem_throne_watchers.105.a
-		allow = {
-			energy > 5000 
-			minerals > 5000
-			hidden_trigger = {
-				NOT = { has_modifier = mem_ring_weakness }
-			}
-		}
-		hidden_effect = { set_country_flag = mem_ring_weakness_researched }
-		capital_scope = { save_event_target_as = mem_pc_home }
-		add_energy = -5000
-		add_minerals = -5000
-		enable_special_project = {
-			name = "MEM_RING_WEAKNESS_PROJECT"
-			location = event_target:mem_pc_home
-			owner = ROOT
-		}
-	}	
-	option = {
-		name = mem_throne_watchers.105.b
-		add_influence = 100
-	}
-}
-
-country_event = {
-	id = mem_throne_watchers.106
-	title = "mem_throne_watchers.106"
-	desc = "mem_throne_watchers.106.desc"
-	picture = GFX_evt_physics_research
-	is_triggered_only = yes
-
-	option = {
-		name = mem_throne_watchers.106.a
-		add_modifier = {
-			modifier = mem_ring_weakness
-			days = 36000
-		}
-	}
-}
-
 # Watcher Upgrade
 # Improves the victory reward
 country_event = {
-	id = mem_throne_watchers.109
-	title = "mem_throne_watchers.109"
-	desc = "mem_throne_watchers.109.desc"
+	id = mem_throne_watchers.45
+	title = "mem_throne_watchers.45"
+	desc = "mem_throne_watchers.45.desc"
 	picture = GFX_evt_unspeakable_horror
 	location = ROOT
 	
@@ -1223,7 +1224,7 @@ country_event = {
 	}
 
 	option = {
-		name = "mem_throne_watchers.109.a"
+		name = "mem_throne_watchers.45.a"
 		event_target:mem_pc_home = {
 			enable_special_project = {
 				name = "MEM_TITAN_AWAKENING"
@@ -1233,15 +1234,15 @@ country_event = {
 		}
 	}
 	option = {
-		name = "mem_throne_watchers.109.b"
+		name = "mem_throne_watchers.45.b"
 		add_influence = 100
 	}
 }
 
 country_event = {
-	id = mem_throne_watchers.110
-	title = "mem_throne_watchers.110"
-	desc = "mem_throne_watchers.110.desc"
+	id = mem_throne_watchers.46
+	title = "mem_throne_watchers.46"
+	desc = "mem_throne_watchers.46.desc"
 	picture = GFX_evt_ship_in_orbit
 	location = FROM
 	
@@ -1258,15 +1259,15 @@ country_event = {
 		}
 
 	option = {
-		name = "mem_throne_watchers.110.a"
+		name = "mem_throne_watchers.46.a"
 		hidden_effect = { set_country_flag = mem_titan_awakening }
 	}	
 }
 
 country_event = {
-	id = mem_throne_watchers.111
-	title = "mem_throne_watchers.111"
-	desc = "mem_throne_watchers.111.desc"
+	id = mem_throne_watchers.47
+	title = "mem_throne_watchers.47"
+	desc = "mem_throne_watchers.47.desc"
 	picture = GFX_evt_small_space_battle
 	show_sound = event_mystic_reveal
 
@@ -1331,6 +1332,6 @@ country_event = {
 			}	
 	}
 	option = {
-		name = "mem_throne_watchers.111.a"
+		name = "mem_throne_watchers.47.a"
 	}
 }
