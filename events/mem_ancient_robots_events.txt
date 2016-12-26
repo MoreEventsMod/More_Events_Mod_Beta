@@ -263,7 +263,21 @@ planet_event = {
 					set_blocker = mem_tb_robot_factory_arid
 				}
 			}
+			pc_savannah = {
+				random_tile = {
+					limit = { has_blocker = mem_tb_strange_mountain }
+					remove_blocker = yes
+					set_blocker = mem_tb_robot_factory_arid
+				}
+			}
 			pc_continental = {
+				random_tile = {
+					limit = { has_blocker = mem_tb_strange_mountain }
+					remove_blocker = yes
+					set_blocker = mem_tb_robot_factory_continental
+				}
+			}
+			pc_alpine = {
 				random_tile = {
 					limit = { has_blocker = mem_tb_strange_mountain }
 					remove_blocker = yes
@@ -278,6 +292,13 @@ planet_event = {
 				}
 			}
 			pc_tropical = {
+				random_tile = {
+					limit = { has_blocker = mem_tb_strange_mountain }
+					remove_blocker = yes
+					set_blocker = mem_tb_robot_factory_tropical
+				}
+			}
+			pc_gaia = {
 				random_tile = {
 					limit = { has_blocker = mem_tb_strange_mountain }
 					remove_blocker = yes
@@ -332,7 +353,6 @@ planet_event = {
 					has_blocker = mem_tb_robot_factory_ocean
 					has_blocker = mem_tb_robot_factory_tropical
 					has_blocker = mem_tb_robot_factory_tundra
-					has_blocker = mem_tb_robot_factory_gaia
 				}
 			}
 			remove_blocker = yes
@@ -399,7 +419,21 @@ planet_event = {
 					set_blocker = mem_tb_robot_factory_arid
 				}
 			}
+			pc_savannah = {
+				random_tile = {
+					limit = { has_building = mem_ancient_robot_building_1 }
+					remove_building = yes
+					set_blocker = mem_tb_robot_factory_arid
+				}
+			}
 			pc_continental = {
+				random_tile = {
+					limit = { has_building = mem_ancient_robot_building_1 }
+					remove_building = yes
+					set_blocker = mem_tb_robot_factory_continental
+				}
+			}
+			pc_alpine = {
 				random_tile = {
 					limit = { has_building = mem_ancient_robot_building_1 }
 					remove_building = yes
@@ -414,6 +448,13 @@ planet_event = {
 				}
 			}
 			pc_tropical = {
+				random_tile = {
+					limit = { has_building = mem_ancient_robot_building_1 }
+					remove_building = yes
+					set_blocker = mem_tb_robot_factory_tropical
+				}
+			}
+			pc_gaia = {
 				random_tile = {
 					limit = { has_building = mem_ancient_robot_building_1 }
 					remove_building = yes
@@ -473,7 +514,7 @@ country_event = {
 	}
 }
 
-# Defeat by First Robot Swarm:
+# Defeat by First Robot Swarm, First Purge:
 
 country_event = {
 	id = mem_ancient_robots.212
@@ -490,15 +531,26 @@ country_event = {
 	
 	immediate = {
 		FROMFROM = {
-			if = {
-				limit = {
-					num_pops > 1
+			IF = {
+				limit = { 
+					count_pops = {
+						limit = { 
+							is_being_purged = no
+							is_growing = no
+						}
+						count > 1
+					} 
 				}
 				random_pop = {
+					limit = { 
+						is_being_purged = no
+						is_growing = yes
+					}
 					purge = yes
 				}
+				planet_event = { id = mem_ancient_robots.226 days = 30 }
 				else = {
-					planet_event = { id = mem_ancient_robots.212 days = 30 }
+					planet_event = { id = mem_ancient_robots.225 days = 30 }
 				}
 			}
 		}
@@ -639,7 +691,6 @@ country_event = {
 						has_blocker = mem_tb_robot_factory_ocean
 						has_blocker = mem_tb_robot_factory_tropical
 						has_blocker = mem_tb_robot_factory_tundra
-						has_blocker = mem_tb_robot_factory_gaia
 					}
 				}
 				remove_blocker = yes
@@ -746,12 +797,12 @@ planet_event = {
 			auto_delete = no
 			flag = {
 				icon = {
-					category = "zoological"
-					file = "flag_zoological_10.dds"
+					category = "pirate"
+					file = "flag_pirate_10.dds"
 				}
 				background= {
 					category = "backgrounds"
-					file = "new_dawn.dds"
+					file = "stripes.dds"
 				}
 				colors={
 					"red"
@@ -860,12 +911,15 @@ planet_event = {
 	
 	immediate = {
 		if = {
-			limit = {
-				num_pops > 1
-			}
+			count_pops = {
+				limit = { 
+					is_growing = no
+				}
+				count > 1
+			} 
 			planet_event = { id = mem_ancient_robots.210 }
 			else = {
-				planet_event = { id = mem_ancient_robots.223 days = 10 } # Set to much higher
+				planet_event = { id = mem_ancient_robots.223 days = 10 random = 10 } # Set to much higher
 			}
 		}
 	}
@@ -879,12 +933,74 @@ planet_event = {
 	is_triggered_only = yes
 
 	immediate = {
-		if = {
-			limit = { num_pops > 1 }
-			random_pop = {
-				purge = yes
+		IF = {
+            limit = { 
+                count_pops = {
+                    limit = { 
+						is_being_purged = no
+						is_growing = no
+					}
+					count > 1
+                } 
+            }
+            random_pop = {
+                limit = { is_being_purged = no }
+                purge = yes
+            }
+			else = {
+				owner = {
+					country_event = { id = mem_ancient_robots.225 } # The last pop has fortified their position.
+				}
 			}
 		}
 	}	
 }
 
+# The last pop has fortified their position.
+country_event = {
+    id = mem_ancient_robots.225
+    title = "mem_ancient_robots.225.name"
+    desc = "mem_ancient_robots.225.desc"
+    is_triggered_only = yes
+	fire_only_once = yes
+}
+
+# Cyclic purge initiation when under occupation
+planet_event = {
+    id = mem_ancient_robots.226
+    hide_window = yes
+    is_triggered_only = yes
+    trigger = {
+        has_planet_flag = mem_super_robot_attack
+        controller = {
+            is_same_value = event_target:mem_evil_robots
+        }
+    }
+    immediate = {
+        IF = {
+            limit = { 
+                count_pops = {
+                    limit = { 
+						is_being_purged = no
+						is_growing = no
+					}
+					count > 1
+                } 
+            }
+            random_pop = {
+                limit = { is_being_purged = no }
+                purge = yes
+            }
+            planet_event = {
+                id = mem_ancient_robots.226 #Re fire this event in a month
+                days = 30
+             }
+
+        else = {
+            owner = {
+                country_event = { id = mem_ancient_robots.225 } # The last pop has fortified their position.
+                }
+            }
+        }
+    }
+}
