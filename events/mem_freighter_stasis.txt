@@ -52,27 +52,39 @@ country_event = {
 	immediate = {
 		create_country = {
 			name = "TODO: Faction Name MEM-FS"
-			type = "mem_TODO_TEST_TYPE" #faction
+			type = "mem_refugee" #TODO: Pick something I like
+			ignore_initial_colony_error = yes
 		}
+		#TODO: This seems like it should work but it fails to spawn the fleet
 		last_created_country = {
-			create_fleet = { name = "Adrift Fleet" }
+			create_fleet = { 
+				name = "Adrift Fleet"
+				settings = { spawn_debris = no }
+				effect = {
+					set_owner = prev
+					create_ship = {
+						name = "Silent Ship"
+						design = "MEM-Freighter-Stasis-Freighter"
+						graphical_culture = prev #TODO: ?
+					}
+					last_created_ship = {
+						save_event_target_as = mem_freighter_stasis_ship
+					}
+					set_location = {
+						target = event_target:mem_freighter_stasis_star
+						distance = 250 #TODO: Calibrate -- note that systems seem to vary in size
+						angle = random #TODO: Need to keep track of what angle this is; may have to select from cases
+					}
+					save_event_target_as = CustomCapital
+					prev = {
+						set_custom_capital_location = event_target:CustomCapital
+					}
+				}
+			}
 			set_country_flag = mem_freighter_stasis_refugee_country
 			save_event_target_as = mem_freighter_stasis_refugees
 			last_created_fleet = {
-				set_owner = PREV
 				set_fleet_flag = mem_freighter_stasis_refugee_fleet
-				create_ship = {
-					name = "Silent Ship"
-					design = "MEM-Freighter-Stasis-Freighter"	
-				}
-				last_created_ship = {
-					save_event_target_as = mem_freighter_stasis_ship
-				}
-				set_location = {
-					target = event_target:mem_freighter_stasis_star
-					distance = 250 #TODO: Calibrate -- note that systems seem to vary in size
-					angle = random #TODO: Need to keep track of what angle this is; may have to select from cases
-				}
 				set_fleet_stance = passive
 				queue_actions = {
 					move_to = event_target:mem_freighter_stasis_star
