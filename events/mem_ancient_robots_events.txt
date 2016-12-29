@@ -290,6 +290,7 @@ planet_event = {
 	desc = mem_ancient_robots.210.desc
 	picture = GFX_evt_ground_combat
 	is_triggered_only = yes
+	fire_only_once = yes
 	
 	immediate = { # This creates the EVIL ROBOT ARMIES:
 		random_tile = {
@@ -317,12 +318,12 @@ country_event = {
 	desc = mem_ancient_robots.211.desc
 	picture = GFX_evt_ground_combat
 	is_triggered_only = yes
-	fire_only_once = yes
 	
 	trigger = {
 		is_ai = no
 		FROMFROM = {
 			has_planet_flag = mem_super_robot_attack
+			is_occupied_flag = no
 		}
 	}
 	
@@ -343,7 +344,7 @@ country_event = {
 	}
 }
 
-# Defeat by First Robot Swarm, First Purge:
+# Defeated by First Robot Swarm, First Purge:
 
 country_event = {
 	id = mem_ancient_robots.212
@@ -363,8 +364,10 @@ country_event = {
 			IF = {
 				limit = { 
 					count_pops = {
-						is_being_purged = no
-						is_growing = no
+						limit = {
+							is_being_purged = no
+							is_growing = no
+						}
 						count > 1
 					} 
 				}
@@ -399,32 +402,35 @@ planet_event = {
 	
 	immediate = {
 		set_planet_flag = mem_super_robot_attack_2
-		
-		random_country = {
-			limit = {
-				has_country_flag = mem_these_are_evil_robots
+		create_country = {
+			name = "Ancient Robots"
+			type = faction
+			effect = {
+				establish_communications_no_message = root.owner
 			}
+			species = robot
+			flag = {
+				icon = {
+					category = "pirate"
+					file = "flag_pirate_10.dds"
+				}
+				background= {
+					category = "backgrounds"
+					file = "stripes.dds"
+				}
+				colors={
+					"red"
+					"black"
+					"null"
+					"null"
+				}
+			}
+		}
+		last_created_country = {
 			save_event_target_as = mem_evil_robots
+			set_country_flag = mem_these_are_evil_robots
 		}
 		
-		create_army = {
-			name = "Robot Swarm"
-			owner = event_target:mem_evil_robots
-			species = robot
-			type = mem_evil_robot_army
-		}
-		create_army = {
-			name = "Robot Swarm"
-			owner = event_target:mem_evil_robots
-			species = robot
-			type = mem_evil_robot_army
-		}
-		create_army = {
-			name = "Robot Swarm"
-			owner = event_target:mem_evil_robots
-			species = robot
-			type = mem_evil_robot_army
-		}
 		create_army = {
 			name = "Robot Swarm"
 			owner = event_target:mem_evil_robots
@@ -486,18 +492,9 @@ country_event = {
 			remove_modifier = mem_under_siege
 			random_tile = {
 				limit = {
-					OR = {
-						has_blocker = mem_tb_robot_factory_arctic
-						has_blocker = mem_tb_robot_factory_arid
-						has_blocker = mem_tb_robot_factory_continental
-						has_blocker = mem_tb_robot_factory_desert
-						has_blocker = mem_tb_robot_factory_ocean
-						has_blocker = mem_tb_robot_factory_tropical
-						has_blocker = mem_tb_robot_factory_tundra
-					}
+					has_blocker = mem_tb_robot_factory
 				}
-				remove_blocker = yes
-				set_building = mem_ancient_robot_building_3
+				set_building = mem_ancient_robot_building_2
 			}
 		}
 	}
@@ -532,6 +529,7 @@ country_event = {
 		FROMFROM = {
 			remove_planet_flag = mem_super_robot_attack
 			remove_planet_flag = mem_super_robot_attack_2
+			remove_modifier = mem_under_siege
 			destroy_colony = yes
 			change_pc = pc_nuked
 		}
@@ -690,9 +688,12 @@ planet_event = {
 	immediate = {
 		if = {
 			count_pops = {
-				is_growing = no
+				limit = {
+					is_being_purged = no
+					is_growing = no
+				}
 				count > 1
-			} 
+			}
 			planet_event = { id = mem_ancient_robots.210 }
 			else = {
 				planet_event = { id = mem_ancient_robots.223 days = 10 random = 10 } # Set to much higher
@@ -711,11 +712,13 @@ planet_event = {
 	immediate = {
 		IF = {
             limit = { 
-                count_pops = { 
-					is_being_purged = no
-					is_growing = no
+                count_pops = {
+					limit = {
+						is_being_purged = no
+						is_growing = no
+					}
 					count > 1
-                } 
+				} 
             }
             random_pop = {
                 limit = { is_being_purged = no }
@@ -753,11 +756,13 @@ planet_event = {
     immediate = {
         IF = {
             limit = { 
-                count_pops = { 
-					is_being_purged = no
-					is_growing = no
+                count_pops = {
+					limit = {
+						is_being_purged = no
+						is_growing = no
+					}
 					count > 1
-                } 
+				}
             }
             random_pop = {
                 limit = { is_being_purged = no }
