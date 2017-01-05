@@ -1,0 +1,206 @@
+#Written by Sorta
+namespace = sorta
+
+#This document is triggers for events and therefore the consequences, what they're calling is in sorta_I_english.yml
+country_event = {
+	#ID sets my events apart from other developers and where they find the files needed 
+	id = sorta.1
+	#Name of event
+
+	title = "sorta.1.name"
+	#Description of Event
+	desc = "sorta.1.desc"
+	#Picture of event, there's a list of pictures already in the game
+	picture = GFX_evt_fleet_neutral
+	#Sound of event, there's a list of pictures already in the game
+	show_sound = event_ship_thrusters
+	#How long it takes the event to happen from when it is triggered
+	mean_time_to_happen = {
+		days = 1
+	}
+	#The various triggers for the event
+	trigger = {
+		#you can't be a robot
+		is_ai = no
+		any_neighbor_country = {
+				#AI has to have the personality migrant flock
+    			has_ai_personality = migrating_flock
+				NOT = { 
+					has_country_flag = migrant_flock_met_player
+						}
+			has_communications = ROOT
+			}
+		}
+	immediate = {
+		random_neighbor_country = {
+			limit = {
+				NOT = { is_country = ROOT }
+				}
+			set_country_flag = migrant_flock_met_player
+			#Abbreviation for calling the event
+			save_event_target_as = migflk
+			}
+		}
+	option = {
+		#One of the many trait triggers I have, their response is in sorta_I_english
+		name = sorta.1.xenophile
+			trigger = {
+				OR = {
+					has_ethic = ethic_xenophile
+				}
+			}
+			event_target:migflk  = {	
+				add_opinion_modifier = {
+					who = ROOT
+					#Tells the game the migrants were allowed
+					modifier = migrants_allowed
+					}
+				}
+			#Things we don't tell the player that it's effecting this outcome. 
+			hidden_effect = { 
+				If = { 
+					limit = { 
+						OR = {
+						#If you have the ethic spiritualist your population likes the migrants less
+							has_ethic = ethic_spiritualist
+							has_ethic = ethic_fanatic_spiritualist
+						 }
+					}
+					country_event = {
+						#There are 3 different outcomes for this event, sorta.2 is best as the migrants join and no relations
+						id = sorta.2
+						days = 75
+						random = 15
+						}
+					else = {
+						country_event = { 
+							#Migrants don't adapt as easily in sorta.4
+							id = sorta.4 
+							days = 75 
+							random = 15 
+										} 
+									}
+					}
+				}
+		}
+	option = {
+		name = sorta.1.individualist
+		trigger = {
+			OR = {
+				has_ethic = ethic_individualist
+			}
+		}
+		event_target:migflk = {	
+			add_opinion_modifier = {
+				who = ROOT
+				modifier = migrants_allowed
+				}
+			}
+		hidden_effect = { 
+			If = { 
+				limit = { 
+					OR = { 
+						has_ethic = ethic_spiritualist
+						has_ethic = ethic_fanatic_spiritualist
+						 } 
+					}
+				country_event = {
+					id = sorta.2
+					days = 75
+					random = 15
+					}
+			else = {
+				country_event = { 
+					id = sorta.4 
+					days = 75 
+					random = 15 
+						} 
+					}
+				}
+			}
+		}
+	option = {
+		name = sorta.1.fanindividualist
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_individualist
+			}
+			OR = {
+				has_ethic = ethic_materialist
+				has_ethic = ethic_fanatic_materialist			
+			}
+		}
+		event_target:migflk = {	
+			add_opinion_modifier = {
+				who = ROOT
+				modifier = migrants_allowed
+					}
+				}
+		hidden_effect = { 
+			country_event = { 
+				#sorta.3 results in the migrants joining well, but the empire they ran from takes a relations hit of -50
+				id = sorta.3 
+				days = 75 
+				random = 15 
+							} 
+						}
+				}
+	option = {
+		name = sorta.1.xenophobe
+			trigger = {
+						OR = {
+							has_ethic = ethic_xenophobe
+							has_ethic = ethic_fanatic_xenophobe
+						}
+					}
+			event_target:migflk = {	
+			add_opinion_modifier = {
+				who = ROOT
+				modifier = migrants_allowedPhobe
+					}
+				}
+			}
+	option = {
+		name = sorta.1.fanxenophile
+			trigger = {
+				OR = {
+					has_ethic = ethic_fanatic_xenophile
+				}
+			}
+		}
+
+	option = {
+		name = sorta.1.resigned
+		event_target:migflk = {	
+			add_opinion_modifier = {
+				who = ROOT
+				modifier = migrants_allowed   
+			}
+		}
+
+		hidden_effect = { 
+			If = { 
+				limit = { 
+					OR = { 
+						has_ethic = ethic_spiritualist
+						has_ethic = ethic_fanatic_spiritualist
+						 } 
+					}
+				country_event = {
+					id = sorta.2
+					days = 75
+					random = 15
+				}
+
+			else = {
+				country_event = { 
+					id = sorta.4 
+					days = 75 
+					random = 15 
+				}
+			}
+			}
+		}
+	}
+}
+
