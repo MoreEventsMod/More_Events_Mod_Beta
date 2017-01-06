@@ -934,47 +934,51 @@ event = {
 			has_global_flag = mem_ancient_robot_finish
 			has_global_flag = mem_ancient_robot_cancel
 		}
-		any_planet = {
-			AND = {
-				has_planet_flag = mem_ancient_robot_world
-				owner = {
-					NOT = {
-						has_country_flag = mem_ancient_robot_quest_owner
-					}
-				}
-			}
-			exists = yes
-		}
     }
     immediate = {
-		set_global_flag = mem_ancient_robot_cancel
-		random_planet = {
+		IF = {
 			limit = {
-				has_planet_flag = mem_ancient_robot_world
+				any_planet = {
+					AND = {
+						has_planet_flag = mem_ancient_robot_world
+						owner = {
+							NOT = {
+								has_country_flag = mem_ancient_robot_quest_owner
+							}
+						}
+					}
+					exists = yes
+				}
 			}
-			random_tile = {
+			set_global_flag = mem_ancient_robot_cancel
+			random_planet = {
 				limit = {
-					OR = {
-						has_blocker = mem_tb_unclearable_mountain
-						has_blocker = mem_tb_strange_mountain
-						has_blocker = mem_tb_robot_factory
+					has_planet_flag = mem_ancient_robot_world
+				}
+				random_tile = {
+					limit = {
+						OR = {
+							has_blocker = mem_tb_unclearable_mountain
+							has_blocker = mem_tb_strange_mountain
+							has_blocker = mem_tb_robot_factory
+						}
+					}
+					remove_blocker = yes
+				}
+				remove_modifier = mem_under_siege
+				owner = {
+					every_owned_pop = {
+						purge = no
 					}
 				}
-				remove_blocker = yes
 			}
-			remove_modifier = mem_under_siege
-			owner = {
-				every_owned_pop = {
-					purge = no
+			random_country = {
+				limit = {
+					has_country_flag = mem_ancient_robot_quest_owner
+					has_event_chain = mem_ancient_robots_chain
 				}
+				end_event_chain = "mem_ancient_robots_chain"
 			}
-		}
-		random_country = {
-			limit = {
-				has_country_flag = mem_ancient_robot_quest_owner
-				has_event_chain = mem_ancient_robots_chain
-			}
-			end_event_chain = "mem_ancient_robots_chain"
 		}
 	}
 }
