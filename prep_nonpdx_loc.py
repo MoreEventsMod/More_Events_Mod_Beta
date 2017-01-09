@@ -28,7 +28,7 @@ except getopt.GetoptError:
 	print('Valid arguments are -h, --help, -s, --source=, -o, --overwrite, -k, --keep-extra')
 	sys.exit(47)
 for opt, val in options:
-	elif opt in ("-h", "--help"):
+	if opt in ("-h", "--help"):
 		print("-h, --help :")
 		print("    See this help information.")
 		print("-s, --source= :")
