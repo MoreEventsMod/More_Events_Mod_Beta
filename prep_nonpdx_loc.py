@@ -59,11 +59,11 @@ for filename in os.listdir('localisation')[:]:
 		print('DEBUG: Removing unrelated loc file')
 		os.remove('localisation/' + filename)
 		continue
-	sourceFile = open('localisation/' + filename, 'r')
-	newFilename = filename.replace(sourceLanguage, overwriteLanguage)
-	with open('localisation/' + newFilename, 'w+', encoding="utf-8") as targetFile:
-		for line in sourceFile:
-			targetFile.write(line.replace(sourceLanguage + ':', target + ':'))
-		targetFile.close()
-		sourceFile.seek(0)
+	with open('localisation/' + filename, 'r', encoding="utf-8") as sourceFile:
+		newFilename = filename.replace(sourceLanguage, overwriteLanguage)
+		with open('localisation/' + newFilename, 'w+', encoding="utf-8") as targetFile:
+			for line in sourceFile:
+				targetFile.write(line.replace(sourceLanguage + ':', target + ':'))
+			targetFile.close()
+			sourceFile.seek(0)
 print(sourceLanguage + ' placed in ' + overwriteLanguage + ' loc files.')
