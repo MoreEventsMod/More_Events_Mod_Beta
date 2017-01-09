@@ -53,10 +53,10 @@ if (sourceLanguage == None):
 	print('Defaulting to source language: ' + sourceLanguage)
 
 for filename in os.listdir('localisation')[:]:
-	#TODO: From HERE!!
 	if (filename.count(overwriteLanguage) > 0):
 		continue
 	elif (filename.count(sourceLanguage) == 0 and (not deleteExtraLanguages)):
+		print('DEBUG: Removing unrelated loc file')
 		os.remove('localisation/' + filename)
 		continue
 	sourceFile = open('localisation/' + filename, 'r')
