@@ -63,7 +63,7 @@ for filename in os.listdir('localisation')[:]:
 		newFilename = filename.replace(sourceLanguage, overwriteLanguage)
 		with open('localisation/' + newFilename, 'w+', encoding="utf-8") as targetFile:
 			for line in sourceFile:
-				targetFile.write(line.replace(sourceLanguage + ':', target + ':'))
+				targetFile.write(line.replace(sourceLanguage + ':', overwriteLanguage + ':'))
 			targetFile.close()
 			sourceFile.seek(0)
 print(sourceLanguage + ' placed in ' + overwriteLanguage + ' loc files.')
