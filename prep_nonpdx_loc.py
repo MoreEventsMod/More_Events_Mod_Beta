@@ -56,7 +56,6 @@ for filename in os.listdir('localisation')[:]:
 	if (filename.count(overwriteLanguage) > 0):
 		continue
 	elif (filename.count(sourceLanguage) == 0 and deleteExtraLanguages):
-		print('DEBUG: Removing unrelated loc file')
 		os.remove('localisation/' + filename)
 		continue
 	with open('localisation/' + filename, 'r', encoding="utf-8") as sourceFile:
@@ -66,4 +65,5 @@ for filename in os.listdir('localisation')[:]:
 				targetFile.write(line.replace(sourceLanguage + ':', overwriteLanguage + ':'))
 			targetFile.close()
 			sourceFile.seek(0)
+	os.remove('localisation/' + filename)
 print(sourceLanguage + ' placed in ' + overwriteLanguage + ' loc files.')
