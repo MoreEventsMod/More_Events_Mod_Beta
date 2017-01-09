@@ -47,16 +47,16 @@ for opt, val in options:
 		print('Setting source language to ' + val)
 	elif opt in ("-k", "--keep-extra"):
 		deleteExtraLanguages = False
-if sourceLanguage == None
+if (sourceLanguage == None):
 	print('/!\ WARNING: No source language set.')
 	sourceLanguage = 'l_chinese'
 	print('Defaulting to source language: ' + sourceLanguage)
 
 for filename in os.listdir('localisation')[:]:
 	#TODO: From HERE!!
-	if (filename.count(overwriteLanguage) > 0)
+	if (filename.count(overwriteLanguage) > 0):
 		continue
-	elif (filename.count(sourceLanguage) == 0 and (not deleteExtraLanguages))
+	elif (filename.count(sourceLanguage) == 0 and (not deleteExtraLanguages)):
 		os.remove('localisation/' + filename)
 		continue
 	sourceFile = open('localisation/' + filename, 'r')
