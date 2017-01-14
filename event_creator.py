@@ -9,53 +9,116 @@
 
 from tkinter import *
 from tkinter import ttk
+import os, sys, re
 
 root = Tk()
+root.grid_columnconfigure(0,weight=1)
+root.grid_rowconfigure(0,weight=1)
 root.title("MEM Event Creator for Stellaris")
 
 mainframe = ttk.Frame(root, padding="3 3 12 12")
-mainframe.grid()
+mainframe.grid(sticky="NSEW")
+mainframe.grid_rowconfigure(1, weight=1)
 
 eventTypeFrame = ttk.LabelFrame(mainframe, text="Event Type")
-eventTypeFrame.grid(row=1,column=1)
+eventTypeFrame.grid(row=0,column=1)
 eventType = StringVar()
 eventTypeAnomalyRadio = ttk.Radiobutton(eventTypeFrame, text="Anomaly", variable=eventType, value="Anomaly").grid(row=1, column=0, sticky="W")
 eventTypeMTTHRadio = ttk.Radiobutton(eventTypeFrame, text="MTTH", variable=eventType, value="MTTH", state="disabled").grid(row=2, column=0, sticky="W")
 eventTypeDiplomaticRadio = ttk.Radiobutton(eventTypeFrame, text="Diplomatic", variable=eventType, value="Diplomatic", state="disabled").grid(row=3, column=0, sticky="W")
 eventType.set("Anomaly")
 
-internalNameFrame = ttk.Frame(mainframe)
-internalNameFrame.grid(row=1,column=0)
-internalName = StringVar()
-ttk.Label(internalNameFrame, text="Internal Name:").grid(row=1,column=0)
-internalNameEntry = ttk.Entry(internalNameFrame, width=20, textvariable=internalName)
-internalNameEntry.grid(row=1,column=1)
-
-imageMenuFrame = ttk.Frame(mainframe)
-imageMenuFrame.grid()
-image = StringVar()
+internalIDFrame = ttk.Frame(mainframe)
+internalIDFrame.grid(row=0,column=0)
+internalID = StringVar()
+ttk.Label(internalIDFrame, text="Internal ID:").grid(row=1,column=0)
+internalIDEntry = ttk.Entry(internalIDFrame, width=20, textvariable=internalID)
+internalIDEntry.grid(row=1,column=1)
 
 anomalyCategoryFrame = ttk.LabelFrame(mainframe, text="Anomaly Category")
-anomalyCategoryFrame.grid()
-anomalyCategoryName = StringVar()
-anomalyCategoryNameEntry = ttk.Entry(anomalyCategoryFrame, width=25, textvariable=anomalyCategoryName, state="disabled").grid(row=1, column=1, sticky="W")
+anomalyCategoryFrame.grid(row=1,column=0,sticky="NS")
+anomalyCategoryFrame.grid_columnconfigure(0, weight=1)
+anomalyCategoryFrame.grid_columnconfigure(1, weight=1)
+anomalyCategoryFrame.grid_rowconfigure(7, weight=1)
+anomalyCategoryKeyFrame = ttk.Frame(anomalyCategoryFrame)
+anomalyCategoryKeyFrame.grid(row=0,column=0,columnspan=2,sticky="WE")
+anomalyCategoryKeyFrame.grid_columnconfigure(1, weight=1)
+anomalyCategoryKey = StringVar()
+ttk.Label(anomalyCategoryKeyFrame, text="Category Key: ").grid(row=0,column=0,sticky="W")
+anomalyCategoryKeyEntry = ttk.Entry(anomalyCategoryKeyFrame, width=30, textvariable=anomalyCategoryKey, state="disabled").grid(row=0, column=1, sticky="WE")
 useCustomCategoryName = BooleanVar()
-anomalyCategoryUseCustomNameCheck = ttk.Checkbutton(anomalyCategoryFrame, text="Use Custom Category Name", variable=useCustomCategoryName, onvalue=True, offvalue=False).grid(row=2,column=1,sticky="W")
+anomalyCategoryUseCustomNameCheck = ttk.Checkbutton(anomalyCategoryFrame, text="Use Custom Category Key", variable=useCustomCategoryName, onvalue=True, offvalue=False).grid(row=1,column=0,sticky="W")
 useExistingCategory = BooleanVar()
-anomalyCategoryUseExistingCategoryCheck = ttk.Checkbutton(anomalyCategoryFrame, text="Use Existing Category", variable=useExistingCategory, onvalue=True, offvalue=False, state="disabled").grid(row=3,column=1,sticky="W")
+anomalyCategoryUseExistingCategoryCheck = ttk.Checkbutton(anomalyCategoryFrame, text="Use Existing Category", variable=useExistingCategory, onvalue=True, offvalue=False, state="disabled").grid(row=2,column=0,sticky="W")
 
-#anomalyCategoryNumericsFrame = ttk.Frame(anomalyCategoryFrame)
-#anomalyCategoryNumericsFrame.grid(row=4,column=1)
 anomalyFailRateFrame = ttk.Frame(anomalyCategoryFrame)
-anomalyFailRateFrame.grid(row=4,column=1,sticky="W")
+anomalyFailRateFrame.grid(row=1,column=1,sticky="E")
 anomalyFailRate = IntVar()
 ttk.Label(anomalyFailRateFrame, text="Fail Rate:").grid(row=0,column=0,sticky="W")
 anomalyFailRateEntry = ttk.Entry(anomalyFailRateFrame, width=3, textvariable=anomalyFailRate).grid(row=0,column=1,sticky="E")
 ttk.Label(anomalyFailRateFrame, text="%").grid(row=0,column=2,sticky="W")
 anomalyLevelFrame = ttk.Frame(anomalyCategoryFrame)
-anomalyLevelFrame.grid(row=4,column=1,sticky="E")
+anomalyLevelFrame.grid(row=2,column=1,sticky="E")
 anomalyLevel = IntVar()
 ttk.Label(anomalyLevelFrame, text="Level:").grid(row=0,column=0,sticky="W")
 anomalyLevelEntry = ttk.Entry(anomalyLevelFrame, width=3, textvariable=anomalyLevel).grid(row=0,column=1,sticky="E")
 
+anomalyCategoryTitleFrame = ttk.Frame(anomalyCategoryFrame)
+anomalyCategoryTitleFrame.grid_columnconfigure(1, weight=1)
+anomalyCategoryTitleFrame.grid(row=3,column=0, columnspan=2, sticky="WE")
+anomalyCategoryTitle = StringVar()
+ttk.Label(anomalyCategoryTitleFrame, text="Title Text: ").grid(row=0,column=0,sticky="W")
+anomalyCategoryTitleEntry = ttk.Entry(anomalyCategoryTitleFrame, width=25, textvariable=anomalyCategoryTitle).grid(row=0,column=1,sticky="WE")
+anomalyCategoryImageIDFrame = ttk.Frame(anomalyCategoryFrame)
+anomalyCategoryImageIDFrame.grid(row=5, column=0, columnspan=2, sticky="WE")
+anomalyCategoryImageIDFrame.grid_columnconfigure(1, weight=1)
+anomalyCategoryImageID = StringVar()
+ttk.Label(anomalyCategoryImageIDFrame, text="Image ID: ").grid(row=0,column=0,sticky="W")
+anomalyCategoryImageIDCombo = ttk.Combobox(anomalyCategoryImageIDFrame, textvariable=anomalyCategoryImageID)
+anomalyCategoryImageIDCombo.grid(row=0,column=1,sticky="WE")
+anomalyCategoryImageIDCombo['values'] = ('TODO', 'TODO 2')
+with open('mem-utils/event-image-names.txt', 'r') as inFile:
+	for line in inFile:
+		anomalyCategoryImageIDCombo['values'] = anomalyCategoryImageIDCombo['values'] + tuple([line])
+ttk.Label(anomalyCategoryFrame, text="Description Text:").grid(row=6,column=0,columnspan=2,sticky="W")
+anomalyCategoryDesc = StringVar()
+anomalyCategoryDescEntry = ttk.Entry(anomalyCategoryFrame, textvariable=anomalyCategoryDesc)
+anomalyCategoryDescEntry.grid(row=7,column=0,columnspan=2,sticky="WENS")
+
+anomalyValidPlanetTypesFrame = ttk.LabelFrame(anomalyCategoryFrame, text="Planet Types to Spawn on")
+anomalyValidPlanetTypesFrame.grid(row=8, column=0, columnspan=2, sticky="W")
+anomalyValidPlanetTypes = list()
+anomalyValidPlanetChecks = list()
+planetTypeInternalIDs = list()
+#TODO
+currRow = 0
+currCol = 0
+with open("mem-utils/planet-types-names.txt") as planetTypeFile:
+	for line in planetTypeFile:
+		splitLine = [x.strip() for x in line.split(',')]
+		planetTypeInternalIDs.append(splitLine[0])
+		anomalyValidPlanetTypes.append(BooleanVar())
+		anomalyValidPlanetChecks.append(ttk.Checkbutton(anomalyValidPlanetTypesFrame, text=splitLine[1], variable=anomalyValidPlanetTypes[2*currRow+currCol], onvalue=True, offvalue=False).grid(row=currRow,column=currCol,sticky="W"))
+		if (currCol == 0 or currCol == 1):
+			currCol += 1
+		else:
+			currRow += 1
+			currCol = 0
+
+anomalySuccessEventFrame = ttk.LabelFrame(mainframe, text="Anomaly Success Event")
+anomalySuccessEventFrame.grid(row=1,column=1,sticky="NS")
+anomalySuccessEventFrame.grid_columnconfigure(0, weight=1)
+anomalySuccessEventFrame.grid_columnconfigure(1, weight=1)
+anomalySuccessEventIDFrame = ttk.Frame(anomalySuccessEventFrame)
+anomalySuccessEventIDFrame.grid(row=0,column=0,columnspan=2,sticky="WE")
+anomalySuccessEventIDFrame.grid_columnconfigure(1, weight=1)
+anomalySuccessEventID = StringVar()
+ttk.Label(anomalySuccessEventIDFrame, text="Event ID: ").grid(row=0,column=0,sticky="W")
+anomalySuccessEventIDEntry = ttk.Entry(anomalySuccessEventIDFrame, width=30, textvariable=anomalySuccessEventID, state="disabled").grid(row=0, column=1, sticky="WE")
+useCustomAnomalySuccessID = BooleanVar()
+useCustomAnomalySuccessIDCheck = ttk.Checkbutton(anomalySuccessEventFrame, text="Use Custom Event ID", variable=useCustomAnomalySuccessID, onvalue=True, offvalue=False).grid(row=1,column=0,sticky="W")
+
+
+			
+			
 root.mainloop()
