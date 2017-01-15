@@ -118,6 +118,39 @@ anomalySuccessEventIDEntry = ttk.Entry(anomalySuccessEventIDFrame, width=30, tex
 useCustomAnomalySuccessID = BooleanVar()
 useCustomAnomalySuccessIDCheck = ttk.Checkbutton(anomalySuccessEventFrame, text="Use Custom Event ID", variable=useCustomAnomalySuccessID, onvalue=True, offvalue=False).grid(row=1,column=0,sticky="W")
 
+anomalySuccessEventNameFrame = ttk.Frame(anomalySuccessEventFrame)
+anomalySuccessEventNameFrame.grid(row=2,column=0)
+ttk.Label(anomalySuccessEventNameFrame, text="Name: ").grid(row=0,column=0,sticky="W")
+anomalySuccessEventName = StringVar()
+anomalySuccessEventNameEntry = ttk.Entry(anomalySuccessEventNameFrame, width=30, textvariable=anomalySuccessEventName).grid(row=0, column=1, sticky="WE")
+
+anomalySuccessImageIDFrame = ttk.Frame(anomalySuccessEventFrame)
+anomalySuccessImageIDFrame.grid(row=4, column=0, columnspan=2, sticky="WE")
+anomalySuccessImageIDFrame.grid_columnconfigure(1, weight=1)
+anomalySuccessImageID = StringVar()
+ttk.Label(anomalySuccessImageIDFrame, text="Image ID: ").grid(row=0,column=0,sticky="W")
+anomalySuccessImageIDCombo = ttk.Combobox(anomalySuccessImageIDFrame, textvariable=anomalySuccessImageID)
+anomalySuccessImageIDCombo.grid(row=0,column=1,sticky="WE")
+anomalySuccessImageIDCombo['values'] = ('TODO', 'TODO 2')
+with open('mem-utils/event-image-names.txt', 'r') as inFile:
+	for line in inFile:
+		anomalySuccessImageIDCombo['values'] = anomalySuccessImageIDCombo['values'] + tuple([line])
+ttk.Label(anomalySuccessEventFrame, text="Description Text:").grid(row=5,column=0,columnspan=2,sticky="W")
+anomalySuccessDesc = StringVar()
+anomalySuccessDescEntry = ttk.Entry(anomalySuccessEventFrame, textvariable=anomalySuccessDesc)
+anomalySuccessDescEntry.grid(row=6,column=0,columnspan=2,sticky="WENS")
+
+anomalySuccessClearDeposit = BooleanVar()
+anomalySuccessClearDepositCheck = ttk.Checkbutton(anomalySuccessEventFrame, text="Clear Orbital Deposit", variable=anomalySuccessClearDeposit, onvalue=True, offvalue=False).grid(row=7,column=0,sticky="W")
+
+anomalySuccessOptionFrame = list()
+anomalySuccessOptionText = list()
+anomalySuccessOptionCheck = list()
+anomalySuccessOptionUsed = list()
+for i in range(4):
+	#TODO
+	anomalySuccessOptionUsed.append(BooleanVar())
+	anomalySuccessOptionCheck.append(ttk.Checkbutton(TODO))
 
 			
 			
