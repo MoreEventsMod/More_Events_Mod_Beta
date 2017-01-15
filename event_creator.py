@@ -145,13 +145,17 @@ anomalySuccessClearDepositCheck = ttk.Checkbutton(anomalySuccessEventFrame, text
 
 anomalySuccessOptionFrame = list()
 anomalySuccessOptionText = list()
+anomalySuccessOptionEntry = list()
 anomalySuccessOptionCheck = list()
 anomalySuccessOptionUsed = list()
 for i in range(4):
 	#TODO
+	anomalySuccessOptionFrame.append(ttk.Frame(anomalySuccessEventFrame))
+	anomalySuccessOptionFrame[i].grid(row=5+i, column=0, columnspan=2, sticky="WE")
 	anomalySuccessOptionUsed.append(BooleanVar())
-	anomalySuccessOptionCheck.append(ttk.Checkbutton(TODO))
-
-			
+	anomalySuccessOptionCheck.append(ttk.Checkbutton(anomalySuccessOptionFrame[i],text=str(i+1)+":", variable=anomalySuccessOptionUsed, onvalue=True, offvalue=False).grid(row=0,column=0,sticky="W"))
+	anomalySuccessOptionText.append(StringVar())
+	anomalySuccessOptionEntry.append(ttk.Entry(anomalySuccessOptionFrame[i], textvariable=anomalySuccessOptionText))
+	anomalySuccessOptionEntry[i].grid(row=0,column=1,sticky="WE")
 			
 root.mainloop()
