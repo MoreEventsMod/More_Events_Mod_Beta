@@ -12,40 +12,91 @@ from tkinter import ttk
 import os, sys, re
 
 root = Tk()
+
+class EventData:
+	def __init__(self):
+		pass
+data = EventData()
+data.internalID = StringVar()
+data.eventType = StringVar()
+data.anomalyCategoryKey = StringVar()
+
+class LabelEntry:
+	def __init__(self, parent, labeltext, *args,**kwargs):
+		self.parent = parent
+		frameKeywords = ["class", "colormap", "container", "height", "padx", "pady", "visual"]
+		entryKeywords = kwargs.keys() - frameKeywords
+		frameKeywords = kwargs.keys() & frameKeywords
+		frameKWArgs = {key: kwargs[key] for key in frameKeywords}
+		entryKWArgs = {key: kwargs[key] for key in entryKeywords}
+		self.frame = ttk.Frame(parent, **frameKWArgs)
+		self.frame.grid_columnconfigure(1, weight=1)
+		self.label = ttk.Label(self.frame, text= labeltext)
+		self.label.grid(row=0, column=0, sticky="W")
+		self.entry = ttk.Entry(self.frame, **entryKWArgs)
+		self.entry.grid(row=0, column=1, sticky="WE")
+		
+	def grid(self, **kwargs):
+		self.frame.grid(**kwargs)
+		
+	def pack(self, **kwargs):
+		self.frame.pack(**kwargs)
+		
+	def place(self, **kwargs):
+		self.frame.place(**kwargs)
+        
+class EventTypeFrame(ttk.LabelFrame):
+	def __init__(self, parent, *args, **kwargs):
+		ttk.LabelFrame.__init__(self, parent, *args, **kwargs)
+		self.parent = parent
+		self.grid(row=0, column=1)
+		global data
+		self.anomalyRadio = ttk.Radiobutton(self, text="Anomaly", variable=data.eventType, value="Anomaly").grid(row=0, column=0, sticky="W")
+		self.mtthRadio = ttk.Radiobutton(self, text="MTTH", variable=data.eventType, value="MTTH", state="disabled").grid(row=1, column=0, sticky="W")
+		self.diplomaticRadio = ttk.Radiobutton(self, text="Diplomatic", variable=data.eventType, value="Diplomatic", state="disabled").grid(row=2, column=0, sticky="W")
+		data.eventType.set("Anomaly")
+
+#TODO: Authorial entry boxes in BasicsFrame
+
+class BasicsFrame(ttk.Frame):
+	def __init__(self, parent, *args, **kwargs):
+		ttk.Frame.__init__(self, parent, *args, **kwargs)
+		self.parent = parent
+		self.grid(row=0, column=0, columnspan = 4, sticky = "NEW")
+		self.grid_columnconfigure(0, weight=1)
+		self.eventTypeFrame = EventTypeFrame(self, text="Event Type")
+		self.eventTypeFrame.grid(row=0, column=1)
+		global data
+		self.internalIDLabelEntry = LabelEntry(self, labeltext="Internal ID: ", textvariable=data.internalID)
+		self.internalIDLabelEntry.grid(row=0, column=0)
+   
+class AnomalyCategoryFrame(ttk.LabelFrame):
+	def __init__(self, parent, *args, **kwargs):
+		ttk.LabelFrame.__init__(self, parent, *args, **kwargs)
+		self.parent = parent
+		self.grid(row=1,column=0,sticky="NS")
+		self.grid_columnconfigure(0,weight=1)
+		self.grid_columnconfigure(1,weight=1)
+		self.grid_columnconfigure(2,weight=1)
+		self.grid_rowconfigure(7,weight=1)
+		global data
+		self.key = LabelEntry(self, labeltext="Category Key: ", width=30, textvariable=data.anomalyCategoryKey, state="disabled")
+		self.key.grid(row=0,column=0,columnspan=2,sticky="WE")
+	 
+class MainFrame(ttk.Frame):
+	def __init__(self, parent, *args, **kwargs):
+		ttk.Frame.__init__(self, parent, *args, **kwargs)
+		self.parent = parent
+		self.grid(sticky="NSEW")
+		self.basicsFrame = BasicsFrame(self)
+
 root.grid_columnconfigure(0,weight=1)
 root.grid_rowconfigure(0,weight=1)
 root.title("MEM Event Creator for Stellaris")
+root.mainframe = MainFrame(root, padding="3 3 12 12")
+root.mainframe.grid_rowconfigure(1, weight=1)
 
-mainframe = ttk.Frame(root, padding="3 3 12 12")
-mainframe.grid(sticky="NSEW")
-mainframe.grid_rowconfigure(1, weight=1)
-
-eventTypeFrame = ttk.LabelFrame(mainframe, text="Event Type")
-eventTypeFrame.grid(row=0,column=1)
-eventType = StringVar()
-eventTypeAnomalyRadio = ttk.Radiobutton(eventTypeFrame, text="Anomaly", variable=eventType, value="Anomaly").grid(row=1, column=0, sticky="W")
-eventTypeMTTHRadio = ttk.Radiobutton(eventTypeFrame, text="MTTH", variable=eventType, value="MTTH", state="disabled").grid(row=2, column=0, sticky="W")
-eventTypeDiplomaticRadio = ttk.Radiobutton(eventTypeFrame, text="Diplomatic", variable=eventType, value="Diplomatic", state="disabled").grid(row=3, column=0, sticky="W")
-eventType.set("Anomaly")
-
-internalIDFrame = ttk.Frame(mainframe)
-internalIDFrame.grid(row=0,column=0)
-internalID = StringVar()
-ttk.Label(internalIDFrame, text="Internal ID:").grid(row=1,column=0)
-internalIDEntry = ttk.Entry(internalIDFrame, width=20, textvariable=internalID)
-internalIDEntry.grid(row=1,column=1)
-
-anomalyCategoryFrame = ttk.LabelFrame(mainframe, text="Anomaly Category")
-anomalyCategoryFrame.grid(row=1,column=0,sticky="NS")
-anomalyCategoryFrame.grid_columnconfigure(0, weight=1)
-anomalyCategoryFrame.grid_columnconfigure(1, weight=1)
-anomalyCategoryFrame.grid_rowconfigure(7, weight=1)
-anomalyCategoryKeyFrame = ttk.Frame(anomalyCategoryFrame)
-anomalyCategoryKeyFrame.grid(row=0,column=0,columnspan=2,sticky="WE")
-anomalyCategoryKeyFrame.grid_columnconfigure(1, weight=1)
-anomalyCategoryKey = StringVar()
-ttk.Label(anomalyCategoryKeyFrame, text="Category Key: ").grid(row=0,column=0,sticky="W")
-anomalyCategoryKeyEntry = ttk.Entry(anomalyCategoryKeyFrame, width=30, textvariable=anomalyCategoryKey, state="disabled").grid(row=0, column=1, sticky="WE")
+anomalyCategoryFrame = AnomalyCategoryFrame(root.mainframe, text="Anomaly Category")
 useCustomCategoryName = BooleanVar()
 anomalyCategoryUseCustomNameCheck = ttk.Checkbutton(anomalyCategoryFrame, text="Use Custom Category Key", variable=useCustomCategoryName, onvalue=True, offvalue=False).grid(row=1,column=0,sticky="W")
 useExistingCategory = BooleanVar()
@@ -95,17 +146,17 @@ currRow = 0
 currCol = 0
 with open("mem-utils/planet-types-names.txt") as planetTypeFile:
 	for line in planetTypeFile:
+		numCols = 3
 		splitLine = [x.strip() for x in line.split(',')]
 		planetTypeInternalIDs.append(splitLine[0])
 		anomalyValidPlanetTypes.append(BooleanVar())
-		anomalyValidPlanetChecks.append(ttk.Checkbutton(anomalyValidPlanetTypesFrame, text=splitLine[1], variable=anomalyValidPlanetTypes[2*currRow+currCol], onvalue=True, offvalue=False).grid(row=currRow,column=currCol,sticky="W"))
-		if (currCol == 0 or currCol == 1):
-			currCol += 1
-		else:
+		anomalyValidPlanetChecks.append(ttk.Checkbutton(anomalyValidPlanetTypesFrame, text=splitLine[1], variable=anomalyValidPlanetTypes[numCols*currRow+currCol], onvalue=True, offvalue=False).grid(row=currRow,column=currCol,sticky="W"))
+		currCol += 1
+		if (currCol == numCols):
 			currRow += 1
 			currCol = 0
 
-anomalySuccessEventFrame = ttk.LabelFrame(mainframe, text="Anomaly Success Event")
+anomalySuccessEventFrame = ttk.LabelFrame(root.mainframe, text="Anomaly Success Event")
 anomalySuccessEventFrame.grid(row=1,column=1,sticky="NS")
 anomalySuccessEventFrame.grid_columnconfigure(0, weight=1)
 anomalySuccessEventFrame.grid_columnconfigure(1, weight=1)
