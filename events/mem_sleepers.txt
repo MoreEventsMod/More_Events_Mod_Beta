@@ -312,6 +312,9 @@ ship_event = {
 	is_triggered_only = yes
 	
 	immediate = {
+		fleet = {
+			set_event_locked = yes
+		}
 		solar_system = {
 			random_system_planet = {
 				limit = {
@@ -336,6 +339,9 @@ ship_event = {
 			add_energy = -500
 		}
 		hidden_effect = {
+			fleet = {
+				set_event_locked = no
+			}
 			owner = {
 				random_list = {
 					1 = { country_event = { id = mem_sleepers.50 days = 30} } # Sleepers Awake
@@ -361,6 +367,9 @@ ship_event = {
 			}
 		}
 		hidden_effect = {
+			fleet = {
+				set_event_locked = no
+			}
 			owner = {
 				random_list = {
 					1 = { country_event = { id = mem_sleepers.50 days = 30} } # Sleepers Awake
@@ -403,6 +412,9 @@ ship_event = {
 			add_influence = 100
 		}
 		hidden_effect = {
+			fleet = {
+				set_event_locked = no
+			}
 			owner = {
 				random_list = {
 					80 = { country_event = { id = mem_sleepers.8 days = 30} } # small Explosion
@@ -413,7 +425,145 @@ ship_event = {
 	}
 }
 
-#Letting it blow up as a xenophobe
+#Looting the Vault and potentially getting uplifting tech option
+country_event = {
+	id = mem_sleepers.6
+	title = mem_sleepers.6.name
+	desc = mem_sleepers.6.desc
+	picture = GFX_evt_mem_horror_corridor
+	location = FROMFROMFROMFROM
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		FROM = {
+			fleet = {
+				set_event_locked = no
+			}
+			solar_system = {
+				random_system_planet = {
+					limit = {
+						has_planet_flag = mem_sleepers_planet
+					}
+					random_pop = {
+						save_event_target_as = mem_sleepers_natives
+					}
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_sleepers.6.a
+		add_energy = 500
+		add_minerals = 750
+		IF = {
+			limit = {
+				NOT = {
+					has_technology = tech_epigenetic_triggers
+				}
+			}
+			add_research_option = tech_epigenetic_triggers
+			add_tech_progress = {
+				tech = tech_epigenetic_triggers
+				progress = 0.3
+			} 
+			ELSE = {
+				add_society_research = 150
+			}
+		}
+	}
+}
+
+#Some sleepers awake and attack your looting team (small explosion) Scientist dies
+country_event = {
+	id = mem_sleepers.7
+	title = mem_sleepers.7.name
+	desc = mem_sleepers.7.desc
+	picture = GFX_evt_nuclear_explosion
+	location = FROMFROMFROMFROM
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_system_within_border = {
+			limit = {
+				any_planet = {
+					has_planet_flag = mem_sleepers_planet
+				}
+			}
+			random_planet = {
+				limit = {
+					has_planet_flag = mem_sleepers_planet
+				}
+				random_tile =  {
+					limit = {
+						has_blocker = no
+						has_grown_pop = no
+						has_building = no
+					}
+					set_blocker = tb_bomb_crater
+				}
+				owner = {
+					IF = {
+						limit = {
+							NOR = {
+								has_ethic = ethic_fanatic_spiritualist
+								has_ethic = ethic_spiritualist
+								has_ethic = ethic_fanatic_materialist
+								has_ethic = ethic_materialist
+							}
+						}
+						country_add_ethic = ethic_spiritualist
+						every_owned_pop = {
+							pop_add_ethic = ethic_spiritualist
+						}
+					}
+					IF = {
+						limit = {
+							has_ethic = ethic_fanatic_materialist	
+						}
+						country_remove_ethic = ethic_fanatic_materialist
+						country_add_ethic = ethic_fanatic_spiritualist
+						every_owned_pop = {
+							pop_remove_ethic = ethic_fanatic_materialist
+							pop_add_ethic = ethic_fanatic_spiritualist
+						}
+					}
+					IF = {
+						limit = {
+							has_ethic = ethic_materialist	
+						}
+						country_remove_ethic = ethic_materialist
+						country_add_ethic = ethic_spiritualist
+						every_owned_pop = {
+							pop_remove_ethic = ethic_materialist
+							pop_add_ethic = ethic_spiritualist
+						}
+					}
+				}
+			}
+		}
+		FROM = {
+			fleet = {
+				kill_leader = { type = scientist show_notification = no}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_sleepers.7.a
+		hidden_effect = {
+			FROM = {
+				fleet = {
+					set_event_locked = no
+				}
+			}
+		}
+	}
+}
+
+#Letting it blow up as a xenophobe (small)
 country_event = {
 	id = mem_sleepers.8
 	title = mem_sleepers.8.name
@@ -489,7 +639,7 @@ country_event = {
 	}
 }
 
-#Letting it blow up as a xenophobe
+#Letting it blow up as a xenophobe (big)
 country_event = {
 	id = mem_sleepers.9
 	title = mem_sleepers.9.name
