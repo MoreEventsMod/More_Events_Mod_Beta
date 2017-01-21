@@ -58,7 +58,9 @@ planet_event = {
 	
 	trigger = {
 		has_observation_outpost = yes
-		NOT = has_global_flag = mem_sleepers
+		NOT = {
+			has_global_flag = mem_sleepers
+		}
 		observation_outpost = { 
 			OR = { 
 				has_mission = passive_observation
@@ -373,10 +375,10 @@ ship_event = {
 			}
 			owner = {
 				random_list = {
-					#1 = { country_event = { id = mem_sleepers.50 days = 30} } # Sleepers Awake xenophile
+					1 = { country_event = { id = mem_sleepers.50 days = 30} } # Sleepers Awake xenophile
 					1 = { country_event = { id = mem_sleepers.100 days = 30} } # Sleepers Awake xenophobe
-					#2 = { country_event = { id = mem_sleepers.150 days = 30} } # Remnants
-					#2 = { country_event = { id = mem_sleepers.200 days = 30} } # The Last
+					2 = { country_event = { id = mem_sleepers.150 days = 30} } # Remnants
+					2 = { country_event = { id = mem_sleepers.200 days = 30} } # The Last
 				}
 			}
 		}
@@ -798,7 +800,7 @@ country_event = {
 	
 	picture_event_data = {
 		portrait = event_target:mem_sleepers_country
-		room = corridor_room
+		room = mem_corridor_room
 	}
 
 	option = {
@@ -1188,7 +1190,10 @@ country_event = {
 			species = owner_main_species
 			name = random
 			skill = 1
-			traits = random
+			traits = {
+				add_trait = trait_ruler_champion_of_the_people
+				add_trait = trait_ruler_fertility_preacher
+			}
 		}
 		assign_leader = last_created_leader
 		capital_scope = {
@@ -1545,7 +1550,7 @@ country_event = {
 	
 	picture_event_data = {
 		portrait = event_target:mem_sleepers_country
-		room = corridor_room
+		room = mem_corridor_room
 	}
 
 	option = {
@@ -1946,7 +1951,10 @@ country_event = {
 			species = owner_main_species
 			name = random
 			skill = 1
-			traits = random
+			traits = {
+				add_trait = trait_ruler_warlike
+				add_trait = trait_ruler_industrialist
+			}
 		}
 		assign_leader = last_created_leader
 		capital_scope = {
@@ -2122,9 +2130,324 @@ country_event = {
 		}
 	}
 }
-#		create_leader = {
-#			type = general
-#			species = event_target:subterranean_species
-#			name = random
-#			skill = 500
-#		}
+
+#Remnants
+country_event = {
+	id = mem_sleepers.150
+	title = mem_sleepers.150.name
+	desc = mem_sleepers.150.desc
+	show_sound = event_conversation
+	
+	is_triggered_only = yes
+	
+	diplomatic = yes
+	
+	immediate = {
+		FROMFROMFROMFROM = {
+			create_species = {
+				name = "Ozari"
+				class = random
+				portrait = random
+				homeworld = THIS
+				traits = {
+					trait = trait_natural_sociologists
+					trait = trait_venerable
+					trait = trait_sedentary
+				}
+			}
+			create_country = {
+				name = "Ozari Remnants"
+				species = last_created
+				type = adversary
+				ethos = {
+					ethic = ethic_xenophile
+					ethic = ethic_collectivist
+					ethic = ethic_materialist
+				}
+				auto_delete = no
+				flag = {
+					icon = {
+						category = "spherical"
+						file = "flag_spherical_1.dds"
+					}
+					background= {
+						category = "backgrounds"
+						file = "new_dawn.dds"
+					}
+					colors={
+						"green"
+						"black"
+						"null"
+						"null"
+					}
+				}
+			}
+			last_created_country = {
+				set_relation_flag = {
+					who = mem_sleepers_station_owner
+					flag = mem_sleepers
+				}
+				set_country_flag = mem_sleepers_country
+				establish_communications_no_message = event_target:mem_sleepers_station_owner
+				save_event_target_as = mem_sleepers_country
+				owner_species = { save_event_target_as = mem_sleepers_species }
+			}
+		}
+	}
+	
+	picture_event_data = {
+		portrait = event_target:mem_sleepers_country
+		room = mem_corridor_room
+	}
+
+	option = {
+		name = mem_sleepers.150.a
+		custom_tooltip = mem_sleepers.150.a.tooltip
+		response_text = mem_sleepers.150.a.response
+		add_modifier = {
+			modifier = mem_sleepers_research_boost
+			days = -1
+		}
+		hidden_effect = {
+			country_event = { id = mem_sleepers.151 days = 30 } # should be days = 14400 random = 3600
+		}
+	}
+	
+	option = {
+		name = mem_sleepers.150.b
+		response_text = mem_sleepers.150.b.response
+		add_influence = 75
+		hidden_effect = {
+			country_event = { id = mem_sleepers.152 days = 30 } # should be days = 1800 random = 200
+		}
+	}
+	
+	option = {
+		name = mem_sleepers.150.c
+		trigger = {
+			has_ethic = ethic_fanatic_xenophobe
+		}
+		response_text = mem_sleepers.150.c.response
+		add_influence = 150
+	}
+}
+
+#Last Ozari dies
+country_event = {
+	id = mem_sleepers.151
+	title = mem_sleepers.151.name
+	desc = mem_sleepers.151.desc
+	picture = GFX_evt_genetic_modification
+	
+	is_triggered_only = yes 
+	
+	option = {
+		name = mem_sleepers.151.a
+		remove_modifier = mem_sleepers_research_boost
+	}
+}
+
+#Primitive civilization evolves with help of Ozari
+country_event = {
+	id = mem_sleepers.152
+	title = mem_sleepers.152.name
+	desc = mem_sleepers.152.desc
+	picture = GFX_evt_medieval_alien_civilization
+	location = FROMFROMFROMFROMFROM
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		any_system_within_border = {
+			any_planet = {
+				has_planet_flag = mem_sleepers_planet
+				has_observation_outpost = yes
+				owner = {
+					is_country_type = primitive
+					OR = {
+						has_country_flag = bronze_age
+						has_country_flag = iron_age
+						has_country_flag = late_medieval_age
+						has_country_flag = renaissance_age
+					}
+				}
+			}
+		}
+	}
+	
+	immediate = {
+		random_planet = {
+			limit = {
+				has_planet_flag = mem_sleepers_planet
+			}
+			owner = {
+				THIS = {
+					save_event_target_as = mem_sleepers_country
+				}
+				IF = {
+					limit = {
+						has_country_flag = bronze_age
+					}
+					remove_country_flag = bronze_age
+				}
+				IF = {
+					limit = {
+						has_country_flag = iron_age
+					}
+					remove_country_flag = iron_age
+				}
+				IF = {
+					limit = {
+						has_country_flag = late_medieval_age
+					}
+					remove_country_flag = late_medieval_age
+				}
+				IF = {
+					limit = {
+						has_country_flag = renaissance_age
+					}
+					remove_country_flag = renaissance_age
+				}	
+				set_country_flag = steam_age
+				set_primitive_age = steam_age
+				home_planet = {
+					every_planet_army = { remove_army = yes }
+					while = {
+						count = 3
+						create_army = {
+							name = "Industrial Army"
+							owner = event_target:mem_sleepers_country
+							species = event_target:mem_sleepers_country
+							type = "industrial_army"
+						}
+					}	
+					random_tile = {
+						limit = { 
+							has_blocker = no 
+							has_building = no 
+							has_grown_pop = no
+						}
+						set_building = "building_primitive_factory"
+						create_pop = {
+							species = owner
+							ethos = owner
+						}			
+						add_resource = {
+							resource = minerals
+							amount = 1
+							replace = yes
+						}
+					}			
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_sleepers.152.a
+	}
+}
+
+country_event = {
+	id = mem_sleepers.200
+	title = mem_sleepers.200.name
+	desc = mem_sleepers.200.desc
+	show_sound = event_conversation
+	
+	is_triggered_only = yes
+	
+	diplomatic = yes
+	
+	immediate = {
+		FROMFROMFROMFROM = {
+			create_species = {
+				name = "Ozari"
+				class = random
+				portrait = random
+				homeworld = THIS
+				traits = {
+					trait = trait_natural_sociologists
+					trait = trait_venerable
+					trait = trait_sedentary
+				}
+			}
+			create_country = {
+				name = "Ozari Remnant"
+				species = last_created
+				type = adversary
+				ethos = {
+					ethic = ethic_fanatic_xenophobe
+					ethic = ethic_collectivist
+				}
+				auto_delete = no
+				flag = {
+					icon = {
+						category = "spherical"
+						file = "flag_spherical_1.dds"
+					}
+					background= {
+						category = "backgrounds"
+						file = "new_dawn.dds"
+					}
+					colors={
+						"green"
+						"black"
+						"null"
+						"null"
+					}
+				}
+			}
+			last_created_country = {
+				set_relation_flag = {
+					who = mem_sleepers_station_owner
+					flag = mem_sleepers
+				}
+				set_country_flag = mem_sleepers_country
+				establish_communications_no_message = event_target:mem_sleepers_station_owner
+				save_event_target_as = mem_sleepers_country
+				owner_species = { save_event_target_as = mem_sleepers_species }
+			}
+		}
+	}
+	
+	picture_event_data = {
+		portrait = event_target:mem_sleepers_country
+		room = mem_corridor_room
+	}
+
+	option = {
+		name = mem_sleepers.200.a
+		custom_tooltip = mem_sleepers.200.a.tooltip
+		response_text = mem_sleepers.200.a.response
+		create_leader = {
+			type = scientist
+			species = event_target:mem_sleepers_species
+			name = random
+			skill = 4000
+			traits = {
+				add_trait = leader_trait_expertise_biology
+				add_trait = mem_leader_trait_last_ozari
+			}
+		}
+	}
+	
+	option = {
+		name = mem_sleepers.200.b
+		trigger = {
+			NOT = {
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
+		response_text = mem_sleepers.200.b.response
+		add_influence = 75
+	}
+	
+	option = {
+		name = mem_sleepers.200.c
+		trigger = {
+			has_ethic = ethic_fanatic_xenophobe
+		}
+		response_text = mem_sleepers.200.c.response
+		add_influence = 150
+	}
+}
