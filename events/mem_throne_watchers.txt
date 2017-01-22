@@ -42,6 +42,7 @@ ship_event = {
 				limit = { has_event_chain = "mem_lex_ring_chain" }
 				end_event_chain = "mem_lex_ring_chain"
 			}
+			establish_communications_no_message = event_target:mem_ring_country
 			set_country_flag = encountered_mem_titan
 		}
 	}		
@@ -110,7 +111,16 @@ country_event = {
 	picture = GFX_evt_fallen_empire
 	
 	is_triggered_only = yes
-	fire_only_once = yes
+	
+	trigger = {
+		NOT = {
+			has_country_flag = mem_ring_bounce
+		}
+	}
+	
+	immediate = {
+		set_country_flag = mem_ring_bounce
+	}
 	
 	option = {
 		name = "mem_throne_watchers.11.a"
@@ -123,33 +133,17 @@ country_event = {
 	id = mem_throne_watchers.20
 	hide_window = yes
 	is_triggered_only = yes
-	
-	fire_only_once = yes
 
 	trigger = {
 		is_country_type = mem_ring_guardian
-		any_owned_ship = {
-			is_ship_size = mem_titan	
-			fleet = {
-				exists = solar_system
-				solar_system = {
-					has_star_flag = mem_ring_system
-				}
-			}	
-		}
 		
 		from = {
+			NOT = {
+				has_country_flag = mem_ring_weakness_check
+			}
 			is_country_type = default
 			is_ai = no
-			any_owned_ship = {
-				is_ship_class = shipclass_military 
-				fleet = {
-					exists = solar_system
-					solar_system = {
-						has_star_flag = mem_ring_system
-					}
-				}	
-			}
+
 			AND = {
 				OR = {
 					has_technology = "tech_ship_armor_5"
@@ -174,6 +168,7 @@ country_event = {
 
 	immediate = {
 		from = {
+			set_country_flag = mem_ring_weakness_check
 			country_event = { id = mem_throne_watchers.21 }
 		}
 	}
@@ -185,13 +180,8 @@ country_event = {
 	desc = "mem_throne_watchers.21.desc"
 	picture = GFX_evt_exploding_ship
 	is_triggered_only = yes
-	
-	fire_only_once = yes
 
 	trigger = {
-		from = { is_country_type = mem_ring_guardian }
-		is_country_type = default
-		is_ai = no
 		NOT = { has_country_flag = mem_ring_weakness_researched }
 	}
 
@@ -227,7 +217,7 @@ country_event = {
 		name = mem_throne_watchers.22.a
 		add_modifier = {
 			modifier = mem_ring_weakness
-			days = 36000
+			days = -1
 		}
 	}
 }
@@ -267,9 +257,10 @@ country_event = {
 		}
 		FROM = {
 			country_event = { id = mem_throne_watchers.31 }
+			country_event = { id = mem_ancestor.30 days = 1800 }
+			country_event = { id = mem_ancestor.30 days = 3600 }
 			set_country_flag = mem_titan_slayer
 			set_global_flag = ring_bounce_off
-			save_event_target_as = mem_titan_slayer
 		}
 		every_country = {
 			limit = { 
@@ -349,7 +340,6 @@ ship_event = {
 			name = "Ancient Warform"
 			settings = {
 				spawn_debris = no 
-				is_boss = yes
 			}
 			effect = {
 				set_owner = event_target:mem_titan_pc_project_owner
@@ -1278,41 +1268,54 @@ country_event = {
 
 	option = {
 		name = "mem_throne_watchers.46.a"
+		custom_tooltip = mem_throne_watchers.46.a.tooltip
 		hidden_effect = { set_country_flag = mem_titan_awakening }
 	}	
 }
 
 country_event = {
 	id = mem_throne_watchers.47
-	title = "mem_throne_watchers.47"
-	desc = "mem_throne_watchers.47.desc"
-	picture = GFX_evt_small_space_battle
-	show_sound = event_mystic_reveal
 
-	fire_only_once = yes
+	hide_window = yes
 	is_triggered_only = yes
 	
 	trigger = {
 		is_ai = no
 		is_country_type = default
+		NOT = { has_country_flag = mem_titan_evolve_success }
 		has_country_flag = mem_titan_slayer
 		has_country_flag = mem_titan_awakening
-		FROMFROM = { is_ship_size = mem_titan_pc }
+		any_owned_ship = {
+			is_ship_size = mem_titan_pc
+		}
 	}
 	
 	immediate = {
 		add_threat = {
-			who = ROOT
+			who = THIS
 			amount = 10
 		}
 		FROMFROM = {
 			save_event_target_as = mem_titan_pc_spawn
 		}
-		create_fleet = {
+		if = {
+			limit = {
+				FROMFROM = {
+					OWNER = {
+						count_owned_ships = {
+							limit = {
+								is_ship_size = mem_titan_pc
+								FLEET = { is_same_value = event_target:mem_titan_pc_spawn }
+							}
+							count > 0
+						}
+					}
+				}
+			}
+			create_fleet = {
 			name = "Solar Envoy"
 			settings = {
 				spawn_debris = no 
-				is_boss = yes
 			}
 			effect = {
 				set_owner = PREV
@@ -1332,6 +1335,9 @@ country_event = {
 					}	
 				}
 			}
+			FROMFROM = {
+				delete_fleet = this
+			}
 			last_created_fleet = {
 				create_ambient_object = {
 					type = mem_effect_explosion_2_object
@@ -1347,9 +1353,8 @@ country_event = {
 					entity_scale_to_size = yes
 					scale = 100
 				}
-			}	
-	}
-	option = {
-		name = "mem_throne_watchers.47.a"
+			}
+			set_country_flag = mem_titan_evolve_success
+		}
 	}
 }

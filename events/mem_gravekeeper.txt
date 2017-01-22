@@ -67,9 +67,6 @@ ship_event = {
 			add_engineering_research = 1000
 		}
 		hidden_effect = {
-			owner = { 
-				country_event = { id = mem_gravekeeper.10 }
-			}
 			event_target:mem_gravekeeper_system = {
 				random_system_ambient_object = {
 					limit = { has_ambient_object_flag = mem_gravekeeper_flag }
@@ -146,6 +143,10 @@ ship_event = {
 					entity_scale_to_size = yes
 					scale = 10
 				}
+			}
+			owner = { 
+				country_event = { id = mem_gravekeeper.10 }
+				establish_communications_no_message = event_target:mem_grave_country
 			}
 			event_target:mem_gravekeeper_ambient = { destroy_ambient_object = this }
 			set_global_flag = mem_grave_appeared
@@ -342,35 +343,17 @@ country_event = {
 	id = mem_gravekeeper.30
 	hide_window = yes
 	is_triggered_only = yes
-	
-	fire_only_once = yes
 
 	trigger = {
 		is_country_type = mem_grave_guardian
-		any_owned_ship = {
-		    OR = {
-				is_ship_size = mem_grave
-				is_ship_size = mem_grave_awakened
-			}
-			fleet = {
-				exists = solar_system
-				solar_system = {
-				has_star_flag = mem_grave_system
-				}
-			}
-		}
+		
 		from = {
+			NOT = {
+				has_country_flag = mem_grave_weakness_check
+			}
 			is_country_type = default
 			is_ai = no
-			any_owned_ship = {
-			is_ship_class = shipclass_military 
-			fleet = {
-					exists = solar_system
-					solar_system = {
-						has_star_flag = mem_grave_system
-					}
-				}	
-			}
+
 			AND = {
 				OR = {
 					has_technology = "tech_ship_armor_5"
@@ -395,6 +378,7 @@ country_event = {
 
 	immediate = {
 		from = {
+			set_country_flag = mem_grave_weakness_check
 			country_event = { id = mem_gravekeeper.31 }
 		}
 	}
@@ -406,13 +390,8 @@ country_event = {
 	desc = "mem_gravekeeper.31.desc"
 	picture = GFX_evt_exploding_ship
 	is_triggered_only = yes
-	
-	fire_only_once = yes
 
 	trigger = {
-		from = { is_country_type = mem_grave_guardian }
-		is_country_type = default
-		is_ai = no
 		NOT = { has_country_flag = mem_grave_weakness_researched }
 	}
 
@@ -449,7 +428,7 @@ country_event = {
 
 		add_modifier = {
 			modifier = mem_grave_weakness
-			days = 36000
+			days = -1
 		}
 	}
 }
@@ -499,8 +478,9 @@ country_event = {
 		}
 		FROM = {
 			country_event = { id = mem_gravekeeper.41 }
+			country_event = { id = mem_ancestor.30 days = 1800 }
+			country_event = { id = mem_ancestor.30 days = 3600 }
 			set_country_flag = mem_grave_slayer
-			save_event_target_as = mem_grave_slayer
 		}
 		every_country = {
 			limit = { 
@@ -595,7 +575,6 @@ ship_event = {
 			name = "Gravekeeper"
 			settings = {
 				spawn_debris = no 
-				is_boss = yes
 			}
 			effect = {
 				set_owner = event_target:mem_grave_project_owner
@@ -703,42 +682,55 @@ country_event = {
 		}
 
 	option = {
-		name = "mem_gravekeeper.322.a"
+		name = "mem_gravekeeper.61.a"
+		custom_tooltip = mem_gravekeeper.61.a.tooltip
 		hidden_effect = { set_country_flag = mem_grave_awakening }
 	}	
 }
 
 country_event = {
 	id = mem_gravekeeper.70
-	title = "mem_gravekeeper.70"
-	desc = "mem_gravekeeper.70.desc"
-	picture = GFX_evt_small_space_battle
-	show_sound = event_mystic_reveal
 
-	fire_only_once = yes
+	hide_window = yes
 	is_triggered_only = yes
 	
 	trigger = {
 		is_ai = no
 		is_country_type = default
+		NOT = { has_country_flag = mem_grave_evolve_success }
 		has_country_flag = mem_grave_slayer
 		has_country_flag = mem_grave_awakening
-		FROMFROM = { is_ship_size = mem_grave_awakened_pc_bound }
+		any_owned_ship = {
+			is_ship_size = mem_grave_awakened_pc_bound
+		}
 	}
 	
 	immediate = {
 		add_threat = {
-			who = ROOT
+			who = THIS
 			amount = 10
 		}
 		FROMFROM = {
 			save_event_target_as = mem_grave_pc_spawn
 		}
-		create_fleet = {
+		if = {
+			limit = {
+				FROMFROM = {
+					OWNER = {
+						count_owned_ships = {
+							limit = {
+								is_ship_size = mem_grave_awakened_pc_bound
+								FLEET = { is_same_value = event_target:mem_grave_pc_spawn }
+							}
+							count > 0
+						}
+					}
+				}
+			}
+			create_fleet = {
 			name = "Awakened Gravekeeper"
 			settings = {
 				spawn_debris = no 
-				is_boss = yes
 			}
 			effect = {
 				set_owner = PREV
@@ -758,6 +750,9 @@ country_event = {
 					}	
 				}
 			}
+			FROMFROM = {
+				delete_fleet = this
+			}
 			last_created_fleet = {
 				create_ambient_object = {
 					type = mem_effect_explosion_5_object
@@ -773,9 +768,8 @@ country_event = {
 					entity_scale_to_size = yes
 					scale = 100
 				}
-			}	
-	}
-	option = {
-		name = "mem_gravekeeper.70.a"
+			}
+			set_country_flag = mem_grave_evolve_success
+		}
 	}
 }
