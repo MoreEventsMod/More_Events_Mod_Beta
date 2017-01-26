@@ -51,6 +51,23 @@ mem_effect_explosion_4 = {
 	}
 }
 
+mem_effect_explosion_5_big = {
+	create_ambient_object = {
+		type = mem_effect_explosion_5_object
+		location = THIS
+		duration = 10
+		
+		use_3d_location = yes
+		
+		entity_offset = { min = 0 max = 0 }
+		entity_offset_angle = { min = 0 max = 0 }
+		entity_offset_height = { min = 0 max = 0 }
+		
+		entity_scale_to_size = yes
+		scale = 100
+	}
+}
+
 mem_effect_explosion_6_big = {
 	create_ambient_object = {
 		type = mem_effect_explosion_6_object
@@ -924,6 +941,21 @@ mem_conduit_fleet_roaming_3 = {
 	}
 }
 
+mem_conduit_owner_swap = {
+	every_fleet_in_system = {
+		if = {
+			limit = {
+				NOT = {
+					OWNER = {
+						is_country_type = mem_conduit_guardian
+					}
+				}
+			}
+			set_owner = event_target:mem_conduit_country
+		}
+	}
+}
+
 ###MEM ANCESTOR EFFECTS
 
 #mem ancestor star spawn templates 1
@@ -1079,8 +1111,8 @@ mem_ancestor_immortal = {
 								found_planet = {
 									move_to = this
 									wait = {
-										duration = 180
-										random = 45
+										duration = 25
+										random = 15
 									}
 								}
 							}
@@ -1245,8 +1277,8 @@ mem_ancestor_immortal_1 = {
 								found_planet = {
 									move_to = this
 									wait = {
-										duration = 180
-										random = 45
+										duration = 25
+										random = 15
 									}
 								}
 							}
@@ -1411,8 +1443,8 @@ mem_ancestor_immortal_2 = {
 								found_planet = {
 									move_to = this
 									wait = {
-										duration = 180
-										random = 45
+										duration = 25
+										random = 15
 									}
 								}
 							}
@@ -1478,8 +1510,8 @@ mem_ancestor_immortal_3 = {
 								found_planet = {
 									move_to = this
 									wait = {
-										duration = 180
-										random = 45
+										duration = 25
+										random = 15
 									}
 								}
 							}
@@ -1544,7 +1576,161 @@ mem_ancestor_immortal_4 = {
 								found_planet = {
 									move_to = this
 									wait = {
-										duration = 180
+										duration = 25
+										random = 15
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+# ancestor initial spawn templates
+
+mem_ancestor_herald_init = {
+	create_fleet = {
+		name = "Herald of Thesan"
+		settings = {
+			spawn_debris = no 
+		}
+		effect = {
+			set_owner = event_target:mem_ancestor_country
+			create_ship = {
+				name = "Favi"
+				design = "Eita"
+				prefix = no
+			}
+			set_location = event_target:mem_ancestor_escape
+			
+			set_fleet_stance = aggressive
+			set_aggro_range = 1000
+			set_aggro_range_measure_from = self
+
+			queue_actions = {
+				repeat = {
+					find_random_system = {
+						trigger = {
+							id = mem_ancestor_herald.roam.2a
+							exists = space_owner
+							any_planet = {
+								OR = {
+									has_spaceport = yes  
+									has_observation_outpost = yes
+									has_mining_station = yes
+									has_research_station = yes 
+								}
+							}
+							NOT = {
+								OR = {
+									has_star_flag = mem_ring_system
+									has_star_flag = mem_grave_system
+									has_star_flag = mem_garden_system
+								}
+								space_owner = {
+									is_same_value = event_target:mem_ancestor_country
+								}
+							}
+						}
+						found_system = {
+							move_to = this
+							
+							find_closest_planet = {
+								trigger = {
+									id = mem_ancestor_herald.roam.2b
+									OR = {
+										has_spaceport = yes  
+										has_observation_outpost = yes
+										has_mining_station = yes
+										has_research_station = yes 
+									}
+								}
+								found_planet = {
+									move_to = this
+									wait = {
+										duration = 45
+										random = 25
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+mem_ancestor_vessel_init = {
+	create_fleet = {
+		name = "Vessel of Thesan"
+		settings = {
+			spawn_debris = no 
+			is_boss = yes
+		}
+		effect = {
+			set_owner = event_target:mem_ancestor_country
+			create_ship = {
+				name = "Fanu"
+				design = "Persipnei I"
+				prefix = no
+			}
+			set_fleet_flag = mem_ancestor_boss_fleet
+			set_fleet_stance = aggressive
+			set_aggro_range_measure_from = self
+			set_aggro_range = 1000
+			
+			set_location = {
+			target = event_target:mem_ancestor_escape
+			distance = 0
+			angle = random 
+			}
+			queue_actions = {
+				repeat = {
+					find_closest_system = {
+						trigger = {
+							id = mem_ancestor_boss.roam.1a
+							exists = space_owner
+							any_planet = {
+								OR = {
+									has_spaceport = yes  
+									has_observation_outpost = yes
+									has_mining_station = yes
+									has_research_station = yes 
+								}
+							}
+							NOT = {
+								OR = {
+									has_star_flag = mem_ring_system
+									has_star_flag = mem_grave_system
+									has_star_flag = mem_garden_system
+								}
+								space_owner = {
+									is_same_value = event_target:mem_ancestor_country
+								}
+							}
+						}
+						found_system = {
+							move_to = this
+							
+							find_closest_planet = {
+								trigger = {
+									id = mem_ancestor_boss.roam.1b
+									OR = {
+										has_spaceport = yes  
+										has_observation_outpost = yes
+										has_mining_station = yes
+										has_research_station = yes 
+									}
+								}
+								found_planet = {
+									move_to = this
+									wait = {
+										duration = 90
 										random = 45
 									}
 								}
@@ -1621,7 +1807,7 @@ mem_ancestor_fanu_1 = {
 								found_planet = {
 									move_to = this
 									wait = {
-										duration = 360
+										duration = 180
 										random = 90
 									}
 								}
@@ -1696,8 +1882,8 @@ mem_ancestor_fanu_2 = {
 								found_planet = {
 									move_to = this
 									wait = {
-										duration = 360
-										random = 90
+										duration = 270
+										random = 135
 									}
 								}
 							}
@@ -1774,7 +1960,7 @@ mem_ancestor_fanu_3 = {
 									move_to = this
 									wait = {
 										duration = 360
-										random = 90
+										random = 180
 									}
 								}
 							}
@@ -1848,8 +2034,8 @@ mem_ancestor_thesan_1 = {
 								found_planet = {
 									move_to = this
 									wait = {
-										duration = 360
-										random = 90
+										duration = 90
+										random = 45
 									}
 								}
 							}
@@ -1923,161 +2109,8 @@ mem_ancestor_thesan_2 = {
 								found_planet = {
 									move_to = this
 									wait = {
-										duration = 360
-										random = 90
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-# ancestor initial spawn templates
-
-mem_ancestor_vessel_init = {
-	create_fleet = {
-		name = "Vessel of Thesan"
-		settings = {
-			spawn_debris = no 
-			is_boss = yes
-		}
-		effect = {
-			set_owner = event_target:mem_ancestor_country
-			create_ship = {
-				name = "Fanu"
-				design = "Persipnei I"
-				prefix = no
-			}
-			set_fleet_flag = mem_ancestor_boss_fleet
-			set_fleet_stance = aggressive
-			set_aggro_range_measure_from = self
-			set_aggro_range = 1000
-			
-			set_location = {
-			target = event_target:mem_ancestor_escape
-			distance = 0
-			angle = random 
-			}
-			queue_actions = {
-				repeat = {
-					find_closest_system = {
-						trigger = {
-							id = mem_ancestor_boss.roam.1a
-							exists = space_owner
-							any_planet = {
-								OR = {
-									has_spaceport = yes  
-									has_observation_outpost = yes
-									has_mining_station = yes
-									has_research_station = yes 
-								}
-							}
-							NOT = {
-								OR = {
-									has_star_flag = mem_ring_system
-									has_star_flag = mem_grave_system
-									has_star_flag = mem_garden_system
-								}
-								space_owner = {
-									is_same_value = event_target:mem_ancestor_country
-								}
-							}
-						}
-						found_system = {
-							move_to = this
-							
-							find_closest_planet = {
-								trigger = {
-									id = mem_ancestor_boss.roam.1b
-									OR = {
-										has_spaceport = yes  
-										has_observation_outpost = yes
-										has_mining_station = yes
-										has_research_station = yes 
-									}
-								}
-								found_planet = {
-									move_to = this
-									wait = {
-										duration = 360
-										random = 90
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-mem_ancestor_herald_init = {
-	create_fleet = {
-		name = "Herald of Thesan"
-		settings = {
-			spawn_debris = no 
-		}
-		effect = {
-			set_owner = event_target:mem_ancestor_country
-			create_ship = {
-				name = "Favi"
-				design = "Eita"
-				prefix = no
-			}
-			set_location = event_target:mem_ancestor_escape
-			
-			set_fleet_stance = aggressive
-			set_aggro_range = 1000
-			set_aggro_range_measure_from = self
-
-			queue_actions = {
-				repeat = {
-					find_random_system = {
-						trigger = {
-							id = mem_ancestor_herald.roam.2a
-							exists = space_owner
-							any_planet = {
-								OR = {
-									has_spaceport = yes  
-									has_observation_outpost = yes
-									has_mining_station = yes
-									has_research_station = yes 
-								}
-							}
-							NOT = {
-								OR = {
-									has_star_flag = mem_ring_system
-									has_star_flag = mem_grave_system
-									has_star_flag = mem_garden_system
-								}
-								space_owner = {
-									is_same_value = event_target:mem_ancestor_country
-								}
-							}
-						}
-						found_system = {
-							move_to = this
-							
-							find_closest_planet = {
-								trigger = {
-									id = mem_ancestor_herald.roam.2b
-									OR = {
-										has_spaceport = yes  
-										has_observation_outpost = yes
-										has_mining_station = yes
-										has_research_station = yes 
-									}
-								}
-								found_planet = {
-									move_to = this
-									wait = {
-										duration = 180
-										random = 45
+										duration = 45
+										random = 25
 									}
 								}
 							}
