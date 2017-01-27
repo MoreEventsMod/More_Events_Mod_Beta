@@ -1,0 +1,209 @@
+####################################
+#
+# Antaran Menace - Midgame Crisis
+#
+# Coding by Malthus
+#
+####################################
+
+namespace = mem_antarans
+
+#Setup Event at Game Start for randomly disabling the Crisis
+event = {
+	id = mem_antarans.1
+	hide_window = yes
+	
+	immediate = {
+		random_list = {
+			3 = {
+				set_global_flag = mem_antarans_disabled
+			}
+			1 = { }
+		}
+	}
+}
+
+#Empire Targeting for Raids
+planet_event = {
+	id = mem_antarans.2
+	hide_window = yes
+	
+	trigger = {
+		is_colony = yes
+		is_capital = no
+		NOR = {
+			has_planet_flag = mem_antarans_raided_planet #this is a timed flag set when the planet is raided 
+			has_global_flag = mem_antarans_recent_attack #this is a timed flag set at the start of a raid
+		}
+		owner = {
+			is_country_type = default
+			NOR = {
+				has_country_flag = mem_antarans_raided_empire #this is a timed flag set when the an empire gets attacked
+				has_country_flag = mem_antarans_target_1
+				has_country_flag = mem_antarans_target_2
+				has_country_flag = mem_antarans_target_3
+				has_country_flag = mem_antarans_target_4
+				has_country_flag = mem_antarans_target_5
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		months = 32
+	}
+	
+	immediate = {
+		IF = {
+			limit = {
+				NOT = {
+					any_country = {
+						has_country_flag = mem_antarans_target_1
+					}
+				}
+			}
+			owner = {
+				set_country_flag = mem_antarans_target_1
+			}
+			ELSE = {
+				IF = {
+					limit = {
+						NOT = {
+							any_country = {
+								has_country_flag = mem_antarans_target_2
+							}
+						}
+					}
+					owner = {
+						set_country_flag = mem_antarans_target_2
+					}
+					ELSE = {
+						IF = {
+							limit = {
+								NOT = {
+									any_country = {
+										has_country_flag = mem_antarans_target_3
+									}
+								}
+							}
+							owner = {
+								set_country_flag = mem_antarans_target_3
+							}
+							ELSE = {
+								IF = {
+									limit = {
+										NOT = {
+											any_country = {
+												has_country_flag = mem_antarans_target_4
+											}
+										}
+									}
+									owner = {
+										set_country_flag = mem_antarans_target_4
+									}
+									ELSE = {
+										IF = {
+											limit = {
+												NOT = {
+													any_country = {
+														has_country_flag = mem_antarans_target_5
+													}
+												}
+											}
+											owner = {
+												set_country_flag = mem_antarans_target_5
+											}
+											#this is for testing purpose
+											random_country = {
+												limit = {
+													is_ai = no
+												}
+												country_event = { id = mem_antarans.99 days = 5 }
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+#Test Event to show Targets
+country_event = {
+	id = mem_antarans.99
+	title = "Antaran Test"
+	desc = "All flags have been set"
+	picture = GFX_evt_mem_space_battle
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_country = {
+			limit = {
+				has_country_flag = mem_antarans_target_1
+			}
+			save_event_target_as = mem_antarans_target_1
+		}		
+		create_point_of_interest = {
+			id = mem_antarans_target.1
+			name = "mem_antarans_target_1"
+			desc = "mem_antarans_target_1_desc"
+			location = event_target:mem_antarans_target_1
+		}
+		random_country = {
+			limit = {
+				has_country_flag = mem_antarans_target_2
+			}
+			save_event_target_as = mem_antarans_target_2
+		}		
+		create_point_of_interest = {
+			id = mem_antarans_target.2
+			name = "mem_antarans_target_2"
+			desc = "mem_antarans_target_2_desc"
+			location = event_target:mem_antarans_target_2
+		}
+		random_country = {
+			limit = {
+				has_country_flag = mem_antarans_target_3
+			}
+			save_event_target_as = mem_antarans_target_3
+		}		
+		create_point_of_interest = {
+			id = mem_antarans_target.3
+			name = "mem_antarans_target_3"
+			desc = "mem_antarans_target_3_desc"
+			location = event_target:mem_antarans_target_3
+		}
+		random_country = {
+			limit = {
+				has_country_flag = mem_antarans_target_4
+			}
+			save_event_target_as = mem_antarans_target_4
+		}		
+		create_point_of_interest = {
+			id = mem_antarans_target.4
+			name = "mem_antarans_target_4"
+			desc = "mem_antarans_target_4_desc"
+			location = event_target:mem_antarans_target_4
+		}
+		random_country = {
+			limit = {
+				has_country_flag = mem_antarans_target_5
+			}
+			save_event_target_as = mem_antarans_target_5
+		}		
+		create_point_of_interest = {
+			id = mem_antarans_target.5
+			name = "mem_antarans_target_5"
+			desc = "mem_antarans_target_5_desc"
+			location = event_target:mem_antarans_target_5
+		}
+	}
+	
+	option = {
+		name = "OK"
+	}
+}
