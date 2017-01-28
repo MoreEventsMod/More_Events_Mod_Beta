@@ -34,6 +34,7 @@ planet_event = {
 		NOR = {
 			has_planet_flag = mem_antarans_raided_planet #this is a timed flag set when the planet is raided 
 			has_global_flag = mem_antarans_recent_attack #this is a timed flag set at the start of a raid
+			has_global_flag = mem_antarans_disabled
 		}
 		owner = {
 			is_country_type = default
@@ -112,12 +113,63 @@ planet_event = {
 											owner = {
 												set_country_flag = mem_antarans_target_5
 											}
+											#set a break between attack rounds
+											set_timed_global_flag = {
+												flag = mem_antarans_recent_attack
+												days = 3600 # 10 years
+												random = 720
+											}
 											#this is for testing purpose
 											random_country = {
 												limit = {
 													is_ai = no
 												}
 												country_event = { id = mem_antarans.99 days = 5 }
+											}
+											#Following events set the Antaran Raids in motion
+											random_country = {
+												limit = {
+													has_country_flag = mem_antarans_target_1
+												}
+												country_event = { id = mem_antarans.3 days = 30 random = 10 }
+											}
+											random_country = {
+												limit = {
+													has_country_flag = mem_antarans_target_2
+												}
+												country_event = { id = mem_antarans.3 days = 30 random = 10 }
+											}
+											random_country = {
+												limit = {
+													has_country_flag = mem_antarans_target_3
+												}
+												country_event = { id = mem_antarans.3 days = 30 random = 10 }
+											}
+											random_country = {
+												limit = {
+													has_country_flag = mem_antarans_target_4
+												}
+												country_event = { id = mem_antarans.3 days = 30 random = 10 }
+											}
+											random_country = {
+												limit = {
+													has_country_flag = mem_antarans_target_5
+												}
+												country_event = { id = mem_antarans.3 days = 30 random = 10 }
+											}
+											#Also start a notification message for all not attacked human players from here later
+											every_country = {
+												limit = {
+													NOR = {
+														has_country_flag = mem_antarans_target_1
+														has_country_flag = mem_antarans_target_2
+														has_country_flag = mem_antarans_target_3
+														has_country_flag = mem_antarans_target_4
+														has_country_flag = mem_antarans_target_5
+													}
+													is_ai = no
+												}
+												#start notification event a month later than the other events
 											}
 										}
 									}
@@ -128,6 +180,162 @@ planet_event = {
 				}
 			}
 		}
+	}
+}
+
+#Hidden Event to place the Ambient Object ( Dimensional Rift opening ) at the rim of a target system
+country_event = {
+	id = mem_antarans.3
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		IF = { # check if the empire is target of a retaliation
+			limit = {
+				has_country_flag = mem_antarans_retaliation
+			}
+			remove_country_flag = mem_antarans_retaliation
+			random_owned_planet = {
+				limit = {
+					is_capital = yes
+				}
+				solar_system = {
+					random_system_planet = {
+						limit = {
+							is_star = yes
+						}
+						THIS = {
+							save_event_target_as = mem_antarans_target_sun
+						}
+					}
+					create_ambient_object = { # exchange that later with a custom made one from frog
+						type = "abandoned_ship_object"
+					}
+					random_system_ambient_object = {
+						limit = { is_same_value = last_created_ambient_object }
+						set_location = {
+							target = event_target:mem_antarans_target_sun
+							distance = 150
+							angle = random
+						}
+						set_ambient_object_flag = mem_antarans_retaliation_rift
+					}
+				}
+			}
+			# start next event to notify the player
+			country_event = { id = mem_antarans.4 days = 5 }
+			ELSE = {
+				IF = { # failsafe if valid raiding target has been lost in the meantime because of a war or something else - check here and use normal raiding target
+					limit = {
+						any_owned_planet = {
+							is_colony = yes
+							is_capital = no
+							NOT = {
+								has_country_flag = raided_planet
+							}
+						}
+					}
+					random_owned_planet = {
+						limit = {
+							is_colony = yes
+							is_capital = no
+							NOT = {
+								has_planet_flag = mem_antarans_raided_planet
+							}
+						}
+						solar_system = {
+							random_system_planet = {
+								limit = {
+									is_star = yes
+								}
+								THIS = {
+									save_event_target_as = mem_antarans_target_sun
+								}
+							}
+							create_ambient_object = { # exchange that later with a custom made one from frog
+								type = "abandoned_ship_object"
+							}
+							random_system_ambient_object = {
+								limit = { is_same_value = last_created_ambient_object }
+								set_location = {
+									target = event_target:mem_antarans_target_sun
+									distance = 150
+									angle = random
+								}
+								set_ambient_object_flag = mem_antarans_raiding_rift
+							}
+						}
+					}
+					country_event = { id = mem_antarans.4 days = 5 }
+					ELSE = { # failsafe target - if not even the capital is left there is nothing happening anyway
+						random_owned_planet = {
+							limit = {
+								is_colony = yes
+							}
+							solar_system = {
+								random_system_planet = {
+									limit = {
+										is_star = yes
+									}
+									THIS = {
+										save_event_target_as = mem_antarans_target_sun
+									}
+								}
+								create_ambient_object = { # exchange that later with a custom made one from frog
+									type = "abandoned_ship_object"
+								}
+								random_system_ambient_object = {
+									limit = { is_same_value = last_created_ambient_object }
+									set_location = {
+										target = event_target:mem_antarans_target_sun
+										distance = 150
+										angle = random
+									}
+									set_ambient_object_flag = mem_antarans_raiding_rift
+								}
+							}
+						}
+						country_event = { id = mem_antarans.4 days = 5 }
+					}
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = mem_antarans.4
+	title = mem_antarans.4.name
+	desc = { # for first encounter
+		text = mem_antarans.4a.desc
+		trigger = {
+			NOT = { 
+				has_country_flag = mem_antarans_retaliation 
+				has_country_flag = mem_antarans_met
+			}
+		}
+	}
+	desc = { # after first encounter has happened before
+		text = mem_antarans.4b.desc
+		trigger = {
+			NOT = { 
+				has_country_flag = mem_antarans_retaliation 
+			}
+			has_country_flag = mem_antarans_met
+		}
+	}
+	desc = { # for retaliation encounter
+		text = mem_antarans.4c.desc
+		trigger = { has_country_flag = mem_antarans_retaliation }
+	}
+	picture = GFX_evt_mem_space_battle # we will need custom art for a picture of one of those rifts opening
+	location = event_target:mem_antarans_target_sun
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "YEAHHHHHH!" # replace later
 	}
 }
 
