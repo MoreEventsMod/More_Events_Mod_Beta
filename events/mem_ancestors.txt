@@ -21,6 +21,7 @@ country_event = {
 				is_ship_size = mem_apostle_egg
 				is_ship_size = mem_apostle_child
 				is_ship_size = mem_apostle_scout
+				is_ship_size = mem_apostle_station
 				is_ship_size = mem_apostle_xxl_cloud
 				is_ship_size = mem_apostle_xl_cloud
 				is_ship_size = mem_apostle_l_cloud
@@ -52,6 +53,7 @@ country_event = {
 						is_ship_size = mem_apostle_egg
 						is_ship_size = mem_apostle_child
 						is_ship_size = mem_apostle_scout
+						is_ship_size = mem_apostle_station
 					}
 				}
 			}
@@ -251,19 +253,11 @@ country_event = {
 		if = {
 			limit = {
 				FROMFROMFROM = {
-					is_ship_size = mem_apostle_4
-				}
-			}
-			mem_ancestor_immortal_1 = yes
-			last_created_fleet = {
-				mem_effect_explosion_7 = yes
-			}
-			break = yes
-		}
-		if = {
-			limit = {
-				FROMFROMFROM = {
-					is_ship_size = mem_apostle_scout
+					OR = {
+						is_ship_size = mem_apostle_scout
+						is_ship_size = mem_apostle_station
+						is_ship_size = mem_apostle_4
+					}
 				}
 			}
 			mem_ancestor_immortal_1 = yes
@@ -403,6 +397,12 @@ country_event = {
 			}
 			mem_ancestor_fanu_1 = yes
 			FROMFROM = {
+				OWNER = {
+					add_modifier = {
+						modifier = "mem_ancestor_buff_1"
+						days = -1
+					}
+				}
 				delete_fleet = this
 			}
 			last_created_fleet = {
@@ -437,6 +437,12 @@ country_event = {
 			}
 			mem_ancestor_fanu_2 = yes
 			FROMFROM = {
+				OWNER = {
+					add_modifier = {
+						modifier = "mem_ancestor_buff_2"
+						days = -1
+					}
+				}
 				delete_fleet = this
 			}
 			last_created_fleet = {
@@ -468,6 +474,12 @@ country_event = {
 			mem_ancestor_fanu_3 = yes
 			mem_ancestor_thesan_1 = yes
 			FROMFROM = {
+				OWNER = {
+					add_modifier = {
+						modifier = "mem_ancestor_buff_3"
+						days = -1
+					}
+				}
 				delete_fleet = this
 			}
 			last_created_fleet = {
@@ -506,6 +518,12 @@ country_event = {
 			}
 			mem_ancestor_thesan_2 = yes
 			FROMFROM = {
+				OWNER = {
+					add_modifier = {
+						modifier = "mem_ancestor_buff_4"
+						days = -1
+					}
+				}
 				delete_fleet = this
 			}
 			last_created_fleet = {
@@ -626,18 +644,27 @@ planet_event = {
 			who = from
 			amount = 1000
 		}
-		this = {
-			solar_system = {
-				random_system_planet = {
-					limit = { is_star = yes }
-					save_event_target_as = mem_ancestor_spawn_3
-				}
-			}
-		}
 		from = {
 			save_event_target_as = mem_ancestor_swarm_owner_3
 		}
-		mem_ancestor_immortal_3 = yes
+		this = {
+			solar_system = {
+				if = {
+					limit = {
+						NOT = {
+							any_ship_in_system = { 
+								is_ship_size = mem_apostle_station
+							}
+						}
+					}
+					random_system_planet = {
+						limit = { is_star = yes }
+						save_event_target_as = mem_ancestor_spawn_3
+						mem_ancestor_ward = yes
+					}
+				}
+			}
+		}
 		create_ambient_object = {
 			type = mem_effect_explosion_6_object
 			location = THIS
@@ -779,9 +806,10 @@ planet_event = {
 			save_event_target_as = mem_ancestor_swarm_owner_4
 			}
 		}
-		mem_ancestor_immortal_4 = yes
+		mem_ancestor_immortal_3 = yes
 		destroy_colony = yes
 		set_planet_max_health = 0
+		remove_planet_flag = mem_ancestor_world
 		create_ambient_object = {
 			type = mem_effect_explosion_6_object
 			location = THIS
@@ -804,6 +832,165 @@ planet_event = {
 		}
 		FROM = {
 			country_event = { id = mem_ancestor.48 days = 10 }
+		}
+	}
+}
+
+fleet_event = {
+	id = mem_ancestor.8
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		queue_actions = {
+			repeat = {
+				max_iterations = 2
+				find_closest_system = {
+					trigger = {
+						id = mem_ancestor_monstrosity.roam.1
+						OR = {
+							any_ship_in_system = {
+								exists = owner
+								NOT = {
+									owner = {
+										is_same_value = event_target:mem_ancestor_country
+									}
+								}
+							}
+							AND = {
+								exists = space_owner
+								any_planet = {
+									OR = {
+										has_spaceport = yes  
+										has_observation_outpost = yes
+										has_mining_station = yes
+										has_research_station = yes 
+									}
+								}
+								NOT = {
+									space_owner = {
+										is_same_value = event_target:mem_ancestor_country
+									}
+								}
+							}
+						}
+						NOT = {
+							OR = {
+								has_star_flag = mem_ring_system
+								has_star_flag = mem_grave_system
+								has_star_flag = mem_garden_system
+								has_star_flag = mem_prison_system
+							}
+							any_ship_in_system = {
+								is_ship_size = mem_apostle_xxl_cloud 
+							}
+						}
+					}
+					found_system = {
+						move_to = this
+						
+						find_closest_planet = {
+							trigger = {
+								id = mem_ancestor_monstrosity.roam.2
+								OR = {
+									is_star = yes
+									has_spaceport = yes  
+									has_observation_outpost = yes
+									has_mining_station = yes
+									has_research_station = yes 
+								}
+							}
+							found_planet = {
+								move_to = this
+								wait = {
+									duration = 25
+									random = 15
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+fleet_event = {
+	id = mem_ancestor.9
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		queue_actions = {
+			repeat = {
+				find_random_system = {
+					trigger = {
+						id = mem_ancestor_herald.roam.1a
+						OR = {
+							any_ship_in_system = {
+								exists = owner
+								NOT = {
+									owner = {
+										is_same_value = event_target:mem_ancestor_country
+									}
+								}
+							}
+							AND = {
+								exists = space_owner
+								any_planet = {
+									OR = {
+										has_spaceport = yes  
+										has_observation_outpost = yes
+										has_mining_station = yes
+										has_research_station = yes 
+									}
+								}
+								NOT = {
+									space_owner = {
+										is_same_value = event_target:mem_ancestor_country
+									}
+								}
+							}
+						}
+						NOT = {
+							OR = {
+								has_star_flag = mem_ring_system
+								has_star_flag = mem_grave_system
+								has_star_flag = mem_garden_system
+								has_star_flag = mem_prison_system
+							}
+							any_ship_in_system = {
+								is_ship_size = mem_apostle_scout 
+							}
+						}
+					}
+					found_system = {
+						move_to = this
+						
+						find_closest_planet = {
+							trigger = {
+								id = mem_ancestor_herald.roam.1b
+								OR = {
+									is_star = yes
+									has_spaceport = yes  
+									has_observation_outpost = yes
+									has_mining_station = yes
+									has_research_station = yes 
+								}
+							}
+							found_planet = {
+								move_to = this
+								wait = {
+									duration = 45
+									random = 25
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 }
@@ -1362,19 +1549,15 @@ country_event = {
 					set_country_flag = mem_ancestor_country
 					set_graphical_culture = fallen_empire_01
 					guardian_difficulty = yes
-					
-					set_policy = {
-						policy = orbital_bombardment
-						option = orbital_bombardment_full
-						cooldown = no
-					}
 				}
 				mem_effect_explosion_6_big = yes
 				mem_ancestor_vessel_init = yes
-				while = {
-					count = 6
-					mem_ancestor_herald_init = yes
-				}
+				mem_ancestor_herald_1 = yes
+				mem_ancestor_herald_2 = yes
+				mem_ancestor_herald_3 = yes
+				mem_ancestor_herald_4 = yes
+				mem_ancestor_herald_5 = yes
+				mem_ancestor_herald_6 = yes
 			}
 		}
 		every_country = {
@@ -1383,21 +1566,77 @@ country_event = {
 					is_ai = no
 					is_country_type = default
 				}
-				country_event = { id = mem_ancestor.44 days = 10 }
+				country_event = { id = mem_ancestor.44 }
 				establish_communications_no_message = event_target:mem_ancestor_country
 			}
 			if = {
 				limit = {
-					is_country_type = mem_ancestor_guardian
+					OR = {
+						is_country_type = fallen_empire
+						is_country_type = awakened_fallen_empire
+					}
 				}
-				root = {
-					declare_war = {
-						who = prev
-					}	
-				}
+				country_event = { id = mem_ancestor.28 days = 30 }
 			}
 		}
 		set_global_flag = mem_ancestor_crisis_start
+	}
+}
+
+country_event = {
+	id = mem_ancestor.28
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		any_country = {
+			OR = {
+				has_country_flag = mem_ancestor_seal_destroyer
+				has_country_flag = mem_titan_slayer
+				has_country_flag = mem_grave_slayer
+				has_country_flag = mem_conduit_slayer
+			}
+		}
+	}
+
+	immediate = {	
+		this = {
+			save_event_target_as = mem_ancestor_fallen
+		}
+		random_country = {
+			limit = {
+				OR = {
+					has_country_flag = mem_ancestor_seal_destroyer
+					has_country_flag = mem_titan_slayer
+					has_country_flag = mem_grave_slayer
+					has_country_flag = mem_conduit_slayer
+				}
+			}
+			save_event_target_as = mem_ancestor_sealing_war_target
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_communications = event_target:mem_ancestor_sealing_war_target
+				}
+			}
+			establish_communications_no_message = event_target:mem_ancestor_sealing_war_target
+		}
+		declare_war = {
+			who = event_target:mem_ancestor_sealing_war_target
+			major_war = yes
+			name = "War Of Sealing"
+		}
+		add_war_demand = {
+			type = "total_defeat"
+			parameter:country = event_target:mem_ancestor_sealing_war_target
+			warscore_cost = 75
+			target = this
+			enemy = event_target:mem_ancestor_sealing_war_target
+		}
+		event_target:mem_ancestor_sealing_war_target = {
+			country_event = { id = mem_ancestor.49 }
+		}
 	}
 }
 
@@ -1700,6 +1939,40 @@ country_event = {
 }
 
 country_event = {
+	id = mem_ancestor.49
+	title = "mem_ancestor.49"
+	desc = "mem_ancestor.49.desc"
+	picture = GFX_evt_nuclear_explosion
+	
+	is_triggered_only = yes
+	
+	diplomatic = yes
+	
+	trigger = {
+		NOT = {
+			has_global_flag = mem_ancestor_sealing_war
+		}
+	}
+
+	picture_event_data = {
+		portrait = event_target:mem_ancestor_fallen
+		planet_background = event_target:mem_ancestor_fallen
+		graphical_culture = event_target:mem_ancestor_fallen
+		city_level = event_target:mem_ancestor_fallen
+		room = event_target:mem_ancestor_fallen
+	}
+
+	immediate = {
+		set_global_flag = mem_ancestor_sealing_war
+	}
+	
+	option = {
+		name = "mem_ancestor.49.a"
+		response_text = "mem_ancestor.49.a.response"
+	}
+}
+
+country_event = {
 	id = mem_ancestor.50
 	hide_window = yes
 	
@@ -1807,11 +2080,31 @@ country_event = {
 			}
 			is_country_type = default
 			is_ai = no
-
+			
 			OR = {
 				has_country_flag = mem_titan_slayer
 				has_country_flag = mem_grave_slayer
 				has_country_flag = mem_conduit_slayer
+			}
+			
+			AND = {
+				OR = {
+					has_technology = "tech_ship_armor_5"
+					has_technology = "tech_dragon_armor"
+				}
+				OR = {
+					has_technology = "tech_shields_5"
+					has_technology = "tech_enigmatic_deflector"
+				}		
+				OR = {
+					has_technology = "tech_zero_point_power"
+					has_technology = "tech_enigmatic_power_core"
+				}
+				OR = {
+					has_technology = "tech_energy_lance_2"
+					has_technology = "tech_arc_emitter_2"
+					has_technology = "tech_mass_accelerator_2"
+				}
 			}
 		}
 	}
@@ -1872,3 +2165,194 @@ country_event = {
 	}
 }
 
+country_event = {
+	id = mem_ancestor.70
+	hide_window = yes
+	is_triggered_only = yes
+	
+	fire_only_once = yes
+
+	trigger = {
+		is_country_type = mem_ancestor_guardian
+		has_country_flag = mem_ancestor_country
+		FROMFROM = {
+			has_ship_flag = mem_ancestor_herald_1
+			is_ship_size = mem_apostle_scout
+		}
+	}
+
+	immediate = {
+		FROMFROM = {
+			mem_effect_explosion_8 = yes
+		}
+		every_country = {
+			limit = { 
+				is_country_type = mem_ancestor_guardian
+			}
+			add_modifier = {
+				modifier = "mem_ancestor_herald_debuff_1"
+				days = -1
+			}
+		}
+	}
+}
+
+country_event = {
+	id = mem_ancestor.71
+	hide_window = yes
+	is_triggered_only = yes
+	
+	fire_only_once = yes
+
+	trigger = {
+		is_country_type = mem_ancestor_guardian
+		has_country_flag = mem_ancestor_country
+		FROMFROM = {
+			has_ship_flag = mem_ancestor_herald_2
+			is_ship_size = mem_apostle_scout
+		}
+	}
+
+	immediate = {
+		FROMFROM = {
+			mem_effect_explosion_8 = yes
+		}
+		every_country = {
+			limit = { 
+				is_country_type = mem_ancestor_guardian
+			}
+			add_modifier = {
+				modifier = "mem_ancestor_herald_debuff_2"
+				days = -1
+			}
+		}
+	}
+}
+
+country_event = {
+	id = mem_ancestor.72
+	hide_window = yes
+	is_triggered_only = yes
+	
+	fire_only_once = yes
+
+	trigger = {
+		is_country_type = mem_ancestor_guardian
+		has_country_flag = mem_ancestor_country
+		FROMFROM = {
+			has_ship_flag = mem_ancestor_herald_3
+			is_ship_size = mem_apostle_scout
+		}
+	}
+
+	immediate = {
+		FROMFROM = {
+			mem_effect_explosion_8 = yes
+		}
+		every_country = {
+			limit = { 
+				is_country_type = mem_ancestor_guardian
+			}
+			add_modifier = {
+				modifier = "mem_ancestor_herald_debuff_3"
+				days = -1
+			}
+		}
+	}
+}
+
+country_event = {
+	id = mem_ancestor.73
+	hide_window = yes
+	is_triggered_only = yes
+	
+	fire_only_once = yes
+
+	trigger = {
+		is_country_type = mem_ancestor_guardian
+		has_country_flag = mem_ancestor_country
+		FROMFROM = {
+			has_ship_flag = mem_ancestor_herald_4
+			is_ship_size = mem_apostle_scout
+		}
+	}
+
+	immediate = {
+		FROMFROM = {
+			mem_effect_explosion_8 = yes
+		}
+		every_country = {
+			limit = { 
+				is_country_type = mem_ancestor_guardian
+			}
+			add_modifier = {
+				modifier = "mem_ancestor_herald_debuff_4"
+				days = -1
+			}
+		}
+	}
+}
+
+country_event = {
+	id = mem_ancestor.74
+	hide_window = yes
+	is_triggered_only = yes
+	
+	fire_only_once = yes
+
+	trigger = {
+		is_country_type = mem_ancestor_guardian
+		has_country_flag = mem_ancestor_country
+		FROMFROM = {
+			has_ship_flag = mem_ancestor_herald_5
+			is_ship_size = mem_apostle_scout
+		}
+	}
+
+	immediate = {
+		FROMFROM = {
+			mem_effect_explosion_8 = yes
+		}
+		every_country = {
+			limit = { 
+				is_country_type = mem_ancestor_guardian
+			}
+			add_modifier = {
+				modifier = "mem_ancestor_herald_debuff_5"
+				days = -1
+			}
+		}
+	}
+}
+
+country_event = {
+	id = mem_ancestor.75
+	hide_window = yes
+	is_triggered_only = yes
+	
+	fire_only_once = yes
+
+	trigger = {
+		is_country_type = mem_ancestor_guardian
+		has_country_flag = mem_ancestor_country
+		FROMFROM = {
+			has_ship_flag = mem_ancestor_herald_6
+			is_ship_size = mem_apostle_scout
+		}
+	}
+
+	immediate = {
+		FROMFROM = {
+			mem_effect_explosion_8 = yes
+		}
+		every_country = {
+			limit = { 
+				is_country_type = mem_ancestor_guardian
+			}
+			add_modifier = {
+				modifier = "mem_ancestor_herald_debuff_6"
+				days = -1
+			}
+		}
+	}
+}
