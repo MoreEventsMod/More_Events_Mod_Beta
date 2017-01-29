@@ -8,6 +8,8 @@
 
 namespace = mem_antarans
 
+#Fleet spawning events start at 100
+
 #Setup Event at Game Start for randomly disabling the Crisis
 event = {
 	id = mem_antarans.1
@@ -15,13 +17,13 @@ event = {
 	
 	immediate = {
 		random_list = {
-			3 = {
-				set_global_flag = mem_antarans_disabled
-			}
+#			3 = {
+#				set_global_flag = mem_antarans_disabled
+#			}
 			1 = {
 				set_timed_global_flag = {
 					flag = mem_antarans_recent_attack
-					days = 3600 # 10 years
+					days = 9000 # 25 years
 					random = 720
 				}
 			}
@@ -234,6 +236,8 @@ country_event = {
 			}
 			# start next event to notify the player
 			country_event = { id = mem_antarans.4 days = 5 }
+			# start overnext event to open the rift and spawn enemy fleet
+			country_event = { id = mem_antarans.5 days = 30 }
 			ELSE = {
 				IF = { # failsafe if valid raiding target has been lost in the meantime because of a war or something else - check here and use normal raiding target
 					limit = {
@@ -276,7 +280,10 @@ country_event = {
 							}
 						}
 					}
+					# start next event to notify the player
 					country_event = { id = mem_antarans.4 days = 5 }
+					# start overnext event to open the rift and spawn enemy fleet
+					country_event = { id = mem_antarans.5 days = 30 }
 					ELSE = { # failsafe target - if not even the capital is left there is nothing happening anyway
 						random_owned_planet = {
 							limit = {
@@ -305,7 +312,10 @@ country_event = {
 								}
 							}
 						}
+						# start next event to notify the player
 						country_event = { id = mem_antarans.4 days = 5 }
+						# start overnext event to open the rift and spawn enemy fleet
+						country_event = { id = mem_antarans.5 days = 30 }
 					}
 				}
 			}
@@ -313,6 +323,7 @@ country_event = {
 	}
 }
 
+#Notification Event that a Rift is forming
 country_event = {
 	id = mem_antarans.4
 	title = mem_antarans.4.name
@@ -345,6 +356,75 @@ country_event = {
 	
 	option = {
 		name = "YEAHHHHHH!" # replace later
+	}
+}
+
+#Rift opens and fleet is spawned
+country_event = {
+	id = mem_antarans.5
+	title = mem_antarans.5.name
+	desc = { # for first encounter
+		text = mem_antarans.5a.desc
+		trigger = {
+			NOT = { 
+				has_country_flag = mem_antarans_retaliation
+				has_country_flag = mem_antarans_met
+			}
+		}
+	}
+	desc = { # after first encounter has happened before
+		text = mem_antarans.5b.desc
+		trigger = {
+			NOT = { 
+				has_country_flag = mem_antarans_retaliation 
+			}
+			has_country_flag = mem_antarans_met
+		}
+	}
+	desc = { # for retaliation encounter
+		text = mem_antarans.5c.desc
+		trigger = { has_country_flag = mem_antarans_retaliation }
+	}
+	picture = GFX_evt_mem_space_battle # we will need custom art for a picture of an opened rifts with ships coming through
+	location = event_target:mem_antarans_target_sun
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		IF = { in case of retaliation strike
+			limit = {
+				has_country_flag = mem_antarans_retaliation
+			}
+			
+		}
+		IF = { in case of first raiding encounter
+			limit = {
+				NOT = {
+					has_country_flag = mem_antarans_retaliation
+					has_country_flag = mem_antarans_met
+				}
+			}
+			
+		}
+		IF = { in case of later raiding encounter
+			limit = {
+				NOT = {
+					has_country_flag = mem_antarans_retaliation
+				}
+				has_country_flag = mem_antarans_met
+			}
+		}
+	}
+}
+
+#Retaliation Fleet spawn
+country_event = {
+	id = mem_antarans.100
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
 	}
 }
 
