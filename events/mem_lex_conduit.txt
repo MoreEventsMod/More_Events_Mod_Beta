@@ -1,0 +1,2807 @@
+namespace = mem_the_conduit
+
+#300 The Conduit
+# Code & idea by Frog, writing by Cc
+
+# Early event & project order
+#
+# 1 -> MEM_CONDUIT_UNLOCK -> 5
+#	-> 11 -> MEM_OBELISK_1_PROJECT -> 21 -> 31
+#	-> 12 -> MEM_OBELISK_2_PROJECT -> 22 -> 32
+#	-> 13 -> MEM_OBELISK_3_PROJECT -> 23 -> 33
+#	-> 14 -> MEM_OBELISK_4_PROJECT -> 24 -> 34
+
+#Initial Encounter & First Project Spawn
+ship_event = {
+	id = mem_the_conduit.1
+	title = "mem_the_conduit.1"
+	desc = "mem_the_conduit.1.desc"
+	picture = GFX_evt_ancient_alien_temple
+	show_sound = event_mystic_reveal_light
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			NOT = { has_country_flag = encountered_mem_conduit }
+			is_ai = no
+		}
+		FROM = {
+			has_star_flag = mem_garden_system
+			NOT = {
+				has_star_flag = mem_garden_unlock 
+			}
+		}
+	}
+	
+	immediate = {
+		FROM = {
+			save_event_target_as = mem_garden_system 
+		}
+		owner = {
+			set_country_flag = encountered_mem_conduit
+		}
+		every_country = {
+			if = {
+				limit = {
+					has_event_chain = "mem_lex_garden_chain" 
+				}
+				end_event_chain = "mem_lex_garden_chain"
+			}
+		}
+	}		
+	
+	option = {
+		name = "mem_the_conduit.1.a"
+		event_target:mem_shielded_target = {
+			enable_special_project = {
+				name = "MEM_CONDUIT_UNLOCK"
+				location = THIS
+				owner = ROOT
+			}
+		}
+	}
+}
+
+#Garden Unlock (Planet Access Granted)
+ship_event = {
+	id = mem_the_conduit.5
+	title = "mem_the_conduit.5"
+	desc = "mem_the_conduit.5.desc"
+	picture = GFX_evt_animal_wildlife
+	show_sound = event_mystic_reveal
+	
+	is_triggered_only = yes
+		
+	option = {
+		name = "mem_the_conduit.5.a"
+		custom_tooltip = mem_the_conduit.5.a.tooltip
+		hidden_effect = {
+			random_system = {
+				limit = {
+					has_star_flag = mem_garden_system
+				}
+				random_system_planet = {
+						limit = {
+							is_planet_class = pc_shielded
+							has_planet_flag = mem_conduit_shielded
+							NOT = { has_planet_flag = mem_conduit_garden }
+							solar_system = {
+								NOT = { has_star_flag = mem_garden_unlock }
+							}
+						}
+						change_pc = pc_gaia
+						set_planet_flag = mem_conduit_garden
+						set_planet_flag = fallen_empire_world
+						set_planet_flag = colony_event
+						
+						add_modifier = {
+							modifier = "mem_garden_mod"
+							days = -1
+						}
+						random_tile = {
+							limit = { has_blocker = no has_building = no num_adjacent_tiles = 2 }
+							set_building = "mem_building_obelisk_0_1"			
+						}
+						random_tile = {
+							limit = { has_blocker = no has_building = no num_adjacent_tiles = 2 }
+							set_building = "mem_building_obelisk_0_2"		
+						}
+						random_tile = {
+							limit = { has_blocker = no has_building = no num_adjacent_tiles = 2 }
+							set_building = "mem_building_obelisk_0_3"	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no num_adjacent_tiles = 2 }
+							set_building = "mem_building_obelisk_0_4"		
+						}
+						random_tile = {
+							limit = { has_blocker = no has_building = no num_adjacent_tiles > 3 }
+							set_building = "mem_building_ancient_ruin_2"
+							add_resource = {
+								resource = food
+								amount = 1
+								replace = yes
+							}	
+							add_resource = {
+								resource = minerals
+								amount = 1
+							}
+							random_neighboring_tile = {
+									limit = { has_blocker = no has_building = no }
+									set_building = "building_agri_processing_complex"
+									add_resource = {
+										resource = food
+										amount = 1
+										replace = yes
+								}						
+							}
+							random_neighboring_tile = {
+									limit = { has_blocker = no has_building = no }
+									set_building = "building_dark_matter_power_plant"
+									add_resource = {
+										resource = energy
+										amount = 1
+										replace = yes
+								}						
+							}
+							random_neighboring_tile = {
+									limit = { has_blocker = no has_building = no }
+									set_building = "building_dark_matter_power_plant"
+									add_resource = {
+										resource = energy
+										amount = 1
+										replace = yes
+								}						
+							}
+							random_neighboring_tile = {
+									limit = { has_blocker = no has_building = no }
+									set_building = "building_ancient_factory"
+									add_resource = {
+										resource = minerals
+										amount = 1
+										replace = yes
+								}						
+							}				
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_blocker = tb_ancient_ruins	
+							add_resource = {
+								resource = engineering_research
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_blocker = tb_ancient_ruins	
+							add_resource = {
+								resource = society_research
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_blocker = tb_ancient_ruins	
+							add_resource = {
+								resource = physics_research
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_blocker = tb_ancient_ruins	
+							add_resource = {
+								resource = sr_betharian
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_blocker = tb_mem_paradise	
+							add_resource = {
+								resource = sr_alien_pets
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_blocker = tb_mem_paradise	
+							add_resource = {
+								resource = engineering_research
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_blocker = tb_mem_paradise	
+							add_resource = {
+								resource = society_research
+								amount = 1
+								replace = yes
+							}							
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_blocker = tb_mem_paradise	
+							add_resource = {
+								resource = physics_research
+								amount = 1
+								replace = yes
+							}		
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_blocker = tb_mem_paradise	
+							add_resource = {
+								resource = food
+								amount = 1
+								replace = yes
+							}		
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_blocker = tb_mem_paradise	
+							add_resource = {
+								resource = energy
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_blocker = tb_mem_paradise	
+							add_resource = {
+								resource = energy
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_blocker = tb_mem_paradise	
+							add_resource = {
+								resource = minerals
+								amount = 1
+								replace = yes
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_blocker = tb_mem_paradise	
+							add_resource = {
+								resource = energy
+								amount = 2
+								replace = yes
+							}
+							add_resource = {
+								resource = food
+								amount = 1
+							}		
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_blocker = tb_mem_paradise	
+							add_resource = {
+								resource = energy
+								amount = 2
+								replace = yes
+							}
+							add_resource = {
+								resource = food
+								amount = 1
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_blocker = tb_mem_paradise	
+							add_resource = {
+								resource = minerals
+								amount = 2
+								replace = yes
+							}
+							add_resource = {
+								resource = food
+								amount = 1
+							}	
+						}
+						random_tile = {
+							limit = { has_building = no has_blocker = no }
+							set_blocker = tb_mem_paradise	
+							add_resource = {
+								resource = minerals
+								amount = 2
+								replace = yes
+							}
+							add_resource = {
+								resource = food
+								amount = 1
+							}	
+						}
+				}
+				solar_system = {
+					set_star_flag = mem_garden_unlock 
+				}
+			}
+		}
+	}
+	option = {
+		name = "mem_the_conduit.5.b"
+		owner = { 
+			add_influence = 100
+		}
+	}
+}
+
+#Conduit Obelisk 1 Init
+planet_event = {
+	id = mem_the_conduit.11
+	title = "mem_the_conduit.11"
+	desc = "mem_the_conduit.11.desc"
+	picture = GFX_evt_alien_ruins
+	location = ROOT
+	
+	trigger = {
+		has_owner = yes
+		is_homeworld = no
+		has_planet_flag = mem_conduit_garden		
+		owner = {
+			is_ai = no 
+			is_country_type = default
+		}	
+		has_ground_combat = no
+		num_pops > 0
+		has_building = "mem_building_obelisk_0_1"
+		NOT = { has_global_flag = mem_obelisk_1_research_clear }
+		NOT = { has_global_flag = mem_conduit_eye_appeared }
+		NOT = { has_planet_flag = mem_colony_event }
+	}
+
+	is_triggered_only = yes
+	
+	immediate = {
+			set_planet_flag = mem_colony_event
+			owner = { set_country_flag = mem_conduit_garden_country }	
+	}
+	
+	option = {
+		name = mem_the_conduit.11.a
+		enable_special_project = {
+			name = "MEM_OBELISK_1_PROJECT"
+			location = root
+			owner = root
+		}
+	}
+	
+	option = {
+		name = mem_the_conduit.11.b
+		owner = { 
+			add_influence = -100
+		}
+	}
+}
+
+#Conduit Obelisk 2 Init
+planet_event = {
+	id = mem_the_conduit.12
+	title = "mem_the_conduit.12"
+	desc = "mem_the_conduit.12.desc"
+	picture = GFX_evt_alien_ruins
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_ai = no
+			has_country_flag = mem_conduit_garden_country
+		}
+		NOT = { has_global_flag = mem_obelisk_2_research_clear }
+		NOT = { has_global_flag = mem_conduit_eye_appeared }
+		has_planet_flag = mem_conduit_garden
+		has_planet_flag = mem_colony_event 
+		has_building = "mem_building_obelisk_0_2"
+		has_building = "mem_building_obelisk_1"
+		has_ground_combat = no
+		num_pops > 0
+	}
+
+	option = {
+		name = mem_the_conduit.12.a
+		enable_special_project = {
+			name = "MEM_OBELISK_2_PROJECT"
+			location = root
+			owner = root
+		}
+	}
+	
+	option = {
+		name = mem_the_conduit.12.b
+		hidden_effect = {
+			every_owned_pop = { 
+				add_modifier = {
+					modifier = "opinion_disrespected"
+					days = 360
+				}
+			}
+		}
+		owner = { 
+			add_influence = -100
+		}
+	}
+}
+
+#Conduit Obelisk 3 Init
+planet_event = {
+	id = mem_the_conduit.13
+	title = "mem_the_conduit.13"
+	desc = "mem_the_conduit.13.desc"
+	picture = GFX_evt_alien_ruins
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_ai = no
+			has_country_flag = mem_conduit_garden_country
+		}
+		NOT = { has_global_flag = mem_obelisk_3_research_clear }
+		NOT = { has_global_flag = mem_conduit_eye_appeared }
+		has_planet_flag = mem_conduit_garden
+		has_planet_flag = mem_colony_event
+		has_building = "mem_building_obelisk_0_3"
+		has_building = "mem_building_obelisk_1"
+		has_building = "mem_building_obelisk_2"		
+		has_ground_combat = no
+		num_pops > 0
+	}
+
+	option = {
+		name = mem_the_conduit.13.a
+		enable_special_project = {
+			name = "MEM_OBELISK_3_PROJECT"
+			location = root
+			owner = root
+		}
+	}
+	
+	option = {
+		name = mem_the_conduit.13.b
+		hidden_effect = {
+			every_owned_pop = { 
+				add_modifier = {
+					modifier = "opinion_disrespected"
+					days = 360
+				}
+			}
+		}
+		owner = { 
+			add_influence = -100
+		}
+	}
+}
+
+#Conduit Obelisk 4 Init
+planet_event = {
+	id = mem_the_conduit.14
+	title = "mem_the_conduit.14"
+	desc = "mem_the_conduit.14.desc"
+	picture = GFX_evt_alien_ruins
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_ai = no
+			has_country_flag = mem_conduit_garden_country
+		}
+		NOT = { has_global_flag = mem_obelisk_4_research_clear }
+		NOT = { has_global_flag = mem_conduit_eye_appeared }
+		has_planet_flag = mem_conduit_garden
+		has_planet_flag = mem_colony_event
+		has_building = "mem_building_obelisk_0_4"
+		has_building = "mem_building_obelisk_1"
+		has_building = "mem_building_obelisk_2"
+		has_building = "mem_building_obelisk_3"
+		has_ground_combat = no
+		num_pops > 0
+	}
+
+	option = {
+		name = mem_the_conduit.14.a
+		enable_special_project = {
+			name = "MEM_OBELISK_4_PROJECT"
+			location = root
+			owner = root
+		}
+	}
+	
+	option = {
+		name = mem_the_conduit.14.b
+		hidden_effect = {
+			every_owned_pop = { 
+				add_modifier = {
+					modifier = "pop_angered"
+					days = 360
+				}
+			}
+		}
+		owner = { 
+			add_influence = -100
+		}
+	}
+}
+
+#Conduit Obelisk 1 Research Complete
+planet_event = {
+	id = mem_the_conduit.21
+	title = "mem_the_conduit.21"
+	desc = "mem_the_conduit.21.desc"
+	picture = GFX_evt_medieval_alien_civilization
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_ai = no
+			has_country_flag = mem_conduit_garden_country
+		}
+		has_planet_flag = mem_conduit_garden
+		has_planet_flag = mem_colony_event
+		has_building = "mem_building_obelisk_0_1"
+		has_ground_combat = no
+		num_pops > 0
+	}
+
+	immediate = {
+		owner = { set_country_flag = mem_obelisk_init_1 }
+		set_global_flag = mem_obelisk_1_research_clear
+	}
+
+	option = {
+		name = EXCELLENT
+	}
+}
+
+#Conduit Obelisk 2 Research Complete
+planet_event = {
+	id = mem_the_conduit.22
+	title = "mem_the_conduit.22"
+	desc = "mem_the_conduit.22.desc"
+	picture = GFX_evt_medieval_alien_civilization
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_ai = no
+			has_country_flag = mem_conduit_garden_country
+		}
+		has_planet_flag = mem_conduit_garden
+		has_planet_flag = mem_colony_event
+		has_building = "mem_building_obelisk_0_2"
+		has_ground_combat = no
+		num_pops > 0
+	}
+
+	immediate = {
+		owner = { set_country_flag = mem_obelisk_init_2 }
+		set_global_flag = mem_obelisk_2_research_clear
+	}
+
+	option = {
+		name = EXCELLENT
+	}
+}
+
+#Conduit Obelisk 3 Research Complete
+planet_event = {
+	id = mem_the_conduit.23
+	title = "mem_the_conduit.23"
+	desc = "mem_the_conduit.23.desc"
+	picture = GFX_evt_medieval_alien_civilization
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_ai = no
+			has_country_flag = mem_conduit_garden_country
+		}
+		has_planet_flag = mem_conduit_garden
+		has_planet_flag = mem_colony_event
+		has_building = "mem_building_obelisk_0_3"	
+		has_ground_combat = no
+		num_pops > 0
+	}
+
+	immediate = {
+		owner = { set_country_flag = mem_obelisk_init_3 }
+		set_global_flag = mem_obelisk_3_research_clear
+	}
+
+	option = {
+		name = EXCELLENT
+	}
+}
+
+#Conduit Obelisk 4 Research Complete
+planet_event = {
+	id = mem_the_conduit.24
+	title = "mem_the_conduit.24"
+	desc = "mem_the_conduit.24.desc"
+	picture = GFX_evt_medieval_alien_civilization
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_ai = no
+			has_country_flag = mem_conduit_garden_country
+		}
+		has_planet_flag = mem_conduit_garden
+		has_planet_flag = mem_colony_event
+		has_building = "mem_building_obelisk_0_4"
+		has_ground_combat = no
+		num_pops > 0
+	}
+
+	immediate = {
+		owner = { set_country_flag = mem_obelisk_init_4 }
+		set_global_flag = mem_obelisk_4_research_clear
+	}
+
+	option = {
+		name = EXCELLENT
+	}
+}
+
+#Conduit Orbital Obelisk 1
+planet_event = {
+	id = mem_the_conduit.31
+	title = "mem_the_conduit.31"
+	desc = "mem_the_conduit.31.desc"
+	picture = GFX_evt_psionics
+	show_sound = event_mystic_reveal
+	location = ROOT
+	
+	trigger = {
+		NOT = { has_global_flag = mem_conduit_pillar_1_activated }
+		NOT = { has_global_flag = mem_conduit_eye_appeared }
+		from = {
+			has_building = mem_building_obelisk_1
+		}
+	}
+	
+	is_triggered_only = yes
+
+	immediate = {
+			add_threat = {
+			who = owner 
+			amount = 10
+			}
+			add_modifier = {
+			modifier = "mem_obelisk_1_mod"
+			days = -1
+			}
+			every_owned_pop = { 
+				add_modifier = {
+					modifier = "mem_pop_conduit_1"
+					days = -1
+				}
+			}	
+			solar_system = {
+			random_system_ambient_object = {
+				limit = { has_ambient_object_flag = mem_conduit_pillar_1 }
+				save_event_target_as = mem_conduit_pillar_1_target
+			}
+			create_ambient_object = {
+				type = "mem_conduit_on_object"
+			}
+			last_created_ambient_object = {
+				set_location = event_target:mem_conduit_pillar_1_target
+				set_ambient_object_flag = mem_conduit_pillar_1_on
+			}
+			event_target:mem_conduit_pillar_1_target = {
+			destroy_ambient_object = this 
+			}
+		}
+		set_global_flag = mem_conduit_pillar_1_activated
+		planet_event = { id = mem_the_conduit.12 days = 1800 }
+	}
+	
+	option = {
+		name = mem_the_conduit.31.a
+	}
+}
+
+#Conduit Orbital Obelisk 2
+planet_event = {
+	id = mem_the_conduit.32
+	title = "mem_the_conduit.32"
+	desc = "mem_the_conduit.32.desc"
+	picture = GFX_evt_psionics
+	show_sound = event_mystic_reveal
+	location = ROOT
+	
+	trigger = {
+		has_global_flag = mem_conduit_pillar_1_activated
+		NOT = { has_global_flag = mem_conduit_pillar_2_activated }
+		NOT = { has_global_flag = mem_conduit_eye_appeared }
+		from = {
+			has_building = mem_building_obelisk_2
+		}
+	}
+	
+	is_triggered_only = yes
+
+	immediate = {
+			add_threat = {
+			who = owner 
+			amount = 10
+			}
+			add_modifier = {
+			modifier = "mem_obelisk_2_mod"
+			days = -1
+			}
+			every_owned_pop = { 
+				add_modifier = {
+					modifier = "mem_pop_conduit_2"
+					days = -1
+				}
+			}
+			solar_system = {
+			random_system_ambient_object = {
+				limit = { has_ambient_object_flag = mem_conduit_pillar_2 }
+				save_event_target_as = mem_conduit_pillar_2_target
+			}
+			create_ambient_object = {
+				type = "mem_conduit_on_object"
+			}
+			last_created_ambient_object = {
+				set_location = event_target:mem_conduit_pillar_2_target
+				set_ambient_object_flag = mem_conduit_pillar_2_on
+			}
+			event_target:mem_conduit_pillar_2_target = {
+			destroy_ambient_object = this 
+			}
+		}
+		set_global_flag = mem_conduit_pillar_2_activated
+		planet_event = { id = mem_the_conduit.13 days = 1800 }
+	}
+	
+	option = {
+		name = mem_the_conduit.32.a
+	}
+}
+
+#Conduit Orbital Obelisk 3
+planet_event = {
+	id = mem_the_conduit.33
+	title = "mem_the_conduit.33"
+	desc = "mem_the_conduit.33.desc"
+	picture = GFX_evt_psionics
+	show_sound = event_mystic_reveal
+	location = ROOT
+	
+	trigger = {
+		has_global_flag = mem_conduit_pillar_1_activated
+		has_global_flag = mem_conduit_pillar_2_activated
+		NOT = { has_global_flag = mem_conduit_eye_appeared }
+		NOT = { has_global_flag = mem_conduit_pillar_3_activated }
+		from = {
+			has_building = mem_building_obelisk_3
+		}
+	}
+	
+	is_triggered_only = yes
+
+	immediate = {
+		add_threat = {
+		who = owner 
+		amount = 10
+		}
+		add_modifier = {
+		modifier = "mem_obelisk_3_mod"
+		days = -1
+		}
+		every_owned_pop = { 
+			add_modifier = {
+				modifier = "mem_pop_conduit_3"
+				days = -1
+			}
+		}
+		solar_system = {
+			random_system_ambient_object = {
+				limit = { has_ambient_object_flag = mem_conduit_pillar_3 }
+				save_event_target_as = mem_conduit_pillar_3_target
+			}
+			create_ambient_object = {
+				type = "mem_conduit_on_object"
+			}
+			last_created_ambient_object = {
+				set_location = event_target:mem_conduit_pillar_3_target
+				set_ambient_object_flag = mem_conduit_pillar_3_on
+			}
+			event_target:mem_conduit_pillar_3_target = {
+			destroy_ambient_object = this 
+			}	
+		}
+		set_global_flag = mem_conduit_pillar_3_activated
+		planet_event = { id = mem_the_conduit.14 days = 1800 }
+	}
+	
+	option = {
+		name = mem_the_conduit.33.a
+	}
+}
+
+#Conduit Orbital Obelisk 4
+planet_event = {
+	id = mem_the_conduit.34
+	title = "mem_the_conduit.34"
+	desc = "mem_the_conduit.34.desc"
+	picture = GFX_evt_psionics
+	show_sound = event_mystic_reveal
+	location = ROOT
+	
+	trigger = {
+		has_global_flag = mem_conduit_pillar_1_activated
+		has_global_flag = mem_conduit_pillar_2_activated
+		has_global_flag = mem_conduit_pillar_3_activated
+		NOT = { has_global_flag = mem_conduit_eye_appeared }
+		NOT = { has_global_flag = mem_conduit_pillar_4_activated }
+		from = {
+			has_building = mem_building_obelisk_4
+		}
+	}
+	
+	is_triggered_only = yes
+
+	immediate = {
+			add_threat = {
+			who = owner 
+			amount = 10
+			}
+			add_modifier = {
+			modifier = "mem_obelisk_4_mod"
+			days = -1
+			}
+			every_owned_pop = { 
+				add_modifier = {
+					modifier = "mem_pop_conduit_4"
+					days = -1
+				}
+			}
+			solar_system = {
+			random_system_ambient_object = {
+				limit = { has_ambient_object_flag = mem_conduit_pillar_4 }
+				save_event_target_as = mem_conduit_pillar_4_target
+			}
+			create_ambient_object = {
+				type = "mem_conduit_on_object"
+			}
+			last_created_ambient_object = {
+				set_location = event_target:mem_conduit_pillar_4_target
+				set_ambient_object_flag = mem_conduit_pillar_4_on
+			}
+			event_target:mem_conduit_pillar_4_target = {
+			destroy_ambient_object = this 
+			}
+		}
+		set_global_flag = mem_conduit_pillar_4_activated
+	}
+	
+	option = {
+		name = mem_the_conduit.34.a
+	}
+}
+
+#Conduit Crisis Init
+country_event = {
+	id = mem_the_conduit.50
+	title = "mem_the_conduit.50"
+	desc = "mem_the_conduit.50.desc"
+	picture = GFX_evt_unknown_ships
+	show_sound = event_activating_unknown_technology
+	
+	fire_only_once = yes
+	
+	trigger = {
+		is_ai = no
+		is_country_type = default
+		has_country_flag = mem_conduit_garden_country
+		OR = {
+			has_global_flag = mem_conduit_pillar_1_activated
+			has_global_flag = mem_conduit_pillar_2_activated
+			has_global_flag = mem_conduit_pillar_3_activated
+			has_global_flag = mem_conduit_pillar_4_activated
+		}
+		NOT = {
+			has_global_flag = mem_conduit_eye_appeared 
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 200
+		
+		modifier = {
+			factor = 0.75
+			has_global_flag = mem_conduit_pillar_1_activated
+		}
+		modifier = {
+			factor = 0.5
+			AND = {
+				has_global_flag = mem_conduit_pillar_1_activated
+				has_global_flag = mem_conduit_pillar_2_activated
+			}
+		}
+		modifier = {
+			factor = 0.25
+			AND = {
+				has_global_flag = mem_conduit_pillar_1_activated
+				has_global_flag = mem_conduit_pillar_2_activated
+				has_global_flag = mem_conduit_pillar_3_activated
+			}
+		}
+		modifier = {
+			factor = 0.01
+			AND = {
+				has_global_flag = mem_conduit_pillar_1_activated
+				has_global_flag = mem_conduit_pillar_2_activated
+				has_global_flag = mem_conduit_pillar_3_activated
+				has_global_flag = mem_conduit_pillar_4_activated
+			}
+		}
+	}
+	
+	immediate = {
+		random_system = {
+			limit = { has_star_flag = mem_garden_system }
+			every_system_planet = {
+				if = {
+					limit = { 
+						has_planet_flag = mem_conduit_garden
+					}
+					add_modifier = {
+						modifier = "mem_obelisk_5_mod"
+						days = -1
+					}
+				}
+				if = {
+					limit = {
+						is_star = yes
+					}
+					save_event_target_as = mem_garden_star_locator
+				}
+			}
+			create_ambient_object = {
+				type = "mem_conduit_eye_object"
+			}
+			last_created_ambient_object = {
+				set_location = event_target:mem_garden_star_locator
+				set_ambient_object_flag = mem_conduit_eye_flag
+				save_event_target_as = mem_conduit_eye_locator
+			}
+			create_ambient_object = {
+				type = mem_effect_explosion_3_object
+				duration = 10
+				
+				use_3d_location = yes
+				
+				entity_offset = { min = 0 max = 0 }
+				entity_offset_angle = { min = 0 max = 0 }
+				entity_offset_height = { min = 0 max = 0 }
+				
+				entity_scale_to_size = yes
+				scale = 5
+			}
+			last_created_ambient_object = {
+				set_location = event_target:mem_conduit_eye_locator
+			}
+			save_event_target_as = mem_conduit_system
+		}
+		set_global_flag = mem_conduit_eye_appeared
+	}
+	
+	option = {
+		name = WORRYING
+		hidden_effect = { country_event = { id = mem_the_conduit.55 days = 1800 } }
+	}
+}
+
+#Conduit Crisis Start
+country_event = {
+	id = mem_the_conduit.55
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		create_country = {
+			name = "The Garden"
+			type = mem_conduit_guardian
+			flag = {
+				icon = {
+					category = "spherical"
+					file = "flag_spherical_20.dds"
+				}
+				background= {
+					category = "backgrounds"
+					file = "00_solid.dds"
+				}
+				 colors={
+						"dark_brown"
+						"dark_brown"
+						"null"
+						"null"
+				}
+			}
+		}
+		last_created_country = {
+		if = {
+			limit = {
+				NOT = {
+					has_modifier = mem_conduit_power
+				}
+			}
+			add_modifier = {
+				modifier = mem_conduit_power
+				days = -1
+			}
+		}
+		save_event_target_as = mem_Seekers
+		save_global_event_target_as = mem_conduit_country
+		set_country_flag = mem_conduit_country
+		set_graphical_culture = fallen_empire_03
+		guardian_difficulty = yes
+		}
+		event_target:mem_conduit_system = {
+			random_system_planet = {
+				limit = {
+					has_planet_flag = mem_conduit_garden
+				}
+				set_owner = event_target:mem_conduit_country
+			}
+			random_system_ambient_object = {
+				limit = { has_ambient_object_flag = mem_conduit_eye_flag }
+				save_event_target_as = mem_conduit_eye_spawn
+			}
+			mem_conduit_owner_swap = yes
+		}
+		random_system = {
+			limit = {
+				distance = {
+					source = event_target:mem_conduit_system
+					max_distance = 100
+					min_distance = 0
+				}
+				NOT = {
+					OR = {
+						has_star_flag = guardian
+						has_star_flag = sanctuary_system
+						has_star_flag = mem_ring_system
+						has_star_flag = mem_grave_system
+						has_star_flag = mem_garden_system
+						has_star_flag = mem_prison_system
+					}
+					any_planet = {
+						OR = {
+							is_planet_class = pc_black_hole 
+							is_planet_class = pc_neutron_star
+							is_planet_class = pc_pulsar
+						}
+					}
+				}
+			}
+			random_system_planet = {
+				limit = {
+					is_star = yes 
+				}
+				save_event_target_as = mem_conduit_anchor_1_spawn	
+			}
+			mem_conduit_owner_swap = yes
+			set_star_flag = mem_conduit_anchor_1
+		}
+		random_system = {
+			limit = {
+				distance = {
+					source = event_target:mem_conduit_system
+					max_distance = 100
+					min_distance = 0
+				}
+				NOT = {
+					OR = {
+						has_star_flag = guardian
+						has_star_flag = sanctuary_system
+						has_star_flag = mem_conduit_anchor_1
+						has_star_flag = mem_ring_system
+						has_star_flag = mem_grave_system
+						has_star_flag = mem_garden_system
+						has_star_flag = mem_prison_system
+					}
+					any_planet = {
+						OR = {
+							is_planet_class = pc_black_hole 
+							is_planet_class = pc_neutron_star
+							is_planet_class = pc_pulsar
+						}
+					}
+				}
+			}
+			random_system_planet = {
+				limit = {
+					is_star = yes 
+				}
+				save_event_target_as = mem_conduit_anchor_2_spawn	
+			}
+			mem_conduit_owner_swap = yes
+			set_star_flag = mem_conduit_anchor_2
+		}
+		random_system = {
+			limit = {
+				distance = {
+					source = event_target:mem_conduit_system
+					max_distance = 100
+					min_distance = 0
+				}
+				NOT = {
+					OR = {
+						has_star_flag = guardian
+						has_star_flag = sanctuary_system
+						has_star_flag = mem_conduit_anchor_1
+						has_star_flag = mem_conduit_anchor_2
+						has_star_flag = mem_ring_system
+						has_star_flag = mem_grave_system
+						has_star_flag = mem_garden_system
+						has_star_flag = mem_prison_system
+					}
+					any_planet = {
+						OR = {
+							is_planet_class = pc_black_hole 
+							is_planet_class = pc_neutron_star
+							is_planet_class = pc_pulsar
+						}
+					}
+				}
+			}
+			random_system_planet = {
+				limit = {
+					is_star = yes 
+				}
+				save_event_target_as = mem_conduit_anchor_3_spawn	
+			}
+			mem_conduit_owner_swap = yes
+			set_star_flag = mem_conduit_anchor_3
+		}
+		random_system = {
+			limit = {
+				distance = {
+					source = event_target:mem_conduit_system
+					max_distance = 100
+					min_distance = 0
+				}
+				NOT = {
+					OR = {
+						has_star_flag = guardian
+						has_star_flag = sanctuary_system
+						has_star_flag = mem_conduit_anchor_1
+						has_star_flag = mem_conduit_anchor_2
+						has_star_flag = mem_conduit_anchor_3
+						has_star_flag = mem_ring_system
+						has_star_flag = mem_grave_system
+						has_star_flag = mem_garden_system
+						has_star_flag = mem_prison_system
+					}
+					any_planet = {
+						OR = {
+							is_planet_class = pc_black_hole 
+							is_planet_class = pc_neutron_star
+							is_planet_class = pc_pulsar
+						}
+					}
+				}
+			}
+			random_system_planet = {
+				limit = {
+					is_star = yes 
+				}
+				save_event_target_as = mem_conduit_anchor_4_spawn	
+			}
+			mem_conduit_owner_swap = yes
+			set_star_flag = mem_conduit_anchor_4
+		}
+		mem_conduit_anchor_1 = yes
+		last_created_fleet = {
+			mem_effect_explosion_4 = yes
+		}
+		mem_conduit_anchor_2 = yes
+		last_created_fleet = {
+			mem_effect_explosion_4 = yes
+		}
+		mem_conduit_anchor_3 = yes
+		last_created_fleet = {
+			mem_effect_explosion_4 = yes
+		}
+		mem_conduit_anchor_4 = yes
+		last_created_fleet = {
+			mem_effect_explosion_4 = yes
+		}
+		mem_conduit_bulwark = yes
+		last_created_fleet = {
+			mem_effect_explosion_4 = yes
+		}
+		while = {
+			count = 3
+			mem_conduit_fleet_1 = yes
+		}
+		while = {
+			count = 2
+			mem_conduit_fleet_2 = yes
+		}	
+		mem_conduit_fleet_3 = yes	
+		
+		#Anchor 1
+		
+		while = {
+			count = 2
+			mem_conduit_fleet_anchor_1_small = yes
+		}
+		mem_conduit_fleet_anchor_1_big = yes
+		
+		#Anchor 2
+
+		while = {
+			count = 2
+			mem_conduit_fleet_anchor_2_small = yes
+		}
+		mem_conduit_fleet_anchor_2_big = yes
+		
+		#Anchor 3
+
+		while = {
+			count = 2
+			mem_conduit_fleet_anchor_3_small = yes
+		}
+		mem_conduit_fleet_anchor_3_big = yes
+		
+		#Anchor 4
+		
+		while = {
+			count = 2
+			mem_conduit_fleet_anchor_4_small = yes
+		}
+		mem_conduit_fleet_anchor_4_big = yes
+
+		event_target:mem_conduit_eye_spawn = {
+			destroy_ambient_object = this 
+		}
+		establish_communications_no_message = event_target:mem_conduit_country
+		country_event = { id = mem_the_conduit.56 }
+	}
+}
+
+country_event = {
+	id = mem_the_conduit.56
+	title = "mem_the_conduit.56"
+	desc = "mem_the_conduit.56.desc"
+	picture = GFX_evt_fleet_evil
+	show_sound = event_red_alert
+	location = event_target:mem_conduit_system
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "mem_the_conduit.56.a"
+	}
+}
+
+fleet_event = {
+	id = mem_the_conduit.57
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		queue_actions = {
+			repeat = {
+				find_random_system = {
+					trigger = {
+						id = mem_conduit_roam.4.trigger.1
+						NOT = {
+							OR = {
+								has_star_flag = sanctuary_system
+								has_star_flag = mem_ring_system
+								has_star_flag = mem_grave_system
+								has_star_flag = mem_garden_system
+								has_star_flag = mem_prison_system
+								has_star_flag = guardian
+							}
+						}
+						is_inside_border = event_target:mem_conduit_country 
+					}
+					found_system = {
+						move_to = this
+					}
+				}
+				find_closest_planet = {
+					trigger = {
+						id = mem_conduit_roam.4.trigger.2
+						is_star = yes
+					}
+					found_planet = {
+						move_to = this
+						orbit_planet = this
+						wait = {
+							duration = 10
+							random = 50
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+#Conduit Crisis Final Fleet
+fleet_event = {
+	id = mem_the_conduit.60
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		event_target:mem_Seekers = {
+			mem_conduit_fleet_boss = yes
+		}
+	}
+}
+
+#Conduit Crisis Fleet 1
+fleet_event = {
+	id = mem_the_conduit.61
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		event_target:mem_Seekers = {
+			mem_conduit_fleet_roaming_1 = yes
+		}
+	}
+}
+
+#Conduit Crisis Fleet 2
+fleet_event = {
+	id = mem_the_conduit.62
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		event_target:mem_Seekers = {
+			mem_conduit_fleet_roaming_2 = yes
+		}
+	}
+}
+
+#Conduit Crisis Fleet 3
+fleet_event = {
+	id = mem_the_conduit.63
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		event_target:mem_Seekers = {
+			mem_conduit_fleet_roaming_3 = yes
+		}
+	}
+}
+
+#Conduit Mothership summons help
+
+fleet_event = {
+	id = mem_the_conduit.64
+	hide_window = yes
+	
+	trigger = {
+		NOT = {
+			AND = {
+				has_global_flag = mem_conduit_anchor_1_off
+				has_global_flag = mem_conduit_anchor_2_off
+				has_global_flag = mem_conduit_anchor_3_off
+				has_global_flag = mem_conduit_anchor_4_off
+			}
+		}
+		any_combatant_fleet = {
+			exists = owner
+			owner = {
+				is_country_type = mem_conduit_guardian
+			}
+			NOT = { 
+				has_fleet_flag = mem_conduit_summon_cooldown
+			}
+			any_owned_ship = {
+				is_ship_size = mem_conduit_fortress
+				has_hp_percentage < 0.8
+				has_hp_percentage > 0
+			}
+		}	
+	}
+	
+	immediate = {
+		random_system = {
+			limit = {
+				has_star_flag = mem_garden_system
+			}
+			random_system_planet = {
+				limit = {
+					is_star = yes
+				}
+				mem_effect_explosion_4 = yes
+				save_event_target_as = mem_conduit_summon
+			}
+		}
+		event_target:mem_conduit_country = {
+			every_owned_fleet = {
+					limit = {
+						has_fleet_flag = mem_conduit_fleet
+					}
+					set_location = event_target:mem_conduit_summon
+			}
+		}
+		random_combatant_fleet = {
+			limit = {
+				exists = owner
+				owner = {
+					is_country_type = mem_conduit_guardian
+				}
+				any_owned_ship = {
+					is_ship_size = mem_conduit_fortress
+				}
+			}
+			set_timed_fleet_flag = {
+				flag = mem_conduit_summon_cooldown
+				days = 30
+			}
+		}
+		random_country = {
+			limit = {
+				has_country_flag = mem_conduit_garden_country
+			}
+			country_event = { id = mem_the_conduit.65 }
+		}
+	}
+}
+
+country_event = {
+	id = mem_the_conduit.65
+	title = "mem_the_conduit.65"
+	desc = "mem_the_conduit.65.desc"
+	picture = GFX_evt_unknown_ships
+	show_sound = event_yellow_alert
+	location = event_target:mem_conduit_summon
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = {
+			has_country_flag = mem_conduit_summon_notification
+		}
+	}
+	
+	immediate = {
+		set_country_flag = mem_conduit_summon_notification
+	}
+	
+	option = {
+		name = BATTLESTATIONS
+	}
+}
+
+#Conduit Crisis Research (Hidden)
+country_event = {
+	id = mem_the_conduit.70
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = mem_conduit_guardian
+		
+		from = {
+			NOT = {
+				has_country_flag = mem_conduit_weakness_check
+			}
+			is_country_type = default
+			is_ai = no
+			
+			AND = {
+				OR = {
+					has_technology = "tech_ship_armor_5"
+					has_technology = "tech_dragon_armor"
+				}
+				OR = {
+					has_technology = "tech_shields_5"
+					has_technology = "tech_enigmatic_deflector"
+				}		
+				OR = {
+					has_technology = "tech_zero_point_power"
+					has_technology = "tech_enigmatic_power_core"
+				}
+				OR = {
+					has_technology = "tech_energy_lance_2"
+					has_technology = "tech_arc_emitter_2"
+					has_technology = "tech_mass_accelerator_2"
+				}
+			}
+		}
+	}
+
+	immediate = {
+		from = {
+			set_country_flag = mem_conduit_weakness_check
+			country_event = { id = mem_the_conduit.71 }
+		}
+	}
+}
+
+#Conduit Crisis Research (Offer Project)
+country_event = {
+	id = mem_the_conduit.71
+	title = "mem_the_conduit.71"
+	desc = "mem_the_conduit.71.desc"
+	picture = GFX_evt_exploding_ship
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = mem_conduit_weakness_researched }
+	}
+
+	option = {
+		name = mem_the_conduit.71.a
+		allow = {
+			hidden_trigger = {
+				NOT = { has_modifier = mem_conduit_weakness }
+			}
+		}
+		capital_scope = { save_event_target_as = mem_pc_home }
+		hidden_effect = { set_country_flag = mem_conduit_weakness_researched }
+		enable_special_project = {
+			name = "MEM_CONDUIT_WEAKNESS_PROJECT"
+			location = event_target:mem_pc_home
+			owner = ROOT
+		}
+	}
+	option = {
+		name = mem_the_conduit.71.b
+		add_influence = 100
+	}
+}
+
+#Conduit Crisis Research (Project Complete)
+country_event = {
+	id = mem_the_conduit.72
+	title = "mem_the_conduit.72"
+	desc = "mem_the_conduit.72.desc"
+	picture = GFX_evt_physics_research
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_the_conduit.72.a
+		add_modifier = {
+			modifier = mem_conduit_weakness
+			days = -1
+		}
+	}
+}
+
+#Avatar Destroyed
+country_event = {
+	id = mem_the_conduit.80
+	hide_window = yes
+	is_triggered_only = yes
+	
+	fire_only_once = yes
+
+	trigger = {
+		is_country_type = mem_conduit_guardian
+		has_country_flag = mem_conduit_country
+		FROMFROM = {
+			is_ship_size = mem_conduit_avatar
+			}
+		FROM = { is_ai = no }
+	}
+
+	immediate = {
+		FROMFROM = {
+			mem_effect_explosion_4 = yes
+		}
+		every_country = {
+			limit = { 
+				is_country_type = mem_conduit_guardian
+				NOT = { has_modifier = mem_conduit_avatar_debuff }
+			}
+			add_modifier = {
+				modifier = "mem_conduit_avatar_debuff"
+				days = -1
+			}
+		}
+	}
+}
+
+#Anchor 1 Destroyed
+country_event = {
+	id = mem_the_conduit.81
+	hide_window = yes
+	is_triggered_only = yes
+	
+	fire_only_once = yes
+
+	trigger = {
+		NOT = {
+			has_global_flag = mem_conduit_anchor_1_off
+		}
+		is_country_type = mem_conduit_guardian
+		has_country_flag = mem_conduit_country
+		FROMFROM = {
+			is_ship_size = mem_conduit_anchor
+			solar_system = {
+				has_star_flag = mem_conduit_anchor_1
+			}
+		}
+	}
+
+	immediate = {
+		FROMFROM = {
+			mem_effect_explosion_4 = yes
+		}
+		every_country = {
+			limit = { 
+				is_country_type = mem_conduit_guardian
+				NOT = { has_modifier = mem_conduit_anchor_1_debuff }
+			}
+			add_modifier = {
+				modifier = "mem_conduit_anchor_1_debuff"
+				days = -1
+			}
+		}
+		set_global_flag = mem_conduit_anchor_1_off
+	}
+}
+
+#Anchor 2 Destroyed
+country_event = {
+	id = mem_the_conduit.82
+	hide_window = yes
+	is_triggered_only = yes
+	
+	fire_only_once = yes
+
+	trigger = {
+		NOT = {
+			has_global_flag = mem_conduit_anchor_2_off
+		}
+		is_country_type = mem_conduit_guardian
+		has_country_flag = mem_conduit_country
+		FROMFROM = {
+			is_ship_size = mem_conduit_anchor
+			solar_system = {
+				has_star_flag = mem_conduit_anchor_2
+			}
+		}
+	}
+
+	immediate = {
+		FROMFROM = {
+			mem_effect_explosion_4 = yes
+		}
+		every_country = {
+			limit = { 
+				is_country_type = mem_conduit_guardian
+				NOT = { has_modifier = mem_conduit_anchor_2_debuff }
+			}
+			add_modifier = {
+				modifier = "mem_conduit_anchor_2_debuff"
+				days = -1
+			}
+		}
+		set_global_flag = mem_conduit_anchor_2_off
+	}
+}
+
+#Anchor 3 Destroyed
+country_event = {
+	id = mem_the_conduit.83
+	hide_window = yes
+	is_triggered_only = yes
+	
+	fire_only_once = yes
+
+	trigger = {
+		NOT = {
+			has_global_flag = mem_conduit_anchor_3_off
+		}
+		is_country_type = mem_conduit_guardian
+		has_country_flag = mem_conduit_country
+		FROMFROM = {
+			is_ship_size = mem_conduit_anchor
+			solar_system = {
+				has_star_flag = mem_conduit_anchor_3
+			}
+		}
+	}
+
+	immediate = {
+		FROMFROM = {
+			mem_effect_explosion_4 = yes
+		}
+		every_country = {
+			limit = { 
+				is_country_type = mem_conduit_guardian
+				NOT = { has_modifier = mem_conduit_anchor_3_debuff }
+			}
+			add_modifier = {
+				modifier = "mem_conduit_anchor_3_debuff"
+				days = -1
+			}
+		}
+		set_global_flag = mem_conduit_anchor_3_off
+	}
+}
+
+#Anchor 4 Destroyed
+country_event = {
+	id = mem_the_conduit.84
+	hide_window = yes
+	is_triggered_only = yes
+	
+	fire_only_once = yes
+
+	trigger = {
+		NOT = {
+			has_global_flag = mem_conduit_anchor_4_off
+		}
+		is_country_type = mem_conduit_guardian
+		has_country_flag = mem_conduit_country
+		FROMFROM = {
+			is_ship_size = mem_conduit_anchor
+			solar_system = {
+				has_star_flag = mem_conduit_anchor_4
+			}
+		}
+	}
+
+	immediate = {
+		FROMFROM = {
+			mem_effect_explosion_4 = yes
+		}
+		every_country = {
+			limit = { 
+				is_country_type = mem_conduit_guardian
+				NOT = { has_modifier = mem_conduit_anchor_4_debuff }
+			}
+			add_modifier = {
+				modifier = "mem_conduit_anchor_4_debuff"
+				days = -1
+			}
+		}
+		set_global_flag = mem_conduit_anchor_4_off
+	}
+}
+
+#Conduit Crisis Clear (Hidden)
+country_event = {
+	id = mem_the_conduit.100
+	hide_window = yes
+	
+	fire_only_once = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		is_country_type = mem_conduit_guardian
+		has_country_flag = mem_conduit_country
+		FROMFROM = {
+			is_ship_size = mem_conduit_fortress 
+		}
+		FROM = {
+			is_ai = no 
+		}
+	}
+	
+	immediate = {
+		FROM = {
+			save_event_target_as = mem_pc_home
+			set_country_flag = mem_conduit_slayer
+			country_event = { id = mem_the_conduit.101 }
+			mem_ancestor_seal_trigger = yes
+		}
+	    FROMFROM = {
+			mem_effect_explosion_4 = yes
+		}
+		random_system = {
+			limit = { has_star_flag = mem_garden_system }
+			random_system_planet = {
+				limit = {
+					has_planet_flag = mem_conduit_garden
+				}
+				if = {
+					limit = { has_modifier = mem_obelisk_5_mod }
+					remove_modifier = mem_obelisk_5_mod
+				}
+				add_modifier = {
+					modifier = "mem_obelisk_6_mod"
+					days = -1
+				}
+				set_owner = event_target:mem_pc_home
+				every_owned_pop = { 
+					add_modifier = {
+						modifier = "mem_pop_conduit_5"
+						days = -1
+					}
+				}
+			}
+			set_star_flag = mem_conduit_defeated
+			save_event_target_as = mem_conduit_system 
+		}
+		every_country = {
+			if = {
+				limit = { 
+					has_modifier = mem_conduit_weakness
+				}
+				remove_modifier = "mem_conduit_weakness"
+			}
+			if = {
+				limit = {
+					has_special_project = MEM_CONDUIT_WEAKNESS_PROJECT
+				}
+				abort_special_project = {
+					type = "MEM_CONDUIT_WEAKNESS_PROJECT"
+					location = capital_scope
+				}
+			}
+		}
+		add_threat = {
+			who = FROM
+			amount = 100
+		}
+		destroy_country = yes
+		mem_awaken = yes
+	}
+}
+
+#Conduit Crisis Clear
+country_event = {
+	id = mem_the_conduit.101
+	title = "mem_the_conduit.101"
+	desc = "mem_the_conduit.101.desc"
+	picture = GFX_evt_small_space_battle
+	show_sound = event_space_battle
+	location = event_target:mem_conduit_system 
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		is_ai = no
+		is_country_type = default
+		has_country_flag = mem_conduit_slayer
+	}
+	
+	immediate = {
+		random_system = {
+			limit = { has_star_flag = mem_garden_system }
+			random_system_planet = {
+				limit = {
+					has_planet_flag = mem_conduit_garden
+				}
+				save_event_target_as = mem_garden_aid
+			}
+			save_event_target_as = mem_conduit_system
+		}
+	}
+	
+	option = {
+		name = "mem_the_conduit.101.a"
+		event_target:mem_garden_aid = {
+			enable_special_project = {
+				name = "MEM_GARDEN_HELP"
+				location = THIS
+				owner = ROOT
+			}
+		}
+	}
+}
+
+#Garden Aid Completion
+ship_event = {
+	id = mem_the_conduit.110
+	title = "mem_the_conduit.110"
+	desc = "mem_the_conduit.110.desc"
+	picture = GFX_evt_colony_settlement
+	location = event_target:mem_conduit_system
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_ai = no
+			has_country_flag = mem_conduit_slayer
+			NOT = {
+				has_country_flag = mem_garden_aid_complete 
+			}
+		}
+	}
+
+	immediate = {
+			owner = {
+				set_country_flag = mem_garden_aid_complete
+			}
+			random_system = {
+				limit =  { has_star_flag = mem_garden_system }
+				random_system_planet = {
+					limit = { has_planet_flag = mem_conduit_garden }
+					every_owned_pop = {
+						if = {
+								limit = { has_modifier = mem_pop_conduit_1 }
+								remove_modifier = mem_pop_conduit_1
+						}	
+						if = {
+								limit = { has_modifier = mem_pop_conduit_2 }
+								remove_modifier = mem_pop_conduit_2
+						}
+						if = {
+								limit = { has_modifier = mem_pop_conduit_3 }
+								remove_modifier = mem_pop_conduit_3
+						}
+						if = {
+								limit = { has_modifier = mem_pop_conduit_4 }
+								remove_modifier = mem_pop_conduit_4
+						}
+						if = {
+								limit = { has_modifier = mem_pop_conduit_5 }
+								remove_modifier = mem_pop_conduit_5
+						}
+					}
+					if = {
+						limit = { has_modifier = mem_obelisk_6_mod }
+						remove_modifier = mem_obelisk_6_mod
+					}
+					save_event_target_as = mem_garden_clear
+				}
+			}
+	}
+	option = {
+		name = mem_the_conduit.110.a
+	}
+}
+
+#Molten modifier (Needed for timed reward)
+country_event = {
+	id = mem_the_conduit.120
+	hide_window = yes
+	
+	fire_only_once = yes
+	
+	trigger = {
+			is_ai = no
+			is_country_type = default
+			NOT = {
+				has_country_flag = mem_conduit_molten_toggle
+			}
+			has_country_flag = mem_conduit_slayer
+			has_country_flag = mem_garden_aid_complete
+			has_country_flag = mem_conduit_obelisks_destroyed
+			any_planet_within_border = {
+				AND = {
+					has_planet_flag = mem_garden_molten
+					has_research_station = yes
+				}
+			}
+	}
+
+	immediate = {
+		random_system = {
+			limit = {
+				has_star_flag = mem_garden_system
+			}
+		save_event_target_as = mem_conduit_system	
+		}
+		set_country_flag = mem_conduit_molten_toggle
+	}
+}
+
+#Conduit Crisis Timed Reward Init (Make MEM_LAVA_DRIVER project available)
+country_event = {
+	id = mem_the_conduit.121
+	title = "mem_the_conduit.121"
+	desc = "mem_the_conduit.121.desc"
+	picture = GFX_evt_molten
+	location = event_target:mem_conduit_system
+	
+	fire_only_once = yes
+	
+	trigger = {
+		is_ai = no
+		is_country_type = default
+		has_country_flag = mem_garden_aid_complete
+		has_country_flag = mem_conduit_slayer
+		has_country_flag = mem_conduit_obelisks_destroyed
+		has_country_flag = mem_conduit_molten_toggle
+		any_owned_planet = {
+			has_planet_flag = mem_conduit_garden
+		}
+		OR = {
+				has_country_flag = mem_conduit_fleet_choice_1
+				has_country_flag = mem_conduit_fleet_choice_2
+				has_country_flag = mem_conduit_fleet_choice_3
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 50
+
+		modifier = {
+			factor = 0.75
+			AND = {
+				has_country_flag = mem_conduit_molten_toggle
+				has_country_flag = mem_conduit_fleet_choice_1
+			}
+		}
+		modifier = {
+			factor = 0.75
+			AND = {
+				has_country_flag = mem_conduit_molten_toggle
+				has_country_flag = mem_conduit_fleet_choice_2
+			}
+		}
+		modifier = {
+			factor = 0.75
+			AND = {
+				has_country_flag = mem_conduit_molten_toggle
+				has_country_flag = mem_conduit_fleet_choice_3
+			}
+		}
+		modifier = {
+			factor = 0.5
+			AND = {
+				has_country_flag = mem_conduit_molten_toggle
+				has_country_flag = mem_conduit_fleet_choice_3
+				has_country_flag = mem_conduit_fleet_choice_1
+			}
+		}
+		modifier = {
+			factor = 0.5
+			AND = {
+				has_country_flag = mem_conduit_molten_toggle
+				has_country_flag = mem_conduit_fleet_choice_3
+				has_country_flag = mem_conduit_fleet_choice_2
+			}
+		}
+		modifier = {
+			factor = 0.5
+			AND = {
+				has_country_flag = mem_conduit_molten_toggle
+				has_country_flag = mem_conduit_fleet_choice_1
+				has_country_flag = mem_conduit_fleet_choice_2
+			}
+		}
+		modifier = {
+			factor = 0.1
+			AND = {
+				has_country_flag = mem_conduit_molten_toggle
+				has_country_flag = mem_conduit_fleet_choice_1
+				has_country_flag = mem_conduit_fleet_choice_2
+				has_country_flag = mem_conduit_fleet_choice_3
+			}
+		}
+	}
+	
+	immediate = {
+		random_system = {
+			limit = {
+				has_star_flag = mem_garden_system
+			}
+			save_event_target_as = mem_conduit_system	
+			random_system_planet = {
+				limit = {
+					is_planet_class = pc_molten
+				}
+				save_event_target_as = mem_garden_molten
+			}
+		}
+	}
+	
+	option = {
+		name = "mem_the_conduit.121.a"
+		event_target:mem_garden_molten = {
+			enable_special_project = {
+				name = "MEM_LAVA_DIVER"
+				location = THIS
+				owner = ROOT
+			}
+		}
+	}
+	
+	option = {
+		name = "mem_the_conduit.121.b"
+		add_influence = 100
+	}
+}
+
+#Conduit Crisis Timed Reward (MEM_LAVA_DRIVER complete)
+ship_event = {
+	id = mem_the_conduit.122
+	title = "mem_the_conduit.122"
+	desc = "mem_the_conduit.122.desc"
+	picture = GFX_evt_ship_in_orbit
+	show_sound = event_mystic_reveal_light
+	location = event_target:mem_conduit_system
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		owner = { save_event_target_as = mem_conduit_project_owner }
+	}
+	
+	option = { 
+		name = "mem_the_conduit.122.a"
+		create_fleet = {
+			name = "Magma Diver"
+			settings = {
+				spawn_debris = no 
+			}
+			effect = {
+				set_owner = event_target:mem_conduit_project_owner
+				create_ship = {
+					name = "Conduit"
+					design = "Seqtet"
+					graphical_culture = "fallen_empire_03"
+					prefix = no
+				}
+				set_location = root
+			}
+		}
+	}
+	
+	option = {
+		name = "mem_the_conduit.122.b"
+		owner = {
+		add_minerals = 5000
+		add_energy = 5000
+		}
+	}
+}
+
+#Conduit Crisis Timed Reward Upgrade Init (Make MEM_CONDUIT_AWAKENING project available)
+country_event = {
+	id = mem_the_conduit.130
+	title = "mem_the_conduit.130"
+	desc = "mem_the_conduit.130.desc"
+	picture = GFX_evt_unspeakable_horror
+	
+	fire_only_once = yes
+	
+	trigger = {
+		is_ai = no
+		is_country_type = default
+		has_country_flag = mem_conduit_slayer
+		has_country_flag = mem_garden_aid_complete
+		any_owned_ship = {
+			is_ship_size = mem_conduit_avatar_bound
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 50
+
+		modifier = {
+			factor = 0.5
+			has_country_flag = mem_titan_slayer
+		}
+		
+		modifier = {
+			factor = 0.5
+			has_country_flag = mem_grave_slayer
+		}
+		
+		modifier = {
+			factor = 0.1
+			has_country_flag = mem_titan_slayer
+			has_country_flag = mem_grave_slayer
+		}
+	}
+	
+	immediate = {
+		capital_scope = { save_event_target_as = mem_pc_home }
+	}
+
+	option = {
+		name = "mem_the_conduit.130.a"
+		event_target:mem_pc_home = {
+			enable_special_project = {
+				name = "MEM_CONDUIT_AWAKENING"
+				location = THIS
+				owner = ROOT
+			}
+		}
+	}
+	option = {
+		name = "mem_the_conduit.130.b"
+		add_influence = 100
+	}
+}
+
+#Conduit Crisis Timed Reward Upgrade Activation (MEM_CONDUIT_AWAKENING project complete)
+country_event = {
+	id = mem_the_conduit.131
+	title = "mem_the_conduit.131"
+	desc = "mem_the_conduit.131.desc"
+	picture = GFX_evt_ship_in_orbit
+	
+	is_triggered_only = yes
+	
+	trigger = {
+			is_ai = no
+			is_country_type = default
+			NOT = { has_country_flag = mem_conduit_avatar_awakening }
+			any_owned_ship = {
+			is_ship_size = mem_conduit_avatar_bound
+			}
+		}
+
+	option = {
+		name = "mem_the_conduit.131.a"
+		custom_tooltip = mem_the_conduit.131.a.tooltip
+		hidden_effect = {
+			set_country_flag = mem_conduit_avatar_awakening
+		}
+	}	
+}
+
+#Conduit Crisis Timed Reward Upgrade Transform
+country_event = {
+	id = mem_the_conduit.132
+
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		is_ai = no
+		is_country_type = default
+		NOT = { has_country_flag = mem_conduit_evolve_success }
+		has_country_flag = mem_conduit_slayer
+		has_country_flag = mem_conduit_avatar_awakening
+		any_owned_ship = {
+			is_ship_size = mem_conduit_avatar_bound
+		}
+	}
+	
+	immediate = {
+		add_threat = {
+			who = THIS
+			amount = 10
+		}
+		FROMFROM = {
+			OWNER = {
+				save_event_target_as = mem_conduit_avatar_owner
+			}
+			save_event_target_as = mem_conduit_avatar_spawn
+		}
+		if = {
+			limit = {
+				FROMFROM = {
+					OWNER = {
+						count_owned_ships = {
+							limit = {
+								is_ship_size = mem_conduit_avatar_bound
+								FLEET = { is_same_value = event_target:mem_conduit_avatar_spawn }
+							}
+							count > 0
+						}
+					}
+				}
+			}
+			create_fleet = {
+			name = "Magma Diver"
+			settings = {
+				spawn_debris = no 
+			}
+			effect = {
+				set_owner = event_target:mem_conduit_avatar_owner
+				while = {
+					count = 1
+					create_ship = {
+						name = "Conduit"
+						design = "Matet"
+						graphical_culture = "fallen_empire_03"
+						prefix = no
+					}
+				}
+				set_location = {
+					target = event_target:mem_conduit_avatar_spawn
+					distance = 0
+					angle = random
+					}	
+				}
+			}
+			FROMFROM = {
+				delete_fleet = this
+			}
+			last_created_fleet = {
+				mem_effect_explosion_4 = yes
+			}
+			set_country_flag = mem_conduit_evolve_success
+		}
+	}
+}
+
+#Broken Pillars
+country_event = {
+	id = mem_the_conduit.140
+	title = "mem_the_conduit.140"
+	desc = "mem_the_conduit.140.desc"
+	picture = GFX_evt_alien_ruins
+	location = event_target:mem_conduit_system
+	
+	fire_only_once = yes
+	
+	trigger = {
+		is_ai = no
+		is_country_type = default
+		has_country_flag = mem_conduit_slayer
+		has_country_flag = mem_garden_aid_complete
+		any_owned_planet = {
+			has_planet_flag = mem_conduit_garden
+			NOT = {
+				OR = {
+					has_building = "mem_building_obelisk_0_1"
+					has_building = "mem_building_obelisk_0_2"
+					has_building = "mem_building_obelisk_0_3"
+					has_building = "mem_building_obelisk_0_4"
+					has_building = "mem_building_obelisk_1"
+					has_building = "mem_building_obelisk_2"
+					has_building = "mem_building_obelisk_3"
+					has_building = "mem_building_obelisk_4"
+				}
+			}
+		}
+	}
+
+	immediate = {
+		random_system = {
+			limit = {
+				has_star_flag = mem_garden_system 
+			}
+			every_system_ambient_object = {
+				if = { 
+					limit = {
+						OR = {
+							has_ambient_object_flag = mem_conduit_pillar_1
+							has_ambient_object_flag = mem_conduit_pillar_2
+							has_ambient_object_flag = mem_conduit_pillar_3
+							has_ambient_object_flag = mem_conduit_pillar_4
+							has_ambient_object_flag = mem_conduit_pillar_1_on
+							has_ambient_object_flag = mem_conduit_pillar_2_on
+							has_ambient_object_flag = mem_conduit_pillar_3_on
+							has_ambient_object_flag = mem_conduit_pillar_4_on
+						}
+					}
+					random_system = {
+						limit = {
+							has_star_flag = mem_garden_system 
+						}
+						every_system_ambient_object = {
+							limit = {
+								OR = {
+									has_ambient_object_flag = mem_conduit_pillar_1
+									has_ambient_object_flag = mem_conduit_pillar_2
+									has_ambient_object_flag = mem_conduit_pillar_3
+									has_ambient_object_flag = mem_conduit_pillar_4
+									has_ambient_object_flag = mem_conduit_pillar_1_on
+									has_ambient_object_flag = mem_conduit_pillar_2_on
+									has_ambient_object_flag = mem_conduit_pillar_3_on
+									has_ambient_object_flag = mem_conduit_pillar_4_on
+								}
+							}
+							destroy_ambient_object = this
+						}
+					}
+				}
+			}
+			random_system_planet = {
+				limit = {
+					is_star = yes
+				}
+				mem_effect_explosion_4 = yes
+			}
+			random_system_planet = {
+				limit = {
+					has_planet_flag = mem_conduit_garden 
+				}
+				if = {
+					limit = { has_modifier = mem_obelisk_1_mod }
+					remove_modifier = mem_obelisk_1_mod
+				}
+				if = {
+					limit = { has_modifier = mem_obelisk_2_mod }
+					remove_modifier = mem_obelisk_2_mod
+				}
+				if = {
+					limit = { has_modifier = mem_obelisk_3_mod }
+					remove_modifier = mem_obelisk_3_mod
+				}
+				if = {
+					limit = { has_modifier = mem_obelisk_4_mod }
+					remove_modifier = mem_obelisk_4_mod
+				}
+				add_modifier = {
+							modifier = "mem_obelisk_7_mod"
+							days = -1
+				}
+			}
+		}
+		set_country_flag = mem_conduit_obelisks_destroyed
+	}
+	
+	option = {
+		name = mem_the_conduit.140.a
+		hidden_effect = { country_event = { id = mem_the_conduit.150 days = 360 } }
+	}
+}
+
+#Start fleet repairs (delayed reward for breaking pillars; effectively spawns on repeat every 5 years)
+country_event = {
+	id = mem_the_conduit.150
+	title = "mem_the_conduit.150"
+	desc = "mem_the_conduit.150.desc"
+	picture = GFX_evt_federation_fleet
+	show_sound = event_mystic_reveal
+	location = event_target:mem_garden_clear
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		is_ai = no
+		is_country_type = default
+		has_country_flag = mem_conduit_slayer
+		has_country_flag = mem_garden_aid_complete
+		has_country_flag = mem_conduit_obelisks_destroyed
+		any_owned_planet = {
+			has_planet_flag = mem_conduit_garden
+		}
+		NOT = {
+			check_variable = {
+					which = "mem_conduit_reward_counter"
+					value = 3
+			}
+		}
+	}
+	
+	immediate = {
+		if = {
+			limit = {
+				check_variable = {
+					which = "mem_conduit_reward_counter"
+					value < 1
+				}
+			}
+			set_variable = {
+				which = "mem_conduit_reward_counter"
+				value = 1
+			}
+			else = {
+				change_variable = {
+					which = "mem_conduit_reward_counter"
+					value = 1
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_the_conduit.150.a
+		custom_tooltip = mem_the_conduit.150.a.tooltip
+		allow = {
+			energy > 1000
+			minerals > 1000	
+		}
+		random_system = {
+			limit = {
+				has_star_flag = mem_garden_system 
+				}
+			random_system_planet = {
+				limit = {
+					has_planet_flag = mem_conduit_garden 
+				}
+				save_event_target_as = mem_conduit_garden
+			}
+		}
+		hidden_effect = {
+			if ={
+				limit = {
+					NOT = { has_country_flag = mem_conduit_fleet_choice_1   }
+				}
+				set_country_flag = mem_conduit_fleet_choice_1 
+			}
+		}
+		add_energy = -1000
+		add_minerals = -1000
+		enable_special_project = {
+			name = "MEM_CONDUIT_FLEET_1"
+			location = event_target:mem_conduit_garden
+			owner = ROOT
+		}
+	}
+	option = {
+		name = mem_the_conduit.150.b
+		custom_tooltip = mem_the_conduit.150.b.tooltip
+		allow = {
+			energy > 2000
+			minerals > 2000
+		}
+		random_system = {
+			limit = {
+				has_star_flag = mem_garden_system 
+				}
+			random_system_planet = {
+				limit = {
+					has_planet_flag = mem_conduit_garden 
+					}
+				save_event_target_as = mem_conduit_garden
+			}
+		}
+		hidden_effect = {
+			if ={
+				limit = {
+					NOT = { has_country_flag = mem_conduit_fleet_choice_2  }
+				}
+				set_country_flag = mem_conduit_fleet_choice_2
+			}
+		}
+		add_energy = -2000
+		add_minerals = -2000
+		enable_special_project = {
+			name = "MEM_CONDUIT_FLEET_2"
+			location = event_target:mem_conduit_garden
+			owner = ROOT
+		}
+	}
+	option = {
+		name = mem_the_conduit.150.c
+		custom_tooltip = mem_the_conduit.150.c.tooltip
+		allow = {
+			energy > 3000
+			minerals > 3000
+		}
+		random_system = {
+			limit = {
+				has_star_flag = mem_garden_system 
+			}
+			random_system_planet = {
+				limit = { 
+					has_planet_flag = mem_conduit_garden 
+				}
+				save_event_target_as = mem_conduit_garden
+			}
+		}
+		hidden_effect = {
+			if ={
+				limit = {
+					NOT = { has_country_flag = mem_conduit_fleet_choice_3  }
+				}
+				set_country_flag = mem_conduit_fleet_choice_3
+			}
+		}
+		add_energy = -3000
+		add_minerals = -3000
+		enable_special_project = {
+			name = "MEM_CONDUIT_FLEET_3"
+			location = event_target:mem_conduit_garden
+			owner = ROOT
+		}
+	}
+	option = {
+		name = mem_the_conduit.150.d
+		add_influence = 100
+	}
+}
+
+#Fleet Repair Reward: FLEET 1 (Escort fleet)
+ship_event = {
+	id = mem_the_conduit.151
+	title = "mem_the_conduit.151"
+	desc = "mem_the_conduit.151.desc"
+	picture = GFX_evt_ship_in_orbit
+	show_sound = event_mystic_reveal_light
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			is_ai = no
+			is_country_type = default
+			has_country_flag = mem_conduit_fleet_choice_1
+		}
+	}
+
+	immediate = {
+		owner = {
+			save_event_target_as = mem_conduit_fleet_owner 
+			add_threat = {
+			who = owner
+			amount = 10
+			}
+		}
+	}
+	
+	option = { 
+		name = EXCELLENT
+		create_fleet = {
+			name = "Eternal Flotilla"
+			settings = {
+				spawn_debris = no 
+			}	
+			effect = {
+				set_owner = event_target:mem_conduit_fleet_owner
+				while = {
+					count = 5
+					create_ship = {
+						name = "Conduit"
+						design = "Nephtys"
+						graphical_culture = "fallen_empire_03"
+						prefix = no
+					}	
+				}
+				set_location = root
+			}
+		}
+		hidden_effect = {
+			owner = {
+				country_event = { id = mem_the_conduit.150 days = 360 }			
+			}
+		}
+	}
+	
+}
+
+#Fleet Repair Reward: FLEET 2 (Battleship fleet)
+ship_event = {
+	id = mem_the_conduit.152
+	title = "mem_the_conduit.152"
+	desc = "mem_the_conduit.152.desc"
+	picture = GFX_evt_ship_in_orbit
+	show_sound = event_mystic_reveal_light
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			is_ai = no
+			is_country_type = default
+			has_country_flag = mem_conduit_fleet_choice_2
+		}
+	}
+	
+	immediate = {
+		owner = {
+			save_event_target_as = mem_conduit_fleet_owner 
+			add_threat = {
+			who = owner
+			amount = 10
+			}
+		}
+	}
+	
+	option = { 
+		name = EXCELLENT
+		create_fleet = {
+			name = "Eternal Flotilla"
+			settings = {
+				spawn_debris = no 
+			}
+			effect = {
+				set_owner = event_target:mem_conduit_fleet_owner
+				create_ship = {
+					name = "Conduit"
+					design = "Seth"
+					graphical_culture = "fallen_empire_03"
+					prefix = no
+				}
+				while = {
+					count = 5
+					create_ship = {
+						name = "Conduit"
+						design = "Nephtys"
+						graphical_culture = "fallen_empire_03"
+						prefix = no
+					}	
+				}
+				set_location = root
+			}
+		}
+		hidden_effect = {
+			owner = {
+				country_event = { id = mem_the_conduit.150 days = 360 }			
+			}
+		}
+	}
+}
+
+#Fleet Repair Reward: FLEET 3 (Titan fleet)
+ship_event = {
+	id = mem_the_conduit.153
+	title = "mem_the_conduit.153"
+	desc = "mem_the_conduit.153.desc"
+	picture = GFX_evt_ship_in_orbit
+	show_sound = event_mystic_reveal_light
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			is_ai = no
+			is_country_type = default
+			has_country_flag = mem_conduit_fleet_choice_3
+		}
+	}
+	
+	immediate = {
+		owner = {
+			save_event_target_as = mem_conduit_fleet_owner 
+			add_threat = {
+			who = owner
+			amount = 10
+			}
+		}
+	}
+	
+	option = { 
+		name = EXCELLENT
+		create_fleet = {
+			name = "Eternal Flotilla"
+			settings = {
+				spawn_debris = no 
+			}
+			effect = {
+				set_owner = event_target:mem_conduit_fleet_owner
+				create_ship = {
+					name = "Conduit"
+					design = "Osiris"
+					graphical_culture = "fallen_empire_03"
+					prefix = no
+				}
+				while = {
+					count = 5
+					create_ship = {
+						name = "Conduit"
+						design = "Nephtys"
+						graphical_culture = "fallen_empire_03"
+						prefix = no
+					}	
+				}
+				set_location = root
+			}
+		}
+		hidden_effect = {
+			owner = {
+				country_event = { id = mem_the_conduit.150 days = 360 }			
+			}
+		}
+	}
+}
