@@ -10,7 +10,7 @@
 
 namespace = mem_lunar_gate
 
-# This event is called with on_colony_2_year_old. It is used to trigger the "real" event.
+# This event is used to trigger the "real" event.
 planet_event = {
 	id = mem_lunar_gate.1
 	hide_window = yes		
@@ -20,6 +20,7 @@ planet_event = {
 			OR = {
 				has_building = building_capital_1
 				has_building = building_capital_2
+				has_building = building_capital_3
 			}
 		} 
 		has_owner = yes
@@ -34,6 +35,7 @@ planet_event = {
 			has_planet_flag = mem_lunar_gate_checked
 			has_planet_flag = colony_event
 		}
+		
 		owner = {
 			has_technology = tech_wormhole_generation_1
 			Not = {
@@ -42,22 +44,25 @@ planet_event = {
 		}
 	}
 	
-	mean_time_to_happen = { months = 1 } #24 months reduced to 1 for testing TODO
+	mean_time_to_happen = { months = 24 }
 	
 	immediate = { 
 		set_planet_flag = mem_lunar_gate_checked
+		
 		random_list = { # values are subject to change
-			500 = { # goes to real start of event	5 real value TODO			
+			5 = { # goes to real start of event
 				planet_event = { id = mem_lunar_gate.2 }
 				owner = {
 					set_country_flag = mem_lunar_gate
 				}
 			}
+			
 			10 = { # this prevents the event from firing ever
 				owner = {
 					set_country_flag = mem_lunar_gate 
 				}
 			}
+			
 			85 = {} # this does nothing, it just means next time, you have a new chance
 		}
 	}
@@ -69,40 +74,46 @@ planet_event = {
 	title = "mem_lunar_gate.2.name"
 	desc = "mem_lunar_gate.2.desc"	
 	picture = GFX_evt_asteroid_approaching_planet
+	show_sound = event_administrative_work
 	location = FROM
 	is_triggered_only = yes
 	
 	immediate = {
-		THIS = { save_event_target_as = lunar_gate_planet }
-		FROM = {
+		THIS = { save_event_target_as = mem_lunar_gate_planet }
+		
+		THIS.owner = {
 			set_country_flag = colony_event
 		}
+		
 		random_moon = {
 			limit = {
 				uninhabitable_regular_planet  = yes
 			}
-			save_event_target_as = lunar_gate_moon
+			save_event_target_as = mem_lunar_gate_moon
 		}
 	}
 	
 	# Accept the gate construction
 	option = {
 		name = "mem_lunar_gate.2.a"
+		
 		trigger = {
 			root.owner = {
 				minerals > 499
 				energy > 799
 			}		
 		}
+		
 		root.owner = {
 			add_minerals = -500
 			add_energy = -800
 		}
-		event_target:lunar_gate_moon = {
+		
+		event_target:mem_lunar_gate_moon = {
 			enable_special_project = {
 				name = "MEM_LUNAR_GATE_PROJECT"
 				owner = ROOT
-				location = event_target:lunar_gate_moon
+				location = event_target:mem_lunar_gate_moon
 			}
 		}	
 	}
@@ -110,30 +121,47 @@ planet_event = {
 	# Decide to study elements
 	option = {
 		name = "mem_lunar_gate.2.b"
+		
 		trigger = {
 			root.owner = {
 				minerals > 499
 				energy > 799
 			}		
-		}
+		}		
+		
+		hidden_effect = {
+			owner = {
+				 remove_country_flag  = colony_event
+			}
+		}	
+		
 		root.owner = { add_physics_research = 50 }
 	}
 
 	# Too expensive, study elements
 	option = {
 		name = "mem_lunar_gate.2.c"
+		
 		trigger = {
 			root.owner = {
 				minerals < 500
 				energy < 800				
 			}		
+		}	
+		
+		hidden_effect = {
+			owner = {
+				 remove_country_flag  = colony_event
+			}
 		}
+		
 		root.owner = { add_physics_research = 50 }	
 	}
 	
 	# Too extensive, check later
 	option = {
 		name = "mem_lunar_gate.2.d"
+		
 		trigger = {
 			root.owner = {
 				minerals < 500
@@ -144,11 +172,11 @@ planet_event = {
 		
 		root.owner = {
 			add_influence = -50
-		}
+		}	
 		
 		planet_event = { 
 			id = mem_lunar_gate.3 
-			days = 10 # Real value 360 TODO
+			days = 360
 		}	
 	}
 }
@@ -159,29 +187,33 @@ planet_event = {
 	title = "mem_lunar_gate.3.name"
 	desc = "mem_lunar_gate.3.desc"	
 	picture = GFX_evt_asteroid_approaching_planet
+	show_sound = event_administrative_work
 	location = FROM
 	is_triggered_only = yes
 	
 	# Accept the gate construction
 	option = {
 		name = "mem_lunar_gate.3.a"
+		
 		trigger = {
 			root.owner = {
 				minerals > 499
 				energy > 799
 			}		
 		}
+		
 		root.owner = {
 			add_minerals = -500
 			add_energy = -800
 		}
-		event_target:lunar_gate_moon = {
+		
+		event_target:mem_lunar_gate_moon = {
 			enable_special_project = {
 				name = "MEM_LUNAR_GATE_PROJECT"
 				owner = ROOT
-				location = event_target:lunar_gate_moon
+				location = event_target:mem_lunar_gate_moon
 			}
-		}	
+		}
 	}
 	
 	# Decide to study elements
@@ -193,19 +225,35 @@ planet_event = {
 				energy > 799
 			}		
 		}
-		root.owner = { add_physics_research = 50 }	
+		
+		hidden_effect = {
+			owner = {
+				 remove_country_flag  = colony_event
+			}
+		}	
+		
+		root.owner = { add_physics_research = 50 }
 	}
 
 	# Too expensive, study elements
 	option = {
 		name = "mem_lunar_gate.3.c"
+		
 		trigger = {
 			root.owner = {
 				minerals < 500
 				energy < 800				
 			}		
 		}
+		
+		hidden_effect = {
+			owner = {
+				 remove_country_flag  = colony_event
+			}
+		}	
+		
 		root.owner = { add_physics_research = 50 }
+		
 		FROM = {
 			add_modifier = {
 				modifier = "mem_lunar_gate_broken_promise"
@@ -221,20 +269,27 @@ ship_event = {
 	title = "mem_lunar_gate.4.name"
 	desc = "mem_lunar_gate.4.desc"	
 	picture = GFX_evt_wormhole
-	location = event_target:lunar_gate_planet
+	show_sound = event_activating_unknown_technology
+	location = event_target:mem_lunar_gate_planet
 	is_triggered_only = yes
 	
 	option = {
 		name = "EXCELLENT"
-		event_target:lunar_gate_planet = {
+		
+		hidden_effect = {
+			event_target:mem_lunar_gate_planet.owner = {
+				 remove_country_flag  = colony_event
+			}
+		}
+		
+		event_target:mem_lunar_gate_planet = {
 			add_modifier = {
 				modifier = "mem_lunar_gate_access"
 				days = -1
-				remove_flag = colony_event
 			}
 		}
-
-		event_target:lunar_gate_moon = {
+		
+		event_target:mem_lunar_gate_moon = {
 			add_modifier = {
 				modifier = "mem_lunar_gate_completed"
 				days = -1
@@ -249,12 +304,20 @@ ship_event = {
 	title = "mem_lunar_gate.5.name"
 	desc = "mem_lunar_gate.5.desc"	
 	picture = GFX_evt_nuclear_explosion
-	location = event_target:lunar_gate_planet
+	show_sound = event_air_raid_siren
+	location = event_target:mem_lunar_gate_planet
 	is_triggered_only = yes
 	
 	option = {
 		name = "mem_lunar_gate.5.a"
-		event_target:lunar_gate_planet = {
+		
+		hidden_effect = {
+			event_target:mem_lunar_gate_planet.owner = {
+				 remove_country_flag  = colony_event
+			}
+		}
+		
+		event_target:mem_lunar_gate_planet = {
 			add_modifier = {
 				modifier = "mem_lunar_gate_pollution"
 				days = 3600
@@ -263,10 +326,9 @@ ship_event = {
 			random_tile = {	set_blocker = "tb_bombarded_land" }
 			random_pop = { kill_pop = yes }
 			random_pop = { kill_pop = yes }
-			remove_flag = colony_event
 		}
-
-		event_target:lunar_gate_moon = {
+		
+		event_target:mem_lunar_gate_moon = {
 			change_pc = "pc_mem_destroyed_barren"			
 			add_modifier = {
 				modifier = "mem_lunar_gate_catastrophe"
@@ -282,7 +344,8 @@ ship_event = {
 	title = "mem_lunar_gate.6.name"
 	desc = "mem_lunar_gate.6.desc"	
 	picture = GFX_evt_wormhole
-	location = event_target:lunar_gate_planet
+	show_sound = event_air_raid_siren
+	location = event_target:mem_lunar_gate_planet
 	is_triggered_only = yes
 	
 	option = {
@@ -291,7 +354,7 @@ ship_event = {
 		kill_leader = { type = scientist show_notification = no }
 		fleet = { destroy_fleet = this }
 
-		event_target:lunar_gate_moon = {
+		event_target:mem_lunar_gate_moon = {
 			change_pc = "pc_mem_micro_black_hole"
 			 
 			orbital_deposit_tile = {
@@ -307,8 +370,10 @@ ship_event = {
 			}
 		}
 		
-		event_target:lunar_gate_planet = {
-			remove_flag = colony_event
+		hidden_effect = {
+			event_target:mem_lunar_gate_planet.owner = {
+				 remove_country_flag  = colony_event
+			}
 		}
 	}
 }
