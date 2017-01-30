@@ -1,26 +1,24 @@
 namespace = mem_music_tour
 
-# Example ethic triggers to be found in on_action_events in the stellaris events folder.
-
 # Meeting AI types events.
 
 country_event = {
-	id = mem_music_tour.8
-	title = "mem_music_tour.8.name"
-	desc = "mem_music_tour.8.desc"
-
-	picture = GFX_evt_metropolis
-	show_sound = event_cityscape	
+	id = mem_music_tour.7
+	hide_window = yes
 	
 	trigger = {
 		any_neighbor_country = {
-			OR = {
-				has_ethic = ethic_individualist
-				has_ethic = ethic_fanatic_individualist
+		OR = {
+			has_ethic = ethic_individualist
+			has_ethic = ethic_fanatic_individualist
 			}
-			NOT = { has_country_flag = mem_sent_rockstar_to_player }	#countries stop sending rockstars once they've sent one to a player
+			NOT = {
+			has_country_flag = mem_sent_rockstar_to_player    #countries stop sending rockstars once they've sent one to a player
+				}
+			}
 		}
-	}
+
+	
 	mean_time_to_happen = {
 		months = 960
 	}	
@@ -30,27 +28,64 @@ country_event = {
 				OR = {
 					has_ethic = ethic_individualist
 					has_ethic = ethic_fanatic_individualist
+					}
+				NOT = { 
+				has_country_flag = mem_sent_rockstar_to_player 
+					}
 				}
-				NOT = { has_country_flag = mem_sent_rockstar_to_player }
-			}
-			save_event_target_as = mem_rockstar_origin 
-			if = {	
-				limit = { root = { is_ai = no } }
+				if = {limit = {
+				OR = {
+				capital_scope = { owner = { is_same_species = capital_scope.root.owner_species } }
+				capital_scope = { owner = { is_subspecies = capital_scope.root.owner_species } }
+					}
+				}
 				set_country_flag = mem_sent_rockstar_to_player
+				
+				else = {
+			save_event_target_as = mem_rockstar_origin
+			if = {	
+				limit = { root = { is_ai = no }}
+				set_country_flag = mem_sent_rockstar_to_player
+				root = {set_country_flag = mem_rockstar_exists}
+					}
+				}
 			}
-		}		
-		random_owned_planet = {
-			save_event_target_as = mem_tour_location 
 		}
-		random_list = {
-			20 = { set_country_flag = mem_rockflag }
-			16 = { set_country_flag = mem_dubstepflag }
-			16 = { set_country_flag = mem_incomprehensibleflag }
-			16 = { set_country_flag = mem_rapperflag }
-			16 = { set_country_flag = mem_festivalflag }
-			16 = { set_country_flag = mem_metalflag }
+					if = { limit = {ROOT = {has_country_flag = mem_rockstar_exists}}
+					country_event = {
+					id = mem_music_tour.8
+				}
+			}
 		}
 	}
+
+country_event = {
+	id = mem_music_tour.8
+	title = "mem_music_tour.8.name"
+	desc = "mem_music_tour.8.desc"
+
+	is_triggered_only = yes
+	
+	immediate = {
+	
+	ROOT = {remove_country_flag = mem_rockstar_exists}
+	
+	random_owned_planet = {
+			save_event_target_as = mem_tour_location 
+			}
+			random_list = {
+				20 = { set_country_flag = mem_rockflag }
+				16 = { set_country_flag = mem_dubstepflag }
+				16 = { set_country_flag = mem_incomprehensibleflag }
+				16 = { set_country_flag = mem_rapperflag }
+				16 = { set_country_flag = mem_festivalflag }
+				16 = { set_country_flag = mem_metalflag }
+				}
+		}
+	
+	picture = GFX_evt_metropolis
+	show_sound = event_cityscape	
+			
 	option = {
 		name = "mem_music_tour.8.xenophile"
 		trigger = {
@@ -465,3 +500,25 @@ country_event = {
 		}
 		}
 	}
+
+#Remove flags for easy retesting.	
+country_event = {
+id = mem_music_tour.99
+hide_window = yes
+
+is_triggered_only = yes
+
+trigger = {
+
+any_neighbor_country = {
+		has_country_flag = mem_sent_rockstar_to_player    #countries stop sending rockstars once they've sent one to a player
+			}
+		}
+		
+		immediate = {
+		random_neighbor_country = {
+		remove_country_flag = mem_sent_rockstar_to_player
+		}
+	}
+}
+

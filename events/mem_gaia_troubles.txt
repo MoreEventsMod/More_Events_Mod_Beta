@@ -1,0 +1,824 @@
+##############################
+# Gaia Troubles
+# by Matthew Betts (/u/matthewbetts)
+##############################
+
+namespace = mem_gaia_troubles
+
+@tier1materialreward = 6
+@tier1materialmin = 100
+@tier1materialmax = 500
+@tier2materialreward = 12
+@tier2materialmin = 150
+@tier2materialmax = 1000
+@tier3materialreward = 18
+@tier3materialmin = 250
+@tier3materialmax = 1500
+@tier4materialreward = 24
+@tier4materialmin = 350
+@tier4materialmax = 2000
+
+@tier1influencereward = 6
+@tier1influencemin = 40
+@tier1influencemax = 100
+@tier2influencereward = 12
+@tier2influencemin = 80
+@tier2influencemax = 175
+@tier3influencereward = 18
+@tier3influencemin = 125
+@tier3influencemax = 250
+@tier4influencereward = 24
+@tier4influencemin = 150
+@tier4influencemax = 300
+
+@tier1researchreward = 6
+@tier1researchmin = 60
+@tier1researchmax = 150
+@tier2researchreward = 12
+@tier2researchmin = 90
+@tier2researchmax = 250
+@tier3researchreward = 18
+@tier3researchmin = 120
+@tier3researchmax = 350
+@tier4researchreward = 24
+@tier4researchmin = 300
+@tier4researchmax = 800
+
+#Inital event
+planet_event = {
+	id = mem_gaia_troubles.1
+	title = "mem_gaia_troubles.name"
+	desc = "mem_gaia_troubles.desc"
+	picture = GFX_evt_big_landing_ship
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_owner = yes
+		original_owner = yes
+		is_homeworld = no
+		owner = {
+			is_ai = no
+			NOT = { has_country_flag = gaia_troubles }
+		}
+		NOT = { has_global_flag = gaia_troubles_global }
+		NOT = { has_planet_flag = colony_event }
+		NOT = { has_planet_flag = gaia_troubles_planet }
+		NOT = { has_global_flag = gaia_troubles_done }
+
+		has_ground_combat = no
+		num_pops > 0
+		is_capital = no
+		is_planet_class = pc_gaia
+	}
+
+	immediate = {
+		set_global_flag = gaia_troubles_global
+		set_planet_flag = colony_event
+		set_planet_flag = gaia_troubles_planet
+		owner = { set_country_flag = gaia_troubles_country }
+	}
+
+	option = {
+		name = EXCELLENT
+		hidden_effect = { planet_event = { id = mem_gaia_troubles.2 days = 9000 } } #25 years (Stellaris year = 360 Stellaris days)
+	}
+}
+
+#First option event 
+planet_event = {
+	id = mem_gaia_troubles.2
+	title = "mem_gaia_troubles.2.name"
+	desc = "mem_gaia_troubles.2.desc"
+	picture = GFX_evt_in_the_dark
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_ai = no
+			has_country_flag = gaia_troubles_country
+		}
+		has_planet_flag = gaia_troubles_planet
+		has_planet_flag = colony_event 
+		has_ground_combat = no
+		num_pops > 0
+	}
+
+	#Leave Hammer untouched
+	option = {
+		name = mem_gaia_troubles.2.a
+		hidden_effect = { planet_event = { id = mem_gaia_troubles.3 days = 400 } }
+	}
+
+	#Take Hammer to homeworld to inspect, reason = better equipment is there
+	option = {
+		name = mem_gaia_troubles.2.b
+		hidden_effect = { planet_event = { id = mem_gaia_troubles.4 days = 400 } }
+	}
+
+#May include these in a later release/update as of now .11 and .12 don't exist
+
+#	#Open to public as an exhibition
+#	option = {
+#		name = mem_gaia_troubles.2.c
+#		hidden_effect = { planet_event = { id = mem_gaia_troubles.11 days = 400 } }
+#	}
+
+#	#Inspect on planet
+#	option = {
+#		name = mem_gaia_troubles.2.d
+#		hidden_effect = { planet_event = { id = mem_gaia_troubles.12 days = 400 } }
+#	}
+
+	#Try 'unorthodox' approach (Zap with with a bit of radiation)
+	option = {
+		name = mem_gaia_troubles.2.e
+		hidden_effect = { planet_event = { id = mem_gaia_troubles.20 days = 400 } }
+	}
+}
+
+#Ends the event chain early so you don't have to deal with all this shit
+planet_event = {
+	id = mem_gaia_troubles.3
+	title = "mem_gaia_troubles.3.name"
+	desc = "mem_gaia_troubles.3.desc"
+	picture = GFX_evt_colony_settlement
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_ai = no
+			has_country_flag = gaia_troubles_country
+		}
+		has_planet_flag = gaia_troubles_planet
+		has_planet_flag = colony_event 
+		has_ground_combat = no
+		num_pops > 0
+		is_capital = no
+	}
+
+	immediate = {
+		set_global_flag = gaia_troubles_done
+		remove_global_flag = gaia_troubles_global
+		remove_planet_flag = colony_event
+		remove_planet_flag = gaia_troubles_planet
+		#remove_country_flag = gaia_troubles_country
+	}
+
+	option = {
+		name = mem_gaia_troubles.3.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+	}
+}
+
+#Hazardous Weather appears
+planet_event = {
+	id = mem_gaia_troubles.4
+	title = "mem_gaia_troubles.4.name"
+	desc = "mem_gaia_troubles.4.desc"
+	picture = GFX_evt_gas_giant
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_ai = no
+			has_country_flag = gaia_troubles_country
+		}
+		has_planet_flag = gaia_troubles_planet
+		has_planet_flag = colony_event 
+		has_ground_combat = no
+		num_pops > 0
+		is_capital = no
+	}
+
+	immediate = {
+		add_modifier = {
+			modifier = "hazardous_weather"
+			days = -1
+		}
+	}
+
+	option = {
+		name = mem_gaia_troubles.4.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		hidden_effect = { planet_event = { id = mem_gaia_troubles.5 days = 200 } }
+	}
+	option = {
+		name = mem_gaia_troubles.4.b
+		hidden_effect = { planet_event = { id = mem_gaia_troubles.10 days = 200 } }
+	}
+}
+
+#Tectonic plates become unstable
+planet_event = {
+	id = mem_gaia_troubles.5
+	title = "mem_gaia_troubles.5.name"
+	desc = "mem_gaia_troubles.5.desc"
+	picture = GFX_evt_city_ruins
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_ai = no
+			has_country_flag = gaia_troubles_country
+		}
+		has_planet_flag = gaia_troubles_planet
+		has_planet_flag = colony_event 
+		has_ground_combat = no
+		num_pops > 0
+		is_capital = no
+	}
+
+	immediate = {
+		add_modifier = {
+			modifier = "unstable_tectonics"
+			days = -1
+		}
+	}
+
+	option = {
+		name = mem_gaia_troubles.5.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		hidden_effect = { planet_event = { id = mem_gaia_troubles.6 days = 200 } }
+	}
+	option = {
+		name = mem_gaia_troubles.5.b
+		hidden_effect = { planet_event = { id = mem_gaia_troubles.10 days = 200 } }
+	}
+}
+
+#Gravity gets very strong
+planet_event = {
+	id = mem_gaia_troubles.6
+	title = "mem_gaia_troubles.6.name"
+	desc = "mem_gaia_troubles.6.desc"
+	picture = GFX_evt_atmospheric_entry
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_ai = no
+			has_country_flag = gaia_troubles_country
+		}
+		has_planet_flag = gaia_troubles_planet
+		has_planet_flag = colony_event 
+		has_ground_combat = no
+		num_pops > 0
+		is_capital = no
+	}
+
+	immediate = {
+		add_modifier = {
+			modifier = "high_gravity"
+			days = -1
+		}
+	}
+
+	option = {
+		name = mem_gaia_troubles.6.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+		}
+		hidden_effect = { planet_event = { id = mem_gaia_troubles.7 days = 200 } }
+	}
+	option = {
+		name = mem_gaia_troubles.6.b
+		hidden_effect = { planet_event = { id = mem_gaia_troubles.10 days = 200 } }
+	}
+}
+
+#Planet shits itself and literally changes type, one last chance to stop it here
+planet_event = {
+	id = mem_gaia_troubles.7
+	title = "mem_gaia_troubles.7.name"
+	desc = "mem_gaia_troubles.7.desc"
+	picture = GFX_evt_burning_settlement
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_ai = no
+			has_country_flag = gaia_troubles_country
+		}
+		has_planet_flag = gaia_troubles_planet
+		has_planet_flag = colony_event 
+		has_ground_combat = no
+		num_pops > 0
+		is_capital = no
+	}
+
+	immediate = {
+		change_pc = pc_arid
+	}
+
+
+	option = {
+		name = mem_gaia_troubles.7.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier4researchreward
+				min = @tier4researchmin
+				max = @tier4researchmax
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier4researchreward
+				min = @tier4researchmin
+				max = @tier4researchmax
+			}
+		}
+
+		hidden_effect = { 
+			planet_event = { id = mem_gaia_troubles.8 days = 200 } 
+		}
+	}
+	option = {
+		name = mem_gaia_troubles.7.b
+		hidden_effect = { planet_event = { id = mem_gaia_troubles.10 days = 200 } }
+	}
+}
+
+#Planet shits itself again and changes type, this time to toxic + no research bonus this time
+planet_event = {
+	id = mem_gaia_troubles.8
+	title = "mem_gaia_troubles.8.name"
+	desc = "mem_gaia_troubles.8.desc"
+	picture = GFX_evt_dead_city
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_ai = no
+			has_country_flag = gaia_troubles_country
+		}
+		has_planet_flag = gaia_troubles_planet
+		has_planet_flag = colony_event 
+		has_ground_combat = no
+		num_pops > 0
+		is_capital = no
+	}
+
+	option = {
+		name = mem_gaia_troubles.8.a
+		change_pc = pc_toxic
+		destroy_colony = yes
+		hidden_effect = { planet_event = { id = mem_gaia_troubles.9 days = 30 } }
+	}
+}
+
+#End message becuase you're a madman and decided not to return the artifact
+planet_event = {
+	id = mem_gaia_troubles.9
+	title = "mem_gaia_troubles.9.name"
+	desc = "mem_gaia_troubles.9.desc"
+	picture = GFX_evt_dead_city
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_ai = no
+			has_country_flag = gaia_troubles_country
+		}
+		has_planet_flag = gaia_troubles_planet
+		has_planet_flag = colony_event 
+		has_ground_combat = no
+		num_pops > 0
+		is_capital = no
+	}
+
+	immediate = {
+		set_global_flag = gaia_troubles_done
+		remove_global_flag = gaia_troubles_global
+		remove_planet_flag = colony_event
+		remove_planet_flag = gaia_troubles_planet
+		#remove_country_flag = gaia_troubles_country
+	}
+
+	option = {
+		name = mem_gaia_troubles.9.a
+	}
+}
+
+#End chain if you decide to return the artifact
+planet_event = {
+	id = mem_gaia_troubles.10
+	title = "mem_gaia_troubles.10.name"
+	desc = "mem_gaia_troubles.10.desc"
+	picture = GFX_evt_metropolis
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_ai = no
+			has_country_flag = gaia_troubles_country
+		}
+		has_planet_flag = gaia_troubles_planet
+		has_planet_flag = colony_event 
+		has_ground_combat = no
+		num_pops > 0
+		is_capital = no
+	}
+
+	immediate = {
+		set_global_flag = gaia_troubles_done
+		remove_global_flag = gaia_troubles_global
+		remove_planet_flag = colony_event
+		remove_planet_flag = gaia_troubles_planet
+		#remove_country_flag = gaia_troubles_country
+	}
+
+	option = {
+		name = mem_gaia_troubles.10.a
+	}
+}
+
+
+#Ship Spawning event chain
+planet_event = {
+	id = mem_gaia_troubles.20
+	title = "mem_gaia_troubles.20.name"
+	desc = "mem_gaia_troubles.20.desc"
+	picture = GFX_evt_mining_operations
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_ai = no
+			has_country_flag = gaia_troubles_country
+		}
+		has_planet_flag = gaia_troubles_planet
+		has_planet_flag = colony_event 
+		has_ground_combat = no
+		num_pops > 0
+		is_capital = no
+	}
+
+	option = {
+		name = GOOD
+		hidden_effect = { planet_event = { id = mem_gaia_troubles.21 days = 30 } }
+	}
+}
+
+#The player may flick between .21 and .22 a number of times with a chance to go to 
+planet_event = {
+	id = mem_gaia_troubles.21
+	title = "mem_gaia_troubles.21.name"
+	desc = "mem_gaia_troubles.21.desc"
+	picture = GFX_evt_mining_operations
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_ai = no
+			has_country_flag = gaia_troubles_country
+		}
+		has_planet_flag = gaia_troubles_planet
+		has_planet_flag = colony_event 
+		has_ground_combat = no
+		num_pops > 0
+		is_capital = no
+	}
+
+	option = {
+		name = mem_gaia_troubles.21.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		hidden_effect = {
+			random_list = {
+				50 = { planet_event = { id = mem_gaia_troubles.21 days = 40 random = 30 } }
+				50 = { planet_event = { id = mem_gaia_troubles.23 days = 40 random = 30 } }
+			}
+		}	
+	}
+	option = {
+		name = mem_gaia_troubles.21.b
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		hidden_effect = {
+			random_list = {
+				50 = { planet_event = { id = mem_gaia_troubles.22 days = 40 random = 30 } }
+				50 = { planet_event = { id = mem_gaia_troubles.24 days = 40 random = 30 } }
+			}
+		}	
+	}
+}
+
+planet_event = {
+	id = mem_gaia_troubles.22
+	title = "mem_gaia_troubles.22.name"
+	desc = "mem_gaia_troubles.22.desc"
+	picture = GFX_evt_mining_operations
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_ai = no
+			has_country_flag = gaia_troubles_country
+		}
+		has_planet_flag = gaia_troubles_planet
+		has_planet_flag = colony_event 
+		has_ground_combat = no
+		num_pops > 0
+		is_capital = no
+	}
+
+	option = {
+		name = mem_gaia_troubles.22.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		hidden_effect = {
+			random_list = {
+				50 = { planet_event = { id = mem_gaia_troubles.22 days = 40 random = 30 } }
+				50 = { planet_event = { id = mem_gaia_troubles.23 days = 40 random = 30 } }
+			}
+		}	
+	}
+	option = {
+		name = mem_gaia_troubles.22.b
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		hidden_effect = {
+			random_list = {
+				50 = { planet_event = { id = mem_gaia_troubles.21 days = 40 random = 30 } }
+				50 = { planet_event = { id = mem_gaia_troubles.24 days = 40 random = 30 } }
+			}
+		}	
+	}
+}
+
+planet_event = {
+	id = mem_gaia_troubles.23
+	title = "mem_gaia_troubles.23.name"
+	desc = "mem_gaia_troubles.23.desc"
+	picture = GFX_evt_star_chart
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_ai = no
+			has_country_flag = gaia_troubles_country
+		}
+		has_planet_flag = gaia_troubles_planet
+		has_planet_flag = colony_event 
+		has_ground_combat = no
+		num_pops > 0
+		is_capital = no
+	}
+
+	immediate = {
+		set_global_flag = gaia_troubles_done
+		remove_global_flag = gaia_troubles_global
+		remove_planet_flag = colony_event
+		remove_planet_flag = gaia_troubles_planet
+		#remove_country_flag = gaia_troubles_country
+	}
+	
+	option = {
+		name = UNFORTUNATE
+	}
+}
+
+planet_event = {
+	id = mem_gaia_troubles.24
+	title = "mem_gaia_troubles.24.name"
+	desc = "mem_gaia_troubles.24.desc"
+	picture = GFX_evt_small_space_battle
+	location = ROOT
+
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			is_ai = no
+			has_country_flag = gaia_troubles_country
+		}
+		has_planet_flag = gaia_troubles_planet
+		has_planet_flag = colony_event 
+		has_ground_combat = no
+		num_pops > 0
+		is_capital = no
+	}
+
+	immediate = {
+		set_global_flag = gaia_troubles_done
+		remove_global_flag = gaia_troubles_global
+		remove_planet_flag = colony_event
+		remove_planet_flag = gaia_troubles_planet
+		#remove_country_flag = gaia_troubles_country
+	}
+
+	option = {
+		name = BATTLESTATIONS
+		hidden_effect = {
+			create_country = {
+				name = "Unknown Drones"
+				type = faction
+			}
+			last_created_country = {
+				establish_communications_no_message = root.owner
+				create_fleet = { name = "Unknown Fleet" }
+				last_created_fleet = {
+					set_owner = PREV
+					create_ship = {
+						name = "Unknown Ship 1"
+						design = "Guardian"
+					}
+					create_ship = {
+						name = "Unknown Ship 2"
+						design = "Guardian"
+					}
+					create_ship = {
+						name = "Unknown Ship 3"
+						design = "Guardian"
+					}
+					create_ship = {
+						name = "Unknown Ship 4"
+						design = "Guardian"
+					}
+					create_ship = {
+						name = "Unknown Ship 5"
+						design = "Guardian"
+					}
+					create_ship = {
+						name = "Unknown Ship 6"
+						design = "Guardian"
+					}
+					create_ship = {
+						name = "Unknown Ship 7"
+						design = "Guardian"
+					}
+					create_ship = {
+						name = "Unknown Ship 8"
+						design = "Guardian"
+					}
+					create_ship = {
+						name = "Unknown Ship 9"
+						design = "Guardian"
+					}
+					create_ship = {
+						name = "Unknown Ship 10"
+						design = "Guardian"
+					}
+					set_fleet_stance = aggressive
+					set_aggro_range_measure_from = self
+					set_aggro_range = 300
+					set_location = from
+				}
+				set_faction_hostility = { set_hostile = yes }
+				establish_communications_no_message = root.owner
+			}
+		}
+	}
+}

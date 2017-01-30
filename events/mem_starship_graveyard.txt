@@ -1,0 +1,145 @@
+namespace = mem_starship_graveyard
+
+#####################################
+# Starship Graveyard Project
+#####################################
+#
+# Idea: add amoeba flagella pods as option?
+
+planet_event = {
+	id = mem_starship_graveyard.100
+	hide_window = yes
+	
+	mean_time_to_happen = {
+		months = 360
+	}
+	
+	trigger = {
+		has_modifier = starship_graveyard
+		has_research_station = yes
+		NOT = {
+			has_planet_flag = mem_graveyard_event_open
+		}
+		NOT = {
+			solar_system = {
+				space_owner = {
+					has_country_flag = mem_graveyard_event_fired
+				}
+			}
+		}
+	}
+	
+	immediate = {
+		set_planet_flag = mem_graveyard_event_open
+		solar_system = {
+			space_owner = {
+				country_event = { id = mem_starship_graveyard.101 }
+			}
+		}
+	}
+}
+
+country_event = {
+	id = mem_starship_graveyard.101
+	title = mem_starship_graveyard.101.title
+	desc = mem_starship_graveyard.101.desc
+	picture = GFX_evt_space_debris
+	show_sound = event_scanner
+	is_triggered_only = yes
+	
+	immediate = {
+		random_planet = {
+			limit = {
+				has_planet_flag = mem_graveyard_event_open
+				space_owner = {
+					is_country = root
+				}
+			}
+			save_event_target_as = mem_graveyard_planet
+		}
+		set_country_flag = mem_graveyard_event_fired
+	}
+	
+	option = { # Do it
+		name = mem_starship_graveyard.101.a
+		enable_special_project = {
+			name = MEM_STARSHIP_GRAVEYARD_PROJECT
+			location = event_target:mem_graveyard_planet
+			owner = root
+		}
+	}
+	
+	option = { # Forget it
+		name = mem_starship_graveyard.101.b
+	}
+}
+
+ship_event = {
+	id = mem_starship_graveyard.102
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		random_list = {
+			1 = {
+				owner = {
+					country_event = { id = mem_starship_graveyard.103 }
+				}
+			}
+			1 = {
+				modifier = {
+					owner = {
+						has_technology = tech_crystal_armor_2
+					}
+					factor = 0
+				}
+				owner = {
+					country_event = { id = mem_starship_graveyard.104 }
+				}
+			}
+		}
+	}
+}
+
+country_event = { # Oodles of engineering points
+	id = mem_starship_graveyard.103
+	title = mem_starship_graveyard.103.title
+	desc = mem_starship_graveyard.103.desc
+	picture = GFX_evt_space_debris
+	show_sound = event_scanner
+	is_triggered_only = yes
+
+	option = {
+		name = mem_starship_graveyard.103.a
+		add_monthly_resource_mult = {
+			resource = engineering_research
+			value = 24
+			min = 150
+			max = 500
+		}
+	}
+}
+
+country_event = { # Crystal plating
+	id = mem_starship_graveyard.104
+	title = mem_starship_graveyard.104.title
+	desc = mem_starship_graveyard.104.desc
+	picture = GFX_evt_space_debris
+	show_sound = event_scanner
+	is_triggered_only = yes
+
+	option = {
+		name = mem_starship_graveyard.104.a
+		add_research_option = tech_crystal_armor_2
+		add_tech_progress = {
+			tech = tech_crystal_armor_2
+			progress = 0.10
+		}
+		add_monthly_resource_mult = {
+			resource = engineering_research
+			value = 12
+			min = 90
+			max = 250
+		}
+	}
+}
