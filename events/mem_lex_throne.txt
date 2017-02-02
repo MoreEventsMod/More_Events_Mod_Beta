@@ -244,8 +244,12 @@ country_event = {
 			is_country_type = mem_ring_guardian
 		}
 		has_country_flag = mem_ring_country
-		FROMFROM = { is_ship_size = mem_titan }
-		FROM = { is_ai = no }
+		FROMFROM = {
+			is_ship_size = mem_titan 
+		}
+		FROM = {
+			#is_ai = no 
+		}
 	}
 	
 	immediate = {
@@ -255,7 +259,7 @@ country_event = {
 		}
 		FROM = {
 			country_event = { id = mem_throne_watchers.31 }
-			mem_ancestor_seal_trigger = yes
+			#mem_ancestor_seal_trigger = yes
 			set_country_flag = mem_titan_slayer
 		}
 		every_country = {
@@ -1191,7 +1195,9 @@ country_event = {
 			is_ai = no
 			is_country_type = default
 			has_country_flag = mem_titan_slayer
-			NOT = { has_country_flag = mem_titan_awakening }
+			NOT = {
+				has_country_flag = mem_titan_awakening 
+			}
 			any_owned_ship = {
 			is_ship_size = mem_titan_pc
 			}
@@ -1200,7 +1206,9 @@ country_event = {
 	option = {
 		name = "mem_throne_watchers.46.a"
 		custom_tooltip = mem_throne_watchers.46.a.tooltip
-		hidden_effect = { set_country_flag = mem_titan_awakening }
+		hidden_effect = {
+			set_country_flag = mem_titan_awakening 
+		}
 	}	
 }
 
@@ -1213,7 +1221,9 @@ country_event = {
 	trigger = {
 		is_ai = no
 		is_country_type = default
-		NOT = { has_country_flag = mem_titan_evolve_success }
+		NOT = {
+			has_country_flag = mem_titan_evolve_success 
+		}
 		has_country_flag = mem_titan_slayer
 		has_country_flag = mem_titan_awakening
 		any_owned_ship = {
@@ -1277,5 +1287,210 @@ country_event = {
 			}
 			set_country_flag = mem_titan_evolve_success
 		}
+	}
+}
+
+country_event = {
+	id = mem_throne_watchers.48
+	title = "mem_throne_watchers.48"
+	desc = "mem_throne_watchers.48.desc"
+	picture = GFX_evt_unspeakable_horror
+	
+	fire_only_once = yes
+	
+	trigger = {
+		is_ai = no
+		is_country_type = default
+		has_country_flag = mem_titan_slayer
+		has_country_flag = mem_titan_awakening
+		has_country_flag = mem_titan_evolve_success
+		any_owned_ship = {
+			is_ship_size = mem_titan
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 50
+		
+		modifier = {
+			factor = 0.75
+				any_country = {
+					has_country_flag = awakened_fallen_empire
+				}	
+		}
+		modifier = {
+			factor = 0.5
+				has_global_flag = ai_revolt_happened
+		}
+		modifier = {
+			factor = 0.5
+				has_global_flag = prethoryn_invasion_happened
+		}
+		modifier = {
+			factor = 0.5
+				has_global_flag = extradimensional_invasion_happened
+		}
+		modifier = {
+			factor = 0.25
+				has_global_flag = war_in_heaven_started
+		}
+		modifier = {
+			factor = 0.1
+				has_global_flag = mem_ancestor_crisis_start
+		}
+	}
+	
+	immediate = {
+		capital_scope = { save_event_target_as = mem_pc_home }
+	}
+
+	option = {
+		name = "mem_throne_watchers.48.a"
+		event_target:mem_pc_home = {
+			enable_special_project = {
+				name = "MEM_TITAN_LIMIT_BREAK"
+				location = THIS
+				owner = ROOT
+			}
+		}
+	}
+	option = {
+		name = "mem_throne_watchers.48.b"
+		add_influence = 100
+	}
+}
+
+country_event = {
+	id = mem_throne_watchers.49
+	title = "mem_throne_watchers.49"
+	desc = "mem_throne_watchers.49.desc"
+	picture = GFX_evt_ship_in_orbit
+	
+	is_triggered_only = yes
+	
+	trigger = {
+			is_ai = no
+			is_country_type = default
+			has_country_flag = mem_titan_slayer
+			has_country_flag = mem_titan_awakening
+			has_country_flag = mem_titan_evolve_success
+			NOT = {
+				has_country_flag = mem_titan_overdrive_unlock 
+			}
+			any_owned_ship = {
+				is_ship_size = mem_titan
+			}
+		}
+
+	option = {
+		name = "mem_throne_watchers.49.a"
+		custom_tooltip = mem_throne_watchers.49.a.tooltip
+		hidden_effect = {
+			set_country_flag = mem_titan_overdrive_unlock 
+		}
+	}	
+}
+
+fleet_event = {
+	id = mem_throne_watchers.50
+	hide_window = yes
+
+	trigger = {	
+		any_combatant_fleet = {
+			exists = owner
+			owner = {
+				has_country_flag = mem_titan_overdrive_unlock
+				NOT = {
+					has_country_flag = mem_titan_overdrive_cd_flag
+				}
+			}
+			any_owned_ship = {
+				is_ship_size = mem_titan
+				has_hp_percentage < 0.1
+				has_hp_percentage > 0
+			}
+		}
+	}
+	
+	immediate = {
+		random_combatant_fleet = {
+			limit = {
+				exists = owner
+				owner = {
+					is_ai = no
+					is_country_type = default
+					has_country_flag = mem_titan_overdrive_unlock
+					NOT = {
+						has_country_flag = mem_titan_overdrive_cd_flag
+					}
+				}
+				any_owned_ship = {
+					is_ship_size = mem_titan
+				}
+			}
+			this = {
+				save_event_target_as = mem_overdrive_fleet_loc
+			}
+			owner = {
+				random_owned_ship = {
+					limit = {
+						is_ship_size = mem_titan
+					}
+					repair_ship = yes
+					mem_overdrive = yes
+					ship_event = { id = mem_throne_watchers.51 days = 30   }
+				}
+				country_event = { id = mem_throne_watchers.52 }
+				set_timed_country_flag = {
+					flag = mem_titan_overdrive_cd_flag
+					days = 360
+				}
+			}
+		}
+	}
+}
+
+ship_event = {
+	id = mem_throne_watchers.51
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		this = {
+			save_event_target_as = mem_overdrive_cd_loc
+		}
+		owner = {
+			country_event = { id = mem_throne_watchers.53 }
+		}
+		mem_overdrive_cd = yes
+	}
+}
+
+country_event = {
+	id = mem_throne_watchers.52
+	title = "mem_throne_watchers.52"
+	desc = "mem_throne_watchers.52.desc"
+	picture = GFX_evt_small_space_battle
+	location = event_target:mem_overdrive_fleet_loc
+	
+	is_triggered_only = yes
+
+	option = {
+		name = "mem_throne_watchers.52.a"
+	}
+}
+
+country_event = {
+	id = mem_throne_watchers.53
+	title = "mem_throne_watchers.53"
+	desc = "mem_throne_watchers.53.desc"
+	picture = GFX_evt_sentient_AI
+	location = event_target:mem_overdrive_cd_loc
+	
+	is_triggered_only = yes
+
+	option = {
+		name = "mem_throne_watchers.53.a"
 	}
 }

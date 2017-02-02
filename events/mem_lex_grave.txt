@@ -298,7 +298,7 @@ ship_event = {
 						}	
 						find_closest_planet  = {
 							trigger = {
-								id = mem_grave_awakened.patrol.6
+								id = mem_grave_awakened.patrol.4
 								has_planet_flag = mem_graveyard_patrol_4
 							}
 							found_planet = {
@@ -398,7 +398,7 @@ fleet_event = {
 				has_country_flag = mem_gravekeeper_angered
 			}
 			country_event = { id = mem_gravekeeper.24 }
-		}	
+		}
 		random_combatant_fleet = {
 			limit = {
 				exists = owner
@@ -410,12 +410,11 @@ fleet_event = {
 				}
 			}
 			set_location = event_target:mem_grave_escape_loc_2
+			fleet_event = { id = mem_gravekeeper.23 }
 			set_timed_fleet_flag = {
 				flag = mem_grave_ftl_cooldown
-				days = 360
+				days = 3600
 			}
-			clear_fleet_actions = this
-			fleet_event = { id = mem_gravekeeper.23 }
 		}
 	}
 }
@@ -427,11 +426,31 @@ fleet_event = {
 	is_triggered_only = yes
 
 	immediate = {
+		this = {
+			owner = {
+				random_owned_ship = {
+					limit = {
+						is_ship_size = mem_grave_awakened 
+					}
+					save_event_target_as = mem_grave_roaming
+				}
+			}
+			solar_system = {
+					save_event_target_as = mem_grave_roam_loc
+			}
+		}
+		fleet_event = { id = mem_gravekeeper.25 days = 1800 }
+		clear_fleet_actions = this
 		queue_actions = {
 			repeat = {
 				find_random_system = {
 					trigger = {
 						id = mem_grave_roam.1
+						distance = {
+							source = event_target:mem_grave_roam_loc
+							max_distance = 9999
+							min_distance = 250
+						}
 						NOT = {
 							OR = {
 								has_star_flag = guardian
@@ -442,10 +461,7 @@ fleet_event = {
 								has_star_flag = mem_prison_system
 							}
 							any_planet = {
-								is_colonizable = yes
-								is_colony = yes 
-								is_homeworld = yes
-								is_ringworld = yes 
+								num_pops > 0
 							}
 							any_ship_in_system = {
 								is_ship_size = mem_grave_awakened 
@@ -454,19 +470,24 @@ fleet_event = {
 					}
 					found_system = {
 						move_to = this
-						
 						find_closest_planet = {
 							trigger = {
 								id =  mem_grave_roam.2
 								is_star = yes
 							}
 							found_planet = {
-								move_to = this
-								wait = {
-									duration = 90
-									random = 45
+								orbit_planet = this
+								effect = {
+									id = mem_grave_roam.3
+									event_target:mem_grave_roaming = {
+										repair_ship = yes
+									}
 								}
 							}
+						}
+						wait = {
+							duration = 90
+							random = 45
 						}
 					}
 				}
@@ -499,6 +520,113 @@ country_event = {
 	
 	option = {
 		name = "mem_gravekeeper.24.a"
+	}
+}
+
+fleet_event = {
+	id = mem_gravekeeper.25
+	hide_window = yes
+	
+	is_triggered_only = yes
+
+	immediate = {
+		this = {
+			save_event_target_as = mem_gravekeeper_reset
+		}
+		clear_fleet_actions = this
+		queue_actions = {
+			find_random_system = {
+				trigger = {
+					id = mem_grave_return.1
+					has_star_flag =	mem_grave_system
+				}
+				found_system = {
+					move_to = this
+					find_closest_planet = {
+						trigger = {
+							id =  mem_grave_return.2
+							is_star = yes
+						}
+						found_planet = {
+							move_to = this
+							effect = {
+								id = mem_grave_return.3
+								event_target:mem_gravekeeper_reset = {
+									fleet_event = { id = mem_gravekeeper.26 }
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+fleet_event = {
+	id = mem_gravekeeper.26
+	hide_window = yes
+	
+	is_triggered_only = yes
+
+	immediate = {
+		clear_fleet_actions = this
+		queue_actions = {	
+			repeat = {
+				find_closest_planet  = {
+					trigger = {
+						id = mem_grave_awakened.patrol.1a
+						has_planet_flag = mem_graveyard_patrol_1
+					}
+					found_planet = {
+						move_to = this
+						orbit_planet = this
+						wait = {
+							duration = 30
+						}
+					}
+				}
+				find_closest_planet  = {
+					trigger = {
+						id = mem_grave_awakened.patrol.2a
+						has_planet_flag = mem_graveyard_patrol_2
+					}
+					found_planet = {
+						move_to = this
+						orbit_planet = this
+						wait = {
+							duration = 30
+						}
+					}
+				}
+				find_closest_planet  = {
+					trigger = {
+						id = mem_grave_awakened.patrol.3a
+						has_planet_flag = mem_graveyard_patrol_3
+					}
+					found_planet = {
+						move_to = this
+						orbit_planet = this
+						wait = {
+							duration = 30
+						}
+					}
+				}	
+				find_closest_planet  = {
+					trigger = {
+						id = mem_grave_awakened.patrol.4a
+						has_planet_flag = mem_graveyard_patrol_4
+					}
+					found_planet = {
+						move_to = this
+						orbit_planet = this
+						wait = {
+							duration = 30
+						}
+					}
+				}	
+			}
+		}
 	}
 }
 
@@ -628,7 +756,7 @@ ship_event = {
 		}
 		FROM = {
 			OWNER = {
-				is_ai = no 	
+				#is_ai = no 
 			}
 		}
 	}
@@ -655,7 +783,7 @@ ship_event = {
 		FROM = {
 			OWNER = {
 				country_event = { id = mem_gravekeeper.41 }
-				mem_ancestor_seal_trigger = yes
+				#mem_ancestor_seal_trigger = yes
 				set_country_flag = mem_grave_slayer
 				add_threat = {
 					who = THIS
@@ -1058,5 +1186,210 @@ country_event = {
 			}
 			set_country_flag = mem_grave_evolve_success
 		}
+	}
+}
+
+country_event = {
+	id = mem_gravekeeper.71
+	title = "mem_gravekeeper.71"
+	desc = "mem_gravekeeper.71.desc"
+	picture = GFX_evt_unspeakable_horror
+	
+	fire_only_once = yes
+	
+	trigger = {
+		is_ai = no
+		is_country_type = default
+		has_country_flag = mem_grave_slayer
+		has_country_flag = mem_grave_awakening
+		has_country_flag = mem_grave_evolve_success
+		any_owned_ship = {
+			is_ship_size = mem_grave_awakened_pc
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 50
+		
+		modifier = {
+			factor = 0.75
+				any_country = {
+					has_country_flag = awakened_fallen_empire
+				}	
+		}
+		modifier = {
+			factor = 0.5
+				has_global_flag = ai_revolt_happened
+		}
+		modifier = {
+			factor = 0.5
+				has_global_flag = prethoryn_invasion_happened
+		}
+		modifier = {
+			factor = 0.5
+				has_global_flag = extradimensional_invasion_happened
+		}
+		modifier = {
+			factor = 0.25
+				has_global_flag = war_in_heaven_started
+		}
+		modifier = {
+			factor = 0.1
+				has_global_flag = mem_ancestor_crisis_start
+		}
+	}
+	
+	immediate = {
+		capital_scope = { save_event_target_as = mem_pc_home }
+	}
+
+	option = {
+		name = "mem_gravekeeper.71.a"
+		event_target:mem_pc_home = {
+			enable_special_project = {
+				name = "MEM_GRAVE_LIMIT_BREAK"
+				location = THIS
+				owner = ROOT
+			}
+		}
+	}
+	option = {
+		name = "mem_gravekeeper.71.b"
+		add_influence = 100
+	}
+}
+
+country_event = {
+	id = mem_gravekeeper.72
+	title = "mem_gravekeeper.72"
+	desc = "mem_gravekeeper.72.desc"
+	picture = GFX_evt_ship_in_orbit
+	
+	is_triggered_only = yes
+	
+	trigger = {
+			is_ai = no
+			is_country_type = default
+			has_country_flag = mem_grave_slayer
+			has_country_flag = mem_grave_awakening
+			has_country_flag = mem_grave_evolve_success
+			NOT = {
+				has_country_flag = mem_grave_overdrive_unlock 
+			}
+			any_owned_ship = {
+				is_ship_size = mem_grave_awakened_pc
+			}
+		}
+
+	option = {
+		name = "mem_gravekeeper.72.a"
+		custom_tooltip = mem_gravekeeper.72.a.tooltip
+		hidden_effect = {
+			set_country_flag = mem_grave_overdrive_unlock 
+		}
+	}	
+}
+
+fleet_event = {
+	id = mem_gravekeeper.73
+	hide_window = yes
+
+	trigger = {	
+		any_combatant_fleet = {
+			exists = owner
+			owner = {
+				has_country_flag = mem_grave_overdrive_unlock
+				NOT = {
+					has_country_flag = mem_grave_overdrive_cd_flag
+				}
+			}
+			any_owned_ship = {
+				is_ship_size = mem_grave_awakened_pc
+				has_hp_percentage < 0.1
+				has_hp_percentage > 0
+			}
+		}
+	}
+	
+	immediate = {
+		random_combatant_fleet = {
+			limit = {
+				exists = owner
+				owner = {
+					is_ai = no
+					is_country_type = default
+					has_country_flag = mem_grave_overdrive_unlock
+					NOT = {
+						has_country_flag = mem_grave_overdrive_cd_flag
+					}
+				}
+				any_owned_ship = {
+					is_ship_size = mem_grave_awakened_pc
+				}
+			}
+			this = {
+				save_event_target_as = mem_overdrive_fleet_loc
+			}
+			owner = {
+				random_owned_ship = {
+					limit = {
+						is_ship_size = mem_grave_awakened_pc
+					}
+					repair_ship = yes
+					mem_overdrive = yes
+					ship_event = { id = mem_gravekeeper.74 days = 30 }
+				}
+				country_event = { id = mem_gravekeeper.75 }
+				set_timed_country_flag = {
+					flag = mem_grave_overdrive_cd_flag
+					days = 360
+				}
+			}
+		}
+	}
+}
+
+ship_event = {
+	id = mem_gravekeeper.74
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		this = {
+			save_event_target_as = mem_overdrive_cd_loc
+		}
+		owner = {
+			country_event = { id = mem_gravekeeper.76 }
+		}
+		mem_overdrive_cd = yes
+	}
+}
+
+country_event = {
+	id = mem_gravekeeper.75
+	title = "mem_gravekeeper.75"
+	desc = "mem_gravekeeper.75.desc"
+	picture = GFX_evt_small_space_battle
+	location = event_target:mem_overdrive_fleet_loc
+	
+	is_triggered_only = yes
+
+	option = {
+		name = "mem_gravekeeper.75.a"
+	}
+}
+
+country_event = {
+	id = mem_gravekeeper.76
+	title = "mem_gravekeeper.76"
+	desc = "mem_gravekeeper.76.desc"
+	picture = GFX_evt_sentient_AI
+	location = event_target:mem_overdrive_cd_loc
+	
+	is_triggered_only = yes
+
+	option = {
+		name = "mem_gravekeeper.76.a"
 	}
 }

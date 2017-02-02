@@ -1419,14 +1419,6 @@ fleet_event = {
 	hide_window = yes
 	
 	trigger = {
-		NOT = {
-			AND = {
-				has_global_flag = mem_conduit_anchor_1_off
-				has_global_flag = mem_conduit_anchor_2_off
-				has_global_flag = mem_conduit_anchor_3_off
-				has_global_flag = mem_conduit_anchor_4_off
-			}
-		}
 		any_combatant_fleet = {
 			exists = owner
 			owner = {
@@ -1464,6 +1456,12 @@ fleet_event = {
 					set_location = event_target:mem_conduit_summon
 			}
 		}
+		random_country = {
+			limit = {
+				has_country_flag = mem_conduit_garden_country
+			}
+			country_event = { id = mem_the_conduit.65 }
+		}
 		random_combatant_fleet = {
 			limit = {
 				exists = owner
@@ -1476,14 +1474,8 @@ fleet_event = {
 			}
 			set_timed_fleet_flag = {
 				flag = mem_conduit_summon_cooldown
-				days = 30
+				days = 3600
 			}
-		}
-		random_country = {
-			limit = {
-				has_country_flag = mem_conduit_garden_country
-			}
-			country_event = { id = mem_the_conduit.65 }
 		}
 	}
 }
@@ -1818,7 +1810,7 @@ country_event = {
 			is_ship_size = mem_conduit_fortress 
 		}
 		FROM = {
-			is_ai = no 
+			#is_ai = no 
 		}
 	}
 	
@@ -1827,7 +1819,7 @@ country_event = {
 			save_event_target_as = mem_pc_home
 			set_country_flag = mem_conduit_slayer
 			country_event = { id = mem_the_conduit.101 }
-			mem_ancestor_seal_trigger = yes
+			#mem_ancestor_seal_trigger = yes
 		}
 	    FROMFROM = {
 			mem_effect_explosion_4 = yes
@@ -2803,5 +2795,210 @@ ship_event = {
 				country_event = { id = mem_the_conduit.150 days = 360 }			
 			}
 		}
+	}
+}
+
+country_event = {
+	id = mem_the_conduit.200
+	title = "mem_the_conduit.200"
+	desc = "mem_the_conduit.200.desc"
+	picture = GFX_evt_unspeakable_horror
+	
+	fire_only_once = yes
+	
+	trigger = {
+		is_ai = no
+		is_country_type = default
+		has_country_flag = mem_conduit_slayer
+		has_country_flag = mem_conduit_avatar_awakening
+		has_country_flag = mem_conduit_evolve_success
+		any_owned_ship = {
+			is_ship_size = mem_conduit_avatar
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 50
+		
+		modifier = {
+			factor = 0.75
+				any_country = {
+					has_country_flag = awakened_fallen_empire
+				}	
+		}
+		modifier = {
+			factor = 0.5
+				has_global_flag = ai_revolt_happened
+		}
+		modifier = {
+			factor = 0.5
+				has_global_flag = prethoryn_invasion_happened
+		}
+		modifier = {
+			factor = 0.5
+				has_global_flag = extradimensional_invasion_happened
+		}
+		modifier = {
+			factor = 0.25
+				has_global_flag = war_in_heaven_started
+		}
+		modifier = {
+			factor = 0.1
+				has_global_flag = mem_ancestor_crisis_start
+		}
+	}
+	
+	immediate = {
+		capital_scope = { save_event_target_as = mem_pc_home }
+	}
+
+	option = {
+		name = "mem_the_conduit.200.a"
+		event_target:mem_pc_home = {
+			enable_special_project = {
+				name = "MEM_CONDUIT_LIMIT_BREAK"
+				location = THIS
+				owner = ROOT
+			}
+		}
+	}
+	option = {
+		name = "mem_the_conduit.200.b"
+		add_influence = 100
+	}
+}
+
+country_event = {
+	id = mem_the_conduit.201
+	title = "mem_the_conduit.201"
+	desc = "mem_the_conduit.201.desc"
+	picture = GFX_evt_ship_in_orbit
+	
+	is_triggered_only = yes
+	
+	trigger = {
+			is_ai = no
+			is_country_type = default
+			has_country_flag = mem_conduit_slayer
+			has_country_flag = mem_conduit_avatar_awakening
+			has_country_flag = mem_conduit_evolve_success
+			NOT = {
+				has_country_flag = mem_conduit_overdrive_unlock 
+			}
+			any_owned_ship = {
+				is_ship_size = mem_conduit_avatar
+			}
+		}
+
+	option = {
+		name = "mem_the_conduit.201.a"
+		custom_tooltip = mem_the_conduit.201.a.tooltip
+		hidden_effect = {
+			set_country_flag = mem_conduit_overdrive_unlock 
+		}
+	}	
+}
+
+fleet_event = {
+	id = mem_the_conduit.202
+	hide_window = yes
+
+	trigger = {	
+		any_combatant_fleet = {
+			exists = owner
+			owner = {
+				has_country_flag = mem_conduit_overdrive_unlock 
+				NOT = {
+					has_country_flag = mem_conduit_overdrive_cd_flag
+				}
+			}
+			any_owned_ship = {
+				is_ship_size = mem_conduit_avatar
+				has_hp_percentage < 0.1
+				has_hp_percentage > 0
+			}
+		}
+	}
+	
+	immediate = {
+		random_combatant_fleet = {
+			limit = {
+				exists = owner
+				owner = {
+					is_ai = no
+					is_country_type = default
+					has_country_flag = mem_conduit_overdrive_unlock 
+					NOT = {
+						has_country_flag = mem_conduit_overdrive_cd_flag
+					}
+				}
+				any_owned_ship = {
+					is_ship_size = mem_conduit_avatar
+				}
+			}
+			this = {
+				save_event_target_as = mem_overdrive_fleet_loc
+			}
+			owner = {
+				random_owned_ship = {
+					limit = {
+						is_ship_size = mem_conduit_avatar
+					}
+					repair_ship = yes
+					mem_overdrive = yes
+					ship_event = { id = mem_the_conduit.203 days = 30   }
+				}
+				country_event = { id = mem_the_conduit.204 }
+				set_timed_country_flag = {
+					flag = mem_conduit_overdrive_cd_flag
+					days = 360
+				}
+			}
+		}
+	}
+}
+
+ship_event = {
+	id = mem_the_conduit.203
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		this = {
+			save_event_target_as = mem_overdrive_cd_loc
+		}
+		owner = {
+			country_event = { id = mem_the_conduit.205 }
+		}
+		mem_overdrive_cd = yes
+	}
+}
+
+country_event = {
+	id = mem_the_conduit.204
+	title = "mem_the_conduit.204"
+	desc = "mem_the_conduit.204.desc"
+	picture = GFX_evt_small_space_battle
+	location = event_target:mem_overdrive_fleet_loc
+	
+	is_triggered_only = yes
+
+	option = {
+		name = "mem_the_conduit.204.a"
+	}
+}
+
+country_event = {
+	id = mem_the_conduit.205
+	title = "mem_the_conduit.205"
+	desc = "mem_the_conduit.205.desc"
+	picture = GFX_evt_sentient_AI
+	location = event_target:mem_overdrive_cd_loc
+	
+	is_triggered_only = yes
+
+	option = {
+		name = "mem_the_conduit.205.a"
 	}
 }
