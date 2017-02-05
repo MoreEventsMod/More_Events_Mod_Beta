@@ -1,0 +1,71 @@
+#This rule is a condition for bombarding planets
+#Root = fleet, potential attacker
+#From = planet, potential target
+can_orbital_bombard = {
+	exists = FROM.OWNER
+	OR = {
+		AND = {
+			ROOT.OWNER = {
+				NOT = { has_communications = FROM.OWNER }
+			}
+			FROM.OWNER = {
+				NOT = { is_country_type = primitive }
+			}
+		}
+		AND = {
+			ROOT.OWNER = {
+				NOR = {
+					has_policy_flag = interference_passive
+					has_policy_flag = interference_active
+				}
+			}
+			FROM.OWNER = { is_country_type = primitive }
+		}
+		ROOT.OWNER = { is_hostile = FROM.CONTROLLER }
+		ROOT.OWNER = { is_at_war_with = FROM.CONTROLLER }
+		FROM = {
+			is_planet_class = pc_infested
+		}
+		ROOT.OWNER = {
+			OR = {
+				is_country_type = mem_ancestor_guardian
+				is_country_type = extradimensional
+				is_country_type = extradimensional_2
+				is_country_type = extradimensional_3
+				is_country_type = swarm
+			}
+		}
+	}
+}
+
+#Root = country
+#This = pop
+can_auto_migrate_pop = {
+	if = { 
+		limit = {
+			AND = {		
+				is_enslaved = no
+				OR = {
+					ROOT = { has_policy_flag = migration_allowed_all }
+					AND = {
+						ROOT = { has_policy_flag = migration_allowed_primary_only }
+						is_same_species = ROOT 
+					}
+				}
+				planet = {
+					is_controlled_by = owner
+					count_pops = {
+						limit = {
+							is_colony_pop = yes
+						}
+						count > 5 # Must be at least this many colony-sustaining Pops on the planet for a Pop to be allowed to migrate
+					}
+				}
+			}
+		}
+		always = yes
+		else = {
+			always = no
+		}
+	}
+}
