@@ -215,7 +215,7 @@ country_event = {
 	}
 }
 
-# Swarm downgrade on death
+# Swarm downgrade and split on death
 
 country_event = {
 	id = mem_ancestor.2
@@ -253,14 +253,43 @@ country_event = {
 		if = {
 			limit = {
 				FROMFROMFROM = {
-					OR = {
-						is_ship_size = mem_apostle_scout
-						is_ship_size = mem_apostle_station
-						is_ship_size = mem_apostle_4
-					}
+					is_ship_size = mem_apostle_4
 				}
 			}
-			mem_ancestor_immortal_1 = yes
+			while = {
+				count = 8
+				mem_ancestor_immortal_1 = yes
+			}
+			last_created_fleet = {
+				mem_effect_explosion_7 = yes
+			}
+			break = yes
+		}
+		if = {
+			limit = {
+				FROMFROMFROM = {
+					is_ship_size = mem_apostle_station
+				}
+			}
+			while = {
+				count = 4
+				mem_ancestor_immortal_1 = yes
+			}
+			last_created_fleet = {
+				mem_effect_explosion_7 = yes
+			}
+			break = yes
+		}
+		if = {
+			limit = {
+				FROMFROMFROM = {
+					is_ship_size = mem_apostle_scout
+				}
+			}
+			while = {
+				count = 2
+				mem_ancestor_immortal_1 = yes
+			}
 			last_created_fleet = {
 				mem_effect_explosion_7 = yes
 			}
@@ -274,7 +303,10 @@ country_event = {
 			}
 			random_list = {
 				50 = {
-					mem_ancestor_elder_1 = yes
+					while = {
+						count = 2
+						mem_ancestor_elder_1 = yes
+					}
 					last_created_fleet = {
 						mem_effect_explosion_7 = yes
 					}
@@ -293,7 +325,10 @@ country_event = {
 			}
 			random_list = {
 				50 = {
-					mem_ancestor_adult_1 = yes
+					while = {
+						count = 2
+						mem_ancestor_adult_1 = yes
+					}
 					last_created_fleet = {
 						mem_effect_explosion_7 = yes
 					}
@@ -312,7 +347,10 @@ country_event = {
 			}
 			random_list = {
 				50 = {
-					mem_ancestor_young_1 = yes
+					while = {
+						count = 2
+						mem_ancestor_young_1 = yes
+					}
 					last_created_fleet = {
 						mem_effect_explosion_7 = yes
 					}
@@ -331,7 +369,10 @@ country_event = {
 			}
 			random_list = {
 				50 = {
-					mem_ancestor_infant_1 = yes
+					while = {
+						count = 2
+						mem_ancestor_infant_1 = yes
+					}
 					last_created_fleet = {
 						mem_effect_explosion_7 = yes
 					}
@@ -391,7 +432,7 @@ country_event = {
 							}
 							count > 0
 						}
-						num_owned_planets > 10
+						num_owned_planets > 5
 					}
 				}
 			}
@@ -431,7 +472,7 @@ country_event = {
 							}
 							count > 0
 						}
-						num_owned_planets > 20
+						num_owned_planets > 10
 					}
 				}
 			}
@@ -467,7 +508,7 @@ country_event = {
 							}
 							count > 0
 						}
-						num_owned_planets > 30
+						num_owned_planets > 15
 					}
 				}
 			}
@@ -512,7 +553,7 @@ country_event = {
 							}
 							count > 0
 						}
-						num_owned_planets > 40
+						num_owned_planets > 20
 					}
 				}
 			}
@@ -615,7 +656,10 @@ fleet_event = {
 			limit = {
 				has_fleet_flag = mem_ancestor_boss_decay
 			}
-			mem_ancestor_immortal_2 = yes
+			while = {
+				count = 16
+				mem_ancestor_immortal_2 = yes
+			}
 			last_created_fleet = {
 				mem_effect_explosion_7 = yes
 			}
@@ -851,6 +895,188 @@ planet_event = {
 	}
 }
 
+planet_event = {
+	id = mem_ancestor.7
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		FROM = {
+			is_country_type = mem_ancestor_guardian
+		}
+	}
+	
+	immediate = {
+		random_list = {
+			50 = {
+				if = {
+					limit = {
+						count_pops = {
+							count > 1
+						}
+					}						
+					random_pop = {
+						limit = {
+							NOT = {
+								has_modifier = mem_pop_ancestor
+								is_growing = yes 
+							}
+						}
+						add_modifier = {
+							modifier = "mem_pop_ancestor"
+							days = -1
+						}
+					}
+					add_threat = {
+						who = FROM
+						amount = 100
+					}
+				}
+			}
+			50 = {
+			}
+		}
+		random_list = {
+			50 = {
+				if = {
+					limit = {
+						count_pops = {
+							count > 1
+						}
+						any_pop = {
+							has_modifier = mem_pop_ancestor
+						}
+					}
+					FROM = {
+						country_event = { id = action.23 }
+						save_event_target_as = mem_ancestor_swarm_owner_6
+					}							
+					random_pop = {
+						limit = {
+							has_modifier = mem_pop_ancestor
+						}
+						kill_pop = yes
+					}
+					THIS = {
+						solar_system = {
+							random_system_planet = {
+								limit = {
+									is_star = yes
+								}
+								save_event_target_as = mem_ancestor_spawn_6
+							}
+						}
+					}
+					mem_ancestor_infant_6 = yes
+					add_threat = {
+						who = FROM
+						amount = 100
+					}
+				}
+			}
+			50 = {
+			}
+		}
+		random_list = {
+			50 = {
+				if = {
+					limit = {
+						count_pops = {
+							count > 1
+						}
+					}						
+					random_army = {
+						limit = {
+							exists = this
+						}
+						remove_army = yes  
+					}
+					add_threat = {
+						who = FROM
+						amount = 100
+					}
+				}
+			}
+			50 = {
+			}
+		}
+		random_list = {
+			50 = {
+				random_tile = {
+					limit = {
+						has_building = yes
+						is_ruined = no
+					}
+					set_ruined = yes
+				}
+				add_threat = {
+					who = FROM
+					amount = 100
+				}
+			}
+			50 = {
+			}
+		}
+		random_list = {
+			50 = {
+				if = {
+					limit = {
+						planet = {
+							count_pops = {
+								count > 1
+							}
+						}
+					}
+					random_tile = {
+						limit = {
+							has_grown_pop = no
+							has_growing_pop = no 
+							has_blocker = no
+							has_building = yes
+							is_ruined = yes
+						}
+						set_blocker = "tb_mem_nature"
+					}
+					add_threat = {
+						who = FROM
+						amount = 100
+					}
+				}
+			}
+			50 = {
+			}
+		}
+		random_list = {
+			50 = {	
+				if = {
+					limit = {
+						planet = {
+							count_pops = {
+								count > 1
+							}
+						}
+					}
+					random_tile = {
+						limit = {
+							has_grown_pop = no
+							has_growing_pop = no 
+							has_blocker = no
+							has_building = no
+						}
+						set_blocker = "tb_mem_nature"
+					}
+					add_threat = {
+						who = FROM
+						amount = 100
+					}
+				}
+			}
+			50 = {
+			}
+		}
+	}
+}
+
 fleet_event = {
 	id = mem_ancestor.8
 	hide_window = yes
@@ -1025,6 +1251,16 @@ fleet_event = {
 			exists = owner
 			owner = {
 				is_country_type = mem_ancestor_guardian
+				NOT = {
+					AND = {
+						has_modifier = mem_ancestor_herald_debuff_1
+						has_modifier = mem_ancestor_herald_debuff_2
+						has_modifier = mem_ancestor_herald_debuff_3
+						has_modifier = mem_ancestor_herald_debuff_4
+						has_modifier = mem_ancestor_herald_debuff_5
+						has_modifier = mem_ancestor_herald_debuff_6
+					}
+				}
 			}
 			NOT = { 
 				has_fleet_flag = mem_ancestor_ftl_cooldown
@@ -1044,36 +1280,14 @@ fleet_event = {
 	}
 	
 	immediate = {
-		solar_system = {
-				save_event_target_as = mem_ancestor_escape_loc_1
-				random_system_planet = {
-					limit = {
-						is_star = yes
-					}
-					mem_effect_explosion_5_big = yes
-				}
-		}
-		random_rim_system = {
-			limit = {
-				distance = {
-					source = event_target:mem_ancestor_escape_loc_1
-					max_distance = 9999
-					min_distance = 250
-				} 
-			}
-			random_system_planet = {
-				limit = {
-					is_star = yes
-				}
-				mem_effect_explosion_5_big = yes
-				save_event_target_as = mem_ancestor_escape_loc_2
-			}
-		}
 		random_combatant_fleet = {
 			limit = {
 				exists = owner
 				owner = {
 					is_country_type = mem_ancestor_guardian
+				}
+				NOT = { 
+					has_fleet_flag = mem_ancestor_ftl_cooldown
 				}
 				any_owned_ship = {
 					OR = {
@@ -1083,6 +1297,46 @@ fleet_event = {
 						is_ship_size = mem_apostle_egg
 						is_ship_size = mem_apostle_child
 					}
+				}
+			}
+			solar_system = {
+				save_event_target_as = mem_ancestor_escape_loc_1
+				random_system_planet = {
+					limit = {
+						is_star = yes
+					}
+					mem_effect_explosion_5_big = yes
+				}
+				every_fleet_in_system = {
+					limit = {
+						exists = owner
+						owner = {
+							NOT = {
+								is_country_type = mem_ancestor_guardian
+							}
+						}
+					}
+					clear_orders = yes 
+					add_modifier = {
+						modifier = "mem_ancestor_pc_boss_debuff"
+						days = 90
+					}
+				}
+			}
+			random_rim_system = {
+				limit = {
+					distance = {
+						source = event_target:mem_ancestor_escape_loc_1
+						max_distance = 9999
+						min_distance = 250
+					} 
+				}
+				random_system_planet = {
+					limit = {
+						is_star = yes
+					}
+					mem_effect_explosion_5_big = yes
+					save_event_target_as = mem_ancestor_escape_loc_2
 				}
 			}
 			set_location = event_target:mem_ancestor_escape_loc_2
@@ -1098,9 +1352,16 @@ fleet_event = {
 						}
 					}
 					repair_ship = yes
-					add_modifier = {
-						modifier = "mem_ancestor_enraged"
-						days = 30
+					if = {
+						limit = {
+							NOT = {
+								has_modifier = mem_ancestor_boss_enraged
+							}
+						}
+						add_modifier = {
+							modifier = "mem_ancestor_boss_enraged"
+							days = 90
+						}
 					}
 				}
 			}
@@ -1128,14 +1389,28 @@ fleet_event = {
 			any_owned_ship = {
 				is_ship_size = mem_apostle_scout
 				has_ship_flag = mem_ancestor_herald_1
-				has_hp_percentage < 0.25
+				has_hp_percentage < 0.5
 				has_hp_percentage > 0
 			}
 		}	
 	}
 	
 	immediate = {
-		solar_system = {
+		random_combatant_fleet = {
+			limit = {
+				exists = owner
+				owner = {
+					is_country_type = mem_ancestor_guardian
+				}
+				NOT = { 
+					has_fleet_flag = mem_ancestor_scout_ftl_cooldown_1
+				}
+				any_owned_ship = {
+					is_ship_size = mem_apostle_scout
+					has_ship_flag = mem_ancestor_herald_1
+				}
+			}
+			solar_system = {
 				save_event_target_as = mem_ancestor_escape_loc_1_scout_1
 				random_system_planet = {
 					limit = {
@@ -1143,32 +1418,36 @@ fleet_event = {
 					}
 					mem_effect_explosion_5_big = yes
 				}
-		}
-		random_rim_system = {
-			limit = {
-				distance = {
-					source = event_target:mem_ancestor_escape_loc_1_scout_1
-					max_distance = 9999
-					min_distance = 250
-				} 
+				every_fleet_in_system = {
+					limit = {
+						exists = owner
+						owner = {
+							NOT = {
+								is_country_type = mem_ancestor_guardian
+							}
+						}
+					}
+					clear_orders = yes 
+					add_modifier = {
+						modifier = "mem_ancestor_pc_herald_debuff"
+						days = 90
+					}
+				}
 			}
-			random_system_planet = {
+			random_rim_system = {
 				limit = {
-					is_star = yes
+					distance = {
+						source = event_target:mem_ancestor_escape_loc_1_scout_1
+						max_distance = 9999
+						min_distance = 250
+					} 
 				}
-				mem_effect_explosion_5_big = yes
-				save_event_target_as = mem_ancestor_escape_loc_2_scout_1
-			}
-		}
-		random_combatant_fleet = {
-			limit = {
-				exists = owner
-				owner = {
-					is_country_type = mem_ancestor_guardian
-				}
-				any_owned_ship = {
-					is_ship_size = mem_apostle_scout
-					has_ship_flag = mem_ancestor_herald_1
+				random_system_planet = {
+					limit = {
+						is_star = yes
+					}
+					mem_effect_explosion_5_big = yes
+					save_event_target_as = mem_ancestor_escape_loc_2_scout_1
 				}
 			}
 			set_location = event_target:mem_ancestor_escape_loc_2_scout_1
@@ -1179,9 +1458,16 @@ fleet_event = {
 						has_ship_flag = mem_ancestor_herald_1
 					}
 					repair_ship = yes
-					add_modifier = {
-						modifier = "mem_ancestor_enraged"
-						days = 30
+					if = {
+						limit = {
+							NOT = {
+								has_modifier = mem_ancestor_herald_enraged
+							}
+						}
+						add_modifier = {
+							modifier = "mem_ancestor_herald_enraged"
+							days = 90
+						}
 					}
 				}
 			}
@@ -1209,14 +1495,28 @@ fleet_event = {
 			any_owned_ship = {
 				is_ship_size = mem_apostle_scout
 				has_ship_flag = mem_ancestor_herald_2
-				has_hp_percentage < 0.25
+				has_hp_percentage < 0.5
 				has_hp_percentage > 0
 			}
 		}	
 	}
 	
 	immediate = {
-		solar_system = {
+		random_combatant_fleet = {
+			limit = {
+				exists = owner
+				owner = {
+					is_country_type = mem_ancestor_guardian
+				}
+				NOT = { 
+					has_fleet_flag = mem_ancestor_scout_ftl_cooldown_2
+				}
+				any_owned_ship = {
+					is_ship_size = mem_apostle_scout
+					has_ship_flag = mem_ancestor_herald_2
+				}
+			}
+			solar_system = {
 				save_event_target_as = mem_ancestor_escape_loc_1_scout_2
 				random_system_planet = {
 					limit = {
@@ -1224,32 +1524,36 @@ fleet_event = {
 					}
 					mem_effect_explosion_5_big = yes
 				}
-		}
-		random_rim_system = {
-			limit = {
-				distance = {
-					source = event_target:mem_ancestor_escape_loc_1_scout_2
-					max_distance = 9999
-					min_distance = 250
-				} 
+				every_fleet_in_system = {
+					limit = {
+						exists = owner
+						owner = {
+							NOT = {
+								is_country_type = mem_ancestor_guardian
+							}
+						}
+					}
+					clear_orders = yes 
+					add_modifier = {
+						modifier = "mem_ancestor_pc_herald_debuff"
+						days = 90
+					}
+				}
 			}
-			random_system_planet = {
+			random_rim_system = {
 				limit = {
-					is_star = yes
+					distance = {
+						source = event_target:mem_ancestor_escape_loc_1_scout_2
+						max_distance = 9999
+						min_distance = 250
+					} 
 				}
-				mem_effect_explosion_5_big = yes
-				save_event_target_as = mem_ancestor_escape_loc_2_scout_2
-			}
-		}
-		random_combatant_fleet = {
-			limit = {
-				exists = owner
-				owner = {
-					is_country_type = mem_ancestor_guardian
-				}
-				any_owned_ship = {
-					is_ship_size = mem_apostle_scout
-					has_ship_flag = mem_ancestor_herald_2
+				random_system_planet = {
+					limit = {
+						is_star = yes
+					}
+					mem_effect_explosion_5_big = yes
+					save_event_target_as = mem_ancestor_escape_loc_2_scout_2
 				}
 			}
 			set_location = event_target:mem_ancestor_escape_loc_2_scout_2
@@ -1260,9 +1564,16 @@ fleet_event = {
 						has_ship_flag = mem_ancestor_herald_2
 					}
 					repair_ship = yes
-					add_modifier = {
-						modifier = "mem_ancestor_enraged"
-						days = 30
+					if = {
+						limit = {
+							NOT = {
+								has_modifier = mem_ancestor_herald_enraged
+							}
+						}
+						add_modifier = {
+							modifier = "mem_ancestor_herald_enraged"
+							days = 90
+						}
 					}
 				}
 			}
@@ -1290,14 +1601,28 @@ fleet_event = {
 			any_owned_ship = {
 				is_ship_size = mem_apostle_scout
 				has_ship_flag = mem_ancestor_herald_3
-				has_hp_percentage < 0.25
+				has_hp_percentage < 0.5
 				has_hp_percentage > 0
 			}
 		}	
 	}
 	
 	immediate = {
-		solar_system = {
+		random_combatant_fleet = {
+			limit = {
+				exists = owner
+				owner = {
+					is_country_type = mem_ancestor_guardian
+				}
+				NOT = { 
+					has_fleet_flag = mem_ancestor_scout_ftl_cooldown_3
+				}
+				any_owned_ship = {
+					is_ship_size = mem_apostle_scout
+					has_ship_flag = mem_ancestor_herald_3
+				}
+			}
+			solar_system = {
 				save_event_target_as = mem_ancestor_escape_loc_1_scout_3
 				random_system_planet = {
 					limit = {
@@ -1305,32 +1630,36 @@ fleet_event = {
 					}
 					mem_effect_explosion_5_big = yes
 				}
-		}
-		random_rim_system = {
-			limit = {
-				distance = {
-					source = event_target:mem_ancestor_escape_loc_1_scout_3
-					max_distance = 9999
-					min_distance = 250
-				} 
+				every_fleet_in_system = {
+					limit = {
+						exists = owner
+						owner = {
+							NOT = {
+								is_country_type = mem_ancestor_guardian
+							}
+						}
+					}
+					clear_orders = yes 
+					add_modifier = {
+						modifier = "mem_ancestor_pc_herald_debuff"
+						days = 90
+					}
+				}
 			}
-			random_system_planet = {
+			random_rim_system = {
 				limit = {
-					is_star = yes
+					distance = {
+						source = event_target:mem_ancestor_escape_loc_1_scout_3
+						max_distance = 9999
+						min_distance = 250
+					} 
 				}
-				mem_effect_explosion_5_big = yes
-				save_event_target_as = mem_ancestor_escape_loc_2_scout_3
-			}
-		}
-		random_combatant_fleet = {
-			limit = {
-				exists = owner
-				owner = {
-					is_country_type = mem_ancestor_guardian
-				}
-				any_owned_ship = {
-					is_ship_size = mem_apostle_scout
-					has_ship_flag = mem_ancestor_herald_3
+				random_system_planet = {
+					limit = {
+						is_star = yes
+					}
+					mem_effect_explosion_5_big = yes
+					save_event_target_as = mem_ancestor_escape_loc_2_scout_3
 				}
 			}
 			set_location = event_target:mem_ancestor_escape_loc_2_scout_3
@@ -1341,9 +1670,16 @@ fleet_event = {
 						has_ship_flag = mem_ancestor_herald_3
 					}
 					repair_ship = yes
-					add_modifier = {
-						modifier = "mem_ancestor_enraged"
-						days = 30
+					if = {
+						limit = {
+							NOT = {
+								has_modifier = mem_ancestor_herald_enraged
+							}
+						}
+						add_modifier = {
+							modifier = "mem_ancestor_herald_enraged"
+							days = 90
+						}
 					}
 				}
 			}
@@ -1371,14 +1707,28 @@ fleet_event = {
 			any_owned_ship = {
 				is_ship_size = mem_apostle_scout
 				has_ship_flag = mem_ancestor_herald_4
-				has_hp_percentage < 0.25
+				has_hp_percentage < 0.5
 				has_hp_percentage > 0
 			}
 		}	
 	}
 	
 	immediate = {
-		solar_system = {
+		random_combatant_fleet = {
+			limit = {
+				exists = owner
+				owner = {
+					is_country_type = mem_ancestor_guardian
+				}
+				NOT = { 
+					has_fleet_flag = mem_ancestor_scout_ftl_cooldown_4
+				}
+				any_owned_ship = {
+					is_ship_size = mem_apostle_scout
+					has_ship_flag = mem_ancestor_herald_4
+				}
+			}
+			solar_system = {
 				save_event_target_as = mem_ancestor_escape_loc_1_scout_4
 				random_system_planet = {
 					limit = {
@@ -1386,32 +1736,36 @@ fleet_event = {
 					}
 					mem_effect_explosion_5_big = yes
 				}
-		}
-		random_rim_system = {
-			limit = {
-				distance = {
-					source = event_target:mem_ancestor_escape_loc_1_scout_4
-					max_distance = 9999
-					min_distance = 250
-				} 
+				every_fleet_in_system = {
+					limit = {
+						exists = owner
+						owner = {
+							NOT = {
+								is_country_type = mem_ancestor_guardian
+							}
+						}
+					}
+					clear_orders = yes 
+					add_modifier = {
+						modifier = "mem_ancestor_pc_herald_debuff"
+						days = 90
+					}
+				}
 			}
-			random_system_planet = {
+			random_rim_system = {
 				limit = {
-					is_star = yes
+					distance = {
+						source = event_target:mem_ancestor_escape_loc_1_scout_4
+						max_distance = 9999
+						min_distance = 250
+					} 
 				}
-				mem_effect_explosion_5_big = yes
-				save_event_target_as = mem_ancestor_escape_loc_2_scout_4
-			}
-		}
-		random_combatant_fleet = {
-			limit = {
-				exists = owner
-				owner = {
-					is_country_type = mem_ancestor_guardian
-				}
-				any_owned_ship = {
-					is_ship_size = mem_apostle_scout
-					has_ship_flag = mem_ancestor_herald_4
+				random_system_planet = {
+					limit = {
+						is_star = yes
+					}
+					mem_effect_explosion_5_big = yes
+					save_event_target_as = mem_ancestor_escape_loc_2_scout_4
 				}
 			}
 			set_location = event_target:mem_ancestor_escape_loc_2_scout_4
@@ -1422,9 +1776,16 @@ fleet_event = {
 						has_ship_flag = mem_ancestor_herald_4
 					}
 					repair_ship = yes
-					add_modifier = {
-						modifier = "mem_ancestor_enraged"
-						days = 30
+					if = {
+						limit = {
+							NOT = {
+								has_modifier = mem_ancestor_herald_enraged
+							}
+						}
+						add_modifier = {
+							modifier = "mem_ancestor_herald_enraged"
+							days = 90
+						}
 					}
 				}
 			}
@@ -1452,14 +1813,28 @@ fleet_event = {
 			any_owned_ship = {
 				is_ship_size = mem_apostle_scout
 				has_ship_flag = mem_ancestor_herald_5
-				has_hp_percentage < 0.25
+				has_hp_percentage < 0.5
 				has_hp_percentage > 0
 			}
 		}	
 	}
 	
 	immediate = {
-		solar_system = {
+		random_combatant_fleet = {
+			limit = {
+				exists = owner
+				owner = {
+					is_country_type = mem_ancestor_guardian
+				}
+				NOT = { 
+					has_fleet_flag = mem_ancestor_scout_ftl_cooldown_5
+				}
+				any_owned_ship = {
+					is_ship_size = mem_apostle_scout
+					has_ship_flag = mem_ancestor_herald_5
+				}
+			}
+			solar_system = {
 				save_event_target_as = mem_ancestor_escape_loc_1_scout_5
 				random_system_planet = {
 					limit = {
@@ -1467,32 +1842,36 @@ fleet_event = {
 					}
 					mem_effect_explosion_5_big = yes
 				}
-		}
-		random_rim_system = {
-			limit = {
-				distance = {
-					source = event_target:mem_ancestor_escape_loc_1_scout_5
-					max_distance = 9999
-					min_distance = 250
-				} 
+				every_fleet_in_system = {
+					limit = {
+						exists = owner
+						owner = {
+							NOT = {
+								is_country_type = mem_ancestor_guardian
+							}
+						}
+					}
+					clear_orders = yes 
+					add_modifier = {
+						modifier = "mem_ancestor_pc_herald_debuff"
+						days = 90
+					}
+				}
 			}
-			random_system_planet = {
+			random_rim_system = {
 				limit = {
-					is_star = yes
+					distance = {
+						source = event_target:mem_ancestor_escape_loc_1_scout_5
+						max_distance = 9999
+						min_distance = 250
+					} 
 				}
-				mem_effect_explosion_5_big = yes
-				save_event_target_as = mem_ancestor_escape_loc_2_scout_5
-			}
-		}
-		random_combatant_fleet = {
-			limit = {
-				exists = owner
-				owner = {
-					is_country_type = mem_ancestor_guardian
-				}
-				any_owned_ship = {
-					is_ship_size = mem_apostle_scout
-					has_ship_flag = mem_ancestor_herald_5
+				random_system_planet = {
+					limit = {
+						is_star = yes
+					}
+					mem_effect_explosion_5_big = yes
+					save_event_target_as = mem_ancestor_escape_loc_2_scout_5
 				}
 			}
 			set_location = event_target:mem_ancestor_escape_loc_2_scout_5
@@ -1503,9 +1882,16 @@ fleet_event = {
 						has_ship_flag = mem_ancestor_herald_5
 					}
 					repair_ship = yes
-					add_modifier = {
-						modifier = "mem_ancestor_enraged"
-						days = 30
+					if = {
+						limit = {
+							NOT = {
+								has_modifier = mem_ancestor_herald_enraged
+							}
+						}
+						add_modifier = {
+							modifier = "mem_ancestor_herald_enraged"
+							days = 90
+						}
 					}
 				}
 			}
@@ -1533,14 +1919,28 @@ fleet_event = {
 			any_owned_ship = {
 				is_ship_size = mem_apostle_scout
 				has_ship_flag = mem_ancestor_herald_6
-				has_hp_percentage < 0.25
+				has_hp_percentage < 0.5
 				has_hp_percentage > 0
 			}
 		}	
 	}
 	
 	immediate = {
-		solar_system = {
+		random_combatant_fleet = {
+			limit = {
+				exists = owner
+				owner = {
+					is_country_type = mem_ancestor_guardian
+				}
+				NOT = { 
+					has_fleet_flag = mem_ancestor_scout_ftl_cooldown_6
+				}
+				any_owned_ship = {
+					is_ship_size = mem_apostle_scout
+					has_ship_flag = mem_ancestor_herald_6
+				}
+			}
+			solar_system = {
 				save_event_target_as = mem_ancestor_escape_loc_1_scout_6
 				random_system_planet = {
 					limit = {
@@ -1548,32 +1948,36 @@ fleet_event = {
 					}
 					mem_effect_explosion_5_big = yes
 				}
-		}
-		random_rim_system = {
-			limit = {
-				distance = {
-					source = event_target:mem_ancestor_escape_loc_1_scout_6
-					max_distance = 9999
-					min_distance = 250
-				} 
+				every_fleet_in_system = {
+					limit = {
+						exists = owner
+						owner = {
+							NOT = {
+								is_country_type = mem_ancestor_guardian
+							}
+						}
+					}
+					clear_orders = yes 
+					add_modifier = {
+						modifier = "mem_ancestor_pc_herald_debuff"
+						days = 90
+					}
+				}
 			}
-			random_system_planet = {
+			random_rim_system = {
 				limit = {
-					is_star = yes
+					distance = {
+						source = event_target:mem_ancestor_escape_loc_1_scout_6
+						max_distance = 9999
+						min_distance = 250
+					} 
 				}
-				mem_effect_explosion_5_big = yes
-				save_event_target_as = mem_ancestor_escape_loc_2_scout_6
-			}
-		}
-		random_combatant_fleet = {
-			limit = {
-				exists = owner
-				owner = {
-					is_country_type = mem_ancestor_guardian
-				}
-				any_owned_ship = {
-					is_ship_size = mem_apostle_scout
-					has_ship_flag = mem_ancestor_herald_6
+				random_system_planet = {
+					limit = {
+						is_star = yes
+					}
+					mem_effect_explosion_5_big = yes
+					save_event_target_as = mem_ancestor_escape_loc_2_scout_6
 				}
 			}
 			set_location = event_target:mem_ancestor_escape_loc_2_scout_6
@@ -1584,9 +1988,16 @@ fleet_event = {
 						has_ship_flag = mem_ancestor_herald_6
 					}
 					repair_ship = yes
-					add_modifier = {
-						modifier = "mem_ancestor_enraged"
-						days = 30
+					if = {
+						limit = {
+							NOT = {
+								has_modifier = mem_ancestor_herald_enraged
+							}
+						}
+						add_modifier = {
+							modifier = "mem_ancestor_herald_enraged"
+							days = 90
+						}
 					}
 				}
 			}
@@ -2070,11 +2481,14 @@ country_event = {
 			country_event = { id = mem_ancestor.43 days = 10 }
 		}
 		country_event = { id = mem_ancestor.27 days = 360 }
-		set_global_flag = mem_ancestor_black_hole
+		set_timed_global_flag = {
+			flag = mem_ancestor_black_hole
+			days = 1800
+		}
 	}
 }
 
-#Super Massive Black Hole destroys fleet
+#Super Massive Black Hole destroys fleet for 5 years
 
 fleet_event = {
 	id = mem_ancestor.26
@@ -2110,6 +2524,7 @@ country_event = {
 	}
 	
 	immediate =  {
+		mem_ancestor_target = yes
 		random_system = {
 			limit = {
 				has_star_flag = mem_prison_system
@@ -2118,7 +2533,6 @@ country_event = {
 				limit = {
 					has_planet_flag = mem_ancestor_prison_star
 				}
-				save_global_event_target_as = mem_ancestor_escape
 				create_country = {
 					name = "Chosen of Thesan"
 					type = mem_ancestor_guardian
@@ -2149,6 +2563,10 @@ country_event = {
 						add_modifier = {
 							modifier = mem_ancestor_power
 							days = -1
+						}
+						add_modifier = {
+							modifier = mem_ancestor_escape_power
+							days = 90
 						}
 					}
 					save_global_event_target_as = mem_ancestor_country
@@ -2639,7 +3057,7 @@ country_event = {
 			}	
 		}
 		FROM = {
-		is_ai = no 
+			#is_ai = no 
 		}
 	}
 	
@@ -2775,9 +3193,35 @@ country_event = {
 	}
 
 	immediate = {
-		from = {
-			set_country_flag = mem_ancestor_weakness_check
-			country_event = { id = mem_ancestor.61 }
+		if = {
+			limit = {
+				check_variable = {
+					which = "mem_ancestor_kill_counter"
+					value < 1
+				}
+			}
+			set_variable = {
+				which = "mem_ancestor_kill_counter"
+				value = 1
+			}
+			else = {
+				change_variable = {
+					which = "mem_ancestor_kill_counter"
+					value = 1
+				}
+				if = {
+					limit = {
+						check_variable = {
+							which = "mem_ancestor_kill_counter"
+							value = 100
+						}
+					}
+					from = {
+						set_country_flag = mem_ancestor_weakness_check
+						country_event = { id = mem_ancestor.61 days = 30 }
+					}
+				}
+			}
 		}
 	}
 }
@@ -2790,7 +3234,12 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		NOT = { has_country_flag = mem_ancestor_weakness_researched }
+		NOT = {
+			any_country = {
+				has_country_flag = mem_ancestor_slayer
+			}
+			has_country_flag = mem_ancestor_weakness_researched 
+		}
 	}
 
 	option = {

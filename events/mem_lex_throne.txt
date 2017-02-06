@@ -175,9 +175,35 @@ country_event = {
 	}
 
 	immediate = {
-		from = {
-			set_country_flag = mem_ring_weakness_check
-			country_event = { id = mem_throne_watchers.21 }
+		if = {
+			limit = {
+				check_variable = {
+					which = "mem_ring_kill_counter"
+					value < 1
+				}
+			}
+			set_variable = {
+				which = "mem_ring_kill_counter"
+				value = 1
+			}
+			else = {
+				change_variable = {
+					which = "mem_ring_kill_counter"
+					value = 1
+				}
+				if = {
+					limit = {
+						check_variable = {
+							which = "mem_ring_kill_counter"
+							value = 100
+						}
+					}
+					from = {
+						set_country_flag = mem_ring_weakness_check
+						country_event = { id = mem_throne_watchers.21 days = 30 }
+					}
+				}
+			}
 		}
 	}
 }
@@ -190,7 +216,12 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		NOT = { has_country_flag = mem_ring_weakness_researched }
+		NOT = {
+			any_country = {
+				has_country_flag = mem_titan_slayer
+			}
+			has_country_flag = mem_ring_weakness_researched 
+		}
 	}
 
 	option = {

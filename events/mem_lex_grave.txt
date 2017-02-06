@@ -673,9 +673,35 @@ country_event = {
 	}
 
 	immediate = {
-		from = {
-			set_country_flag = mem_grave_weakness_check
-			country_event = { id = mem_gravekeeper.31 }
+		if = {
+			limit = {
+				check_variable = {
+					which = "mem_grave_kill_counter"
+					value < 1
+				}
+			}
+			set_variable = {
+				which = "mem_grave_kill_counter"
+				value = 1
+			}
+			else = {
+				change_variable = {
+					which = "mem_grave_kill_counter"
+					value = 1
+				}
+				if = {
+					limit = {
+						check_variable = {
+							which = "mem_grave_kill_counter"
+							value = 100
+						}
+					}
+					from = {
+						set_country_flag = mem_grave_weakness_check
+						country_event = { id = mem_gravekeeper.31 days = 30 }
+					}
+				}
+			}
 		}
 	}
 }
@@ -689,6 +715,9 @@ country_event = {
 
 	trigger = {
 		NOT = {
+			any_country = {
+				has_country_flag = mem_grave_slayer
+			}
 			has_country_flag = mem_grave_weakness_researched 
 		}
 	}
