@@ -432,7 +432,7 @@ country_event = {
 							}
 							count > 0
 						}
-						num_owned_planets > 5
+						num_owned_planets > 10
 					}
 				}
 			}
@@ -472,7 +472,7 @@ country_event = {
 							}
 							count > 0
 						}
-						num_owned_planets > 10
+						num_owned_planets > 20
 					}
 				}
 			}
@@ -508,7 +508,7 @@ country_event = {
 							}
 							count > 0
 						}
-						num_owned_planets > 15
+						num_owned_planets > 30
 					}
 				}
 			}
@@ -553,7 +553,7 @@ country_event = {
 							}
 							count > 0
 						}
-						num_owned_planets > 20
+						num_owned_planets > 40
 					}
 				}
 			}
@@ -907,6 +907,14 @@ planet_event = {
 	}
 	
 	immediate = {
+		if = {
+			limit = {
+				NOT = {
+					has_planet_flag = mem_ancestor_touched
+				}
+			}
+			set_planet_flag = mem_ancestor_touched
+		}
 		random_list = {
 			50 = {
 				if = {
@@ -1077,8 +1085,122 @@ planet_event = {
 	}
 }
 
-fleet_event = {
+#Crisis galaxy wide effect
+
+event = {
 	id = mem_ancestor.8
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		has_global_flag = mem_ancestor_crisis_start
+		NOT = {
+		 has_global_flag = mem_ancestor_crisis_end
+		}
+	}
+
+	immediate = {
+		every_planet = {
+			if = {
+				limit = {
+					num_pops = 0
+					has_planet_flag = mem_ancestor_touched
+					NOT = {
+						has_planet_flag = mem_ancestor_world
+						OR = {
+							is_planet_class = pc_ringworld_habitable 
+							is_planet_class = pc_mem_ringworld_habitable 
+							has_planet_flag = fallen_empire_world
+							has_modifier = holy_planet
+						}
+					}
+				}
+				mem_ancestor_delayed_conversion = yes
+				change_pc = pc_gaia
+				set_owner = event_target:mem_ancestor_country
+				set_planet_flag = mem_ancestor_world
+				every_tile = {
+					set_blocker = tb_mem_nature
+				}
+				add_resource = { 
+					resource = sr_alien_pets
+					amount = 1 
+				}
+				break = yes
+			}
+			if = {
+				limit = {
+					num_pops = 0
+					AND = {
+						has_planet_flag = fallen_empire_world
+						has_planet_flag = mem_ancestor_touched
+					}
+					NOT = {
+						has_planet_flag = mem_ancestor_world
+						OR = {
+							is_planet_class = pc_ringworld_habitable
+							is_planet_class = pc_ringworld_habitable_damaged
+						}
+					}
+				}
+				mem_ancestor_delayed_conversion = yes
+				change_pc = pc_nuked
+				every_tile = {
+					set_building = mem_building_crisis_ruin
+				}
+				add_resource = { 
+					resource = sr_betharian
+					amount = 1
+				}
+				break = yes
+			}
+			if = {
+				limit = {
+					num_pops = 0
+					AND = {
+						has_modifier = holy_planet 
+						has_planet_flag = mem_ancestor_touched
+					}
+					NOT = {
+						has_planet_flag = mem_ancestor_world
+					}
+				}
+				mem_ancestor_delayed_conversion = yes
+				change_pc = pc_mem_cracked	
+				set_planet_max_health = 0
+				add_resource = { 
+					resource = sr_dark_matter
+					amount = 1
+				}
+				break = yes
+			}
+			if = {
+				limit = {
+					num_pops = 0
+					has_planet_flag = mem_ancestor_touched
+					OR = {
+						is_planet_class = pc_ringworld_habitable 
+						is_planet_class = pc_mem_ringworld_habitable 
+					}
+					NOT = {
+						has_planet_flag = mem_ancestor_world
+					}
+				}
+				mem_ancestor_delayed_conversion = yes
+				change_pc = pc_ringworld_habitable_damaged
+				set_planet_max_health = 0
+				add_resource = { 
+					resource = sr_living_metal
+					amount = 1
+				}
+				break = yes
+			}
+		}
+	}
+}
+
+fleet_event = {
+	id = mem_ancestor.9
 	hide_window = yes
 	
 	is_triggered_only = yes
@@ -1114,9 +1236,6 @@ fleet_event = {
 										is_same_value = event_target:mem_ancestor_country
 									}
 								}
-							}
-							any_planet = {
-								num_pops > 0
 							}
 						}
 						NOT = {
@@ -1161,7 +1280,7 @@ fleet_event = {
 }
 
 fleet_event = {
-	id = mem_ancestor.9
+	id = mem_ancestor.10
 	hide_window = yes
 	
 	is_triggered_only = yes
@@ -1196,9 +1315,6 @@ fleet_event = {
 										is_same_value = event_target:mem_ancestor_country
 									}
 								}
-							}
-							any_planet = {
-								num_pops > 0
 							}
 						}
 						NOT = {
@@ -2483,7 +2599,7 @@ country_event = {
 		country_event = { id = mem_ancestor.27 days = 360 }
 		set_timed_global_flag = {
 			flag = mem_ancestor_black_hole
-			days = 1800
+			days = 360
 		}
 	}
 }
@@ -2705,6 +2821,8 @@ country_event = {
 	}
 }
 
+#Seal Chain Reaction
+
 country_event = {
 	id = mem_ancestor.30
 	hide_window = yes
@@ -2742,6 +2860,55 @@ country_event = {
 	}
 }
 
+#Keep AI out
+
+fleet_event = {
+	id = mem_ancestor.31
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			NOT = {
+				is_country_type = mem_ancestor_guardian
+			}
+			is_ai = yes
+		}
+		FROM = {
+			has_star_flag = mem_prison_system
+			any_ship = { 
+				AND = {
+					is_ship_size = mem_apostle_seal
+					owner = { is_country_type = mem_prison_passive }
+				}
+			}
+		}
+	}
+	
+	immediate = {
+		FROM = {
+			save_event_target_as = mem_ancestor_bounce_1_loc
+		}
+		random_system = {
+			limit = {
+				distance = {
+					source = event_target:mem_ancestor_bounce_1_loc
+					max_distance = 9999
+					min_distance = 100
+				} 
+			}
+			random_system_planet = {
+				limit = {
+					is_star = yes
+				}
+				save_event_target_as = mem_ancestor_bounce_2_loc
+			}
+		}
+		set_location = event_target:mem_ancestor_bounce_2_loc
+		clear_orders = yes 
+	}		
+}
+
 # Entering system
 
 ship_event = {
@@ -2768,8 +2935,8 @@ ship_event = {
 		}
 		owner = {
 			NOT = {
-			has_country_flag = mem_ancestor_seal_destroyer
-			has_country_flag = encountered_mem_prison 
+				has_country_flag = mem_ancestor_seal_destroyer
+				has_country_flag = encountered_mem_prison 
 			}
 			is_ai = no
 		}
@@ -3062,6 +3229,16 @@ country_event = {
 	}
 	
 	immediate = {
+		if = {
+			limit = {
+				has_global_flag = mem_ancestor_crisis_start
+				NOT = {
+					has_global_flag = mem_ancestor_crisis_end
+				}
+			}
+			remove_global_flag = mem_ancestor_crisis_start
+			set_global_flag = mem_ancestor_crisis_end
+		}
 		FROMFROM = {
 			create_ambient_object = {
 				type = mem_effect_explosion_8_object
@@ -3213,7 +3390,7 @@ country_event = {
 					limit = {
 						check_variable = {
 							which = "mem_ancestor_kill_counter"
-							value = 100
+							value = 50
 						}
 					}
 					from = {

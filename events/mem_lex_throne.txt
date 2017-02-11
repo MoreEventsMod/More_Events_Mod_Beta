@@ -68,12 +68,15 @@ ship_event = {
 
 #Bounce (Entering system: AI, or Human w/out Enough Sensors)
 #Locks the system from AI and too-weak human players
-ship_event = {
+fleet_event = {
 	id = mem_throne_watchers.10
 	hide_window = yes
 	is_triggered_only = yes
 	
 	trigger = {
+		NOT = {
+			has_global_flag = mem_throne_bounce_toggle
+		}
 		owner = {
 			OR = {
 				NOT = {
@@ -85,7 +88,6 @@ ship_event = {
 				}
 				is_ai = yes
 			}
-			
 		}
 		FROM = {
 			has_star_flag = mem_ring_system
@@ -100,12 +102,28 @@ ship_event = {
 	
 	immediate = {
 		owner = {
-			country_event = { id = mem_throne_watchers.11 }
+			if = {
+				limit = {
+					is_ai = no
+				}
+				capital_scope = {
+					save_event_target_as = mem_throne_bounce_loc
+				}
+				country_event = { id = mem_throne_watchers.11 }
+				else = {
+					random_system = {
+						random_system_planet = {
+							limit = {
+								is_star = yes
+							}
+							save_event_target_as = mem_throne_bounce_loc
+						}
+					}
+				}
+			}
 		}		
-		fleet = {
-			order_forced_return = yes
-			clear_orders = yes 
-		}
+		set_location = event_target:mem_throne_bounce_loc
+		clear_orders = yes 
 	}		
 }
 
@@ -195,7 +213,7 @@ country_event = {
 					limit = {
 						check_variable = {
 							which = "mem_ring_kill_counter"
-							value = 100
+							value = 50
 						}
 					}
 					from = {
@@ -290,7 +308,7 @@ country_event = {
 		}
 		FROM = {
 			country_event = { id = mem_throne_watchers.31 }
-			#mem_ancestor_seal_trigger = yes
+			mem_ancestor_seal_trigger = yes
 			set_country_flag = mem_titan_slayer
 		}
 		every_country = {
@@ -384,6 +402,7 @@ ship_event = {
 			}
 		}
 		hidden_effect = {
+			set_global_flag = mem_throne_bounce_toggle
 			random_system = {
 				limit = {
 					has_star_flag = mem_ring_system
