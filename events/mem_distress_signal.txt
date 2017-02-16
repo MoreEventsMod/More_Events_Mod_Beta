@@ -1,0 +1,392 @@
+#################################
+# Distress Signal anomalies
+# Idea and writing by Malthus and ViolentBeetle
+# Code by Tuttu
+#################################
+
+namespace = mem_distress_signal
+@mem_crash_site_society_gain = 150
+# TODO : Change event sounds
+
+# Failure and Critical failure
+ship_event = {
+	id = mem_distress_signal.1
+	title = "mem_distress_signal.1.name"
+	desc = "mem_distress_signal.1.desc"
+	picture =  GFX_evt_ship_in_orbit 
+	show_sound = event_ship_bridge
+	location = FROM
+
+	is_triggered_only = yes
+
+	option = {
+		name = mem_distress_signal.1.a
+	}
+}
+
+# Stranded
+ship_event = {
+	id = mem_distress_signal.10
+	title = "mem_distress_signal.10.name"
+	desc = "mem_distress_signal.10.desc"
+	picture =  GFX_evt_mem_crashlanding 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+
+	option = {
+		name = mem_distress_signal.10.a
+		custom_tooltip = mem_distress_signal.10.a.tooltip	
+		hidden_effect = {
+			create_species = {
+				name = random
+				class = random
+				portrait = random
+				traits = random
+			}			
+		
+			owner = {
+				create_leader = {
+					type = scientist
+					species = last_created
+					name = "Bheer Gry'Ills"
+					skill = 500
+					traits = {
+						trait = leader_trait_custom_AI_assistant
+						#trait = random_trait
+					}
+				}
+				
+				last_created_leader = {
+					random_list = {
+						50 = { add_trait = leader_trait_adaptable }
+						40 = { add_trait = leader_trait_roamer }
+						10 = { add_trait = leader_trait_arrested_development }
+					}
+				}				
+			}
+		}
+	}
+	
+	# Available to Xenophobe only
+	option = {
+		name = mem_distress_signal.10.b		
+		trigger = {
+			root.owner = {
+				OR = {
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}		
+		}
+		FROM = {
+			enable_special_project = {
+				name = "MEM_DISTRESS_SIGNAL_STRANDED_SURVIVOR"
+				owner = ROOT
+				location = FROM
+			}
+		}
+	}
+}
+
+ship_event = {
+	id = mem_distress_signal.11
+	title = "mem_distress_signal.11.name"
+	desc = {
+		random_list = {
+			25 = { text = mem_distress_signal.11.desc.a}
+			25 = { text = mem_distress_signal.11.desc.b}
+			25 = { text = mem_distress_signal.11.desc.c}
+			25 = { text = mem_distress_signal.11.desc.d}
+		}
+	}
+	picture =  GFX_evt_mem_crashlanding 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+	
+	option = {
+		name = mem_distress_signal.11.a		
+		root.owner = { add_society_research = 250 }
+	}
+}
+
+# Rock Thrashers
+ship_event = {
+	id = mem_distress_signal.20
+	title = "mem_distress_signal.20.name"
+	desc = "mem_distress_signal.20.desc"
+	picture =  GFX_evt_mem_strange_tectonics 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+
+	option = {
+		name = mem_distress_signal.20.a		
+		FROM = {
+			save_event_target_as = mem_distress_signal_rock_thrashers_planet
+			enable_special_project = {
+				name = "MEM_DISTRESS_SIGNAL_ROCK_THRASHERS"
+				owner = ROOT
+				location = FROM
+			}
+		}
+	}
+}
+
+# Rock Thrashers special project completion
+ship_event = {
+	id = mem_distress_signal.21
+	title = "mem_distress_signal.21.name"
+	desc = "mem_distress_signal.21.desc"
+	picture =  GFX_evt_mem_strange_tectonics 
+	show_sound = event_sensor_ping
+	location = event_target:mem_distress_signal_rock_thrashers_planet
+
+	is_triggered_only = yes	
+
+	option = {
+		name = mem_distress_signal.21.a.neutral
+		trigger = {
+			root.owner = {
+				NOR = {
+					has_ethic = ethic_xenophile
+					has_ethic = ethic_fanatic_xenophile
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		event_target:mem_distress_signal_rock_thrashers_planet = {
+			add_modifier = {
+				modifier = mem_distress_signal_rock_thrashers
+				days = -1
+			}
+		}
+	}
+
+	option = {
+		name = mem_distress_signal.21.a.xenophile
+		trigger = { 
+			root.owner = {
+				OR = {
+					has_ethic = ethic_xenophile
+					has_ethic = ethic_fanatic_xenophile
+				}
+			}
+		}
+		event_target:mem_distress_signal_rock_thrashers_planet = {
+			add_modifier = {
+				modifier = mem_distress_signal_rock_thrashers
+				days = -1
+			}
+		}
+	}
+	
+	option = {
+		name = mem_distress_signal.21.a.xenophobe
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		event_target:mem_distress_signal_rock_thrashers_planet = {
+			add_modifier = {
+				modifier = mem_distress_signal_rock_thrashers
+				days = -1
+			}
+		}
+	}
+}
+
+# Colony ship crash site
+ship_event = {
+	id = mem_distress_signal.30
+	title = "mem_distress_signal.30.name"
+	desc = "mem_distress_signal.30.desc"
+	picture =  GFX_evt_landing_ship 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+
+	option = {
+		name = mem_distress_signal.30.a		
+		FROM = {
+			save_event_target_as = mem_distress_signal_colony_ship_planet
+			enable_special_project = {
+				name = "MEM_DISTRESS_SIGNAL_COLONY_SHIP"
+				owner = ROOT
+				location = FROM
+			}
+		}
+	}
+}
+
+ship_event = {
+	id = mem_distress_signal.31
+	title = "mem_distress_signal.31.name"
+	desc = "mem_distress_signal.31.desc"
+	picture =  GFX_evt_landing_ship 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+
+	option = {
+		name = mem_distress_signal.31.a.common	
+		ROOT = {
+			add_society_research = @mem_crash_site_society_gain
+		}
+	}
+	
+	option = {
+		name = mem_distress_signal.31.a.xenocoll
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_collectivist
+					has_ethic = ethic_fanatic_collectivist
+				}
+			}
+		}
+		ROOT = {
+			add_society_research = @mem_crash_site_society_gain
+		}
+	}
+}
+
+ship_event = {
+	id = mem_distress_signal.32
+	title = "mem_distress_signal.32.name"
+	desc = "mem_distress_signal.32.desc"
+	picture =  GFX_evt_landing_ship 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+
+	option = {
+		name = mem_distress_signal.32.a.common	
+		ROOT = {
+			add_society_research = @mem_crash_site_society_gain
+		}
+	}
+	
+	option = {
+		name = mem_distress_signal.32.a.xenocoll
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_collectivist
+					has_ethic = ethic_fanatic_collectivist
+				}
+			}
+		}
+		ROOT = {
+			add_society_research = @mem_crash_site_society_gain
+		}
+	}
+}
+
+ship_event = {
+	id = mem_distress_signal.33
+	title = "mem_distress_signal.33.name"
+	desc = "mem_distress_signal.33.desc"
+	picture =  GFX_evt_landing_ship 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+
+	option = {
+		name = mem_distress_signal.33.a.common	
+		event_target:mem_distress_signal_colony_ship_planet = {
+			add_modifier = {
+				modifier = mem_distress_signal_lost_colony
+				days = -1
+			}
+		}
+	}
+	
+	option = {
+		name = mem_distress_signal.33.a.xenocoll
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_collectivist
+					has_ethic = ethic_fanatic_collectivist
+				}
+			}
+		}
+		event_target:mem_distress_signal_colony_ship_planet = {
+			add_modifier = {
+				modifier = mem_distress_signal_lost_colony
+				days = -1
+			}
+		}
+	}
+	
+	option = {
+		name = mem_distress_signal.33.a.materialist
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+				}
+			}
+		}
+		event_target:mem_distress_signal_colony_ship_planet = {
+			add_modifier = {
+				modifier = mem_distress_signal_lost_colony
+				days = -1
+			}
+		}
+	}
+	
+	option = {
+		name = mem_distress_signal.33.a.spiritualist
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_spiritualist
+					has_ethic = ethic_fanatic_spiritualist
+				}
+			}
+		}
+		event_target:mem_distress_signal_colony_ship_planet = {
+			add_modifier = {
+				modifier = mem_distress_signal_lost_colony
+				days = -1
+			}
+		}
+	}
+}
+
+
+# DEBUG #
+country_event = {
+	id = mem_distress_signal.100
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		ROOT = {
+			country_add_ethic = "ethic_xenophobe"
+		}
+	}
+}
