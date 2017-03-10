@@ -25,30 +25,6 @@ event = {
 					flag = mem_antarans_recent_attack
 					days = 9000 # 25 years
 				}
-				create_country = {
-					name = "The Dark Ones"
-					type = mem_antarans
-					flag = {
-						icon = {
-							category = "domination"
-							file = "domination_21.dds"
-						}
-						background= {
-							category = "backgrounds"
-							file = "00_solid.dds"
-						}
-						colors={
-							"black"
-							"dark_purple"
-							"null"
-							"null"
-						}
-					}
-				}
-				last_created_country = {
-					set_country_flag = mem_antarans_country
-					set_graphical_culture = fallen_empire_04
-				}
 			}
 		}
 	}
@@ -229,6 +205,10 @@ country_event = {
 			random_owned_planet = {
 				limit = {
 					is_capital = yes
+				}
+				set_timed_planet_flag = {
+					flag = mem_antarans_raiding_target
+					days = 600
 				}
 				solar_system = {
 					random_system_planet = {
@@ -455,6 +435,25 @@ country_event = {
 	# TODO make unseful options as reply based on ethics
 }
 
+#Establishing communications with every country that does not already know them (is started at fleet spawn 100 and 101)
+country_event = {
+	id = mem_antarans.10
+    hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		every_country = {
+			limit = {
+				NOT = {
+					has_communications = ROOT
+				}
+			}
+			establish_communications_no_message = ROOT
+		}
+	}
+}
+
 #Retaliation Fleet spawn
 country_event = {
 	id = mem_antarans.100
@@ -474,6 +473,14 @@ country_event = {
 					has_country_flag = mem_antarans_country
 				}
 				save_event_target_as = mem_antarans_country
+				IF = {
+					limit = {
+						NOT = {
+							has_communications = ROOT
+						}
+					}
+					establish_communications_no_message = ROOT
+				}	
 			}
 			ELSE = { # otherwise the antaran country is created and saved as event target
 				create_country = {
@@ -500,8 +507,22 @@ country_event = {
 					set_country_flag = mem_antarans_country
 					set_graphical_culture = fallen_empire_04
 					save_event_target_as = mem_antarans_country
+					IF = {
+						limit = {
+							NOT = {
+								has_communications = ROOT
+							}
+						}
+						establish_communications_no_message = ROOT
+					}
 				}
 			}
+		}
+		random_country = { # establish communications with all other empires
+			limit = {
+				has_country_flag = mem_antarans_country
+			}
+			country_event = { id = mem_antarans.10 days = 1 }
 		}
 		random_system = {
 			limit = {
@@ -536,6 +557,7 @@ country_event = {
 				}
 				last_created_fleet = { # fleet flag for bombarding event
 					set_fleet_flag = mem_antarans_fleet
+					fleet_event = { id = mem_antarans.110 days = 1 }
 				}
 				IF = { # check which attack number the empire has (1 to 5) for destruction check to know which empire will be the target of a retaliation strike
 					limit = {
@@ -600,11 +622,67 @@ country_event = {
 	is_triggered_only = yes
 
 	immediate = {
-		random_country = {
+		IF = { # if the antarans already exist their country is saved as event target
+			limit = {
+				any_country = {
+					has_country_flag = mem_antrarans_country
+				}
+			}
+			random_country = {
+				limit = {
+					has_country_flag = mem_antarans_country
+				}
+				save_event_target_as = mem_antarans_country
+				IF = {
+					limit = {
+						NOT = {
+							has_communications = ROOT
+						}
+					}
+					establish_communications_no_message = ROOT
+				}		
+			}
+			ELSE = { # otherwise the antaran country is created and saved as event target
+				create_country = {
+					name = "The Dark Ones"
+					type = mem_antarans
+					flag = {
+						icon = {
+							category = "domination"
+							file = "domination_21.dds"
+						}
+						background= {
+							category = "backgrounds"
+							file = "00_solid.dds"
+						}
+						colors={
+							"black"
+							"dark_purple"
+							"null"
+							"null"
+						}
+					}
+				}
+				last_created_country = {
+					set_country_flag = mem_antarans_country
+					set_graphical_culture = fallen_empire_04
+					save_event_target_as = mem_antarans_country
+					IF = {
+						limit = {
+							NOT = {
+								has_communications = ROOT
+							}
+						}
+						establish_communications_no_message = ROOT
+					}
+				}
+			}
+		}
+		random_country = { # establish communications with all other empires
 			limit = {
 				has_country_flag = mem_antarans_country
 			}
-			save_event_target_as = mem_antarans_country
+			country_event = { id = mem_antarans.10 days = 1 }
 		}
 		random_system = {
 			limit = {
@@ -635,7 +713,22 @@ country_event = {
 							set_owner = event_target:mem_antarans_country
 							create_ship = {
 								name = random
-								design = "Supremacy"
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
 								graphical_culture = "fallen_empire_04"
 							}
 							set_location = {
@@ -668,6 +761,26 @@ country_event = {
 								design = "Supremacy"
 								graphical_culture = "fallen_empire_04"
 							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
 							set_location = {
 								target = PREV
 								distance = 0
@@ -696,6 +809,46 @@ country_event = {
 							create_ship = {
 								name = random
 								design = "Supremacy"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Supremacy"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Supremacy"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
 								graphical_culture = "fallen_empire_04"
 							}
 							set_location = {
@@ -728,6 +881,66 @@ country_event = {
 							create_ship = {
 								name = random
 								design = "Supremacy"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Supremacy"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Supremacy"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Supremacy"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
 								graphical_culture = "fallen_empire_04"
 							}
 							set_location = {
@@ -766,6 +979,71 @@ country_event = {
 								design = "Supremacy"
 								graphical_culture = "fallen_empire_04"
 							}
+							create_ship = {
+								name = random
+								design = "Supremacy"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Supremacy"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Supremacy"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Supremacy"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
 							set_location = {
 								target = PREV
 								distance = 0
@@ -797,6 +1075,76 @@ country_event = {
 								design = "Supremacy"
 								graphical_culture = "fallen_empire_04"
 							}
+							create_ship = {
+								name = random
+								design = "Supremacy"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Supremacy"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Supremacy"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Supremacy"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Supremacy"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
+							create_ship = {
+								name = random
+								design = "Glory"
+								graphical_culture = "fallen_empire_04"
+							}
 							set_location = {
 								target = PREV
 								distance = 0
@@ -807,6 +1155,7 @@ country_event = {
 				}
 				last_created_fleet = { # fleet flag for bombarding event
 					set_fleet_flag = mem_antarans_fleet
+					fleet_event = { id = mem_antarans.110 days = 1 }
 				}
 				IF = { # check which attack number the empire has (1 to 5) for destruction check to know which empire will be the target of a retaliation strike
 					limit = {
@@ -858,6 +1207,92 @@ country_event = {
 						set_fleet_flag = mem_antarans_fleet_5
 					}
 				}
+			}
+		}
+	}
+}
+
+# tells the raiding or retaliation fleet to move to the target planet to start bombarding
+fleet_event = {
+	id = mem_antarans.110
+	hide_window = yes
+	
+	is_triggered_only = yes
+
+	immediate = {
+		queue_actions = {
+			repeat	= {
+				find_closest_planet  = {
+					trigger = {
+						id = mem_antarans_action.1
+						has_planet_flag = mem_antarans_raiding_target
+					}
+					found_planet = {
+						move_to = this
+						orbit_planet = this
+					}
+				}
+				wait = 500
+			}
+		}
+	}
+}
+
+# Planet has reached zero health and now gets debuff and owner flags are being changed
+planet_event = {
+	id = mem_antarans.111
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		FROM = {
+			has_country_flag = mem_antarans_country
+		}
+	}
+	
+	immediate = {
+		add_modifier = {
+			modifier = mem_antarans_raided
+			days = 3600
+		}
+		
+		solar_system = {
+			random_fleet_in_system = {
+				limit = {
+					exists = owner
+					owner = { is_country_type = mem_antarans }
+				}
+				fleet_event = { id = mem_antarans.112 days = 1 }
+			}
+		}
+	}
+}
+
+# sending raiding or retaliation fleet home to the rift and let them vanish
+fleet_event = {
+	id = mem_antarans.112
+	hide_window = yes
+	
+	is_triggered_only = yes
+
+	immediate = {
+		orbit = {
+			solar_system = {
+				random_system_ambient_object = {
+					limit = {
+						has_ambient_object_flag = mem_antarans_rift
+					}
+					save_event_target_as = mem_antarans_rift
+				}
+			}
+		}
+		clear_fleet_actions = ROOT
+		queue_actions = {
+			move_to = event_target:mem_antarans_rift
+			effect = {
+				id = mem_antarans_action.2
+				delete_fleet  = this
 			}
 		}
 	}
