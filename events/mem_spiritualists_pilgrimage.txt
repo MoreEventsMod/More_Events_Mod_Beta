@@ -17,7 +17,7 @@ country_event = {
 	}
 	
 	immediate = {
-		set_global_flag = 35_years_passed
+		set_global_flag = mem_35_years_passed
 	}
 }
 
@@ -37,21 +37,34 @@ country_event = {
 	}
 	
 	trigger = {		
-		has_global_flag = 35_years_passed
+		has_global_flag = mem_35_years_passed
 		NOR = {	
 			has_global_flag = pilgrimage_in_progress 
 			has_country_flag = pilgrims_received
 		}
-		#NOT = { has_country_flag = pilgrims_received }
 		any_neighbor_country = {
+			is_country_type = default
+			NOR = {
+				root = {
+					is_rival = prev
+				}
+				is_rival = root
+			}
+			ROOT = {
+				capital_scope = { 
+					solar_system = { 
+						has_access_fleet = prevprevprev
+					}
+				}
+			}
 			OR = {
 				has_ethic = "ethic_spiritualist"
 				has_ethic = "ethic_fanatic_spiritualist"
 			}
 			NOR = {			
 				# Prevent the same country to do the pilgrimage again
-					has_country_flag = spiritualists_pilgrimage_ongoing
-					has_country_flag = spiritualists_pilgrimage_done
+				has_country_flag = spiritualists_pilgrimage_ongoing
+				has_country_flag = spiritualists_pilgrimage_done
 			}
 		}
 	}
@@ -60,7 +73,7 @@ country_event = {
 		months = 70
 		modifier = {
 			# 10 more time if xenophobic
-			factor = 10
+			factor = 2
 			OR = {
 				has_ethic = "ethic_xenophobe"
 				has_ethic = "ethic_fanatic_xenophobe"
@@ -71,34 +84,46 @@ country_event = {
 	immediate = {		
 		set_global_flag = pilgrimage_in_progress		
 		ROOT = { set_country_flag = pilgrims_received }
-		#ROOT = {
-		#	random_owned_planet = {
-		#		save_event_target_as = pilgrims_destination
-		#	}
-		#}
 		random_neighbor_country = {
 			limit = {
+				is_country_type = default
+				NOR = {
+					root = {
+						is_rival = prev
+					}
+					is_rival = root
+				}
+				ROOT = {
+					capital_scope = { 
+						solar_system = { 
+							has_access_fleet = prevprevprev
+						}
+					}
+				}
 				OR = {
 					has_ethic = "ethic_spiritualist"
 					has_ethic = "ethic_fanatic_spiritualist"
 				}
 				NOR = {			
 					# Prevent the same country to do the pilgrimage again
-						has_country_flag = spiritualists_pilgrimage_ongoing
-						has_country_flag = spiritualists_pilgrimage_done		
+					has_country_flag = spiritualists_pilgrimage_ongoing
+					has_country_flag = spiritualists_pilgrimage_done		
 				}
 			}
 			save_event_target_as = pilgrims_origin
 			set_country_flag = spiritualists_pilgrimage_ongoing
-			
 			closest_system = { 
 				limit = { 
-					is_owned_by = ROOT 
+					any_planet = {
+						is_owned_by = ROOT
+						is_colony = yes
+						is_capital = no
+					}
 				}
-				min_steps = 1
 				random_system_planet = { 
 					limit = { 
 						is_owned_by = ROOT 
+						is_colony = yes
 						is_capital = no
 					} 
 				save_event_target_as = pilgrims_destination 
@@ -115,7 +140,6 @@ country_event = {
 					has_ethic = "ethic_fanatic_xenophobe"
 			}
 		}
-				
 		if = {
 			limit = {
 				ROOT = {
