@@ -1,0 +1,2541 @@
+########################
+# Sleepers
+# Code by Malthus
+# Text by ViolentBeetle
+########################
+
+namespace = mem_sleepers
+
+@tier1materialreward = 6
+@tier1materialmin = 100
+@tier1materialmax = 500
+@tier2materialreward = 12
+@tier2materialmin = 150
+@tier2materialmax = 1000
+@tier3materialreward = 18
+@tier3materialmin = 250
+@tier3materialmax = 1500
+@tier4materialreward = 24
+@tier4materialmin = 350
+@tier4materialmax = 2000
+
+@tier1influencereward = 6
+@tier1influencemin = 40
+@tier1influencemax = 100
+@tier2influencereward = 12
+@tier2influencemin = 80
+@tier2influencemax = 175
+@tier3influencereward = 18
+@tier3influencemin = 125
+@tier3influencemax = 250
+@tier4influencereward = 24
+@tier4influencemin = 150
+@tier4influencemax = 300
+
+@tier1researchreward = 6
+@tier1researchmin = 60
+@tier1researchmax = 150
+@tier2researchreward = 12
+@tier2researchmin = 90
+@tier2researchmax = 250
+@tier3researchreward = 18
+@tier3researchmin = 120
+@tier3researchmax = 350
+@tier4researchreward = 24
+@tier4researchmin = 150
+@tier4researchmax = 500
+
+################################################################################
+################################################################################
+################################################################################
+ 
+# Happens on planet with obervation post with either passive or active observation
+
+# Sleepers setup (HIDDEN)
+planet_event = {
+	id = mem_sleepers.1
+	hide_window = yes
+	
+	trigger = {
+		has_observation_outpost = yes
+		NOT = {
+			has_global_flag = mem_sleepers
+		}
+		observation_outpost = { 
+			OR = { 
+				has_mission = passive_observation
+				has_mission = specimen_collection
+			}
+		}
+		observation_outpost_owner = {
+			is_ai = no
+		}
+		owner = {
+			is_country_type = primitive
+			OR = {
+				has_country_flag = bronze_age
+				has_country_flag = iron_age
+				has_country_flag = late_medieval_age
+				has_country_flag = renaissance_age
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		#months = 5000
+		months = 1
+	}
+	
+	immediate = {
+		observation_outpost_owner = {
+			limit = { 
+				is_ai = no
+			}
+			THIS = {
+				save_event_target_as = mem_sleepers_station_owner
+			}
+			country_event = { id = mem_sleepers.2 }
+		}
+		set_planet_flag = mem_sleepers_planet
+		set_global_flag = mem_sleepers
+	}
+}
+
+country_event = {
+	id = mem_sleepers.2
+	title = mem_sleepers.2.name
+	desc = mem_sleepers.2.desc
+	picture = GFX_evt_satellite_in_orbit
+	show_sound = event_yellow_alert
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_sleepers.2.a
+		random_system_within_border = {
+			limit = {
+				any_planet = {
+					has_planet_flag = mem_sleepers_planet
+				}
+			}
+			random_planet = {
+				limit = {
+					has_planet_flag = mem_sleepers_planet
+				}
+				enable_special_project = {
+					name = "MEM_SLEEPERS_SCAN"
+					location = THIS
+					owner = ROOT
+				}
+			}
+		}
+	}
+}
+
+# Failed to do the project (Soft Fail)
+country_event = {
+	id = mem_sleepers.3
+	title = mem_sleepers.3.name
+	desc = mem_sleepers.3.desc
+	picture = GFX_evt_nuclear_explosion
+	show_sound = event_super_explosion
+	location = FROMFROMFROM
+	
+	is_triggered_only = yes
+
+	immediate = {
+		random_system_within_border = {
+			limit = {
+				any_planet = {
+					has_planet_flag = mem_sleepers_planet
+				}
+			}
+			random_planet = {
+				limit = {
+					has_planet_flag = mem_sleepers_planet
+				}
+				random_tile =  {
+					limit = {
+						has_blocker = no
+						has_grown_pop = no
+						has_building = no
+					}
+					set_blocker = tb_bomb_crater
+				}
+				owner = {
+					IF = {
+						limit = {
+							NOR = {
+								has_ethic = ethic_fanatic_spiritualist
+								has_ethic = ethic_spiritualist
+								has_ethic = ethic_fanatic_materialist
+								has_ethic = ethic_materialist
+							}
+						}
+						country_add_ethic = ethic_spiritualist
+						every_owned_pop = {
+							pop_change_ethic = "ethic_spiritualist"
+						}
+					}
+					IF = {
+						limit = {
+							has_ethic = ethic_fanatic_materialist	
+						}
+						country_remove_ethic = ethic_fanatic_materialist
+						country_add_ethic = ethic_fanatic_spiritualist
+						every_owned_pop = {
+							pop_change_ethic = "ethic_spiritualist"
+						}
+					}
+					IF = {
+						limit = {
+							has_ethic = ethic_materialist	
+						}
+						country_remove_ethic = ethic_materialist
+						country_add_ethic = ethic_spiritualist
+						every_owned_pop = {
+							pop_change_ethic = "ethic_spiritualist"
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = "mem_sleepers.3.a"
+	}
+}
+
+# Failed to do the project (Hard Fail)
+country_event = {
+	id = mem_sleepers.4
+	title = mem_sleepers.4.name
+	desc = mem_sleepers.4.desc
+	picture = GFX_evt_nuclear_explosion
+	show_sound = event_super_explosion
+	location = FROMFROMFROM
+	
+	is_triggered_only = yes
+
+	immediate = {
+		random_system_within_border = {
+			limit = {
+				any_planet = {
+					has_planet_flag = mem_sleepers_planet
+				}
+			}
+			random_planet = {
+				limit = {
+					has_planet_flag = mem_sleepers_planet
+				}
+				observation_outpost = {
+					dismantle = yes
+				}
+				destroy_colony = yes
+				change_pc = pc_nuked
+				random_tile = {
+					limit = { 
+						has_blocker = no
+						num_adjacent_tiles > 3
+					}
+					set_blocker = tb_bomb_crater
+					random_neighboring_tile = {
+						limit = {
+							has_blocker = no
+						}
+						set_blocker = tb_radioactive_wasteland
+					}
+					random_neighboring_tile = {
+						limit = {
+							has_blocker = no
+						}
+						set_blocker = tb_radioactive_wasteland
+					}
+					random_neighboring_tile = {
+						limit = {
+							has_blocker = no
+						}
+						set_blocker = tb_radioactive_wasteland
+					}
+					random_neighboring_tile = {
+						limit = {
+							has_blocker = no
+						}
+						set_blocker = tb_radioactive_wasteland
+					}
+				}
+				random_tile = {
+					limit = { 
+						has_blocker = no
+					}
+					set_blocker = tb_active_volcano
+				}
+				random_tile = {
+					limit = { 
+						has_blocker = no
+					}
+					set_blocker = tb_active_volcano
+				}
+				random_tile = {
+					limit = { 
+						has_blocker = no
+					}
+					set_blocker = tb_active_volcano
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = "mem_sleepers.4.a"
+		trigger = {       
+			NOT = {
+				has_ethic = "ethic_fanatic_xenophobe"
+			}
+		}
+	}
+	
+	option = {
+		name = "mem_sleepers.4.b"
+		trigger = {
+			has_ethic = "ethic_fanatic_xenophobe"
+		}
+	}
+}
+
+ship_event = {
+	id = mem_sleepers.5
+	title = mem_sleepers.5.name
+	desc = mem_sleepers.5.desc
+	picture = GFX_evt_mem_horror_corridor
+	show_sound = event_airlock
+	location = FROMFROMFROM
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		fleet = {
+			set_event_locked = yes
+		}
+		solar_system = {
+			random_system_planet = {
+				limit = {
+					has_planet_flag = mem_sleepers_planet
+				}
+				random_pop = {
+					save_event_target_as = mem_sleepers_natives
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_sleepers.5.a
+		custom_tooltip = mem_sleepers.5.a.tooltip
+		trigger = {
+			owner = {
+				energy > 499
+			}
+		}
+		owner= {
+			add_energy = -500
+		}
+		hidden_effect = {
+			fleet = {
+				set_event_locked = no
+			}
+			owner = {
+				random_list = {
+					1 = { country_event = { id = mem_sleepers.45 days = 30} } # Sleepers Awake xenophile
+					1 = { country_event = { id = mem_sleepers.95 days = 30} } # Sleepers Awake xenophobe
+					2 = { country_event = { id = mem_sleepers.145 days = 30} } # Remnants
+					2 = { country_event = { id = mem_sleepers.195 days = 30} } # The Last
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_sleepers.5.a
+		custom_tooltip = mem_sleepers.5.b.tooltip
+		trigger = {
+			owner = {
+				energy < 500
+			}
+		}
+		owner = {
+			add_modifier = {
+				modifier = mem_sleepers_energy_cost
+				days = 1500
+			}
+		}
+		hidden_effect = {
+			fleet = {
+				set_event_locked = no
+			}
+			owner = {
+				random_list = {
+					1 = { country_event = { id = mem_sleepers.45 days = 30} } # Sleepers Awake xenophile
+					1 = { country_event = { id = mem_sleepers.95 days = 30} } # Sleepers Awake xenophobe
+					2 = { country_event = { id = mem_sleepers.145 days = 30} } # Remnants
+					2 = { country_event = { id = mem_sleepers.195 days = 30} } # The Last
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_sleepers.5.c
+		custom_tooltip = mem_sleepers.5.c.tooltip
+		trigger = {
+			owner = {
+				NOR = {
+					has_ethic = ethic_fanatic_xenophile
+					has_ethic = ethic_xenophile
+				}
+			}
+		}
+		hidden_effect = {
+			owner = {
+				random_list = {
+					3 = { country_event = { id = mem_sleepers.6 days = 30} } # Getting some Loot and Research
+					1 = { country_event = { id = mem_sleepers.7 days = 30} } # Some sleepers awake and destroy the vault
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_sleepers.5.d
+		trigger = {
+			owner = {
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
+		owner = {
+			add_influence = 100
+		}
+		hidden_effect = {
+			fleet = {
+				set_event_locked = no
+			}
+			owner = {
+				random_list = {
+					80 = { country_event = { id = mem_sleepers.8 days = 30} } # small Explosion
+					20 = { country_event = { id = mem_sleepers.9 days = 30} } # big Explosion
+				}
+			}
+		}
+	}
+}
+
+#Looting the Vault and potentially getting uplifting tech option
+country_event = {
+	id = mem_sleepers.6
+	title = mem_sleepers.6.name
+	desc = mem_sleepers.6.desc
+	picture = GFX_evt_mem_horror_corridor
+	show_sound = event_laboratory_sound
+	location = FROMFROMFROMFROM
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		FROM = {
+			fleet = {
+				set_event_locked = no
+			}
+			solar_system = {
+				random_system_planet = {
+					limit = {
+						has_planet_flag = mem_sleepers_planet
+					}
+					random_pop = {
+						save_event_target_as = mem_sleepers_natives
+					}
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_sleepers.6.a
+		add_energy = 500
+		add_minerals = 750
+		IF = {
+			limit = {
+				NOT = {
+					has_technology = tech_epigenetic_triggers
+				}
+			}
+			add_research_option = tech_epigenetic_triggers
+			add_tech_progress = {
+				tech = tech_epigenetic_triggers
+				progress = 0.3
+			} 
+			ELSE = {
+				add_society_research = 150
+			}
+		}
+	}
+}
+
+#Some sleepers awake and attack your looting team (small explosion) Scientist dies
+country_event = {
+	id = mem_sleepers.7
+	title = mem_sleepers.7.name
+	desc = mem_sleepers.7.desc
+	picture = GFX_evt_nuclear_explosion
+	show_sound =  event_ground_battle
+	location = FROMFROMFROMFROM
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_system_within_border = {
+			limit = {
+				any_planet = {
+					has_planet_flag = mem_sleepers_planet
+				}
+			}
+			random_planet = {
+				limit = {
+					has_planet_flag = mem_sleepers_planet
+				}
+				random_tile =  {
+					limit = {
+						has_blocker = no
+						has_grown_pop = no
+						has_building = no
+					}
+					set_blocker = tb_bomb_crater
+				}
+				owner = {
+					IF = {
+						limit = {
+							NOR = {
+								has_ethic = ethic_fanatic_spiritualist
+								has_ethic = ethic_spiritualist
+								has_ethic = ethic_fanatic_materialist
+								has_ethic = ethic_materialist
+							}
+						}
+						country_add_ethic = ethic_spiritualist
+						every_owned_pop = {
+							pop_change_ethic = "ethic_spiritualist"
+						}
+					}
+					IF = {
+						limit = {
+							has_ethic = ethic_fanatic_materialist	
+						}
+						country_remove_ethic = ethic_fanatic_materialist
+						country_add_ethic = ethic_fanatic_spiritualist
+						every_owned_pop = {
+							pop_change_ethic = "ethic_spiritualist"
+						}
+					}
+					IF = {
+						limit = {
+							has_ethic = ethic_materialist	
+						}
+						country_remove_ethic = ethic_materialist
+						country_add_ethic = ethic_spiritualist
+						every_owned_pop = {
+							pop_change_ethic = "ethic_spiritualist"
+						}
+					}
+				}
+			}
+		}
+		FROM = {
+			fleet = {
+				kill_leader = { type = scientist show_notification = no}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_sleepers.7.a
+		hidden_effect = {
+			FROM = {
+				fleet = {
+					set_event_locked = no
+				}
+			}
+		}
+	}
+}
+
+#Letting it blow up as a xenophobe (small)
+country_event = {
+	id = mem_sleepers.8
+	title = mem_sleepers.8.name
+	desc = mem_sleepers.8.desc
+	picture = GFX_evt_nuclear_explosion
+	show_sound = event_super_explosion
+	location = FROMFROMFROMFROM
+	
+	is_triggered_only = yes
+
+	immediate = {
+		random_system_within_border = {
+			limit = {
+				any_planet = {
+					has_planet_flag = mem_sleepers_planet
+				}
+			}
+			random_planet = {
+				limit = {
+					has_planet_flag = mem_sleepers_planet
+				}
+				random_tile =  {
+					limit = {
+						has_blocker = no
+						has_grown_pop = no
+						has_building = no
+					}
+					set_blocker = tb_bomb_crater
+				}
+				owner = {
+					IF = {
+						limit = {
+							NOR = {
+								has_ethic = ethic_fanatic_spiritualist
+								has_ethic = ethic_spiritualist
+								has_ethic = ethic_fanatic_materialist
+								has_ethic = ethic_materialist
+							}
+						}
+						country_add_ethic = ethic_spiritualist
+						every_owned_pop = {
+							pop_change_ethic = "ethic_spiritualist"
+						}
+					}
+					IF = {
+						limit = {
+							has_ethic = ethic_fanatic_materialist	
+						}
+						country_remove_ethic = ethic_fanatic_materialist
+						country_add_ethic = ethic_fanatic_spiritualist
+						every_owned_pop = {
+							pop_change_ethic = "ethic_spiritualist"
+						}
+					}
+					IF = {
+						limit = {
+							has_ethic = ethic_materialist	
+						}
+						country_remove_ethic = ethic_materialist
+						country_add_ethic = ethic_spiritualist
+						every_owned_pop = {
+							pop_change_ethic = "ethic_spiritualist"
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = "mem_sleepers.8.a"
+	}
+}
+
+#Letting it blow up as a xenophobe (big)
+country_event = {
+	id = mem_sleepers.9
+	title = mem_sleepers.9.name
+	desc = mem_sleepers.9.desc
+	picture = GFX_evt_nuclear_explosion
+	show_sound = event_super_explosion
+	location = FROMFROMFROMFROM
+	
+	is_triggered_only = yes
+
+	immediate = {
+		random_system_within_border = {
+			limit = {
+				any_planet = {
+					has_planet_flag = mem_sleepers_planet
+				}
+			}
+			random_planet = {
+				limit = {
+					has_planet_flag = mem_sleepers_planet
+				}
+				observation_outpost = {
+					dismantle = yes
+				}
+				destroy_colony = yes
+				change_pc = pc_nuked
+				random_tile = {
+					limit = { 
+						has_blocker = no
+						num_adjacent_tiles > 3
+					}
+					set_blocker = tb_bomb_crater
+					random_neighboring_tile = {
+						limit = {
+							has_blocker = no
+						}
+						set_blocker = tb_radioactive_wasteland
+					}
+					random_neighboring_tile = {
+						limit = {
+							has_blocker = no
+						}
+						set_blocker = tb_radioactive_wasteland
+					}
+					random_neighboring_tile = {
+						limit = {
+							has_blocker = no
+						}
+						set_blocker = tb_radioactive_wasteland
+					}
+					random_neighboring_tile = {
+						limit = {
+							has_blocker = no
+						}
+						set_blocker = tb_radioactive_wasteland
+					}
+				}
+				random_tile = {
+					limit = { 
+						has_blocker = no
+					}
+					set_blocker = tb_active_volcano
+				}
+				random_tile = {
+					limit = { 
+						has_blocker = no
+					}
+					set_blocker = tb_active_volcano
+				}
+				random_tile = {
+					limit = { 
+						has_blocker = no
+					}
+					set_blocker = tb_active_volcano
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = "mem_sleepers.9.a"
+	}
+}
+
+#Sleepers Awake (xenophile) prelude narration
+country_event = {
+	id = mem_sleepers.45
+	title = mem_sleepers.45.name
+	desc = mem_sleepers.45.desc
+	picture = GFX_evt_mem_laboratory
+	show_sound = event_laboratory_sound
+	location = FROM.FROMFROMFROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_sleepers.45.a
+		custom_tooltip = mem_sleepers.45.a.tooltip
+		hidden_effect = {
+			country_event = { id = mem_sleepers.50 }
+		}
+	}
+}
+
+#Sleepers Awake xenophile
+country_event = {
+	id = mem_sleepers.50
+	title = mem_sleepers.50.name
+	desc = mem_sleepers.50.desc
+	
+	is_triggered_only = yes
+	
+	diplomatic = yes
+	
+	immediate = {
+		FROMFROMFROMFROM = {
+			create_species = {
+				name = "Ozari"
+				class = random
+				portrait = random
+				homeworld = THIS
+				traits = {
+					trait = trait_natural_sociologists
+					trait = trait_venerable
+					trait = trait_sedentary
+				}
+			}
+			create_country = {
+				name = "Ozari Remnants"
+				species = last_created
+				type = adversary
+				ethos = {
+					ethic = ethic_xenophile
+					ethic = ethic_pacifist
+					ethic = ethic_materialist
+				}
+				auto_delete = no
+				flag = {
+					icon = {
+						category = "spherical"
+						file = "flag_spherical_1.dds"
+					}
+					background= {
+						category = "backgrounds"
+						file = "new_dawn.dds"
+					}
+					colors={
+						"green"
+						"black"
+						"null"
+						"null"
+					}
+				}
+			}
+			last_created_country = {
+				set_relation_flag = {
+					who = mem_sleepers_station_owner
+					flag = mem_sleepers
+				}
+				set_country_flag = mem_sleepers_country
+				establish_communications_no_message = event_target:mem_sleepers_station_owner
+				save_event_target_as = mem_sleepers_country
+				owner_species = { save_event_target_as = mem_sleepers_species }
+			}
+			best_tile_for_pop = {
+				create_pop = { 
+					species = event_target:mem_sleepers_country
+					ethos = event_target:mem_sleepers_country
+				}
+			}	
+		}
+		country_event = { id = mem_sleepers.51 days = 60 }
+	}
+	
+	picture_event_data = {
+		portrait = event_target:mem_sleepers_country
+		room = mem_server_room
+	}
+
+	option = {
+		name = mem_sleepers.50.a
+		response_text = mem_sleepers.50.a.response
+	}
+}
+
+#Sleepers meet natives - player choice if integrating, protectorate or free empire
+country_event = {
+	id = mem_sleepers.51
+	title = mem_sleepers.51.name
+	desc = mem_sleepers.51.desc
+	picture = GFX_evt_mem_native_interaction
+	show_sound = event_primitive_civilization
+	location = FROMFROMFROMFROMFROM
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_system_within_border = {
+			limit = {
+				any_planet = {
+					has_planet_flag = mem_sleepers_planet
+				}
+			}
+			random_planet = {
+				limit = {
+					has_planet_flag = mem_sleepers_planet
+				}
+				owner = {
+					IF = {
+						limit = {
+							NOR = {
+								has_ethic = ethic_fanatic_xenophobe
+								has_ethic = ethic_xenophobe
+								has_ethic = ethic_fanatic_xenophile
+								has_ethic = ethic_xenophile
+							}
+						}
+						country_add_ethic = ethic_xenophile
+						every_owned_pop = {
+							pop_change_ethic = "ethic_xenophile"
+						}
+					}
+					IF = {
+						limit = {
+							has_ethic = ethic_fanatic_xenophobe	
+						}
+						country_remove_ethic = ethic_fanatic_xenophobe
+						country_add_ethic = ethic_fanatic_xenophile
+						every_owned_pop = {
+							pop_change_ethic = "ethic_xenophile"
+						}
+					}
+					IF = {
+						limit = {
+							has_ethic = ethic_xenophobe	
+						}
+						country_remove_ethic = ethic_xenophobe
+						country_add_ethic = ethic_xenophile
+						every_owned_pop = {
+							pop_change_ethic = "ethic_xenophile"
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	#integrate them peacefully
+	option = {
+		name = mem_sleepers.51.a
+		custom_tooltip = mem_sleepers.51.a.tooltip
+		hidden_effect = {
+			random_system_within_border = {
+				limit = {
+					any_planet = {
+						has_planet_flag = mem_sleepers_planet
+					}
+				}
+				random_planet = {
+					limit = {
+						has_planet_flag = mem_sleepers_planet
+					}
+					observation_outpost = {
+						dismantle = yes
+					}
+					set_owner = ROOT
+					every_planet_army = {
+						remove_army = yes
+					}
+				}
+			}
+		}
+	}
+	
+	#make them a protectorate
+	option = {
+		name = mem_sleepers.51.b
+		custom_tooltip = mem_sleepers.51.b.tooltip
+		hidden_effect = {
+			random_system_within_border = {
+				limit = {
+					any_planet = {
+						has_planet_flag = mem_sleepers_planet
+					}
+				}
+				random_planet = {
+					limit = {
+						has_planet_flag = mem_sleepers_planet
+					}
+					observation_outpost = {
+						dismantle = yes
+					}
+					owner = {
+						switch = {
+							trigger = has_country_flag
+							bronze_age = { remove_country_flag = bronze_age }
+							iron_age = { remove_country_flag = iron_age }
+							late_medieval_age = { remove_country_flag = late_medieval_age }
+							renaissance_age = { remove_country_flag = renaissance_age }
+						}
+						set_country_flag = early_space_age
+						country_event = { id = mem_sleepers.52 }
+						set_subject_of = {
+							who = root
+							subject_type = protectorate
+						}					
+					}
+				}
+			}
+		}
+	}
+	
+	#make them a free empire
+	option = {
+		name = mem_sleepers.51.c
+		trigger = {
+			NOT = {
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
+		custom_tooltip = mem_sleepers.51.c.tooltip
+		hidden_effect = {
+			random_system_within_border = {
+				limit = {
+					any_planet = {
+						has_planet_flag = mem_sleepers_planet
+					}
+				}
+				random_planet = {
+					limit = {
+						has_planet_flag = mem_sleepers_planet
+					}
+					observation_outpost = {
+						dismantle = yes
+					}
+					owner = {
+						switch = {
+							trigger = has_country_flag
+							bronze_age = { remove_country_flag = bronze_age }
+							iron_age = { remove_country_flag = iron_age }
+							late_medieval_age = { remove_country_flag = late_medieval_age }
+							renaissance_age = { remove_country_flag = renaissance_age }
+						}
+						set_country_flag = early_space_age
+						country_event = { id = mem_sleepers.52 }				
+					}
+				}
+			}
+		}
+	}
+	
+	#make them a free empire
+	option = {
+		name = mem_sleepers.51.d
+		trigger = {
+			has_ethic = ethic_fanatic_xenophobe
+		}
+		custom_tooltip = mem_sleepers.51.c.tooltip
+		hidden_effect = {
+			random_system_within_border = {
+				limit = {
+					any_planet = {
+						has_planet_flag = mem_sleepers_planet
+					}
+				}
+				random_planet = {
+					limit = {
+						has_planet_flag = mem_sleepers_planet
+					}
+					observation_outpost = {
+						dismantle = yes
+					}
+					owner = {
+						switch = {
+							trigger = has_country_flag
+							bronze_age = { remove_country_flag = bronze_age }
+							iron_age = { remove_country_flag = iron_age }
+							late_medieval_age = { remove_country_flag = late_medieval_age }
+							renaissance_age = { remove_country_flag = renaissance_age }
+						}
+						set_country_flag = early_space_age
+						country_event = { id = mem_sleepers.52 }				
+					}
+				}
+			}
+		}
+	}
+}
+
+#Sleepers Entering Space Age (HIDDEN)
+country_event = {
+	id = mem_sleepers.52
+	hide_window = yes
+	
+	trigger = {
+		is_country_type = primitive
+		has_country_flag = early_space_age
+	}
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		remove_country_flag = early_space_age
+		set_country_type = default
+		change_dominant_species = event_target:mem_sleepers_species
+		change_country_flag = {
+			icon = {
+				category = "spherical"
+				file = "flag_spherical_1.dds"
+			}
+			background= {
+				category = "backgrounds"
+				file = "new_dawn.dds"
+			}
+			colors={
+				"green"
+				"black"
+				"null"
+				"null"
+			}
+		}
+		if = {
+			limit = { is_species_class = MAM }
+			set_graphical_culture = mammalian_01
+		}
+		if = {
+			limit = { is_species_class = HUM }
+			set_graphical_culture = mammalian_01
+		}
+		if = {
+			limit = { is_species_class = PLANT }
+			set_graphical_culture = plantoid_01
+		}
+		if = {
+			limit = { is_species_class = REP }
+			set_graphical_culture = reptilian_01
+		}
+		if = {
+			limit = { is_species_class = AVI }
+			set_graphical_culture = avian_01
+		}
+		if = {
+			limit = { is_species_class = ART }
+			set_graphical_culture = arthropoid_01
+		}
+		if = {
+			limit = { is_species_class = MOL }
+			set_graphical_culture = molluscoid_01
+		}
+		if = {
+			limit = { is_species_class = FUN }
+			set_graphical_culture = fungoid_01
+		}
+		#making sure the country has the correct ethics
+		IF = {
+			limit = {
+				has_ethic = ethic_fanatic_authoritarian
+			}
+			country_remove_ethic = ethic_fanatic_authoritarian 
+		}
+		IF = {
+			limit = {
+				NOT = {
+					has_ethic = ethic_pacifist
+				}
+			}
+			country_add_ethic = ethic_pacifist 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_fanatic_egalitarian
+			}
+			country_remove_ethic = ethic_fanatic_egalitarian 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_egalitarian
+			}
+			country_remove_ethic = ethic_egalitarian 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_fanatic_xenophobe
+			}
+			country_remove_ethic = ethic_fanatic_xenophobe 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_xenophobe
+			}
+			country_remove_ethic = ethic_xenophobe 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_fanatic_xenophile
+			}
+			country_remove_ethic = ethic_fanatic_xenophile 
+		}
+		IF = {
+			limit = {
+				NOT = {
+					has_ethic = ethic_xenophile
+				}
+			}
+			country_add_ethic = ethic_xenophile 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_fanatic_militarist
+			}
+			country_remove_ethic = ethic_fanatic_militarist 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_militarist
+			}
+			country_remove_ethic = ethic_militarist 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_fanatic_pacifist
+			}
+			country_remove_ethic = ethic_fanatic_pacifist 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_authoritarian
+			}
+			country_remove_ethic = ethic_authoritarian 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_fanatic_spiritualist
+			}
+			country_remove_ethic = ethic_fanatic_spiritualist 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_spiritualist
+			}
+			country_remove_ethic = ethic_spiritualist 
+		}
+		IF = {
+			limit = {
+				NOT = {
+					has_ethic = ethic_materialist
+				}
+			}
+			country_add_ethic = ethic_materialist 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_fanatic_materialist
+			}
+			country_remove_ethic = ethic_fanatic_materialist 
+		}
+		change_government = {
+			authority = "auth_democratic"
+			civics = {
+				civic = civic_free_haven
+				civic = civic_technocracy
+			}
+		}
+		set_name = "Ozari Commonwealth"
+		add_minerals = 1000 # enough for a spaceport and then some
+		add_energy = 500
+		create_leader = {
+			type = ruler
+			species = owner_main_species
+			name = random
+			skill = 1
+			traits = {
+				add_trait = trait_ruler_champion_of_the_people
+				add_trait = trait_ruler_fertility_preacher
+			}
+		}
+		assign_leader = last_created_leader
+		capital_scope = {
+			every_owned_pop = {
+				#making sure the pops have the correct ethics
+				random_list = {
+					34 = { pop_change_ethic = "ethic_materialist" }
+					33 = { pop_change_ethic = "ethic_pacifist" }
+					33 = { pop_change_ethic = "ethic_xenophile" }
+				}
+			}
+			every_tile = {
+				limit = {
+					has_blocker = yes
+					NOR = {
+						has_blocker = tb_decrepit_dwellings
+						has_blocker = tb_failing_infrastructure	
+					}
+				}
+				remove_blocker = yes
+			}		
+			random_tile = {
+				limit = { 
+					has_grown_pop = yes 
+					OR = { 
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				set_building = "building_capital_2"	
+				add_resource = {
+					resource = food
+					amount = 1
+					replace = yes
+				}	
+				add_resource = {
+					resource = minerals
+					amount = 1
+				}				
+			}
+			random_tile = {
+				limit = { 
+					has_grown_pop = yes 
+					OR = { 
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				set_building = "building_mining_network_1"	
+				add_resource = {
+					resource = minerals
+					amount = 1
+					replace = yes
+				}				
+			}
+			random_tile = {
+				limit = { 
+					has_grown_pop = yes 
+					OR = { 
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				set_building = "building_mining_network_1"	
+				add_resource = {
+					resource = minerals
+					amount = 1
+					replace = yes
+				}				
+			}			
+			random_tile = {
+				limit = { 
+					has_grown_pop = yes 
+					OR = { 
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				set_building = "building_hydroponics_farm_1"
+				add_resource = {
+					resource = food
+					amount = 1
+					replace = yes
+				}				
+			}
+			random_tile = {
+				limit = { 
+					has_grown_pop = yes 
+					OR = { 
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				set_building = "building_hydroponics_farm_1"
+				add_resource = {
+					resource = food
+					amount = 1
+					replace = yes
+				}				
+			}			
+			random_tile = {
+				limit = { 
+					has_grown_pop = yes 				
+					OR = { 
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				set_building = "building_power_plant_1"	
+				add_resource = {
+					resource = energy
+					amount = 1
+					replace = yes
+				}					
+			}
+			random_tile = {
+				limit = { 
+					has_grown_pop = yes 				
+					OR = { 
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				set_building = "building_power_plant_1"	
+				add_resource = {
+					resource = energy
+					amount = 1
+					replace = yes
+				}					
+			}
+			random_tile = {
+				limit = { 
+					has_grown_pop = yes 				
+					OR = { 
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				set_building = "building_power_plant_1"	
+				add_resource = {
+					resource = energy
+					amount = 1
+					replace = yes
+				}					
+			}			
+			every_planet_army = {
+				remove_army = yes
+			}
+			create_army = {
+				name = random
+				owner = PREV
+				species = owner_main_species
+				type = "defense_army"
+			}
+			create_army = {
+				name = random
+				owner = PREV
+				species = owner_main_species
+				type = "defense_army"
+			}	
+			create_army = {
+				name = random
+				owner = PREV
+				species = owner_main_species
+				type = "defense_army"
+			}	
+			create_army = {
+				name = random
+				owner = PREV
+				species = owner_main_species
+				type = "defense_army"
+			}				
+		}
+	}
+}
+
+#Sleepers Awake (xenophobe) prelude narration
+#Uses (xenophile) version localisation
+country_event = {
+	id = mem_sleepers.95
+	title = mem_sleepers.45.name
+	desc = mem_sleepers.45.desc
+	picture = GFX_evt_mem_laboratory
+	show_sound = event_laboratory_sound
+	location = FROM.FROMFROMFROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_sleepers.45.a
+		custom_tooltip = mem_sleepers.45.a.tooltip
+		hidden_effect = {
+			country_event = { id = mem_sleepers.100 }
+		}
+	}
+}
+
+#Sleepers Awake xenophobe (uses texts of xenophile path)
+country_event = {
+	id = mem_sleepers.100
+	title = mem_sleepers.50.name
+	desc = mem_sleepers.50.desc
+	
+	is_triggered_only = yes
+	
+	diplomatic = yes
+	
+	immediate = {
+		FROMFROMFROMFROM = {
+			create_species = {
+				name = "Ozari"
+				class = random
+				portrait = random
+				homeworld = THIS
+				traits = {
+					trait = trait_natural_sociologists
+					trait = trait_venerable
+					trait = trait_sedentary
+				}
+			}
+			create_country = {
+				name = "Ozari Remnants"
+				species = last_created
+				type = adversary
+				ethos = {
+					ethic = ethic_fanatic_xenophobe
+					ethic = ethic_authoritarian
+				}
+				auto_delete = no
+				flag = {
+					icon = {
+						category = "spherical"
+						file = "flag_spherical_1.dds"
+					}
+					background= {
+						category = "backgrounds"
+						file = "new_dawn.dds"
+					}
+					colors={
+						"red"
+						"black"
+						"null"
+						"null"
+					}
+				}
+			}
+			last_created_country = {
+				set_relation_flag = {
+					who = mem_sleepers_station_owner
+					flag = mem_sleepers
+				}
+				set_country_flag = mem_sleepers_country
+				establish_communications_no_message = event_target:mem_sleepers_station_owner
+				save_event_target_as = mem_sleepers_country
+				owner_species = { save_event_target_as = mem_sleepers_species }
+			}
+			best_tile_for_pop = {
+				create_pop = { 
+					species = event_target:mem_sleepers_country
+					ethos = event_target:mem_sleepers_country
+				}
+			}
+			last_created_pop = {
+				set_pop_flag = mem_sleepers_ozari
+			}
+		}
+		country_event = { id = mem_sleepers.101 days = 60 }
+	}
+	
+	picture_event_data = {
+		portrait = event_target:mem_sleepers_country
+		room = mem_server_room
+	}
+
+	option = {
+		name = mem_sleepers.50.a
+		response_text = mem_sleepers.50.a.response
+	}
+}
+
+#Sleepers meet natives - player choice if integrating, protectorate or free empire
+country_event = {
+	id = mem_sleepers.101
+	title = mem_sleepers.101.name
+	desc = mem_sleepers.101.desc
+	picture = GFX_evt_mem_ground_combat
+	show_sound = event_ground_battle
+	location = FROMFROMFROMFROMFROM
+	
+	is_triggered_only = yes
+	
+	#integrate them peacefully
+	option = {
+		name = mem_sleepers.101.a
+		trigger = {
+			NOR = {
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_xenophile
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
+		custom_tooltip = mem_sleepers.101.a.tooltip
+		hidden_effect = {	
+			random_system_within_border = {
+				limit = {
+					any_planet = {
+						has_planet_flag = mem_sleepers_planet
+					}
+				}
+				random_planet = {
+					limit = {
+						has_planet_flag = mem_sleepers_planet
+					}
+					every_owned_pop = {
+						limit = {
+							NOT = {
+								has_pop_flag = mem_sleepers_ozari
+							}
+						}
+						kill_pop = yes
+					}
+				}
+			}
+			random_system_within_border = {
+				limit = {
+					any_planet = {
+						has_planet_flag = mem_sleepers_planet
+					}
+				}
+				random_planet = {
+					limit = {
+						has_planet_flag = mem_sleepers_planet
+					}
+					observation_outpost = {
+						dismantle = yes
+					}
+					set_owner = ROOT
+					every_planet_army = {
+						remove_army = yes
+					}
+				}
+			}
+		}
+	}
+	
+	#integrate them peacefully
+	option = {
+		name = mem_sleepers.101.a.xenophobe
+		trigger = {
+			has_ethic = ethic_fanatic_xenophobe
+		}
+		custom_tooltip = mem_sleepers.101.a.tooltip
+		hidden_effect = {
+			random_system_within_border = {
+				limit = {
+					any_planet = {
+						has_planet_flag = mem_sleepers_planet
+					}
+				}
+				random_planet = {
+					limit = {
+						has_planet_flag = mem_sleepers_planet
+					}
+					every_owned_pop = {
+						limit = {
+							NOT = {
+								has_pop_flag = mem_sleepers_ozari
+							}
+						}
+						kill_pop = yes
+					}
+				}
+			}
+			random_system_within_border = {
+				limit = {
+					any_planet = {
+						has_planet_flag = mem_sleepers_planet
+					}
+				}
+				random_planet = {
+					limit = {
+						has_planet_flag = mem_sleepers_planet
+					}
+					observation_outpost = {
+						dismantle = yes
+					}
+					set_owner = ROOT
+					every_planet_army = {
+						remove_army = yes
+					}
+				}
+			}
+		}
+	}
+	
+	#make them a protectorate
+	option = {
+		name = mem_sleepers.101.b
+		trigger = {
+			NOR = {
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_xenophile
+			}
+		}
+		custom_tooltip = mem_sleepers.101.b.tooltip
+		hidden_effect = {
+			random_system_within_border = {
+				limit = {
+					any_planet = {
+						has_planet_flag = mem_sleepers_planet
+					}
+				}
+				random_planet = {
+					limit = {
+						has_planet_flag = mem_sleepers_planet
+					}
+					every_owned_pop = {
+						limit = {
+							NOT = {
+								has_pop_flag = mem_sleepers_ozari
+							}
+						}
+						kill_pop = yes
+					}
+				}
+			}
+			random_system_within_border = {
+				limit = {
+					any_planet = {
+						has_planet_flag = mem_sleepers_planet
+					}
+				}
+				random_planet = {
+					limit = {
+						has_planet_flag = mem_sleepers_planet
+					}
+					observation_outpost = {
+						dismantle = yes
+					}
+					owner = {
+						switch = {
+							trigger = has_country_flag
+							bronze_age = { remove_country_flag = bronze_age }
+							iron_age = { remove_country_flag = iron_age }
+							late_medieval_age = { remove_country_flag = late_medieval_age }
+							renaissance_age = { remove_country_flag = renaissance_age }
+						}
+						set_country_flag = early_space_age
+						country_event = { id = mem_sleepers.102 }
+						set_subject_of = {
+							who = root
+							subject_type = protectorate
+						}					
+					}
+				}
+			}
+		}
+	}
+	
+	#make them a free empire
+	option = {
+		name = mem_sleepers.101.c
+		trigger = {
+			NOT = {
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
+		custom_tooltip = mem_sleepers.51.c.tooltip
+		hidden_effect = {
+			random_system_within_border = {
+				limit = {
+					any_planet = {
+						has_planet_flag = mem_sleepers_planet
+					}
+				}
+				random_planet = {
+					limit = {
+						has_planet_flag = mem_sleepers_planet
+					}
+					every_owned_pop = {
+						limit = {
+							NOT = {
+								has_pop_flag = mem_sleepers_ozari
+							}
+						}
+						kill_pop = yes
+					}
+				}
+			}
+			random_system_within_border = {
+				limit = {
+					any_planet = {
+						has_planet_flag = mem_sleepers_planet
+					}
+				}
+				random_planet = {
+					limit = {
+						has_planet_flag = mem_sleepers_planet
+					}
+					observation_outpost = {
+						dismantle = yes
+					}
+					owner = {
+						switch = {
+							trigger = has_country_flag
+							bronze_age = { remove_country_flag = bronze_age }
+							iron_age = { remove_country_flag = iron_age }
+							late_medieval_age = { remove_country_flag = late_medieval_age }
+							renaissance_age = { remove_country_flag = renaissance_age }
+						}
+						set_country_flag = early_space_age
+						country_event = { id = mem_sleepers.102 }				
+					}
+				}
+			}
+		}
+	}
+	
+	#make them a free empire
+	option = {
+		name = mem_sleepers.51.d
+		trigger = {
+			has_ethic = ethic_fanatic_xenophobe
+		}
+		custom_tooltip = mem_sleepers.51.c.tooltip
+		hidden_effect = {
+			random_system_within_border = {
+				limit = {
+					any_planet = {
+						has_planet_flag = mem_sleepers_planet
+					}
+				}
+				random_planet = {
+					limit = {
+						has_planet_flag = mem_sleepers_planet
+					}
+					every_owned_pop = {
+						limit = {
+							NOT = {
+								has_pop_flag = mem_sleepers_ozari
+							}
+						}
+						kill_pop = yes
+					}
+				}
+			}
+			random_system_within_border = {
+				limit = {
+					any_planet = {
+						has_planet_flag = mem_sleepers_planet
+					}
+				}
+				random_planet = {
+					limit = {
+						has_planet_flag = mem_sleepers_planet
+					}
+					observation_outpost = {
+						dismantle = yes
+					}
+					owner = {
+						switch = {
+							trigger = has_country_flag
+							bronze_age = { remove_country_flag = bronze_age }
+							iron_age = { remove_country_flag = iron_age }
+							late_medieval_age = { remove_country_flag = late_medieval_age }
+							renaissance_age = { remove_country_flag = renaissance_age }
+						}
+						set_country_flag = early_space_age
+						country_event = { id = mem_sleepers.102 }				
+					}
+				}
+			}
+		}
+	}
+}
+
+#Sleepers Entering Space Age (HIDDEN)
+country_event = {
+	id = mem_sleepers.102
+	hide_window = yes
+	
+	trigger = {
+		is_country_type = primitive
+		has_country_flag = early_space_age
+	}
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		remove_country_flag = early_space_age
+		set_country_type = default
+		change_dominant_species = event_target:mem_sleepers_species
+		change_country_flag = {
+			icon = {
+				category = "spherical"
+				file = "flag_spherical_1.dds"
+			}
+			background= {
+				category = "backgrounds"
+				file = "new_dawn.dds"
+			}
+			colors={
+				"red"
+				"black"
+				"null"
+				"null"
+			}
+		}
+		if = {
+			limit = { is_species_class = MAM }
+			set_graphical_culture = mammalian_01
+		}
+		if = {
+			limit = { is_species_class = HUM }
+			set_graphical_culture = mammalian_01
+		}
+		if = {
+			limit = { is_species_class = PLANT }
+			set_graphical_culture = plantoid_01
+		}
+		if = {
+			limit = { is_species_class = REP }
+			set_graphical_culture = reptilian_01
+		}
+		if = {
+			limit = { is_species_class = AVI }
+			set_graphical_culture = avian_01
+		}
+		if = {
+			limit = { is_species_class = ART }
+			set_graphical_culture = arthropoid_01
+		}
+		if = {
+			limit = { is_species_class = MOL }
+			set_graphical_culture = molluscoid_01
+		}
+		if = {
+			limit = { is_species_class = FUN }
+			set_graphical_culture = fungoid_01
+		}
+		#making sure the country has the correct ethics
+		IF = {
+			limit = {
+				has_ethic = ethic_fanatic_authoritarian
+			}
+			country_remove_ethic = ethic_fanatic_authoritarian
+		}
+		IF = {
+			limit = {
+				NOT = {
+					has_ethic = ethic_authoritarian
+				}
+			}
+			country_add_ethic = ethic_authoritarian 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_fanatic_egalitarian
+			}
+			country_remove_ethic = ethic_fanatic_egalitarian 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_egalitarian
+			}
+			country_remove_ethic = ethic_egalitarian 
+		}
+		IF = {
+			limit = {
+				NOT = {
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+			country_add_ethic = ethic_fanatic_xenophobe 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_xenophobe
+			}
+			country_remove_ethic = ethic_xenophobe 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_fanatic_xenophile
+			}
+			country_remove_ethic = ethic_fanatic_xenophile 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_xenophile
+			}
+			country_remove_ethic = ethic_xenophile 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_fanatic_militarist
+			}
+			country_remove_ethic = ethic_fanatic_militarist 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_militarist
+			}
+			country_remove_ethic = ethic_militarist 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_fanatic_pacifist
+			}
+			country_remove_ethic = ethic_fanatic_pacifist 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_pacifist
+			}
+			country_remove_ethic = ethic_pacifist 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_fanatic_spiritualist
+			}
+			country_remove_ethic = ethic_fanatic_spiritualist 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_spiritualist
+			}
+			country_remove_ethic = ethic_spiritualist 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_materialist
+			}
+			country_remove_ethic = ethic_materialist 
+		}
+		IF = {
+			limit = {
+				has_ethic = ethic_fanatic_materialist
+			}
+			country_remove_ethic = ethic_fanatic_materialist 
+		}
+		change_government = {
+			authority = "auth_imperial"
+			civics = {
+				civic = civic_functional_architecture
+				civic = civic_police_state
+			}
+		}
+		set_name = "Ozari Dominion"
+		add_minerals = 2000 # enough for a spaceport and then some
+		add_energy = 500
+		create_leader = {
+			type = ruler
+			species = owner_main_species
+			name = random
+			skill = 1
+			traits = {
+				add_trait = trait_ruler_warlike
+				add_trait = trait_ruler_industrialist
+			}
+		}
+		assign_leader = last_created_leader
+		capital_scope = {
+			while = {
+				limit = { num_pops < 4 }
+				random_tile = {
+					limit = {
+						has_grown_pop = no
+					}
+					create_pop = {
+						species = owner
+					}
+				}
+			}
+			every_tile = {
+				limit = {
+					has_blocker = yes
+					NOR = {
+						has_blocker = tb_decrepit_dwellings
+						has_blocker = tb_failing_infrastructure	
+					}
+				}
+				remove_blocker = yes
+			}		
+			random_tile = {
+				limit = { 
+					has_grown_pop = yes 
+					OR = { 
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				set_building = "building_capital_2"	
+				add_resource = {
+					resource = energy
+					amount = 1
+					replace = yes
+				}			
+			}
+			random_tile = {
+				limit = { 
+					OR = { 
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				set_building = "building_mining_network_1"	
+				add_resource = {
+					resource = minerals
+					amount = 1
+					replace = yes
+				}				
+			}
+			random_tile = {
+				limit = {  
+					OR = { 
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				set_building = "building_mining_network_1"	
+				add_resource = {
+					resource = minerals
+					amount = 1
+					replace = yes
+				}				
+			}			
+			random_tile = {
+				limit = {
+					OR = { 
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				set_building = "building_hydroponics_farm_1"
+				add_resource = {
+					resource = food
+					amount = 1
+					replace = yes
+				}				
+			}
+			random_tile = {
+				limit = { 
+					OR = { 
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				set_building = "building_hydroponics_farm_1"
+				add_resource = {
+					resource = food
+					amount = 1
+					replace = yes
+				}				
+			}			
+			random_tile = {
+				limit = { 				
+					OR = { 
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				set_building = "building_power_plant_1"	
+				add_resource = {
+					resource = energy
+					amount = 1
+					replace = yes
+				}					
+			}
+			random_tile = {
+				limit = { 				
+					OR = { 
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				set_building = "building_power_plant_1"	
+				add_resource = {
+					resource = energy
+					amount = 1
+					replace = yes
+				}					
+			}
+			random_tile = {
+				limit = { 				
+					OR = { 
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				set_building = "building_power_plant_1"	
+				add_resource = {
+					resource = energy
+					amount = 1
+					replace = yes
+				}					
+			}			
+			every_planet_army = {
+				remove_army = yes
+			}
+			create_army = {
+				name = random
+				owner = PREV
+				species = owner_main_species
+				type = "defense_army"
+			}
+			create_army = {
+				name = random
+				owner = PREV
+				species = owner_main_species
+				type = "defense_army"
+			}	
+			create_army = {
+				name = random
+				owner = PREV
+				species = owner_main_species
+				type = "defense_army"
+			}	
+			create_army = {
+				name = random
+				owner = PREV
+				species = owner_main_species
+				type = "defense_army"
+			}				
+		}
+	}
+}
+
+#Remnants prelude narration
+country_event = {
+	id = mem_sleepers.145
+	title = mem_sleepers.145.name
+	desc = mem_sleepers.145.desc
+	picture = GFX_evt_mem_horror_corridor
+	show_sound = event_laboratory_sound
+	location = FROM.FROMFROMFROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_sleepers.145.a
+		custom_tooltip = mem_sleepers.145.a.tooltip
+		hidden_effect = {
+			country_event = { id = mem_sleepers.150 }
+		}
+	}
+}
+
+#Remnants
+country_event = {
+	id = mem_sleepers.150
+	title = mem_sleepers.150.name
+	desc = mem_sleepers.150.desc
+	
+	is_triggered_only = yes
+	
+	diplomatic = yes
+	
+	immediate = {
+		FROMFROMFROMFROM = {
+			create_species = {
+				name = "Ozari"
+				class = random
+				portrait = random
+				homeworld = THIS
+				traits = {
+					trait = trait_natural_sociologists
+					trait = trait_venerable
+					trait = trait_sedentary
+				}
+			}
+			create_country = {
+				name = "Ozari Remnants"
+				species = last_created
+				type = adversary
+				ethos = {
+					ethic = ethic_xenophile
+					ethic = ethic_pacifist
+					ethic = ethic_materialist
+				}
+				auto_delete = no
+				flag = {
+					icon = {
+						category = "spherical"
+						file = "flag_spherical_1.dds"
+					}
+					background= {
+						category = "backgrounds"
+						file = "new_dawn.dds"
+					}
+					colors={
+						"green"
+						"black"
+						"null"
+						"null"
+					}
+				}
+			}
+			last_created_country = {
+				set_relation_flag = {
+					who = mem_sleepers_station_owner
+					flag = mem_sleepers
+				}
+				set_country_flag = mem_sleepers_country
+				establish_communications_no_message = event_target:mem_sleepers_station_owner
+				save_event_target_as = mem_sleepers_country
+				owner_species = { save_event_target_as = mem_sleepers_species }
+			}
+		}
+	}
+	
+	picture_event_data = {
+		portrait = event_target:mem_sleepers_country
+		room = mem_corridor_room
+	}
+
+	option = {
+		name = mem_sleepers.150.a
+		custom_tooltip = mem_sleepers.150.a.tooltip
+		response_text = mem_sleepers.150.a.response
+		add_modifier = {
+			modifier = mem_sleepers_research_boost
+			days = -1
+		}
+		hidden_effect = {
+			country_event = { id = mem_sleepers.151 days = 14400 random = 3600 } # should be days = 14400 random = 3600
+		}
+	}
+	
+	option = {
+		name = mem_sleepers.150.b
+		response_text = mem_sleepers.150.b.response
+		add_influence = 75
+		hidden_effect = {
+			country_event = { id = mem_sleepers.152 days = 1800 random = 200 } # should be days = 1800 random = 200
+		}
+	}
+	
+	option = {
+		name = mem_sleepers.150.c
+		trigger = {
+			has_ethic = ethic_fanatic_xenophobe
+		}
+		response_text = mem_sleepers.150.c.response
+		add_influence = 150
+	}
+}
+
+#Last Ozari dies
+country_event = {
+	id = mem_sleepers.151
+	title = mem_sleepers.151.name
+	desc = mem_sleepers.151.desc
+	picture = GFX_evt_genetic_modification
+	show_sound = event_default
+	
+	is_triggered_only = yes 
+	
+	option = {
+		name = mem_sleepers.151.a
+		trigger = {
+			NOT = {
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
+		remove_modifier = mem_sleepers_research_boost
+	}
+	
+	option = {
+		name = mem_sleepers.151.b
+		trigger = {
+			has_ethic = ethic_fanatic_xenophobe
+		}
+		remove_modifier = mem_sleepers_research_boost
+	}
+}
+
+#Primitive civilization evolves with help of Ozari
+country_event = {
+	id = mem_sleepers.152
+	title = mem_sleepers.152.name
+	desc = mem_sleepers.152.desc
+	picture = GFX_evt_medieval_alien_civilization
+	show_sound = event_primitive_civilization
+	location = FROMFROMFROMFROMFROM
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		any_system_within_border = {
+			any_planet = {
+				has_planet_flag = mem_sleepers_planet
+				has_observation_outpost = yes
+				owner = {
+					is_country_type = primitive
+					OR = {
+						has_country_flag = bronze_age
+						has_country_flag = iron_age
+						has_country_flag = late_medieval_age
+						has_country_flag = renaissance_age
+					}
+				}
+			}
+		}
+	}
+	
+	immediate = {
+		random_planet = {
+			limit = {
+				has_planet_flag = mem_sleepers_planet
+			}
+			owner = {
+				THIS = {
+					save_event_target_as = mem_sleepers_country
+				}
+				IF = {
+					limit = {
+						has_country_flag = bronze_age
+					}
+					remove_country_flag = bronze_age
+				}
+				IF = {
+					limit = {
+						has_country_flag = iron_age
+					}
+					remove_country_flag = iron_age
+				}
+				IF = {
+					limit = {
+						has_country_flag = late_medieval_age
+					}
+					remove_country_flag = late_medieval_age
+				}
+				IF = {
+					limit = {
+						has_country_flag = renaissance_age
+					}
+					remove_country_flag = renaissance_age
+				}	
+				set_country_flag = steam_age
+				set_primitive_age = steam_age
+				home_planet = {
+					every_planet_army = { remove_army = yes }
+					while = {
+						count = 3
+						create_army = {
+							name = "Industrial Army"
+							owner = event_target:mem_sleepers_country
+							species = event_target:mem_sleepers_country
+							type = "industrial_army"
+						}
+					}	
+					random_tile = {
+						limit = { 
+							has_blocker = no 
+							has_building = no 
+							has_grown_pop = no
+						}
+						set_building = "building_primitive_factory"
+						create_pop = {
+							species = owner
+							ethos = owner
+						}			
+						add_resource = {
+							resource = minerals
+							amount = 1
+							replace = yes
+						}
+					}			
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_sleepers.152.a
+	}
+}
+
+#The Last prelude narration
+country_event = {
+	id = mem_sleepers.195
+	title = mem_sleepers.195.name
+	desc = mem_sleepers.195.desc
+	picture = GFX_evt_mem_horror_corridor
+	show_sound = event_laboratory_sound
+	location = FROM.FROMFROMFROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_sleepers.195.a
+		custom_tooltip = mem_sleepers.195.a.tooltip
+		hidden_effect = {
+			country_event = { id = mem_sleepers.200 }
+		}
+	}
+}
+
+#The Last
+country_event = {
+	id = mem_sleepers.200
+	title = mem_sleepers.200.name
+	desc = mem_sleepers.200.desc
+	
+	is_triggered_only = yes
+	
+	diplomatic = yes
+	
+	immediate = {
+		FROMFROMFROMFROM = {
+			create_species = {
+				name = "Ozari"
+				class = random
+				portrait = random
+				homeworld = THIS
+				traits = {
+					trait = trait_natural_sociologists
+					trait = trait_venerable
+					trait = trait_sedentary
+				}
+			}
+			create_country = {
+				name = "Ozari Remnant"
+				species = last_created
+				type = adversary
+				ethos = {
+					ethic = ethic_xenophile
+					ethic = ethic_pacifist
+					ethic = ethic_materialist
+				}
+				auto_delete = no
+				flag = {
+					icon = {
+						category = "spherical"
+						file = "flag_spherical_1.dds"
+					}
+					background= {
+						category = "backgrounds"
+						file = "new_dawn.dds"
+					}
+					colors={
+						"green"
+						"black"
+						"null"
+						"null"
+					}
+				}
+			}
+			last_created_country = {
+				set_relation_flag = {
+					who = mem_sleepers_station_owner
+					flag = mem_sleepers
+				}
+				set_country_flag = mem_sleepers_country
+				establish_communications_no_message = event_target:mem_sleepers_station_owner
+				save_event_target_as = mem_sleepers_country
+				owner_species = { save_event_target_as = mem_sleepers_species }
+			}
+		}
+	}
+	
+	picture_event_data = {
+		portrait = event_target:mem_sleepers_country
+		room = mem_corridor_room
+	}
+
+	option = {
+		name = mem_sleepers.200.a
+		custom_tooltip = mem_sleepers.200.a.tooltip
+		response_text = mem_sleepers.200.a.response
+		create_leader = {
+			type = scientist
+			species = event_target:mem_sleepers_species
+			name = random
+			skill = 4000
+			traits = {
+				add_trait = leader_trait_expertise_biology
+				add_trait = mem_leader_trait_last_ozari
+			}
+		}
+	}
+	
+	option = {
+		name = mem_sleepers.200.b
+		trigger = {
+			NOT = {
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
+		response_text = mem_sleepers.200.b.response
+		add_influence = 75
+	}
+	
+	option = {
+		name = mem_sleepers.200.c
+		trigger = {
+			has_ethic = ethic_fanatic_xenophobe
+		}
+		response_text = mem_sleepers.200.c.response
+		add_influence = 150
+	}
+}
