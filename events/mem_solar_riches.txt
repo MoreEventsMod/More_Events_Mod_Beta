@@ -1,0 +1,162 @@
+
+################################
+# Solar Riches
+# Original idea by: Chkkt
+# Code by: Kingtrin        
+# Writing by: Chkkt     
+################################
+
+namespace = mem_solar_riches
+
+@tier1materialreward = 6
+@tier1materialmin = 100
+@tier1materialmax = 500
+@tier2materialreward = 12
+@tier2materialmin = 150
+@tier2materialmax = 1000
+@tier3materialreward = 18
+@tier3materialmin = 250
+@tier3materialmax = 1500
+@tier4materialreward = 24
+@tier4materialmin = 500
+@tier4materialmax = 2000
+
+@tier1influencereward = 6
+@tier1influencemin = 40
+@tier1influencemax = 100
+@tier2influencereward = 12
+@tier2influencemin = 80
+@tier2influencemax = 175
+@tier3influencereward = 18
+@tier3influencemin = 125
+@tier3influencemax = 250
+@tier4influencereward = 24
+@tier4influencemin = 150
+@tier4influencemax = 300
+
+@tier1researchreward = 6
+@tier1researchmin = 60
+@tier1researchmax = 150
+@tier2researchreward = 12
+@tier2researchmin = 90
+@tier2researchmax = 250
+@tier3researchreward = 18
+@tier3researchmin = 120
+@tier3researchmax = 350
+@tier4researchreward = 24
+@tier4researchmin = 150
+@tier4researchmax = 500
+
+# Success
+ship_event = {
+	id = mem_solar_riches.1
+	title = "mem_solar_riches.1.name"
+	desc = "mem_solar_riches.1.desc"
+	picture = "GFX_evt_star_yellow"
+	show_sound = event_ship_bridge
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		# Set a flag here to ease future expansion of the event
+		OWNER = { 
+			set_country_flag = mem_solar_riches_success
+		}
+	}
+	
+	option = {
+		name = mem_solar_riches.1.a
+		OWNER = {
+			add_energy = 300
+			add_minerals = 50
+		}
+	}
+	
+	# give 20% progress to tech 2 power plants
+	option = {
+		name = mem_solar_riches.1.b
+		trigger = {
+			OWNER = {
+				NOT = { has_technology = tech_power_plant_2 }
+			}
+		}
+		OWNER = {
+			add_research_option = tech_power_plant_2
+			add_tech_progress = {
+				tech = tech_power_plant_2
+				progress = 0.20
+			}
+			if = {
+				limit = { NOT = { has_technology = tech_power_hub_1 } }
+				add_research_option = tech_power_hub_1
+				add_tech_progress = {
+					tech = tech_power_hub_1
+					progress = 0.10
+				}
+				break = yes
+			}		
+		}
+	}
+	
+	# give 20% progress to tech 3 power plants if already have tech 2
+	option = {
+		name = mem_solar_riches.1.b
+		trigger = {
+			OWNER = {
+				NOT = { has_technology = tech_power_plant_3 }
+				has_technology = tech_power_plant_2
+			}
+		}
+		OWNER = {
+			add_research_option = tech_power_plant_3
+			add_tech_progress = {
+				tech = tech_power_plant_3
+				progress = 0.20
+			}
+			if = {
+				limit = { NOT = { has_technology = tech_power_hub_1 } }
+				add_research_option = tech_power_hub_1
+				add_tech_progress = {
+					tech = tech_power_hub_1
+					progress = 0.10
+				}
+				break = yes
+			}		
+		}
+	}
+	
+	# if both already researched, give research points instead
+	option = {
+		name = mem_solar_riches.1.b
+		trigger = {
+			OWNER = {
+				has_technology = tech_power_plant_3
+			}
+		}
+		OWNER = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+	}
+}
+
+# Failure
+ship_event = {
+	id = mem_solar_riches.2
+	title = "mem_solar_riches.2.name"
+	desc = "mem_solar_riches.2.desc"
+	picture = "GFX_evt_star_yellow"
+	show_sound = event_ship_bridge
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = UNFORTUNATE
+	}
+}
