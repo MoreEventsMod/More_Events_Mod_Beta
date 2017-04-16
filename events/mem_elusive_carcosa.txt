@@ -19,22 +19,52 @@ country_event = {
 		num_owned_planets > 4
 		FROM = { 
 			leader_class = scientist 
-			has_trait = leader_trait_maniacal
+			OR = {
+				has_trait = leader_trait_maniacal
+				has_trait = leader_trait_spark_of_genius
+				has_trait = leader_trait_expertise_biology
+				has_trait = leader_trait_expertise_field_manipulation
+				# if you have the last Ozari from the Sleepers Observation Post Event
+				has_trait = mem_leader_trait_last_ozari
+			}
 		}
 	}
 	
 	immediate = {
-		random_list = {
-			90 = {}
-			10 = { 
-				random_owned_planet = {
-					limit = {
-						is_colony = yes
-						is_capital = no
-					}
-					save_global_event_target_as = mem_carcosa_colony
+		IF = { # if you have the last Ozari from the Sleepers Observation Post Event
+			limit = {
+				FROM = { 
+					leader_class = scientist
+					has_trait = mem_leader_trait_last_ozari
 				}
-				country_event = { id = mem_elusive_carcosa.11 } 
+			}
+			random_list = {
+				25 = {}
+				75 = { 
+					random_owned_planet = {
+						limit = {
+							is_colony = yes
+							is_capital = no
+						}
+						save_global_event_target_as = mem_carcosa_colony
+					}
+					country_event = { id = mem_elusive_carcosa.11 } 
+				}
+			}
+			ELSE = {
+				random_list = {
+					90 = {}
+					10 = { 
+						random_owned_planet = {
+							limit = {
+								is_colony = yes
+								is_capital = no
+							}
+							save_global_event_target_as = mem_carcosa_colony
+						}
+						country_event = { id = mem_elusive_carcosa.11 } 
+					}
+				}
 			}
 		}
 	}
@@ -48,7 +78,13 @@ country_event = {
 	picture = GFX_evt_animal_wildlife
 	
 	is_triggered_only = yes
-	fire_only_once = yes	#since this sets global flags and we don't need more than 1/game
+#	fire_only_once = yes	#since this sets global flags and we don't need more than 1/game
+	
+	trigger = {
+		NOT = {
+			has_country_flag = mem_elusive_carcosa
+		}
+	}
 	
 	immediate = {
 		set_country_flag = mem_elusive_carcosa
