@@ -247,8 +247,8 @@ planet_event = {
 		}	
 		hidden_effect = { # Set up next event
 			random_list = {
-				1 = { planet_event = { id = mem_ancient_robots.208 days = 30 } }
-				1 = { planet_event = { id = mem_ancient_robots.209 days = 30 } }
+				60 = { planet_event = { id = mem_ancient_robots.208 days = 30 } }
+				40 = { planet_event = { id = mem_ancient_robots.209 days = 30 } }
 			}
 		}
 	}
@@ -351,7 +351,6 @@ planet_event = {
 	location = ROOT
 	
 	is_triggered_only = yes
-	fire_only_once = yes
 	
 	trigger = {
 		NOT = {
@@ -360,7 +359,7 @@ planet_event = {
 	}
 	
 	immediate = { # This creates the EVIL ROBOT ARMIES:
-		planet_event = { id = mem_ancient_robots.221 }
+		planet_event = { id = mem_ancient_robots.221 days = 1 }
 	}
 	
 	option = {
@@ -396,7 +395,7 @@ planet_event = {
 			remove_building = yes
 			set_blocker = mem_tb_robot_factory
 		}
-		planet_event = { id = mem_ancient_robots.221 }
+		planet_event = { id = mem_ancient_robots.221 days = 1 }
 		remove_planet_flag = mem_ancient_robots_AI_friendly
 	}
 	
@@ -425,6 +424,9 @@ country_event = {
 		FROMFROM = {
 			has_planet_flag = mem_super_robot_attack
 			is_occupied_flag = no
+			controller = {
+				is_same_value = ROOT
+			}
 		}
 		NOT = {
 			has_global_flag = mem_ancient_robot_cancel
@@ -432,9 +434,6 @@ country_event = {
 	}
 	
 	immediate = {
-		every_owned_pop = {
-            purge = no
-        }
 		FROMFROM = {
 			remove_planet_flag = mem_super_robot_attack
 		}
@@ -464,9 +463,15 @@ country_event = {
 	is_triggered_only = yes
 	
 	trigger = {
+		is_ai = no
 		has_country_flag = mem_ancient_robot_quest_owner
 		FROMFROM = {
 			has_planet_flag = mem_super_robot_attack
+			NOT = {
+				controller = {
+					is_same_value = root
+				}
+			}
 		}
 		NOT = {
 			has_global_flag = mem_ancient_robot_cancel
@@ -476,21 +481,30 @@ country_event = {
 	immediate = {
 		FROMFROM = {
 			IF = {
+				limit = { has_spaceport = yes }
+				destroy_fleet = spaceport
+			}
+			IF = {
+				limit = {
+					any_pop = {
+						is_growing = yes
+					}
+				}
+				random_pop = {
+					limit = { 
+						is_growing = yes
+					}
+					kill_pop = yes
+				}
+			}
+			IF = {
 				limit = { 
 					count_pops = {
 						limit = {
-							is_being_purged = no
 							is_growing = no
 						}
 						count > 1
 					} 
-				}
-				random_pop = {
-					limit = { 
-						is_being_purged = no
-						is_growing = yes
-					}
-					purge = yes
 				}
 				planet_event = { id = mem_ancient_robots.226 days = 50 }
 				else = {
@@ -607,8 +621,12 @@ country_event = {
 	is_triggered_only = yes
 	
 	trigger = {
+		is_ai = no
 		FROMFROM = {
 			has_planet_flag = mem_super_robot_attack_2
+			controller = {
+				is_same_value = ROOT
+			}
 		}
 		NOT = {
 			has_global_flag = mem_ancient_robot_cancel
@@ -617,6 +635,7 @@ country_event = {
 	
 	immediate = {
 		FROMFROM = {
+			set_planet_flag = mem_ancient_robot_building
 			set_global_flag = mem_ancient_robot_finish
 			remove_planet_flag = mem_super_robot_attack_2
 			remove_modifier = mem_under_siege
@@ -655,11 +674,17 @@ country_event = {
 	is_triggered_only = yes
 	
 	trigger = {
+		is_ai = no
 		NOT = {
 			has_global_flag = mem_ancient_robot_cancel
 		}
 		FROMFROM = {
 			has_planet_flag = mem_super_robot_attack_2
+			NOT = {
+				controller = {
+					is_same_value = root
+				}
+			}
 		}
 	}
 	
@@ -809,6 +834,7 @@ planet_event = {
 	is_triggered_only = yes
 	
 	trigger = {
+		has_owner = yes
 		owner = {
 			has_country_flag = mem_ancient_robot_quest_owner
 		}
@@ -826,7 +852,7 @@ planet_event = {
 			remove_building = yes
 			set_building = mem_ancient_robot_building_2
 		}
-		planet_event = { id = mem_ancient_robots.210 }
+		planet_event = { id = mem_ancient_robots.210 days = 1 }
 	}	
 }
 
@@ -848,13 +874,12 @@ planet_event = {
 			limit = {
 				count_pops = {
 					limit = {
-						is_being_purged = no
 						is_growing = no
 					}
 					count > 1
 				}
 			}
-			planet_event = { id = mem_ancient_robots.210 }
+			planet_event = { id = mem_ancient_robots.210 days = 1 }
 			else = {
 				planet_event = { id = mem_ancient_robots.223 days = 180 random = 30 }
 			}
@@ -908,22 +933,22 @@ planet_event = {
     }
     immediate = {
         IF = {
-            limit = { 
-                count_pops = {
+			limit = { 
+				count_pops = {
 					limit = {
-						is_being_purged = no
 						is_growing = no
 					}
 					count > 1
-				}
-            }
-            random_pop = {
-                limit = { is_being_purged = no }
-                purge = yes
-            }
+				} 
+			}
+			random_pop = {
+				limit = { is_growing = no }
+				kill_pop = yes
+			}
             planet_event = {
-                id = mem_ancient_robots.226 #Re fire this event in a month
-                days = 60
+                id = mem_ancient_robots.226 #Refire this event after a few months month
+                days = 120
+				random = 30
             }
 			else = {
 				planet_event = { id = mem_ancient_robots.225 } # The last pop has fortified their position.
@@ -975,11 +1000,6 @@ event = {
 				remove_blocker = yes
 			}
 			remove_modifier = mem_under_siege
-			owner = {
-				every_owned_pop = {
-					purge = no
-				}
-			}
 		}
 		random_country = {
 			limit = {
