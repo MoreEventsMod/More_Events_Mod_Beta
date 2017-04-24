@@ -1,0 +1,432 @@
+namespace = mem_artifact
+
+country_event = {
+	id = mem_artifact.1
+	
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		FROMFROM = {
+			is_ship_size = mem_artifact_ship
+		}
+	}
+	
+	immediate = {
+		FROMFROMFROM = {
+			if = {
+				limit = {
+					exists = this
+				}
+				save_event_target_as = mem_artifact_bomb_loc
+				else = {
+					FROMFROM = {
+						save_event_target_as = mem_artifact_bomb_loc
+					}
+				}
+			}
+		}
+		FROMFROM = {
+			save_event_target_as = mem_artifact_ship_loc
+			owner = {
+				save_event_target_as = mem_artifact_ship_owner
+			}
+			random_list = {
+				1 = {
+				}
+				33 = {
+					add_modifier = {
+						modifier = "mem_artifact_ship_power_1"
+						days = 30
+					}
+				}
+				33 = {
+					add_modifier = {
+						modifier = "mem_artifact_ship_power_2"
+						days = 30
+					}
+				}
+				33 = {
+					add_modifier = {
+						modifier = "mem_artifact_ship_power_3"
+						days = 30
+					}
+				}
+			}
+			if = {
+				limit = {
+					has_modifier = mem_artifact_ship_power_1
+				}
+				random_list = {
+					50 = {
+					}
+					50 = {
+						remove_modifier = "mem_artifact_ship_power_1"
+						create_fleet = {
+							name = "Psionic Projection"
+							settings = {
+								spawn_debris = no 
+							}
+							effect = {
+								set_owner = event_target:mem_artifact_ship_owner
+								create_ship = {
+									name = "Zun'Yata"
+									design = "Av'Rta I"
+									prefix = no
+								}
+								set_location = event_target:mem_artifact_ship_loc
+								set_fleet_stance = aggressive
+								set_aggro_range = 500
+								set_aggro_range_measure_from = self
+								
+								fleet_event = { id = mem_artifact.2 days = 30 }
+							}
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					has_modifier = mem_artifact_ship_power_2
+				}
+				random_list = {
+					50 = {
+					}
+					50 = {
+						remove_modifier = "mem_artifact_ship_power_2"
+						create_fleet = {
+							name = "Psionic Projection"
+							settings = {
+								spawn_debris = no 
+							}
+							effect = {
+								set_owner = event_target:mem_artifact_ship_owner
+								create_ship = {
+									name = "Zun'Yaka"
+									design = "Av'Rta II"
+									prefix = no
+								}
+								set_location = event_target:mem_artifact_ship_loc
+								
+								set_fleet_stance = aggressive
+								set_aggro_range = 500
+								set_aggro_range_measure_from = self
+								
+								fleet_event = { id = mem_artifact.2 days = 30 }
+							}
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					has_modifier = mem_artifact_ship_power_3
+				}
+				random_list = {
+					50 = {
+					}
+					50 = {
+						remove_modifier = "mem_artifact_ship_power_3"
+						create_fleet = {
+							name = "Psionic Projection"
+							settings = {
+								spawn_debris = no 
+								is_boss = yes
+							}
+							effect = {
+								set_owner = event_target:mem_artifact_ship_owner
+								create_ship = {
+									name = "Val'Ukatva"
+									design = "Nir'Rti I"
+									prefix = no
+								}
+								set_location = event_target:mem_artifact_bomb_loc
+
+								fleet_event = { id = mem_artifact.2 days = 1 }
+								
+								set_event_locked = yes
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+fleet_event = {
+	id = mem_artifact.2
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		destroy_fleet = THIS
+	}
+}
+
+country_event = {
+	id = mem_artifact.3
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		FROMFROMFROM = {
+			is_ship_size = mem_artifact_bomb_2
+		}
+	}
+	
+	immediate = {
+		FROMFROMFROM = {
+			OWNER = {
+				save_event_target_as = mem_artifact_bomb_2_owner
+			}
+		}
+		FROMFROM = {
+			solar_system = {
+				random_system_planet = {
+					limit = {
+						is_star = yes 
+					}
+					save_event_target_as = mem_artifact_bomb_2_loc
+					mem_effect_explosion_AOE = yes
+				}
+				every_system_planet = {
+					if = {
+						limit = {
+							exists = this
+							is_star = no 
+						}
+						if = {
+							limit = {
+								OR = {
+									habitable_planet = yes
+									habitable_structure = yes
+								}
+								NOT = {
+									has_modifier = mem_artifact_bomb_2_planet_effect
+								}
+							}
+							add_modifier = {
+								modifier = "mem_artifact_bomb_2_planet_effect"
+								days = 3600
+							}
+						}
+						every_tile = {
+							if = {
+								limit = {
+									OR = {
+										has_grown_pop = yes
+										has_growing_pop = yes
+									}
+								}
+								kill_pop = yes
+							}
+						}
+					}
+				}
+				set_timed_star_flag = { flag = mem_artifact_bomb_2_debuff days = 1800 }
+			}
+		}
+		create_fleet = {
+			name = "Psionic Projection"
+			settings = {
+				spawn_debris = no 
+				is_boss = yes
+			}
+			effect = {
+				set_owner = event_target:mem_artifact_bomb_2_owner
+				create_ship = {
+					name = "Ab'Hu"
+					design = "Nir'Rti II"
+					prefix = no
+				}
+				set_location = event_target:mem_artifact_bomb_2_loc
+
+				fleet_event = { id = mem_artifact.2 days = 1 }
+				
+				set_event_locked = yes
+			}
+		}
+		every_country = {
+			limit = {
+				has_communications = event_target:mem_artifact_bomb_2_owner
+				NOT = { is_country = event_target:mem_artifact_bomb_2_owner }
+				NOT = { has_ai_personality_behaviour = purger }
+				OR = {
+					is_country_type = default
+					has_ai_personality = awakened_fallen_empire_xenophile				
+				}	
+			}
+			add_opinion_modifier = { who = event_target:mem_artifact_bomb_2_owner modifier = opinion_genocidal }
+		}
+		add_threat = {
+			who = event_target:mem_artifact_bomb_2_owner
+			amount = 1000
+		}
+	}
+}
+
+country_event = {
+	id = mem_artifact.4
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		FROMFROMFROM = {
+			is_ship_size = mem_artifact_bomb_1
+		}
+	}
+	
+	immediate = {
+		FROMFROMFROM = {
+			OWNER = {
+				save_event_target_as = mem_artifact_bomb_1_owner
+			}
+		}
+		FROMFROM = {
+			solar_system = {
+				random_system_planet = {
+					limit = {
+						is_star = yes 
+					}
+					save_event_target_as = mem_artifact_bomb_1_loc
+					mem_effect_explosion_AOE = yes
+					last_created_ambient_object = {
+						set_ambient_object_flag = mem_artifact_bomb_1_explosion_ambient
+					}
+					change_pc = pc_black_hole
+				}
+				every_system_planet = {
+					if = {
+						limit = {
+							exists = this
+							is_star = no
+						}
+						every_tile = {
+							if = {
+								limit = {
+									OR = {
+										has_grown_pop = yes
+										has_growing_pop = yes
+									}
+								}
+								kill_pop = yes
+							}
+						}
+						remove_planet = yes 
+					}
+				}
+				every_system_ambient_object = {
+					if = {
+						limit = {
+							exists = this
+							NOT = {
+								has_ambient_object_flag = mem_artifact_bomb_1_explosion_ambient
+							}
+						}
+						destroy_ambient_object = this
+					}
+				}
+				set_timed_star_flag = { flag = mem_artifact_bomb_1_debuff days = 1800 }
+			}
+		}
+		create_fleet = {
+			name = "Psionic Projection"
+			settings = {
+				spawn_debris = no 
+				is_boss = yes
+			}
+			effect = {
+				set_owner = event_target:mem_artifact_bomb_1_owner
+				create_ship = {
+					name = "Va'Zin"
+					design = "Nir'Rti III"
+					prefix = no
+				}
+				set_location = event_target:mem_artifact_bomb_1_loc
+
+				fleet_event = { id = mem_artifact.2 days = 1 }
+				
+				set_event_locked = yes
+			}
+		}
+		every_country = {
+			limit = {
+				has_communications = event_target:mem_artifact_bomb_1_owner
+				NOT = { is_country = event_target:mem_artifact_bomb_1_owner }
+				NOT = { has_ai_personality_behaviour = purger }
+				OR = {
+					is_country_type = default
+					has_ai_personality = awakened_fallen_empire_xenophile				
+				}	
+			}
+			add_opinion_modifier = { who = event_target:mem_artifact_bomb_1_owner modifier = opinion_genocidal }
+		}
+		add_threat = {
+			who = event_target:mem_artifact_bomb_1_owner
+			amount = 1000
+		}
+	}
+}
+
+event = {
+	id = mem_artifact.5
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		any_system = {
+			has_star_flag = mem_artifact_bomb_2_debuff
+		}
+	}
+	
+	immediate = {
+		random_system = {
+			limit = {
+				has_star_flag = mem_artifact_bomb_2_debuff
+			}
+			every_fleet_in_system = {
+				if = {
+					limit = {
+						exists = this
+					}
+					add_modifier = {
+						modifier = "mem_artifact_bomb_2_debuff_effect"
+						days = 30
+					}
+				}
+			}
+		}
+	}
+}
+
+event = {
+	id = mem_artifact.6
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		any_system = {
+			has_star_flag = mem_artifact_bomb_1_debuff
+		}
+	}
+	
+	immediate = {
+		random_system = {
+			limit = {
+				has_star_flag = mem_artifact_bomb_1_debuff
+			}
+			every_fleet_in_system = {
+				if = {
+					limit = {
+						exists = this
+					}
+					add_modifier = {
+						modifier = "mem_artifact_bomb_1_debuff_effect"
+						days = 30
+					}
+				}
+			}
+		}
+	}
+}
