@@ -420,6 +420,7 @@ fleet_event = {
 			}
 			set_location = event_target:mem_grave_escape_loc_2
 			fleet_event = { id = mem_gravekeeper.23 }
+			set_fleet_flag = mem_grave_track_toggle
 			set_timed_fleet_flag = {
 				flag = mem_grave_ftl_cooldown
 				days = 3600
@@ -445,7 +446,21 @@ fleet_event = {
 				}
 			}
 			solar_system = {
-					save_event_target_as = mem_grave_roam_loc
+					save_event_target_as = mem_grave_roam_loc	
+			}
+		}
+		every_country = {
+			if = {
+				limit = {
+					is_ai = no
+					NOT = {
+						has_event_chain = mem_grave_tracker_chain
+					}
+				}
+				begin_event_chain = {
+					event_chain = "mem_grave_tracker_chain"
+					target = this
+				}
 			}
 		}
 		fleet_event = { id = mem_gravekeeper.25 days = 1800 }
@@ -488,8 +503,22 @@ fleet_event = {
 								orbit_planet = this
 								effect = {
 									id = mem_grave_roam.3
+									save_event_target_as = mem_grave_temp_loc
 									event_target:mem_grave_roaming = {
 										repair_ship = yes
+									}
+									every_country = {
+										limit = {
+											has_event_chain = mem_grave_tracker_chain
+										}
+										remove_point_of_interest = mem_grave_tracker_poi.1
+										create_point_of_interest = {
+											id = mem_grave_tracker_poi.1
+											name = "mem_grave_tracker_poi"
+											desc = "mem_grave_tracker_poi_desc"
+											event_chain = mem_grave_tracker_chain
+											location = event_target:mem_grave_temp_loc
+										}
 									}
 								}
 							}
@@ -666,6 +695,7 @@ country_event = {
 				}
 				OR = {
 					has_technology = "tech_shields_5"
+					has_technology = "tech_psionic_shield"
 					has_technology = "tech_enigmatic_deflector"
 				}		
 				OR = {
@@ -702,7 +732,7 @@ country_event = {
 					limit = {
 						check_variable = {
 							which = "mem_grave_kill_counter"
-							value = 50
+							value = 100
 						}
 					}
 					from = {
@@ -801,7 +831,7 @@ ship_event = {
 		}
 		FROM = {
 			OWNER = {
-				#is_ai = no 
+				is_ai = no 	
 			}
 		}
 	}
@@ -837,6 +867,13 @@ ship_event = {
 			}
 		}
 		every_country = {
+			if = {
+				limit = {
+					has_event_chain = "mem_grave_tracker_chain" 
+				}
+				remove_point_of_interest = mem_grave_tracker_poi.1
+				end_event_chain = "mem_grave_tracker_chain"
+			}
 			if = {
 				limit = { 
 					has_modifier = mem_grave_weakness
@@ -952,6 +989,13 @@ ship_event = {
 			}
 		}
 		every_country = {
+			if = {
+				limit = {
+					has_event_chain = "mem_grave_tracker_chain" 
+				}
+				remove_point_of_interest = mem_grave_tracker_poi.1
+				end_event_chain = "mem_grave_tracker_chain"
+			}
 			if = {
 				limit = { 
 					has_modifier = mem_grave_weakness
