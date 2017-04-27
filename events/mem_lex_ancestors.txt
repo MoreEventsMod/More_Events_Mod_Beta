@@ -699,13 +699,17 @@ country_event = {
 	trigger = {
 		is_country_type = mem_ancestor_guardian
 		has_country_flag = mem_ancestor_country
-		NOT = {
-			AND = {
-				has_country_flag = mem_ancestor_evolve_1
-				has_country_flag = mem_ancestor_evolve_2
-				has_country_flag = mem_ancestor_evolve_3
-				has_country_flag = mem_ancestor_evolve_4
-			}
+		NAND = {
+			has_country_flag = mem_ancestor_evolve_1
+			has_country_flag = mem_ancestor_evolve_2
+			has_country_flag = mem_ancestor_evolve_3
+			has_country_flag = mem_ancestor_evolve_4
+		}
+		NAND = {
+			has_country_flag = mem_ancestor_evolve_1
+			has_country_flag = mem_ancestor_evolve_2
+			has_country_flag = mem_ancestor_evolve_3
+			has_country_flag = mem_ancestor_evolve_4
 		}
 		any_owned_ship = {
 			OR = {
@@ -1058,13 +1062,11 @@ planet_event = {
 		}
 		if = {
 			limit = {
-				NOT = {
-					OR = {
-						is_planet_class = pc_ringworld_habitable 
-						is_planet_class = pc_mem_ringworld_habitable 
-						has_planet_flag = fallen_empire_world
-						has_modifier = holy_planet
-					}
+				NOR = {
+					is_planet_class = pc_ringworld_habitable 
+					is_planet_class = pc_mem_ringworld_habitable 
+					has_planet_flag = fallen_empire_world
+					has_modifier = holy_planet
 				}
 			}
 			destroy_colony = yes
@@ -1978,15 +1980,13 @@ fleet_event = {
 			exists = owner
 			owner = {
 				is_country_type = mem_ancestor_guardian
-				NOT = {
-					AND = {
-						has_modifier = mem_ancestor_herald_debuff_1
-						has_modifier = mem_ancestor_herald_debuff_2
-						has_modifier = mem_ancestor_herald_debuff_3
-						has_modifier = mem_ancestor_herald_debuff_4
-						has_modifier = mem_ancestor_herald_debuff_5
-						has_modifier = mem_ancestor_herald_debuff_6
-					}
+				NAND = {
+					has_modifier = mem_ancestor_herald_debuff_1
+					has_modifier = mem_ancestor_herald_debuff_2
+					has_modifier = mem_ancestor_herald_debuff_3
+					has_modifier = mem_ancestor_herald_debuff_4
+					has_modifier = mem_ancestor_herald_debuff_5
+					has_modifier = mem_ancestor_herald_debuff_6
 				}
 			}
 			NOT = { 
@@ -3782,14 +3782,9 @@ country_event = {
 			this = {
 				save_event_target_as = mem_ancestor_fallen
 			}
-			random_country = {
+			every_country = {
 				limit = {
-					OR = {
-						has_country_flag = mem_ancestor_seal_destroyer
-						has_country_flag = mem_titan_slayer
-						has_country_flag = mem_grave_slayer
-						has_country_flag = mem_conduit_slayer
-					}
+					has_country_flag = mem_ancestor_seal_destroyer
 				}
 				save_event_target_as = mem_ancestor_sealing_war_target
 			}
@@ -3870,15 +3865,13 @@ country_event = {
 	is_triggered_only = yes
 	
 	trigger = {
-		NOT = {
-			AND = {
-				has_global_flag = mem_ancestor_seal_1_global
-				has_global_flag = mem_ancestor_seal_2_global
-				has_global_flag = mem_ancestor_seal_3_global
-				has_global_flag = mem_ancestor_seal_4_global
-				has_global_flag = mem_ancestor_seal_5_global
-				has_global_flag = mem_ancestor_seal_6_global
-			}
+		NAND = {
+			has_global_flag = mem_ancestor_seal_1_global
+			has_global_flag = mem_ancestor_seal_2_global
+			has_global_flag = mem_ancestor_seal_3_global
+			has_global_flag = mem_ancestor_seal_4_global
+			has_global_flag = mem_ancestor_seal_5_global
+			has_global_flag = mem_ancestor_seal_6_global
 		}
 	}
 
@@ -3963,16 +3956,14 @@ ship_event = {
 	is_triggered_only = yes
 	
 	trigger = {
-		NOT = {
-			OR = {
-				has_global_flag = mem_ancestor_seal_1_global
-				has_global_flag = mem_ancestor_seal_2_global
-				has_global_flag = mem_ancestor_seal_3_global
-				has_global_flag = mem_ancestor_seal_4_global
-				has_global_flag = mem_ancestor_seal_5_global
-				has_global_flag = mem_ancestor_seal_6_global
-				has_global_flag = mem_ancestor_crisis_start
-			}
+		NOR = {
+			has_global_flag = mem_ancestor_seal_1_global
+			has_global_flag = mem_ancestor_seal_2_global
+			has_global_flag = mem_ancestor_seal_3_global
+			has_global_flag = mem_ancestor_seal_4_global
+			has_global_flag = mem_ancestor_seal_5_global
+			has_global_flag = mem_ancestor_seal_6_global
+			has_global_flag = mem_ancestor_crisis_start
 		}
 		owner = {
 			NOT = {
@@ -4017,6 +4008,7 @@ ship_event = {
 	
 	option = {
 		name =  CURIOUS
+		custom_tooltip = mem_ancestor.40.a.tooltip
 	}
 }
 
@@ -4579,23 +4571,25 @@ country_event = {
 			mem_effect_explosion_8 = yes
 		}
 		every_country = {
-			limit = {
-				has_event_chain = "mem_lex_ancestor_chain" 
+			if = {
+				limit = {
+					has_event_chain = "mem_lex_ancestor_chain" 
+				}
+				remove_point_of_interest = mem_ancestor_herald_poi.1
+				add_event_chain_counter = { 
+					event_chain = "mem_lex_ancestor_chain" 
+					counter = "mem_ancestor_herald_counter" 
+					amount = 1 
+				}
 			}
-			remove_point_of_interest = mem_ancestor_herald_poi.1
-			add_event_chain_counter = { 
-				event_chain = "mem_lex_ancestor_chain" 
-				counter = "mem_ancestor_herald_counter" 
-				amount = 1 
-			}
-		}
-		random_country = {
-			limit = { 
-				is_country_type = mem_ancestor_guardian
-			}
-			add_modifier = {
-				modifier = "mem_ancestor_herald_debuff_1"
-				days = -1
+			if = {
+				limit = { 
+					is_country_type = mem_ancestor_guardian
+				}
+				add_modifier = {
+					modifier = "mem_ancestor_herald_debuff_1"
+					days = -1
+				}
 			}
 		}
 	}
@@ -4622,23 +4616,25 @@ country_event = {
 			mem_effect_explosion_8 = yes
 		}
 		every_country = {
-			limit = {
-				has_event_chain = "mem_lex_ancestor_chain" 
+			if = {
+				limit = {
+					has_event_chain = "mem_lex_ancestor_chain" 
+				}
+				remove_point_of_interest = mem_ancestor_herald_poi.2
+				add_event_chain_counter = { 
+					event_chain = "mem_lex_ancestor_chain" 
+					counter = "mem_ancestor_herald_counter" 
+					amount = 1 
+				}
 			}
-			remove_point_of_interest = mem_ancestor_herald_poi.2
-			add_event_chain_counter = { 
-				event_chain = "mem_lex_ancestor_chain" 
-				counter = "mem_ancestor_herald_counter" 
-				amount = 1 
-			}
-		}
-		random_country = {
-			limit = { 
-				is_country_type = mem_ancestor_guardian
-			}
-			add_modifier = {
-				modifier = "mem_ancestor_herald_debuff_2"
-				days = -1
+			if = {
+				limit = { 
+					is_country_type = mem_ancestor_guardian
+				}
+				add_modifier = {
+					modifier = "mem_ancestor_herald_debuff_2"
+					days = -1
+				}
 			}
 		}
 	}
@@ -4665,23 +4661,25 @@ country_event = {
 			mem_effect_explosion_8 = yes
 		}
 		every_country = {
-			limit = {
-				has_event_chain = "mem_lex_ancestor_chain" 
+			if = {
+				limit = {
+					has_event_chain = "mem_lex_ancestor_chain" 
+				}
+				remove_point_of_interest = mem_ancestor_herald_poi.3
+				add_event_chain_counter = { 
+					event_chain = "mem_lex_ancestor_chain" 
+					counter = "mem_ancestor_herald_counter" 
+					amount = 1 
+				}
 			}
-			remove_point_of_interest = mem_ancestor_herald_poi.3
-			add_event_chain_counter = { 
-				event_chain = "mem_lex_ancestor_chain" 
-				counter = "mem_ancestor_herald_counter" 
-				amount = 1 
-			}
-		}
-		random_country = {
-			limit = { 
-				is_country_type = mem_ancestor_guardian
-			}
-			add_modifier = {
-				modifier = "mem_ancestor_herald_debuff_3"
-				days = -1
+			if = {
+				limit = { 
+					is_country_type = mem_ancestor_guardian
+				}
+				add_modifier = {
+					modifier = "mem_ancestor_herald_debuff_3"
+					days = -1
+				}
 			}
 		}
 	}
@@ -4708,23 +4706,25 @@ country_event = {
 			mem_effect_explosion_8 = yes
 		}
 		every_country = {
-			limit = {
-				has_event_chain = "mem_lex_ancestor_chain" 
+			if = {
+				limit = {
+					has_event_chain = "mem_lex_ancestor_chain" 
+				}
+				remove_point_of_interest = mem_ancestor_herald_poi.4
+				add_event_chain_counter = { 
+					event_chain = "mem_lex_ancestor_chain" 
+					counter = "mem_ancestor_herald_counter" 
+					amount = 1 
+				}
 			}
-			remove_point_of_interest = mem_ancestor_herald_poi.4
-			add_event_chain_counter = { 
-				event_chain = "mem_lex_ancestor_chain" 
-				counter = "mem_ancestor_herald_counter" 
-				amount = 1 
-			}
-		}
-		random_country = {
-			limit = { 
-				is_country_type = mem_ancestor_guardian
-			}
-			add_modifier = {
-				modifier = "mem_ancestor_herald_debuff_4"
-				days = -1
+			if = {
+				limit = { 
+					is_country_type = mem_ancestor_guardian
+				}
+				add_modifier = {
+					modifier = "mem_ancestor_herald_debuff_4"
+					days = -1
+				}
 			}
 		}
 	}
@@ -4751,23 +4751,25 @@ country_event = {
 			mem_effect_explosion_8 = yes
 		}
 		every_country = {
-			limit = {
-				has_event_chain = "mem_lex_ancestor_chain" 
+			if = {
+				limit = {
+					has_event_chain = "mem_lex_ancestor_chain" 
+				}
+				remove_point_of_interest = mem_ancestor_herald_poi.5
+				add_event_chain_counter = { 
+					event_chain = "mem_lex_ancestor_chain" 
+					counter = "mem_ancestor_herald_counter" 
+					amount = 1 
+				}
 			}
-			remove_point_of_interest = mem_ancestor_herald_poi.5
-			add_event_chain_counter = { 
-				event_chain = "mem_lex_ancestor_chain" 
-				counter = "mem_ancestor_herald_counter" 
-				amount = 1 
-			}
-		}
-		random_country = {
-			limit = { 
-				is_country_type = mem_ancestor_guardian
-			}
-			add_modifier = {
-				modifier = "mem_ancestor_herald_debuff_5"
-				days = -1
+			if = {
+				limit = { 
+					is_country_type = mem_ancestor_guardian
+				}
+				add_modifier = {
+					modifier = "mem_ancestor_herald_debuff_5"
+					days = -1
+				}
 			}
 		}
 	}
@@ -4794,23 +4796,25 @@ country_event = {
 			mem_effect_explosion_8 = yes
 		}
 		every_country = {
-			limit = {
-				has_event_chain = "mem_lex_ancestor_chain" 
+			if = {
+				limit = {
+					has_event_chain = "mem_lex_ancestor_chain" 
+				}
+				remove_point_of_interest = mem_ancestor_herald_poi.6
+				add_event_chain_counter = { 
+					event_chain = "mem_lex_ancestor_chain" 
+					counter = "mem_ancestor_herald_counter" 
+					amount = 1 
+				}
 			}
-			remove_point_of_interest = mem_ancestor_herald_poi.6
-			add_event_chain_counter = { 
-				event_chain = "mem_lex_ancestor_chain" 
-				counter = "mem_ancestor_herald_counter" 
-				amount = 1 
-			}
-		}
-		random_country = {
-			limit = { 
-				is_country_type = mem_ancestor_guardian
-			}
-			add_modifier = {
-				modifier = "mem_ancestor_herald_debuff_6"
-				days = -1
+			if = {
+				limit = { 
+					is_country_type = mem_ancestor_guardian
+				}
+				add_modifier = {
+					modifier = "mem_ancestor_herald_debuff_6"
+					days = -1
+				}
 			}
 		}
 	}
