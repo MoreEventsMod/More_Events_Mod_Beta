@@ -246,6 +246,11 @@ country_event = {
 					}
 					save_event_target_as = mem_artifact_bomb_2_loc
 					mem_effect_explosion_AOE = yes
+					create_ambient_object = {
+					type = "mem_cloud_ambient_object"
+					location = this
+					duration = 1800
+					}
 				}
 				every_system_planet = {
 					if = {
@@ -265,7 +270,20 @@ country_event = {
 							}
 							add_modifier = {
 								modifier = "mem_artifact_bomb_2_planet_effect"
-								days = 3600
+								days = 1800
+							}
+						}
+						if = {
+							limit = {
+								has_army = yes
+							}
+							while = {
+								limit = {
+									has_army = yes
+								}
+								random_planet_army = {
+									remove_army = yes
+								}
 							}
 						}
 						every_tile = {
@@ -277,6 +295,13 @@ country_event = {
 									}
 								}
 								kill_pop = yes
+							}
+							if = {
+								limit = {
+									has_building = yes
+									is_ruined = no
+								}
+								set_ruined = yes
 							}
 						}
 					}
@@ -353,13 +378,53 @@ country_event = {
 					last_created_ambient_object = {
 						set_ambient_object_flag = mem_artifact_bomb_1_explosion_ambient
 					}
-					change_pc = pc_black_hole
+					create_ambient_object = {
+					type = "mem_cloud_ambient_object"
+					duration = 1800
+					location = this
+					}
+					last_created_ambient_object = {
+						set_ambient_object_flag = mem_artifact_bomb_1_fog_1
+					}
+					create_ambient_object = {
+					type = "mem_cloud_ambient_alt_object"
+					duration = 1800
+					location = this
+					}
+					last_created_ambient_object = {
+						set_ambient_object_flag = mem_artifact_bomb_1_fog_2
+					}
+					if = {
+						limit = {
+							NOT = {
+								is_planet_class = pc_mem_star_dummy
+							}
+						}
+						prevent_anomaly = yes
+						orbital_deposit_tile = {
+							clear_deposits = yes
+						}
+						change_pc = pc_mem_star_dummy
+					}
 				}
 				every_system_planet = {
 					if = {
 						limit = {
 							exists = this
 							is_star = no
+						}
+						if = {
+							limit = {
+								has_army = yes
+							}
+							while = {
+								limit = {
+									has_army = yes
+								}
+								random_planet_army = {
+									remove_army = yes
+								}
+							}
 						}
 						every_tile = {
 							if = {
@@ -379,7 +444,9 @@ country_event = {
 					if = {
 						limit = {
 							exists = this
-							NOT = {
+							NOR = {
+								has_ambient_object_flag = mem_artifact_bomb_1_fog_1
+								has_ambient_object_flag = mem_artifact_bomb_1_fog_2
 								has_ambient_object_flag = mem_artifact_bomb_1_explosion_ambient
 							}
 						}
@@ -538,4 +605,106 @@ fleet_event = {
 	}
 }
 
-#random_neighbor_system
+# Beautiful Erasure
+
+planet_event = {
+	id = mem_artifact.9
+	hide_window = yes
+	
+	is_triggered_only = yes
+
+	immediate = {
+		solar_system = {
+			random_system_planet = {
+				limit = {
+					is_star = yes 
+				}
+				mem_effect_explosion_AOE = yes
+				last_created_ambient_object = {
+					set_ambient_object_flag = mem_artifact_doom_ambient
+				}
+				create_ambient_object = {
+				type = "mem_cloud_ambient_object"
+				location = this
+				}
+				last_created_ambient_object = {
+					set_ambient_object_flag = mem_artifact_doom_fog_1
+				}
+				create_ambient_object = {
+				type = "mem_cloud_ambient_alt_object"
+				location = this
+				}
+				last_created_ambient_object = {
+					set_ambient_object_flag = mem_artifact_doom_fog_2
+				}
+			}
+			every_system_planet = {
+				if = {
+					limit = {
+						exists = this
+					}
+					if = {
+						limit = {
+							has_army = yes
+						}
+						while = {
+							limit = {
+								has_army = yes
+							}
+							random_planet_army = {
+								remove_army = yes
+							}
+						}
+					}
+					every_tile = {
+						if = {
+							limit = {
+								OR = {
+									has_grown_pop = yes
+									has_growing_pop = yes
+								}
+							}
+							kill_pop = yes
+						}
+					}
+					remove_planet = yes 
+				}
+			}
+			every_fleet_in_system = {
+				if = {
+					limit = {
+						exists = this
+					}
+					destroy_fleet = THIS
+				}
+			}
+			every_system_ambient_object = {
+				if = {
+					limit = {
+						exists = this
+						NOR = {
+							has_ambient_object_flag = mem_artifact_doom_ambient
+							has_ambient_object_flag = mem_artifact_doom_fog_1
+							has_ambient_object_flag = mem_artifact_doom_fog_2
+						}
+					}
+					destroy_ambient_object = this
+				}
+			}
+			set_star_flag = mem_artifact_doom_flag
+			random_system = {
+				limit = {
+					NOT = {
+						has_star_flag = mem_artifact_doom_flag
+					}
+				}
+				random_system_planet = {
+					limit = {
+						is_star = yes
+					}
+					planet_event = { id = mem_artifact.9 days = 30 }
+				}
+			}
+		}
+	}
+}
