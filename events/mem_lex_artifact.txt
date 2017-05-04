@@ -1313,7 +1313,7 @@ ship_event = {
 	}
 	
 	mean_time_to_happen = {
-		years = 10
+		years = 5
 
 		modifier = {
 			factor = 0.1
@@ -1390,6 +1390,31 @@ ship_event = {
 	
 	option = {
 		name = mem_artifact.52.a
+		begin_event_chain = {
+			event_chain = "mem_artifact_cipher_chain"
+			target = ROOT
+		}
+		create_point_of_interest = {
+			id = mem_artifact_cipher_poi.1
+			name = "mem_artifact_cipher_1_poi"
+			desc = "mem_artifact_cipher_1_poi_desc"
+			event_chain = mem_artifact_cipher_chain
+			location = event_target:mem_cipher_1_station_loc
+		}
+		create_point_of_interest = {
+			id = mem_artifact_cipher_poi.2
+			name = "mem_artifact_cipher_2_poi"
+			desc = "mem_artifact_cipher_2_poi_desc"
+			event_chain = mem_artifact_cipher_chain
+			location = event_target:mem_cipher_2_station_loc
+		}
+		create_point_of_interest = {
+			id = mem_artifact_cipher_poi.3
+			name = "mem_artifact_cipher_3_poi"
+			desc = "mem_artifact_cipher_3_poi_desc"
+			event_chain = mem_artifact_cipher_chain
+			location = event_target:mem_cipher_3_station_loc
+		}
 	}
 	
 	option = {
@@ -2040,6 +2065,119 @@ country_event = {
 					}
 				}
 				destroy_ambient_object = this
+			}
+		}
+		every_country = {
+			limit = {
+				is_ai = no
+			}
+			country_event = { id = mem_artifact.62 }
+		}
+	}
+}
+
+country_event = {
+	id = mem_artifact.62
+	title = "mem_artifact.62.name"
+	desc = "mem_artifact.62.desc"
+	picture = GFX_evt_small_space_battle
+	show_sound = event_radio_chatter
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = {
+			has_country_flag = mem_relic_unlock_notify_toggle
+		}
+	}
+	
+	immediate = {
+		random_system = {
+			limit = {
+				has_star_flag = mem_gate_system
+			}
+			random_system_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_artifact_activated_relic
+				}
+				save_event_target_as = mem_artifact_relic_final_loc
+			}
+		}
+		set_country_flag = mem_relic_unlock_notify_toggle
+	}
+	
+	option = {
+		name = mem_artifact.62.a
+		event_target:mem_artifact_relic_final_loc = {
+			enable_special_project = {
+				name = "MEM_RELIC_TRUE_ACCESS"
+				location = this
+				owner = ROOT
+			}
+		}
+	}
+}
+
+ship_event = {
+	id = mem_artifact.63
+	title = "mem_artifact.63.name"
+	desc = "mem_artifact.63.desc"
+	picture = GFX_evt_small_space_battle
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = {
+			owner = {
+				has_country_flag = mem_artifact_relic_unlock
+			}
+		}
+	}
+	
+	immediate = {
+		owner = {
+			save_event_target_as = mem_artifact_relic_owner
+			add_threat = {
+				who = owner 
+				amount = 10
+			}
+			set_country_flag = mem_artifact_relic_unlock
+		}
+	}
+	
+	option = {
+		name = "mem_artifact.63.a"
+		create_fleet = {
+			name = "The Relic"
+			settings = {
+				spawn_debris = no 
+				is_boss = yes
+			}
+			effect = {
+				set_owner = event_target:mem_artifact_relic_owner
+				create_ship = {
+					name = "Am'Rta"
+					design = "Dai'Vata"
+					prefix = no
+				}
+				set_location = {
+					target = event_target:mem_artifact_relic_loc
+					distance = 0
+					angle = 0
+				}
+			}
+		}
+		hidden_effect = {
+			random_system = {
+				limit = {
+					has_star_flag = mem_gate_system
+				}
+				random_system_ambient_object = {
+					limit = {
+						has_ambient_object_flag = mem_artifact_activated_relic
+					}
+					destroy_ambient_object = this
+				}
 			}
 		}
 	}
