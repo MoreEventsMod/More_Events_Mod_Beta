@@ -12,6 +12,9 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
+		NOT = {
+			has_global_flag = mem_ancestor_crisis_end
+		}
 		FROMFROM = {
 			OR = {
 				is_ship_size = mem_apostle_1
@@ -528,6 +531,9 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
+		NOT = {
+			has_global_flag = mem_ancestor_crisis_end
+		}
 		FROMFROMFROM = {
 			OR = {
 				is_ship_size = mem_apostle_4
@@ -740,7 +746,7 @@ country_event = {
 							}
 							count > 0
 						}
-						num_owned_planets > 15
+						num_owned_planets > 10
 					}
 				}
 			}
@@ -779,7 +785,7 @@ country_event = {
 							}
 							count > 0
 						}
-						num_owned_planets > 30
+						num_owned_planets > 20
 					}
 				}
 			}
@@ -815,7 +821,7 @@ country_event = {
 							}
 							count > 0
 						}
-						num_owned_planets > 45
+						num_owned_planets > 30
 					}
 				}
 			}
@@ -859,7 +865,7 @@ country_event = {
 							}
 							count > 0
 						}
-						num_owned_planets > 60
+						num_owned_planets > 40
 					}
 				}
 			}
@@ -944,17 +950,25 @@ fleet_event = {
 			limit = {
 				has_fleet_flag = mem_ancestor_dying_spawn
 			}
-			random_list = {
-				25 = {
-					mem_ancestor_infant_2 = yes
-					last_created_fleet = {
-						mem_effect_explosion_7 = yes
-					}
-					destroy_fleet = THIS
-					break = yes
+			if = {
+				limit = {
+					has_global_flag = mem_ancestor_crisis_end
 				}
-				75 = {
-					break = yes
+				destroy_fleet = THIS
+				else = {
+					random_list = {
+						50 = {
+							mem_ancestor_infant_2 = yes
+							last_created_fleet = {
+								mem_effect_explosion_7 = yes
+							}
+							destroy_fleet = THIS
+							break = yes
+						}
+						50 = {
+							break = yes
+						}
+					}
 				}
 			}
 		}
@@ -1637,6 +1651,8 @@ event = {
 	}
 }
 
+#Crisis Starspawn fleet action
+
 fleet_event = {
 	id = mem_ancestor.9
 	hide_window = yes
@@ -1683,6 +1699,7 @@ fleet_event = {
 								has_star_flag = mem_grave_system
 								has_star_flag = mem_garden_system
 								has_star_flag = mem_prison_system
+								has_star_flag = mem_gate_system
 							}
 							any_ship_in_system = {
 								is_ship_size = mem_apostle_xxl_cloud 
@@ -1717,6 +1734,8 @@ fleet_event = {
 		}
 	}
 }
+
+#Crisis Herald fleet action
 
 fleet_event = {
 	id = mem_ancestor.10
@@ -1763,9 +1782,14 @@ fleet_event = {
 								has_star_flag = mem_grave_system
 								has_star_flag = mem_garden_system
 								has_star_flag = mem_prison_system
+								has_star_flag = mem_gate_system
 							}
 							any_ship_in_system = {
 								OR = {
+									is_ship_size = mem_artifact_ship
+									is_ship_size = mem_artifact_relic_frame
+									is_ship_size = mem_artifact_bomb_1
+									is_ship_size = mem_artifact_bomb_2 
 									is_ship_size = mem_titan
 									is_ship_size = mem_grave_awakened_pc
 									is_ship_size = mem_conduit_avatar
@@ -1958,6 +1982,8 @@ fleet_event = {
 	}
 }
 
+#Crisis Leviathan special ability
+
 fleet_event = {
 	id = mem_ancestor.11
 	hide_window = yes
@@ -2103,6 +2129,8 @@ fleet_event = {
 	}
 }
 
+#Crisis Leviathan Herald 1 special ability
+
 fleet_event = {
 	id = mem_ancestor.12
 	hide_window = yes
@@ -2224,6 +2252,8 @@ fleet_event = {
 		}
 	}
 }
+
+#Crisis Leviathan Herald 2 special ability
 
 fleet_event = {
 	id = mem_ancestor.13
@@ -2347,6 +2377,8 @@ fleet_event = {
 	}
 }
 
+#Crisis Leviathan Herald 3 special ability
+
 fleet_event = {
 	id = mem_ancestor.14
 	hide_window = yes
@@ -2468,6 +2500,8 @@ fleet_event = {
 		}
 	}
 }
+
+#Crisis Leviathan Herald 4 special ability
 
 fleet_event = {
 	id = mem_ancestor.15
@@ -2591,6 +2625,8 @@ fleet_event = {
 	}
 }
 
+#Crisis Leviathan Herald 5 special ability
+
 fleet_event = {
 	id = mem_ancestor.16
 	hide_window = yes
@@ -2712,6 +2748,8 @@ fleet_event = {
 		}
 	}
 }
+
+#Crisis Leviathan Herald 6 special ability
 
 fleet_event = {
 	id = mem_ancestor.17
@@ -2835,55 +2873,58 @@ fleet_event = {
 	}
 }
 
-event = {
+#Debuff if crisis ship enters system
+
+ship_event = {
 	id = mem_ancestor.18
 	hide_window = yes
 	is_triggered_only = yes
 	
 	trigger = {
-		has_global_flag = mem_ancestor_crisis_start
-		NOT = {
-			has_global_flag = mem_ancestor_crisis_end
+		FROM = {
+			any_ship_in_system = {
+				exists = owner
+				NOT = {
+					owner = {
+						is_country_type = mem_ancestor_guardian
+					}
+				}
+			}
 		}
+		owner = {
+			is_country_type = mem_ancestor_guardian
+		}
+		OR = {
+			is_ship_size = mem_apostle_1
+			is_ship_size = mem_apostle_2
+			is_ship_size = mem_apostle_3
+			is_ship_size = mem_apostle_4
+			is_ship_size = mem_apostle_egg
+			is_ship_size = mem_apostle_child
+			is_ship_size = mem_apostle_scout
+		}	
 	}
 	
 	immediate = {
-		random_system = {
-			if = {
+		FROM = {
+			every_fleet_in_system = {
 				limit = {
-					any_ship_in_system = {
-						OR = {
-							is_ship_size = mem_apostle_1
-							is_ship_size = mem_apostle_2
-							is_ship_size = mem_apostle_3
-							is_ship_size = mem_apostle_4
-							is_ship_size = mem_apostle_egg
-							is_ship_size = mem_apostle_child
-							is_ship_size = mem_apostle_scout
+					NOT = {
+						owner = {
+							is_country_type = mem_ancestor_guardian
 						}
 					}
 				}
-				every_fleet_in_system = {
-					if = {
-						limit = {
-							exists = this
-							NOT = {
-								OWNER = {
-									is_country_type = mem_ancestor_guardian
-								}
-							}
-							
-						}
-						add_modifier = {
-							modifier = "mem_ancestor_in_system_ship_debuff"
-							days = 30
-						}
-					}
+				add_modifier = {
+					modifier = "mem_ancestor_in_system_ship_debuff"
+					days = 90
 				}
 			}
 		}
 	}
 }
+
+#Crisis Ship Encounter check
 
 fleet_event = {
 	id = mem_ancestor.19
@@ -3605,7 +3646,7 @@ country_event = {
 	}
 }
 
-#Super Massive Black Hole applies debuff to fleet for 5 years
+#Super Massive Black Hole applies debuff to fleet for 1 year
 
 event = {
 	id = mem_ancestor.26
@@ -3640,6 +3681,8 @@ event = {
 		}
 	}
 }
+
+#Crisis Init
 
 country_event = {
 	id = mem_ancestor.27
@@ -3880,6 +3923,13 @@ fleet_event = {
 	trigger = {
 		owner = {
 			NOT = {
+				AND = {
+					has_technology = "tech_sensors_4"
+					OR = {
+						has_technology = "tech_precognition_interface"
+						has_technology = "tech_combat_computers_3"
+					}
+				}
 				is_country_type = mem_ancestor_guardian
 			}
 			is_ai = yes
@@ -4154,6 +4204,8 @@ country_event = {
 	}
 }
 
+# Notification - Crisis harvest
+
 country_event = {
 	id = mem_ancestor.47
 	title = "mem_ancestor.47"
@@ -4177,6 +4229,8 @@ country_event = {
 	}
 }
 
+# Notification - World reclaimed
+
 country_event = {
 	id = mem_ancestor.48
 	title = "mem_ancestor.48"
@@ -4199,6 +4253,8 @@ country_event = {
 		name = "mem_ancestor.48.a"
 	}
 }
+
+# Diplomacy Window War Declaration
 
 country_event = {
 	id = mem_ancestor.49
@@ -4322,11 +4378,16 @@ country_event = {
 				end_event_chain = "mem_lex_ancestor_chain"
 			}
 		}
+		if = {
+			limit = {
+				has_modifier = mem_ancestor_power
+			}
+			remove_modifier = "mem_ancestor_power"
+		}
 		add_threat = {
 			who = FROM
 			amount = 100
 		}
-		destroy_country = yes
 	}
 }
 
@@ -4344,6 +4405,8 @@ country_event = {
 		name = "mem_ancestor.51.a"
 	}
 }
+
+#Herald POI
 
 country_event = {
 	id = mem_ancestor.52
@@ -4367,6 +4430,8 @@ country_event = {
 		name = "EXCELLENT"
 	}
 }
+
+#Leviathan special ability notification
 
 country_event = {
 	id = mem_ancestor.53
@@ -4394,7 +4459,7 @@ country_event = {
 	}
 }
 
-#Crisis research
+#Crisis research init
 
 country_event = {
 	id = mem_ancestor.60
@@ -4476,6 +4541,8 @@ country_event = {
 	}
 }
 
+#Crisis research project
+
 country_event = {
 	id = mem_ancestor.61
 	title = "mem_ancestor.61"
@@ -4513,6 +4580,8 @@ country_event = {
 	}
 }
 
+#Crisis research project complete
+
 country_event = {
 	id = mem_ancestor.62
 	title = "mem_ancestor.62"
@@ -4536,7 +4605,7 @@ country_event = {
 	}
 }
 
-#Crisis gets debuffed with death of a Herald.
+#Crisis Herald 1 destruction
 
 country_event = {
 	id = mem_ancestor.70
@@ -4583,6 +4652,8 @@ country_event = {
 	}
 }
 
+#Crisis Herald 2 destruction
+
 country_event = {
 	id = mem_ancestor.71
 	hide_window = yes
@@ -4627,6 +4698,8 @@ country_event = {
 		}
 	}
 }
+
+#Crisis Herald 3 destruction
 
 country_event = {
 	id = mem_ancestor.72
@@ -4673,6 +4746,8 @@ country_event = {
 	}
 }
 
+#Crisis Herald 4 destruction
+
 country_event = {
 	id = mem_ancestor.73
 	hide_window = yes
@@ -4718,6 +4793,8 @@ country_event = {
 	}
 }
 
+#Crisis Herald 5 destruction
+
 country_event = {
 	id = mem_ancestor.74
 	hide_window = yes
@@ -4762,6 +4839,8 @@ country_event = {
 		}
 	}
 }
+
+#Crisis Herald 6 destruction
 
 country_event = {
 	id = mem_ancestor.75
@@ -4809,6 +4888,7 @@ country_event = {
 }
 
 # World Terraformed (HIDDEN)
+
 planet_event = {
 	id = mem_ancestor.200
 	hide_window = yes
@@ -4828,6 +4908,7 @@ planet_event = {
 }
 
 # Thesan World Cleansed (HIDDEN)
+
 planet_event = {
 	id = mem_ancestor.201
 	hide_window = yes
@@ -4852,6 +4933,7 @@ planet_event = {
 }
 
 # Thesan Kill Count (HIDDEN)
+
 country_event = {
 	id = mem_ancestor.202
 	hide_window = yes
@@ -4890,6 +4972,7 @@ country_event = {
 }
 
 # Thesan Victims (HIDDEN)
+
 country_event = {
 	id = mem_ancestor.203
 	hide_window = yes
