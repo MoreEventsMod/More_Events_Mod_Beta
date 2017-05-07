@@ -944,8 +944,10 @@ ship_event = {
 	}
 	
 	trigger ={
-		is_ship_size = mem_artifact_cipher
-		has_ship_flag = mem_artifact_cipher_1
+		AND = {
+			is_ship_size = mem_artifact_cipher
+			has_ship_flag = mem_artifact_cipher_1
+		}
 		solar_system = {
 			has_star_flag = mem_gate_system
 		}
@@ -999,8 +1001,10 @@ ship_event = {
 	}
 	
 	trigger ={
-		is_ship_size = mem_artifact_cipher
-		has_ship_flag = mem_artifact_cipher_2
+		AND = {
+			is_ship_size = mem_artifact_cipher
+			has_ship_flag = mem_artifact_cipher_2
+		}
 		solar_system = {
 			has_star_flag = mem_gate_system
 		}
@@ -1054,8 +1058,10 @@ ship_event = {
 	}
 	
 	trigger ={
-		is_ship_size = mem_artifact_cipher
-		has_ship_flag = mem_artifact_cipher_3
+		AND = {
+			is_ship_size = mem_artifact_cipher
+			has_ship_flag = mem_artifact_cipher_3
+		}
 		solar_system = {
 			has_star_flag = mem_gate_system
 		}
@@ -1103,7 +1109,7 @@ country_event = {
 	hide_window = yes
 	
 	fire_only_once = yes
-
+	
 	trigger = {
 		NOR = {
 			has_global_flag = mem_artifact_awakening 
@@ -1117,9 +1123,76 @@ country_event = {
 	}
 	
 	mean_time_to_happen = {
-		days = 60
+		days = 30
 	}
 	
+	immediate = {
+		every_country = {
+			if = {
+				limit = {
+					has_event_chain = "mem_artifact_cipher_chain"
+				}
+				end_event_chain = "mem_artifact_cipher_chain"
+			}
+			if = {
+				limit = {
+					has_special_project = MEM_GATE_EXPLORE
+				}
+				abort_special_project = {
+					type = "MEM_GATE_EXPLORE"
+				}
+			}
+			if = {
+				limit = {
+					has_special_project = MEM_RELIC_ACCESS
+				}
+				abort_special_project = {
+					type = "MEM_RELIC_ACCESS"
+				}
+			}
+		}
+		random_system = {
+			limit = {
+				has_star_flag = mem_gate_system
+			}
+			every_system_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_artifact_relic_alt_target
+				}
+				create_ambient_object = {
+				type = "mem_artifact_relic_alt_2_object"
+				}
+				last_created_ambient_object = {
+					set_location = {
+						target = this
+						distance = 0
+						angle = 0
+					}
+					set_ambient_object_flag = mem_artifact_relic_alt_2_target
+				}
+				destroy_ambient_object = this
+			}
+		}
+		set_global_flag = mem_artifact_activation
+		country_event = { id = mem_artifact.22 days = 60 }
+	}
+}
+
+# Relic Activation - Thunderstorm
+
+country_event = {
+	id = mem_artifact.22
+	hide_window = yes
+
+	is_triggered_only = yes
+	
+	trigger = {
+		has_global_flag = mem_artifact_activation
+		NOT = {
+			has_global_flag = mem_artifact_awakening 
+		}
+	}
+
 	immediate = {
 		random_system = {
 			limit = {
@@ -1209,8 +1282,51 @@ country_event = {
 			}
 			set_star_flag = mem_gate_system_storm_debuff
 		}
-		set_global_flag = mem_artifact_activation
 		country_event = { id = mem_artifact.62 days = 60 }
+	}
+}
+
+#Cipher Auto Repair
+
+ship_event = {
+	id = mem_artifact.23
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		OR = {
+			is_ship_size = mem_artifact_cipher
+			is_ship_size = mem_artifact_cipher_alt
+		}
+	}
+	
+	immediate = {
+		this = {
+			mem_effect_explosion_small_1 = yes
+		}
+		owner = {
+			capital_scope = {
+				save_event_target_as = mem_artifact_cipher_escape
+			}
+		}
+		set_disabled = no
+		repair_ship = yes
+		if = {
+			limit = {
+				NOT = {
+					has_modifier = mem_artifact_ship_repair
+				}
+			}
+			add_modifier = {
+				modifier = "mem_artifact_ship_repair"
+				days = 30
+			}
+		}
+		fleet = {
+			set_location = event_target:mem_artifact_cipher_escape
+			clear_orders = yes 
+		}
 	}
 }
 
@@ -1338,7 +1454,7 @@ event = {
 
 ship_event = {
 	id = mem_artifact.50
-	title = "mem_artifact.50"
+	title = "mem_artifact.50.name"
 	desc = "mem_artifact.50.desc"
 	picture = GFX_evt_ship_in_orbit
 	location = FROM
@@ -1346,7 +1462,8 @@ ship_event = {
 	is_triggered_only = yes
 	
 	trigger = {
-	    NOT = {
+	    NOR = {
+			has_global_flag = mem_artifact_activation
 			has_global_flag = mem_artifact_awakening 
 		}
 		owner = {
@@ -1383,13 +1500,14 @@ ship_event = {
 
 ship_event = {
 	id = mem_artifact.51
-	title = "mem_artifact.51"
+	title = "mem_artifact.51.name"
 	desc = "mem_artifact.51.desc"
 	picture = GFX_evt_gas_giant
 	location = THIS
 	
 	trigger = {
-		NOT = {
+		NOR = {
+			has_global_flag = mem_artifact_activation
 			has_global_flag = mem_artifact_awakening 
 		}
 		owner = {
@@ -1449,7 +1567,7 @@ ship_event = {
 
 ship_event = {
 	id = mem_artifact.52
-	title = "mem_artifact.52"
+	title = "mem_artifact.52.name"
 	desc = "mem_artifact.52.desc"
 	picture = GFX_evt_space_station
 	location = THIS
@@ -1457,7 +1575,8 @@ ship_event = {
 	is_triggered_only = yes
 	
 	trigger = {
-		NOT = {
+		NOR = {
+			has_global_flag = mem_artifact_activation
 			has_global_flag = mem_artifact_awakening 
 		}
 		owner = {
@@ -1486,30 +1605,39 @@ ship_event = {
 	
 	option = {
 		name = mem_artifact.52.a
-		begin_event_chain = {
+		if = {
+			limit = {
+				NOT = {
+					owner = {
+						has_event_chain = "mem_artifact_cipher_chain"
+					}
+				}
+			}
+			begin_event_chain = {
 			event_chain = "mem_artifact_cipher_chain"
 			target = ROOT
-		}
-		create_point_of_interest = {
-			id = mem_artifact_cipher_poi.1
-			name = "mem_artifact_cipher_1_poi"
-			desc = "mem_artifact_cipher_1_poi_desc"
-			event_chain = mem_artifact_cipher_chain
-			location = event_target:mem_cipher_1_station_loc
-		}
-		create_point_of_interest = {
-			id = mem_artifact_cipher_poi.2
-			name = "mem_artifact_cipher_2_poi"
-			desc = "mem_artifact_cipher_2_poi_desc"
-			event_chain = mem_artifact_cipher_chain
-			location = event_target:mem_cipher_2_station_loc
-		}
-		create_point_of_interest = {
-			id = mem_artifact_cipher_poi.3
-			name = "mem_artifact_cipher_3_poi"
-			desc = "mem_artifact_cipher_3_poi_desc"
-			event_chain = mem_artifact_cipher_chain
-			location = event_target:mem_cipher_3_station_loc
+			}
+			create_point_of_interest = {
+				id = mem_artifact_cipher_poi.1
+				name = "mem_artifact_cipher_1_poi"
+				desc = "mem_artifact_cipher_1_poi_desc"
+				event_chain = mem_artifact_cipher_chain
+				location = event_target:mem_cipher_1_station_loc
+			}
+			create_point_of_interest = {
+				id = mem_artifact_cipher_poi.2
+				name = "mem_artifact_cipher_2_poi"
+				desc = "mem_artifact_cipher_2_poi_desc"
+				event_chain = mem_artifact_cipher_chain
+				location = event_target:mem_cipher_2_station_loc
+			}
+			create_point_of_interest = {
+				id = mem_artifact_cipher_poi.3
+				name = "mem_artifact_cipher_3_poi"
+				desc = "mem_artifact_cipher_3_poi_desc"
+				event_chain = mem_artifact_cipher_chain
+				location = event_target:mem_cipher_3_station_loc
+			}
 		}
 	}
 	
@@ -1537,13 +1665,63 @@ ship_event = {
 	is_triggered_only = yes
 	
 	trigger = {
-		NOT = {
+		owner = {
+			NOT = {
+				has_country_flag = mem_artifact_forceful_access_toggle
+			}
+		}
+		NOR = {
+			has_global_flag = mem_artifact_activation
 			has_global_flag = mem_artifact_awakening 
+		}
+	}
+	
+	immediate = {
+		owner = {
+			set_country_flag = mem_artifact_forceful_access_toggle
+		}
+	}
+	
+	option = {
+		name = mem_artifact.53.a
+		if = {
+			limit = {
+				NOT = {
+					owner = {
+						has_event_chain = "mem_artifact_cipher_chain"
+					}
+				}
+			}
+			begin_event_chain = {
+			event_chain = "mem_artifact_cipher_chain"
+			target = ROOT
+			}
+			create_point_of_interest = {
+				id = mem_artifact_cipher_poi.1
+				name = "mem_artifact_cipher_1_poi"
+				desc = "mem_artifact_cipher_1_poi_desc"
+				event_chain = mem_artifact_cipher_chain
+				location = event_target:mem_cipher_1_station_loc
+			}
+			create_point_of_interest = {
+				id = mem_artifact_cipher_poi.2
+				name = "mem_artifact_cipher_2_poi"
+				desc = "mem_artifact_cipher_2_poi_desc"
+				event_chain = mem_artifact_cipher_chain
+				location = event_target:mem_cipher_2_station_loc
+			}
+			create_point_of_interest = {
+				id = mem_artifact_cipher_poi.3
+				name = "mem_artifact_cipher_3_poi"
+				desc = "mem_artifact_cipher_3_poi_desc"
+				event_chain = mem_artifact_cipher_chain
+				location = event_target:mem_cipher_3_station_loc
+			}
 		}
 	}
 
 	option = {
-		name = mem_artifact.53.a
+		name = mem_artifact.53.b
 		hidden_effect = {
 			random_system = {
 				limit = {
@@ -1570,6 +1748,12 @@ ship_event = {
 			every_country = {
 				if = {
 					limit = {
+						has_event_chain = "mem_artifact_cipher_chain"
+					}
+					end_event_chain = "mem_artifact_cipher_chain"
+				}
+				if = {
+					limit = {
 						has_special_project = MEM_GATE_EXPLORE
 					}
 					abort_special_project = {
@@ -1591,35 +1775,6 @@ ship_event = {
 			set_global_flag = mem_artifact_awakening
 		}
 	}
-	
-	option = {
-		name = mem_artifact.53.b	
-		begin_event_chain = {
-			event_chain = "mem_artifact_cipher_chain"
-			target = ROOT
-		}
-		create_point_of_interest = {
-			id = mem_artifact_cipher_poi.1
-			name = "mem_artifact_cipher_1_poi"
-			desc = "mem_artifact_cipher_1_poi_desc"
-			event_chain = mem_artifact_cipher_chain
-			location = event_target:mem_cipher_1_station_loc
-		}
-		create_point_of_interest = {
-			id = mem_artifact_cipher_poi.2
-			name = "mem_artifact_cipher_2_poi"
-			desc = "mem_artifact_cipher_2_poi_desc"
-			event_chain = mem_artifact_cipher_chain
-			location = event_target:mem_cipher_2_station_loc
-		}
-		create_point_of_interest = {
-			id = mem_artifact_cipher_poi.3
-			name = "mem_artifact_cipher_3_poi"
-			desc = "mem_artifact_cipher_3_poi_desc"
-			event_chain = mem_artifact_cipher_chain
-			location = event_target:mem_cipher_3_station_loc
-		}
-	}
 }
 
 #Enable Storm Clouds
@@ -1631,6 +1786,9 @@ country_event = {
 	
 	trigger = {
 		has_global_flag = mem_artifact_awakening 
+		NOT = {
+			has_global_flag = mem_artifact_activation
+		}
 	}
 	
 	immediate = {
@@ -2396,6 +2554,7 @@ ship_event = {
 				name = "The Cipher"
 				settings = {
 					spawn_debris = no 
+					is_boss = yes
 				}
 				effect = {
 					set_owner = event_target:mem_artifact_relic_owner
@@ -2456,3 +2615,740 @@ ship_event = {
 		}
 	}
 }
+
+#Enter Cipher 1 System - Shield unlock
+
+ship_event = {
+	id = mem_artifact.100
+	title = "mem_artifact.100.name"
+	desc = "mem_artifact.100.desc"
+	picture = GFX_evt_ship_in_orbit
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	trigger = {
+	    NOR = {
+			has_global_flag = mem_artifact_activation
+			has_global_flag = mem_artifact_awakening 
+		}
+		owner = {
+			NOT = {
+				has_country_flag = encountered_mem_cipher_1_system
+			}
+			is_ai = no
+			has_country_flag = mem_artifact_station_expedition
+		}
+		FROM = {
+			has_star_flag = mem_cipher_1_system
+		}
+	}
+	
+	immediate = {
+		owner = {
+			if = {
+				limit = {
+					has_event_chain = "mem_artifact_cipher_chain"
+				}
+				remove_point_of_interest = mem_artifact_cipher_poi.1
+			}
+			set_country_flag = encountered_mem_cipher_1_system
+		}
+	}		
+	
+	option = {
+		name = "mem_artifact.100.a"
+		hidden_effect = {
+			event_target:mem_cipher_1_station_loc = {
+				mem_effect_explosion_small_2 = yes
+				create_ambient_object = {
+					type = "mem_starbase_object"
+					location = THIS
+				}
+				last_created_ambient_object = {
+					set_ambient_object_flag = mem_cipher_1_station
+					save_event_target_as = mem_cipher_1_station_project
+				}
+				destroy_ambient_object = this
+			}
+		}
+		event_target:mem_cipher_1_station_project = {
+			enable_special_project = {
+				name = "MEM_CIPHER_1_ACCESS"
+				location = this
+				owner = ROOT
+			}
+		}
+	}
+}
+
+#Enter Cipher 2 System - Shield unlock
+
+ship_event = {
+	id = mem_artifact.101
+	title = "mem_artifact.101.name"
+	desc = "mem_artifact.101.desc"
+	picture = GFX_evt_ship_in_orbit
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	trigger = {
+	    NOR = {
+			has_global_flag = mem_artifact_activation
+			has_global_flag = mem_artifact_awakening 
+		}
+		owner = {
+			NOT = {
+				has_country_flag = encountered_mem_cipher_2_system
+			}
+			is_ai = no
+			has_country_flag = mem_artifact_station_expedition
+		}
+		FROM = {
+			has_star_flag = mem_cipher_2_system
+		}
+	}
+	
+	immediate = {
+		owner = {
+			if = {
+				limit = {
+					has_event_chain = "mem_artifact_cipher_chain"
+				}
+				remove_point_of_interest = mem_artifact_cipher_poi.2
+			}
+			set_country_flag = encountered_mem_cipher_2_system
+		}
+	}		
+	
+	option = {
+		name = "mem_artifact.101.a"
+		hidden_effect = {
+			event_target:mem_cipher_2_station_loc = {
+				mem_effect_explosion_small_2 = yes
+				create_ambient_object = {
+					type = "mem_starbase_object"
+					location = THIS
+				}
+				last_created_ambient_object = {
+					set_ambient_object_flag = mem_cipher_2_station
+					save_event_target_as = mem_cipher_2_station_project
+				}
+				destroy_ambient_object = this
+			}
+		}
+		event_target:mem_cipher_2_station_project = {
+			enable_special_project = {
+				name = "MEM_CIPHER_2_ACCESS"
+				location = this
+				owner = ROOT
+			}
+		}
+	}
+}
+
+#Enter Cipher 3 System - Shield unlock
+
+ship_event = {
+	id = mem_artifact.102
+	title = "mem_artifact.102.name"
+	desc = "mem_artifact.102.desc"
+	picture = GFX_evt_ship_in_orbit
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	trigger = {
+	    NOR = {
+			has_global_flag = mem_artifact_activation
+			has_global_flag = mem_artifact_awakening 
+		}
+		owner = {
+			NOT = {
+				has_country_flag = encountered_mem_cipher_3_system
+			}
+			is_ai = no
+			has_country_flag = mem_artifact_station_expedition
+		}
+		FROM = {
+			has_star_flag = mem_cipher_3_system
+		}
+	}
+	
+	immediate = {
+		owner = {
+			if = {
+				limit = {
+					has_event_chain = "mem_artifact_cipher_chain"
+				}
+				remove_point_of_interest = mem_artifact_cipher_poi.3
+			}
+			set_country_flag = encountered_mem_cipher_3_system
+		}
+	}		
+	
+	option = {
+		name = "mem_artifact.102.a"
+		hidden_effect = {
+			event_target:mem_cipher_3_station_loc = {
+				mem_effect_explosion_small_2 = yes
+				create_ambient_object = {
+					type = "mem_starbase_object"
+					location = THIS
+				}
+				last_created_ambient_object = {
+					set_ambient_object_flag = mem_cipher_3_station
+					save_event_target_as = mem_cipher_3_station_project
+				}
+				destroy_ambient_object = this
+			}
+		}
+		event_target:mem_cipher_3_station_project = {
+			enable_special_project = {
+				name = "MEM_CIPHER_3_ACCESS"
+				location = this
+				owner = ROOT
+			}
+		}
+	}
+}
+
+#Enter Cipher 1 System - Shield locked
+
+ship_event = {
+	id = mem_artifact.103
+	title = "mem_artifact.103.name"
+	desc = "mem_artifact.103.desc"
+	picture = GFX_evt_ship_in_orbit
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			NOT = {
+				has_country_flag = encountered_mem_cipher_1_locked_system
+				has_country_flag = encountered_mem_cipher_1_system
+				has_country_flag = mem_artifact_station_expedition
+				has_event_chain = "mem_artifact_cipher_chain"
+			}
+			is_ai = no
+		}
+		FROM = {
+			has_star_flag = mem_cipher_1_system
+		}
+	}
+	
+	immediate = {
+		owner = {
+			set_country_flag = encountered_mem_cipher_1_locked_system
+		}
+	}		
+	
+	option = {
+		name = "mem_artifact.103.a"
+	}
+}
+
+#Enter Cipher 2 System - Shield locked
+
+ship_event = {
+	id = mem_artifact.104
+	title = "mem_artifact.104.name"
+	desc = "mem_artifact.104.desc"
+	picture = GFX_evt_ship_in_orbit
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			NOT = {
+				has_country_flag = encountered_mem_cipher_2_locked_system
+				has_country_flag = encountered_mem_cipher_2_system
+				has_country_flag = mem_artifact_station_expedition
+				has_event_chain = "mem_artifact_cipher_chain"
+			}
+			is_ai = no
+		}
+		FROM = {
+			has_star_flag = mem_cipher_2_system
+		}
+	}
+	
+	immediate = {
+		owner = {
+			set_country_flag = encountered_mem_cipher_2_locked_system
+		}
+	}		
+	
+	option = {
+		name = "mem_artifact.104.a"
+	}
+}
+
+#Enter Cipher 3 System - Shield locked
+
+ship_event = {
+	id = mem_artifact.105
+	title = "mem_artifact.105.name"
+	desc = "mem_artifact.105.desc"
+	picture = GFX_evt_ship_in_orbit
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			NOT = {
+				has_country_flag = encountered_mem_cipher_3_locked_system
+				has_country_flag = encountered_mem_cipher_3_system
+				has_country_flag = mem_artifact_station_expedition
+				has_event_chain = "mem_artifact_cipher_chain"
+			}
+			is_ai = no
+		}
+		FROM = {
+			has_star_flag = mem_cipher_3_system
+		}
+	}
+	
+	immediate = {
+		owner = {
+			set_country_flag = encountered_mem_cipher_3_locked_system
+		}
+	}		
+	
+	option = {
+		name = "mem_artifact.105.a"
+	}
+}
+
+#Cipher 1 Reward
+
+ship_event = {
+	id = mem_artifact.106
+	title = "mem_artifact.106.name"
+	desc = "mem_artifact.106.desc"
+	picture = GFX_evt_small_space_battle
+	
+	is_triggered_only = yes
+
+	trigger = {
+		owner = {
+			has_country_flag = encountered_mem_cipher_1_system
+			NOT = {
+				has_country_flag = mem_cipher_1_system_unlock
+			}
+		}
+	}
+	
+	immediate = {
+		this = {
+			save_event_target_as = mem_artifact_cipher_1_loc
+			owner = {
+				save_event_target_as = mem_artifact_cipher_1_owner
+				set_country_flag = mem_cipher_1_system_unlock
+			}
+		}
+	}
+	
+	option = {
+		name = "mem_artifact.106.a"
+		hidden_effect = {
+			owner = {
+				if = {
+					limit = {
+						has_event_chain = "mem_artifact_cipher_chain"
+					}
+					add_event_chain_counter = { 
+						event_chain = "mem_artifact_cipher_chain" 
+						counter = "mem_artifact_cipher_counter" 
+						amount = 1 
+					}
+				}
+			}
+		}
+		create_fleet = {
+			name = "1st Cipher"
+			settings = {
+				spawn_debris = no 
+				is_boss = yes
+			}
+			effect = {
+				set_owner = event_target:mem_artifact_cipher_1_owner
+				create_ship = {
+					name = "Ti'Mira"
+					design = "Amb'Ara I"
+					prefix = no
+					
+					effect = {
+						set_disable_at_health = 0.05
+						set_ship_flag = mem_artifact_cipher_1_locked
+					}
+				}
+				set_location = {
+					target = event_target:mem_artifact_cipher_1_loc
+					distance = 5
+					angle = random
+				}
+			}
+		}
+	}
+}
+
+#Cipher 2 Reward
+
+ship_event = {
+	id = mem_artifact.107
+	title = "mem_artifact.107.name"
+	desc = "mem_artifact.107.desc"
+	picture = GFX_evt_small_space_battle
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			has_country_flag = encountered_mem_cipher_2_system
+			NOT = {
+				has_country_flag = mem_cipher_2_system_unlock
+			}
+		}
+	}
+	
+	immediate = {
+		this = {
+			save_event_target_as = mem_artifact_cipher_2_loc
+			owner = {
+				save_event_target_as = mem_artifact_cipher_2_owner
+				set_country_flag = mem_cipher_2_system_unlock
+			}
+		}
+	}
+	
+	option = {
+		name = "mem_artifact.107.a"
+		hidden_effect = {
+			owner = {
+				if = {
+					limit = {
+						has_event_chain = "mem_artifact_cipher_chain"
+					}
+					add_event_chain_counter = { 
+						event_chain = "mem_artifact_cipher_chain" 
+						counter = "mem_artifact_cipher_counter" 
+						amount = 1 
+					}
+				}
+			}
+		}
+		create_fleet = {
+			name = "2nd Cipher"
+			settings = {
+				spawn_debris = no 
+				is_boss = yes
+			}
+			effect = {
+				set_owner = event_target:mem_artifact_cipher_2_owner
+				create_ship = {
+					name = "Ak'tu"
+					design = "Amb'Ara I"
+					prefix = no
+					
+					effect = {
+						set_disable_at_health = 0.05
+						set_ship_flag = mem_artifact_cipher_2_locked
+					}
+				}
+				set_location = {
+					target = event_target:mem_artifact_cipher_2_loc
+					distance = 5
+					angle = random 
+				}
+			}
+		}
+	}
+}
+
+#Cipher 3 Reward
+
+ship_event = {
+	id = mem_artifact.108
+	title = "mem_artifact.108.name"
+	desc = "mem_artifact.108.desc"
+	picture = GFX_evt_small_space_battle
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			has_country_flag = encountered_mem_cipher_3_system
+			NOT = {
+				has_country_flag = mem_cipher_3_system_unlock
+			}
+		}
+	}
+	
+	immediate = {
+		this = {
+			save_event_target_as = mem_artifact_cipher_3_loc
+			owner = {
+				save_event_target_as = mem_artifact_cipher_3_owner
+				set_country_flag = mem_cipher_3_system_unlock
+			}
+		}
+	}
+	
+	option = {
+		name = "mem_artifact.108.a"
+		hidden_effect = {
+			owner = {
+				if = {
+					limit = {
+						has_event_chain = "mem_artifact_cipher_chain"
+					}
+					add_event_chain_counter = { 
+						event_chain = "mem_artifact_cipher_chain" 
+						counter = "mem_artifact_cipher_counter" 
+						amount = 1 
+					}
+				}
+			}
+		}
+		create_fleet = {
+			name = "3rd Cipher"
+			settings = {
+				spawn_debris = no 
+				is_boss = yes
+			}
+			effect = {
+				set_owner = event_target:mem_artifact_cipher_3_owner
+				create_ship = {
+					name = "Ak'tu"
+					design = "Amb'Ara I"
+					prefix = no
+					
+					effect = {
+						set_disable_at_health = 0.05
+						set_ship_flag = mem_artifact_cipher_3_locked
+					}
+				}
+				set_location = {
+					target = event_target:mem_artifact_cipher_3_loc
+					distance = 5
+					angle = random
+				}
+			}
+		}
+	}
+}
+
+#Cipher 1 Upgrade
+
+country_event = {
+	id = mem_artifact.109
+	title = "mem_artifact.109.name"
+	desc = "mem_artifact.109.desc"
+	picture = GFX_evt_small_space_battle
+	
+	fire_only_once = yes
+	
+	trigger = {
+		is_ai = no
+		AND = {
+			has_technology = "tech_sentient_ai"
+			has_technology = "tech_physics_lab_3"
+		}
+		NOT = {
+			any_owned_ship = {
+				AND = {
+					has_ship_flag = mem_artifact_cipher_1
+					is_ship_size = mem_artifact_cipher
+				}
+			}	
+		}
+		any_owned_ship = {
+			AND = {
+				has_ship_flag = mem_artifact_cipher_1_locked
+				is_ship_size = mem_artifact_cipher
+			}
+		}	
+	}
+	
+	mean_time_to_happen = {
+		years = 5
+	}
+	
+	option = {
+		name = "mem_artifact.109.a"
+		hidden_effect = {
+			every_owned_ship = {
+				limit = {
+					AND = {
+						is_ship_size = mem_artifact_cipher
+						has_ship_flag = mem_artifact_cipher_1_locked
+					}
+				}
+				set_ship_flag = mem_artifact_cipher_1
+			}
+			country_event = { id = mem_artifact.112 days = 30 }
+		}
+	}
+}
+
+#Cipher 2 Upgrade
+
+country_event = {
+	id = mem_artifact.110
+	title = "mem_artifact.110.name"
+	desc = "mem_artifact.110.desc"
+	picture = GFX_evt_small_space_battle
+	
+	fire_only_once = yes
+	
+	trigger = {
+		is_ai = no
+		AND = {
+			has_technology = "tech_sentient_ai"
+			has_technology = "tech_biolab_3"
+		}
+		NOT = {
+			any_owned_ship = {
+				AND = {
+					has_ship_flag = mem_artifact_cipher_2
+					is_ship_size = mem_artifact_cipher
+				}
+			}	
+		}
+		any_owned_ship = {
+			AND = {
+				has_ship_flag = mem_artifact_cipher_2_locked
+				is_ship_size = mem_artifact_cipher
+			}
+		}	
+	}
+	
+	mean_time_to_happen = {
+		years = 5
+	}
+	
+	option = {
+		name = "mem_artifact.110.a"
+		hidden_effect = {
+			every_owned_ship = {
+				limit = {
+					AND = {
+						is_ship_size = mem_artifact_cipher
+						has_ship_flag = mem_artifact_cipher_2_locked
+					}
+				}
+				set_ship_flag = mem_artifact_cipher_2
+			}
+			country_event = { id = mem_artifact.112 days = 30 }
+		}
+	}
+}
+
+#Cipher 3 Upgrade
+
+country_event = {
+	id = mem_artifact.111
+	title = "mem_artifact.111.name"
+	desc = "mem_artifact.111.desc"
+	picture = GFX_evt_small_space_battle
+	
+	fire_only_once = yes
+	
+	trigger = {
+		is_ai = no
+		AND = {
+			has_technology = "tech_sentient_ai"
+			has_technology = "tech_engineering_lab_3"
+		}
+		NOT = {
+			any_owned_ship = {
+				AND = {
+					has_ship_flag = mem_artifact_cipher_3
+					is_ship_size = mem_artifact_cipher
+				}
+			}	
+		}
+		any_owned_ship = {
+			AND = {
+				has_ship_flag = mem_artifact_cipher_3_locked
+				is_ship_size = mem_artifact_cipher
+			}
+		}	
+	}
+	
+	mean_time_to_happen = {
+		years = 5
+	}
+	
+	option = {
+		name = "mem_artifact.111.a"
+		hidden_effect = {
+			every_owned_ship = {
+				limit = {
+					AND = {
+						is_ship_size = mem_artifact_cipher
+						has_ship_flag = mem_artifact_cipher_3_locked
+					}
+				}
+				set_ship_flag = mem_artifact_cipher_3
+			}
+			country_event = { id = mem_artifact.112 days = 30 }
+		}
+	}
+}
+
+#Ciphers Collected Notify
+
+country_event = {
+	id = mem_artifact.112
+	title = "mem_artifact.112.name"
+	desc = "mem_artifact.112.desc"
+	picture = GFX_evt_small_space_battle
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = {
+			has_country_flag = mem_artifact_gather_notify
+		}
+		NOR = {
+			has_global_flag = mem_artifact_awakening 
+			has_global_flag = mem_artifact_activation
+		}
+		NOR ={
+			has_global_flag = Cipher_1_activation
+			has_global_flag = Cipher_2_activation
+			has_global_flag = Cipher_3_activation
+		}
+		any_owned_ship = {
+			AND = {
+				has_ship_flag = mem_artifact_cipher_1
+				is_ship_size = mem_artifact_cipher
+			}
+			AND = {
+				has_ship_flag = mem_artifact_cipher_2
+				is_ship_size = mem_artifact_cipher
+			}
+			AND = {
+				has_ship_flag = mem_artifact_cipher_3
+				is_ship_size = mem_artifact_cipher
+			}
+		}	
+	}
+	
+	immediate = {
+		set_country_flag = mem_artifact_gather_notify
+	}
+	
+	option = {
+		name = "mem_artifact.112.a"
+	}
+
+}
+
