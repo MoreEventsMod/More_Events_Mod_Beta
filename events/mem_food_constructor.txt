@@ -471,14 +471,16 @@ planet_event = {
 				random_system = {
 					limit = {
 						any_planet = {
-							is_planet_class = pc_barren
-							is_planet_class = pc_barren_cold
-							is_planet_class = pc_toxic
+							OR = {
+								is_planet_class = pc_barren
+								is_planet_class = pc_barren_cold
+								is_planet_class = pc_toxic
+							}
 						}
 						distance = {
 						source = event_target:origin
-						min = 1
-						max = 4
+						min_distance = 10
+						max_distance = 100
 						}
 						NOT = {
 							has_star_flag = hostile_system
@@ -501,8 +503,8 @@ planet_event = {
 							has_star_flag = mem_food_constructor_home
 						}
 						spawn_system = {
-							min_distance = 1
-							max_distance = 4
+							min_distance = 10
+							max_distance = 40
 							initializer = "mem_food_constructor_crash_system"
 						}
 					}
@@ -540,10 +542,21 @@ ship_event = {
 		
 	trigger = {
 		owner = {
-			has_country_flag = mem_food_constructor_search
-			NOT = {
-				has_country_flag = mem_food_constructor_foundcrash
+			AND = {
+				has_country_flag = mem_food_constructor_search
+				NOT = {
+					has_country_flag = mem_food_constructor_foundcrash
+				}
+				FROM = {
+					has_star_flag = mem_food_constructor_crashsite
+				}
 			}
+		}
+	}
+	
+	immediate = {
+		owner = {
+			set_country_flag = mem_food_constructor_foundcrash
 		}
 	}
 	
@@ -553,9 +566,11 @@ ship_event = {
 		closest_system = {
 			random_system_planet = {
 				limit = {
-					is_planet_class = pc_barren
-					is_planet_class = pc_barren_cold
-					is_planet_class = pc_toxic
+					OR = {
+						is_planet_class = pc_barren
+						is_planet_class = pc_barren_cold
+						is_planet_class = pc_toxic
+					}
 				}
 				enable_special_project = {
 					name = "MEM_FOOD_CONSTRUCTOR_CRASHSITE"
@@ -586,9 +601,9 @@ ship_event = {
 		name = mem_food_constructor.7a
 		
 		IF = {
-			trigger = {
-				any_system = {
-					NOT = {
+			limit = {
+				NOT = {
+					any_system = {
 						has_star_flag = mem_food_constructor_recluse_system
 					}
 				}
@@ -619,3 +634,18 @@ ship_event = {
 		}
 	}
 }
+
+ship_event = {
+
+	id = mem_food_constructor.8
+	title = mem_food_constructor.8.name
+	desc = mem_food_constructor.8.desc
+	picture = GFX_evt_mem_wreckage_shelter
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	option = {
+	name = mem_food_constructor.8a
+	
+	}
