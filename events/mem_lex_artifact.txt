@@ -775,7 +775,7 @@ planet_event = {
 					limit = {
 						is_star = yes
 					}
-					planet_event = { id = mem_artifact.9 days = 30 }
+					planet_event = { id = mem_artifact.9 days = 10 }
 				}
 			}
 		}
@@ -993,7 +993,10 @@ ship_event = {
 	trigger ={
 		AND = {
 			is_ship_size = mem_artifact_cipher
-			has_ship_flag = mem_artifact_cipher_1
+			OR = {
+				has_ship_flag = mem_artifact_cipher_1
+				has_ship_flag = mem_artifact_cipher_1_locked
+			}
 		}
 		solar_system = {
 			has_star_flag = mem_gate_system
@@ -1028,10 +1031,28 @@ ship_event = {
 				}
 			}
 		}
+		if = {
+			limit = {
+				has_ship_flag = mem_artifact_cipher_1
+			}
+			set_global_flag = Cipher_1_activation
+			else = {
+				owner = {
+					if = {
+						limit = {
+							NOT = {
+								has_country_flag = mem_artifact_forceful_access_toggle
+							}
+						}
+						set_country_flag = mem_artifact_forceful_access_toggle
+					}
+				}
+				set_global_flag = Cipher_1_false_activation
+			}
+		}
 		fleet = {
 			delete_fleet = this
 		}
-		set_global_flag = Cipher_1_activation
 	}
 }
 
@@ -1050,7 +1071,10 @@ ship_event = {
 	trigger ={
 		AND = {
 			is_ship_size = mem_artifact_cipher
-			has_ship_flag = mem_artifact_cipher_2
+			OR = {
+				has_ship_flag = mem_artifact_cipher_2
+				has_ship_flag = mem_artifact_cipher_2_locked
+			}
 		}
 		solar_system = {
 			has_star_flag = mem_gate_system
@@ -1085,10 +1109,28 @@ ship_event = {
 				}
 			}
 		}
+		if = {
+			limit = {
+				has_ship_flag = mem_artifact_cipher_2
+			}
+			set_global_flag = Cipher_2_activation
+			else = {
+				owner = {
+					if = {
+						limit = {
+							NOT = {
+								has_country_flag = mem_artifact_forceful_access_toggle
+							}
+						}
+						set_country_flag = mem_artifact_forceful_access_toggle
+					}
+				}
+				set_global_flag = Cipher_2_false_activation
+			}
+		}
 		fleet = {
 			delete_fleet = this
 		}
-		set_global_flag = Cipher_2_activation
 	}
 }
 
@@ -1107,7 +1149,10 @@ ship_event = {
 	trigger ={
 		AND = {
 			is_ship_size = mem_artifact_cipher
-			has_ship_flag = mem_artifact_cipher_3
+			OR = {
+				has_ship_flag = mem_artifact_cipher_3
+				has_ship_flag = mem_artifact_cipher_3_locked
+			}
 		}
 		solar_system = {
 			has_star_flag = mem_gate_system
@@ -1142,10 +1187,28 @@ ship_event = {
 				}
 			}
 		}
+		if = {
+			limit = {
+				has_ship_flag = mem_artifact_cipher_3
+			}
+			set_global_flag = Cipher_3_activation
+			else = {
+				owner = {
+					if = {
+						limit = {
+							NOT = {
+								has_country_flag = mem_artifact_forceful_access_toggle
+							}
+						}
+						set_country_flag = mem_artifact_forceful_access_toggle
+					}
+				}
+				set_global_flag = Cipher_3_false_activation
+			}
+		}
 		fleet = {
 			delete_fleet = this
 		}
-		set_global_flag = Cipher_3_activation
 	}
 }
 
@@ -1162,15 +1225,24 @@ country_event = {
 			has_global_flag = mem_artifact_awakening 
 			has_global_flag = mem_artifact_activation
 		}
-		AND ={
-			has_global_flag = Cipher_1_activation
-			has_global_flag = Cipher_2_activation
-			has_global_flag = Cipher_3_activation
+		AND = {
+			OR = {
+				has_global_flag = Cipher_1_activation
+				has_global_flag = Cipher_1_false_activation
+			}
+			OR = {
+				has_global_flag = Cipher_2_activation
+				has_global_flag = Cipher_2_false_activation
+			}
+			OR = {
+				has_global_flag = Cipher_3_activation
+				has_global_flag = Cipher_3_false_activation
+			}
 		}
 	}
 	
 	mean_time_to_happen = {
-		days = 30
+		days = 60
 	}
 	
 	immediate = {
@@ -1220,8 +1292,23 @@ country_event = {
 				destroy_ambient_object = this
 			}
 		}
-		set_global_flag = mem_artifact_activation
-		country_event = { id = mem_artifact.22 days = 60 }
+		
+		if = {
+			limit = {
+				AND = {
+					has_global_flag = Cipher_1_activation
+					has_global_flag = Cipher_2_activation
+					has_global_flag = Cipher_3_activation
+				}
+			}
+			set_global_flag = mem_artifact_activation
+			country_event = { id = mem_artifact.22 days = 60 }
+			else = {
+				set_global_flag = mem_artifact_awakening
+				country_event = { id = mem_artifact.54 days = 60 }
+			}
+		}
+		
 	}
 }
 
@@ -1572,13 +1659,6 @@ ship_event = {
 	
 	mean_time_to_happen = {
 		years = 1
-
-		modifier = {
-			factor = 0.5
-			owner = {
-				has_technology = "tech_precognition_interface"
-			}
-		}
 	}
 	
 	immediate = {
@@ -2098,7 +2178,6 @@ country_event = {
 			}
 			establish_communications_no_message = event_target:mem_gate_country
 		}
-		set_global_flag = mem_artifact_awakening
 	}
 }
 
@@ -2441,6 +2520,9 @@ country_event = {
 			every_system_ambient_object = {
 				limit = {
 					OR = {
+						has_ambient_object_flag = mem_artifact_cipher_1_ambient
+						has_ambient_object_flag = mem_artifact_cipher_2_ambient
+						has_ambient_object_flag = mem_artifact_cipher_3_ambient
 						has_ambient_object_flag = mem_artifact_alt_ward_1_reset
 						has_ambient_object_flag = mem_artifact_alt_ward_2_reset
 						has_ambient_object_flag = mem_artifact_alt_ward_3_reset
@@ -3596,7 +3678,7 @@ country_event = {
 	}
 	
 	mean_time_to_happen = {
-		years = 5
+		years = 10
 	}
 	
 	option = {
@@ -3609,6 +3691,7 @@ country_event = {
 						has_ship_flag = mem_artifact_cipher_1_locked
 					}
 				}
+				remove_ship_flag = mem_artifact_cipher_1_locked
 				set_ship_flag = mem_artifact_cipher_1
 			}
 		}
@@ -3648,7 +3731,7 @@ country_event = {
 	}
 	
 	mean_time_to_happen = {
-		years = 5
+		years = 10
 	}
 	
 	option = {
@@ -3661,6 +3744,7 @@ country_event = {
 						has_ship_flag = mem_artifact_cipher_2_locked
 					}
 				}
+				remove_ship_flag = mem_artifact_cipher_2_locked
 				set_ship_flag = mem_artifact_cipher_2
 			}
 		}
@@ -3700,7 +3784,7 @@ country_event = {
 	}
 	
 	mean_time_to_happen = {
-		years = 5
+		years = 10
 	}
 	
 	option = {
@@ -3713,6 +3797,7 @@ country_event = {
 						has_ship_flag = mem_artifact_cipher_3_locked
 					}
 				}
+				remove_ship_flag = mem_artifact_cipher_3_locked
 				set_ship_flag = mem_artifact_cipher_3
 			}
 		}
