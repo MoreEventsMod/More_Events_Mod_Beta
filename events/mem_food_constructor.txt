@@ -448,14 +448,6 @@ planet_event = {
 	
 	option = {
 		name = mem_food_constructor.5a
-		trigger = {
-			owner = {
-				NOR = {
-					has_ethic = ethic_fanatic_spiritualist
-					has_ethic = ethic_spiritualist
-				}
-			}
-		}
 		
 		hidden_effect = {
 			#What if someone else had created the system already?
@@ -585,7 +577,7 @@ ship_event = {
 	}
 }
 
-#Special project complete
+#Special project complete - spawn Solitude system, issue POI
 
 ship_event = {
 
@@ -620,24 +612,24 @@ ship_event = {
 		random_system = {
 			limit = {
 				has_star_flag = mem_food_constructor_recluse_system
-			}
-			random_planet = {
-				limit = {
-					has_planet_flag = mem_food_constructor_recluse
-				}
-				save_event_target_as = recluse
-				
-			}
+			}			
+			save_event_target_as = recluse
+		}
+		create_point_of_interest = {
+			id = mem_food_constructor_poi2
+			name = mem_food_constructor_poi2
+			desc = mem_food_constructor_poi2_desc
+			event_chain = mem_food_constructor_chain
+			location = event_target:recluse
 		}
 		
-		enable_special_project = {
-			name = "MEM_FOOD_CONSTRUCTOR_CRASHSITE"
-			location = event_target:recluse
-			owner = root
+		owner = {
+			set_country_flag = mem_food_constructor_search_recluse
 		}
 	}
 }
 
+#We arrived to the system, now what?
 ship_event = {
 
 	id = mem_food_constructor.8
@@ -648,7 +640,91 @@ ship_event = {
 	
 	is_triggered_only = yes
 	
-	option = {
-	name = mem_food_constructor.8a
-	
+	trigger = {
+		owner = {
+			AND = {
+				has_country_flag = mem_food_constructor_search_recluse
+				NOT = {
+					has_country_flag = mem_food_constructor_foundrecluse
+				}
+				FROM = {
+					has_star_flag = mem_food_constructor_recluse_system
+				}
+			}
+		}
 	}
+	
+	immediate = {
+		owner = {
+			set_country_flag = mem_food_constructor_foundrecluse
+		}
+	}
+	
+	option = {
+		name = mem_food_constructor.8a
+		closest_system = {
+			random_system_planet = {
+				limit = {
+					has_planet_flag = mem_food_constructor_recluse
+				}
+				enable_special_project = {
+					name = "MEM_FOOD_CONSTRUCTOR_RECLUSE"
+					location = this
+					owner = root
+				}
+			}
+		}
+	}
+}
+
+#Project complete - final set of coordinates
+
+ship_event = {
+
+	id = mem_food_constructor.9
+	title = mem_food_constructor.9.name
+	desc = mem_food_constructor.9.desc
+	picture = GFX_evt_mem_wreckage_shelter
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_food_constructor.9a
+		
+		IF = {
+			limit = {
+				NOT = {
+					any_system = {
+						has_star_flag = mem_food_constructor_reesan_system
+					}
+				}
+			}
+			closest_system = {
+				spawn_system = {
+					min_distance = 1
+					max_distance = 10
+					initializer = "mem_food_constructor_reesan_system"
+				}
+			}
+		}
+		
+		random_system = {
+			limit = {
+				has_star_flag = mem_food_constructor_reesan_system
+			}			
+			save_event_target_as = reesan
+		}
+		create_point_of_interest = {
+			id = mem_food_constructor_poi2
+			name = mem_food_constructor_poi2
+			desc = mem_food_constructor_poi2_desc
+			event_chain = mem_food_constructor_chain
+			location = event_target:reesan
+		}
+		
+		owner = {
+			set_country_flag = mem_food_constructor_search_reesan
+		}
+	}
+}
