@@ -406,7 +406,7 @@ country_event = {
 		}
 		add_threat = {
 			who = event_target:mem_artifact_bomb_2_owner
-			amount = 100
+			amount = 10
 		}
 	}
 }
@@ -556,7 +556,7 @@ country_event = {
 		}
 		add_threat = {
 			who = event_target:mem_artifact_bomb_1_owner
-			amount = 100
+			amount = 10
 		}
 	}
 }
@@ -1025,15 +1025,19 @@ ship_event = {
 			}
 		}
 		solar_system = {
-			any_ship_in_system = {
-				exists = this
-				is_ship_size = mem_artifact_cipher
-				OR = {
-					has_ship_flag = mem_artifact_cipher_1
-					has_ship_flag = mem_artifact_cipher_1_locked
+			AND = {
+				any_ship_in_system = {
+					AND = {
+						exists = this
+						is_ship_size = mem_artifact_cipher
+						OR = {
+							has_ship_flag = mem_artifact_cipher_1
+							has_ship_flag = mem_artifact_cipher_1_locked
+						}
+					}
 				}
+				has_star_flag = mem_gate_system
 			}
-			has_star_flag = mem_gate_system
 		}
 		NOR = {
 			has_global_flag = mem_artifact_activation
@@ -1112,15 +1116,19 @@ ship_event = {
 			}
 		}
 		solar_system = {
-			any_ship_in_system = {
-				exists = this
-				is_ship_size = mem_artifact_cipher
-				OR = {
-					has_ship_flag = mem_artifact_cipher_2
-					has_ship_flag = mem_artifact_cipher_2_locked
+			AND = {
+				any_ship_in_system = {
+					AND = {
+						exists = this
+						is_ship_size = mem_artifact_cipher
+						OR = {
+							has_ship_flag = mem_artifact_cipher_2
+							has_ship_flag = mem_artifact_cipher_2_locked
+						}
+					}
 				}
+				has_star_flag = mem_gate_system
 			}
-			has_star_flag = mem_gate_system
 		}
 		NOR = {
 			has_global_flag = mem_artifact_activation
@@ -1199,15 +1207,19 @@ ship_event = {
 			}
 		}
 		solar_system = {
-			any_ship_in_system = {
-				exists = this
-				is_ship_size = mem_artifact_cipher
-				OR = {
-					has_ship_flag = mem_artifact_cipher_3
-					has_ship_flag = mem_artifact_cipher_3_locked
+			AND = {
+				any_ship_in_system = {
+					AND = {
+						exists = this
+						is_ship_size = mem_artifact_cipher
+						OR = {
+							has_ship_flag = mem_artifact_cipher_3
+							has_ship_flag = mem_artifact_cipher_3_locked
+						}
+					}
 				}
+				has_star_flag = mem_gate_system
 			}
-			has_star_flag = mem_gate_system
 		}
 		NOR = {
 			has_global_flag = mem_artifact_activation
@@ -1535,28 +1547,48 @@ country_event = {
 	}
 	
 	immediate = {
-		random_system = {
+		if = {
 			limit = {
-				any_ship_in_system = {
+				NOT = {
+					has_global_flag = mem_artifact_endtime
+				}
+			}
+			random_system = {
+				limit = {
+					any_ship_in_system = {
+						is_ship_size = mem_artifact_relic_frame
+					}
+				}
+				random_system_planet = {
+					limit = {
+						is_star = yes
+					}
+					planet_event = { id = mem_artifact.9 days = 1 }
+				}
+			}
+			every_owned_ship = {
+				limit = {
 					is_ship_size = mem_artifact_relic_frame
 				}
-			}
-			random_system_planet = {
-				limit = {
-					is_star = yes
+				fleet = {
+					destroy_fleet = THIS
 				}
-				planet_event = { id = mem_artifact.9 days = 1 }
 			}
+			every_country = {
+				limit = {
+					OR = {
+						is_country_type = default
+						is_country_type = fallen_empire
+						is_country_type = awakened_fallen_empire
+					}
+				}
+				add_opinion_modifier = {
+					modifier = opinion_doomed_us_all
+					who = ROOT
+				}
+			}
+			set_global_flag = mem_artifact_endtime
 		}
-		every_owned_ship = {
-			limit = {
-				is_ship_size = mem_artifact_relic_frame
-			}
-			fleet = {
-				destroy_fleet = THIS
-			}
-		}
-		set_global_flag = mem_artifact_endtime
 	}
 }
 
@@ -1578,6 +1610,11 @@ country_event = {
 	}
 	
 	immediate = {
+		FROMFROMFROM = {
+			owner = {
+				save_event_target_as = mem_artifact_endtime_owner
+			}
+		}
 		if = {
 			limit = {
 				NOT = {
@@ -1592,6 +1629,19 @@ country_event = {
 						}
 						planet_event = { id = mem_artifact.9 days = 1 }
 					}
+				}
+			}
+			every_country = {
+				limit = {
+					OR = {
+						is_country_type = default
+						is_country_type = fallen_empire
+						is_country_type = awakened_fallen_empire
+					}
+				}
+				add_opinion_modifier = {
+					modifier = opinion_doomed_us_all
+					who = event_target:mem_artifact_endtime_owner
 				}
 			}
 			set_global_flag = mem_artifact_endtime
@@ -2849,7 +2899,7 @@ ship_event = {
 			save_event_target_as = mem_artifact_relic_owner
 			add_threat = {
 				who = owner 
-				amount = 10
+				amount = 5
 			}
 			set_country_flag = mem_artifact_relic_unlock
 		}
