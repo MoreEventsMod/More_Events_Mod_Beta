@@ -184,9 +184,7 @@ planet_event = {
 			days = -1
 		}
 		
-		begin_event_chain = {
-			event_chain = "mem_food_constructor_chain"
-		}
+		
 	}
 	
 
@@ -210,9 +208,7 @@ planet_event = {
 			days = -1
 		}
 		
-		begin_event_chain = {
-			event_chain = "mem_food_constructor_chain"
-		}
+		
 	}
 	
 	option = {
@@ -234,9 +230,7 @@ planet_event = {
 			days = -1
 		}
 		
-		begin_event_chain = {
-			event_chain = "mem_food_constructor_chain"
-		}
+		
 	}
 
 }
@@ -449,6 +443,10 @@ planet_event = {
 	option = {
 		name = mem_food_constructor.5a
 		
+		begin_event_chain = {
+			event_chain = "mem_food_constructor_chain"
+		}
+		
 		hidden_effect = {
 			#What if someone else had created the system already?
 			IF = {
@@ -555,7 +553,7 @@ ship_event = {
 	option = {
 		name = mem_food_constructor.6a
 		
-		closest_system = {
+		solar_system = {
 			random_system_planet = {
 				limit = {
 					OR = {
@@ -571,8 +569,10 @@ ship_event = {
 				}
 			}
 		}
-		owner = { 
-			remove_point_of_interest = mem_food_constructor_poi1
+		hidden_effect = {
+			owner = { 
+				remove_point_of_interest = mem_food_constructor_poi1
+			}
 		}
 	}
 }
@@ -591,20 +591,21 @@ ship_event = {
 	
 	option = {
 		name = mem_food_constructor.7a
-		
-		IF = {
-			limit = {
-				NOT = {
-					any_system = {
-						has_star_flag = mem_food_constructor_recluse_system
+		hidden_effect = {
+			IF = {
+				limit = {
+					NOT = {
+						any_system = {
+							has_star_flag = mem_food_constructor_recluse_system
+						}
 					}
 				}
-			}
-			closest_system = {
-				spawn_system = {
-					min_distance = 1
-					max_distance = 10
-					initializer = "mem_food_constructor_recluse_system"
+				closest_system = {
+					spawn_system = {
+						min_distance = 1
+						max_distance = 10
+						initializer = "mem_food_constructor_recluse_system"
+					}
 				}
 			}
 		}
@@ -662,7 +663,7 @@ ship_event = {
 	
 	option = {
 		name = mem_food_constructor.8a
-		closest_system = {
+		solar_system = {
 			random_system_planet = {
 				limit = {
 					has_planet_flag = mem_food_constructor_recluse
@@ -672,6 +673,11 @@ ship_event = {
 					location = this
 					owner = root
 				}
+			}
+		}
+		hidden_effect = {
+			owner = {
+				remove_point_of_interest = mem_food_constructor_poi2
 			}
 		}
 	}
@@ -691,20 +697,21 @@ ship_event = {
 	
 	option = {
 		name = mem_food_constructor.9a
-		
-		IF = {
-			limit = {
-				NOT = {
-					any_system = {
-						has_star_flag = mem_food_constructor_reesan_system
+		hidden_effect = {
+			IF = {
+				limit = {
+					NOT = {
+						any_system = {
+							has_star_flag = mem_food_constructor_reesan_system
+						}
 					}
 				}
-			}
-			closest_system = {
-				spawn_system = {
-					min_distance = 1
-					max_distance = 10
-					initializer = "mem_food_constructor_reesan_system"
+				closest_system = {
+					spawn_system = {
+						min_distance = 1
+						max_distance = 10
+						initializer = "mem_food_constructor_reesan_system"
+					}
 				}
 			}
 		}
@@ -716,9 +723,9 @@ ship_event = {
 			save_event_target_as = reesan
 		}
 		create_point_of_interest = {
-			id = mem_food_constructor_poi2
-			name = mem_food_constructor_poi2
-			desc = mem_food_constructor_poi2_desc
+			id = mem_food_constructor_poi3
+			name = mem_food_constructor_poi3
+			desc = mem_food_constructor_poi3_desc
 			event_chain = mem_food_constructor_chain
 			location = event_target:reesan
 		}
@@ -726,5 +733,300 @@ ship_event = {
 		owner = {
 			set_country_flag = mem_food_constructor_search_reesan
 		}
+	}
+}
+
+#We are at Reesan system, let's chat with drones
+ship_event = {
+	id = mem_food_constructor.10
+	title = mem_food_constructor.10.name
+	desc = mem_food_constructor.10.desc
+	picture = GFX_evt_mem_wreckage_shelter
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			AND = {
+				has_country_flag = mem_food_constructor_search_reesan
+				NOT = {
+					has_country_flag = mem_food_constructor_foundreesan
+				}
+				FROM = {
+					has_star_flag = mem_food_constructor_reesan_system
+				}
+			}
+		}
+	}
+	
+	immediate = {
+		owner = {
+			set_country_flag = mem_food_constructor_foundreesan
+		}
+		# solar_system = {
+			# random_fleet_in_system = {
+				# limit = {
+					# has_fleet_flag = mem_food_constructor_reesanfleet
+				# }
+				# owner = {
+					# establish_communications_no_message = root
+				# }
+			# }
+		# }
+	}
+	
+	option = {
+		name = ONSCREEN
+		
+		solar_system = {
+			random_system_planet = {
+				limit = {
+					has_planet_flag = mem_food_constructor_reesan
+				}
+				enable_special_project = {
+					name = "MEM_FOOD_CONSTRUCTOR_REESAN"
+					location = this
+					owner = root
+				}
+			}
+		}
+		hidden_effect = {
+			owner = {
+				remove_point_of_interest = mem_food_constructor_poi3
+				country_event = {id = mem_food_constructor.12}
+			}
+		}
+	}
+
+}
+
+#################################################
+#################################################
+####RESERVED FOR POSSIBLE LACK OF SHIPS HERE####
+#################################################
+#################################################
+
+#Drone diplomacy
+country_event = {
+	id = mem_food_constructor.12
+	title = mem_food_constructor.12.name
+	desc = mem_food_constructor.12.desc
+	
+	is_triggered_only = yes
+	
+	diplomatic = yes
+	
+	picture_event_data = {
+		room = no_video_feed_room
+	}
+	
+	option = {
+		name = mem_food_constructor.12a
+		response_text = mem_food_constructor.12a.response
+		is_dialog_only = yes
+	}
+	
+	option = {
+		name = mem_food_constructor.12b
+		response_text = mem_food_constructor.12b.response
+		is_dialog_only = yes
+	}
+	
+	option = {
+		name = mem_food_constructor.12c
+		response_text = mem_food_constructor.12c.response
+		is_dialog_only = yes
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_pacifist
+				has_ethic = ethic_pacifist
+			}
+		}
+		name = mem_food_constructor.12d
+		response_text = mem_food_constructor.12d.response
+		is_dialog_only = yes
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_militarist
+				has_ethic = ethic_militarist
+			}
+		}
+		name = mem_food_constructor.12e
+		response_text = mem_food_constructor.12e.response
+		is_dialog_only = yes
+	}
+	
+	option = {
+		name = mem_food_constructor.12f
+		response_text = mem_food_constructor.12f.response
+	}
+}
+
+
+#Found Reesan Key
+ship_event = {
+	id = mem_food_constructor.13
+	title = mem_food_constructor.13.name
+	desc = mem_food_constructor.13.desc
+	picture = GFX_evt_mem_wreckage_shelter
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		FROMFROM = {
+			clear_deposits = yes
+		}
+	}
+	
+	option = {
+		name = SPLENDID
+		
+		custom_tooltip = mem_food_constructor.13a.tooltip
+		
+		owner = {
+			set_country_flag = mem_food_constructor_has_key
+		}
+		
+		FROMFROM = {
+			orbital_deposit_tile = {  
+				add_deposit = d_enormous3_engineering_deposit
+				add_deposit = d_enormous3_physics_deposit
+			}
+		}
+	}
+}
+
+#That's it, we done here
+
+planet_event = {
+	id = mem_food_constructor.14
+	title = mem_food_constructor.14.name
+	desc = mem_food_constructor.14.desc
+	picture = GFX_evt_mem_wreckage_shelter
+	location = ROOT
+	
+	trigger = {
+		OR = {
+			has_planet_flag = mem_food_constructor_step1
+			has_planet_flag = mem_food_constructor_step2
+			has_planet_flag = mem_food_constructor_step3
+			has_planet_flag = mem_food_constructor_step4
+		}
+		NOT = {
+			has_planet_flag = mem_food_constructor_step5
+		}
+		owner = {
+			has_country_flag = mem_food_constructor_has_key
+		}
+	}
+	
+	mean_time_to_happen = {
+		days = 15
+	}
+	
+	immediate = {
+		remove_planet_flag = mem_food_constructor_step1
+		remove_planet_flag = mem_food_constructor_step2
+		remove_planet_flag = mem_food_constructor_step3
+		remove_planet_flag = mem_food_constructor_step4
+		set_planet_flag = mem_food_constructor_step5
+	}
+	
+	option = {
+		name = mem_food_constructor.14a
+		
+		remove_modifier = mem_food_constructor_modifier_1
+		remove_modifier = mem_food_constructor_modifier_2
+		remove_modifier = mem_food_constructor_modifier_3
+		remove_modifier = mem_food_constructor_modifier_4
+		
+		add_modifier = { 
+			modifier = mem_food_constructor_modifier_5
+			days = -1
+		}
+		owner = {
+			end_event_chain = mem_food_constructor_chain
+		}
+		
+	}
+	
+}
+
+#Epilogue: Planet turns into Gaia
+
+planet_event = {
+	id = mem_food_constructor.15
+	title = mem_food_constructor.15.name
+	desc = mem_food_constructor.15.desc
+	picture = GFX_evt_mem_wreckage_shelter
+	location = ROOT
+
+	trigger = {
+		has_planet_flag = mem_food_constructor_step5
+	}
+	
+	mean_time_to_happen = {
+		months = 1
+	}
+	
+	immediate = {
+		remove_planet_flag = mem_food_constructor_step5
+		set_planet_flag = mem_food_constructor_finished
+	}
+	
+	option = {
+		name = AMAZING
+		
+		trigger = {
+			owner = {
+				NOR = {
+					has_ethic = ethic_fanatic_spiritualist
+					has_ethic = ethic_spiritualist
+					has_ethic = ethic_fanatic_xenophile
+					has_ethic = ethic_xenophile
+				}
+			}
+		}
+		
+		change_pc = pc_gaia
+	}
+	
+	option = {
+		name = mem_food_constructor.15b
+		
+		trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_fanatic_spiritualist
+					has_ethic = ethic_spiritualist
+				}
+			}
+		}
+		
+		change_pc = pc_gaia
+	}
+	
+	option = {
+		name = mem_food_constructor.15c
+		
+		
+		trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_fanatic_xenophile
+					has_ethic = ethic_xenophile
+				}
+			}
+		}
+		
+		change_pc = pc_gaia
 	}
 }
