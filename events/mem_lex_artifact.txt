@@ -31,13 +31,13 @@ country_event = {
 					has_modifier = mem_artifact_shroudborn_power
 				}
 				random_list = {
-					75 = {
+					50 = {
 					}
-					25 = {
+					50 = {
 						remove_modifier = "mem_artifact_shroudborn_power"
 						add_modifier = {
 							modifier = "mem_artifact_shroudborn_bonus"
-							days = 30
+							days = 90
 						}
 						repair_ship = yes
 					}
@@ -115,14 +115,12 @@ country_event = {
 					}
 				}
 			}
-			if = {
-				limit = {
-					has_modifier = mem_artifact_ship_power_1
-				}
-				random_list = {
-					50 = {
-					}
-					50 = {
+			random_list = {
+				20 = {
+					if = {
+						limit = {
+							has_modifier = mem_artifact_ship_power_1
+						}
 						remove_modifier = "mem_artifact_ship_power_1"
 						create_fleet = {
 							name = "Psionic Projection"
@@ -145,17 +143,14 @@ country_event = {
 								fleet_event = { id = mem_artifact.2 days = 60 }
 							}
 						}
+						break = yes
 					}
 				}
-			}
-			if = {
-				limit = {
-					has_modifier = mem_artifact_ship_power_2
-				}
-				random_list = {
-					50 = {
-					}
-					50 = {
+				20 = {
+					if = {
+						limit = {
+							has_modifier = mem_artifact_ship_power_2
+						}
 						remove_modifier = "mem_artifact_ship_power_2"
 						create_fleet = {
 							name = "Psionic Projection"
@@ -179,17 +174,14 @@ country_event = {
 								fleet_event = { id = mem_artifact.2 days = 60 }
 							}
 						}
+						break = yes
 					}
 				}
-			}
-			if = {
-				limit = {
-					has_modifier = mem_artifact_ship_power_3
-				}
-				random_list = {
-					50 = {
-					}
-					50 = {
+				20 = {
+					if = {
+						limit = {
+							has_modifier = mem_artifact_ship_power_3
+						}
 						remove_modifier = "mem_artifact_ship_power_3"
 						create_fleet = {
 							name = "Psionic Projection"
@@ -211,17 +203,14 @@ country_event = {
 								set_event_locked = yes
 							}
 						}
+						break = yes
 					}
 				}
-			}
-			if = {
-				limit = {
-					has_modifier = mem_artifact_ship_power_4
-				}
-				random_list = {
-					50 = {
-					}
-					50 = {
+				20 = {
+					if = {
+						limit = {
+							has_modifier = mem_artifact_ship_power_4
+						}
 						remove_modifier = "mem_artifact_ship_power_4"
 						create_fleet = {
 							name = "Psionic Projection"
@@ -243,21 +232,30 @@ country_event = {
 								set_event_locked = yes
 							}
 						}
+						break = yes
 					}
 				}
-			}
-			if = {
-				limit = {
-					has_modifier = mem_artifact_ship_power_5
-				}
-				random_list = {
-					50 = {
-					}
-					50 = {
+				20 = {
+					if = {
+						limit = {
+							has_modifier = mem_artifact_ship_power_5
+						}
 						remove_modifier = "mem_artifact_ship_power_5"
-						add_modifier = {
-							modifier = "mem_artifact_ship_repair"
-							days = 30
+						solar_system = {
+							every_fleet_in_system = {
+								if = {
+									limit = {
+										exists = this
+										owner = {
+											is_country = event_target:mem_artifact_ship_owner
+										}
+									}
+									add_modifier = {
+										modifier = "mem_artifact_ship_booster"
+										days = 30
+									}
+								}
+							}
 						}
 						repair_ship = yes
 					}
@@ -339,21 +337,6 @@ country_event = {
 						}
 						if = {
 							limit = {
-								OR = {
-									habitable_planet = yes
-									habitable_structure = yes
-								}
-								NOT = {
-									has_modifier = mem_artifact_bomb_2_planet_effect
-								}
-							}
-							add_modifier = {
-								modifier = "mem_artifact_bomb_2_planet_effect"
-								days = 1800
-							}
-						}
-						if = {
-							limit = {
 								has_army = yes
 							}
 							while = {
@@ -381,6 +364,60 @@ country_event = {
 									is_ruined = no
 								}
 								set_ruined = yes
+							}
+						}
+						if = {
+							limit = {
+								AND = {
+									habitable_planet = no
+									habitable_structure = yes
+								}
+							}
+							random_list = {
+								50 = {
+									if = {
+										limit = {
+											NOT = {
+												has_modifier = mem_artifact_bomb_2_planet_effect
+											}
+										}
+										add_modifier = {
+											modifier = "mem_artifact_bomb_2_planet_effect"
+											days = 1800
+										}
+									}
+								}
+								50 = {
+									remove_planet = yes 
+								}
+							}
+							else = {
+								if = {
+									limit = {
+										AND = {
+											habitable_planet = yes
+											habitable_structure = no
+										}
+									}
+									random_list = {
+										50 = {
+											if = {
+												limit = {
+													NOT = {
+														has_modifier = mem_artifact_bomb_2_planet_effect
+													}
+												}
+												add_modifier = {
+													modifier = "mem_artifact_bomb_2_planet_effect"
+													days = 1800
+												}
+											}
+										}
+										50 = {
+											change_pc = pc_shrouded
+										}
+									}
+								}
 							}
 						}
 					}
@@ -621,7 +658,7 @@ event = {
 						exists = this
 						NOT = {
 							owner = {
-								is_country_type = shroud_spirits
+								is_country_type = mem_shroud_guardian
 							}
 						}
 					}
@@ -659,7 +696,7 @@ event = {
 						exists = this
 						NOT = {
 							owner = {
-								is_country_type = shroud_spirits
+								is_country_type = mem_shroud_guardian
 							}
 						}
 					}
@@ -687,6 +724,11 @@ fleet_event = {
 				if = {
 					limit = {
 						exists = this
+						NOT = {
+							owner = {
+								is_country_type = mem_shroud_guardian
+							}
+						}
 					}
 					add_modifier = {
 						modifier = "mem_artifact_bomb_1_temp"
@@ -712,6 +754,11 @@ fleet_event = {
 				if = {
 					limit = {
 						exists = this
+						NOT = {
+							owner = {
+								is_country_type = mem_shroud_guardian
+							}
+						}
 					}
 					add_modifier = {
 						modifier = "mem_artifact_bomb_2_temp"
@@ -1131,7 +1178,6 @@ ship_event = {
 		NOR = {
 			has_global_flag = mem_artifact_activation
 			has_global_flag = mem_artifact_awakening 
-			has_global_flag = Cipher_1_activation
 		}
 	}
 	
@@ -1225,7 +1271,6 @@ ship_event = {
 		NOR = {
 			has_global_flag = mem_artifact_activation
 			has_global_flag = mem_artifact_awakening 
-			has_global_flag = Cipher_2_activation
 		}
 	}
 	
@@ -1319,7 +1364,6 @@ ship_event = {
 		NOR = {
 			has_global_flag = mem_artifact_activation
 			has_global_flag = mem_artifact_awakening 
-			has_global_flag = Cipher_3_activation
 		}
 	}
 	
@@ -1622,11 +1666,11 @@ ship_event = {
 		if = {
 			limit = {
 				NOT = {
-					has_modifier = mem_artifact_ship_repair
+					has_modifier = mem_artifact_ship_booster
 				}
 			}
 			add_modifier = {
-				modifier = "mem_artifact_ship_repair"
+				modifier = "mem_artifact_ship_booster"
 				days = 30
 			}
 		}
@@ -1671,6 +1715,7 @@ country_event = {
 					limit = {
 						is_star = yes
 					}
+					save_event_target_as = mem_artifact_doom_start_system
 					planet_event = { id = mem_artifact.9 days = 1 }
 				}
 			}
@@ -1697,6 +1742,12 @@ country_event = {
 					modifier = opinion_doomed_us_all
 					who = ROOT
 				}
+			}
+			every_country = {
+				limit = {
+					is_ai = no
+				}
+				country_event = { id = mem_artifact.28 days = 5 }
 			}
 			set_global_flag = mem_artifact_endtime
 		}
@@ -1738,6 +1789,7 @@ country_event = {
 						limit = {
 							is_star = yes
 						}
+						save_event_target_as = mem_artifact_doom_start_system
 						planet_event = { id = mem_artifact.9 days = 1 }
 					}
 				}
@@ -1754,6 +1806,12 @@ country_event = {
 					modifier = opinion_doomed_us_all
 					who = event_target:mem_artifact_endtime_owner
 				}
+			}
+			every_country = {
+				limit = {
+					is_ai = no
+				}
+				country_event = { id = mem_artifact.28 days = 5 }
 			}
 			set_global_flag = mem_artifact_endtime
 		}
@@ -1798,6 +1856,8 @@ event = {
 	}
 }
 
+#Cipher activation notify
+
 country_event = {
 	id = mem_artifact.27
 	title = "mem_artifact.27.name"
@@ -1819,6 +1879,32 @@ country_event = {
 	
 	option = {
 		name = "mem_artifact.27.a"
+	}
+}
+
+#Cipher activation notify
+
+country_event = {
+	id = mem_artifact.28
+	title = "mem_artifact.28.name"
+	desc = "mem_artifact.28.desc"
+	picture = GFX_evt_wormhole
+	location = event_target:mem_artifact_doom_start_system
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = {
+			has_country_flag = mem_artifact_doom_notify
+		}
+	}
+	
+	immediate = {
+		set_country_flag = mem_artifact_doom_notify
+	}
+	
+	option = {
+		name = "mem_artifact.28.a"
 	}
 }
 
@@ -3038,6 +3124,20 @@ ship_event = {
 			}
 			set_country_flag = mem_artifact_relic_unlock
 		}
+		every_country = {
+			limit = {
+				has_communications = event_target:mem_artifact_relic_owner
+				NOT = {
+					is_country = event_target:mem_artifact_relic_owner
+				}
+				OR = {
+					is_country_type = default
+					is_country_type = fallen_empire
+					is_country_type = awakened_fallen_empire		
+				}	
+			}
+			add_opinion_modifier = { who = event_target:mem_artifact_relic_owner modifier = mem_gate_leviathan_owner }
+		}
 	}
 	
 	option = {
@@ -3702,6 +3802,7 @@ country_event = {
 		AND = {
 			has_technology = "tech_sentient_ai"
 			has_technology = "tech_physics_lab_3"
+			has_technology = "tech_repeatable_improved_tile_energy_output"
 		}
 		NOT = {
 			any_owned_ship = {
@@ -3720,7 +3821,7 @@ country_event = {
 	}
 	
 	mean_time_to_happen = {
-		years = 5
+		years = 1
 	}
 	
 	option = {
@@ -3755,6 +3856,7 @@ country_event = {
 		AND = {
 			has_technology = "tech_sentient_ai"
 			has_technology = "tech_biolab_3"
+			has_technology = "tech_repeatable_improved_tile_food_output"
 		}
 		NOT = {
 			any_owned_ship = {
@@ -3773,7 +3875,7 @@ country_event = {
 	}
 	
 	mean_time_to_happen = {
-		years = 5
+		years = 1
 	}
 	
 	option = {
@@ -3808,6 +3910,7 @@ country_event = {
 		AND = {
 			has_technology = "tech_sentient_ai"
 			has_technology = "tech_engineering_lab_3"
+			has_technology = "tech_repeatable_improved_tile_mineral_output"
 		}
 		NOT = {
 			any_owned_ship = {
@@ -3826,7 +3929,7 @@ country_event = {
 	}
 	
 	mean_time_to_happen = {
-		years = 5
+		years = 1
 	}
 	
 	option = {
@@ -4127,8 +4230,6 @@ planet_event = {
 				set_fleet_stance = aggressive
 				set_aggro_range = 500
 				set_aggro_range_measure_from = self
-				
-				fleet_event = { id = mem_artifact.2 days = 3600 }
 			}
 		}
 	}
