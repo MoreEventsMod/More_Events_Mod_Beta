@@ -19,7 +19,7 @@ planet_event = {
 			is_country_type = default
 			is_ai = no
 		}
-		planet_size > 20
+		planet_size > 19
 		any_tile = {
 			has_blocker = tb_mountain_range
 		}
@@ -404,10 +404,10 @@ planet_event = {
 	}
 }
 
-# Victory over initial robot armies:
-# This = country, planet owner
-# From = country, attack leader
-# FromFrom = planet
+#Victory over initial robot armies:
+#This = country, planet owner
+#From = country, attack leader
+#FromFrom = planet
 
 country_event = {
 	id = mem_ancient_robots.211
@@ -441,11 +441,48 @@ country_event = {
 	
 	option = {
 		name = mem_ancient_robots.211.a
-		# Set up special project to lay siege to the AI
+		#Set up special project to lay siege to the AI
 		enable_special_project = {
 			name = MEM_SIEGE_PROJECT
 			location = FROMFROM
 			owner = root
+		}
+	}
+}
+
+# Retaking the planet
+planet_event = {
+	id = mem_ancient_robots.2111
+	title = mem_ancient_robots.211.name
+	desc = mem_ancient_robots.211.desc
+	picture = GFX_evt_ground_combat
+	show_sound = event_ground_battle
+	location = root
+
+	trigger = {
+		has_owner = yes
+		owner = {
+			is_ai = no
+		}
+		has_planet_flag = mem_super_robot_attack
+		is_occupied_flag = no
+		has_ground_combat = no
+		NOT = {
+			has_global_flag = mem_ancient_robot_cancel
+		}
+	}
+	
+	immediate = {
+		remove_planet_flag = mem_super_robot_attack
+	}
+	
+	option = {
+		name = mem_ancient_robots.211.a
+		# Set up special project to lay siege to the AI
+		enable_special_project = {
+			name = MEM_SIEGE_PROJECT
+			location = root
+			owner = root.owner
 		}
 	}
 }
@@ -467,11 +504,6 @@ country_event = {
 		has_country_flag = mem_ancient_robot_quest_owner
 		FROMFROM = {
 			has_planet_flag = mem_super_robot_attack
-			NOT = {
-				controller = {
-					is_same_value = root
-				}
-			}
 		}
 		NOT = {
 			has_global_flag = mem_ancient_robot_cancel
@@ -622,11 +654,9 @@ country_event = {
 	
 	trigger = {
 		is_ai = no
+		has_country_flag = mem_ancient_robot_quest_owner
 		FROMFROM = {
 			has_planet_flag = mem_super_robot_attack_2
-			controller = {
-				is_same_value = ROOT
-			}
 		}
 		NOT = {
 			has_global_flag = mem_ancient_robot_cancel
@@ -675,22 +705,20 @@ country_event = {
 	
 	trigger = {
 		is_ai = no
-		NOT = {
-			has_global_flag = mem_ancient_robot_cancel
-		}
+		has_country_flag = mem_ancient_robot_quest_owner
 		FROMFROM = {
 			has_planet_flag = mem_super_robot_attack_2
-			NOT = {
-				controller = {
-					is_same_value = root
-				}
-			}
+		}
+		NOT = {
+			has_global_flag = mem_ancient_robot_cancel
 		}
 	}
 	
 	immediate = {
+		FROM = {
+			destroy_country = yes
+		}
 		FROMFROM = {
-			remove_planet_flag = mem_super_robot_attack
 			remove_planet_flag = mem_super_robot_attack_2
 			remove_modifier = mem_under_siege
 			destroy_colony = { keep_buildings = no }
@@ -879,7 +907,11 @@ planet_event = {
 					count > 1
 				}
 			}
-			planet_event = { id = mem_ancient_robots.210 days = 1 }
+			#TODO random list
+			random_list = {
+				50 = { planet_event = { id = mem_ancient_robots.210 days = 1 } }
+				50 = {}
+			}
 			else = {
 				planet_event = { id = mem_ancient_robots.223 days = 180 random = 30 }
 			}
@@ -905,6 +937,7 @@ planet_event = {
 		owner = {
 			has_country_flag = mem_ancient_robot_quest_owner
 		}
+		has_planet_flag = mem_super_robot_attack
 		NOT = {
 			has_global_flag = mem_ancient_robot_cancel
 		}
@@ -1007,6 +1040,20 @@ event = {
 				has_event_chain = mem_ancient_robots_chain
 			}
 			end_event_chain = "mem_ancient_robots_chain"
+		}
+	}
+}
+
+# Test event to set a mountain range tile blocker
+planet_event = {
+	id = mem_ancient_robots.230
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_tile = {
+			set_blocker = tb_mountain_range
 		}
 	}
 }
