@@ -1,0 +1,310 @@
+##########################
+# More Event Mod Options
+# by Malthus
+##########################
+
+namespace = mem_options
+
+event = {
+	id = mem_options.1
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_country = {
+			limit = {
+				is_ai = no
+			}
+			country_event = { id = mem_options.2 days = 5 }
+		}
+	}
+}
+
+# Game Start Event to create the project
+country_event = {
+	id = mem_options.2
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		begin_event_chain = {
+			event_chain = mem_options_chain
+			target = THIS
+		}
+		capital_scope = {
+			enable_special_project = {
+				name = MEM_OPTIONS_PROJECT
+				location = this
+				owner = PREV
+			}
+			enable_special_project = {
+				name = MEM_OPTIONS_REMOVAL_PROJECT
+				location = this
+				owner = PREV
+			}
+		}
+	}
+}
+
+# Bridge Event from Project to Menu
+planet_event = {
+	id = mem_options.3
+	hide_window = yes
+	
+	is_triggered_only = yes
+
+	immediate = {
+		owner = {
+			end_event_chain = mem_options_chain
+			begin_event_chain = {
+				event_chain = mem_options_chain
+				target = THIS
+			}
+			capital_scope = {
+				enable_special_project = {
+					name = MEM_OPTIONS_PROJECT
+					location = this
+					owner = PREV
+				}
+				enable_special_project = {
+					name = MEM_OPTIONS_REMOVAL_PROJECT
+					location = this
+					owner = PREV
+				}
+			}
+		}
+		owner = {
+			country_event = { id = mem_options.4 }
+		}
+	}
+}
+
+planet_event = {
+	id = mem_options.300
+	hide_window = yes
+	
+	is_triggered_only = yes
+
+	immediate = {
+		owner = {
+			end_event_chain = mem_options_chain
+		}
+	}
+}
+
+# Main Menu
+country_event = {
+	id = mem_options.4
+	title = mem_options.4.name
+	desc = mem_options.4.desc
+	picture = GFX_evt_mem_options
+	
+	is_triggered_only = yes
+	
+	# LEX Submenu
+	option = {
+		name = mem_options.4.a
+		country_event = { id = mem_options.5 }
+	}
+	
+	# Shieldworld Options
+	option = {
+		name = mem_options.4.b
+		country_event = { id = mem_options.6 }
+	}
+	
+	# Exit EVENT
+	option = {
+		name = mem_options.exit
+	}
+}
+
+# mem_ring_seed, mem_grave_seed, mem_garden_seed, mem_prison_seed, mem_gate_seed
+# mem_ring_system, mem_grave_system, mem_garden_system, mem_prison_system, mem_gate_system
+
+# LEX Submenu
+country_event = {
+	id = mem_options.5
+	title = mem_options.5.name
+	desc = mem_options.5.desc
+	picture = GFX_evt_mem_lex_options
+	
+	is_triggered_only = yes
+	
+#	#disable LEX
+	# option = {
+		# name = mem_options.5.a
+		# trigger = {
+			# NOT = {
+				# any_system = {
+					# OR = {
+						# has_star_flag = mem_ring_system
+						# has_star_flag = mem_grave_system
+						# has_star_flag = mem_garden_system
+						# has_star_flag = mem_prison_system
+						# has_star_flag = mem_gate_system
+					# }
+				# }
+			# }
+		# }
+		# set_global_flag = mem_ring_seed
+		# set_global_flag = mem_grave_seed
+		# set_global_flag = mem_garden_seed
+		# set_global_flag = mem_prison_seed
+		# set_global_flag = mem_gate_seed
+	# }
+	
+#	#LEX is already disabled
+	# option = {
+		# name = mem_options.5.b
+		# trigger = {
+			# NOT = {
+				# any_system = {
+					# OR = {
+						# has_star_flag = mem_ring_system
+						# has_star_flag = mem_grave_system
+						# has_star_flag = mem_garden_system
+						# has_star_flag = mem_prison_system
+						# has_star_flag = mem_gate_system
+					# }
+				# }
+			# }
+			# has_global_flag = mem_ring_seed
+			# has_global_flag = mem_grave_seed
+			# has_global_flag = mem_garden_seed
+			# has_global_flag = mem_prison_seed
+			# has_global_flag = mem_gate_seed
+		# }
+	# }
+	
+#	#LEX is already active
+	# option = {
+		# name = mem_options.5.b
+		# trigger = {
+			# any_system = {
+				# OR = {
+					# has_star_flag = mem_ring_system
+					# has_star_flag = mem_grave_system
+					# has_star_flag = mem_garden_system
+					# has_star_flag = mem_prison_system
+					# has_star_flag = mem_gate_system
+				# }
+			# }
+		# }
+	# }
+	
+	# Back to previous Menu
+	option = {
+		name = mem_options.back
+		country_event = { id = mem_options.4 }
+	}
+	
+	#Exit
+	option = {
+		name = mem_options.exit
+	}
+}
+
+# Shieldworld Menu
+country_event = {
+	id = mem_options.6
+	title = mem_options.6.name
+	desc = mem_options.6.desc
+	picture = GFX_evt_mem_options
+	
+	is_triggered_only = yes
+	
+	# activate planetary shield effects
+	option = {
+		name = mem_options.6.a
+		trigger = {
+			has_global_flag = mem_planetary_shields_OFF
+		}
+		hidden_effect = {
+			remove_global_flag = mem_planetary_shields_OFF
+			every_planet = {
+				limit = {
+					OR = {
+						has_building = building_planetary_shield_generator
+						has_building = building_mem_planetary_shield_generator_heavy
+						has_building = building_mem_planetary_shield_generator_orila
+					}
+				}
+				#standard shields
+				planet_event = { id = mem_planetary_shields.2 }
+				#heavy shields
+				planet_event = { id = mem_planetary_shields.4 }
+				#orila shields
+				planet_event = { id = mem_planetary_shields.5 }
+			}
+			#reopen the menu
+			country_event = { id = mem_options.6 days = 1 }
+		}
+	}
+	
+	# deactivate planetary shield effects
+	option = {
+		name = mem_options.6.b
+		trigger = {
+			NOT = {
+				has_global_flag = mem_planetary_shields_OFF
+			}
+		}
+		hidden_effect = {
+			set_global_flag = mem_planetary_shields_OFF
+			every_ambient_object = {
+				limit = {
+					OR = {
+						has_ambient_object_flag = mem_planetary_shield_01
+						has_ambient_object_flag = mem_planetary_shield_02
+						has_ambient_object_flag = mem_planetary_shield_03
+					}
+				}
+				destroy_ambient_object = this
+			}
+			#reopen the menu
+			country_event = { id = mem_options.6 days = 1 }
+		}
+	}
+	# activate shieldworld effects
+	option = {
+		name = mem_options.6.c
+		trigger = {
+			has_global_flag = mem_planetary_shield_worlds_OFF
+		}
+		hidden_effect = {
+			#activation event
+			country_event = { id = mem_planetary_shields.11 }
+			#reopen the menu
+			country_event = { id = mem_options.6 days = 1 }
+		}
+	}
+	
+	# deactivate shieldworld effects
+	option = {
+		name = mem_options.6.d
+		trigger = {
+			NOT = {
+				has_global_flag = mem_planetary_shield_worlds_OFF
+			}
+		}
+		hidden_effect = {
+			#deactivation event
+			country_event = { id = mem_planetary_shields.12 }
+			#reopen the menu
+			country_event = { id = mem_options.6 days = 1 }
+		}
+	}
+	# Back to previous Menu
+	option = {
+		name = mem_options.back
+		country_event = { id = mem_options.4 }
+	}
+	
+	# Exit EVENT
+	option = {
+		name = mem_options.exit
+	}
+}
