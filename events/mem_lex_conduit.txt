@@ -989,6 +989,7 @@ planet_event = {
 country_event = {
 	id = mem_the_conduit.50
 	hide_window = yes
+	
 	fire_only_once = yes
 	
 	trigger = {
@@ -1758,7 +1759,7 @@ country_event = {
 							limit = {
 								check_variable = {
 									which = "mem_conduit_kill_counter"
-									value = 3
+									value = 5
 								}
 							}
 							from = {
@@ -2139,52 +2140,58 @@ country_event = {
 	}
 	
 	immediate = {
-		FROM = {
-			save_event_target_as = mem_pc_home
-			set_country_flag = mem_conduit_slayer
-			if = {
-				limit = {
-					any_system = {
-						any_planet = {
-							exists = this
-							has_planet_flag = mem_conduit_garden
-						}
-					}
-				}
-				country_event = { id = mem_the_conduit.101 }
-			}
-		}
-	    FROMFROM = {
+		FROMFROM = {
 			mem_effect_explosion_4 = yes
+		}
+		FROM = {
+			save_event_target_as = mem_conduit_slayer_target
+			set_country_flag = mem_conduit_slayer
+			add_threat = {
+				who = THIS
+				amount = 10
+			}
 		}
 		random_system = {
 			limit = {
 				has_star_flag = mem_garden_system 
 			}
 			random_system_planet = {
+				limit = {
+					has_planet_flag = mem_conduit_garden
+				}
 				if = {
 					limit = {
-						exists = this
-						has_planet_flag = mem_conduit_garden
+						has_modifier = mem_obelisk_5_mod
 					}
-					if = {
-						limit = { has_modifier = mem_obelisk_5_mod }
-						remove_modifier = mem_obelisk_5_mod
+					remove_modifier = mem_obelisk_5_mod
+				}
+				if = {
+					limit = {
+						NOT = {
+							has_modifier = mem_obelisk_6_mod
+						}
 					}
 					add_modifier = {
 						modifier = "mem_obelisk_6_mod"
-						days = -1
+						days = 3600
 					}
-					set_owner = event_target:mem_pc_home
-					every_owned_pop = { 
+				}
+				every_owned_pop = {
+					if = {
+						limit = {
+							NOT = {
+								has_modifier = mem_pop_conduit_5
+							}
+						}
 						add_modifier = {
 							modifier = "mem_pop_conduit_5"
-							days = -1
+							days = 3600
 						}
 					}
 				}
+				set_owner = event_target:mem_conduit_slayer_target
+				save_event_target_as = mem_garden_aid
 			}
-			set_star_flag = mem_conduit_defeated
 			save_event_target_as = mem_conduit_system 
 		}
 		every_country = {
@@ -2209,12 +2216,74 @@ country_event = {
 					location = capital_scope
 				}
 			}
+			if = {
+				limit = {
+					has_country_flag = mem_conduit_slayer
+					any_system = {
+						AND = {
+							has_star_flag = mem_garden_system
+							any_planet = {
+								has_planet_flag = mem_conduit_garden
+							}
+						}
+					}
+				}
+				country_event = { id = mem_the_conduit.101 }
+			}
 		}
-		add_threat = {
-			who = FROM
-			amount = 10
+		every_owned_ship = {
+			if = {
+				limit = {
+					exists = THIS
+					is_ship_size = mem_conduit_anchor
+				}
+				fleet = {
+					destroy_fleet = THIS
+				}
+			}
 		}
-		destroy_country = yes
+		every_owned_fleet = {
+			limit = {
+				exists = THIS
+			}
+			clear_orders = yes 
+			queue_actions = {
+				repeat = {
+					find_random_system = {
+						trigger = {
+							id = mem_conduit_scatter.1
+							NOT = {
+								OR = {
+									has_star_flag = guardian
+									has_star_flag = mem_ring_system
+									has_star_flag = mem_grave_system
+									has_star_flag = mem_garden_system
+									has_star_flag = mem_prison_system
+									has_star_flag = mem_gate_system
+								}
+							}
+						}
+						found_system = {
+							move_to = this
+							
+							find_closest_planet = {
+								trigger = {
+									id =  mem_conduit_scatter.2
+									is_star = yes
+								}
+								found_planet = {
+									move_to = this
+									wait = {
+										duration = 360
+										random = 180
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 		mem_awaken = yes
 	}
 }
@@ -2232,20 +2301,13 @@ country_event = {
 	
 	trigger = {
 		is_ai = no
-		has_country_flag = mem_conduit_slayer
-	}
-	
-	immediate = {
-		random_system = {
-			limit = { has_star_flag = mem_garden_system }
-			random_system_planet = {
-				limit = {
-					has_planet_flag = mem_conduit_garden
-				}
-				save_event_target_as = mem_garden_aid
-			}
-			save_event_target_as = mem_conduit_system
+		NOT = {
+			has_country_flag = mem_conduit_aid_notify
 		}
+	}
+
+	immediate = {
+		set_country_flag = mem_conduit_aid_notify
 	}
 	
 	option = {
@@ -2273,7 +2335,6 @@ ship_event = {
 	trigger = {
 		owner = {
 			is_ai = no
-			has_country_flag = mem_conduit_slayer
 			NOT = {
 				has_country_flag = mem_garden_aid_complete 
 			}
@@ -2283,36 +2344,36 @@ ship_event = {
 	immediate = {
 			owner = {
 				set_country_flag = mem_garden_aid_complete
-			}
-			random_system = {
-				limit =  { has_star_flag = mem_garden_system }
-				random_system_planet = {
-					limit = { has_planet_flag = mem_conduit_garden }
-					every_owned_pop = {
-						if = {
-								limit = { has_modifier = mem_pop_conduit_1 }
-								remove_modifier = mem_pop_conduit_1
-						}	
-						if = {
-								limit = { has_modifier = mem_pop_conduit_2 }
-								remove_modifier = mem_pop_conduit_2
-						}
-						if = {
-								limit = { has_modifier = mem_pop_conduit_3 }
-								remove_modifier = mem_pop_conduit_3
-						}
-						if = {
-								limit = { has_modifier = mem_pop_conduit_4 }
-								remove_modifier = mem_pop_conduit_4
-						}
-						if = {
-								limit = { has_modifier = mem_pop_conduit_5 }
-								remove_modifier = mem_pop_conduit_5
-						}
+				every_owned_pop = {
+					if = {
+							limit = { has_modifier = mem_pop_conduit_1 }
+							remove_modifier = mem_pop_conduit_1
+					}	
+					if = {
+							limit = { has_modifier = mem_pop_conduit_2 }
+							remove_modifier = mem_pop_conduit_2
 					}
 					if = {
-						limit = { has_modifier = mem_obelisk_6_mod }
-						remove_modifier = mem_obelisk_6_mod
+							limit = { has_modifier = mem_pop_conduit_3 }
+							remove_modifier = mem_pop_conduit_3
+					}
+					if = {
+							limit = { has_modifier = mem_pop_conduit_4 }
+							remove_modifier = mem_pop_conduit_4
+					}
+					if = {
+							limit = { has_modifier = mem_pop_conduit_5 }
+							remove_modifier = mem_pop_conduit_5
+					}
+				}
+			}
+			random_system = {
+				limit =  {
+					has_star_flag = mem_garden_system 
+				}
+				random_system_planet = {
+					limit = {
+						has_planet_flag = mem_conduit_garden 
 					}
 					save_event_target_as = mem_garden_clear
 				}
@@ -2328,7 +2389,7 @@ country_event = {
 	id = mem_the_conduit.120
 	hide_window = yes
 	
-	#fire_only_once = yes
+	fire_only_once = yes
 	
 	trigger = {
 		is_ai = no
@@ -2345,12 +2406,6 @@ country_event = {
 	}
 
 	immediate = {
-		random_system = {
-			limit = {
-				has_star_flag = mem_garden_system
-			}
-		save_event_target_as = mem_conduit_system	
-		}
 		set_country_flag = mem_conduit_molten_toggle
 	}
 }
@@ -2367,9 +2422,10 @@ country_event = {
 	
 	trigger = {
 		is_ai = no
-		has_country_flag = mem_garden_aid_complete
-		has_country_flag = mem_conduit_slayer
-		#has_country_flag = mem_conduit_obelisks_destroyed
+		any_country = {
+			has_country_flag = mem_garden_aid_complete
+			has_country_flag = mem_conduit_slayer
+		}
 		any_owned_planet = {
 			has_planet_flag = mem_conduit_garden
 		}
@@ -2446,6 +2502,17 @@ ship_event = {
 	option = { 
 		name = "mem_the_conduit.122.a"
 		hidden_effect = {
+			random_system = {
+				limit = {
+					has_star_flag = mem_garden_system
+				}
+				random_system_planet = {
+					limit = {
+						has_planet_flag = mem_conduit_garden
+					}
+					save_event_target_as = mem_conduit_fleet_reward_loc
+				}
+			}
 			owner = {
 				set_country_flag = mem_the_conduit_reward_unlock
 				country_event = { id = mem_the_conduit.150 days = 1800 }
@@ -2473,7 +2540,6 @@ ship_event = {
 			name = "Magma Diver"
 			settings = {
 				spawn_debris = no 
-				is_boss = yes
 			}
 			effect = {
 				set_owner = event_target:mem_conduit_project_owner
@@ -2494,6 +2560,7 @@ ship_event = {
 		add_minerals = 5000
 		add_energy = 5000
 			hidden_effect = {
+				set_country_flag = mem_the_conduit_reward_unlock
 				country_event = { id = mem_the_conduit.150 days = 1800 }
 			}
 		}
@@ -2511,8 +2578,6 @@ country_event = {
 	
 	trigger = {
 		is_ai = no
-		has_country_flag = mem_conduit_slayer
-		has_country_flag = mem_garden_aid_complete
 		any_owned_ship = {
 			is_ship_size = mem_conduit_avatar_bound
 		}
@@ -2596,8 +2661,6 @@ country_event = {
 	trigger = {
 		is_ai = no
 		NOT = { has_country_flag = mem_conduit_evolve_success }
-		has_country_flag = mem_conduit_slayer
-		has_country_flag = mem_conduit_avatar_awakening
 		any_owned_ship = {
 			is_ship_size = mem_conduit_avatar_bound
 		}
@@ -2632,7 +2695,6 @@ country_event = {
 			name = "Magma Diver"
 			settings = {
 				spawn_debris = no 
-				is_boss = yes
 			}
 			effect = {
 				set_owner = event_target:mem_conduit_avatar_owner
@@ -2675,8 +2737,10 @@ country_event = {
 	
 	trigger = {
 		is_ai = no
-		has_country_flag = mem_conduit_slayer
-		has_country_flag = mem_garden_aid_complete
+		AND = {
+			has_country_flag = mem_conduit_slayer
+			has_country_flag = mem_garden_aid_complete
+		}
 		any_owned_planet = {
 			has_planet_flag = mem_conduit_garden
 			NOR = {
@@ -2759,9 +2823,20 @@ country_event = {
 					limit = { has_modifier = mem_obelisk_4_mod }
 					remove_modifier = mem_obelisk_4_mod
 				}
-				add_modifier = {
-							modifier = "mem_obelisk_7_mod"
-							days = -1
+				if = {
+					limit = { has_modifier = mem_obelisk_6_mod }
+					remove_modifier = mem_obelisk_6_mod
+				}
+				if = {
+					limit = { 
+						NOT = {
+							has_modifier = mem_obelisk_7_mod 
+						}
+					}
+					add_modifier = {
+						modifier = "mem_obelisk_7_mod"
+						days = -1
+					}
 				}
 			}
 		}
@@ -2780,15 +2855,12 @@ country_event = {
 	desc = "mem_the_conduit.150.desc"
 	picture = GFX_evt_federation_fleet
 	show_sound = event_mystic_reveal
-	location = event_target:mem_garden_clear
+	location = event_target:mem_conduit_fleet_reward_loc
 	
 	is_triggered_only = yes
 	
 	trigger = {
 		is_ai = no
-		has_country_flag = mem_conduit_slayer
-		has_country_flag = mem_garden_aid_complete
-		#has_country_flag = mem_conduit_obelisks_destroyed
 		has_country_flag = mem_the_conduit_reward_unlock
 		any_owned_planet = {
 			has_planet_flag = mem_conduit_garden
