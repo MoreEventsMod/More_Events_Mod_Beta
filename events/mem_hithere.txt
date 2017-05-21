@@ -1,0 +1,338 @@
+########################
+# Hi there!
+# Writing and code by ViolentBeetle
+# Idea by Malthus
+########################
+
+namespace = mem_hithere
+
+@tier1materialreward = 6
+@tier1materialmin = 100
+@tier1materialmax = 500
+@tier2materialreward = 12
+@tier2materialmin = 150
+@tier2materialmax = 1000
+@tier3materialreward = 18
+@tier3materialmin = 250
+@tier3materialmax = 1500
+@tier4materialreward = 24
+@tier4materialmin = 350
+@tier4materialmax = 2000
+
+@tier1influencereward = 6
+@tier1influencemin = 40
+@tier1influencemax = 100
+@tier2influencereward = 12
+@tier2influencemin = 80
+@tier2influencemax = 175
+@tier3influencereward = 18
+@tier3influencemin = 125
+@tier3influencemax = 250
+@tier4influencereward = 24
+@tier4influencemin = 150
+@tier4influencemax = 300
+
+@tier1researchreward = 6
+@tier1researchmin = 60
+@tier1researchmax = 150
+@tier2researchreward = 12
+@tier2researchmin = 90
+@tier2researchmax = 250
+@tier3researchreward = 18
+@tier3researchmin = 120
+@tier3researchmax = 350
+@tier4researchreward = 24
+@tier4researchmin = 150
+@tier4researchmax = 500
+
+################################################################################
+################################################################################
+################################################################################
+
+#Signal received
+planet_event = {
+	id = mem_hithere.1
+	title = mem_hithere.1.name
+	desc = mem_hithere.1.desc
+	
+	picture = GFX_evt_physics_research
+	show_sound = event_radio_chatter
+	
+	mean_time_to_happen = {
+		months = 1
+	}
+	
+	trigger = {
+		NOT = {
+			has_global_flag = mem_hithere_happened
+		}
+		has_owner = yes
+		owner = { is_ai = no }
+	}
+	
+	immediate = {
+		set_global_flag = mem_hithere_happened
+		owner = {
+			set_country_flag = mem_hithere_country
+		}
+	}
+	
+	option = {
+		name = ONSCREEN
+		
+		hidden_effect = {
+			create_species = {
+				name = "Valintu"
+				class = random
+				portrait = random
+				traits = random
+			}
+			
+			last_created_species = {
+				save_global_event_target_as = mem_hithere_species
+			}
+			
+			spawn_system = {
+				min_distance = 20
+				max_distance = 50
+				initializer = "mem_hithere_init"
+			}
+			
+			random_system = {
+				limit = {
+					has_star_flag = mem_hithere_system
+				}
+				save_global_event_target_as = mem_hithere_system
+			}
+			
+			owner = {
+				country_event = {
+					id = mem_hithere.2
+				}
+			}
+			
+		}
+	}
+	
+	option = {
+		name = mem_hithere.1a
+		
+		trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_xenophobe
+				}
+			}
+		}
+		
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier2materialreward
+				min = @tier2materialmin
+				max = @tier2materialmax
+			}
+		}
+	}
+}
+
+country_event = {
+	id = mem_hithere.2
+	title = mem_hithere.2.name
+	desc = mem_hithere.2.desc
+	
+	diplomatic = yes
+	
+	is_triggered_only = yes
+	
+	picture_event_data = {
+		portrait = event_target:mem_hithere_species
+		room = mem_server_room
+	}
+	
+	option = {
+		name = mem_hithere.2a
+		
+		trigger = {
+			NOR = {
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_xenophile
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
+				has_civic = civic_hive_devouring_swarm
+				has_civic = civic_fanatic_purifiers
+			}
+		}
+		
+		create_point_of_interest = {
+			id = mem_hithere_poi
+			name = mem_hithere_poi
+			desc = mem_hithere_poi_desc
+			location = event_target:mem_hithere_system
+		}
+	}
+	
+	option = {
+		name = mem_hithere.2a.phile
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_xenophile
+			}
+		}
+		
+		create_point_of_interest = {
+			id = mem_hithere_poi
+			name = mem_hithere_poi
+			desc = mem_hithere_poi_desc
+			location = event_target:mem_hithere_system
+		}
+	}
+	
+	option = {
+		name = mem_hithere.2a.phobe
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
+			}
+			NOT = {
+				has_civic = civic_hive_devouring_swarm
+			}
+		}
+		
+		create_point_of_interest = {
+			id = mem_hithere_poi
+			name = mem_hithere_poi
+			desc = mem_hithere_poi_desc
+			location = event_target:mem_hithere_system
+		}
+	}
+	
+	option = {
+		name = mem_hithere.2a.swarm
+		
+		trigger = {
+			has_civic = civic_hive_devouring_swarm
+		}
+		
+		create_point_of_interest = {
+			id = mem_hithere_poi
+			name = mem_hithere_poi
+			desc = mem_hithere_poi_desc
+			location = event_target:mem_hithere_system
+		}
+	}
+	
+	option = {
+		name = mem_hithere.2a.pur
+		
+		trigger = {
+			has_civic = civic_fanatic_purifiers
+		}
+		
+		create_point_of_interest = {
+			id = mem_hithere_poi
+			name = mem_hithere_poi
+			desc = mem_hithere_poi_desc
+			location = event_target:mem_hithere_system
+		}
+	}
+}
+
+ship_event = {
+	id = mem_hithere.3
+	title = mem_hithere.3.name
+	desc = mem_hithere.3.desc
+	
+	picture = GFX_evt_ship_in_orbit
+	show_sound = event_radio_chatter
+	
+	is_triggered_only = yes
+	fire_only_once = yes
+	
+	trigger = {
+		owner = {
+			has_country_flag = mem_hithere_country
+		}
+		from = {
+			has_star_flag = mem_hithere_system
+		}
+	}
+	
+	immediate = {
+		owner  = {
+			remove_point_of_interest = mem_hithere_poi
+		}
+	}
+	
+	option = {
+		name = TERRIBLE
+		
+		trigger = {
+			owner = {
+				NOR = {
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_xenophobe
+					has_civic = civic_hive_devouring_swarm
+					has_civic = civic_fanatic_purifiers
+				}
+			}
+		}
+		
+		owner = {
+			add_influence = 25
+		}
+	}
+	
+	option = {
+		name = mem_hithere.3a.phobe
+		
+		trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_xenophobe
+				}
+				NOT = {
+					has_civic = civic_hive_devouring_swarm
+				}
+			}
+		}
+		
+		owner = {
+			add_influence = 25
+		}
+	}
+	
+	option = {
+		name = mem_hithere.3a.swarm
+		
+		trigger = {
+			owner = {
+				has_civic = civic_hive_devouring_swarm
+			}
+		}
+		
+		owner = {
+			add_influence = 25
+		}
+	}
+	
+	option = {
+		name = mem_hithere.3a.pur
+		
+		trigger = {
+			owner = {
+				has_civic = civic_fanatic_purifiers
+			}
+		}
+		
+		owner = {
+			add_influence = 25
+		}
+	}
+}
