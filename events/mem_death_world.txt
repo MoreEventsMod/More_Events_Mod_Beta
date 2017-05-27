@@ -283,7 +283,7 @@ planet_event = {
 	option = {
 		name = mem_death_world.6a
 		
-		allow = {
+		trigger = {
 			owner = {
 				minerals > 249
 			}
@@ -492,5 +492,303 @@ planet_event = {
 				}
 			}
 		}
+	}
+}
+
+#Looking for a solution
+planet_event = {
+	id = mem_death_world.11
+	title = mem_death_world.11.name
+	desc = mem_death_world.11.desc
+	picture = GFX_evt_alien_nature
+	show_sound = event_alien_nature
+	location = ROOT
+	
+	mean_time_to_happen = {
+		months = 36
+	}
+	
+	trigger = {
+		has_planet_flag = mem_death_world_advanced
+		NOT = {
+			has_planet_flag = mem_death_world_looking
+		}
+	}
+	
+	immediate = {
+		set_planet_flag = mem_death_world_looking
+	}
+	
+	option = {
+		name = mem_death_world.11a
+		
+		trigger = {
+			owner = {
+				NOR = {
+					has_ethic = ethic_fanatic_xenophile
+					has_ethic = ethic_fanatic_pacifist
+				}
+			}
+		}
+		
+		begin_event_chain = {
+			event_chain = mem_death_world_chain
+		}
+		
+		enable_special_project = {
+			name = MEM_DEATH_WORLD_WAR_ON_NATURE
+			owner = root
+			location = this
+		}
+	}
+	
+	#Option for study
+	#Option for walled garden
+	#Option for psionic
+	#Option for hive mind
+}
+
+#War on nature: Choosing the path
+
+planet_event = {
+	id = mem_death_world.12
+	title = mem_death_world.12.name
+	desc = mem_death_world.12.desc
+	picture = GFX_evt_alien_nature
+	show_sound = event_alien_nature
+	location = ROOT
+
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_death_world.12a
+		
+		enable_special_project = {
+			name = MEM_DEATH_WORLD_WILDLIFE_REMOVAL
+			owner = root
+			location = this
+		}
+		
+		enable_special_project = {
+			name = MEM_DEATH_WORLD_EXTERMINATION_OR_BUST
+			owner = root
+			location = this
+		}
+	}
+}
+
+#War on nature: Wildlife removal
+
+planet_event = {
+	id = mem_death_world.13
+	title = mem_death_world.13.name
+	desc = mem_death_world.13.desc
+	picture = GFX_evt_nuclear_explosion
+	show_sound = event_alien_nature
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_planet_flag = mem_death_world_finished
+		change_pc = pc_nuked
+	}
+	
+	option = {
+		name = mem_death_world.13a
+		
+		owner = {
+			add_society_research = 1000
+		}
+		add_modifier = {
+			modifier = mem_death_world_wasteland
+			days = -1
+		}
+		
+		IF = {
+			limit = {
+				has_modifier = mem_death_world_2
+			}
+			remove_modifier = mem_death_world_2
+		}
+		
+		IF = {
+			limit = {
+				has_modifier = mem_death_world_3
+			}
+			remove_modifier = mem_death_world_3
+		}
+	}
+}
+
+#Extermination or bust
+
+planet_event = {
+	id = mem_death_world.14
+	title = mem_death_world.14.name
+	desc = mem_death_world.14.desc
+	picture = GFX_evt_ground_combat
+	show_sound = event_alien_nature
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_planet_flag = mem_death_world_fight
+		create_country = {
+			name = "Death world animalia"
+			type = faction
+		}
+		last_created_country = {
+			set_country_flag = mem_death_world_monsters
+		}
+		create_army = {
+			name = "Alpha torrasque"
+			owner = last_created
+			type = "mem_alpha_torrasque_army"
+		}
+		create_army = {
+			name = "Torrasque"
+			owner = last_created
+			type = "mem_torrasque_army"
+		}
+		create_army = {
+			name = "Torrasque"
+			owner = last_created
+			type = "mem_torrasque_army"
+		}
+		create_army = {
+			name = "Hunter-killer pack"
+			owner = last_created
+			type = "mem_hunter_killer_army"
+		}
+		create_army = {
+			name = "Hunter-killer pack"
+			owner = last_created
+			type = "mem_hunter_killer_army"
+		}
+		create_army = {
+			name = "Hunter-killer pack"
+			owner = last_created
+			type = "mem_hunter_killer_army"
+		}
+		create_army = {
+			name = "Hunter-killer pack"
+			owner = last_created
+			type = "mem_hunter_killer_army"
+		}
+		create_army = {
+			name = "Hunter-killer pack"
+			owner = last_created
+			type = "mem_hunter_killer_army"
+		}
+	}
+	
+	option = {
+		name = mem_death_world.14a
+	}
+	
+}
+
+#We won! FROMFROM = planet
+
+country_event = {
+	id = mem_death_world.15
+	title = mem_death_world.15.name
+	desc = mem_death_world.15.desc
+	picture = GFX_evt_ground_combat
+	show_sound = event_alien_nature
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		FROMFROM = {
+			has_planet_flag = mem_death_world_fight
+			NOT = { has_planet_flag = mem_death_world_finished }
+		}
+		FROM = {
+			has_country_flag = mem_death_world_monsters
+		}
+	}
+	
+	immediate = {
+		FROMFROM = {
+			set_planet_flag = mem_death_world_finished
+		}
+	}
+	
+	option = {
+		name = mem_death_world.15a
+		
+		
+		add_society_research = 500
+		
+		FROMFROM = {
+			add_modifier = {
+				modifier = mem_death_world_graveyard
+				days = -1
+			}
+			
+			remove_planet_flag = mem_paradise_blocked
+			
+			IF = {
+				limit = {
+					has_modifier = mem_death_world_2
+				}
+				remove_modifier = mem_death_world_2
+			}
+			
+			IF = {
+				limit = {
+					has_modifier = mem_death_world_3
+				}
+				remove_modifier = mem_death_world_3
+			}
+		}
+	}
+}
+
+# We lost!
+
+country_event = {
+	id = mem_death_world.16
+	title = mem_death_world.16.name
+	desc = mem_death_world.16.desc
+	picture = GFX_evt_ground_combat
+	show_sound = event_alien_nature
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		FROMFROM = {
+			has_planet_flag = mem_death_world_fight
+			NOT = { has_planet_flag = mem_death_world_finished }
+		}
+		FROM = {
+			has_country_flag = mem_death_world_monsters
+		}
+	}
+	
+	immediate = {
+		FROMFROM = {
+			remove_modifier = mem_death_world_2
+			remove_modifier = mem_death_world_3
+			set_planet_flag = mem_death_world_finished
+			change_pc = pc_toxic
+			add_modifier = {
+				modifier = mem_death_world_toxic
+				days = -1
+			}
+			orbital_deposit_tile = {
+				clear_deposits = yes
+				add_deposit = d_enormous2_society_deposit
+			}
+		}
+	}
+	
+	option = {
+		name = mem_death_world_LOST
 	}
 }
