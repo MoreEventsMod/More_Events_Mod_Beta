@@ -149,6 +149,12 @@ planet_event = {
 		NOR = {
 			has_planet_flag = mem_death_world_finished
 			has_planet_flag = mem_death_world_happening
+			owner = {
+				has_ethic = ethic_hive_mind
+			}
+		}
+		any_pop = {
+			is_robot_pop = no
 		}
 	}
 	
@@ -264,6 +270,9 @@ planet_event = {
 			has_planet_flag = mem_death_world_finished
 			has_planet_flag = mem_death_world_happening
 			has_planet_flag = mem_death_world_militia
+			owner = {
+				has_ethic = ethic_hive_mind
+			}
 		}
 	}
 	
@@ -344,9 +353,19 @@ planet_event = {
 		random_pop = {
 			kill_pop = yes
 		}
-		add_modifier = {
-			modifier = mem_death_world_death_swarm
-			days = 180
+		IF = {
+			limit = {
+				owner = {
+					NOT = {
+						has_ethic = ethic_hive_mind
+					}
+				}
+			}
+			
+			add_modifier = {
+				modifier = mem_death_world_death_swarm
+				days = 180
+			}
 		}
 	}
 	
@@ -389,9 +408,20 @@ planet_event = {
 			}
 			set_ruined = yes
 		}
-		add_modifier = {
-			modifier = mem_death_world_stampede
-			days = 120
+		
+		IF = {
+			limit = {
+				owner = {
+					NOT = {
+						has_ethic = ethic_hive_mind
+					}
+				}
+			}
+			
+			add_modifier = {
+				modifier = mem_death_world_stampede
+				days = 120
+			}
 		}
 	}
 	
@@ -454,6 +484,9 @@ planet_event = {
 			has_planet_flag = mem_death_world_finished
 			has_planet_flag = mem_death_world_happening
 			has_planet_flag = mem_death_world_purity
+			owner = {
+				has_ethic = ethic_hive_mind
+			}
 		}
 	}
 	
@@ -602,6 +635,25 @@ planet_event = {
 		}
 	}
 	#Option for hive mind
+	option = {
+		name = mem_death_world.11e
+		
+		trigger = {
+			owner = {
+				has_ethic = ethic_hive_mind
+			}
+		}
+		
+		begin_event_chain = {
+			event_chain = mem_death_world_chain
+		}
+		
+		enable_special_project = {
+			name = MEM_DEATH_WORLD_HIVE
+			owner = root
+			location = this
+		}
+	}
 }
 
 #War on nature: Choosing the path
@@ -994,6 +1046,10 @@ planet_event = {
 	
 	immediate = {
 		set_planet_flag = mem_death_world_walled_garden_permitted
+		planet_event = {
+			id = mem_death_world.29
+			days = 3600
+		}
 	}
 	
 	option = {
@@ -1269,4 +1325,179 @@ planet_event = {
 		}
 	}
 
+}
+
+#Planetmind joined hive
+planet_event = {
+	id = mem_death_world.27
+	title = mem_death_world.27.name
+	desc = mem_death_world.27.desc
+	picture = GFX_evt_alien_nature
+	show_sound = event_alien_nature
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_planet_flag = mem_death_world_finished
+		remove_modifier = mem_death_world_2
+		remove_modifier = mem_death_world_3
+		remove_planet_flag = mem_paradise_blocked
+	}
+	
+	option = {
+		name = mem_death_world.27a
+		custom_tooltip = mem_death_world.27a.tooltip
+		
+		trigger = {
+			any_tile = {
+				has_pop = no
+				has_blocker = no
+			}
+		}
+		
+		hidden_effect = {
+			create_species = {
+				name = random
+				class = random
+				portrait = random
+				traits = {
+					trait = trait_presentient_starborn
+					trait = trait_strong
+					trait = trait_fleeting
+					trait = trait_slow_learners
+					trait = trait_hive_mind
+				}
+				homeworld = root
+			}
+			last_created_species = {
+				save_event_target_as = planetmind
+			}
+			random_tile = {
+				limit = {
+					has_pop = no
+					has_blocker = no
+				}
+				create_pop = {
+					species = event_target:planetmind
+				}
+			}
+			random_tile = {
+				limit = {
+					has_pop = no
+					has_blocker = no
+				}
+				create_pop = {
+					species = event_target:planetmind
+				}
+			}
+			random_tile = {
+				limit = {
+					has_pop = no
+					has_blocker = no
+				}
+				create_pop = {
+					species = event_target:planetmind
+				}
+			}
+			
+		}
+		
+		owner = {
+			end_event_chain = "mem_death_world_chain"
+		}
+	}
+	
+	option = {
+		name = mem_death_world.27b
+		
+		add_modifier = {
+			modifier = mem_death_world_dead_planetmind
+			days = -1
+		}
+		
+		owner = {
+			end_event_chain = "mem_death_world_chain"
+		}
+	}
+}
+
+#Planetmind rejected hive
+planet_event = {
+	id = mem_death_world.28
+	title = mem_death_world.28.name
+	desc = mem_death_world.28.desc
+	picture = GFX_evt_alien_nature
+	show_sound = event_alien_nature
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		remove_modifier = mem_death_world_2
+		remove_modifier = mem_death_world_3
+		remove_modifier = mem_death_world_militia
+		remove_modifier = mem_death_world_militia_supported
+		set_planet_flag = mem_death_world_finished
+		change_pc = pc_toxic
+		add_modifier = {
+			modifier = mem_death_world_toxic
+			days = -1
+		}
+		orbital_deposit_tile = {
+			clear_deposits = yes
+			add_deposit = d_enormous2_society_deposit
+		}
+	}
+	
+	option = {
+		name = mem_death_world_LOST
+		
+		owner = {
+			end_event_chain = "mem_death_world_chain"
+		}
+	}
+}
+
+#Failure
+planet_event = {
+	id = mem_death_world.29
+	title = mem_death_world.29.name
+	desc = mem_death_world.29.desc
+	picture = GFX_evt_alien_nature
+	show_sound = event_alien_nature
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = {
+			has_planet_flag = mem_death_world_finished
+		}
+	}
+	
+	immediate = {
+		remove_modifier = mem_death_world_2
+		remove_modifier = mem_death_world_3
+		remove_modifier = mem_death_world_militia
+		remove_modifier = mem_death_world_militia_supported
+		set_planet_flag = mem_death_world_finished
+		change_pc = pc_toxic
+		add_modifier = {
+			modifier = mem_death_world_toxic
+			days = -1
+		}
+		orbital_deposit_tile = {
+			clear_deposits = yes
+			add_deposit = d_enormous2_society_deposit
+		}
+	}
+	
+	option = {
+		name = mem_death_world_LOST
+		
+		owner = {
+			end_event_chain = "mem_death_world_chain"
+		}
+	}
 }
