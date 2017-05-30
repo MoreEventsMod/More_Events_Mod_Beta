@@ -1,0 +1,96 @@
+namespace = mem_fish
+
+#Void hunter
+#Idea, code and writing by ViolentBeetle
+
+#Game start event: Set the alarm clock
+event = {
+	id = mem_fish.1
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		any_system = {
+			has_star_flag = mem_fish_system
+		}
+	}
+	
+	immediate = {
+		#This one will be phased out eventually
+		random_country = {
+			limit = {
+				is_ai = no
+			}
+			random_owned_planet = {
+				spawn_system = {
+					initializer = mem_fish_home
+					min_distance = 5
+					max_distance = 10
+				}
+			}
+		}
+		
+		#And this one is the actual point
+		event = {
+			id = mem_fish.2
+			days = 30 #This one will be increased once testing is complete
+		}
+	}
+
+}
+
+#Wakey-wakey
+event = {
+	id = mem_fish.2
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_global_flag = mem_fish_woke
+	}
+}
+
+#Picking the target
+
+event = {
+	id = mem_fish.3
+	
+	hide_window = yes
+	
+	mean_time_to_happen = {
+		days = 14
+	}
+	
+	trigger = {
+		has_global_flag = mem_fish_woke
+		NOT = { has_global_flag = mem_fish_resting }
+		NOT = { has_global_flag = mem_fish_hunting }
+		any_planet = {
+			has_owner = yes
+			any_pop = {
+				is_robot_pop = no
+			}
+			num_pops > 0
+		}
+	}
+	
+	immediate = {
+		any_planet = {
+			limit = {
+				has_owner = yes
+				any_pop = {
+					is_robot_pop = no
+				}
+				num_pops > 0
+			}
+			
+			set_planet_flag = mem_fish_target
+		}
+	}
+}
+
+
