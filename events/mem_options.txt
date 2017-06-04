@@ -106,13 +106,74 @@ country_event = {
 	# LEX Submenu
 	option = {
 		name = mem_options.4.a
-		country_event = { id = mem_options.5 }
+		hidden_effect = {
+			country_event = { id = mem_options.5 }
+		}
 	}
 	
 	# Shieldworld Options
 	option = {
 		name = mem_options.4.b
-		country_event = { id = mem_options.6 }
+		hidden_effect = {
+			country_event = { id = mem_options.6 }
+		}
+	}
+	
+	# Paradise worlds activation
+	option = {
+		name = mem_options.4.c
+		trigger = {
+			has_global_flag = mem_paradise_worlds_OFF
+		}
+		custom_tooltip = mem_options.4.c.tooltip
+		hidden_effect = {
+			remove_global_flag = mem_paradise_worlds_OFF
+			every_planet = {
+				limit = {
+					OR = {
+						is_planet_class = pc_gaia
+						is_planet_class = pc_ringworld_habitable
+					}
+					NOR = {
+						has_modifier = mem_paradise_world
+						has_planet_flag = mem_paradise_blocked
+					}
+				}
+				add_modifier = {
+					modifier = mem_paradise_world
+					days = -1
+				}
+			}
+			country_event = { id = mem_options.4 }
+		}
+	}
+	
+	# Paradise worlds deactivatiom
+	option = {
+		name = mem_options.4.d
+		trigger = {
+			NOT = {
+				has_global_flag = mem_paradise_worlds_OFF
+			}
+		}
+		hidden_effect = {
+			set_global_flag = mem_paradise_worlds_OFF
+			every_planet = {
+				limit = {
+					has_modifier = mem_paradise_world
+				}
+				remove_modifier = mem_paradise_world
+			}
+			country_event = { id = mem_options.4 }
+		}
+	}
+	
+	# Force starting menu
+	option = {
+		name = mem_options.4.e
+		hidden_effect = {
+			country_event = { id = mem_options.7 }
+		}
 	}
 	
 	# Exit EVENT
@@ -198,7 +259,9 @@ country_event = {
 	# Back to previous Menu
 	option = {
 		name = mem_options.back
-		country_event = { id = mem_options.4 }
+		hidden_effect = {
+			country_event = { id = mem_options.4 }
+		}
 	}
 	
 	#Exit
@@ -300,11 +363,220 @@ country_event = {
 	# Back to previous Menu
 	option = {
 		name = mem_options.back
-		country_event = { id = mem_options.4 }
+		hidden_effect = {
+			country_event = { id = mem_options.4 }
+		}
 	}
 	
 	# Exit EVENT
 	option = {
 		name = mem_options.exit
+	}
+}
+
+# Force spawn menu
+country_event = {
+	id = mem_options.7
+	title = mem_options.7.name
+	desc = mem_options.7.desc
+	picture = GFX_evt_mem_options
+	
+	is_triggered_only = yes
+	
+	# anomalies
+	option = {
+		name = mem_options.7.a
+		hidden_effect = {
+			country_event = { id = mem_options.8 }
+		}
+	}
+	
+	# colony events
+	option = {
+		name = mem_options.7.b
+		hidden_effect = {
+			country_event = { id = mem_options.9 }
+		}
+	}
+	
+	# Back to previous Menu
+	option = {
+		name = mem_options.back
+		hidden_effect = {
+			country_event = { id = mem_options.4 }
+		}
+	}
+	
+	# Exit EVENT
+	option = {
+		name = mem_options.exit
+	}
+}
+
+# Force spawn anomalies submenu
+country_event = {
+	id = mem_options.8
+	title = mem_options.8.name
+	desc = mem_options.8.desc
+	picture = GFX_evt_mem_options
+	
+	is_triggered_only = yes
+	
+	# abandoned mecha
+	option = {
+		name = mem_options.8.a
+		hidden_effect = {
+			set_timed_country_flag = { flag = mem_spawn_abandoned_mecha days = 2 }
+			country_event = { id = mem_options.10 days = 1}
+		}
+	}
+	
+	# enterprise of the fallen
+	option = {
+		name = mem_options.8.b
+		hidden_effect = {
+			set_timed_country_flag = { flag = mem_spawn_enterprise_fallen days = 2 }
+			country_event = { id = mem_options.10 days = 1}
+		}
+	}
+	
+	# matrix
+	option = {
+		name = mem_options.8.c
+		hidden_effect = {
+			set_timed_country_flag = { flag = mem_spawn_matrix days = 2 }
+			country_event = { id = mem_options.10 days = 1}
+		}
+	}
+	
+	# giant tanks
+	option = {
+		name = mem_options.8.d
+		hidden_effect = {
+			set_timed_country_flag = { flag = mem_spawn_giant_tanks days = 2 }
+			country_event = { id = mem_options.10 days = 1}
+		}
+	}
+	
+	# lava fortress
+	option = {
+		name = mem_options.8.e
+		hidden_effect = {
+			set_timed_country_flag = { flag = mem_spawn_lava_fortress days = 2 }
+			country_event = { id = mem_options.10 days = 1}
+		}
+	}
+	
+	# Back to previous Menu
+	option = {
+		name = mem_options.back
+		hidden_effect = {
+			country_event = { id = mem_options.7 }
+		}
+	}
+	
+	# Exit EVENT
+	option = {
+		name = mem_options.exit
+	}
+}
+
+# Spawning Notification
+country_event = {
+	id = mem_options.10
+	title = mem_options.10.name
+	desc = mem_options.10.desc
+	picture = GFX_evt_mem_options
+	location = event_target:mem_anomaly_target
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		IF = {
+			limit = {
+				has_country_flag = mem_spawn_lava_fortress
+			}
+			capital_scope = {
+				closest_system = {
+					limit = {
+						any_planet = {
+							is_planet_class = pc_molten
+							has_anomaly = no
+						}
+					}
+					random_system_planet = {
+						limit = {
+							is_planet_class = pc_molten
+							has_anomaly = no
+						}
+						add_anomaly = mem_lava_fortress_category
+						save_event_target_as = mem_anomaly_target
+					}
+				}
+			}
+		}
+		IF = {
+			limit = {
+				OR = {
+					has_country_flag = mem_spawn_abandoned_mecha
+					has_country_flag = mem_spawn_enterprise_fallen
+					has_country_flag = mem_spawn_matrix
+					has_country_flag = mem_spawn_giant_tanks
+				}
+			}
+			capital_scope = {
+				closest_system = {
+					limit = {
+						any_planet = {
+							is_planet_class = pc_nuked
+							has_anomaly = no
+						}
+					}
+					random_system_planet = {
+						limit = {
+							is_planet_class = pc_nuked
+							has_anomaly = no
+						}
+						IF = {
+							limit = {
+								root = {
+									has_country_flag = mem_spawn_abandoned_mecha
+								}
+							}
+							add_anomaly = mem_abandoned_mecha_category
+						}
+						IF = {
+							limit = {
+								root = {
+									has_country_flag = mem_spawn_enterprise_fallen
+								}
+							}
+							add_anomaly = mem_enterprise_fallen_category
+						}
+						IF = {
+							limit = {
+								root = {
+									has_country_flag = mem_spawn_matrix
+								}
+							}
+							add_anomaly = mem_matrix_category
+						}
+						IF = {
+							limit = {
+								root = {
+									has_country_flag = mem_spawn_giant_tanks
+								}
+							}
+							add_anomaly = mem_giant_tank_category
+						}
+						save_event_target_as = mem_anomaly_target
+					}
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = "OK"
 	}
 }
