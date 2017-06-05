@@ -48,8 +48,7 @@ namespace = mem_last_orila
 ################################################################################
 ################################################################################
  
- # Chap'lin contacts the player and marks a system
-
+# Chap'lin contacts the player and marks a system
 country_event = {
 	id = mem_last_orila.1
 	title = mem_last_orila.1.name
@@ -59,7 +58,7 @@ country_event = {
 	fire_only_once = yes
 	
 	trigger = {
-#		has_country_flag = mem_last_orila_start
+		has_country_flag = mem_last_orila_start
 		is_ai = no
 	}
 	
@@ -71,17 +70,19 @@ country_event = {
 	immediate = {
 		random_system = {
 			limit = {
-#				has_star_flag = mem_ea_uplifter_system_0
-				any_planet = {
-					is_capital = yes
-					owner = {
-						is_same_value = root
-					}
-				}
+				has_star_flag = mem_ea_uplifter_system_0
+#				any_planet = {
+#					is_capital = yes
+#					owner = {
+#						is_same_value = root
+#					}
+#				}
 			}
 			spawn_system = {
-				min_distance = 50
-				max_distance = 80
+#				min_distance = 50
+#				max_distance = 80
+				min_distance = 10
+				max_distance = 40
 				initializer = mem_last_orila_1_system
 			}
 		}
@@ -121,19 +122,21 @@ country_event = {
 	}
 }
 
+# Arrival at teh Philus Sigma sytem, project to investigate the wreckage is spawned
 ship_event = {
 	id = mem_last_orila.2
 	title = mem_last_orila.2.name
 	desc = mem_last_orila.2.desc
 	picture = GFX_evt_mem_orila_wreckage
 	show_sound = event_ship_bridge
+	location = root
 	fire_only_once = yes
 	
 	is_triggered_only = yes
 	
 	trigger = {
 		owner = {
-#			has_country_flag = mem_last_orila_start
+			has_event_chain = mem_last_orila_1_chain
 		}
 		FROM = {
 			has_star_flag = mem_last_orila_1_system
@@ -141,7 +144,11 @@ ship_event = {
 	}
 	
 	immediate = {
-		
+		owner = {
+			# starts pirate spawning event
+#			country_event = { id = mem_last_orila.3 days = 100 random = 40 }
+			country_event = { id = mem_last_orila.3 days = 1 }
+		}
 	}
 	
 	option = {
@@ -158,5 +165,412 @@ ship_event = {
 				}
 			}
 		}
+	}
+}
+
+# Pirates are spawned
+country_event = {
+	id = mem_last_orila.3
+	title = mem_last_orila.3.name
+	desc = mem_last_orila.3.desc
+	picture = GFX_evt_mem_space_battle
+	show_sound = event_space_battle
+	location = event_target:mem_last_orila_pirate_fleet_1
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_system = {
+			limit = {
+				has_star_flag = mem_last_orila_1_system
+			}
+			random_system_planet = {
+				create_pirate_country = yes
+				create_fleet = {
+					name = "NAME_Pirate_Fleet"
+					effect = {
+						set_owner = event_target:pirate_country
+						# while = {
+							# count = 2
+							# create_ship = {
+								# name = random
+								# design = "NAME_Black_Earl"
+								# graphical_culture = "pirate_01"
+							# }
+						# }
+						# while = {
+							# count = 6
+							# create_ship = {
+								# name = random
+								# design = "NAME_Corsair"
+								# graphical_culture = "pirate_01"
+							# }
+						# }
+						# while = {
+							# count = 3
+							# create_ship = {
+								# name = random
+								# design = NAME_Reaver
+								# graphical_culture = "pirate_01"
+							# }
+						# }
+						while = {
+							count = 6
+							create_ship = {
+								name = random
+								design = "NAME_Brigand"
+								graphical_culture = "pirate_01"
+							}
+						}
+						# while = {
+							# count = 10
+							# create_ship = {
+								# name = random
+								# design = "NAME_Skull"
+								# graphical_culture = "pirate_01"
+							# }
+						# }
+						set_location = prev
+					}
+				}
+				last_created_fleet = {
+					fleet_event = { id = mem_last_orila.4 days = 1 }
+					save_event_target_as = mem_last_orila_pirate_fleet_1
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_last_orila.3.a
+	}
+}
+
+# sends pirate fleet to wreckage
+fleet_event = {
+	id = mem_last_orila.4
+	hide_window = yes
+	
+	is_triggered_only = yes
+
+	immediate = {
+		orbit = {
+			solar_system = {
+				random_system_ambient_object = {
+					limit = {
+						has_ambient_object_flag = mem_last_orila_wreckage
+					}
+					save_event_target_as = mem_last_orila_wreckage
+				}
+			}
+		}
+		clear_fleet_actions = ROOT
+		queue_actions = {
+			move_to = event_target:mem_last_orila_wreckage
+		}
+	}
+}
+
+# wreckage investigation finished, pirate system is spawned
+ship_event = {
+	id = mem_last_orila.5
+	title = mem_last_orila.5.name
+	desc = mem_last_orila.5.desc
+	picture = GFX_evt_mem_space_battle
+	show_sound = event_ship_bridge
+	location = root
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		owner = {
+			random_system = {
+				limit = {
+					has_star_flag = mem_ea_uplifter_system_0
+#					any_planet = {
+#						is_capital = yes
+#						owner = {
+#							is_same_value = root.owner
+#						}
+#					}
+				}
+				spawn_system = {
+#					min_distance = 50
+#					max_distance = 80
+					min_distance = 10
+					max_distance = 30
+					initializer = mem_last_orila_2_system
+				}
+			}
+			end_event_chain = mem_last_orila_1_chain
+			begin_event_chain = {
+				event_chain = mem_last_orila_2_chain
+				target = root.owner
+			}
+		}
+		random_system = {
+			limit = {
+				has_star_flag = mem_last_orila_2_system
+			}
+			save_event_target_as = mem_last_orila_2_system
+			random_system_planet = {
+				limit = {
+					is_planet_class = pc_asteroid
+				}
+				create_ambient_object = {
+					type = "mem_pride_of_harilla_reactor_object"
+					location = THIS
+				}
+				last_created_ambient_object = { 
+					set_ambient_object_flag = mem_last_orila_reactor
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_last_orila.5.a
+		owner = {
+			create_point_of_interest = {
+				id = mem_last_orila_2_system
+				name = mem_last_orila_2_system
+				desc = mem_last_orila_2_system_desc
+				event_chain = mem_last_orila_2_chain
+				location = event_target:mem_last_orila_2_system
+			}
+		}
+	}
+}
+
+# Arrival at the Pirate system, project for reactor is spawned
+ship_event = {
+	id = mem_last_orila.6
+	title = mem_last_orila.6.name
+	desc = mem_last_orila.6.desc
+	picture = GFX_evt_mem_space_battle
+	show_sound = event_yellow_alert
+	location = root
+	fire_only_once = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			has_event_chain = mem_last_orila_2_chain
+		}
+		FROM = {
+			has_star_flag = mem_last_orila_2_system
+		}
+	}
+	
+	immediate = {
+		owner = { remove_point_of_interest = mem_last_orila_2_system }
+	}
+	
+	option = {
+		name = mem_last_orila.6.a
+		solar_system = {
+			random_system_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_last_orila_reactor
+				}
+				enable_special_project = {
+					name = "MEM_LAST_ORILA_REACTOR_PICKUP_1"
+					location = this
+					owner = root.owner
+				}
+			}
+		}
+	}
+}
+
+# preperation for reactor pickup finished, reactor pickup project is spawned
+ship_event = {
+	id = mem_last_orila.7
+	title = mem_last_orila.7.name
+	desc = mem_last_orila.7.desc
+	picture = GFX_evt_mem_orila_wreckage
+	show_sound = event_yellow_alert
+	location = root
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_last_orila.7.a
+		solar_system = {
+			random_system_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_last_orila_reactor
+				}
+				enable_special_project = {
+					name = "MEM_LAST_ORILA_REACTOR_PICKUP_2"
+					location = this
+					owner = root.owner
+				}
+			}
+		}
+	}
+}
+
+# reactor pickup or respawn of project if chap'lin is not in the system
+ship_event = {
+	id = mem_last_orila.8
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		owner = {
+			IF = {
+				limit = {
+					any_owned_fleet = {
+						OR = {
+							has_fleet_flag = mem_last_orila_fleet
+						}
+						solar_system = {
+							has_star_flag = mem_last_orila_2_system
+						}
+					}
+				}
+				IF = {
+					limit = {
+						any_owned_fleet = {
+							has_fleet_flag = mem_last_orila_fleet_hull
+						}
+					}
+					random_owned_fleet = {
+						limit = {
+							has_fleet_flag = mem_last_orila_fleet
+						}
+						IF = {
+							limit = {
+								exists = leader
+								leader = {
+									leader_class = scientist
+								}
+							}
+							leader = {
+								unassign_leader = this
+							}
+						}
+						delete_fleet = this
+					}
+					random_system = {
+						limit = {
+							has_star_flag = mem_last_orila_2_system
+						}
+						random_system_ambient_object = {
+							limit = {
+								has_ambient_object_flag = mem_last_orila_reactor
+							}
+							create_fleet = { name = "The Last Orila" }
+							last_created_fleet = {
+								set_owner = root.owner
+								create_ship = {
+									name = "Sleipnir"
+									design = "Supremacy"
+									# TODO remove later, frogs ship does not need graphical_culture
+									graphical_culture = "fallen_empire_04"
+									prefix = no
+									upgradable = no
+								}
+								set_location = prev
+								set_fleet_flag = mem_last_orila_fleet
+							}
+							destroy_ambient_object = this
+						}
+					}
+					# leads to event sending ship to capital for repairing
+#					country_event = { id = mem_last_orila.##}
+					ELSE = {
+						random_owned_fleet = {
+							limit = {
+								has_fleet_flag = mem_last_orila_fleet
+							}
+							IF = {
+								limit = {
+									exists = leader
+									leader = {
+										leader_class = scientist
+									}
+								}
+								leader = {
+									unassign_leader = this
+								}
+							}
+							delete_fleet = this
+						}
+						random_system = {
+							limit = {
+								has_star_flag = mem_last_orila_2_system
+							}
+							random_system_ambient_object = {
+								limit = {
+									has_ambient_object_flag = mem_last_orila_reactor
+								}
+								create_fleet = { name = "The Last Orila" }
+								last_created_fleet = {
+									set_owner = root.owner
+									create_ship = {
+										name = "Sleipnir"
+										design = "Glory"
+										# TODO remove later, frogs ship does not need graphical_culture
+										graphical_culture = "fallen_empire_04"
+										prefix = no
+										upgradable = no
+									}
+									set_location = prev
+									set_fleet_flag = mem_last_orila_fleet
+									set_fleet_flag = mem_last_orila_fleet_reactor
+								}
+								destroy_ambient_object = this
+							}
+						}
+					}
+				}
+				ELSE = {
+					country_event = { id = mem_last_orila.9 }
+					random_system = {
+						limit = {
+							has_star_flag = mem_last_orila_2_system
+						}
+						random_system_ambient_object = {
+							limit = {
+								has_ambient_object_flag = mem_last_orila_reactor
+							}
+							enable_special_project = {
+								name = "MEM_LAST_ORILA_REACTOR_PICKUP_2"
+								location = this
+								owner = root.owner
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+# notification that chaplin has to be in the system
+country_event = {
+	id = mem_last_orila.9
+	title = mem_last_orila.9.name
+	desc = mem_last_orila.9.desc
+	picture = GFX_evt_mem_orila_wreckage
+	show_sound = event_yellow_alert
+	location = event_target:mem_last_orila_2_system
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_system = {
+			limit = {
+				has_star_flag = mem_last_orila_2_system
+			}
+			save_event_target_as = mem_last_orila_2_system
+		}
+	}
+	
+	option = {
+		name = mem_last_orila.9.a
 	}
 }
