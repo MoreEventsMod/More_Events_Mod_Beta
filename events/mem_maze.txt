@@ -12,7 +12,7 @@ planet_event = {
 	is_triggered_only = yes
 	
 	trigger = {
-		NOT = { has_global_flag = mem_maze_set }
+		#NOT = { has_global_flag = mem_maze_set }
 		owner = {
 			is_ai = no
 		}
@@ -28,7 +28,7 @@ planet_event = {
 	}
 	
 	immediate = {
-		set_global_flag = mem_maze_set
+		#set_global_flag = mem_maze_set
 		random_list = {
 			0 = {}
 			100 = {
@@ -91,6 +91,9 @@ planet_event = {
 	
 	trigger = {
 		NOT = { has_planet_flag = mem_maze_uncovered }
+		owner = {
+			NOT = { has_country_flag = mem_maze_discoverer }
+		}
 		OR = {
 			has_planet_flag = mem_maze_m@from
 			has_planet_flag = mem_maze_j@from
@@ -106,6 +109,14 @@ planet_event = {
 			id = mem_maze.3
 			days = 1
 		}
+		planet_event = { #Fix timing later
+			id = mem_maze.4
+			days = 30 
+			random = 10
+		}
+		owner = {
+			set_country_flag = mem_maze_discoverer
+		}
 	}
 	
 	option = {
@@ -113,6 +124,7 @@ planet_event = {
 	}
 }
 
+#Workaround since previous event can't place blocker
 planet_event = {
 	id = mem_maze.3
 	
@@ -133,7 +145,729 @@ planet_event = {
 					}
 				}
 			}
-			set_blocker = mem_tb_maze
+			set_blocker = mem_tb_maze1
+		}
+	}
+}
+
+#Step one
+planet_event = {
+	id = mem_maze.4
+	title = mem_maze.4.name
+	desc = mem_maze.4.desc
+	
+	picture = GFX_evt_alien_ruins
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			has_country_flag = mem_maze_discoverer
+			NOT = { has_country_flag = mem_maze_progressed }
+		}
+	}
+	
+	immediate = {
+		owner = {
+			set_country_flag = mem_maze_progressed
+		}
+	}
+	
+	option = {
+		name = mem_maze.4a
+		
+		begin_event_chain = {
+			event_chain = mem_maze_chain
+			target = ROOT
+		}
+		
+		enable_special_project = {
+			name = "MEM_MAZE_0_PROJECT"
+			location = this
+			owner = root
+		}
+	}
+	
+	option = {
+		name = mem_maze.4b
+	}
+	
+	option = {
+		name = mem_maze.4c
+		
+		trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_spiritualist
+					has_ethic = ethic_fanatic_spiritualist
+				}
+			}
+		}
+		
+		random_tile = {
+			limit = { has_blocker = mem_tb_maze1 }
+			set_blocker = mem_tb_maze_holy
+		}
+	}
+}
+
+#Step two
+planet_event = {
+	id = mem_maze.5
+	title = mem_maze.5.name
+	desc = mem_maze.5.desc
+	
+	picture = GFX_evt_alien_ruins
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_maze.5a
+		
+		save_event_target_as = maze_planet
+		
+		random_tile = {
+			limit = { has_blocker = mem_tb_maze1 }
+			set_blocker = mem_tb_maze2
+		}
+		enable_special_project = {
+			name = "MEM_MAZE_1_PROJECT"
+			location = this
+			owner = root
+		}
+	}
+}
+
+#First expedition is over
+
+ship_event = {
+	id = mem_maze.6
+	title = mem_maze.6.name
+	desc = mem_maze.6.desc
+	
+	picture = GFX_evt_alien_ruins
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		kill_leader = {
+			type = scientist
+			show_notification = no
+		}
+		event_target:maze_planet = {
+			random_tile = {
+				limit = { has_blocker = mem_tb_maze2 }
+				set_blocker = mem_tb_maze3
+			}
+		}
+	}
+	
+	option = {
+		name = mem_maze.6a
+		
+		enable_special_project = {
+			name = "MEM_MAZE_2_PROJECT"
+			location = event_target:maze_planet
+			owner = root
+		}
+	}
+	
+	option = {
+		name = mem_maze.6b
+		
+		owner = {
+			add_influence = 25
+		}
+	}
+}
+
+#Second expedition is over
+ship_event = {
+	id = mem_maze.7
+	title = mem_maze.7.name
+	desc = mem_maze.7.desc
+	
+	picture = GFX_evt_alien_ruins
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		kill_leader = {
+			type = scientist
+			show_notification = no
+		}
+	}
+	
+	option = {
+		name = mem_maze.7a
+		
+		enable_special_project = {
+			name = "MEM_MAZE_3_PROJECT"
+			location = event_target:maze_planet
+			owner = root
+		}
+	}
+	
+	option = {
+		name = mem_maze.6b
+		
+		owner = {
+			add_influence = 50
+		}
+	}
+}
+
+#Third expedition is over
+ship_event = {
+	id = mem_maze.8
+	title = mem_maze.8.name
+	desc = mem_maze.8.desc
+	
+	picture = GFX_evt_alien_ruins
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		kill_leader = {
+			type = scientist
+			show_notification = no
+		}
+	}
+	
+	option = {
+		name = mem_maze.8a
+		
+		enable_special_project = {
+			name = "MEM_MAZE_4_PROJECT"
+			location = event_target:maze_planet
+			owner = root
+		}
+	}
+	
+	option = {
+		name = mem_maze.6b
+		
+		owner = {
+			add_influence = 75
+		}
+	}
+}
+
+#Forth expedition is over
+ship_event = {
+	id = mem_maze.9
+	title = mem_maze.9.name
+	desc = mem_maze.9.desc
+	
+	picture = GFX_evt_alien_ruins
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		kill_leader = {
+			type = scientist
+			show_notification = no
+		}
+	}
+	
+	option = {
+		name = mem_maze.9a
+		
+		enable_special_project = {
+			name = "MEM_MAZE_5_PROJECT"
+			location = event_target:maze_planet
+			owner = root
+		}
+	}
+	
+	option = {
+		name = mem_maze.6b
+		
+		owner = {
+			add_influence = 100
+		}
+	}
+}
+
+#Fifth expedition is over
+ship_event = {
+	id = mem_maze.10
+	title = mem_maze.10.name
+	desc = mem_maze.10.desc
+	
+	picture = GFX_evt_alien_ruins
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		leader = {
+			set_leader_flag = mem_maze_leader
+		}
+	}
+	
+	option = {
+		name = ONSCREEN
+		
+		owner = {
+			country_event = {
+				id = mem_maze.11
+			}
+		}
+	}
+}
+
+#Let's chat: What is virtue
+country_event = {
+	id = mem_maze.11
+	title = mem_maze.11.name
+	desc = mem_maze.11.desc
+	
+	is_triggered_only = yes
+	
+	diplomatic = yes
+	
+	picture_event_data = {
+		room = "extradimensional_green_room"
+	}
+	
+	option = {
+		name = mem_maze.11a
+		
+		random_list = {
+			125 = {
+				add_modifier = {
+					modifier = mem_virtue_eg
+					days = -1
+				}
+			}
+			125 = {
+				add_modifier = {
+					modifier = mem_virtue_au
+					days = -1
+				}
+			}
+			125 = {
+				add_modifier = {
+					modifier = mem_virtue_ma
+					days = -1
+				}
+			}
+			125 = {
+				add_modifier = {
+					modifier = mem_virtue_sp
+					days = -1
+				}
+			}
+			125 = {
+				add_modifier = {
+					modifier = mem_virtue_mi
+					days = -1
+				}
+			}
+			125 = {
+				add_modifier = {
+					modifier = mem_virtue_pa
+					days = -1
+				}
+			}
+			125 = {
+				add_modifier = {
+					modifier = mem_virtue_phile
+					days = -1
+				}
+			}
+			125 = {
+				add_modifier = {
+					modifier = mem_virtue_phobe
+					days = -1
+				}
+			}
+		}
+		
+		country_event = {
+			id = mem_maze.12
+		}
+	}
+	
+	option = {
+		name = mem_maze.11b.eg
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_egalitarian
+				has_ethic = ethic_egalitarian
+			}
+		}
+		add_modifier = {
+			modifier = mem_virtue_eg
+			days = -1
+		}
+		country_event = {
+			id = mem_maze.12
+		}
+	}
+	
+	option = {
+		name = mem_maze.11b.au
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_authoritarian
+				has_ethic = ethic_authoritarian
+			}
+		}
+		add_modifier = {
+			modifier = mem_virtue_au
+			days = -1
+		}
+		country_event = {
+			id = mem_maze.12
+		}
+	}
+	
+	option = {
+		name = mem_maze.11b.ma
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_materialist
+				has_ethic = ethic_materialist
+			}
+		}
+		add_modifier = {
+			modifier = mem_virtue_ma
+			days = -1
+		}
+		country_event = {
+			id = mem_maze.12
+		}
+	}
+	
+	option = {
+		name = mem_maze.11b.sp
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_spiritualist
+				has_ethic = ethic_spiritualist
+			}
+		}
+		add_modifier = {
+			modifier = mem_virtue_sp
+			days = -1
+		}
+		country_event = {
+			id = mem_maze.12
+		}
+	}
+	
+	option = {
+		name = mem_maze.11b.pa
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_pacifist
+				has_ethic = ethic_pacifist
+			}
+		}
+		add_modifier = {
+			modifier = mem_virtue_pa
+			days = -1
+		}
+		country_event = {
+			id = mem_maze.12
+		}
+	}
+	
+	option = {
+		name = mem_maze.11b.mi
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_militarist
+				has_ethic = ethic_militarist
+			}
+		}
+		add_modifier = {
+			modifier = mem_virtue_mi
+			days = -1
+		}
+		country_event = {
+			id = mem_maze.12
+		}
+	}
+	
+	option = {
+		name = mem_maze.11b.phobe
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
+			}
+		}
+		add_modifier = {
+			modifier = mem_virtue_phobe
+			days = -1
+		}
+		country_event = {
+			id = mem_maze.12
+		}
+	}
+	
+	option = {
+		name = mem_maze.11b.phile
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_xenophile
+			}
+		}
+		add_modifier = {
+			modifier = mem_virtue_phile
+			days = -1
+		}
+		country_event = {
+			id = mem_maze.12
+		}
+	}
+	
+	option = {
+		name = mem_maze.11c
+		response_text = mem_maze.11c.response
+		is_dialog_only = yes
+	}
+}
+
+#What is vice
+country_event = {
+	id = mem_maze.12
+	title = mem_maze.12.name
+	desc = mem_maze.12.desc
+	
+	is_triggered_only = yes
+	
+	diplomatic = yes
+	
+	picture_event_data = {
+		room = "extradimensional_green_room"
+	}
+	
+	after = {
+		event_target:maze_planet = {
+			random_tile = {
+				limit = { has_blocker = mem_tb_maze3 }
+				set_blocker = mem_tb_maze4
+			}
+			planet_event = {
+			id = mem_maze.13
+			days = 7
+			}
+		}
+	}
+	
+	option = {
+		name = mem_maze.12a
+		response_text = mem_maze.12.farewell
+		
+		random_list = {
+			125 = {
+				add_modifier = {
+					modifier = mem_vice_eg
+					days = -1
+				}
+			}
+			125 = {
+				add_modifier = {
+					modifier = mem_vice_au
+					days = -1
+				}
+			}
+			125 = {
+				add_modifier = {
+					modifier = mem_vice_ma
+					days = -1
+				}
+			}
+			125 = {
+				add_modifier = {
+					modifier = mem_vice_sp
+					days = -1
+				}
+			}
+			125 = {
+				add_modifier = {
+					modifier = mem_vice_mi
+					days = -1
+				}
+			}
+			125 = {
+				add_modifier = {
+					modifier = mem_vice_pa
+					days = -1
+				}
+			}
+			125 = {
+				add_modifier = {
+					modifier = mem_vice_phile
+					days = -1
+				}
+			}
+			125 = {
+				add_modifier = {
+					modifier = mem_vice_phobe
+					days = -1
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_maze.12b.eg
+		response_text = mem_maze.12.farewell
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_egalitarian
+				has_ethic = ethic_egalitarian
+			}
+		}
+		add_modifier = {
+			modifier = mem_vice_eg
+			days = -1
+		}
+	}
+	
+	option = {
+		name = mem_maze.11b.au
+		response_text = mem_maze.12.farewell
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_authoritarian
+				has_ethic = ethic_authoritarian
+			}
+		}
+		add_modifier = {
+			modifier = mem_vice_au
+			days = -1
+		}
+	}
+	
+	option = {
+		name = mem_maze.12b.ma
+		response_text = mem_maze.12.farewell
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_materialist
+				has_ethic = ethic_materialist
+			}
+		}
+		add_modifier = {
+			modifier = mem_vice_ma
+			days = -1
+		}
+	}
+	
+	option = {
+		name = mem_maze.12b.sp
+		response_text = mem_maze.12.farewell
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_spiritualist
+				has_ethic = ethic_spiritualist
+			}
+		}
+		add_modifier = {
+			modifier = mem_vice_sp
+			days = -1
+		}
+	}
+	
+	option = {
+		name = mem_maze.12b.pa
+		response_text = mem_maze.12.farewell
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_pacifist
+				has_ethic = ethic_pacifist
+			}
+		}
+		add_modifier = {
+			modifier = mem_vice_pa
+			days = -1
+		}
+	}
+	
+	option = {
+		name = mem_maze.12b.mi
+		response_text = mem_maze.12.farewell
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_militarist
+				has_ethic = ethic_militarist
+			}
+		}
+		add_modifier = {
+			modifier = mem_vice_mi
+			days = -1
+		}
+	}
+	
+	option = {
+		name = mem_maze.12b.phobe
+		response_text = mem_maze.12.farewell
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
+			}
+		}
+		add_modifier = {
+			modifier = mem_vice_phobe
+			days = -1
+		}
+	}
+	
+	option = {
+		name = mem_maze.12b.phile
+		response_text = mem_maze.12.farewell
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_xenophile
+			}
+		}
+		add_modifier = {
+			modifier = mem_vice_phile
+			days = -1
+		}
+	}
+}
+
+#epilogue
+planet_event = {
+	id = mem_maze.13
+	title = mem_maze.13.name
+	desc = mem_maze.13.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_alien_ruins
+	
+	option = {
+		name = mem_maze.13a
+		
+		owner.random_owned_leader = {
+			limit = { has_leader_flag = mem_maze_leader }
+			add_trait = mem_leader_strange_insight
 		}
 	}
 }
