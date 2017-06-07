@@ -1,0 +1,112 @@
+namespace = mem_maze
+
+#The Maze
+#By ViolentBeetle
+
+#Seeding the planet with special blocker, I guess (on_colonized)
+planet_event = {
+	id = mem_maze.1
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = { has_global_flag = mem_maze_set }
+		owner = {
+			is_ai = no
+		}
+		any_tile = {
+			OR = {
+				has_blocker = tb_mountain_range
+				has_blocker = tb_dense_jungle
+				has_blocker = tb_quicksand_basin
+				has_blocker = tb_massive_glacier
+				has_blocker = tb_toxic_kelp
+			}
+		}
+	}
+	
+	immediate = {
+		set_global_flag = mem_maze_set
+		random_list = {
+			0 = {}
+			100 = {
+				random_tile = {
+					limit = {
+						OR = {
+							has_blocker = tb_mountain_range
+							has_blocker = tb_dense_jungle
+							has_blocker = tb_quicksand_basin
+							has_blocker = tb_massive_glacier
+							has_blocker = tb_toxic_kelp
+						}
+					}
+					IF = {
+						limit = { has_blocker = tb_mountain_range }
+						planet = { set_planet_flag = mem_maze_m@prev }
+					}
+					IF = {
+						limit = { has_blocker = tb_dense_jungle }
+						planet = { set_planet_flag = mem_maze_j@prev }
+					}
+					IF = {
+						limit = { has_blocker = tb_quicksand_basin }
+						planet = { set_planet_flag = mem_maze_q@prev }
+					}
+					IF = {
+						limit = { has_blocker = tb_massive_glacier }
+						planet = { set_planet_flag = mem_maze_g@prev }
+					}
+					IF = {
+						limit = { has_blocker = tb_toxic_kelp }
+						planet = { set_planet_flag = mem_maze_k@prev }
+					}
+				}
+			}
+		}
+	}
+}
+
+#Removed the blocker (on_action)
+planet_event = {
+	id = mem_maze.2
+	
+	title = mem_maze.2.name
+	desc = {
+		trigger = {
+			switch = {
+				trigger = has_planet_flag
+				mem_maze_m@from = { text = mem_maze.2.desc.m }
+				mem_maze_j@from = { text = mem_maze.2.desc.j }
+				mem_maze_q@from = { text = mem_maze.2.desc.q }
+				mem_maze_g@from = { text = mem_maze.2.desc.g }
+				mem_maze_k@from = { text = mem_maze.2.desc.k }
+			}
+		}
+	}
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = { has_planet_flag = mem_maze_uncovered }
+		OR = {
+			has_planet_flag = mem_maze_m@from
+			has_planet_flag = mem_maze_j@from
+			has_planet_flag = mem_maze_q@from
+			has_planet_flag = mem_maze_g@from
+			has_planet_flag = mem_maze_k@from
+		}
+	}
+	
+	immediate = {
+		set_planet_flag = mem_maze_uncovered
+		FROM = {
+			set_blocker = "mem_tb_maze"
+		}
+	}
+	
+	option = {
+		name = INTERESTING
+	}
+}
