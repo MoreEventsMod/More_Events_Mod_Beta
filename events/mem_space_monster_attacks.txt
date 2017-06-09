@@ -1,0 +1,72 @@
+namespace = mem_space_monster_attacks
+
+planet_event = {
+	id = mem_space_monster_attacks.1
+	title = mem_space_monster_attacks.1.name
+	desc = mem_space_monster_attacks.1.desc
+	picture = GFX_evt_mem_giant_crystal
+	show_sound = event_yellow_alert
+	location = event_target:mem_space_monster_attacks_crystal
+	is_triggered_only = yes
+	
+	fire_only_once = yes
+	
+	trigger = {
+		has_owner = yes
+		is_colony = yes
+		is_capital = no
+		owner = {
+			is_ai = no
+		}
+	}
+	
+	immediate = {
+		set_planet_flag = mem_space_monster_attack_target
+		solar_system  = {
+			random_system_planet = {
+				limit = { is_star = yes }
+				save_event_target_as = MonsterLocation
+				create_crystal_country = yes
+				event_target:crystal_country = {
+					create_fleet = { name = "Crystal Fleet" }
+					last_created_fleet = {
+						save_event_target_as = mem_space_monster_attacks_crystal
+						set_owner = prev
+						create_ship = {
+							name = "Saphiron"
+							design = "Ancient Crystal Entity"
+						}
+						set_location = {
+							target = event_target:MonsterLocation
+							distance = 250
+							angle = random
+						}
+						set_fleet_stance = aggressive
+						set_aggro_range_measure_from = self
+						set_aggro_range = 2000
+						queue_actions = {
+							repeat = {
+								find_closest_planet = {
+									trigger = {
+										id = "mem_space_monster_attacks_crystal"
+										has_planet_flag = mem_space_monster_attack_target
+									}
+									found_planet = {
+										orbit_planet = this
+										wait = {
+											duration = 400
+											random = 150
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}	
+	option = {
+		name = mem_space_monster_attacks.1.a
+	}
+}
