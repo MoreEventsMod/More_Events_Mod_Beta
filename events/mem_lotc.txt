@@ -5,7 +5,23 @@
 namespace = mem_lotc
 
 @min_distance = 10
-@max_distance = 20
+@max_distance = 50
+
+@tier1researchreward = 6
+@tier1researchmin = 60
+@tier1researchmax = 150
+@tier2researchreward = 12
+@tier2researchmin = 90
+@tier2researchmax = 250
+@tier3researchreward = 18
+@tier3researchmin = 120
+@tier3researchmax = 350
+@tier4researchreward = 24
+@tier4researchmin = 150
+@tier4researchmax = 500
+@tier5researchreward = 48
+@tier5researchmin = 300
+@tier5researchmax = 1000
 
 # Anomaly survey success
 ship_event = {
@@ -90,8 +106,8 @@ ship_event = {
 						random_planet = {
 							limit = {
 								OR = {
-									any_planet = {is_planet_class = pc_continental }
-									any_planet = {is_planet_class = pc_gaia }
+									is_planet_class = pc_continental
+									is_planet_class = pc_gaia 
 								}
 								distance = {
 									source = event_target:start
@@ -121,10 +137,7 @@ ship_event = {
 								
 								random_planet = {
 									limit = {
-										OR = {
-											any_planet = {is_planet_class = pc_continental }
-											any_planet = {is_planet_class = pc_gaia }
-										}
+										is_planet_class = pc_tropical
 										distance = {
 											source = event_target:start
 											max_distance = @max_distance
@@ -251,50 +264,173 @@ ship_event = {
 				}
 			}
 
-		}
 		
-		#PROJECT ASSIGNMENT
-		random_planet = {
-			limit = {
-				has_planet_flag = mem_lotc_first
+		
+			#PROJECT ASSIGNMENT
+			random_planet = {
+				limit = {
+					has_planet_flag = mem_lotc_first
+				}
+				enable_special_project = {
+					name = "MEM_LOTC_FIRST"
+					location = this
+					owner = root
+				}
 			}
-			enable_special_project = {
-				name = "MEM_LOTC_FIRST"
-				location = this
-				owner = root
+			
+			random_system = {
+				limit = {
+					has_star_flag = mem_lotc_second
+				}
+				save_event_target_as = second_system
+			}
+			create_point_of_interest = {
+				id = mem_lotc_poi.2
+				name = "mem_lotc_poi.2"
+				desc = "mem_lotc_poi.2.desc"
+				event_chain = mem_lotc_first_chain
+				location = event_target:second_system
+			}
+			owner = {
+				set_country_flag = mem_lotc_going_for_it
+			}
+			
+			random_planet = {
+				limit = {
+					has_planet_flag = mem_lotc_third
+				}
+				enable_special_project = {
+					name = "MEM_LOTC_THIRD"
+					location = this
+					owner = root
+				}
+			}
+			random_planet = {
+				limit = {
+					has_planet_flag = mem_lotc_fourth
+				}
+				enable_special_project = {
+					name = "MEM_LOTC_FOURTH"
+					location = this
+					owner = root
+				}
 			}
 		}
-		random_system = {
-			limit = {
-				has_star_flag = mem_lotc_second
+	}
+}
+
+#First set: wet planet
+ship_event = {
+	id = mem_lotc.2
+	title = mem_lotc.2.name
+	desc = mem_lotc.2.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_mem_horror_corridor
+	
+	option = {
+		name = mem_lotc.2a
+		
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "mem_lotc_first_chain" 
+				counter = mem_lotc_clues 
+				amount = 1 
 			}
-			save_event_target_as = second_system
+			
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
 		}
-		create_point_of_interest = {
-			id = mem_lotc_poi.2
-			name = "mem_lotc_poi.2"
-			desc = "mem_lotc_poi.2.desc"
-			event_chain = mem_lotc_first_chain
-			location = event_target:second_system
+	}
+}
+
+#Cruiser action
+#On action: Entering the second system, notified of the ship
+ship_event = {
+	id = mem_lotc.3
+	title = mem_lotc.3.name
+	desc = mem_lotc.3.desc
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			has_country_flag = mem_lotc_going_for_it
+			NOT = { has_country_flag = mem_lotc_found_the_second }
 		}
-		random_planet = {
-			limit = {
-				has_planet_flag = mem_lotc_third
+		from = {
+			has_star_flag = mem_lotc_second
+		}
+	}
+	
+	immediate = {
+		owner = {
+			set_country_flag = mem_lotc_found_the_second
+		}
+	}
+	
+	option = {
+		name = OK
+	}
+}
+
+#On action: cruiser taken out
+country_event = {
+
+
+#Third set: gas giant
+ship_event = {
+	id = mem_lotc.4
+	title = mem_lotc.4.name
+	desc = mem_lotc.4.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_mem_horror_corridor
+	
+	option = {
+		name = mem_lotc.2a
+		
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "mem_lotc_first_chain" 
+				counter = mem_lotc_clues 
+				amount = 1 
 			}
-			enable_special_project = {
-				name = "MEM_LOTC_THIRD"
-				location = this
-				owner = root
+			
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
 			}
 		}
-		random_planet = {
-			limit = {
-				has_planet_flag = mem_lotc_fourth
-			}
-			enable_special_project = {
-				name = "MEM_LOTC_FOURTH"
-				location = this
-				owner = root
+	}
+}
+
+#Fourth set: barren
+ship_event = {
+	id = mem_lotc.2
+	title = mem_lotc.2.name
+	desc = mem_lotc.2.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_mem_horror_corridor
+	
+	option = {
+		name = mem_lotc.2a
+		
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "mem_lotc_first_chain" 
+				counter = mem_lotc_clues 
+				amount = 1 
 			}
 		}
 	}
