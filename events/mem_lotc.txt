@@ -355,6 +355,7 @@ ship_event = {
 	id = mem_lotc.3
 	title = mem_lotc.3.name
 	desc = mem_lotc.3.desc
+	picture = GFX_evt_ship_in_orbit
 	
 	is_triggered_only = yes
 	
@@ -365,6 +366,11 @@ ship_event = {
 		}
 		from = {
 			has_star_flag = mem_lotc_second
+			NOT = { 
+				any_ship_in_system = {
+					has_ship_flag = mem_lotc_disabled_cruiser
+				}
+			}
 		}
 	}
 	
@@ -380,7 +386,7 @@ ship_event = {
 }
 
 #On action: cruiser taken out
-country_event = {
+
 
 
 #Third set: gas giant
@@ -415,9 +421,9 @@ ship_event = {
 
 #Fourth set: barren
 ship_event = {
-	id = mem_lotc.2
-	title = mem_lotc.2.name
-	desc = mem_lotc.2.desc
+	id = mem_lotc.5
+	title = mem_lotc.5.name
+	desc = mem_lotc.5.desc
 	
 	is_triggered_only = yes
 	
@@ -431,6 +437,148 @@ ship_event = {
 				event_chain = "mem_lotc_first_chain" 
 				counter = mem_lotc_clues 
 				amount = 1 
+			}
+		}
+	}
+}
+
+#Ship disabled: Event for NPC
+ship_event = {
+	id = mem_lotc.6
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		has_ship_flag = mem_lotc_cruiser
+	}
+	
+	immediate = {
+		set_ship_flag = mem_lotc_disabled_cruiser
+		IF = {
+			limit = {
+				from.owner = {
+					has_country_flag = mem_lotc_going_for_it
+				}
+			}
+			from.owner = {
+				set_country_flag = mem_lotc_shot_cruiser
+				country_event = {
+					id = mem_lotc.7
+				}
+			}
+			else = {
+				IF = {
+					limit = {
+						any_country = {
+							limit = {
+								has_country_flag = mem_lotc_found_the_second
+							}
+						}
+					}
+					every_country = {
+						limit = {
+							has_country_flag = mem_lotc_found_the_second
+						}
+						country_event = {
+							id = mem_lotc.8
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+#Notified, if the player shot it
+country_event = {
+	id = mem_lotc.7
+	title = mem_lotc.7.name
+	desc = mem_lotc.7.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_exploding_ship
+	
+	option = {
+		name = mem_lotc.7a
+		
+		from = {
+			enable_special_project = {
+				name = "MEM_BOARDING_CRUISER"
+				location = this
+				owner = root
+			}
+		}
+	}
+}
+
+#Notified, player didn't take it out, but was aware of it
+country_event = {
+	id = mem_lotc.8
+	title = mem_lotc.8.name
+	desc = mem_lotc.8.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_exploding_ship
+	
+	option = {
+		name = mem_lotc.8a
+		
+		from = {
+			enable_special_project = {
+				name = "MEM_BOARDING_CRUISER"
+				location = this
+				owner = root
+			}
+		}
+	}
+}
+
+#on_action: Entered the system and found ship disabled
+ship_event = {
+	id = mem_lotc.9
+	title = mem_lotc.9.name
+	desc = mem_lotc.9.desc
+	picture = GFX_evt_ship_in_orbit
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			has_country_flag = mem_lotc_going_for_it
+			NOT = { has_country_flag = mem_lotc_found_the_second }
+		}
+		from = {
+			has_star_flag = mem_lotc_second
+			
+			any_ship_in_system = {
+				has_ship_flag = mem_lotc_disabled_cruiser
+			}
+			
+		}
+	}
+	
+	immediate = {
+		owner = {
+			set_country_flag = mem_lotc_found_the_second
+		}
+	}
+	
+	option = {
+		name = mem_lotc.9a
+		
+		from.random_fleet_in_system = {
+			limit = {
+				has_fleet_flag = mem_lotc_cruiser
+			}
+			
+			enable_special_project = {
+				name = "MEM_BOARDING_CRUISER"
+				location = this
+				owner = root
 			}
 		}
 	}
