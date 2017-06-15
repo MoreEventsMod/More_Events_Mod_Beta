@@ -1,0 +1,301 @@
+#Legacy of the Carcharorion
+#AKA The Unponounceable Welsh event chain
+#By ViolentBeetle
+
+namespace = mem_lotc
+
+@min_distance = 10
+@max_distance = 20
+
+# Anomaly survey success
+ship_event = {
+	id = mem_lotc.1
+	title = "mem_lotc.1.name"
+	desc = "mem_lotc.1.desc"
+	picture = "GFX_evt_dead_city"
+	is_triggered_only = yes
+	
+	immediate = {
+    	owner = {
+    		set_country_flag = mem_lotc_finder
+			# leads to story event "Remnants" (first contact stuff)
+			country_event = { id = story.5 days = 30 }
+    	}
+		
+		from = {
+			set_planet_flag = mem_lotc_start
+			save_event_target_as = start
+			solar_system = {
+				set_star_flag = mem_lotc_start_system
+			}
+		}
+    }
+
+	option = {
+		name = mem_lotc.1a
+		
+		begin_event_chain = {
+			event_chain = "mem_lotc_first_chain"
+			target = root.owner
+		}
+		
+		hidden_effect = {
+		
+			#FIRST PROJECT
+			IF = {
+				limit = {
+					any_system = {
+						any_planet = {is_planet_class = pc_ocean }
+						distance = {
+							source = event_target:start
+							max_distance = @max_distance
+							min_distance = @min_distance
+						}
+						NOT = { has_star_flag = mem_lotc_start_system }
+					}
+				}
+				
+				random_planet = {
+					limit = {
+						is_planet_class = pc_ocean
+						distance = {
+							source = event_target:start
+							max_distance = @max_distance
+							min_distance = @min_distance
+						}
+						solar_system = { 
+							NOT = { has_star_flag = mem_lotc_start_system } 
+						}
+					}
+					set_planet_flag = mem_lotc_first
+				}
+				
+				else = {
+					IF = {
+						limit = {
+							any_system = {
+								OR = {
+									any_planet = {is_planet_class = pc_continental }
+									any_planet = {is_planet_class = pc_gaia }
+								}
+								distance = {
+									source = event_target:start
+									max_distance = @max_distance
+									min_distance = @min_distance
+								}
+								NOT = { has_star_flag = mem_lotc_start_system }
+							}
+						}
+						
+						random_planet = {
+							limit = {
+								OR = {
+									any_planet = {is_planet_class = pc_continental }
+									any_planet = {is_planet_class = pc_gaia }
+								}
+								distance = {
+									source = event_target:start
+									max_distance = @max_distance
+									min_distance = @min_distance
+								}
+								solar_system = { 
+									NOT = { has_star_flag = mem_lotc_start_system } 
+								}
+							}
+							set_planet_flag = mem_lotc_first
+						}
+						
+						else = {
+							IF = {
+								limit = {
+									any_system = {
+										any_planet = {is_planet_class = pc_tropical }
+										distance = {
+											source = event_target:start
+											max_distance = @max_distance
+											min_distance = @min_distance
+										}
+										NOT = { has_star_flag = mem_lotc_start_system }
+									}
+								}
+								
+								random_planet = {
+									limit = {
+										OR = {
+											any_planet = {is_planet_class = pc_continental }
+											any_planet = {is_planet_class = pc_gaia }
+										}
+										distance = {
+											source = event_target:start
+											max_distance = @max_distance
+											min_distance = @min_distance
+										}
+										solar_system = { 
+											NOT = { has_star_flag = mem_lotc_start_system } 
+										}
+									}
+									set_planet_flag = mem_lotc_first
+								}
+								
+								else = {
+									#FALLBACK INITIALIZER
+									event_target:start = {
+										spawn_system = {
+											max_distance = @max_distance
+											min_distance = @min_distance
+											initializer = "mem_lotc_first_init"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			#SECOND PROJECT
+			event_target:start = {
+				spawn_system = {
+					max_distance = @max_distance
+					min_distance = @min_distance
+					initializer = "mem_lotc_second_init"
+				}
+			}
+			
+			#THIRD PROJECT
+			IF = {
+				limit = {
+					any_system = {
+						any_planet = { is_planet_class = pc_gas_giant }
+						NOT = { has_star_flag = mem_lotc_second }
+						distance = {
+							source = event_target:start
+							max_distance = @max_distance
+							min_distance = @min_distance
+						}
+						NOT = { has_star_flag = mem_lotc_start_system }
+					}		
+				}
+				
+				random_planet = {
+					limit = {
+						is_planet_class = pc_gas_giant
+						distance = {
+							source = event_target:start
+							max_distance = @max_distance
+							min_distance = @min_distance
+						}
+						solar_system = { 
+							NOT = { has_star_flag = mem_lotc_start_system } 
+						}
+					}
+					set_planet_flag = mem_lotc_third
+				}
+				
+				else = {
+					#FALLBACK SPAWN
+					event_target:start = {
+						spawn_system = {
+							max_distance = @max_distance
+							min_distance = @min_distance
+							initializer = "mem_lotc_third_init"
+						}
+					}
+				}
+			}
+			
+			#FOURTH PROJECT
+			IF = {
+				limit = {
+					any_system = {
+						OR = {
+							any_planet = { is_planet_class = pc_barren }
+							any_planet = { is_planet_class = pc_barren_cold }
+						}
+						distance = {
+							source = event_target:start
+							max_distance = @max_distance
+							min_distance = @min_distance
+						}
+						NOT = { has_star_flag = mem_lotc_start_system }
+					}		
+				}
+				
+				random_planet = {
+					limit = {
+						OR = {
+							is_planet_class = pc_barren
+							is_planet_class = pc_barren_cold
+						}
+						distance = {
+							source = event_target:start
+							max_distance = @max_distance
+							min_distance = @min_distance
+						}
+						solar_system = { 
+							NOT = { has_star_flag = mem_lotc_start_system } 
+						}
+					}
+					set_planet_flag = mem_lotc_fourth
+				}
+				
+				else = {
+					#FALLBACK SPAWN
+					event_target:start = {
+						spawn_system = {
+							max_distance = @max_distance
+							min_distance = @min_distance
+							initializer = "mem_lotc_fourth_init"
+						}
+					}
+				}
+			}
+
+		}
+		
+		#PROJECT ASSIGNMENT
+		random_planet = {
+			limit = {
+				has_planet_flag = mem_lotc_first
+			}
+			enable_special_project = {
+				name = "MEM_LOTC_FIRST"
+				location = this
+				owner = root
+			}
+		}
+		random_system = {
+			limit = {
+				has_star_flag = mem_lotc_second
+			}
+			save_event_target_as = second_system
+		}
+		create_point_of_interest = {
+			id = mem_lotc_poi.2
+			name = "mem_lotc_poi.2"
+			desc = "mem_lotc_poi.2.desc"
+			event_chain = mem_lotc_first_chain
+			location = event_target:second_system
+		}
+		random_planet = {
+			limit = {
+				has_planet_flag = mem_lotc_third
+			}
+			enable_special_project = {
+				name = "MEM_LOTC_THIRD"
+				location = this
+				owner = root
+			}
+		}
+		random_planet = {
+			limit = {
+				has_planet_flag = mem_lotc_fourth
+			}
+			enable_special_project = {
+				name = "MEM_LOTC_FOURTH"
+				location = this
+				owner = root
+			}
+		}
+	}
+}
