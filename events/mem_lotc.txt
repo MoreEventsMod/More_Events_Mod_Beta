@@ -181,6 +181,7 @@ ship_event = {
 					any_system = {
 						any_planet = { is_planet_class = pc_gas_giant }
 						NOT = { has_star_flag = mem_lotc_second }
+						NOT = { any_planet = { has_planet_flag = mem_lotc_first } }
 						distance = {
 							source = event_target:start
 							max_distance = @max_distance
@@ -200,6 +201,8 @@ ship_event = {
 						}
 						solar_system = { 
 							NOT = { has_star_flag = mem_lotc_start_system } 
+							NOT = { has_star_flag = mem_lotc_second }
+							NOT = { any_planet = { has_planet_flag = mem_lotc_first } }
 						}
 					}
 					set_planet_flag = mem_lotc_third
@@ -225,6 +228,9 @@ ship_event = {
 							any_planet = { is_planet_class = pc_barren }
 							any_planet = { is_planet_class = pc_barren_cold }
 						}
+						NOT = { has_star_flag = mem_lotc_second }
+						NOT = { any_planet = { has_planet_flag = mem_lotc_first } }
+						NOT = { any_planet = { has_planet_flag = mem_lotc_third } }
 						distance = {
 							source = event_target:start
 							max_distance = @max_distance
@@ -345,6 +351,10 @@ ship_event = {
 				min = @tier3researchmin
 				max = @tier3researchmax
 			}
+			
+			hidden_effect = {
+				country_event = { id = mem_lotc.11 }
+			}
 		}
 	}
 }
@@ -377,6 +387,10 @@ ship_event = {
 	immediate = {
 		owner = {
 			set_country_flag = mem_lotc_found_the_second
+			random_country = {
+				limit = { has_country_flag = mem_lotc_theguys }
+				establish_communications_no_message = prev
+			}
 		}
 	}
 	
@@ -397,10 +411,10 @@ ship_event = {
 	
 	is_triggered_only = yes
 	
-	picture = GFX_evt_mem_horror_corridor
+	picture = GFX_evt_mem_hive_cities
 	
 	option = {
-		name = mem_lotc.2a
+		name = mem_lotc.4a
 		
 		owner = {
 			add_event_chain_counter = {
@@ -415,6 +429,10 @@ ship_event = {
 				min = @tier3researchmin
 				max = @tier3researchmax
 			}
+			
+			hidden_effect = {
+				country_event = { id = mem_lotc.11 }
+			}
 		}
 	}
 }
@@ -427,16 +445,19 @@ ship_event = {
 	
 	is_triggered_only = yes
 	
-	picture = GFX_evt_mem_horror_corridor
+	picture = GFX_evt_mining_operations
 	
 	option = {
-		name = mem_lotc.2a
+		name = mem_lotc.5a
 		
 		owner = {
 			add_event_chain_counter = {
 				event_chain = "mem_lotc_first_chain" 
 				counter = mem_lotc_clues 
 				amount = 1 
+			}
+			hidden_effect = {
+				country_event = { id = mem_lotc.11 }
 			}
 		}
 	}
@@ -472,9 +493,7 @@ ship_event = {
 				IF = {
 					limit = {
 						any_country = {
-							limit = {
-								has_country_flag = mem_lotc_found_the_second
-							}
+							has_country_flag = mem_lotc_found_the_second
 						}
 					}
 					every_country = {
@@ -506,10 +525,14 @@ country_event = {
 		
 		from = {
 			enable_special_project = {
-				name = "MEM_BOARDING_CRUISER"
+				name = "MEM_LOTC_BOARDING_CRUISER"
 				location = this
 				owner = root
 			}
+		}
+		
+		hidden_effect = {
+			remove_point_of_interest = mem_lotc_poi.2
 		}
 	}
 }
@@ -529,10 +552,14 @@ country_event = {
 		
 		from = {
 			enable_special_project = {
-				name = "MEM_BOARDING_CRUISER"
+				name = "MEM_LOTC_BOARDING_CRUISER"
 				location = this
 				owner = root
 			}
+		}
+		
+		hidden_effect = {
+			remove_point_of_interest = mem_lotc_poi.2
 		}
 	}
 }
@@ -564,22 +591,122 @@ ship_event = {
 	immediate = {
 		owner = {
 			set_country_flag = mem_lotc_found_the_second
+			random_country = {
+				limit = { has_country_flag = mem_lotc_theguys }
+				establish_communications_no_message = prev
+			}
 		}
 	}
 	
 	option = {
 		name = mem_lotc.9a
 		
-		from.random_fleet_in_system = {
-			limit = {
-				has_fleet_flag = mem_lotc_cruiser
+		from = {
+			random_fleet_in_system = {
+				limit = {
+					has_fleet_flag = mem_lotc_cruiser
+				}
+				
+				enable_special_project = {
+					name = "MEM_LOTC_BOARDING_CRUISER"
+					location = this
+					owner = root
+				}
 			}
-			
-			enable_special_project = {
-				name = "MEM_BOARDING_CRUISER"
-				location = this
-				owner = root
+		}
+		
+		hidden_effect = {
+			owner = {
+				remove_point_of_interest = mem_lotc_poi.2
 			}
 		}
 	}
+}
+
+#Boarding complete
+ship_event = {
+	id = mem_lotc.10
+	title = mem_lotc.10.name
+	desc = mem_lotc.10.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_interior_battle
+	
+	option = {
+		name = mem_lotc.10a
+		
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "mem_lotc_first_chain" 
+				counter = mem_lotc_clues 
+				amount = 1 
+			}
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+			hidden_effect = {
+				country_event = { id = mem_lotc.11 }
+			}
+		}
+	}
+}
+
+#All 4 complete
+country_event = {
+	id = mem_lotc.11
+	title = mem_lotc.11.name
+	desc = mem_lotc.11.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_star_chart
+	
+	trigger = {
+		has_completed_event_chain_counter = {
+			event_chain = "mem_lotc_first_chain" 
+			counter = "mem_lotc_clues" 
+		}
+		NOT = { has_country_flag = mem_lotc_deduced_homeworld }
+	}
+	
+	immediate = {
+		set_country_flag = mem_lotc_deduced_homeworld
+		random_system = {
+			limit = { has_star_flag = mem_lotc_start_system }
+			save_event_target_as = start
+		}
+	}
+	
+	option = {
+		name = mem_lotc.11a
+		
+		hidden_effect = {
+			event_target:start = {
+				spawn_system = {
+					max_distance = @max_distance
+					min_distance = @min_distance
+					initializer = "mem_lotc_homeworld_init"
+				}
+			}
+			random_system = {
+				limit = { has_star_flag = mem_lotc_homeworld }
+				save_event_target_as = homeworld
+			}
+			
+			
+		}
+		
+		create_point_of_interest = {
+			id = mem_lotc_poi.5
+			name = "mem_lotc_poi.5"
+			desc = "mem_lotc_poi.5.desc"
+			event_chain = mem_lotc_first_chain
+			location = event_target:homeworld
+		}
+	}
+	
 }
