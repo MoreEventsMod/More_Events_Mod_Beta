@@ -743,7 +743,7 @@ ship_event = {
 	}
 	
 	immediate = {
-		set_country_flag = mem_lotc_homeworld_found
+		owner = { set_country_flag = mem_lotc_homeworld_found }
 	}
 	
 	option = {
@@ -1425,4 +1425,138 @@ ship_event = {
 		}
 		
 	}	
+}
+
+#Some things are better left buried
+country_event = {
+	id = mem_lotc.27
+	title = mem_lotc.27.name
+	desc = mem_lotc.27.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_unknown_ships
+	
+	trigger = {
+		NOT = { has_global_flag = mem_lotc_reenforcements_arrived }
+	}
+	
+	immediate = {
+		set_global_flag = mem_lotc_reenforcements_arrived
+		random_system = {
+			limit = {
+				has_star_flag = mem_lotc_homeworld
+			}
+			random_planet = {
+				limit = { is_star = yes }
+				planet_event = { id = mem_lotc.29 }
+				planet_event = { id = mem_lotc.29 }
+			}
+		}
+	}
+	
+	option = {
+		name = mem_lotc.27a
+	}
+}
+
+
+#Succesfully found
+country_event = {
+	id = mem_lotc.28
+	title = mem_lotc.28.name
+	desc = mem_lotc.28.desc
+	picture = GFX_evt_star_chart
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		has_completed_event_chain_counter = {
+			event_chain = "mem_lotc_second_chain" 
+			counter = "mem_lotc_surveyed" 
+		}
+		NOT = { has_country_flag = mem_lotc_deduced_colony }
+	}
+	
+	immediate = {
+		set_country_flag = mem_lotc_deduced_colony
+		 random_system = {
+			 limit = { has_star_flag = mem_lotc_homeworld }
+			 save_event_target_as = start
+		 }
+	}
+	
+	option = {
+		name = mem_lotc.11a
+		
+		hidden_effect = {
+			event_target:start = {
+				spawn_system = {
+					max_distance = @max_distance
+					min_distance = @min_distance
+					initializer = "mem_lotc_colony_init"
+				}
+			}
+			random_system = {
+				limit = { has_star_flag = mem_lotc_colony }
+				save_event_target_as = colony
+			}
+			
+			
+		}
+		
+		create_point_of_interest = {
+			id = mem_lotc_poi.6
+			name = "mem_lotc_poi.6"
+			desc = "mem_lotc_poi.6.desc"
+			event_chain = mem_lotc_second_chain
+			location = event_target:homeworld
+		}
+		
+		set_country_flag = mem_lotc_colony_coor
+	}
+}
+
+
+#Hidden event: Placing ships
+planet_event = {
+	id = mem_lotc.29
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_country = {
+			limit = { has_country_flag = mem_lotc_theguys }
+			save_event_target_as = owners
+		}
+		create_fleet = {
+			name = "Carcharorion ghosts"
+			effect = {
+				set_owner = event_target:owners
+				create_ship = {
+					name = "Ghost ship"
+					design = "NAME_F79"
+				}
+				create_ship = {
+					name = "Ghost ship"
+					design = "NAME_F79"
+				}
+				create_ship = {
+					name = "Ghost ship"
+					design = "NAME_F79"
+				}
+				create_ship = {
+					name = "Ghost ship"
+					design = "NAME_F79"
+				}
+				set_location = {
+					target = root
+					distance = 250
+					angle = random
+				}
+			}
+		}
+	}
 }
