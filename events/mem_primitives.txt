@@ -1,0 +1,164 @@
+namespace = mem_primitives
+
+@MTTHBASE = 1
+
+@tier1researchreward = 6
+@tier1researchmin = 60
+@tier1researchmax = 150
+@tier2researchreward = 12
+@tier2researchmin = 90
+@tier2researchmax = 250
+@tier3researchreward = 18
+@tier3researchmin = 120
+@tier3researchmax = 350
+@tier4researchreward = 24
+@tier4researchmin = 150
+@tier4researchmax = 500
+
+#####################################
+# Simple primitive events
+# By ViolentBeetle unless otherwise specified
+#####################################
+
+#Moon landing
+country_event = {
+	id = mem_primitives.100
+	hide_window = yes
+	
+	mean_time_to_happen = {
+		years = @MTTHBASE
+		modifier = {
+			factor = 0.50
+			has_ethic = ethic_materialist
+		}
+		modifier = {
+			factor = 0.10
+			has_ethic = ethic_fanatic_materialist
+		}
+	}
+	
+	trigger = {
+		is_country_type = primitive
+		OR = {
+			has_country_flag = atomic_age
+			has_country_flag = early_space_age
+		}
+		NOT = { has_country_flag = mem_primitives_moon }
+		NOT = { has_ethic = ethic_hive_mind }
+		
+		home_planet = {
+			has_observation_outpost = yes
+			observation_outpost_owner = {
+				NOT = { has_country_flag = mem_primitives_moon_o }
+			}
+			has_moon = yes
+			NOT = {
+				any_moon = { has_owner = yes }
+			}
+			solar_system = {
+				NOT = { has_star_flag = sol }
+			}
+		}
+	}
+	
+	immediate = {
+		set_country_flag = mem_primitives_moon
+		random_list = {
+			40 = { }
+			40 = { shift_ethic = ethic_materialist }
+			20 = { shift_ethic = ethic_militarist }
+		}
+		capital_scope = {
+			random_moon = {
+				save_event_target_as = the_moon
+			}
+			save_event_target_as = the_planet
+			observation_outpost_owner = {
+				set_country_flag = mem_primitives_moon_o
+				
+				country_event = {
+					id = mem_primitives.101
+				}
+			}
+		}
+	}
+}
+
+#One small step: Notification
+country_event = {
+	id = mem_primitives.101
+	title = mem_primitives.101.name
+	desc = mem_primitives.101.desc
+	
+	picture = shift_ethic = ethic_materialist
+	
+	option = {
+		name = mem_primitives.101a
+		
+		trigger = {
+			NOR = {
+				has_ethic = ethic_materialist
+				has_ethic = ethic_fanatic_materialist
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
+	}
+	
+	option = {
+		name = mem_primitives.101a.phobe
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
+	}
+	
+	option = {
+		name = mem_primitives.101a.mat
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_materialist
+				has_ethic = ethic_fanatic_materialist
+			}
+			NOR = {
+				has_ethic = ethic_xenophile
+				has_ethic = ethic_fanatic_xenophile
+			}
+		}
+	}
+	
+	option = {
+		name = mem_primitives.101a.matphile
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_materialist
+				has_ethic = ethic_fanatic_materialist
+			}
+			OR = {
+				has_ethic = ethic_xenophile
+				has_ethic = ethic_fanatic_xenophile
+			}
+		}
+		
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier1researchreward
+			min = @tier1researchmin
+			max = @tier1researchmax 
+		}
+	}
+	
+	after = {
+		add_monthly_resource_mult = {
+			resource = society_research
+			value = @tier1researchreward
+			min = @tier1researchmin
+			max = @tier1researchmax 
+		}
+	}
+}
