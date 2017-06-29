@@ -5,11 +5,12 @@
 #################################
 
 namespace = mem_distress_signal
-@mem_crash_site_society_gain = 150
-@mem_crash_site_influence_gain = 100
+
 @mem_stranded_society_gain1 = 250
 @mem_stranded_society_gain2 = 500
 @mem_stranded_society_gain3 = 1000
+@mem_crash_site_society_gain = 150
+@mem_crash_site_influence_gain = 100
 
 # TODO : Change event sounds
 # TODO : Add Rock Thrashers branch when colonizing before doing special project
@@ -47,9 +48,10 @@ ship_event = {
 	
 	immediate {
 		FROM = { save_event_target_as = mem_distress_signal_stranded_planet }
+		set_global_flag = mem_distress_signal_stranded
 	}
 	
-	# Available to everyone but Hive Mind
+	# Available to everyone but Hive Mind if there's a free leader slot
 	option = {
 		name = mem_distress_signal.100.common.welcome
 		trigger = {
@@ -94,6 +96,7 @@ ship_event = {
 		}
 	}
 	
+	# Available to everyone but Hive Mind if there's no free leader slot
 	option = {
 		name = mem_distress_signal.100.common.welcome.full
 		trigger = {
@@ -103,6 +106,61 @@ ship_event = {
 					has_ethic = ethic_hive_mind
 				}
 			}		
+		}		
+		Root.Owner = {
+			if = {
+				limit = {
+					NOT = { has_technology = tech_colonization_2 }
+				}
+				give_technology = { message = no tech = tech_colonization_2 }
+				add_tech_progress = {
+					tech = tech_colonization_2
+					progress = 0.10
+				}
+				else = {
+					if = {
+						limit = {
+							has_technology = tech_colonization_2
+							NOT = { has_technology = tech_colonization_3 }
+						}
+						give_technology = { message = no tech = tech_colonization_3 }
+						add_tech_progress = {
+							tech = tech_colonization_3
+							progress = 0.10
+						}
+						else = {
+							if = {
+								limit = {
+									has_technology = tech_colonization_2
+									has_technology = tech_colonization_3
+									NOT = { has_technology = tech_colonization_4 }
+								}
+								give_technology = { message = no tech = tech_colonization_4 }
+								add_tech_progress = {
+									tech = tech_colonization_4
+									progress = 0.10
+								}
+								else = {
+									if = {
+										limit = {
+											has_technology = tech_colonization_2
+											has_technology = tech_colonization_3
+											has_technology = tech_colonization_4
+											NOT = { has_technology = tech_colonization_5 }
+										}
+										give_technology = { message = no tech = tech_colonization_5 }
+										add_tech_progress = {
+											tech = tech_colonization_5
+											progress = 0.10
+										}
+										else = { add_society_research = @mem_stranded_society_gain3 }
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 	
@@ -120,7 +178,7 @@ ship_event = {
 		ship_event = { id = mem_distress_signal.101 }
 	}
 	
-	# Available only to Hive Mind with "Genetic Resequencing" Tech
+	# Available only to Hive Mind with "Genetic Resequencing" Tech with free leader slot
 	# And not having the Devouring Swarm Civic
 	option = {
 		name = mem_distress_signal.100.hive.welcome
@@ -166,10 +224,10 @@ ship_event = {
 		}
 	}
 	
-	# Available only to Hive Mind with "Genetic Resequencing" Tech
+	# Available only to Hive Mind with "Genetic Resequencing" Tech without free leader slot
 	# And not having the Devouring Swarm Civic
 	option = {
-		name = mem_distress_signal.100.hive.welcome
+		name = mem_distress_signal.100.hive.welcome.full
 		trigger = {
 			root.owner = {
 				free_leader_slots = 0
@@ -177,6 +235,61 @@ ship_event = {
 				has_technology = tech_genetic_resequencing
 				Not = { has_civic = civic_hive_devouring_swarm }
 			}		
+		}
+		Root.Owner = {			
+			if = {
+				limit = {
+					NOT = { has_technology = tech_colonization_2 }
+				}
+				give_technology = { message = no tech = tech_colonization_2 }
+				add_tech_progress = {
+					tech = tech_colonization_2
+					progress = 0.10
+				}
+				else = {
+					if = {
+						limit = {
+							has_technology = tech_colonization_2
+							NOT = { has_technology = tech_colonization_3 }
+						}
+						give_technology = { message = no tech = tech_colonization_3 }
+						add_tech_progress = {
+							tech = tech_colonization_3
+							progress = 0.10
+						}
+						else = {
+							if = {
+								limit = {
+									has_technology = tech_colonization_2
+									has_technology = tech_colonization_3
+									NOT = { has_technology = tech_colonization_4 }
+								}
+								give_technology = { message = no tech = tech_colonization_4 }
+								add_tech_progress = {
+									tech = tech_colonization_4
+									progress = 0.10
+								}
+								else = {
+									if = {
+										limit = {
+											has_technology = tech_colonization_2
+											has_technology = tech_colonization_3
+											has_technology = tech_colonization_4
+											NOT = { has_technology = tech_colonization_5 }
+										}
+										give_technology = { message = no tech = tech_colonization_5 }
+										add_tech_progress = {
+											tech = tech_colonization_5
+											progress = 0.10
+										}
+										else = { add_society_research = @mem_stranded_society_gain3 }
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 	
@@ -325,18 +438,6 @@ ship_event = {
 		
 	option = {
 		trigger = {
-			Root.owner = {
-				has_country_flag = mem_ds_stranded_survival1
-				has_country_flag = mem_ds_stranded_survival2
-				has_country_flag = mem_ds_stranded_survival3
-			}
-		}
-		name = mem_distress_signal.finalstop
-		ship_event = { id = mem_distress_signal.101 } 		
-	}	
-	
-	option = {
-		trigger = {
 			NOT = {
 				Root.owner = {
 					has_country_flag = mem_ds_stranded_survival1
@@ -369,7 +470,7 @@ ship_event = {
 					}				
 				}
 			}	
-			Root.Owner = { add_influence = @mem_stranded_society_gain1 }
+			Root.Owner = { add_society_research = @mem_stranded_society_gain1 }
 			else = {
 				if = {
 					limit = {
@@ -380,14 +481,26 @@ ship_event = {
 							}				
 						}				
 					}	
-					Root.Owner = { add_influence = @mem_stranded_society_gain2 }
+					Root.Owner = { add_society_research = @mem_stranded_society_gain2 }
 					else = {
-						Root.Owner = { add_influence = @mem_stranded_society_gain3 }
+						Root.Owner = { add_society_research = @mem_stranded_society_gain3 }
 					}
 				}
 			}
 		}
 	}
+	
+	option = {
+		trigger = {
+			Root.owner = {
+				has_country_flag = mem_ds_stranded_survival1
+				has_country_flag = mem_ds_stranded_survival2
+				has_country_flag = mem_ds_stranded_survival3
+			}
+		}
+		name = mem_distress_signal.finalstop
+		ship_event = { id = mem_distress_signal.101 } 		
+	}	
 }
 
 # Stranded - Survivor's story #2
@@ -406,18 +519,6 @@ ship_event = {
 			set_country_flag = mem_ds_stranded_survival2 
 		}		
 	}
-	
-	option = {
-		trigger = {
-			Root.owner = {
-				has_country_flag = mem_ds_stranded_survival1
-				has_country_flag = mem_ds_stranded_survival2
-				has_country_flag = mem_ds_stranded_survival3
-			}
-		}
-		name = mem_distress_signal.finalstop
-		ship_event = { id = mem_distress_signal.101 } 		
-	}	
 	
 	option = {
 		trigger = {
@@ -453,7 +554,7 @@ ship_event = {
 					}				
 				}
 			}	
-			Root.Owner = { add_influence = @mem_stranded_society_gain1 }
+			Root.Owner = { add_society_research = @mem_stranded_society_gain1 }
 			else = {
 				if = {
 					limit = {
@@ -464,14 +565,26 @@ ship_event = {
 							}				
 						}
 					}	
-					Root.Owner = { add_influence = @mem_stranded_society_gain2 }
+					Root.Owner = { add_society_research = @mem_stranded_society_gain2 }
 					else = {
-						Root.Owner = { add_influence = @mem_stranded_society_gain3 }
+						Root.Owner = { add_society_research = @mem_stranded_society_gain3 }
 					}
 				}
 			}
 		}
 	}
+		
+	option = {
+		trigger = {
+			Root.owner = {
+				has_country_flag = mem_ds_stranded_survival1
+				has_country_flag = mem_ds_stranded_survival2
+				has_country_flag = mem_ds_stranded_survival3
+			}
+		}
+		name = mem_distress_signal.finalstop
+		ship_event = { id = mem_distress_signal.101 } 		
+	}	
 }
 
 # Stranded - Survivor's story #3
@@ -490,18 +603,6 @@ ship_event = {
 			set_country_flag = mem_ds_stranded_survival3 
 		}		
 	}
-	
-	option = {
-		trigger = {
-			Root.owner = {
-				has_country_flag = mem_ds_stranded_survival1
-				has_country_flag = mem_ds_stranded_survival2
-				has_country_flag = mem_ds_stranded_survival3
-			}
-		}
-		name = mem_distress_signal.finalstop
-		ship_event = { id = mem_distress_signal.101 } 		
-	}	
 	
 	option = {
 		trigger = {
@@ -537,7 +638,7 @@ ship_event = {
 					}				
 				}
 			}	
-			Root.Owner = { add_influence = @mem_stranded_influence_gain1 }
+			Root.Owner = { add_society_research = @mem_stranded_influence_gain1 }
 			else = {
 				if = {
 					limit = {
@@ -548,14 +649,26 @@ ship_event = {
 							}				
 						}
 					}	
-					Root.Owner = { add_influence = @mem_stranded_influence_gain2 }
+					Root.Owner = { add_society_research = @mem_stranded_influence_gain2 }
 					else = {
-						Root.Owner = { add_influence = @mem_stranded_influence_gain3 }
+						Root.Owner = { add_society_research = @mem_stranded_influence_gain3 }
 					}
 				}
 			}
 		}
 	}
+		
+	option = {
+		trigger = {
+			Root.owner = {
+				has_country_flag = mem_ds_stranded_survival1
+				has_country_flag = mem_ds_stranded_survival2
+				has_country_flag = mem_ds_stranded_survival3
+			}
+		}
+		name = mem_distress_signal.finalstop
+		ship_event = { id = mem_distress_signal.101 } 		
+	}	
 }
 
 # Stranded - Survivor's Death
@@ -568,7 +681,6 @@ ship_event = {
 	location = FROM
 
 	is_triggered_only = yes	
-	
 	
 	option = {
 		name = mem_distress_signal.105.a
@@ -631,7 +743,9 @@ ship_event = {
 	}
 }
 
-# DEBUG #
+#################################
+## DEBUG
+#################################
 country_event = {
 	id = mem_distress_signal.1000
 	hide_window = yes
@@ -657,6 +771,7 @@ country_event = {
 			remove_country_flag = mem_ds_stranded_survival2
 			remove_country_flag = mem_ds_stranded_survival3
 		}
+		remove_global_flag = mem_distress_signal_stranded
 	}
 }
 
