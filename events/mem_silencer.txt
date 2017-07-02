@@ -1,0 +1,445 @@
+namespace = mem_silencer
+
+@tier1materialreward = 6
+@tier1materialmin = 100
+@tier1materialmax = 500
+@tier2materialreward = 12
+@tier2materialmin = 150
+@tier2materialmax = 1000
+@tier3materialreward = 18
+@tier3materialmin = 250
+@tier3materialmax = 1500
+@tier4materialreward = 24
+@tier4materialmin = 350
+@tier4materialmax = 2000
+
+@tier1influencereward = 6
+@tier1influencemin = 40
+@tier1influencemax = 100
+@tier2influencereward = 12
+@tier2influencemin = 80
+@tier2influencemax = 175
+@tier3influencereward = 18
+@tier3influencemin = 125
+@tier3influencemax = 250
+@tier4influencereward = 24
+@tier4influencemin = 150
+@tier4influencemax = 300
+
+@tier1researchreward = 6
+@tier1researchmin = 60
+@tier1researchmax = 150
+@tier2researchreward = 12
+@tier2researchmin = 90
+@tier2researchmax = 250
+@tier3researchreward = 18
+@tier3researchmin = 120
+@tier3researchmax = 350
+@tier4researchreward = 24
+@tier4researchmin = 150
+@tier4researchmax = 500
+
+@MEANTIMETOHAPPEN = 1 #In months
+
+@EVENTTIMER = 30 #in days
+@EVENTTIMERRAND = 30 #in days
+
+@DIPLODELAY = 15 #in days
+
+#The Silencer Event Chain
+#By ViolentBeetle
+
+#Fallen Empire dispatches the silencer
+country_event = {
+	id = mem_silencer.1
+	
+	hide_window = yes
+	
+	mean_time_to_happen = {
+		months = @MEANTIMETOHAPPEN
+		
+		modifier = {
+			has_ethic = ethic_fanatic_xenophobe
+			factor = 0.5
+		}
+		
+		modifier ={
+			has_ethic = ethic_fanatic_xenophile
+			factor = 2
+		}
+	}
+	
+	trigger = {
+		is_country_type = fallen_empire
+		OR = { #Who knows what crazy stuff someone could've modded? Better restrict to default ethics
+			has_ethic = ethic_fanatic_xenophile
+			has_ethic = ethic_fanatic_xenophobe
+			has_ethic = ethic_fanatic_spiritualist
+			has_ethic = ethic_fanatic_materialist
+		}
+		
+		any_country = {
+			is_country_type = default
+			is_ai = no
+			has_communications = root
+			NOT = { has_ethic = ethic_hive_mind }
+			NOT = { is_at_war_with = root }
+			NOR = { #I guess!
+				has_ascension_perk = ap_the_flesh_is_weak
+				has_ascension_perk = ap_mind_over_matter
+			}
+		}
+		
+		NOT = { has_global_flag = mem_silencer }
+	}
+	
+	immediate = {
+		set_country_flag = mem_silencer_FE
+		set_global_flag = mem_silencer
+		
+		save_event_target_as = the_fe
+		
+		random_country = {
+			limit = {
+				is_country_type = default
+				is_ai = no
+				has_communications = root
+				NOT = { has_ethic = ethic_hive_mind }
+				NOT = { is_at_war_with = root }
+				NOR = { #I guess!
+					has_ascension_perk = ap_the_flesh_is_weak
+					has_ascension_perk = ap_mind_over_matter
+				}
+			}
+			
+			set_country_flag = mem_silencer_country
+			save_event_target_as = target_country
+			
+			country_event = {
+				id = mem_silencer.2
+			}
+		}
+	}
+}
+
+country_event = {
+	id = mem_silencer.2
+	title = mem_silencer.2.name
+	desc = mem_silencer.2.desc
+	
+	picture = GFX_evt_smugglers_in_bar
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_owned_planet = {
+			save_event_target_as = silencer_was_here #For localization sake
+		}
+	}
+	
+	option = {
+		name = mem_silencer.2a #Being cooperative
+		
+		trigger = {
+			NOT = { has_valid_civic = civic_fanatic_purifiers }
+			NOT = { has_ethic = ethic_fanatic_xenophobe }
+		}
+		set_country_flag = mem_silencer_cooperative
+		country_event = {
+			id = mem_silencer.3
+			days = @EVENTTIMER
+			random = @EVENTTIMERRAND
+		}
+	}
+	
+	option = {
+		name = mem_silencer.2b #Expel the Silencer
+		custom_tooltip = mem_silencer.2b.tooltip
+		
+		trigger = {
+			NOT = { has_valid_civic = civic_fanatic_purifiers }
+			OR = {
+				NOR = {
+					has_ethic = ethic_egalitarian
+					has_ethic = ethic_fanatic_egalitarian
+				}
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
+		set_country_flag = mem_silencer_uncooperative
+		random_list = {
+			10 = {#Aplogetic
+				country_event = {
+					id = mem_silencer.21
+					days = @DIPLODELAY
+				}
+				modifier = {
+					factor = 2
+					event_target:the_fe = {
+						opinion = { who = root value > 50 }
+					}
+				}
+				modifier = {
+					factor = 0.5
+					event_target:the_fe = {
+						opinion = { who = root value < -50 }
+					}
+				}
+				modifier = {
+					factor = 0
+					event_target:the_fe = {
+						has_ethic = ethic_fanatic_xenophobe
+					}
+				}
+				modifier = {
+					factor = 2
+					event_target:the_fe = {
+						has_ethic = ethic_fanatic_xenophile
+					}
+				}
+			}
+			10 = {#Won't withdraw
+				country_event = {
+					id = mem_silencer.22
+					days = @DIPLODELAY
+				}
+				country_event = {
+					id = mem_silencer.3
+					days = @EVENTTIMER
+					random = @EVENTTIMERRAND
+				}
+				modifier = {
+					factor = 1.5
+					OR = {
+						has_ethic = ethic_fanatic_spiritualist
+						has_ethic = ethic_fanatic_materialist
+					}
+				}
+			}
+		}
+		event_target:the_fe = {
+			add_opinion_modifier = {
+				who = root
+				modifier = mem_silencer_expelled
+			}
+		}
+	}
+	
+	option = {
+		name = mem_silencer.2c #Kill the Silencer
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_authoritarian
+				has_ethic = ethic_fanatic_authoritarian
+				
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
+		
+		set_country_flag = mem_silencer_uncooperative
+		event_target:the_fe = {
+			add_opinion_modifier = {
+				who = root
+				modifier = mem_silencer_executed
+			}
+		}
+		country_event = {
+			id = mem_silencer.3
+			days = @EVENTTIMER
+			random = @EVENTTIMERRAND
+		}
+		country_event = {
+			id = mem_silencer.23
+			days = @DIPLODELAY
+		}
+	}
+}
+
+#Fallen empire agrees to stop messing with us
+country_event = {
+	id = mem_silencer.21
+	diplomatic = yes
+	is_triggered_only = yes
+	
+	title = TRANSMISSION
+	
+	desc = {
+		text = mem_silencer.21.phile
+		trigger = {
+			event_target:the_fe = {
+				has_ethic = ethic_fanatic_xenophile
+			}
+		}
+	}
+	
+	desc = {
+		text = mem_silencer.21.sp
+		trigger = {
+			event_target:the_fe = {
+				has_ethic = ethic_fanatic_spiritualist
+			}
+		}
+	}
+	
+	desc = {
+		text = mem_silencer.21.mat
+		trigger = {
+			event_target:the_fe = {
+				has_ethic = ethic_fanatic_materialist
+			}
+		}
+	}
+	
+	picture_event_data = {
+		portrait = event_target:the_fe
+		planet_background = event_target:the_fe
+		graphical_culture = event_target:the_fe
+		city_level = event_target:the_fe
+		room = event_target:the_fe
+	}
+	
+	option = {
+		name = EXCELLENT
+		
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier4influencereward
+			min = @tier4influencemin
+			max = @tier4influencemax
+		}
+	}
+	
+}
+
+#Fallen empire refuses to stops messing with us
+country_event = {
+	id = mem_silencer.22
+	diplomatic = yes
+	is_triggered_only = yes
+	
+	title = TRANSMISSION
+	
+	desc = {
+		text = mem_silencer.22.phile
+		trigger = {
+			event_target:the_fe = {
+				has_ethic = ethic_fanatic_xenophile
+			}
+		}
+	}
+	
+	desc = {
+		text = mem_silencer.22.phobe
+		trigger = {
+			event_target:the_fe = {
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
+	}
+	
+	desc = {
+		text = mem_silencer.22.sp
+		trigger = {
+			event_target:the_fe = {
+				has_ethic = ethic_fanatic_spiritualist
+			}
+		}
+	}
+	
+	desc = {
+		text = mem_silencer.22.mat
+		trigger = {
+			event_target:the_fe = {
+				has_ethic = ethic_fanatic_materialist
+			}
+		}
+	}
+	
+	picture_event_data = {
+		portrait = event_target:the_fe
+		planet_background = event_target:the_fe
+		graphical_culture = event_target:the_fe
+		city_level = event_target:the_fe
+		room = event_target:the_fe
+	}
+	
+	option = {
+		name = mem_silencer.22a
+		
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier1influencereward
+			min = @tier1influencemin
+			max = @tier1influencemax
+		}
+	}
+	
+}
+
+#Fallen empire is very upset about executed silencer
+country_event = {
+	id = mem_silencer.23
+	diplomatic = yes
+	is_triggered_only = yes
+	
+	title = TRANSMISSION
+	
+	desc = {
+		text = mem_silencer.23.phile
+		trigger = {
+			event_target:the_fe = {
+				has_ethic = ethic_fanatic_xenophile
+			}
+		}
+	}
+	
+	desc = {
+		text = mem_silencer.23.phobe
+		trigger = {
+			event_target:the_fe = {
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
+	}
+	
+	desc = {
+		text = mem_silencer.23.sp
+		trigger = {
+			event_target:the_fe = {
+				has_ethic = ethic_fanatic_spiritualist
+			}
+		}
+	}
+	
+	desc = {
+		text = mem_silencer.23.mat
+		trigger = {
+			event_target:the_fe = {
+				has_ethic = ethic_fanatic_materialist
+			}
+		}
+	}
+	
+	picture_event_data = {
+		portrait = event_target:the_fe
+		planet_background = event_target:the_fe
+		graphical_culture = event_target:the_fe
+		city_level = event_target:the_fe
+		room = event_target:the_fe
+	}
+	
+	option = {
+		name = mem_silencer.23a
+		
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier1influencereward
+			min = @tier1influencemin
+			max = @tier1influencemax
+		}
+	}
+	
+}
