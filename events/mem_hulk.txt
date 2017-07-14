@@ -1,0 +1,140 @@
+########################
+# Experiment on primitives (AKA Hulking)
+# By ViolentBeetle
+########################
+
+namespace = mem_hulk
+
+@tier1influencereward = 6
+@tier1influencemin = 40
+@tier1influencemax = 100
+@tier2influencereward = 12
+@tier2influencemin = 80
+@tier2influencemax = 175
+@tier3influencereward = 18
+@tier3influencemin = 125
+@tier3influencemax = 250
+@tier4influencereward = 24
+@tier4influencemin = 150
+@tier4influencemax = 300
+
+@tier1researchreward = 6
+@tier1researchmin = 60
+@tier1researchmax = 150
+@tier2researchreward = 12
+@tier2researchmin = 90
+@tier2researchmax = 250
+@tier3researchreward = 18
+@tier3researchmin = 120
+@tier3researchmax = 350
+@tier4researchreward = 24
+@tier4researchmin = 150
+@tier4researchmax = 500
+
+@MTTH = 10
+
+################################################################################
+################################################################################
+################################################################################
+ 
+# Happens on planet with obervation post with active observation
+
+#Selecting a planet
+country_event = {
+	id = mem_hulk.1
+	
+	hide_window = yes
+	
+	mean_time_to_happen = {
+		months = @MTTH
+		
+		modifier = {
+			factor = 0.8
+			capital_scope = {
+				observation_outpost_owner = {
+					has_ethic = ethic_materialist
+				}
+			}
+		}
+		modifier = {
+			factor = 0.5
+			capital_scope = {
+				observation_outpost_owner = {
+					has_ethic = ethic_fanatic_materialist
+				}
+			}
+		}
+	}
+	
+	trigger = {
+		is_country_type = primitive
+		NOT = { has_global_flag = mem_hulk }
+		capital_scope = {
+			has_observation_outpost = yes
+			observation_outpost = { has_mission = specimen_collection }
+			observation_outpost_owner = { is_ai = no }
+		}
+	}
+	
+	immediate = {
+		save_event_target_as = them
+		set_country_flag = mem_hulk_primitives
+		capital_scope = {
+			save_event_target_as = their_planet
+			observation_outpost_owner = {
+				save_event_target_as = us
+				set_country_flag = mem_hulk_observer
+				country_event = { id = mem_hulk.2 }
+			}
+		}
+	}
+}
+
+#Proposition
+country_event = {
+	id = mem_hulk.2
+	title = mem_hulk.2.name
+	desc = mem_hulk.2.desc
+	
+	picture = GFX_evt_society_research
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_hulk.2a
+		
+		enable_special_project = {
+			name = "MEM_HULK_EXPERIMENT"
+			location = FROM
+			owner = ROOT
+		}
+	}
+	
+	option = {
+		name = mem_hulk.2b
+		
+		add_influence = 50
+	}
+}
+
+#No outcome
+country_event = {
+	id = mem_hulk.3
+	title = mem_hulk.3.name
+	desc = mem_hulk.3.desc
+	
+	picture = GFX_evt_society_research
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = UNFORTUNATE
+		
+		add_monthly_resource_mult = {
+			resource = society_research
+			value = @tier2researchreward
+			min = @tier2researchmin
+			max = @tier2researchmax
+		}
+	}
+}
