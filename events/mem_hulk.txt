@@ -32,6 +32,8 @@ namespace = mem_hulk
 @tier4researchmax = 500
 
 @MTTH = 10
+@TIMER = 30
+@RANDOM = 30
 
 ################################################################################
 ################################################################################
@@ -105,7 +107,7 @@ country_event = {
 		
 		enable_special_project = {
 			name = "MEM_HULK_EXPERIMENT"
-			location = FROM
+			location = event_target:their_planet
 			owner = ROOT
 		}
 	}
@@ -117,8 +119,8 @@ country_event = {
 	}
 }
 
-#No outcome
-country_event = {
+#Outcome calculation begins
+ship_event = {
 	id = mem_hulk.3
 	title = mem_hulk.3.name
 	desc = mem_hulk.3.desc
@@ -127,14 +129,98 @@ country_event = {
 	
 	is_triggered_only = yes
 	
-	option = {
-		name = UNFORTUNATE
-		
-		add_monthly_resource_mult = {
-			resource = society_research
-			value = @tier2researchreward
-			min = @tier2researchmin
-			max = @tier2researchmax
+	immediate = {
+		event_target:them = {
+			country_event = { id = mem_hulk.4 days = @TIMER random = @RANDOM } #Thing will happen to them
 		}
+	}
+	
+	option = {
+		name = mem_hulk.3a
+		custom_tooltip = mem_hulk.3a.tooltip
+	}
+}
+
+#Primitives experience a thing
+country_event = {
+	id = mem_hulk.4
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		is_country_type = primitive
+	}
+	
+	immediate = {
+		random_list = {
+			20 = { country_event = { id = mem_hulk.5 }  } #Hulks
+		}
+	}
+}
+
+#Hulks resultion
+country_event = {
+	id = mem_hulk.5
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		create_species = {
+			is_mod = yes
+			name = this
+			plural = this
+			class = this
+			portrait = this
+			traits = this
+			sentient = no
+			traits = {
+				trait = mem_trait_hulks
+			}
+		}
+		last_created_species = {
+			save_event_target_as = hulks
+		}
+		random_owned_pop = {
+			set_pop_flag = mem_hulk_spare_him
+		}
+		every_owned_pop = {
+			limit = { 
+				NOT = { has_pop_flag = mem_hulk_spare_him }
+			}
+			change_species = last_created
+		}
+		capital_scope = {
+			observation_outpost_owner = {
+				country_event = {
+					id = mem_hulk.51
+				}
+			}
+		}
+	}
+}
+
+#Observation post owner finds out what he did
+country_event = {
+	id = mem_hulk.51
+	title = mem_hulk.51.name
+	desc = mem_hulk.51.desc
+	
+	picture = GFX_evt_society_research
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		has_country_flag = mem_hulk_observer
+	}
+	
+	option = {
+		name = OK
+	}
+	
+	after = {
 	}
 }
