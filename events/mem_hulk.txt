@@ -101,6 +101,8 @@ country_event = {
 	
 	picture = GFX_evt_society_research
 	
+	location = from
+	
 	is_triggered_only = yes
 	
 	option = {
@@ -128,11 +130,13 @@ ship_event = {
 	
 	picture = GFX_evt_society_research
 	
+	location = event_target:their_planet
+	
 	is_triggered_only = yes
 	
 	immediate = {
-		event_target:them = {
-			country_event = { id = mem_hulk.4 days = @TIMER random = @RANDOM } #Thing will happen to them
+		event_target:their_planet = {
+			planet_event = { id = mem_hulk.4 days = @TIMER random = @RANDOM } #Thing will happen to them
 		}
 	}
 	
@@ -143,7 +147,7 @@ ship_event = {
 }
 
 #Primitives experience a thing
-country_event = {
+planet_event = {
 	id = mem_hulk.4
 	
 	hide_window = yes
@@ -151,18 +155,18 @@ country_event = {
 	is_triggered_only = yes
 	
 	trigger = {
-		is_country_type = primitive
+		owner = { is_country_type = primitive }
 	}
 	
 	immediate = {
 		random_list = {
-			20 = { country_event = { id = mem_hulk.5 }  } #Hulks
+			20 = { planet_event = { id = mem_hulk.5 }  } #Hulks
 		}
 	}
 }
 
 #Hulks resultion
-country_event = {
+planet_event = {
 	id = mem_hulk.5
 	
 	hide_window = yes
@@ -170,47 +174,41 @@ country_event = {
 	is_triggered_only = yes
 	
 	immediate = {
-		create_species = {
-			is_mod = yes
-			name = this
-			plural = this
-			class = this
-			portrait = this
-			traits = this
-			sentient = no
-			traits = {
-				trait = mem_trait_hulks
+		observation_outpost_owner = {
+			country_event = {
+				id = mem_hulk.51
+			}
+		}
+		random_owned_pop = {
+			create_species = {
+				name = this
+				plural = this
+				class = this
+				portrait = this
+				traits = this
+				sentient = no
+				traits = {
+					trait = mem_trait_hulks
+				}
 			}
 		}
 		last_created_species = {
 			save_event_target_as = hulks
 		}
-		capital_scope = {
-			while = {
-				limit = { num_pops > 0 }
-				random_owned_pop = { kill_pop = yes }
-				change_variable = {
-					which = mem_killed_pops
-					value = 1
+		destroy_colony = {
+			keep_buildings = yes
+		}
+		while = {
+			limit = {
+				count_pops = {
+					limit = { is_sentient = no }
+					count < 3
 				}
 			}
-			
-			destroy_colony = {
-				keep_buildings = yes
-			}
-			
-				
 			best_tile_for_pop = {
-				create_pop = {
-					species = event_target:hulks
-				}
+				create_pop = { species = last_created }
 			}
-				
-			
-			observation_outpost_owner = {
-				country_event = { id = mem_hulk.51 days = 1 }
-			}
-			
+
 		}
 	}
 }
@@ -221,45 +219,79 @@ country_event = {
 	title = mem_hulk.51.name
 	desc = mem_hulk.51.desc
 	
-	picture = GFX_evt_society_research
+	picture = GFX_evt_genetic_modification
 	
 	is_triggered_only = yes
+	
+	location = event_target:their_planet
 	
 	trigger = {
 		has_country_flag = mem_hulk_observer
 	}
 	
-	immediate = {
-		event_target:their_planet = {
-			create_species = {
-				name = "NAME_Snakeoid"
-				class = "PRE_REP"
-				portrait = "pre_rep09"
-				traits = {
-					trait = random_presentient_trait
-				}
-				homeworld = FROM
-				sentient = no
-			}
-			while = {
-				limit = {
-					count_pops = {
-						limit = { is_sentient = no }
-						count < 3
-					}
-					free_pop_tiles > 0
-				}
-				best_tile_for_pop = {
-					create_pop = { species = last_created }
-				}
+	option = {
+		name = INCREDIBLE
+		custom_tooltip = mem_hulk.51a.tooltip
+		
+		trigger = {
+			NOR = {
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_xenophile
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
 			}
 		}
 	}
 	
 	option = {
-		name = OK
+		name = mem_hulk.51a.phobe
+		custom_tooltip = mem_hulk.51a.tooltip
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
+			}
+		}
+	}
+	
+	option = {
+		name = mem_hulk.51a.phile
+		custom_tooltip = mem_hulk.51a.tooltip
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_xenophile
+			}
+		}
 	}
 	
 	after = {
+		IF = {
+			limit = { NOT = { has_technology = tech_genome_mapping } }
+			add_research_option = tech_genome_mapping
+			add_tech_progress = {
+				tech = tech_genome_mapping
+				progress = 0.5
+			}
+			ELSE = {
+				IF = {
+					limit = { NOT = { has_technology = tech_epigenetic_triggers } }
+					add_research_option = tech_epigenetic_triggers
+					add_tech_progress = {
+						tech = tech_epigenetic_triggers
+						progress = 0.1
+					}
+				}
+			}
+		}
+		
+		add_monthly_resource_mult = {
+			resource = society_research
+			value = @tier4researchreward
+			min = @tier4researchmin
+			max = @tier4researchmax
+		}
 	}
 }
