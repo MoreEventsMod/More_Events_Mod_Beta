@@ -1,0 +1,178 @@
+#Fallen empire settlers
+#Idea by /u/cookies4all
+#Code and writing by ViolentBeetle
+
+namespace = mem_fe_settlers
+
+@MTTH = 5
+
+@recheck = 30
+@recheckrandom = 30
+
+@modifierduration = 30
+
+#FE pics its victim
+country_event = {
+	id = mem_fe_settlers.1
+	
+	hide_window = yes
+	
+	mean_time_to_happen = {
+		months = @MTTH
+	}
+	
+	trigger = {
+		NOT = { has_global_flag = mem_fe_settlers }
+		is_country_type = fallen_empire
+		is_at_war = no
+		any_country = {
+			#has_communications = root
+			is_ai = no
+			any_owned_planet = {
+				free_pop_tiles > 0
+			}
+			NOT = { has_ethic = ethic_hive_mind }
+		}
+	}
+	
+	immediate = {
+		set_global_flag = mem_fe_settlers
+		save_event_target_as = the_FE
+		random_country = {
+			limit = {
+				#has_communications = root
+				is_ai = no
+				any_owned_planet = {
+					free_pop_tiles > 0
+				}
+				NOT = { has_ethic = ethic_hive_mind }
+			}
+			save_event_target_as = the_recepients
+			country_event = {
+				id = mem_fe_settlers.2
+			}
+		}
+	}
+}
+
+#Diplomatic window
+country_event = {
+	id = mem_fe_settlers.2
+	title = mem_fe_settlers.2.name
+	desc = {
+		trigger = {
+			event_target:the_FE = { has_ethic = ethic_fanatic_xenophile }
+		}
+		text = mem_fe_settlers.2.phile
+	}
+	desc = {
+		trigger = {
+			event_target:the_FE = { has_ethic = ethic_fanatic_xenophobe }
+		}
+		text = mem_fe_settlers.2.phobe
+	}
+	desc = {
+		trigger = {
+			event_target:the_FE = { has_ethic = ethic_fanatic_materialist }
+		}
+		text = mem_fe_settlers.2.mat
+	}
+	desc = {
+		trigger = {
+			event_target:the_FE = { has_ethic = ethic_fanatic_spiritualist }
+		}
+		text = mem_fe_settlers.2.sp
+	}
+	
+	is_triggered_only = yes
+	diplomatic = yes
+	
+	picture_event_data = {
+		portrait = event_target:the_FE
+		planet_background = event_target:the_FE
+		graphical_culture = event_target:the_FE
+		city_level = event_target:the_FE
+		room = event_target:the_FE
+	}
+	
+	option = {
+		name = mem_fe_settlers.2a
+		custom_tooltip = mem_fe_settlers.2a.tooltip
+		
+		trigger = {
+			NOT = { has_civic = civic_fanatic_purifiers }
+		}
+		
+		event_target:the_FE = {
+			add_opinion_modifier = {
+				who = root
+				modifier = mem_fe_settlers_accepted
+			}
+		}
+		
+		hidden_effect = {
+			event_target:the_FE = {
+				country_event = { id = mem_fe_settlers.3 days = @recheck random = @recheckrandom }
+			}
+			random_owned_planet = {
+				limit = {
+					free_pop_tiles > 0
+				}
+				best_tile_for_pop = {
+					create_pop = {
+						species = event_target:the_FE
+					}
+				}
+			}
+			
+			last_created_pop = {
+				IF = {
+					limit = {
+						event_target:the_FE = { has_ethic = ethic_fanatic_spiritualist }
+					}
+					pop_change_ethic = ethic_spiritualist
+				}
+				IF = {
+					limit = {
+						event_target:the_FE = { has_ethic = ethic_fanatic_xenophile }
+					}
+					pop_change_ethic = ethic_xenophile
+				}
+				IF = {
+					limit = {
+						event_target:the_FE = { has_ethic = ethic_fanatic_xenophobe }
+					}
+					pop_change_ethic = ethic_xenophobe
+				}
+				IF = {
+					limit = {
+						event_target:the_FE = { has_ethic = ethic_fanatic_materialist }
+					}
+					pop_change_ethic = ethic_materialist
+				}
+				
+				set_pop_flag = mem_fe_settlers_pop
+				
+				add_modifier = {
+					modifier = mem_fe_settlers_higher_species
+					days = -1
+				}
+				add_modifier = {
+					modifier = mem_fe_settlers_culture_shock
+					days = @modifierduration
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_fe_settlers.2b
+		
+		event_target:the_FE = {
+			add_opinion_modifier = {
+				who = root
+				modifier = mem_fe_settlers_refused
+			}
+		}
+	}
+}
