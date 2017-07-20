@@ -1364,6 +1364,367 @@ country_event = {
 	}
 }
 
+planet_event = {
+	id = mem_test_event.52122
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		# event_target:mem_test_species = {
+			# create_species = {
+				# is_mod = yes
+				# name = this
+				# plural = this
+				# class = this
+				# portrait = this
+				# traits = this
+				# traits = {
+					# trait = random_presentient_trait
+				# }
+				# homeworld = ROOT
+				# sentient = no
+			# }
+		# }
+		# create_species = {
+			# name = "NAME_Snakeoid"
+			# class = mem_test_species
+			# portrait = "pre_rep09"
+			# traits = {
+				# trait = random_presentient_trait
+			# }
+			# homeworld = ROOT
+			# sentient = no
+		# }
+		while = {
+			limit = {
+				count_pops = {
+					limit = { is_sentient = no }
+					count < 3
+				}
+				free_pop_tiles > 0
+			}
+			best_tile_for_pop = {
+				create_pop = { species = last_created }
+			}
+		}
+	}
+}
+
+planet_event = {
+	id = mem_test_event.52123
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		create_species = {
+			name = random
+			class = random
+			portrait = random
+			homeworld = THIS
+			traits = {
+				trait = random_traits
+			}
+		}
+		last_created_species = {
+			save_global_event_target_as = mem_test_species
+		}
+		create_country = {
+			name = random
+			authority = random
+			civics = {
+				civic = civic_landed_nobility
+				civic = civic_flat_world_theory
+			}
+			species = last_created
+			ethos = random
+			flag = {
+				icon = {
+					category = "special"
+					file = "primitive.dds"
+				}
+				background= {
+					category = "backgrounds"
+					file = "new_dawn.dds"
+				}
+				colors={
+					"turquoise"
+					"green"
+					"null"
+					"null"
+				}
+			}
+			type = primitive
+		}
+		last_created_country = {
+			#to prevent them from developing on their own permanently
+			set_country_flag = recently_advanced
+			set_graphical_culture = preindustrial_01
+			random_list = {
+				20 = {
+					set_country_flag = stone_age 
+					set_primitive_age = stone_age
+					change_government = {
+						authority = random
+						civics = {
+							civic = civic_secret_of_fire
+							civic = civic_the_wheel
+						}
+					}
+				}
+				25 = {
+					set_country_flag = bronze_age 
+					set_primitive_age = bronze_age
+					change_government = {
+						authority = random
+						civics = {
+							civic = civic_secret_of_fire
+							civic = civic_the_wheel
+						}
+					}
+					change_country_flag = {
+						icon = {
+							category = "special"
+							file = "primitive.dds"
+						}
+						background= {
+							category = "backgrounds"
+							file = "new_dawn.dds"
+						}
+						colors={
+							"green"
+							"dark_green"
+							"null"
+							"null"
+						}
+					}
+				}
+				25 = {
+					set_country_flag = iron_age 
+					set_primitive_age = iron_age
+					change_country_flag = {
+						icon = {
+							category = "special"
+							file = "primitive.dds"
+						}
+						background= {
+							category = "backgrounds"
+							file = "new_dawn.dds"
+						}
+						colors={
+							"purple"
+							"dark_purple"
+							"null"
+							"null"
+						}
+					}
+				}
+				20 = {
+					set_country_flag = late_medieval_age 
+					set_primitive_age = late_medieval_age
+					change_country_flag = {
+						icon = {
+							category = "special"
+							file = "primitive.dds"
+						}
+						background= {
+							category = "backgrounds"
+							file = "new_dawn.dds"
+						}
+						colors={
+							"light_blue"
+							"blue"
+							"null"
+							"null"
+						}
+					}
+				}
+				10 = {
+					set_country_flag = renaissance_age 
+					set_primitive_age = renaissance_age
+					change_country_flag = {
+						icon = {
+							category = "special"
+							file = "primitive.dds"
+						}
+						background= {
+							category = "backgrounds"
+							file = "new_dawn.dds"
+						}
+						colors={
+							"pink"
+							"burgundy"
+							"null"
+							"null"
+						}
+					}
+				}
+			}
+		}
+		create_colony = {
+			owner = last_created_country
+			species = last_created
+			ethos = owner
+		}
+		random_tile = {
+			limit = {
+				has_blocker = no
+				has_grown_pop = no
+				has_growing_pop = no
+			}
+			create_pop = {
+				species = last_created
+			}
+		}
+		if = {
+			limit = {
+				last_created_country = {
+					OR = {
+						has_country_flag = steam_age
+						has_country_flag = renaissance_age
+					}
+				}
+			}
+			random_tile = {
+				limit = {
+					has_blocker = no
+					has_grown_pop = no
+					has_growing_pop = no
+				}
+				create_pop = {
+					species = last_created
+				}
+			}						
+		}
+		random_tile = {
+			limit = { has_building = "building_colony_shelter" }
+			remove_building = yes
+		}					
+		while = {
+			count = 2
+			random_tile = {
+				limit = { 
+					has_blocker = no 
+					has_building = no 
+					has_grown_pop = yes
+				}
+				set_building = "building_primitive_farm"										
+				add_resource = {
+					resource = food
+					amount = 1
+					replace = yes
+				}
+			}
+		}
+		if = {
+			limit = {
+				last_created_country = {
+					has_country_flag = stone_age
+				}
+			}	
+			every_tile = {
+				limit = {
+					has_building = "building_primitive_farm"
+				}
+				remove_building = yes
+			}
+		}
+		if = {
+			limit = {
+				last_created_country = {
+					OR = {
+						has_country_flag = iron_age 
+						has_country_flag = late_medieval_age 									
+						has_country_flag = renaissance_age
+						has_country_flag = steam_age
+					}
+				}
+			}
+			random_tile = {
+				limit = {
+					has_blocker = no
+					has_grown_pop = no
+					has_growing_pop = no
+				}
+				create_pop = {
+					species = last_created
+				}
+			}						
+			random_tile = {
+				limit = { 
+					has_blocker = no 
+					has_building = no 
+					has_grown_pop = yes
+				}
+				set_building = "building_primitive_farm"
+				add_resource = {
+					resource = food
+					amount = 1
+					replace = yes
+				}
+			}						
+		}					
+		if = {
+			limit = {
+				last_created_country = {
+					OR = {
+						has_country_flag = steam_age
+						has_country_flag = renaissance_age
+					}
+				}
+			}
+			random_tile = {
+				limit = { 
+					has_blocker = no 
+					has_building = no 
+					has_grown_pop = yes
+				}
+				set_building = "building_primitive_farm"
+				add_resource = {
+					resource = food
+					amount = 1
+					replace = yes
+				}
+			}						
+		}
+		random_tile = {
+			limit = {
+				has_blocker = no
+				has_grown_pop = no
+				has_growing_pop = no
+				has_building = no
+			}
+			set_building = "building_mem_planetary_shield_generator_orila"
+		}
+		planet_event = { id = mem_planetary_shields.5 }
+		event_target:mem_test_species = {
+			create_species = {
+				name = this
+				plural = this
+				class = this
+				portrait = this
+				traits = {
+					trait = random_presentient_trait
+				}
+				homeworld = ROOT
+				sentient = no
+			}
+		}
+	}
+}
+
+planet_event = {
+	id = mem_test_event.52124
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		destroy_colony = { keep_buildings = yes }
+	}
+}
+
 # mem_test_event.10
 # Spawn a fleet of 10 naval capacity.
 # Mix of pirate destroyers & corvettes
