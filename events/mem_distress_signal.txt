@@ -6,6 +6,9 @@
 
 namespace = mem_distress_signal
 
+@mem_stranded_influence_gain1 = 50
+@mem_stranded_influence_gain2 = 100
+@mem_stranded_influence_gain3 = 150
 @mem_stranded_society_gain1 = 250
 @mem_stranded_society_gain2 = 500
 @mem_stranded_society_gain3 = 1000
@@ -51,8 +54,7 @@ ship_event = {
 		set_global_flag = mem_distress_signal_stranded
 	}
 	
-	# TODO : A bloquer a Fanatic Purifier
-	# Available to everyone but Hive Mind if there's a free leader slot
+	# Available to everyone but Hive Mind and Fanatic purifiers if there's a free leader slot
 	option = {
 		name = mem_distress_signal.100.common.welcome
 		trigger = {
@@ -60,6 +62,7 @@ ship_event = {
 				free_leader_slots > 0
 				NOT = {
 					has_ethic = ethic_hive_mind
+					has_civic = civic_fanatic_purifiers
 				}
 			}		
 		}
@@ -97,7 +100,7 @@ ship_event = {
 		}
 	}
 	
-	# Available to everyone but Hive Mind if there's no free leader slot
+	# Available to everyone but Hive Mind and Fanatical Purifiers if there's no free leader slot
 	option = {
 		name = mem_distress_signal.100.common.welcome.full
 		
@@ -106,6 +109,7 @@ ship_event = {
 				free_leader_slots = 0
 				NOT = {
 					has_ethic = ethic_hive_mind
+					has_civic = civic_fanatic_purifiers
 				}
 			}		
 		}		
@@ -171,7 +175,7 @@ ship_event = {
 		}
 	}
 	
-	# Available only to Xenophobe
+	# Available only to Xenophobe but not Fanatical Purifier
 	option = {
 		name = mem_distress_signal.100.xenophobe.leave
 		trigger = {
@@ -180,12 +184,24 @@ ship_event = {
 					has_ethic = ethic_xenophobe
 					has_ethic = ethic_fanatic_xenophobe
 				}
+				NOT = { has_civic = civic_fanatic_purifiers }
 			}		
 		}
-		ship_event = { id = mem_distress_signal.101 }
+		hidden_effect = { ship_event = { id = mem_distress_signal.101 } }
 	}
 	
-	# Available only to Hive Mind with "Genetic Resequencing" Tech with free leader slot
+	# Available only to Fanatical Purifiers
+	option = {
+		name = mem_distress_signal.100.fanapurif
+		trigger = {
+			root.owner = {
+				has_civic = civic_fanatic_purifiers
+			}		
+		}
+		Root.Owner = { add_influence = @mem_stranded_influence_gain1 }
+	}	
+	
+	# Available only to Hive Mind with "Genetic Resequencing" Tech, a free leader slot
 	# And not having the Devouring Swarm Civic
 	option = {
 		name = mem_distress_signal.100.hive.welcome
@@ -193,7 +209,7 @@ ship_event = {
 			root.owner = {
 				free_leader_slots > 0
 				has_ethic = ethic_hive_mind
-				has_tech_option = tech_genetic_resequencing
+				has_technology = tech_genetic_resequencing
 				Not = { has_civic = civic_hive_devouring_swarm }
 			}		
 		}
@@ -239,7 +255,7 @@ ship_event = {
 			root.owner = {
 				free_leader_slots = 0
 				has_ethic = ethic_hive_mind
-				has_tech_option = tech_genetic_resequencing
+				has_techology = tech_genetic_resequencing
 				Not = { has_civic = civic_hive_devouring_swarm }
 			}		
 		}
@@ -312,7 +328,7 @@ ship_event = {
 			root.owner = {
 				has_ethic = ethic_hive_mind
 				NOT = { 
-					has_tech_option = tech_genetic_resequencing 
+					has_technology = tech_genetic_resequencing 
 					has_civic = civic_hive_devouring_swarm
 				}
 			}		
@@ -327,7 +343,8 @@ ship_event = {
 				has_ethic = ethic_hive_mind
 				has_civic = civic_hive_devouring_swarm
 			}		
-		}		
+		}
+		Root.Owner = { add_influence = @mem_stranded_influence_gain1 }
 	}
 }
 
@@ -376,7 +393,7 @@ ship_event = {
 							}
 							
 							else = {
-								ship_event = { id = mem_distress_signal.101 }
+								hidden_effect = { ship_event = { id = mem_distress_signal.101 } }
 							}
 						}
 					}
@@ -398,7 +415,7 @@ ship_event = {
 							}
 							
 							else = {
-								ship_event = { id = mem_distress_signal.101 }
+								hidden_effect = { ship_event = { id = mem_distress_signal.101 } }
 							}
 						}
 					}
@@ -420,7 +437,7 @@ ship_event = {
 							}
 							
 							else = {
-								ship_event = { id = mem_distress_signal.101 }
+								hidden_effect = { ship_event = { id = mem_distress_signal.101 } }
 							}
 						}
 					}
@@ -458,7 +475,7 @@ ship_event = {
 			}
 		}
 		name = mem_distress_signal.102.continue
-		ship_event = { id = mem_distress_signal.101 } 		
+		hidden_effect = { ship_event = { id = mem_distress_signal.101 } } 		
 	}	
 	
 	option = {
@@ -510,7 +527,7 @@ ship_event = {
 			}
 		}
 		name = mem_distress_signal.finalstop
-		ship_event = { id = mem_distress_signal.101 } 		
+		hidden_effect = { ship_event = { id = mem_distress_signal.101 } } 		
 	}	
 }
 
@@ -542,7 +559,7 @@ ship_event = {
 			}
 		}
 		name = mem_distress_signal.102.continue
-		ship_event = { id = mem_distress_signal.101 } 		
+		hidden_effect = { ship_event = { id = mem_distress_signal.101 } } 		
 	}	
 	
 	option = {
@@ -594,7 +611,7 @@ ship_event = {
 			}
 		}
 		name = mem_distress_signal.finalstop
-		ship_event = { id = mem_distress_signal.101 } 		
+		hidden_effect = { ship_event = { id = mem_distress_signal.101 } } 		
 	}	
 }
 
@@ -626,7 +643,7 @@ ship_event = {
 			}
 		}
 		name = mem_distress_signal.102.continue
-		ship_event = { id = mem_distress_signal.101 } 		
+		hidden_effect = { ship_event = { id = mem_distress_signal.101 } } 		
 	}	
 	
 	option = {
@@ -678,7 +695,7 @@ ship_event = {
 			}
 		}
 		name = mem_distress_signal.finalstop
-		ship_event = { id = mem_distress_signal.101 } 		
+		hidden_effect = { ship_event = { id = mem_distress_signal.101 } } 		
 	}	
 }
 
@@ -747,11 +764,151 @@ ship_event = {
 			Root.Owner = { free_leader_slots = 0 }
 		}
 		name = mem_distress_signal.110.accept.full
+		Root.Owner = { add_influence = @mem_stranded_influence_gain3
+		}
 	}
 
 	option = {
 		name = mem_distress_signal.110.deny		
 	}
+}
+
+#################################
+## ROCK THRASHERS
+#################################
+
+# Rock Thrashers - Initial event
+# Used event_target : mem_distress_signal_rock_thrashers_planet --> Planet where anomaly spawned
+ship_event = {
+	id = mem_distress_signal.200
+	title = "mem_distress_signal.200.name"
+	desc = "mem_distress_signal.200.desc"
+	picture =  GFX_evt_mem_strange_tectonics 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+
+	immediate = {
+		FROM = {
+			save_event_target_as = mem_distress_signal_rock_thrashers_planet
+			set_planet_flag = mem_distress_signal_rock_thrashers_planet
+		}
+	}
+	
+	option = {
+		name = mem_distress_signal.200.a		
+		FROM = {
+			set_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_not_completed
+			enable_special_project = {
+				name = "MEM_DISTRESS_SIGNAL_ROCK_THRASHERS_DISCOVERY_PROJECT"
+				owner = ROOT
+				location = FROM
+			}			
+		}
+	}
+	
+	option = {
+		name = mem_distress_signal.200.b
+		Rood.Owner = { add_influence = 50 }
+	}
+	
+	option = {
+		name = mem_distress_signal.200.c
+		trigger = {
+			FROM = {
+				has_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_not_completed
+			}
+		}
+		FROM = {
+			set_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_refused
+		}
+	}
+}
+
+# Rock Thrashers - Initial Special Project success
+ship_event = {
+	id = mem_distress_signal.201
+	title = "mem_distress_signal.201.name"
+	desc = "mem_distress_signal.201.desc"
+	picture =  GFX_evt_mem_strange_tectonics 
+	show_sound = event_sensor_ping
+	location = event_target:mem_distress_signal_rock_thrashers_planet
+
+	is_triggered_only = yes	
+
+	option = {
+		name = mem_distress_signal.201.a.neutral
+		trigger = {
+			root.owner = {
+				NOR = {
+					has_ethic = ethic_xenophile
+					has_ethic = ethic_fanatic_xenophile
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		event_target:mem_distress_signal_rock_thrashers_planet = {
+			add_modifier = {
+				modifier = mem_distress_signal_rock_thrashers
+				days = -1
+			}			
+			remove_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_not_completed
+		}
+	}
+
+	option = {
+		name = mem_distress_signal.201.a.xenophile
+		trigger = { 
+			root.owner = {
+				OR = {
+					has_ethic = ethic_xenophile
+					has_ethic = ethic_fanatic_xenophile
+				}
+			}
+		}
+		event_target:mem_distress_signal_rock_thrashers_planet = {
+			add_modifier = {
+				modifier = mem_distress_signal_rock_thrashers
+				days = -1
+			}
+			remove_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_not_completed
+		}
+	}
+	
+	option = {
+		name = mem_distress_signal.201.a.xenophobe
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		event_target:mem_distress_signal_rock_thrashers_planet = {
+			add_modifier = {
+				modifier = mem_distress_signal_rock_thrashers
+				days = -1
+			}
+			remove_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_not_completed
+		}
+	}
+}
+
+# Rock Thrashers - After colonization if the initial special project hasn't been completed
+ship_event = {
+	id = mem_distress_signal.210
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		event_target:mem_distress_signal_rock_thrashers_planet = {
+			has_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_not_completed
+		}
+	}
+	planet_event = { id = mem_distress_signal.200 days = 30 }
 }
 
 #################################
