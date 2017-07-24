@@ -16,7 +16,6 @@ namespace = mem_distress_signal
 @mem_crash_site_influence_gain = 100
 
 # TODO : Change event sounds
-# TODO : Add Rock Thrashers branch when colonizing before doing special project
 
 # Failure and Critical failure
 ship_event = {
@@ -187,6 +186,7 @@ ship_event = {
 				NOT = { has_civic = civic_fanatic_purifiers }
 			}		
 		}
+		custom_tooltip = mem_distress_signal.100.xeno.tooltip	
 		hidden_effect = { ship_event = { id = mem_distress_signal.101 } }
 	}
 	
@@ -255,7 +255,7 @@ ship_event = {
 			root.owner = {
 				free_leader_slots = 0
 				has_ethic = ethic_hive_mind
-				has_techology = tech_genetic_resequencing
+				has_technology = tech_genetic_resequencing
 				Not = { has_civic = civic_hive_devouring_swarm }
 			}		
 		}
@@ -558,7 +558,7 @@ ship_event = {
 				}
 			}
 		}
-		name = mem_distress_signal.102.continue
+		name = mem_distress_signal.103.continue
 		hidden_effect = { ship_event = { id = mem_distress_signal.101 } } 		
 	}	
 	
@@ -642,7 +642,7 @@ ship_event = {
 				}
 			}
 		}
-		name = mem_distress_signal.102.continue
+		name = mem_distress_signal.104.continue
 		hidden_effect = { ship_event = { id = mem_distress_signal.101 } } 		
 	}	
 	
@@ -778,7 +778,6 @@ ship_event = {
 #################################
 
 # Rock Thrashers - Initial event
-# Used event_target : mem_distress_signal_rock_thrashers_planet --> Planet where anomaly spawned
 ship_event = {
 	id = mem_distress_signal.200
 	title = "mem_distress_signal.200.name"
@@ -794,6 +793,7 @@ ship_event = {
 			save_event_target_as = mem_distress_signal_rock_thrashers_planet
 			set_planet_flag = mem_distress_signal_rock_thrashers_planet
 		}
+		set_global_flag = mem_distress_signal_rock_thrashers
 	}
 	
 	option = {
@@ -810,19 +810,7 @@ ship_event = {
 	
 	option = {
 		name = mem_distress_signal.200.b
-		Rood.Owner = { add_influence = 50 }
-	}
-	
-	option = {
-		name = mem_distress_signal.200.c
-		trigger = {
-			FROM = {
-				has_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_not_completed
-			}
-		}
-		FROM = {
-			set_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_refused
-		}
+		Root.Owner = { add_influence = 50 }
 	}
 }
 
@@ -851,7 +839,7 @@ ship_event = {
 		}
 		event_target:mem_distress_signal_rock_thrashers_planet = {
 			add_modifier = {
-				modifier = mem_distress_signal_rock_thrashers
+				modifier = mem_distress_signal_rock_thrashers_pm
 				days = -1
 			}			
 			remove_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_not_completed
@@ -870,7 +858,7 @@ ship_event = {
 		}
 		event_target:mem_distress_signal_rock_thrashers_planet = {
 			add_modifier = {
-				modifier = mem_distress_signal_rock_thrashers
+				modifier = mem_distress_signal_rock_thrashers_pm
 				days = -1
 			}
 			remove_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_not_completed
@@ -889,7 +877,7 @@ ship_event = {
 		}
 		event_target:mem_distress_signal_rock_thrashers_planet = {
 			add_modifier = {
-				modifier = mem_distress_signal_rock_thrashers
+				modifier = mem_distress_signal_rock_thrashers_pm
 				days = -1
 			}
 			remove_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_not_completed
@@ -898,17 +886,630 @@ ship_event = {
 }
 
 # Rock Thrashers - After colonization if the initial special project hasn't been completed
-ship_event = {
+planet_event = {
 	id = mem_distress_signal.210
 	hide_window = yes
-	is_triggered_only = yes
+	is_triggered_only = yes	
 
 	trigger = {
-		event_target:mem_distress_signal_rock_thrashers_planet = {
-			has_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_not_completed
+		has_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_not_completed
+	}
+	immediate = { 		
+		planet_event = { id = mem_distress_signal.211 days = 30 }
+		Owner = {
+			random_owned_planet = {
+				limit = { has_planet_flag = mem_distress_signal_rock_thrashers_planet }
+			}			
 		}
 	}
-	planet_event = { id = mem_distress_signal.200 days = 30 }
+}
+
+# Rock Thrashers - If initial project is not completed, reminder and option to remove it.
+planet_event = {
+	id = mem_distress_signal.211
+	title = "mem_distress_signal.211.name"
+	desc = "mem_distress_signal.211.desc"
+	picture =  GFX_evt_mem_strange_tectonics 
+	show_sound = event_sensor_ping
+	location = This
+
+	is_triggered_only = yes	
+	
+	option = {
+		name = mem_distress_signal.211.a
+	}
+	
+	option = {
+		name = mem_distress_signal.211.b
+		This = { set_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_refused }
+		This.Owner = {
+			abort_special_project = {
+				type = MEM_DISTRESS_SIGNAL_ROCK_THRASHERS_DISCOVERY_PROJECT
+			}
+		}
+	}
+}
+
+#################################
+## COLONY SHIP CRASH SITE
+#################################
+
+# Colony ship crash site - Initial event
+ship_event = {
+	id = mem_distress_signal.300
+	title = "mem_distress_signal.300.name"
+	desc = "mem_distress_signal.300.desc"
+	picture =  GFX_evt_landing_ship 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+
+	option = {
+		name = mem_distress_signal.300.a		
+		FROM = {
+			save_event_target_as = mem_distress_signal_colony_ship_planet
+			set_planet_flag = mem_distress_signal_colony_planet
+			enable_special_project = {
+				name = "MEM_DISTRESS_SIGNAL_COLONY_SHIP_PROJECT"
+				owner = ROOT
+				location = FROM
+			}
+		}
+	}
+}
+
+# Crash site - No survivors
+ship_event = {
+	id = mem_distress_signal.301
+	title = "mem_distress_signal.301.name"
+	desc = "mem_distress_signal.301.desc"
+	picture =  GFX_evt_landing_ship 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+
+	option = {
+		name = mem_distress_signal.301.a.common	
+		ROOT = {
+			add_society_research = @mem_crash_site_society_gain
+		}
+	}
+	
+	option = {
+		name = mem_distress_signal.301.a.xenocoll
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_authoritarian
+					has_ethic = ethic_fanatic_authoritarian
+				}
+			}
+		}
+		ROOT = {
+			add_society_research = @mem_crash_site_society_gain
+		}
+	}
+}
+
+#Crash site - Failed colony
+ship_event = {
+	id = mem_distress_signal.302
+	title = "mem_distress_signal.302.name"
+	desc = "mem_distress_signal.302.desc"
+	picture =  GFX_evt_landing_ship 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+
+	option = {
+		name = mem_distress_signal.302.a.common	
+		ROOT = {
+			add_society_research = @mem_crash_site_society_gain
+		}
+	}
+	
+	option = {
+		name = mem_distress_signal.302.a.xenocoll
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_authoritarian
+					has_ethic = ethic_fanatic_authoritarian
+				}
+			}
+		}
+		ROOT = {
+			add_society_research = @mem_crash_site_society_gain
+		}
+	}
+}
+
+#Crash site - Thriving settlement
+ship_event = {
+	id = mem_distress_signal.303
+	title = "mem_distress_signal.303.name"
+	desc = "mem_distress_signal.303.desc"
+	picture =  GFX_evt_landing_ship 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+	
+	immediate = {
+		event_target:mem_distress_signal_colony_ship_planet = {
+			#if = {
+			#	limit = { any_tile = { has_blocker = no } }
+			#	random_tile = {
+			#		limit = { has_blocker = no }
+			#		set_blocker = tb_mem_lost_colony
+			#	}
+			#	else = {
+			#		random_tile = { set_blocker = tb_mem_lost_colony }
+			#	}
+			#}
+			orbital_deposit_tile = { clear_deposits = yes }
+			orbital_deposit_tile = {
+				add_deposit = d_immense_society_deposit
+			}
+		}
+	}
+
+	option = {
+		name = mem_distress_signal.303.a.common	
+		event_target:mem_distress_signal_colony_ship_planet = {
+			add_modifier = {
+				modifier = mem_distress_signal_lost_colony_pm
+				days = -1
+			}
+		}
+	}
+	
+	option = {
+		name = mem_distress_signal.303.a.xenocoll
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_authoritarian
+					has_ethic = ethic_fanatic_authoritarian
+				}
+			}
+		}
+		event_target:mem_distress_signal_colony_ship_planet = {
+			add_modifier = {
+				modifier = mem_distress_signal_lost_colony_pm
+				days = -1
+			}
+		}
+	}
+	
+	option = {
+		name = mem_distress_signal.303.a.materialist
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+				}
+			}
+		}
+		event_target:mem_distress_signal_colony_ship_planet = {
+			add_modifier = {
+				modifier = mem_distress_signal_lost_colony_pm
+				days = -1
+			}
+		}
+	}
+	
+	option = {
+		name = mem_distress_signal.303.a.spiritualist
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_spiritualist
+					has_ethic = ethic_fanatic_spiritualist
+				}
+			}
+		}
+		event_target:mem_distress_signal_colony_ship_planet = {
+			add_modifier = {
+				modifier = mem_distress_signal_lost_colony_pm
+				days = -1
+			}
+		}	
+	
+	option = {
+		name = mem_distress_signal.303.a.fanxenophobe
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		event_target:mem_distress_signal_colony_ship_planet = {
+			add_modifier = {
+				modifier = mem_distress_signal_lost_colony_pm
+				days = -1
+			}
+			
+			enable_special_project = {
+				name = "MEM_DISTRESS_SIGNAL_DESTROY_COLONY_PROJECT"
+				owner = ROOT
+				location = event_target:mem_distress_signal_colony_ship_planet
+			}
+		}
+	}
+}
+
+#Crash site - Colony destruction
+ship_event = {
+	id = mem_distress_signal.304
+	title = "mem_distress_signal.304.name"
+	desc = "mem_distress_signal.304.desc"
+	picture =  GFX_evt_burning_settlement 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+
+	option = {
+		name = mem_distress_signal.304.a
+		ROOT = {
+			 add_influence  = @mem_crash_site_influence_gain
+		}
+	}
+}
+
+#Crash site - Planet colonized - Called by on_action
+planet_event = {
+	id = mem_distress_signal.305
+	hide_window = yes
+	is_triggered_only = yes	
+	
+	trigger = {
+		has_planet_flag = mem_distress_signal_colony_planet
+	}
+
+	immediate = {
+		planet_event = { id = mem_distress_signal.306 days = 30 }
+	}
+}
+
+#Crash site - Planet colonized - Survivors encountered
+planet_event = {
+	id = mem_distress_signal.306
+	title = "mem_distress_signal.306.name"
+	desc = "mem_distress_signal.306.desc"
+	picture =  GFX_evt_burning_settlement 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+
+	# First set of option : let them keep their way of life
+	## Blocked for Fanatic Collectivist, Fanatic Xenophobes and ethos with special answer
+	option = {
+		name = mem_distress_signal.306.a.common
+		
+		trigger = {
+			root.owner = {
+				NOR = {				
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_fanatic_authoritarian
+					has_ethic = ethic_xenophile
+					has_ethic = ethic_fanatic_xenophile
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+				}
+			}
+		}
+		
+		custom_tooltip = mem_distress_signal.306.a.tooltip
+		event_target:mem_distress_signal_colony_ship_planet = {
+			orbital_deposit_tile = { clear_deposits = yes }
+			random_tile = {
+				limit = {
+					has_blocker = no
+					has_building = no
+				}
+				set_blocker = "tb_mem_lost_colony"
+			}
+		}	
+		
+		hidden_effect = { 
+			if = {
+				limit = {
+					OR = {
+						has_ethic = ethic_authoritarian
+					}
+				}
+				random_list = {
+					# Almost between 15 and 50 years - Primitive way of life died out
+					#3 = { planet_event = { id = mem_distress_signal.307 days = 11520 random = 6120 } }
+					3 = { planet_event = { id = mem_distress_signal.307 years = 32 random = 17 } }
+					# Almost between 10 and 30 years - Primitive way of life spreads further
+					#2 = { planet_event = { id = mem_distress_signal.308 days = 7200 random = 3600 } }
+					2 = { planet_event = { id = mem_distress_signal.308 years = 20 random = 10 } }
+					2 = { #No follow up } 
+				}
+				else = {
+					if = {
+						limit = {
+							OR = {
+								has_ethic = ethic_fanatic_authoritarian
+							}
+						}
+						random_list = {
+							# Almost between 15 and 50 years - Primitive way of life died out
+							#4 = { planet_event = { id = mem_distress_signal.307 days = 11520 random = 6120 } }
+							4 = { planet_event = { id = mem_distress_signal.307 years = 32 random = 17 } }
+							# Almost between 10 and 30 years - Primitive way of life spreads further
+							#2 = { planet_event = { id = mem_distress_signal.308 days = 7200 random = 3600 } }
+							2 = { planet_event = { id = mem_distress_signal.308 years = 20 random = 10 } }
+							2 = { #No follow up } 
+						}
+						else = {
+							random_list = { #TODO : change weight
+								# Almost between 15 and 50 years - Primitive way of life died out
+								#2 = { planet_event = { id = mem_distress_signal.307 days = 11520 random = 6120 } }
+								2 = { planet_event = { id = mem_distress_signal.307 years = 32 random = 17 } }
+								# Almost between 10 and 30 years - Primitive way of life spreads further
+								#2 = { planet_event = { id = mem_distress_signal.308 days = 7200 random = 3600 } }
+								2 = { planet_event = { id = mem_distress_signal.308 years = 20 random = 10 } }
+								2 = { #No follow up } 
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	## Special answer for Xenophile ethos
+	option = {
+		name = mem_distress_signal.306.a.xenophile
+		
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_xenophile
+					has_ethic = ethic_fanatic_xenophile
+				}
+			}
+		}
+		
+		custom_tooltip = mem_distress_signal.306.a.tooltip
+		event_target:mem_distress_signal_colony_ship_planet = {
+			orbital_deposit_tile = { clear_deposits = yes }
+			random_tile = {
+				limit = {
+					has_blocker = no
+					has_building = no
+				}
+				set_blocker = "tb_mem_lost_colony"
+			}
+		}
+		
+		hidden_effect = { 
+			random_list = {
+				# Almost between 15 and 50 years - Primitive way of life died out
+				#2 = { planet_event = { id = mem_distress_signal.307 days = 11520 random = 6120 } }
+				2 = { planet_event = { id = mem_distress_signal.307 years = 32 random = 17 } }
+				# Almost between 10 and 30 years - Primitive way of life spreads further
+				#2 = { planet_event = { id = mem_distress_signal.308 days = 7200 random = 3600 } }
+				2 = { planet_event = { id = mem_distress_signal.308 years = 20 random = 10 } }
+				2 = { #No follow up } 
+			}
+		}
+	}
+	
+	## Special answer for Regular Xenophobe
+	option = {
+		name = mem_distress_signal.306.a.regxenophobe
+		
+		trigger = {
+			root.owner = { has_ethic = ethic_xenophobe }
+		}
+		
+		custom_tooltip = mem_distress_signal.306.a.tooltip
+		event_target:mem_distress_signal_colony_ship_planet = {
+			orbital_deposit_tile = { clear_deposits = yes }
+			random_tile = {
+				limit = {
+					has_blocker = no
+					has_building = no
+				}
+				set_blocker = "tb_mem_lost_colony"
+			}
+		}
+		
+		hidden_effect = { 
+			random_list = {
+				# Almost between 15 and 50 years - Primitive way of life died out
+				#2 = { planet_event = { id = mem_distress_signal.307 days = 11520 random = 6120 } }
+				2 = { planet_event = { id = mem_distress_signal.307 years = 32 random = 17 } }
+				# Almost between 10 and 30 years - Primitive way of life spreads further
+				#2 = { planet_event = { id = mem_distress_signal.308 days = 7200 random = 3600 } }
+				2 = { planet_event = { id = mem_distress_signal.308 years = 20 random = 10 } }
+				2 = { #No follow up } 
+			}
+		}
+	}
+	
+	## Special answer for Materialist ethos
+	option = {
+		name = mem_distress_signal.306.a.materialist
+		
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+				}
+			}
+		}
+		
+		custom_tooltip = mem_distress_signal.306.a.tooltip
+		event_target:mem_distress_signal_colony_ship_planet = {
+			orbital_deposit_tile = { clear_deposits = yes }
+			random_tile = {
+				limit = {
+					has_blocker = no
+					has_building = no
+				}
+				set_blocker = "tb_mem_lost_colony"
+			}
+		}
+		
+		hidden_effect = { 
+			if = {
+				limit = {
+					OR = {
+						has_ethic = ethic_materialist
+					}
+				}
+				random_list = {
+					# Almost between 15 and 50 years - Primitive way of life died out
+					#3 = { planet_event = { id = mem_distress_signal.307 days = 11520 random = 6120 } }
+					3 = { planet_event = { id = mem_distress_signal.307 years = 32 random = 17 } }
+					# Almost between 10 and 30 years - Primitive way of life spreads further
+					#2 = { planet_event = { id = mem_distress_signal.308 days = 7200 random = 3600 } }
+					2 = { planet_event = { id = mem_distress_signal.308 years = 20 random = 10 } }
+					2 = { #No follow up } 
+				}
+				else = {
+					if = {
+						limit = {
+							OR = {
+								has_ethic = ethic_fanatic_materialist
+							}
+						}
+						random_list = {
+							# Almost between 15 and 50 years - Primitive way of life died out
+							#4 = { planet_event = { id = mem_distress_signal.307 days = 11520 random = 6120 } }
+							4 = { planet_event = { id = mem_distress_signal.307 years = 32 random = 17 } }
+							# Almost between 10 and 30 years - Primitive way of life spreads further
+							#2 = { planet_event = { id = mem_distress_signal.308 days = 7200 random = 3600 } }
+							2 = { planet_event = { id = mem_distress_signal.308 years = 20 random = 10 } }
+							2 = { #No follow up } 
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	# Second set of option : integrate them
+	## Blocked for Fanatic Individualist / Egalitarian and ethos with special answer
+	option = {
+		name = mem_distress_signal.306.b.common
+		
+		trigger = {
+			root.owner = {
+				NOR = {				
+					has_ethic = ethic_fanatic_egalitarian
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe			
+				}
+			}
+		}
+		
+		custom_tooltip = mem_distress_signal.306.b.tooltip
+		hidden_effect = { planet_event = mem_distress_signal.308 }
+	}
+	
+	## Special answer for Materialist ethos
+	option = {
+		name = mem_distress_signal.306.b.materialist
+		
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+				}
+			}
+		}
+		
+		custom_tooltip = mem_distress_signal.306.b.tooltip
+		hidden_effect = { planet_event = mem_distress_signal.308 }
+	}
+	
+	## Special answer for Xenophobe ethos
+	option = {
+		name = mem_distress_signal.306.b.xenophobe
+		
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		
+		custom_tooltip = mem_distress_signal.306.b.tooltip
+		hidden_effect = { planet_event = mem_distress_signal.308 }
+	}
+	
+	# Third set of option : purge them
+	option = {
+		name = mem_distress_signal.306.c
+		
+		trigger = {
+			root.owner = { has_ethic = ethic_fanatic_xenophobe }
+		}
+		
+		ROOT.owner = { add_influence = @mem_crash_site_influence_gain }
+	}
+}
+
+# TODO : faire cet event
+#Crash site - Planet colonized - Primitive way of live died out
+planet_event = {
+	id = mem_distress_signal.307
+	title = "mem_distress_signal.307.name"
+	desc = "mem_distress_signal.307.desc"
+	picture =  GFX_evt_burning_settlement 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+
+	# First set of option : let them keep their way of life
+	## Blocked for Fanatic Collectivist, Fanatic Xenophobes and ethos with special answer
+	option = {
+		name = mem_distress_signal.307.a.common
+		
+		trigger = {
+			root.owner = {
+				NOR = {				
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_fanatic_authoritarian
+					has_ethic = ethic_xenophile
+					has_ethic = ethic_fanatic_xenophile
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+				}
+			}
+		}
+		
+		custom_tooltip = mem_distress_signal.307.a.tooltip
+		hidden_effect = { planet_event = mem_distress_signal.309 }
+	}
 }
 
 #################################
