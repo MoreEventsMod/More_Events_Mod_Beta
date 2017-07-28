@@ -773,6 +773,9 @@ ship_event = {
 	}
 }
 
+#Todo : Modifier pour faire le gouverneur en deux étapes. Laissez le temps aux vidéo de se répandre : possibilité de tout stopper (Unrest et Unhappiness) ou de laisser continuer.
+#		Si continuer, proposer l'intégration du survivant dans l'empire. Plus tard, il devient une start et peut devenir gouverneur ou crever de la drogue.
+
 #################################
 ## ROCK THRASHERS
 #################################
@@ -843,6 +846,7 @@ ship_event = {
 				days = -1
 			}			
 			remove_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_not_completed
+			hidden_effect = { planet_event = { id = mem_distress_signal.220 days = 165 random = 15 } }
 		}
 	}
 
@@ -862,6 +866,7 @@ ship_event = {
 				days = -1
 			}
 			remove_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_not_completed
+			hidden_effect = { planet_event = { id = mem_distress_signal.220 days = 165 random = 15 } }
 		}
 	}
 	
@@ -881,11 +886,13 @@ ship_event = {
 				days = -1
 			}
 			remove_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_not_completed
+			hidden_effect = { planet_event = { id = mem_distress_signal.220 days = 165 random = 15 } }
 		}
 	}
 }
 
 # Rock Thrashers - After colonization if the initial special project hasn't been completed
+# Only used to trigger mem_distress_signal.211 with a 30 days delay on planet with the good flag
 planet_event = {
 	id = mem_distress_signal.210
 	hide_window = yes
@@ -927,6 +934,95 @@ planet_event = {
 				type = MEM_DISTRESS_SIGNAL_ROCK_THRASHERS_DISCOVERY_PROJECT
 			}
 		}
+		hidden_effect = { planet_event = { id = mem_distress_signal.221 days = 165 random = 15 } }
+	}
+}
+
+# Rock Thrashers - If initial project has been COMPLETED, Rock Thrashers causing damage randomly
+planet_event = {
+	id = mem_distress_signal.220
+	title = "mem_distress_signal.220.name"
+	desc = "mem_distress_signal.220.desc"
+	picture =  GFX_evt_mem_strange_tectonics 
+	show_sound = event_sensor_ping
+	location = This
+
+	trigger = {		
+		has_modifier = mem_distress_signal_rock_thrashers_planet
+		has_colony = yes
+		NOT = {	
+			has_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_refused 
+			has_planet_flag = mem_distress_signal_rock_thrashers_migration_explained
+		}
+		check_variable = {
+			which = "mem_ds_rock_thrashers_migrations" 
+			value < 3
+		}
+	}
+	
+	mean_time_to_happen = {	days = 360 }
+	
+	immediate = {
+		This.Owner = { 
+			hidden_effect = {
+				change_variable = { 
+					which = "mem_ds_rock_thrashers_migrations" 
+					value = 1 
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_distress_signal.220.a
+		add_modifier = {
+			modifier = em_distress_signal_rock_thrashers_damage_pm
+			days = 45
+		}
+		Owner = { add_minerals = -250 random = 38 }
+	}
+	
+	option = {
+		name = mem_distress_signal.220.b
+		trigger = {
+			check_variable = {
+				which = "mem_ds_rock_thrashers_migrations" 
+				value = 3
+			}
+		}
+		enable_special_project = {
+			name = "MEM_DISTRESS_SIGNAL_ROCK_THRASHERS_MIGRATION_PROJECT"
+			owner = ROOT
+			location = THIS
+		}
+	}
+
+}
+# TODO : Faire 220 et 221 / Ajouter le SP
+# Rock Thrashers - If initial project has been REJECTED, Rock Thrashers "attack" after 5 to 6 months that also lead to their discovery
+planet_event = {
+	id = mem_distress_signal.221
+	title = "mem_distress_signal.221.name"
+	desc = "mem_distress_signal.221.desc"
+	picture =  GFX_evt_mem_strange_tectonics 
+	show_sound = event_sensor_ping
+	location = This
+
+	is_triggered_only = yes	
+	
+	option = {
+		name = mem_distress_signal.221.a
+	}
+	
+	option = {
+		name = mem_distress_signal.221.b
+		This = { set_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_refused }
+		This.Owner = {
+			abort_special_project = {
+				type = MEM_DISTRESS_SIGNAL_ROCK_THRASHERS_DISCOVERY_PROJECT
+			}
+		}
+		hidden_effect = { planet_event = { id = mem_distress_signal.221 days = 165 random = 15 } }
 	}
 }
 
