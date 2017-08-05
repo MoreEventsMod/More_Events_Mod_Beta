@@ -1540,7 +1540,11 @@ planet_event = {
 		}
 		create_fleet = {
 			name = "Carcharorion ghosts"
+			
 			effect = {
+				set_fleet_stance = aggressive
+				set_aggro_range_measure_from = self
+				set_aggro_range = 1000
 				set_owner = event_target:owners
 				create_ship = {
 					name = "Ghost ship"
@@ -1560,7 +1564,7 @@ planet_event = {
 				}
 				set_location = {
 					target = root
-					distance = 250
+					distance = 400
 					angle = random
 				}
 			}
@@ -1638,12 +1642,23 @@ ship_event = {
 	picture = GFX_evt_ship_in_orbit
 	
 	option = {
-		name = mem_lotc.32
+		name = mem_lotc.31a
+		
+		random_planet = {
+			limit = {
+				has_planet_flag = mem_lotc_colony_gas
+			}
+			enable_special_project = {
+				name = "MEM_LOTC_FINAL"
+				location = this
+				owner = root
+			}
+		}
 	}
 }
 
 #ON ACTION: Hidden event to mark empire that shoots down fleets
-fleet_event = {
+country_event = {
 	id = mem_lotc.32
 	
 	hide_window = yes
@@ -1657,6 +1672,207 @@ fleet_event = {
 	}
 	
 	immediate = {
-		set_country_flag = mem_lotc_killed_guard
+		set_country_flag = mem_lotc_killed_guard 
+	}
+}
+
+#After defeating
+country_event = {
+	id = mem_lotc.33
+	title = mem_lotc.33.name
+	desc = mem_lotc.33.desc
+	
+	picture = GFX_evt_gas_giant
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		FROMFROMFROM = {
+			has_fleet_flag = mem_lotc_guards
+		}
+	}
+	
+	option = {
+		name = mem_lotc.31a
+		
+		random_planet = {
+			limit = {
+				has_planet_flag = mem_lotc_colony_gas
+			}
+			enable_special_project = {
+				name = "MEM_LOTC_FINAL"
+				location = this
+				owner = root
+			}
+		}
+	}
+}
+
+#Contact established
+ship_event = {
+	id = mem_lotc.34
+	title = mem_lotc.34.name
+	desc = mem_lotc.34.desc
+	
+	picture = GFX_evt_gas_giant
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = ONSCREEN
+		hidden_effect = {
+			owner = {
+				country_event = { id = mem_lotc.35 }
+			}
+		}
+	}
+}
+
+#Conversation
+country_event = {
+	id = mem_lotc.35
+	title = "TRANSMISSION"
+	desc = "mem_lotc.35.desc"
+	
+	diplomatic = yes
+	
+	is_triggered_only = yes
+	
+	picture_event_data = {
+		room = no_video_feed_room
+	}
+	
+	option = {
+		name = mem_lotc.35a
+		response_text = mem_lotc.35a.response
+		
+		end_event_chain = mem_lotc_third_chain
+		hidden_effect = {
+			country_event = { id = mem_lotc.36 days = 5 }
+		}
+	}
+	
+	option = {
+		name = mem_lotc.35b
+		response_text = mem_lotc.35b.response
+		is_dialog_only = yes
+	}
+	
+	option = {
+		name = mem_lotc.35c
+		response_text = mem_lotc.35c.response
+		is_dialog_only = yes
+	}
+	
+	option = {
+		name = mem_lotc.35d
+		response_text = mem_lotc.35d.response
+		is_dialog_only = yes
+		
+		trigger = {
+			has_country_flag = mem_lotc_killed_guard
+		}
+	}
+}
+
+#The end. Get the reward
+country_event = {
+	id = mem_lotc.36
+	title = mem_lotc.36.name
+	desc = mem_lotc.36.desc
+	
+	picture = GFX_evt_ship_in_orbit
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_lotc.36a
+		
+		trigger = {
+			NOR = {
+				has_ethic = ethic_materialist
+				has_ethic = ethic_fanatic_materialist
+				has_ethic = ethic_spiritualist
+				has_ethic = ethic_fanatic_spiritualist
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophile
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_pacifist
+				has_ethic = ethic_fanatic_pacifist
+				has_ethic = ethic_militarist
+				has_ethic = ethic_fanatic_militarist
+			}
+		}
+	}
+	
+	option = {
+		name = mem_lotc.36a.mat
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_materialist
+				has_ethic = ethic_fanatic_materialist
+			}
+		}
+	}
+	
+	option = {
+		name = mem_lotc.36a.sp
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_spiritualist
+				has_ethic = ethic_fanatic_spiritualist
+			}
+		}
+	}
+	
+	option = {
+		name = mem_lotc.36a.phile
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_xenophile
+				has_ethic = ethic_fanatic_xenophile
+			}
+		}
+	}
+	
+	option = {
+		name = mem_lotc.36a.phobe
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
+	}
+	
+	option = {
+		name = mem_lotc.36a.mil
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_militarist
+				has_ethic = ethic_fanatic_militarist
+			}
+		}
+	}
+	
+	option = {
+		name = mem_lotc.36a.pac
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_pacifist
+				has_ethic = ethic_fanatic_pacifist
+			}
+		}
+	}
+	
+	after = {
+		#INSERT REWARD HERE
 	}
 }
