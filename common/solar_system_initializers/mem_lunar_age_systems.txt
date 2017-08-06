@@ -1,0 +1,320 @@
+mem_lunar_age_system = {
+	name = "HERE BE PRIMITIVES, DELETE LATER"
+	class = "rl_standard_stars"
+	#usage_odds = 2 
+	max_instances = 1
+	
+	flags = { mem_lunar_age_system }
+	
+	planet = {
+		class = star
+		orbit_distance = 0
+	}
+	
+	change_orbit = 20
+	
+	planet = {
+		orbit_distance = 20
+		class = random_non_colonizable
+		count = { min = 1 max = 3 }
+		
+		moon = {
+			orbit_distance = { min = 5 max = 10 }
+			class = random_non_colonizable
+			count = { min = 0 max = 1 }
+		}
+	}
+	
+	planet = {
+		orbit_distance = 30
+		class = rl_habitable_normal
+		size = 18
+		
+		flags = { mem_lunar_age_planet }
+		
+		init_effect = {
+			prevent_anomaly = yes
+			
+			create_species = {
+				name = random
+				class = random
+				portrait = random
+				homeworld = THIS
+				traits = {
+					trait = random_traits
+				}
+			}
+			
+			last_created_species = {
+				save_event_target_as = lunar_species
+			}
+			
+			create_country = {
+				name = random
+				authority = random
+				civics = {
+					civic = civic_increasing_urbanization
+					civic = civic_atmospheric_pollution
+				}
+				species = last_created_species
+				ethos = random
+				
+				flag = {
+					icon ={ 
+						category = "blocky"
+						file = "flag_blocky_4.dds"
+					}
+					background = {
+						category = "backgrounds"
+						file = "new_dawn.dds"
+					}
+					colors = {
+						"dark_blue"
+						"green"
+						"null"
+						"null"
+					}
+				}
+				type = primitive
+			}
+			last_created_country = {
+				set_country_flag = mem_lunar_age
+				set_primitive_age = mem_lunar_age
+				
+			}
+			create_colony = {
+				owner = last_created_country
+				species = last_created
+				ethos = owner
+			}
+			random_tile = {
+				limit = { has_building = "building_colony_shelter" }
+				remove_building = yes
+			}
+			every_tile = {
+				limit = {
+					has_blocker = yes
+				}
+				remove_blocker = yes
+			}
+			while = {
+				count = 9
+				random_tile = {
+					limit = {
+						has_blocker = no
+						has_grown_pop = no
+						has_growing_pop = no
+					}
+					create_pop = {
+						species = last_created
+					}
+				}
+			}
+			while = {
+				count = 4
+				random_tile = {
+					limit = { 
+						has_blocker = no 
+						has_building = no 
+						has_grown_pop = yes
+					}
+					set_building = "building_primitive_factory"
+					add_resource = {
+						resource = minerals
+						amount = 1
+						replace = yes
+					}						
+				}
+			}
+			while = {
+				count = 5
+				random_tile = {
+					limit = { 
+						has_blocker = no 
+						has_building = no 
+						has_grown_pop = yes
+					}
+					set_building = "building_primitive_farm"
+					add_resource = {
+						resource = food
+						amount = 1
+						replace = yes
+					}						
+				}
+			}
+			
+		}
+		
+		moon = {
+			orbit_distance = 15
+			class = rl_habitable_normal
+			size = 10
+			
+			flags = { mem_lunar_age_moon }
+			
+			init_effect = {
+				prevent_anomaly = yes
+				
+				create_country = {
+					name = random
+					authority = random
+					civics = {
+						civic = civic_increasing_urbanization
+						civic = civic_atmospheric_pollution
+					}
+					species = last_created_species
+					ethos = random
+					
+					flag = {
+						icon = {
+							category = "blocky"
+							file = "flag_blocky_8.dds"
+						}
+						background = {
+							category = "backgrounds"
+							file = "v.dds"
+						}
+						colors = {
+							"red"
+							"dark_brown"
+							"null"
+							"null"
+						}
+					}
+					type = primitive
+				}
+				last_created_country = {
+					set_country_flag = mem_lunar_age_colony
+					set_primitive_age = mem_lunar_age_colony
+					
+				}
+				create_colony = {
+					owner = last_created_country
+					species = last_created
+					ethos = owner
+				}
+				random_tile = {
+					limit = { has_building = "building_colony_shelter" }
+					remove_building = yes
+				}
+				every_tile = {
+					limit = {
+						has_blocker = yes
+					}
+					remove_blocker = yes
+				}
+				while = {
+					count = 5
+					random_tile = {
+						limit = {
+							has_blocker = no
+							has_grown_pop = no
+							has_growing_pop = no
+						}
+						create_pop = {
+							species = last_created
+						}
+					}
+				}
+				while = {
+					count = 2
+					random_tile = {
+						limit = { 
+							has_blocker = no 
+							has_building = no 
+							has_grown_pop = yes
+						}
+						set_building = "building_primitive_factory"
+						add_resource = {
+							resource = minerals
+							amount = 1
+							replace = yes
+						}						
+					}
+				}
+				while = {
+					count = 3
+					random_tile = {
+						limit = { 
+							has_blocker = no 
+							has_building = no 
+							has_grown_pop = yes
+						}
+						set_building = "building_primitive_farm"
+						add_resource = {
+							resource = food
+							amount = 1
+							replace = yes
+						}						
+					}
+				}
+				
+				IF = {
+					limit = {
+						owner = {
+							OR = {
+								ideal_planet_class = pc_arid
+								ideal_planet_class = pc_savannah
+								ideal_planet_class = pc_desert
+							}
+						}
+					}
+					random_list = {
+						33 = { change_pc = pc_arid }
+						33 = { change_pc = pc_savannah }
+						33 = { change_pc = pc_desert }
+					}
+				}
+				
+				IF = {
+					limit = {
+						owner = {
+							OR = {
+								ideal_planet_class = pc_ocean
+								ideal_planet_class = pc_continental
+								ideal_planet_class = pc_tropical
+							}
+						}
+					}
+					random_list = {
+						33 = { change_pc = pc_ocean }
+						33 = { change_pc = pc_continental }
+						33 = { change_pc = pc_tropical }
+					}
+				}
+				
+				IF = {
+					limit = {
+						owner = {
+							OR = {
+								ideal_planet_class = pc_tundra
+								ideal_planet_class = pc_arctic
+								ideal_planet_class = pc_alpine
+							}
+						}
+					}
+					random_list = {
+						33 = { change_pc = pc_tundra }
+						33 = { change_pc = pc_arctic }
+						33 = { change_pc = pc_alpine }
+					}
+				}
+				
+			}
+			
+		}
+		
+	}
+	
+	planet = {
+		orbit_distance = 20
+		class = random_non_colonizable
+		count = { min = 1 max = 4 }
+		
+		moon = {
+			orbit_distance = { min = 5 max = 10 }
+			class = random_non_colonizable
+			count = { min = 0 max = 2 }
+		}
+	}
+}
