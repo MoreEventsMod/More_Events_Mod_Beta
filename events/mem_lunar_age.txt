@@ -5,6 +5,10 @@
 
 namespace = mem_lunar_age
 
+@MTTHIND = 12
+
+@diplomatictimer = 30
+
 #DEBUG EVENT
 country_event = {
 	id = mem_lunar_age.9999
@@ -96,6 +100,119 @@ ship_event = {
 		name = INTERESTING
 		owner = {
 			hidden_effect = { country_event = { id = story.6 days = 30 } }
+		}
+	}
+}
+
+#############################
+#Road to independence
+#############################
+
+#troubles brewing
+country_event = {
+	id = mem_lunar_age.300
+	
+	hide_window = yes
+	
+	mean_time_to_happen = {
+		months = @MTTHIND
+	}
+	
+	trigger = {
+		is_country_type = primitive
+		has_country_flag = mem_lunar_age_colony
+		NOT = {
+			has_country_flag = mem_lunar_age_path_chosen
+		}
+		NOT = { has_global_flag = mem_lunar_age_grace_period }
+		any_country = {
+			is_country_type = primitive
+			has_country_flag = mem_lunar_age
+		}
+	}
+	
+	immediate = {
+		shift_ethic = ethic_militarist
+		set_country_flag = mem_lunar_age_path_chosen
+		set_country_flag = mem_lunar_age_independence_path
+		
+		observation_outpost_owner = {
+			country_event = { id = mem_lunar_age.301 }
+		}
+		
+		random_country = {
+			limit = { has_country_flag = mem_lunar_age }
+			country_event = { id = mem_lunar_age.302 days = @diplomatictimer }
+		}
+	}
+}
+
+#Notification
+country_event = {
+	id = mem_lunar_age.301
+	title = mem_lunar_age.301.name
+	desc = mem_lunar_age.301.desc
+	
+	picture = GFX_evt_metropolis
+	location = ROOT
+	
+	option = {
+		name = INTERESTING
+	}
+}
+
+#Homeworld considers its options
+country_event = {
+	id = mem_lunar_age.302
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		is_country_type = primitive
+	}
+	
+	immediate = {
+		random_list = {
+			1 = {
+				modifier = {
+					factor = 2
+					has_ethic = ethic_militarist
+				}
+				modifier = {
+					factor = 10
+					has_ethic = ethic_fanatic_militarist
+				}
+				modifier = {
+					factor = 2
+					has_ethic = ethic_authoritarian
+				}
+				modifier = {
+					factor = 10
+					has_ethic = ethic_fanatic_authoritarian
+				}
+				#Militarist response
+			}
+			1 = {
+				modifier = {
+					factor = 2
+					has_ethic = ethic_pacifist
+				}
+				modifier = {
+					factor = 10
+					has_ethic = ethic_fanatic_pacifist
+				}
+				modifier = {
+					factor = 2
+					has_ethic = ethic_pacifist
+				}
+				modifier = {
+					factor = 10
+					has_ethic = ethic_fanatic_pacifist
+				}
+				#Pacifist response
+			}
 		}
 	}
 }
