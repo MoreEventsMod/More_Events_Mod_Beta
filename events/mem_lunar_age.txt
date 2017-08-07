@@ -135,9 +135,12 @@ country_event = {
 		shift_ethic = ethic_militarist
 		set_country_flag = mem_lunar_age_path_chosen
 		set_country_flag = mem_lunar_age_independence_path
+		save_event_target_as = moon_faction
 		
-		observation_outpost_owner = {
-			country_event = { id = mem_lunar_age.301 }
+		capital_scope = {
+			observation_outpost_owner = {
+				country_event = { id = mem_lunar_age.301 }
+			}
 		}
 		
 		random_country = {
@@ -156,6 +159,8 @@ country_event = {
 	picture = GFX_evt_metropolis
 	location = ROOT
 	
+	is_triggered_only = yes
+	
 	option = {
 		name = INTERESTING
 	}
@@ -171,11 +176,43 @@ country_event = {
 	
 	trigger = {
 		is_country_type = primitive
+		exists = event_target:moon_faction
+		event_target:moon_faction = {
+			is_country_type = primitive
+		}
 	}
 	
 	immediate = {
+		save_event_target_as = home_faction
 		random_list = {
-			1 = {
+			1000 = { #Pacifist response
+				modifier = {
+					factor = 2
+					has_ethic = ethic_pacifist
+				}
+				modifier = {
+					factor = 10
+					has_ethic = ethic_fanatic_pacifist
+				}
+				modifier = {
+					factor = 2
+					has_ethic = ethic_pacifist
+				}
+				modifier = {
+					factor = 10
+					has_ethic = ethic_fanatic_pacifist
+				}
+				capital_scope = {
+					observation_outpost_owner = {
+						country_event = { id = mem_lunar_age.303 }
+					}
+				}
+				event_target:moon_faction = {
+					country_event = { id = mem_lunar_age.304 days = @diplomatictimer }
+				}
+			}
+			
+			1 = { #Militarist response
 				modifier = {
 					factor = 2
 					has_ethic = ethic_militarist
@@ -192,27 +229,133 @@ country_event = {
 					factor = 10
 					has_ethic = ethic_fanatic_authoritarian
 				}
-				#Militarist response
+				
+				capital_scope = {
+					observation_outpost_owner = {
+						country_event = { id = mem_lunar_age.306 }
+					}
+				}
+				event_target:moon_faction = {
+					country_event = { id = mem_lunar_age.307 days = @diplomatictimer }
+				}
 			}
-			1 = {
-				modifier = {
-					factor = 2
-					has_ethic = ethic_pacifist
-				}
-				modifier = {
-					factor = 10
-					has_ethic = ethic_fanatic_pacifist
-				}
-				modifier = {
-					factor = 2
-					has_ethic = ethic_pacifist
-				}
-				modifier = {
-					factor = 10
-					has_ethic = ethic_fanatic_pacifist
-				}
-				#Pacifist response
+		}
+	}
+}
+
+#Observer is notified that they accepted independence
+country_event = {
+	id = mem_lunar_age.303
+	title = mem_lunar_age.303.name
+	desc = mem_lunar_age.303.desc
+	
+	picture = GFX_evt_metropolis
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = INTERESTING
+	}
+}
+
+#Observer is notified that they didn't accepted independence
+country_event = {
+	id = mem_lunar_age.306
+	title = mem_lunar_age.306.name
+	desc = mem_lunar_age.306.desc
+	
+	picture = GFX_evt_metropolis
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = INTERESTING
+	}
+}
+
+#Splitting colonies peacefully
+country_event = {
+	id = mem_lunar_age.304
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		is_country_type = primitive
+		exists = event_target:home_faction
+		event_target:home_faction = {
+			is_country_type = primitive
+		}
+	}
+	
+	immediate = {
+		change_government = {
+			#authority = random
+			civics = {
+				civic = civic_mem_declaration_of_independence
+				civic = civic_mem_land_of_opportunity
 			}
+		}
+		remove_country_flag = mem_lunar_age_colony
+		set_country_flag = early_space_age
+		set_primitive_age = early_space_age
+		set_country_flag = mem_lunar_age_path_complete
+		set_name = random
+		
+		
+		event_target:home_faction = {
+			change_government = {
+				#authority = random
+				civics = {
+					civic = civic_increasing_urbanization
+					civic = civic_atmospheric_pollution
+				}
+			}
+		
+			remove_country_flag = mem_lunar_age_colony
+			set_country_flag = early_space_age
+			set_primitive_age = early_space_age
+		}
+		capital_scope = {
+			observation_outpost_owner = {
+				country_event = { id = mem_lunar_age.305 }
+			}
+		}
+	}
+}
+
+#Observer is notified that independence is finished
+country_event = {
+	id = mem_lunar_age.305
+	title = mem_lunar_age.305.name
+	desc = mem_lunar_age.305.desc
+	
+	picture = GFX_evt_metropolis
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = INTERESTING
+	}
+}
+
+#Moon started mobilizing
+country_event = {
+	id = mem_lunar_age.307
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		is_country_type = primitive
+		exists = event_target:home_faction
+		event_target:home_faction = {
+			is_country_type = primitive
 		}
 	}
 }
