@@ -377,6 +377,7 @@ country_event = {
 			}
 			create_fleet = { name = NAME_mem_colonial_defense_fleet }
 			last_created_fleet = {
+				set_fleet_flag = mem_lunar_age_colony
 				set_owner = root
 				while = {
 					count = 3
@@ -431,11 +432,20 @@ country_event = {
 			66 = {  }
 		}
 		capital_scope = {
-			observation_outpost_owner = {
-				country_event = { id = mem_lunar_age.310 }
+			IF = {
+				limit = { has_observation_outpost = yes }
+				observation_outpost_owner = {
+					country_event = { id = mem_lunar_age.310 }
+				}
+				else = {
+					owner = {
+						country_event = { id = mem_lunar_age.311 }
+					}
+				}
 			}
 			create_fleet = { name = NAME_mem_homeworld_defense_fleet }
 			last_created_fleet = {
+				set_fleet_flag = mem_lunar_age_homeworld
 				set_owner = root
 				while = {
 					count = 3
@@ -465,9 +475,45 @@ country_event = {
 	
 	option = {
 		name = mem_lunar_age.310.a
+		custom_tooltip = mem_lunar_age.310.a.tooltip
+		hidden_effect = {
+			event_target:home_faction = {
+				country_event = { id = mem_lunar_age.311 days = @diplomatictimer }
+			}
+		}
+		
 	}
 	
 	option = {
 		name = mem_lunar_age.310.b
+	}
+}
+
+#Homeworld event: going to war
+country_event = {
+	id = mem_lunar_age.311
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		is_country_type = primitive
+		exists = event_target:moon_faction
+		event_target:moon_faction = {
+			is_country_type = primitive
+		}
+	}
+	
+	immediate = {
+		set_country_type = mem_primitive_at_war
+		event_target:moon_faction = {
+			set_country_type = mem_primitive_at_war
+		}
+		declare_war = {
+			who = event_target:moon_faction
+			major_war = yes
+			name = NAME_mem_lunar_age_war
+		}
 	}
 }
