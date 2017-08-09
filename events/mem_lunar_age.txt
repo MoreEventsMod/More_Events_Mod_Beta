@@ -122,7 +122,7 @@ country_event = {
 		is_country_type = primitive
 		has_country_flag = mem_lunar_age_colony
 		NOT = {
-			has_country_flag = mem_lunar_age_path_chosen
+			has_global_flag = mem_lunar_age_path_chosen
 		}
 		NOT = { has_global_flag = mem_lunar_age_grace_period }
 		any_country = {
@@ -133,8 +133,8 @@ country_event = {
 	
 	immediate = {
 		shift_ethic = ethic_militarist
-		set_country_flag = mem_lunar_age_path_chosen
-		set_country_flag = mem_lunar_age_independence_path
+		set_global_flag = mem_lunar_age_path_chosen
+		set_global_flag = mem_lunar_age_independence_path
 		save_event_target_as = moon_faction
 		
 		capital_scope = {
@@ -196,11 +196,11 @@ country_event = {
 				}
 				modifier = {
 					factor = 2
-					has_ethic = ethic_pacifist
+					has_ethic = ethic_egalitarian
 				}
 				modifier = {
 					factor = 10
-					has_ethic = ethic_fanatic_pacifist
+					has_ethic = ethic_fanatic_egalitarian
 				}
 				capital_scope = {
 					observation_outpost_owner = {
@@ -302,7 +302,7 @@ country_event = {
 		remove_country_flag = mem_lunar_age_colony
 		set_country_flag = early_space_age
 		set_primitive_age = early_space_age
-		set_country_flag = mem_lunar_age_path_complete
+		set_global_flag = mem_lunar_age_path_complete
 		set_name = random
 		
 		
@@ -433,7 +433,10 @@ country_event = {
 		}
 		capital_scope = {
 			IF = {
-				limit = { has_observation_outpost = yes }
+				limit = { 
+					has_observation_outpost = yes 
+					observation_outpost_owner = { is_ai = no } #We don't need no ais getting ideas
+				}
 				observation_outpost_owner = {
 					country_event = { id = mem_lunar_age.310 }
 				}
@@ -590,7 +593,7 @@ country_event = {
 		name = mem_lunar_age.312.a.phile
 		custom_tooltip = mem_lunar_age.312.a.tooltip
 		
-		trigger = {
+		allow = {
 			OR = {
 				has_ethic = ethic_fanatic_pacifist
 				has_ethic = ethic_pacifist
@@ -635,7 +638,261 @@ country_event = {
 			country_event = {
 				id = mem_lunar_age.313
 			}
-			set_country_flag = mem_went_agressively
+			set_country_flag = mem_lunar_age_agressive_negotiations
 		}
+	}
+}
+
+#Negotiations started
+country_event = {
+	id = mem_lunar_age.313
+	
+	title = mem_lunar_age.312.name
+	desc = {
+		text = mem_lunar_age.313.benign
+		trigger = { NOT = { has_country_flag = mem_lunar_age_agressive_negotiations } }
+	}
+	desc = {
+		text = mem_lunar_age.313.aggro
+		trigger = { has_country_flag = mem_lunar_age_agressive_negotiations }
+	}
+	
+	is_triggered_only = yes
+	
+	location = event_target:home_faction
+	
+	diplomatic = yes
+	
+	picture_event_data = {
+		portrait = event_target:home_faction
+		room = mem_server_room
+	}
+	
+	option = { # Give them independence
+		name = mem_lunar_age.313.a
+		custom_tooltip = mem_lunar_age.313.a.tooltip
+		response_text = mem_lunar_age.313.a.response
+		
+		hidden_effect = {
+			event_target:moon_faction = {
+				country_event = { id = mem_lunar_age.304 days = @diplomatictimer }
+				shift_ethic = ethic_xenophile
+				add_opinion_modifier = {
+					who = ROOT
+					modifier = mem_lunar_age_supported_us
+				}
+			}
+			event_target:home_faction = {
+				shift_ethic = ethic_xenophobe
+				add_opinion_modifier = {
+					who = ROOT
+					modifier = mem_lunar_age_supported_rebels
+				}
+			}
+		}
+	}
+	
+	option = { #Restore status quo
+		name = mem_lunar_age.313.b
+		custom_tooltip = mem_lunar_age.313.b.tooltip
+		response_text = mem_lunar_age.313.b.response
+		hidden_effect = {
+			event_target:moon_faction = {
+				shift_ethic = ethic_xenophobe
+				change_government = {
+					#authority = random
+					civics = {
+						civic = civic_mem_colonial_administration
+						civic = civic_mem_land_of_opportunity
+					}
+				}
+				add_opinion_modifier = {
+					who = ROOT
+					modifier = mem_lunar_age_supported_tyrants
+				}
+			}
+			event_target:home_faction = {
+				shift_ethic = ethic_xenophile
+				add_opinion_modifier = {
+					who = ROOT
+					modifier = mem_lunar_age_supported_us
+				}
+			}
+			set_global_flag = mem_lunar_age_path_complete
+		}
+	}
+	
+	option = {
+		name = mem_lunar_age.313.c
+		custom_tooltip = mem_lunar_age.313.c.tooltip
+		
+		allow = {
+			NOR = {
+				has_ethic = ethic_hive_mind
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_fanatic_xenophile
+			}
+		}
+		
+		hidden_effect = {
+			random_list = {
+				3 = { #Acceptance
+					country_event = { id = mem_lunar_age.314 }
+					
+					modifier = {
+						factor = 2
+						has_ethic = ethic_xenophile
+					}
+					modifier = {
+						factor = 10
+						has_ethic = ethic_fanatic_xenophile
+					}
+					modifier = {
+						factor = 2
+						has_ethic = ethic_authoritarian
+					}
+					modifier = {
+						factor = 10
+						has_ethic = ethic_fanatic_authoritarian
+					}
+				}
+				1 = { #Refusal
+					country_event = { id = mem_lunar_age.315 }
+					
+					modifier = {
+						factor = 2
+						has_ethic = ethic_xenophobe
+					}
+					modifier = {
+						factor = 10
+						has_ethic = ethic_fanatic_xenophobe
+					}
+					modifier = {
+						factor = 2
+						has_ethic = ethic_egalitarian
+					}
+					modifier = {
+						factor = 10
+						has_ethic = ethic_fanatic_egalitarian
+					}
+				}
+			}
+		}
+	}
+}
+
+#Acceptance of annexation
+country_event = {
+	id = mem_lunar_age.314
+	
+	title = mem_lunar_age.312.name
+	desc = mem_lunar_age.314.desc
+	
+	is_triggered_only = yes
+	
+	location = event_target:home_faction
+	
+	diplomatic = yes
+	
+	picture_event_data = {
+		portrait = event_target:home_faction
+		room = mem_server_room
+	}
+	
+	trigger = {
+		exists = event_target:home_faction
+		exists = event_target:moon_faction
+		event_target:moon_faction = {
+			is_country_type = primitive
+		}
+		event_target:home_faction = {
+			is_country_type = primitive
+		}
+	}
+	
+	immediate = {
+		set_global_flag = mem_lunar_age_path_complete
+	}
+	
+	option = {
+		name = EXCELLENT
+		
+		event_target:home_faction.capital_scope = {
+			set_owner = root
+			every_owned_pop = {
+				add_modifier = {
+					modifier = mem_lunar_age_annex_modifier
+					days = 3600
+				}
+			}
+		}
+		event_target:moon_faction.capital_scope = {
+			set_owner = root
+			every_owned_pop = {
+				add_modifier = {
+					modifier = mem_lunar_age_annex_modifier
+					days = 3600
+				}
+			}
+		}
+	}
+}
+
+#Rejection of annexation
+country_event = {
+	id = mem_lunar_age.315
+	
+	title = mem_lunar_age.312.name
+	desc = mem_lunar_age.315.desc
+	
+	is_triggered_only = yes
+	
+	location = event_target:home_faction
+	
+	diplomatic = yes
+	
+	picture_event_data = {
+		portrait = event_target:home_faction
+		room = mem_server_room
+	}
+	
+	trigger = {
+		exists = event_target:home_faction
+		exists = event_target:moon_faction
+		event_target:moon_faction = {
+			is_country_type = primitive
+		}
+		event_target:home_faction = {
+			is_country_type = primitive
+		}
+	}
+	
+	immediate = {
+		set_global_flag = mem_lunar_age_path_complete
+	}
+	
+	option = {
+		name = mem_lunar_age.315.a
+		
+		event_target:home_faction = {
+			shift_ethic = ethic_xenophobe
+			hidden_effect = { shift_ethic = ethic_xenophobe }
+			add_opinion_modifier = {
+				who = ROOT
+				modifier = mem_lunar_age_tried_annexation
+			}
+		}
+		
+		event_target:moon_faction = {
+			shift_ethic = ethic_xenophobe
+			hidden_effect = { shift_ethic = ethic_xenophobe }
+			add_opinion_modifier = {
+				who = ROOT
+				modifier = mem_lunar_age_tried_annexation
+			}
+		}
+		
+		set_global_flag = mem_lunar_age_path_complete
+		set_global_flag = mem_lunar_age_pissed_off
 	}
 }
