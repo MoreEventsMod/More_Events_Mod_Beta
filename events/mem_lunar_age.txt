@@ -315,7 +315,7 @@ country_event = {
 				}
 			}
 		
-			remove_country_flag = mem_lunar_age_colony
+			remove_country_flag = mem_lunar_age
 			set_country_flag = early_space_age
 			set_primitive_age = early_space_age
 		}
@@ -442,7 +442,7 @@ country_event = {
 				}
 				else = {
 					owner = {
-						country_event = { id = mem_lunar_age.311 }
+						country_event = { id = mem_lunar_age.311 days = @diplomatictimer }
 					}
 				}
 			}
@@ -536,7 +536,43 @@ country_event = {
 	}
 	
 	immediate = {
-		#Chain outcome will be placed here
+		event_target:home_faction.capital_scope = {
+			while = {
+				count = 3
+				random_tile = {
+					limit = { has_pop = yes }
+					kill_pop = yes
+					set_blocker = tb_crater
+				}
+			}
+		}
+		event_target:moon_faction.capital_scope = {
+			while = {
+				count = 2
+				random_tile = {
+					limit = { has_pop = yes }
+					kill_pop = yes
+					set_blocker = tb_crater
+				}
+			}
+		}
+		random_list = {
+			20 = {
+				country_event = { id = mem_lunar_age.316 } #Homeworld surrenders
+			}
+			20 = {
+				country_event = { id = mem_lunar_age.318 } #Colony surrenders
+			}
+			20 = {
+				country_event = { id = mem_lunar_age.320 } #Homeworld destroyed
+			}
+			20 = {
+				country_event = { id = mem_lunar_age.322 } #Colony destroyed
+			}
+			20 = {
+				country_event = { id = mem_lunar_age.324 } #Both are destroyed
+			}
+		}
 	}
 }
 
@@ -894,5 +930,382 @@ country_event = {
 		
 		set_global_flag = mem_lunar_age_path_complete
 		set_global_flag = mem_lunar_age_pissed_off
+	}
+}
+
+#Homeworld surrenders
+country_event = {
+	id = mem_lunar_age.316
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		event_target:moon_faction = {
+			change_government = {
+				#authority = random
+				civics = {
+					civic = civic_mem_declaration_of_independence
+					civic = civic_mem_land_of_opportunity
+				}
+			}
+			remove_country_flag = mem_lunar_age_colony
+			set_country_flag = early_space_age
+			set_primitive_age = early_space_age
+			set_global_flag = mem_lunar_age_path_complete
+			set_name = random
+		}
+		
+		change_government = {
+			#authority = random
+			civics = {
+				civic = civic_increasing_urbanization
+				civic = civic_atmospheric_pollution
+			}
+		}
+		remove_country_flag = mem_lunar_age
+		set_country_flag = early_space_age
+		set_primitive_age = early_space_age
+		
+		#This block is reponsible for sending out notification to observation outposts, won't send two to the same person
+		capital_scope = {
+			observation_outpost_owner = { 
+				country_event = { id = mem_lunar_age.317 }
+				save_event_target_as = outpost_owner
+			}
+		}
+		event_target:moon_faction.capital_scope = {
+			observation_outpost_owner = {
+				IF = {
+					limit = { 
+						NAND = {
+							exists = event_target:outpost_owner
+							is_same_value = event_target:outpost_owner
+						}
+					}
+					country_event = { id = mem_lunar_age.317 }
+				}
+			}
+		}
+	}
+}
+
+#Report: Homeworld surrendered
+country_event = {
+	id = mem_lunar_age.317
+	title = mem_lunar_age.317.name
+	desc = mem_lunar_age.317.desc
+	
+	picture = GFX_evt_metropolis
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = INTERESTING
+	}
+}
+
+#Colony surrendered
+country_event = {
+	id = mem_lunar_age.318
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_global_flag = mem_lunar_age_path_complete
+		event_target:moon_faction = {
+			change_government = {
+				civics = {
+					civic = civic_mem_colonial_administration
+					civic = civic_mem_rebellion_quelled
+				}
+			}
+			set_name = random
+			shift_ethic = ethic_authoritarian
+		}
+		
+		#This block is reponsible for sending out notification to observation outposts, won't send two to the same person
+		capital_scope = {
+			observation_outpost_owner = { 
+				country_event = { id = mem_lunar_age.319 }
+				save_event_target_as = outpost_owner
+			}
+		}
+		event_target:moon_faction.capital_scope = {
+			observation_outpost_owner = {
+				IF = {
+					limit = { 
+						NAND = {
+							exists = event_target:outpost_owner
+							is_same_value = event_target:outpost_owner
+						}
+					}
+					country_event = { id = mem_lunar_age.319 }
+				}
+			}
+		}
+	}
+}
+
+#Report: Colony surrendered
+country_event = {
+	id = mem_lunar_age.319
+	title = mem_lunar_age.319.name
+	desc = mem_lunar_age.319.desc
+	
+	picture = GFX_evt_metropolis
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = INTERESTING
+	}
+}
+
+
+#Homeworld destroyed
+country_event = {
+	id = mem_lunar_age.320
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		event_target:moon_faction = {
+			change_government = {
+				#authority = random
+				civics = {
+					civic = civic_mem_declaration_of_independence
+					civic = civic_mem_land_of_opportunity
+				}
+			}
+			remove_country_flag = mem_lunar_age_colony
+			set_country_flag = early_space_age
+			set_primitive_age = early_space_age
+			set_global_flag = mem_lunar_age_path_complete
+			set_name = random
+			capital_scope = {
+				random_tile = {
+					limit = { has_pop = yes }
+					set_building = mem_lunar_age_monument
+				}
+			}
+		}
+		
+		capital_scope = {
+			change_pc = pc_nuked
+			while = {
+				count = 4
+				random_tile = {
+					limit = { has_building = yes }
+					set_blocker = "tb_city_ruins"
+				}
+			}
+			destroy_colony = { keep_buildings = no }
+			set_planet_flag = primitives_nuked_themselves
+		}
+		
+		#This block is reponsible for sending out notification to observation outposts, won't send two to the same person
+		capital_scope = {
+			observation_outpost_owner = { 
+				country_event = { id = mem_lunar_age.321 }
+				save_event_target_as = outpost_owner
+			}
+		}
+		event_target:moon_faction.capital_scope = {
+			observation_outpost_owner = {
+				IF = {
+					limit = { 
+						NAND = {
+							exists = event_target:outpost_owner
+							is_same_value = event_target:outpost_owner
+						}
+					}
+					country_event = { id = mem_lunar_age.321 }
+				}
+			}
+		}
+	}
+}
+
+#Report: Homeworld destroyed
+country_event = {
+	id = mem_lunar_age.321
+	title = mem_lunar_age.321.name
+	desc = mem_lunar_age.321.desc
+	
+	picture = GFX_evt_metropolis
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = INTERESTING
+	}
+}
+
+#Colonty destroyed
+country_event = {
+	id = mem_lunar_age.322
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		event_target:moon_faction = {
+			capital_scope = {
+				change_pc = pc_nuked
+				set_planet_flag = primitives_nuked_themselves
+				while = {
+					count = 2
+					random_tile = {
+						limit = { has_building = yes }
+						set_blocker = "tb_city_ruins"
+					}
+				}
+				destroy_colony = { keep_buildings = no }
+			}
+			
+			set_global_flag = mem_lunar_age_path_complete
+		}
+		
+		change_government = {
+			#authority = random
+			civics = {
+				civic = civic_increasing_urbanization
+				civic = civic_atmospheric_pollution
+			}
+		}
+		remove_country_flag = mem_lunar_age
+		set_country_flag = early_space_age
+		set_primitive_age = early_space_age
+		capital_scope = {
+			random_tile = {
+				limit = { has_pop = yes }
+				set_building = mem_lunar_age_monument
+			}
+		}
+		
+		#This block is reponsible for sending out notification to observation outposts, won't send two to the same person
+		capital_scope = {
+			observation_outpost_owner = { 
+				country_event = { id = mem_lunar_age.323 }
+				save_event_target_as = outpost_owner
+			}
+		}
+		event_target:moon_faction.capital_scope = {
+			observation_outpost_owner = {
+				IF = {
+					limit = { 
+						NAND = {
+							exists = event_target:outpost_owner
+							is_same_value = event_target:outpost_owner
+						}
+					}
+					country_event = { id = mem_lunar_age.323 }
+				}
+			}
+		}
+	}
+}
+
+#Report: Colony destroyed
+country_event = {
+	id = mem_lunar_age.323
+	title = mem_lunar_age.323.name
+	desc = mem_lunar_age.323.desc
+	
+	picture = GFX_evt_metropolis
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = INTERESTING
+	}
+}
+
+#Both destroyed
+country_event = {
+	id = mem_lunar_age.323
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		event_target:moon_faction = {
+			capital_scope = {
+				change_pc = pc_nuked
+				set_planet_flag = primitives_nuked_themselves
+				while = {
+					count = 2
+					random_tile = {
+						limit = { has_building = yes }
+						set_blocker = "tb_city_ruins"
+					}
+				}
+				destroy_colony = { keep_buildings = no }
+			}
+			
+			set_global_flag = mem_lunar_age_path_complete
+		}
+		
+		capital_scope = {
+			change_pc = pc_nuked
+			while = {
+				count = 4
+				random_tile = {
+					limit = { has_building = yes }
+					set_blocker = "tb_city_ruins"
+				}
+			}
+			destroy_colony = { keep_buildings = no }
+			set_planet_flag = primitives_nuked_themselves
+		}
+		
+		#This block is reponsible for sending out notification to observation outposts, won't send two to the same person
+		capital_scope = {
+			observation_outpost_owner = { 
+				country_event = { id = mem_lunar_age.325 }
+				save_event_target_as = outpost_owner
+			}
+		}
+		event_target:moon_faction.capital_scope = {
+			observation_outpost_owner = {
+				IF = {
+					limit = { 
+						NAND = {
+							exists = event_target:outpost_owner
+							is_same_value = event_target:outpost_owner
+						}
+					}
+					country_event = { id = mem_lunar_age.325 }
+				}
+			}
+		}
+	}
+}
+
+#Report: Both destroyed
+country_event = {
+	id = mem_lunar_age.325
+	title = mem_lunar_age.325.name
+	desc = mem_lunar_age.325.desc
+	
+	picture = GFX_evt_metropolis
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = INTERESTING
 	}
 }
