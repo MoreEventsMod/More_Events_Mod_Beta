@@ -462,7 +462,7 @@ country_event = {
 	}
 }
 
-#Observer is notified that moon started to mobilize
+#Observer is notified that homeworld started to mobilize
 country_event = {
 	id = mem_lunar_age.310
 	title = mem_lunar_age.310.name
@@ -486,6 +486,33 @@ country_event = {
 	
 	option = {
 		name = mem_lunar_age.310.b
+		
+		hidden_effect = {
+			random_list = {
+				1 = {
+					country_event = { id = mem_lunar_age.313 } # Open negotiations
+					modifier = {
+						factor = 2
+						has_ethic = ethic_xenophile
+					}
+					modifier = {
+						factor = 4
+						has_ethic = ethic_fanatic_xenophile
+					}
+				}
+				1 = {
+					country_event = { id = mem_lunar_age.312 } #They don't want to
+					modifier = {
+						factor = 2
+						has_ethic = ethic_xenophobe
+					}
+					modifier = {
+						factor = 4
+						has_ethic = ethic_fanatic_xenophobe
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -506,5 +533,109 @@ country_event = {
 	}
 	
 	immediate = {
+		#Chain outcome will be placed here
+	}
+}
+
+#Diplomatic event: they don't want us to have anything to do with anything
+
+country_event = {
+	id = mem_lunar_age.312
+	title = mem_lunar_age.312.name
+	desc = mem_lunar_age.312.desc
+	
+	is_triggered_only = yes
+	
+	location = event_target:home_faction
+	
+	diplomatic = yes
+	
+	picture_event_data = {
+		portrait = event_target:home_faction
+		room = mem_server_room
+	}
+	
+	trigger = {
+		exists = event_target:home_faction
+		exists = event_target:moon_faction
+		event_target:moon_faction = {
+			is_country_type = primitive
+		}
+		event_target:home_faction = {
+			is_country_type = primitive
+		}
+	}
+	
+	option = {
+		name = mem_lunar_age.312.a
+		custom_tooltip = mem_lunar_age.312.a.tooltip
+		
+		hidden_effect = {
+			event_target:home_faction = {
+				country_event = { id = mem_lunar_age.311 days = @diplomatictimer}
+			}
+		}
+		
+		trigger = {
+			NOR = {
+				has_ethic = ethic_fanatic_pacifist
+				has_ethic = ethic_pacifist
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_xenophile
+			}
+		}
+	}
+	
+	option = {
+		name = mem_lunar_age.312.a.phile
+		custom_tooltip = mem_lunar_age.312.a.tooltip
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_pacifist
+				has_ethic = ethic_pacifist
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_xenophile
+			}
+		}
+	}
+	
+	option = {
+		name = mem_lunar_age.312.b
+		custom_tooltip = mem_lunar_age.312.b.tooltip
+		
+		trigger = {
+			NOR = {
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_fanatic_pacifist
+			}
+			OR = {
+				has_ethic = ethic_militarist
+				has_ethic = ethic_fanatic_militarist
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
+		
+		event_target:home_faction = {
+			random_list = {
+				66 = { shift_ethic = ethic_xenophobe }
+				33 = {  }
+			}
+		}
+		
+		event_target:moon_faction = {
+			random_list = {
+				66 = { shift_ethic = ethic_xenophobe }
+				33 = {  }
+			}
+		}
+		
+		hidden_effect = {
+			country_event = {
+				id = mem_lunar_age.313
+			}
+			set_country_flag = mem_went_agressively
+		}
 	}
 }
