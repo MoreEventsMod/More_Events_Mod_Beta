@@ -6,6 +6,7 @@
 namespace = mem_lunar_age
 
 @MTTHIND = 12
+@MTTHNUKE = 6
 
 @diplomatictimer = 30
 
@@ -1283,7 +1284,7 @@ country_event = {
 				while = {
 					count = 2
 					random_tile = {
-						limit = { has_building = yes }
+						limit = { has_building = no }
 						set_blocker = "tb_city_ruins"
 					}
 				}
@@ -1323,5 +1324,116 @@ country_event = {
 	
 	option = {
 		name = INTERESTING
+	}
+}
+
+#####################
+#    NUCLEAR WAR    #
+#####################
+
+country_event = {
+	id = mem_lunar_age.400
+	
+	hide_window = yes
+	
+	mean_time_to_happen = {
+		months = @MTTHNUKE
+		
+		modifier = {
+			factor = 5
+			has_ethic = ethic_pacifist
+			has_ethic = ethic_fanatic_pacifist
+		}
+	}
+	
+	trigger = {
+		NOT = { has_global_flag = mem_lunar_age_grace_period }
+		OR = {
+			NOT = { has_global_flag = mem_lunar_age_path_chosen }
+			has_global_flag = mem_lunar_age_path_complete
+		}
+		is_country_type = primitive
+		has_country_flag = mem_lunar_age
+		any_country = {
+			is_country_type = primitive
+			has_country_flag = mem_lunar_age_colony
+		}
+	}
+	
+	immediate = {
+		save_event_target_as = home_faction
+		random_country = {
+			limit = { has_country_flag = mem_lunar_age_colony }
+			save_event_target_as = moon_faction
+		}
+		capital_scope = { 
+			save_event_target_as = the_planet
+			observation_outpost_owner = { 
+				country_event = { id = mem_lunar_age.401 }
+				save_event_target_as = outpost_owner
+			} 
+			change_pc = pc_nuked
+			every_tile = {
+				limit = {
+					has_blocker = yes
+				}
+				remove_blocker = yes
+			}
+			destroy_colony = { keep_buildings = no }
+			random_tile = { set_blocker = "tb_radioactive_wasteland" }
+			random_tile = { set_blocker = "tb_radioactive_wasteland" }
+			random_tile = { set_blocker = "tb_bomb_crater" }
+			random_tile = { set_blocker = "tb_bomb_crater" }
+			random_tile = { set_blocker = "tb_city_ruins" }
+			random_tile = { set_blocker = "tb_city_ruins" }
+		}
+		event_target:moon_faction = {
+			shift_ethic = ethic_pacifist
+			shift_ethic = ethic_pacifist
+			capital_scope = {
+				random_tile = {
+					limit = { has_pop = yes }
+					set_building = mem_lunar_age_monument
+				}
+				observation_outpost_owner = {
+					IF = {
+						limit = { 
+							NAND = {
+								exists = event_target:outpost_owner
+								is_same_value = event_target:outpost_owner
+							}
+						}
+						country_event = { id = mem_lunar_age.401 }
+					}
+				}
+			}
+			change_government = {
+				civics = {
+					civic = civic_mem_never_again
+					civic = civic_mem_memories_of_homeworld
+				}
+			}
+			set_name = random
+			remove_country_flag = mem_lunar_age_colony
+			set_country_flag = early_space_age
+			set_primitive_age = early_space_age
+		}
+		
+	}
+}
+
+#Nuclear report
+country_event = {
+	id = mem_lunar_age.401
+	title = mem_lunar_age.401.name
+	desc = mem_lunar_age.401.desc
+	
+	picture = GFX_evt_metropolis
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_lunar_age.401.a
 	}
 }
