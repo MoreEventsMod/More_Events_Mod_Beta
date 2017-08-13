@@ -6,9 +6,10 @@
 namespace = mem_lunar_age
 
 @MTTHIND = 12
-@MTTHNUKE = 6
+@MTTHNUKE = 120
 
 @diplomatictimer = 30
+@annexationrequesttimer = 30
 
 #DEBUG EVENT
 country_event = {
@@ -1438,4 +1439,198 @@ country_event = {
 	option = {
 		name = mem_lunar_age.401.a
 	}
+}
+
+#######################
+#ENGLIGHTENMENT EVENTS#
+#######################
+
+#Knock-off event for custom mission compleition
+country_event = {
+	id = mem_lunar_age.500
+	title = "observation.2000.name"
+	desc = "observation.2000.desc"
+	picture = GFX_evt_metropolis
+	show_sound = event_laboratory_sound
+	location = FROMFROM
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		FROMFROM = {
+			owner = {
+				save_event_target_as = country_we_uplifted
+				IF = {
+					limit = { has_country_flag = mem_lunar_age }
+					random_country = {
+						limit = { has_country_flag = mem_lunar_age_colony }
+						save_event_target_as = country_we_not_uplifted
+					}
+					else = {
+						random_country = {
+							limit = { has_country_flag = mem_lunar_age }
+							save_event_target_as = country_we_not_uplifted
+						}
+					}
+				}
+				IF = {
+					limit = { has_country_flag = mem_lunar_age }
+					remove_country_flag = mem_lunar_age
+					set_country_flag = mem_lunar_age_former
+				
+					else = { 
+						remove_country_flag = mem_lunar_age_colony
+						set_country_flag = mem_lunar_age_colony_former
+					}
+				}
+			}
+			observation_outpost_owner = {
+				# Xenoist Faction Enlightenment Demand
+				set_timed_country_flag = {
+					flag = recent_enlightenment_timed
+					days = 7200 # 20 years
+				}
+				country_event = {
+					id = mem_lunar_age.501
+					days = @annexationrequesttimer
+				}
+			}
+			observation_outpost = {
+				dismantle = yes
+			}
+			owner = {
+				#Here was switch, we don't need this
+				
+				set_country_flag = early_space_age
+				country_event = { id = primitive.16 }
+				if = {
+					limit = {
+						root = { is_country_type = default }
+					}
+					set_subject_of = {
+						who = root
+						subject_type = protectorate
+					}					
+				}
+				if = {
+					limit = {
+						root = { is_country_type = awakened_fallen_empire }
+					}
+					if = {
+						limit = { 
+							root = { 
+								has_ethic = ethic_fanatic_xenophobe
+							}
+						}
+						set_subject_of = {
+							who = root
+							subject_type = thrall
+						}		
+					}	
+					if = {
+						limit = { 
+							root = { 
+								has_ethic = ethic_fanatic_xenophile
+							}
+						}
+						set_subject_of = {
+							who = root
+							subject_type = signatory
+						}		
+					}			
+					if = {
+						limit = { 
+							root = { 
+								has_ethic = ethic_fanatic_spiritualist
+							}
+						}
+						set_subject_of = {
+							who = root
+							subject_type = dominion
+						}		
+					}		
+					if = {
+						limit = { 
+							root = { 
+								has_ethic = ethic_fanatic_materialist
+							}
+						}
+						set_subject_of = {
+							who = root
+							subject_type = satellite
+						}		
+					}				
+				}				
+			}
+		}
+	}
+	
+	option = {
+		name = "observation.2000.a"
+	}
+}
+
+#Country we uplifted requests to annex another one
+country_event = {
+	id = mem_lunar_age.501
+	
+	title = mem_lunar_age.501.name
+	desc = {
+		text = mem_lunar_age.501.homeworld
+		trigger = {
+			event_target:country_we_uplifted = { has_country_flag = mem_lunar_age_former }
+		}
+	}
+	desc = {
+		text = mem_lunar_age.501.moon
+		trigger = {
+			event_target:country_we_uplifted = { has_country_flag = mem_lunar_age_colony_former }
+		}
+	}
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		exists = event_target:country_we_uplifted
+		exists = event_target:country_we_not_uplifted
+		event_target:country_we_not_uplifted = {
+			is_country_type = primitive
+		}
+		event_target:country_we_uplifted = {
+			#is_country_type = default
+			exists = overlord
+			overlord = { is_same_value = root }
+		}
+	}
+	
+	diplomatic = yes
+	location = event_target:country_we_uplifted
+	
+	picture_event_data = {
+		portrait = event_target:country_we_uplifted
+		planet_background = event_target:country_we_uplifted
+		graphical_culture = event_target:country_we_uplifted
+		city_level = event_target:country_we_uplifted
+		room = event_target:country_we_uplifted
+	}
+	
+	option = {
+		name = mem_lunar_age.501.a
+		
+		event_target:country_we_uplifted = {
+			add_opinion_modifier = {
+				who = root
+				modifier = mem_lunar_age_refused_request
+			}
+		}
+	}
+	
+	option = {
+		name = mem_lunar_age.501.b
+		
+		event_target:country_we_not_uplifted.capital_scope = {
+			set_owner = event_target:country_we_uplifted
+		}
+	}
+	
 }
