@@ -1,5 +1,21 @@
 namespace = mem_space_monster_attacks
 
+@tier1materialreward = 6
+@tier1materialmin = 100
+@tier1materialmax = 500
+@tier2materialreward = 12
+@tier2materialmin = 150
+@tier2materialmax = 1000
+@tier3materialreward = 18
+@tier3materialmin = 250
+@tier3materialmax = 1500
+@tier4materialreward = 24
+@tier4materialmin = 350
+@tier4materialmax = 2000
+@tier5materialreward = 48
+@tier5materialmin = 700
+@tier5materialmax = 4000
+
 planet_event = {
 	id = mem_space_monster_attacks.1
 	title = mem_space_monster_attacks.1.name
@@ -84,6 +100,10 @@ planet_event = {
 	}
 }
 
+# crytals has bombarded the colony
+# Planet has reached 0 health
+# This = Planet
+# From = Bombarder
 planet_event = {
 	id = mem_space_monster_attacks.2
 	title = mem_space_monster_attacks.2.name
@@ -108,6 +128,7 @@ planet_event = {
 				limit = {
 					has_fleet_flag = mem_space_monster_attacks_crystal
 				}
+				set_fleet_flag = mem_space_monster_attacks_crystal_finished
 				clear_fleet_actions = this
 				queue_actions = {
 					move_to = event_target:mem_space_monster_attacks_crystal_spawn
@@ -116,6 +137,63 @@ planet_event = {
 						delete_fleet  = this
 					}
 				}
+			}
+		}
+	}
+}
+
+# crystal has been destroyed before bombarding the colony
+# This = owner of fleet 1 (combatant)
+# From = owner of fleet 2 (destroyed)
+# FromFrom = fleet 1
+# FromFromFrom = fleet 2
+fleet_event = {
+	id = mem_space_monster_attacks.3
+	title = mem_space_monster_attacks.3.name
+	desc = mem_space_monster_attacks.3.desc
+	picture = GFX_evt_mem_giant_crystal
+	show_sound = event_ship_bridge
+	location = this
+	is_triggered_only = yes
+	
+	trigger = {
+		FROMFROMFROM = {
+			has_fleet_flag = mem_space_monster_attacks_crystal
+			NOT = {
+				has_fleet_flag = mem_space_monster_attacks_crystal_finished
+			}
+		}
+	}
+}
+
+# crystal has been destroyed after bombarding the colony
+# This = owner of fleet 1 (combatant)
+# From = owner of fleet 2 (destroyed)
+# FromFrom = fleet 1
+# FromFromFrom = fleet 2
+fleet_event = {
+	id = mem_space_monster_attacks.4
+	title = mem_space_monster_attacks.4.name
+	desc = mem_space_monster_attacks.4.desc
+	picture = GFX_evt_mem_giant_crystal
+	show_sound = event_ship_bridge
+	location = this
+	is_triggered_only = yes
+	
+	trigger = {
+		FROMFROMFROM = {
+			has_fleet_flag = mem_space_monster_attacks_crystal_finished
+		}
+	}
+	
+	option = {
+		name = mem_space_monster_attacks.4.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = minerals
+				value = @tier3materialreward
+				min = @tier3materialmin
+				max = @tier3materialmax
 			}
 		}
 	}
