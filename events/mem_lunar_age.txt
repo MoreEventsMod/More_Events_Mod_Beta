@@ -9,6 +9,7 @@ namespace = mem_lunar_age
 @MTTHNUKE = 120
 @MTTHUPLIFT = 21
 @MTTHRETALIATION = 30
+@MTTHSPACE = 6
 
 @diplomatictimer = 30
 @annexationrequesttimer = 30
@@ -2183,6 +2184,7 @@ country_event = {
 	
 		remove_country_flag = mem_lunar_age
 		set_country_flag = early_space_age
+		set_country_flag = acquired_tech
 		set_primitive_age = early_space_age
 	}
 }
@@ -2226,8 +2228,381 @@ country_event = {
 	
 		remove_country_flag = mem_lunar_age_colony
 		set_country_flag = early_space_age
+		set_country_flag = acquired_tech
 		set_primitive_age = early_space_age
 		
 		set_name = random
+	}
+}
+
+#######################
+#PROGRESS ON THEIR OWN#
+#######################
+
+#Homeworld enters the space era alongside the moon
+country_event = {
+	id = mem_lunar_age.700
+	
+	hide_window = yes
+	
+	mean_time_to_happen = {
+		months = @MTTHSPACE
+	}
+	
+	trigger = {
+		NOT = { has_global_flag = mem_lunar_age_grace_period }
+		OR = {
+			NOT = { has_global_flag = mem_lunar_age_path_chosen }
+			has_global_flag = mem_lunar_age_path_complete
+		}
+		is_country_type = primitive
+		has_country_flag = mem_lunar_age
+		any_country = {
+			is_country_type = primitive
+			has_country_flag = mem_lunar_age_colony
+			capital_scope = {
+				OR = {
+					has_observation_outpost = no
+					observation_outpost = { NOT = { has_mission = mem_lunar_technological_enlightenment }  }
+				}
+			}
+		}
+		capital_scope = {
+			OR = {
+				has_observation_outpost = no
+				observation_outpost = { NOT = { has_mission = mem_lunar_technological_enlightenment }  }
+			}
+		}
+	}
+	
+	immediate = {
+		remove_country_flag = mem_lunar_age
+		set_country_flag = primitives_can_into_space
+		set_country_type = default
+		capital_scope = { 
+			save_event_target_as = the_planet 
+		}
+		random_planet = {
+			limit = {
+				has_owner = yes
+				owner = { has_country_flag = mem_lunar_age_colony }
+			}
+			save_event_target_as = the_moon
+			observation_outpost_owner = {
+				save_event_target_as = outpost_owner
+				country_event = { id = primitive.17 }
+			}
+			observation_outpost = { dismantle = yes }
+		}
+		capital_scope = {
+			IF = {
+				limit = {
+					has_observation_outpost = yes
+					observation_outpost_owner = { NOT = { is_same_value = event_target:outpost_owner } }
+				}
+				observation_outpost_owner = {
+					save_event_target_as = outpost_owner
+					country_event = { id = primitive.17 }
+				}
+			}
+			observation_outpost = { dismantle = yes }
+		}
+		
+		change_government = {
+			authority = random
+			civics = random
+		}
+		set_name = random
+		add_minerals = 1000 # enough for a spaceport and then some
+		add_energy = 500
+		add_influence = 300
+		capital_scope = {
+			every_tile = {
+				limit = {
+					has_blocker = yes
+					NOR = {
+						has_blocker = tb_decrepit_dwellings
+						has_blocker = tb_failing_infrastructure
+					}
+				}
+				remove_blocker = yes
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_energy_deposit
+				set_building = "building_capital_2"
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_mineral_deposit
+				set_building = "building_mining_network_1"
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_mineral_deposit
+				set_building = "building_mining_network_1"
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_farmland_deposit
+				set_building = "building_hydroponics_farm_1"
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_farmland_deposit
+				set_building = "building_hydroponics_farm_1"
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_energy_deposit
+				set_building = "building_power_plant_1"
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_energy_deposit
+				set_building = "building_power_plant_1"
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_energy_deposit
+				set_building = "building_power_plant_1"
+			}
+			remove_all_armies = yes
+			create_army = {
+				name = random
+				owner = PREV
+				species = owner_main_species
+				type = "defense_army"
+			}
+			create_army = {
+				name = random
+				owner = PREV
+				species = owner_main_species
+				type = "defense_army"
+			}
+			create_army = {
+				name = random
+				owner = PREV
+				species = owner_main_species
+				type = "defense_army"
+			}
+			create_army = {
+				name = random
+				owner = PREV
+				species = owner_main_species
+				type = "defense_army"
+			}
+		}
+		random_owned_ship = {
+			limit = { is_ship_size = primitive_space_station }
+			fleet = { destroy_fleet = THIS }
+		}
+		
+		event_target:the_moon = {
+			every_tile = {
+				limit = {
+					has_blocker = yes
+					NOR = {
+						has_blocker = tb_decrepit_dwellings
+						has_blocker = tb_failing_infrastructure
+					}
+				}
+				remove_blocker = yes
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_energy_deposit
+				set_building = "building_capital_2"
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_mineral_deposit
+				set_building = "building_mining_network_1"
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_mineral_deposit
+				set_building = "building_mining_network_1"
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_farmland_deposit
+				set_building = "building_hydroponics_farm_1"
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_farmland_deposit
+				set_building = "building_hydroponics_farm_1"
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_energy_deposit
+				set_building = "building_power_plant_1"
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_energy_deposit
+				set_building = "building_power_plant_1"
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_energy_deposit
+				set_building = "building_power_plant_1"
+			}
+			remove_all_armies = yes
+			create_army = {
+				name = random
+				owner = PREV
+				species = owner_main_species
+				type = "defense_army"
+			}
+			create_army = {
+				name = random
+				owner = PREV
+				species = owner_main_species
+				type = "defense_army"
+			}
+			create_army = {
+				name = random
+				owner = PREV
+				species = owner_main_species
+				type = "defense_army"
+			}
+			create_army = {
+				name = random
+				owner = PREV
+				species = owner_main_species
+				type = "defense_army"
+			}
+			set_owner = root
+		}
 	}
 }
