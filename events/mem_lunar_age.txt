@@ -7,9 +7,12 @@ namespace = mem_lunar_age
 
 @MTTHIND = 12
 @MTTHNUKE = 120
+@MTTHUPLIFT = 21
+@MTTHRETALIATION = 30
 
 @diplomatictimer = 30
 @annexationrequesttimer = 30
+@retaliationcooldown = 30
 
 #DEBUG EVENT
 country_event = {
@@ -135,9 +138,21 @@ country_event = {
 			has_global_flag = mem_lunar_age_path_chosen
 		}
 		NOT = { has_global_flag = mem_lunar_age_grace_period }
+		capital_scope = {
+			OR = {
+				has_observation_outpost = no
+				observation_outpost = { NOT = { has_mission = mem_lunar_technological_enlightenment }  }
+			}
+		}
 		any_country = {
 			is_country_type = primitive
 			has_country_flag = mem_lunar_age
+			capital_scope = {
+				OR = {
+					has_observation_outpost = no
+					observation_outpost = { NOT = { has_mission = mem_lunar_technological_enlightenment }  }
+				}
+			}
 		}
 	}
 	
@@ -1360,6 +1375,18 @@ country_event = {
 		any_country = {
 			is_country_type = primitive
 			has_country_flag = mem_lunar_age_colony
+			capital_scope = {
+				OR = {
+					has_observation_outpost = no
+					observation_outpost = { NOT = { has_mission = mem_lunar_technological_enlightenment }  }
+				}
+			}
+		}
+		capital_scope = {
+			OR = {
+				has_observation_outpost = no
+				observation_outpost = { NOT = { has_mission = mem_lunar_technological_enlightenment }  }
+			}
 		}
 	}
 	
@@ -1502,7 +1529,7 @@ country_event = {
 				#Here was switch, we don't need this
 				
 				set_country_flag = early_space_age
-				country_event = { id = primitive.16 }
+				country_event = { id = mem_lunar_age.505 }
 				if = {
 					limit = {
 						root = { is_country_type = default }
@@ -1633,4 +1660,574 @@ country_event = {
 		}
 	}
 	
+}
+
+#Picking up a planet that is eligible for protest
+country_event = {
+	id = mem_lunar_age.502
+	
+	hide_window = yes
+	
+	mean_time_to_happen = {
+		days = @MTTHUPLIFT
+	}
+	
+	trigger = {
+		is_country_type = primitive
+		has_country_flag = mem_lunar_age_colony
+		capital_scope = {
+			has_observation_outpost = yes
+			observation_outpost = {
+				has_mission = mem_lunar_technological_enlightenment
+			}
+			observation_outpost_owner = {
+				NOT = { has_country_flag = mem_lunar_age_request_sent }
+			}
+		}
+		any_country = {
+			is_country_type = primitive
+			has_country_flag = mem_lunar_age
+			capital_scope = {
+				OR = {
+					has_observation_outpost = no
+					observation_outpost = {
+						NOT = { has_mission = mem_lunar_technological_enlightenment }
+					}
+					# observation_outpost_owner = {
+						# NOT = { is_same_value = root.capital_scope.observation_outpost_owner }
+					# }
+				}
+			}
+		}
+	}
+	
+	immediate = {
+		#set_country_flag = mem_lunar_age_angered
+		save_event_target_as = moon_faction
+		random_country = {
+			limit = { has_country_flag = mem_lunar_age }
+			save_event_target_as = home_faction
+		}
+		capital_scope = {
+			observation_outpost_owner = {
+				country_event = {
+					id = mem_lunar_age.503
+				}
+			}
+		}
+	}
+}
+
+
+country_event = {
+	id = mem_lunar_age.503
+	title = mem_lunar_age.503.name
+	desc = mem_lunar_age.503.desc
+	
+	is_triggered_only = yes
+	
+	diplomatic = yes
+	location = from
+	
+	picture_event_data = {
+		portrait = event_target:home_faction
+		room = mem_server_room
+	}
+	
+	immediate = {
+		set_country_flag = mem_lunar_age_request_sent
+	}
+	
+	option = {
+		name = mem_lunar_age.503.a
+		custom_tooltip = mem_lunar_age.503.a.tooltip
+		
+		event_target:home_faction = {
+			add_opinion_modifier = {
+				who = root
+				modifier = mem_lunar_age_refused_to_stop
+			}
+			shift_ethic = ethic_xenophobe
+		}
+		set_country_flag = mem_lunar_age_angered
+	}
+	
+	option = {
+		name = mem_lunar_age.503.b
+		custom_tooltip = mem_lunar_age.503.b.tooltip
+		
+		set_country_flag = mem_lunar_age_promised
+		event_target:moon_faction.capital_scope = {
+			observation_outpost = { set_mission = passive_observation }
+		}
+		event_target:home_faction = {
+			shift_ethic = ethic_xenophile
+		}
+		event_target:moon_faction = {
+			shift_ethic = ethic_xenophobe
+		}
+	}
+	
+	option = {
+		name = mem_lunar_age.503.c
+		custom_tooltip = mem_lunar_age.5.c.tooltip
+		
+		allow = {
+			custom_tooltip = {
+				fail_text = "mem_lunar_age.503.c.fail_text"
+				event_target:home_faction.capital_scope = {
+					has_observation_outpost = yes
+					observation_outpost_owner = { is_same_value = root }
+				}
+			}
+		}
+		
+		set_country_flag = mem_lunar_age_promised
+		
+		event_target:home_faction = {
+			
+			shift_ethic = ethic_xenophile
+			capital_scope = {
+				observation_outpost = { set_mission = mem_lunar_technological_enlightenment }
+			}
+		}
+	}
+}
+
+
+
+#Disabling sneak enlightenment
+country_event = {
+	id = mem_lunar_age.504
+	
+	hide_window = yes
+	
+	mean_time_to_happen = {
+		days = 7
+	}
+	
+	trigger = {
+		is_country_type = primitive
+		has_country_flag = mem_lunar_age_colony
+		capital_scope = {
+			has_observation_outpost = yes
+			observation_outpost_owner = { has_country_flag = mem_lunar_age_promised }
+			observation_outpost = { has_mission = mem_lunar_technological_enlightenment }
+		}
+		any_country = {
+			is_country_type = primitive
+			has_country_flag = mem_lunar_age
+			capital_scope = {
+				OR = {
+					has_observation_outpost = no
+					observation_outpost = {
+						NOT = { has_mission = mem_lunar_technological_enlightenment }
+					}
+				}
+			}
+		}
+	}
+	
+	immediate = {
+		capital_scope = {
+			observation_outpost = { set_mission = passive_observation }
+		}
+	}
+}
+
+#Knock-off event to handle strange behaviour for the moon. Also let's keep flag
+country_event = {
+	id = mem_lunar_age.505
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		remove_country_flag = early_space_age
+		set_country_flag = primitives_can_into_space
+		set_country_type = default
+		#change_country_flag = random
+		#WE ALREADY USING ADVANCED CULTURE
+		# if = {
+			# limit = { is_species_class = MAM }
+			# set_graphical_culture = mammalian_01
+		# }
+		# if = {
+			# limit = { is_species_class = REP }
+			# set_graphical_culture = reptilian_01
+		# }
+		# if = {
+			# limit = { is_species_class = AVI }
+			# set_graphical_culture = avian_01
+		# }
+		# if = {
+			# limit = { is_species_class = ART }
+			# set_graphical_culture = arthropoid_01
+		# }
+		# if = {
+			# limit = { is_species_class = MOL }
+			# set_graphical_culture = molluscoid_01
+		# }
+		# if = {
+			# limit = { is_species_class = FUN }
+			# set_graphical_culture = fungoid_01
+		# }
+		change_government = {
+			authority = random
+			civics = random
+		}
+		set_name = random
+		add_minerals = 1000 # enough for a spaceport and then some
+		add_energy = 500
+		add_influence = 300
+		capital_scope = {
+			every_tile = {
+				limit = {
+					has_blocker = yes
+					NOR = {
+						has_blocker = tb_decrepit_dwellings
+						has_blocker = tb_failing_infrastructure
+					}
+				}
+				remove_blocker = yes
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_energy_deposit
+				set_building = "building_capital_2"
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_mineral_deposit
+				set_building = "building_mining_network_1"
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_mineral_deposit
+				set_building = "building_mining_network_1"
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_farmland_deposit
+				set_building = "building_hydroponics_farm_1"
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_farmland_deposit
+				set_building = "building_hydroponics_farm_1"
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_energy_deposit
+				set_building = "building_power_plant_1"
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_energy_deposit
+				set_building = "building_power_plant_1"
+			}
+			random_tile = {
+				limit = {
+					has_grown_pop = yes
+					OR = {
+						has_building = "building_primitive_farm"
+						has_building = "building_primitive_factory"
+						has_building = no
+					}
+				}
+				clear_deposits = yes
+				add_deposit = d_energy_deposit
+				set_building = "building_power_plant_1"
+			}
+			remove_all_armies = yes
+			create_army = {
+				name = random
+				owner = PREV
+				species = owner_main_species
+				type = "defense_army"
+			}
+			create_army = {
+				name = random
+				owner = PREV
+				species = owner_main_species
+				type = "defense_army"
+			}
+			create_army = {
+				name = random
+				owner = PREV
+				species = owner_main_species
+				type = "defense_army"
+			}
+			create_army = {
+				name = random
+				owner = PREV
+				species = owner_main_species
+				type = "defense_army"
+			}
+		}
+		random_owned_ship = {
+			limit = { is_ship_size = primitive_space_station }
+			fleet = { destroy_fleet = THIS }
+		}
+	}
+}
+
+#Gatekeeper event for pissed-off homeworld
+country_event = {
+	id = mem_lunar_age.506
+	hide_window = yes
+	
+	mean_time_to_happen = {
+		days = @MTTHRETALIATION
+	}
+	
+	trigger = {
+		NOT = { has_global_flag = mem_lunar_age_recent_retaliation }
+		is_country_type = primitive
+		has_country_flag = mem_lunar_age_colony
+		any_country = {
+			is_country_type = primitive
+			has_country_flag = mem_lunar_age
+			NOR = {
+				has_ethic = ethic_pacifist
+				has_ethic = ethic_fanatic_pacifist
+				has_ethic = ethic_xenophile
+				has_ethic = ethic_fanatic_xenophile
+			}
+			capital_scope = {
+				NAND = {
+					has_observation_outpost = yes
+					observation_outpost = { has_mission = mem_lunar_technological_enlightenment }
+				}
+			}
+		}
+		capital_scope = {
+			has_observation_outpost = yes
+			observation_outpost = { has_mission = mem_lunar_technological_enlightenment mission_progress > 0.2 }
+			observation_outpost_owner = { has_country_flag = mem_lunar_age_angered }
+		}
+	}
+	
+	immediate = {
+		save_event_target_as = moon_faction
+		random_country = {
+			limit = { has_country_flag = mem_lunar_age }
+			save_event_target_as = home_faction
+		}
+		random_list = {
+			60 = {  }
+			
+			10 = { #Nuke
+				set_timed_global_flag = {
+					flag = mem_lunar_age_recent_retaliation
+					days = @retaliationcooldown
+				}
+				capital_scope = {
+					random_tile = {
+						limit = { has_pop = yes }
+						kill_pop = yes
+						set_blocker = tb_radioactive_wasteland
+					}
+					observation_outpost = { add_mission_progress = -0.2 }
+					observation_outpost_owner = {
+						country_event = { id = mem_lunar_age.507 }
+					}
+				}
+			}
+			
+			30 = { #Terror
+				set_timed_global_flag = {
+					flag = mem_lunar_age_recent_retaliation
+					days = @MTTHRETALIATION
+				}
+				capital_scope = {
+					observation_outpost = { add_mission_progress = -0.1 }
+					observation_outpost_owner = {
+						country_event = { id = mem_lunar_age.508 }
+					}
+				}
+			}
+		}
+	}
+}
+
+#Nuclear report
+country_event = {
+	id = mem_lunar_age.507
+	title = mem_lunar_age.507.name
+	desc = mem_lunar_age.507.desc
+	
+	picture = GFX_evt_metropolis
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_lunar_age.507.a
+	}
+}
+
+#Nuclear report
+country_event = {
+	id = mem_lunar_age.508
+	title = mem_lunar_age.508.name
+	desc = mem_lunar_age.508.desc
+	
+	picture = GFX_evt_metropolis
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_lunar_age.508.a
+	}
+}
+
+
+######################
+#HANDLING THE ORPHANS#
+######################
+
+#Homeworld orphaned
+
+country_event = {
+	id = mem_lunar_age.600
+	
+	hide_window = yes
+	
+	mean_time_to_happen = {
+		days = 30
+	}
+	
+	trigger = {
+		is_country_type = primitive
+		has_country_flag = mem_lunar_age
+		capital_scope = {
+			NAND = {
+				has_observation_outpost = yes
+				observation_outpost = { has_mission = mem_lunar_technological_enlightenment }
+			}
+		}
+		NOT = {
+			any_country = {
+				is_country_type = primitive
+				has_country_flag = mem_lunar_age_colony
+			}
+		}
+	}
+	
+	immediate = {
+		change_government = {
+			#authority = random
+			civics = {
+				civic = civic_increasing_urbanization
+				civic = civic_atmospheric_pollution
+			}
+		}
+	
+		remove_country_flag = mem_lunar_age
+		set_country_flag = early_space_age
+		set_primitive_age = early_space_age
+	}
+}
+
+#Colony orphaned
+
+country_event = {
+	id = mem_lunar_age.601
+	
+	hide_window = yes
+	
+	mean_time_to_happen = {
+		days = 30
+	}
+	
+	trigger = {
+		is_country_type = primitive
+		has_country_flag = mem_lunar_age_colony
+		capital_scope = {
+			NAND = {
+				has_observation_outpost = yes
+				observation_outpost = { has_mission = mem_lunar_technological_enlightenment }
+			}
+		}
+		NOT = {
+			any_country = {
+				is_country_type = primitive
+				has_country_flag = mem_lunar_age
+			}
+		}
+	}
+	
+	immediate = {
+		change_government = {
+			#authority = random
+			civics = {
+				civic = civic_mem_declaration_of_independence
+				civic = civic_mem_land_of_opportunity
+			}
+		}
+	
+		remove_country_flag = mem_lunar_age_colony
+		set_country_flag = early_space_age
+		set_primitive_age = early_space_age
+		
+		set_name = random
+	}
 }
