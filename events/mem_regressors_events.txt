@@ -157,8 +157,8 @@ event = {
 			}
 			change_country_flag = {
 				icon = {
-					category = "special"
-					file = "primitive.dds"
+					category = "blocky"
+					file = "flag_blocky_12.dds"
 				}
 				background= {
 					category = "backgrounds"
@@ -426,8 +426,8 @@ event = {
 			}
 			change_country_flag = {
 				icon = {
-					category = "special"
-					file = "primitive.dds"
+					category = "human"
+					file = "flag_human_13.dds"
 				}
 				background= {
 					category = "backgrounds"
@@ -579,8 +579,8 @@ event = {
 			}
 			change_country_flag = {
 				icon = {
-					category = "special"
-					file = "primitive.dds"
+					category = "blocky"
+					file = "flag_blocky_11.dds"
 				}
 				background= {
 					category = "backgrounds"
@@ -947,7 +947,7 @@ country_event = {
 	}
 }
 
-#Single outpost event. desc_civ - the only civ we are observing
+#Single outpost event. first_desc_civ - the only civ we are observing
 country_event = {
 	id = mem_regressors.201
 	title = mem_regressors.201.name
@@ -959,9 +959,6 @@ country_event = {
 	location = event_target:first_desc_civ
 	
 	immediate = {
-		event_target:first_desc_civ.capital_scope = {
-			save_event_target_as = origin_system
-		}
 	}
 	
 	option = { #Mission accepted
@@ -1025,9 +1022,6 @@ country_event = {
 	location = event_target:first_desc_civ
 	
 	immediate = {
-		event_target:first_desc_civ.capital_scope = {
-			save_event_target_as = origin_system
-		}
 	}
 	
 	option = { #Mission accepted
@@ -1086,9 +1080,6 @@ country_event = {
 	location = event_target:first_civ
 	
 	immediate = {
-		event_target:first_civ.capital_scope = {
-			save_event_target_as = origin_system
-		}
 	}
 	
 	immediate = { set_country_flag = mem_regressors_found_all_outposts }
@@ -1229,6 +1220,7 @@ country_event = {
 		hidden_effect = {
 			random_system = {
 				limit = { has_star_flag = mem_regressors_pi_system }
+				save_event_target_as = spawner
 				spawn_system = {
 					min_distance = 20
 					max_distance = 50
@@ -1305,3 +1297,68 @@ country_event = {
 ################
 #SECOND CHAPTER#
 ################
+
+ship_event = {
+	id = mem_regressors.300
+	title = mem_regressors.300.name
+	desc = mem_regressors.300.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_mining_station
+	location = event_target:asteroid_base
+	
+	immediate = {
+		owner = { set_country_flag = mem_regressors_started_signal }
+		random_system = {
+			limit = { 
+				has_star_flag = mem_regressors_pi_system 
+				NOT = { is_same_value = event_target:spawner }
+			}
+			set_star_flag = mem_regressors_entrance
+			random_system_planet = {
+				limit = { is_star = yes }
+				save_event_target_as = transmitter_star
+			}
+		}
+	}
+	
+	option = {
+		name = mem_regressors.300.a
+		
+		owner = {
+			end_event_chain = mem_regressors_mystery_chain
+			begin_event_chain = {
+				event_chain = "mem_regressors_signal_chain"
+				target = this
+			}
+			enable_special_project = {	
+				owner = this
+				name = "MEM_REGRESSORS_STAR_TRANSMITTER"
+				location = event_target:transmitter_star 
+			}
+
+		}
+		
+		event_target:asteroid_base = {
+			orbital_deposit_tile = { add_deposit = d_enormous1_society_deposit }
+		}
+	}
+}
+
+ship_event = {
+	id = mem_regressors.301
+	title = mem_regressors.301.name
+	desc = mem_regressors.301.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_satellite_in_orbit
+	
+	option = {
+		name = mem_regressors.301.a
+		custom_tooltip = mem_regressors.301.a.tooltip
+		
+		owner = { set_country_flag = mem_regressors_can_build_angler }
+	}
+}
