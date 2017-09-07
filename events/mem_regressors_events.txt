@@ -956,7 +956,13 @@ country_event = {
 	is_triggered_only = yes
 	
 	picture = GFX_evt_satellite_in_orbit
-	location = event_target:desc_civ
+	location = event_target:first_desc_civ
+	
+	immediate = {
+		event_target:first_desc_civ.capital_scope = {
+			save_event_target_as = origin_system
+		}
+	}
 	
 	option = { #Mission accepted
 		name = mem_regressors.201.a
@@ -1018,6 +1024,12 @@ country_event = {
 	picture = GFX_evt_satellite_in_orbit
 	location = event_target:first_desc_civ
 	
+	immediate = {
+		event_target:first_desc_civ.capital_scope = {
+			save_event_target_as = origin_system
+		}
+	}
+	
 	option = { #Mission accepted
 		name = mem_regressors.202.a
 		
@@ -1072,6 +1084,12 @@ country_event = {
 	
 	picture = GFX_evt_satellite_in_orbit
 	location = event_target:first_civ
+	
+	immediate = {
+		event_target:first_civ.capital_scope = {
+			save_event_target_as = origin_system
+		}
+	}
 	
 	immediate = { set_country_flag = mem_regressors_found_all_outposts }
 	
@@ -1182,3 +1200,108 @@ country_event = {
 		}
 	}
 }
+
+#Special project DECYPHER is complete
+country_event = {
+	id = mem_regressors.206
+	title = mem_regressors.206.name
+	desc = mem_regressors.206.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_star_chart
+	
+	immediate = {
+		random_owned_leader = {
+			limit = { leader_class = scientist is_researching_area = society }
+			save_event_target_as = science_candidate
+		}
+		random_owned_leader = {
+			limit = { leader_class = ruler }
+			save_event_target_as = ruler_candidate
+		}
+	}
+	
+	option = {
+		name = mem_regressors.206.a
+		custom_tooltip = mem_regressors.206.a.tooltip
+	
+		hidden_effect = {
+			random_system = {
+				limit = { has_star_flag = mem_regressors_pi_system }
+				spawn_system = {
+					min_distance = 20
+					max_distance = 50
+					initializer = "mem_regressors_central_system"
+				}
+			}
+			random_planet = {
+				limit = { has_planet_flag = mem_regressors_asteroid }
+				surveyed = {
+					set_surveyed = yes
+					surveyor = root
+				}
+				save_event_target_as = asteroid_base
+			}
+		}
+		enable_special_project = {	
+			owner = root
+			name = "MEM_REGRESSORS_ASTEROID_BASE"
+			location = event_target:asteroid_base
+		}
+	}
+	
+	option = {
+		name = mem_regressors.206.b
+		
+		add_monthly_resource_mult = {
+			resource = society_research
+			value = @tier5researchreward
+			min = @tier5researchmin
+			max = @tier5researchmax
+		}
+		end_event_chain = mem_regressors_mystery_chain
+	}
+	
+	option = {
+		name = mem_regressors.206.c
+		
+		trigger = {
+			exists  = event_target:science_candidate
+			NOT = { has_ethic = ethic_hive_mind }
+		}
+		
+		event_target:science_candidate = {
+			IF = {
+				limit = { NOT = { has_trait = leader_trait_expertise_statecraft } }
+				add_trait = leader_trait_expertise_statecraft
+			}
+			IF = {
+				limit = { NOT = { has_trait = leader_trait_paranoid } }
+				add_trait = leader_trait_paranoid
+			}
+			add_trait = mem_regressors_leader_trait_memetic_engineer
+		}
+		
+		end_event_chain = mem_regressors_mystery_chain
+	}
+	
+	option = {
+		name = mem_regressors.206.d
+		
+		trigger = {
+			exists  = event_target:ruler_candidate
+			NOT = { has_ethic = ethic_hive_mind }
+		}
+		
+		event_target:ruler_candidate = {
+			add_trait = mem_regressors_leader_trait_memetic_engineer_ruler
+		}
+		
+		end_event_chain = mem_regressors_mystery_chain
+	}
+}
+
+################
+#SECOND CHAPTER#
+################
