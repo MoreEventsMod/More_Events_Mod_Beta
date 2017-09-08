@@ -1321,6 +1321,7 @@ ship_event = {
 			set_star_flag = mem_regressors_entrance
 			random_system_planet = {
 				limit = { is_star = yes }
+				set_planet_flag = mem_regressors_transmitter_star
 				save_event_target_as = transmitter_star
 			}
 		}
@@ -1363,5 +1364,270 @@ ship_event = {
 		custom_tooltip = mem_regressors.301.a.tooltip
 		
 		owner = { set_country_flag = mem_regressors_can_build_angler }
+	}
+}
+
+####################################################################
+#CHAPTER THREE: In which we are harassed by aliens over the angler #
+####################################################################
+
+#On building built for the first time
+planet_event = {
+	id = mem_regressors.400
+	title = mem_regressors.400.name
+	desc = mem_regressors.400.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_physics_research
+	
+	trigger = {
+		owner = {
+			NOT = { has_country_flag = mem_regressors_began_angler }
+		}
+		FROM = {
+			has_building = mem_regressors_angler
+		}
+	}
+	
+	immediate = {
+		owner = {
+			set_country_flag = mem_regressors_began_angler
+			remove_country_flag = mem_regressors_can_build_angler
+		}
+		save_event_target_as = angler_planet
+		random_planet = {
+			limit = { has_planet_flag = mem_regressors_transmitter_star }
+			save_event_target_as = transmitter_star
+		}
+		create_country = {
+			name = NAME_mem_regressors_guardians
+			type = faction
+			auto_delete = no
+			graphical_culture = pirate_01
+		}
+		last_created_country = {
+			set_country_flag = mem_regressors_guardians_country
+			establish_communications_no_message = root.owner
+			create_fleet = {
+				name = NAME_mem_regressors_first_fleet
+				effect = {
+					set_aggro_range = 0
+					set_fleet_stance = aggressive
+					set_aggro_range_measure_from = self
+					set_owner = PREV
+					set_fleet_flag = mem_regressors_first_guardians
+					create_ship = {
+						name = NAME_mem_regressor_capital_ship
+						design = NAME_Spearhead
+					}
+					while = {
+						count = 6
+						create_ship = {
+							name = NAME_mem_regressors_escort
+							design = NAME_Bug_Crusher
+						}
+					}
+					set_location = event_target:transmitter_star
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = ONSCREEN
+		
+		hidden_effect = {
+			owner = { country_event = { id = mem_regressors.401 } }
+		}
+	}
+}
+
+#Diplomatic windown to stop
+
+country_event = {
+	id = mem_regressors.401
+	title = TRANSMISSION
+	desc = mem_regressors.401.desc
+	
+	diplomatic = yes
+	
+	is_triggered_only = yes
+	
+	picture_event_data = {
+		room = no_video_feed_room
+	}
+	
+	location = event_target:transmitter_star
+	
+	option = {
+		name = mem_regressors.401.a
+		custom_tooltip = mem_regressors.401.a.tooltip
+		
+		hidden_effect = {
+			set_country_flag = mem_regressors_can_build_angler
+			every_owned_planet = {
+				limit = { has_building = mem_regressors_angler }
+				every_tile = {
+					limit = { has_building = mem_regressors_angler }
+					remove_building = yes
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_regressors.401.b
+		custom_tooltip = mem_regressors.401.b.tooltip
+		
+		hidden_effect = {
+			random_owned_planet = {
+				limit = { has_building = mem_regressors_angler }
+				save_event_target_as = angler_planet
+			}
+			random_country = {
+				limit = { has_country_flag = mem_regressors_guardians_country }
+				random_owned_fleet = {
+					limit = { has_fleet_flag = mem_regressors_first_guardians }
+					fleet_event = { id = mem_regressors.402 }
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_regressors.401.c
+		response_text = mem_regressors.401.c.response
+		is_dialog_only = yes
+	}
+	
+	after = {
+		set_country_flag = mem_regressors_responded_about_angler
+		add_influence = 100
+	}
+}
+
+#Queue to attack
+fleet_event = {
+	id = mem_regressors.402
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		exists = event_target:angler_planet
+	}
+	
+	immediate = {
+		clear_fleet_actions = root
+		queue_actions = {
+			find_closest_planet = {
+				trigger = {
+					id = mem_regressors.trigger.attack
+					is_planet = event_target:angler_planet
+				}
+				found_planet = {
+					move_to = this
+					orbit_planet = THIS
+				}
+			}
+		}
+	}
+}
+
+#Triggered on rebuilding the angler
+planet_event = {
+	id = mem_regressors.403
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			has_country_flag = mem_regressors_responded_about_angler
+		}
+		FROM = {
+			has_building = mem_regressors_angler
+		}
+	}
+	
+	immediate = {
+		owner = { remove_country_flag = mem_regressors_can_build_angler }
+		save_event_target_as = angler_planet
+		
+		random_country = {
+			limit = { has_country_flag = mem_regressors_guardians_country }
+			random_owned_fleet = {
+				limit = { has_fleet_flag = mem_regressors_first_guardians }
+				fleet_event = { id = mem_regressors.402 }
+			}
+		}
+	}
+}
+
+#On building destroyed or replaced
+planet_event = {
+	id = mem_regressors.404
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			has_country_flag = mem_regressors_responded_about_angler
+		}
+		FROM = {
+			has_prev_building = mem_regressors_angler
+		}
+	}
+	
+	immediate = {
+		owner = { set_country_flag = mem_regressors_can_build_angler }
+		save_event_target_as = angler_planet
+		
+		random_planet = {
+			limit = { has_planet_flag = mem_regressors_transmitter_star }
+			save_event_target_as = transmitter_star
+		}
+		
+		random_country = {
+			limit = { has_country_flag = mem_regressors_guardians_country }
+			random_owned_fleet = {
+				limit = { has_fleet_flag = mem_regressors_first_guardians }
+				fleet_event = { id = mem_regressors.405 }
+			}
+		}
+	}
+}
+
+#Queue to retreat
+fleet_event = {
+	id = mem_regressors.405
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		exists = event_target:transmitter_star
+	}
+	
+	immediate = {
+		clear_fleet_actions = root
+		queue_actions = {
+			find_closest_planet = {
+				trigger = {
+					id = mem_regressors.trigger.retreat
+					is_planet = event_target:transmitter_star
+				}
+				found_planet = {
+					move_to = this
+					orbit_planet = THIS
+				}
+			}
+		}
 	}
 }
