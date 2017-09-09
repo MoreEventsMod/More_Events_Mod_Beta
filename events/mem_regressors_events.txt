@@ -1398,15 +1398,28 @@ planet_event = {
 		save_event_target_as = angler_planet
 		random_planet = {
 			limit = { has_planet_flag = mem_regressors_transmitter_star }
-			save_event_target_as = transmitter_star
+			spawn_system = {
+				min_distance = 20
+				max_distance = 50
+				initializer = "mem_regressors_guardians_system"
+			}
+		}
+		random_system = {
+			limit = { has_star_flag = mem_regressors_guardians_system }
+			save_event_target_as = guardians_system
+			random_system_planet = {
+				limit = { is_star = yes }
+				save_event_target_as = guardians_star
+			}
 		}
 		create_country = {
 			name = NAME_mem_regressors_guardians
 			type = faction
 			auto_delete = no
-			graphical_culture = pirate_01
+			
 		}
 		last_created_country = {
+			set_graphical_culture = pirate_01
 			set_country_flag = mem_regressors_guardians_country
 			establish_communications_no_message = root.owner
 			create_fleet = {
@@ -1428,7 +1441,7 @@ planet_event = {
 							design = NAME_Bug_Crusher
 						}
 					}
-					set_location = event_target:transmitter_star
+					set_location = event_target:guardians_star
 				}
 			}
 		}
@@ -1464,6 +1477,8 @@ country_event = {
 		name = mem_regressors.401.a
 		custom_tooltip = mem_regressors.401.a.tooltip
 		
+		set_country_flag = mem_regressors_responded_about_angler
+		
 		hidden_effect = {
 			set_country_flag = mem_regressors_can_build_angler
 			every_owned_planet = {
@@ -1480,10 +1495,13 @@ country_event = {
 		name = mem_regressors.401.b
 		custom_tooltip = mem_regressors.401.b.tooltip
 		
+		set_country_flag = mem_regressors_responded_about_angler
+		
 		hidden_effect = {
 			random_owned_planet = {
 				limit = { has_building = mem_regressors_angler }
 				save_event_target_as = angler_planet
+				solar_system = { save_event_target_as = angler_system }
 			}
 			random_country = {
 				limit = { has_country_flag = mem_regressors_guardians_country }
@@ -1499,11 +1517,6 @@ country_event = {
 		name = mem_regressors.401.c
 		response_text = mem_regressors.401.c.response
 		is_dialog_only = yes
-	}
-	
-	after = {
-		set_country_flag = mem_regressors_responded_about_angler
-		add_influence = 100
 	}
 }
 
@@ -1522,14 +1535,27 @@ fleet_event = {
 	immediate = {
 		clear_fleet_actions = root
 		queue_actions = {
-			find_closest_planet = {
+			find_closest_system = {
 				trigger = {
-					id = mem_regressors.trigger.attack
-					is_planet = event_target:angler_planet
+					id = mem_regressors.trigger.attack.1
+					is_same_value = event_target:angler_system
 				}
-				found_planet = {
+				found_system = {
 					move_to = this
-					orbit_planet = THIS
+					find_closest_planet = {
+						trigger = {
+							id = mem_regressors.trigger.attack.2
+							is_planet = event_target:angler_planet
+						}
+						found_planet = {
+							move_to = this
+							orbit_planet = this
+							effect = {
+								id = mem_regressors.trigger.attack.3
+								planet_event = { id = mem_regressors.406 } #Ruined everything
+							}
+						}
+					}
 				}
 			}
 		}
@@ -1586,12 +1612,8 @@ planet_event = {
 	
 	immediate = {
 		owner = { set_country_flag = mem_regressors_can_build_angler }
-		save_event_target_as = angler_planet
 		
-		random_planet = {
-			limit = { has_planet_flag = mem_regressors_transmitter_star }
-			save_event_target_as = transmitter_star
-		}
+		
 		
 		random_country = {
 			limit = { has_country_flag = mem_regressors_guardians_country }
@@ -1611,23 +1633,63 @@ fleet_event = {
 	
 	is_triggered_only = yes
 	
-	trigger = {
-		exists = event_target:transmitter_star
-	}
+	# trigger = {
+		# exists = event_target:transmitter_star
+	# }
 	
 	immediate = {
+		random_planet = {
+			limit = { has_planet_flag = mem_regressors_transmitter_star }
+			save_event_target_as = transmitter_star
+		}
 		clear_fleet_actions = root
 		queue_actions = {
-			find_closest_planet = {
+			find_closest_system = {
 				trigger = {
 					id = mem_regressors.trigger.retreat
-					is_planet = event_target:transmitter_star
+					has_star_flag = mem_regressors_guardians_system
 				}
-				found_planet = {
+				found_system = {
 					move_to = this
-					orbit_planet = THIS
 				}
 			}
 		}
+	}
+}
+
+#On arrival, they nuke all things
+planet_event = {
+	id = mem_regressors.406
+	title = mem_regressors.406.name
+	desc = mem_regressors.406.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_nuclear_explosion
+	location = root
+	
+	trigger = {
+		has_building = mem_regressors_angler
+	}
+	
+	immediate = {
+		random_tile = {
+			limit = { has_building = mem_regressors_angler }
+			remove_building = yes
+			kill_pop = yes
+			set_blocker = tb_radioactive_wasteland
+		}
+		
+		random_country = {
+			limit = { has_country_flag = mem_regressors_guardians_country }
+			random_owned_fleet = {
+				limit = { has_fleet_flag = mem_regressors_first_guardians }
+				fleet_event = { id = mem_regressors.405 }
+			}
+		}
+	}
+	
+	option = {
+		name = TERRIBLE
 	}
 }
