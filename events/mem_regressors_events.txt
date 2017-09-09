@@ -1471,7 +1471,7 @@ country_event = {
 		room = no_video_feed_room
 	}
 	
-	location = event_target:transmitter_star
+	location = event_target:guardians_star
 	
 	option = {
 		name = mem_regressors.401.a
@@ -1518,6 +1518,18 @@ country_event = {
 		response_text = mem_regressors.401.c.response
 		is_dialog_only = yes
 	}
+	
+	option = {
+		name = mem_regressors.401.d
+		response_text = mem_regressors.401.d.response
+		is_dialog_only = yes
+	}
+	
+	option = {
+		name = mem_regressors.401.e
+		response_text = mem_regressors.401.e.response
+		is_dialog_only = yes
+	}
 }
 
 #Queue to attack
@@ -1533,6 +1545,7 @@ fleet_event = {
 	}
 	
 	immediate = {
+		set_global_flag = mem_regressors_already_targeted
 		clear_fleet_actions = root
 		queue_actions = {
 			find_closest_system = {
@@ -1565,18 +1578,23 @@ fleet_event = {
 #Triggered on rebuilding the angler
 planet_event = {
 	id = mem_regressors.403
-	title = "COMPLETE"
-	desc = "COMPLETE"
+	# title = "COMPLETE"
+	# desc = "COMPLETE"
 	
-	# hide_window = yes
+	hide_window = yes
 	
-	is_triggered_only = yes
+	mean_time_to_happen = {
+		months = 1
+	}
 	
 	trigger = {
+		NOT = { has_global_flag = mem_regressors_already_targeted }
+		NOT = { has_global_flag = mem_regressors_guardians_defeated }
+		has_owner = yes
 		owner = {
 			has_country_flag = mem_regressors_responded
 		}
-		FROM = {
+		any_tile = {
 			has_building = mem_regressors_angler
 		}
 	}
@@ -1595,9 +1613,9 @@ planet_event = {
 		}
 	}
 	
-	option = {
-		name = OK
-	}
+	# option = {
+		# name = OK
+	# }
 }
 
 #On building destroyed or replaced
@@ -1619,6 +1637,7 @@ planet_event = {
 	
 	immediate = {
 		owner = { set_country_flag = mem_regressors_can_build_angler }
+		remove_global_flag = mem_regressors_already_targeted
 		
 		
 		
