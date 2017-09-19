@@ -2025,42 +2025,372 @@ country_event = {
 					initializer = mem_regressors_final_system
 				}
 			}
-			create_country = {
-				name = NAME_mem_regressors_finals
-				type = faction
-				auto_delete = no
-			}
-			last_created_country = {
-				set_country_flag = mem_regressors_final_country
-				add_modifier = { modifier = sanctuary_power days = -1 }
-				save_event_target_as = final_country
-			}
+			
 			random_system = {
 				limit = { has_star_flag = mem_regressors_final_system }
-				random_system_planet = {
-					limit = { has_star_flag = mem_regressors_gas_central }
-					create_fleet = {
-						name = NAME_mem_regressors_final_boss
-						effect = {
-							set_aggro_range = 100
-							set_fleet_stance = aggressive
-							set_aggro_range_measure_from = self
-							set_owner = event_target:final_country
-							set_fleet_flag = mem_regressors_final_boss
-							create_ship = {
-								name = NAME_mem_regressor_final_boss
-								design = NAME_Imperium
-								graphical_culture = "fallen_empire_04"
-								
-								effect = {
-									set_disable_at_health = 0.05
-								}
+				save_event_target_as = final_system
+			}
+		}
+		
+		create_point_of_interest = {
+			id = mem_regressors_poi.final
+			name = "mem_regressors_poi.final"
+			desc = "mem_regressors_poi.final.desc"
+			location = event_target:final_system
+			event_chain = "mem_regressors_signal_chain"
+		}
+	}
+}
+
+###############
+#FINAL CHAPTER#
+###############
+
+#on entering final system
+ship_event = {
+	id = mem_regressors.500
+	title = mem_regressors.500.name
+	desc = mem_regressors.500.desc
+	
+	picture = GFX_evt_ship_in_orbit
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = { 
+			has_country_flag = mem_regressors_angler_complete 
+			NOT = { has_country_flag = mem_regressors_entered_final }
+		}
+		from = { has_star_flag = mem_regressors_final_system }
+	}
+	
+	immediate = {
+		owner = {
+			set_country_flag = mem_regressors_entered_final
+		}
+		
+		create_country = {
+			name = NAME_mem_regressors_finals
+			type = faction
+			auto_delete = no
+		}
+		last_created_country = {
+			set_country_flag = mem_regressors_final_country
+			add_modifier = { modifier = sanctuary_power days = -1 }
+			save_event_target_as = final_country
+		}
+	
+		from = {
+			random_system_planet = {
+				limit = { has_planet_flag = mem_regressors_gas_central }
+				create_fleet = {
+					name = NAME_mem_regressors_final_boss
+					effect = {
+						set_aggro_range = 100
+						set_fleet_stance = aggressive
+						set_aggro_range_measure_from = self
+						set_owner = event_target:final_country
+						set_fleet_flag = mem_regressors_final_boss
+						create_ship = {
+							name = NAME_mem_regressor_final_boss
+							design = NAME_Imperium
+							graphical_culture = "fallen_empire_04"
+							
+							effect = {
+								set_disable_at_health = 0.05
+								set_ship_flag = mem_regressors_final_boss
 							}
-							set_location = prev
+						}
+						set_location = prev
+					}
+				}
+			}
+			random_system_planet = {
+				limit = { has_planet_flag = mem_regressors_gas_moon_one }
+				create_fleet = {
+					name = NAME_mem_regressors_final_battleships
+					effect = {
+						set_aggro_range = 100
+						set_fleet_stance = aggressive
+						set_aggro_range_measure_from = self
+						set_owner = event_target:final_country
+						
+						while = {
+							count = 5
+							create_ship = NAME_mem_regressor_final_battleship
+							design = NAME_Spearhead
+						}
+
+						set_location = prev
+					}
+				}
+			}
+			
+			random_system_planet = {
+				limit = { has_planet_flag = mem_regressors_gas_moon_two }
+				create_fleet = {
+					name = NAME_mem_regressors_final_cruisers
+					effect = {
+						set_aggro_range = 100
+						set_fleet_stance = aggressive
+						set_aggro_range_measure_from = self
+						set_owner = event_target:final_country
+						
+						while = {
+							count = 10
+							create_ship = NAME_mem_regressor_final_cruiser
+							design = NAME_Deaths_Head
+						}
+
+						set_location = prev
+					}
+				}
+			}
+			
+			random_system_planet = {
+				limit = { has_planet_flag = mem_regressors_gas_moon_three }
+				create_fleet = {
+					name = NAME_mem_regressors_final_destroyers
+					effect = {
+						set_aggro_range = 100
+						set_fleet_stance = aggressive
+						set_aggro_range_measure_from = self
+						set_owner = event_target:final_country
+						
+						while = {
+							count = 20
+							create_ship = NAME_mem_regressor_final_destroyer
+							design = NAME_Bug_Crusher
+						}
+
+						set_location = prev
+					}
+				}
+			}
+			
+			random_system_planet = {
+				limit = { has_planet_flag = mem_regressors_gas_moon_four }
+				create_fleet = {
+					name = NAME_mem_regressors_final_corvettes
+					effect = {
+						set_aggro_range = 100
+						set_fleet_stance = aggressive
+						set_aggro_range_measure_from = self
+						set_owner = event_target:final_country
+						
+						while = {
+							count = 40
+							create_ship = NAME_mem_regressor_final_corvette
+							design = NAME_Blade
+						}
+
+						set_location = prev
+					}
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_regressors.500.a
+	}
+}
+
+#Hidden event on boss disabled
+ship_event = {
+	id = mem_regressors.600
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		has_ship_flag = mem_regressors_final_boss
+	}
+	
+	immediate = {
+		FROM = {
+			owner = {
+				IF = {
+					limit = { has_country_flag = mem_regressors_entered_final }
+					country_event = { id = mem_regressors.601 }
+					else = {
+						random_country = {
+							limit = { has_country_flag = mem_regressors_entered_final }
+							country_event = { id = mem_regressors.602 }
 						}
 					}
 				}
 			}
 		}
+	}
+}
+
+#Country event to notify player that he beaten the boss
+country_event = {
+	id = mem_regressors.601
+	title = mem_regressors.601.name
+	desc = mem_regressors.601.desc
+	
+	picture = GFX_evt_debris
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_country_flag = mem_regressors_boss_beaten
+		
+		from = { save_event_target_as = the_boss }
+	}
+	
+	option = {
+		mem_regressors.601.a
+		
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier3researchreward
+			min = @tier3researchmin
+			max = @tier3researchmax
+		}
+		
+		enable_special_project = {	
+			owner = this
+			name = "MEM_REGRESSORS_FINAL_BOSS"
+			location = from 
+		}
+	}
+}
+
+#Country event to notify player that someone else beaten the boss
+country_event = {
+	id = mem_regressors.602
+	title = mem_regressors.602.name
+	desc = mem_regressors.602.desc
+	
+	picture = GFX_evt_debris
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_country_flag = mem_regressors_boss_beaten
+		
+		from = { save_event_target_as = the_boss }
+	}
+	
+	option = {
+		mem_regressors.601.a
+		
+		enable_special_project = {	
+			owner = this
+			name = "MEM_REGRESSORS_FINAL_BOSS"
+			location = from 
+		}
+	}
+}
+
+#Finalized the project
+ship_event = {
+	id = mem_regressors.603
+	title = mem_regressors.603.name
+	desc = mem_regressors.603.desc
+	
+	picture = GFX_evt_debris
+	location = event_target:the_boss
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_country_flag = mem_regressors_finished
+		set_global_flag = mem_regressors_finished
+		
+		owner = { save_event_target_as = the_winner }
+	}
+	
+	option = {
+		mem_regressors.603.a
+		mem_regressors.603.a.tooltip
+		
+		hidden_effect = {
+			create_fleet = {
+				name = NAME_mem_regressors_final_boss
+				effect = {
+					set_aggro_range = 100
+					set_fleet_stance = aggressive
+					set_aggro_range_measure_from = self
+					set_owner = event_target:the_winner
+					set_fleet_flag = mem_regressors_final_boss
+					create_ship = {
+						name = NAME_mem_regressor_final_boss
+						design = NAME_Imperium
+						graphical_culture = "fallen_empire_04"
+					}
+					set_location = event_target:the_boss
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_regressors.603.b
+		custom_tooltip = mem_regressors.603.b.tooltip
+		
+		set_country_flag = mem_regressors_enable_civic
+	}
+	
+	option = {
+		name = mem_regressors.603.c
+		
+		owner = {
+			add_monthly_resource_mult = {
+				resource = influence
+				value = @tier4influencereward
+				min = @tier4influencemin
+				max = @tier4influencemax
+			}
+			
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier5researchreward
+				min = @tier5researchmin
+				max = @tier5researchmax
+			}
+		}
+	}
+	
+	option = {
+		mem_regressors.603.d
+		
+		owner = {
+			IF = {
+				limit = {
+					host_has_dlc = "Utopia"
+					NOT = { has_technology = tech_ascension_theory }
+				}
+				add_research_option = tech_ascension_theory
+				add_tech_progress = {
+					tech = tech_ascension_theory
+					progress = 0.05
+				}
+				else = {
+					add_monthly_resource_mult = {
+						resource = society_research
+						value = 100
+						min = 600
+						max = 6000
+					}
+				}
+			}
+		}
+	}
+	
+	after = {
+		hidden_effect = {
+			event_target:the_boss = {
+				fleet = { delete_fleet = yes }
+			}
+		}
+		end_event_chain = mem_regressors_signal_chain
 	}
 }
