@@ -2001,14 +2001,66 @@ country_event = {
 	
 	trigger = {
 		has_country_flag = mem_regressors_began_angler
+		NOT = { has_country_flag = mem_regressors_angler_complete }
 		has_global_flag = mem_regressors_guardians_defeated
 		any_owned_planet = {
 			has_building = mem_regressors_angler
 		}
 	}
 	
+	immediate = {
+		set_country_flag = mem_regressors_angler_complete
+	}
+	
 	option = {
 		name = mem_regressors.410.a
 		custom_tooltip = mem_regressors.401.a.tooltip
+		
+		hidden_effect = {
+			random_system = {
+				limit = { has_star_flag = mem_regressors_pi_system }
+				spawn_system = {
+					min_distance = 20
+					max_distance = 120
+					initializer = mem_regressors_final_system
+				}
+			}
+			create_country = {
+				name = NAME_mem_regressors_finals
+				type = faction
+				auto_delete = no
+			}
+			last_created_country = {
+				set_country_flag = mem_regressors_final_country
+				add_modifier = { modifier = sanctuary_power days = -1 }
+				save_event_target_as = final_country
+			}
+			random_system = {
+				limit = { has_star_flag = mem_regressors_final_system }
+				random_system_planet = {
+					limit = { has_star_flag = mem_regressors_gas_central }
+					create_fleet = {
+						name = NAME_mem_regressors_final_boss
+						effect = {
+							set_aggro_range = 100
+							set_fleet_stance = aggressive
+							set_aggro_range_measure_from = self
+							set_owner = event_target:final_country
+							set_fleet_flag = mem_regressors_final_boss
+							create_ship = {
+								name = NAME_mem_regressor_final_boss
+								design = NAME_Imperium
+								graphical_culture = "fallen_empire_04"
+								
+								effect = {
+									set_disable_at_health = 0.05
+								}
+							}
+							set_location = prev
+						}
+					}
+				}
+			}
+		}
 	}
 }
