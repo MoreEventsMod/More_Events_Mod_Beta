@@ -59,6 +59,7 @@ namespace = mem_regressors
 @tier5researchmax = 1000
 
 @MTTH = 800
+@MTTH_SUCCESS = 60
 
 #####################
 #ON ACTION AND DEBUG#
@@ -1771,9 +1772,11 @@ planet_event = {
 	
 	hide_window = yes
 	
-	mean_time_to_happen = {
-		months = 1
-	}
+	# mean_time_to_happen = {
+		# months = 1
+	# }
+	
+	is_triggered_only = yes
 	
 	trigger = {
 		NOT = { has_global_flag = mem_regressors_already_targeted }
@@ -1782,7 +1785,7 @@ planet_event = {
 		owner = {
 			has_country_flag = mem_regressors_responded
 		}
-		any_tile = {
+		from = {
 			has_building = mem_regressors_angler
 		}
 	}
@@ -1815,6 +1818,7 @@ planet_event = {
 	is_triggered_only = yes
 	
 	trigger = {
+		NOT = { has_global_flag = mem_regressors_guardians_defeated }
 		owner = {
 			has_country_flag = mem_regressors_responded
 		}
@@ -1825,7 +1829,7 @@ planet_event = {
 	
 	immediate = {
 		owner = { set_country_flag = mem_regressors_can_build_angler }
-		remove_global_flag = mem_regressors_already_targeted
+		
 		
 		
 		
@@ -1852,6 +1856,7 @@ fleet_event = {
 	# }
 	
 	immediate = {
+		remove_global_flag = mem_regressors_already_targeted
 		random_planet = {
 			limit = { has_planet_flag = mem_regressors_transmitter_star }
 			save_event_target_as = transmitter_star
@@ -1910,5 +1915,100 @@ planet_event = {
 		owner = {
 			end_event_chain = mem_regressors_signal_chain
 		}
+	}
+}
+
+#Hidden event to determine if enemy has been destroyed
+country_event = {
+	id = mem_regressors.407
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		is_country_type = faction
+		has_country_flag = mem_regressors_guardians_country
+		fromfrom = {
+			has_fleet_flag = mem_regressors_first_guardians
+		}
+	}
+	
+	immediate = {
+		set_global_flag = mem_regressors_guardians_defeated
+		IF = {
+			limit = {
+				from = { has_country_flag = mem_regressors_began_angler }
+			}
+			from = { country_event = { id = mem_regressors.408 } }
+			else = {
+				random_country = {
+					limit = { has_country_flag = mem_regressors.409 }
+				}
+			}
+		}
+	}
+}
+
+#Player is notified they have beaten guardians
+country_event = {
+	id = mem_regressors.408
+	title = mem_regressors.408.name
+	desc = mem_regressors.408.desc
+	
+	picture = GFX_evt_debris
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = EXCELLENT
+		
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier3researchreward
+			min = @tier3researchmin
+			max = @tier3researchmax
+		}
+	}
+}
+
+#Player is notified that someone else beaten guardians
+country_event = {
+	id = mem_regressors.409
+	title = mem_regressors.409.name
+	desc = mem_regressors.409.desc
+	
+	picture = GFX_evt_debris
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = EXCELLENT
+	}
+}
+
+#Country event to picking up signal
+country_event = {
+	id = mem_regressors.410
+	title = mem_regressors.410.name
+	desc = mem_regressors.410.name
+	
+	picture = GFX_evt_star_chart
+	
+	mean_time_to_happen = {
+		months = @MTTH_SUCCESS
+	}
+	
+	trigger = {
+		has_country_flag = mem_regressors_began_angler
+		has_global_flag = mem_regressors_guardians_defeated
+		any_owned_planet = {
+			has_building = mem_regressors_angler
+		}
+	}
+	
+	option = {
+		name = mem_regressors.410.a
+		custom_tooltip = mem_regressors.401.a.tooltip
 	}
 }
