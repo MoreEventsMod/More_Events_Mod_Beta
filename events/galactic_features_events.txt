@@ -188,10 +188,10 @@ ship_event = {
 			traits = {
 				ideal_planet_class = "pc_nuked"
 				trait = trait_adaptive
-				trait = random_presentient_trait
+				trait = random_presapient_trait
 			}
 			homeworld = FROM
-			sentient = no
+			sapient = no
 		}
 		FROM = {
 			best_tile_for_pop = {
@@ -204,6 +204,7 @@ ship_event = {
 				create_pop = { species = last_created }
 			}
 		}
+		owner = { set_country_flag = found_presapients }
 	}
 	
 	option = {
@@ -259,6 +260,7 @@ ship_event = {
 				50 = { change_pc = pc_barren }
 				50 = { change_pc = pc_barren_cold }
 			}
+			reset_planet = yes
 		}
 		#MEM Planetary Shield Override
 		IF = {
@@ -326,7 +328,8 @@ ship_event = {
 			random_list = {
 				50 = { change_pc = pc_barren }
 				50 = { change_pc = pc_barren_cold }
-			}
+			}			
+			reset_planet = yes
 		}
 		#MEM Planetary Shield Override
 		IF = {
@@ -378,6 +381,7 @@ ship_event = {
 				1 = { change_pc = pc_savannah }
 				1 = { change_pc = pc_desert }
 			}
+			reroll_planet = yes
 		}
 		#MEM Planetary Shield Override
 		IF = {
@@ -441,6 +445,7 @@ country_event = {
 					trait = leader_trait_gale_speed
 					trait = leader_trait_fleet_logistician
 				}
+				event_leader = yes	# prevents this leader from leading factions and winning elections
 			}
 			last_created_leader = {
 				set_age = 35 ### Should be older... need some way to control lifespan.
@@ -458,7 +463,14 @@ country_event = {
 ship_event = {
 	id = galactic_features.305
 	title = "galactic_features.305"
-	desc = "galactic_features.305.desc"
+	desc = {
+		trigger = { owner = { NOT = { has_authority = auth_machine_intelligence } } }
+		text = "galactic_features.305.desc"
+	}
+	desc = {
+		trigger = { owner = { has_authority = auth_machine_intelligence } }
+		text = galactic_features.305.desc.mech
+	}
 	picture = GFX_evt_alien_planet
 	location = FROMFROM
 	
@@ -477,6 +489,7 @@ ship_event = {
 				50 = { change_pc = pc_barren }
 				50 = { change_pc = pc_barren_cold }
 			}
+			reset_planet = yes
 		}
 		#MEM Planetary Shield Override
 		IF = {
@@ -489,6 +502,7 @@ ship_event = {
 				country_event = { id = mem_planetary_shields.11 }
 			}
 		}
+		
 		create_country = {
 			name = "NAME_Old_One"
 			type = cloud
@@ -887,6 +901,7 @@ country_event = {
 					has_ethic = ethic_fanatic_xenophile
 					has_ethic = ethic_fanatic_spiritualist
 					has_ethic = ethic_fanatic_materialist
+					has_authority = auth_machine_intelligence
 				}
 			}
 		}
@@ -894,12 +909,12 @@ country_event = {
 
 	option = {
 		name = galactic_features.361.a.milit
-		trigger = { has_ethic = ethic_fanatic_militarist }
+		trigger = {	has_ethic = ethic_fanatic_militarist }
 	}
 
 	option = {
 		name = galactic_features.361.a.phobe
-		trigger = { has_ethic = ethic_fanatic_xenophobe }
+		trigger = { OR = { has_ethic = ethic_fanatic_xenophobe has_civic = civic_machine_terminator } }
 	}
 
 	option = {
@@ -914,7 +929,15 @@ country_event = {
 
 	option = {
 		name = galactic_features.361.a.mater
-		trigger = { has_ethic = ethic_fanatic_materialist }
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_materialist
+				AND = {
+					has_authority = auth_machine_intelligence
+					NOT = { has_civic = civic_machine_terminator }
+				}
+			}
+		}
 	}
 }
 
@@ -2307,15 +2330,15 @@ event = {
 							set_owner = event_target:drone_country
 							create_ship = {
 								name = "NAME_Drone_2432-D"
-								design = "NAME_Mining"
+								design = "NAME_Ancient_Mining_Drone"
 							}
 							create_ship = {
 								name = "NAME_Drone_7731-A"
-								design = "NAME_Mining"
+								design = "NAME_Ancient_Mining_Drone"
 							}
 							create_ship = {
 								name = "NAME_Drone_4119-X"
-								design = "NAME_Mining"
+								design = "NAME_Ancient_Combat_Drone"
 							}
 							set_location = PREVPREV
 							set_fleet_stance = aggressive
@@ -2367,15 +2390,15 @@ event = {
 							set_owner = event_target:drone_country
 							create_ship = {
 								name = "NAME_Drone_1832-D"
-								design = "NAME_Mining"
+								design = "NAME_Ancient_Mining_Drone"
 							}
 							create_ship = {
 								name = "NAME_Drone_0931-F"
-								design = "NAME_Mining"
+								design = "NAME_Ancient_Combat_Drone"
 							}
 							create_ship = {
 								name = "NAME_Drone_1119-X"
-								design = "NAME_Mining"
+								design = "NAME_Ancient_Combat_Drone"
 							}
 							set_location = PREVPREV
 							set_fleet_stance = aggressive
