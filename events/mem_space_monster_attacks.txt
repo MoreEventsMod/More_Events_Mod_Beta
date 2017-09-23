@@ -1,3 +1,9 @@
+######################################################
+# Space Monster Attacks
+# Text by Malthus
+# Code by Malthus
+######################################################
+
 namespace = mem_space_monster_attacks
 
 @tier1materialreward = 6
@@ -17,6 +23,32 @@ namespace = mem_space_monster_attacks
 @tier5materialmax = 4000
 
 planet_event = {
+	id = mem_space_monster_attacks.1000
+	hide_window = yes
+	fire_only_once = yes
+	
+	trigger = {
+		NOT = { is_planet_class = pc_habitat }
+		has_owner = yes
+		owner = {
+			is_ai = no
+		}
+		is_colony = yes
+		
+		is_capital = no
+	}
+	
+	mean_time_to_happen = {
+		#months = 5000
+		months = 1
+	}
+	
+	immediate = {
+		planet_event = { id = mem_space_monster_attacks.1 }
+	}
+}
+
+planet_event = {
 	id = mem_space_monster_attacks.1
 	title = mem_space_monster_attacks.1.name
 	desc = mem_space_monster_attacks.1.desc
@@ -24,17 +56,6 @@ planet_event = {
 	show_sound = event_yellow_alert
 	location = event_target:mem_space_monster_attacks_crystal
 	is_triggered_only = yes
-	
-	fire_only_once = yes
-	
-	trigger = {
-		has_owner = yes
-#		is_colony = yes
-#		is_capital = no
-		owner = {
-			is_ai = no
-		}
-	}
 	
 	immediate = {
 		set_planet_flag = mem_space_monster_attack_target
@@ -83,8 +104,16 @@ planet_event = {
 									found_planet = {
 										orbit_planet = this
 										wait = {
-											duration = 400
-											random = 150
+											duration = 10
+										}
+										effect = {
+											id = mem_space_monster_attacks_crystal.2
+											random_planet = { 
+												limit = {
+													has_planet_flag = mem_space_monster_attack_target
+												}
+												planet_event = { id = mem_space_monster_attacks.2 }
+											}
 										}
 									}
 								}
@@ -100,10 +129,7 @@ planet_event = {
 	}
 }
 
-# crytals has bombarded the colony
-# Planet has reached 0 health
-# This = Planet
-# From = Bombarder
+# crytal has bombarded the colony
 planet_event = {
 	id = mem_space_monster_attacks.2
 	title = mem_space_monster_attacks.2.name
@@ -115,15 +141,15 @@ planet_event = {
 	
 	trigger = {
 		has_planet_flag = mem_space_monster_attack_target
-		FROM = {
-			any_owned_fleet = {
-				has_fleet_flag = mem_space_monster_attacks_crystal
-			}
-		}
 	}
 	
 	immediate = {
-		FROM = {
+		random_country = {
+			limit = {
+				any_owned_fleet = {
+					has_fleet_flag = mem_space_monster_attacks_crystal
+				}
+			}
 			random_owned_fleet = {
 				limit = {
 					has_fleet_flag = mem_space_monster_attacks_crystal
@@ -133,11 +159,39 @@ planet_event = {
 				queue_actions = {
 					move_to = event_target:mem_space_monster_attacks_crystal_spawn
 					effect = {
-						id = mem_space_monster_attacks_crystal.2
+						id = mem_space_monster_attacks_crystal.3
 						delete_fleet  = this
 					}
 				}
 			}
+		}
+		random_tile = {
+			limit = {
+				has_building = yes
+				is_ruined = no
+			}
+			set_ruined = yes
+		}
+		random_tile = {
+			limit = {
+				has_building = yes
+				is_ruined = no
+			}
+			set_ruined = yes
+		}
+		random_tile = {
+			limit = {
+				has_building = yes
+				is_ruined = no
+			}
+			set_ruined = yes
+		}
+		random_tile = {
+			limit = {
+				has_building = yes
+				is_ruined = no
+			}
+			set_ruined = yes
 		}
 		planet_event = { id = mem_space_monster_attacks.6 days = 180 random = 30 }
 	}
@@ -152,7 +206,7 @@ planet_event = {
 # From = owner of fleet 2 (destroyed)
 # FromFrom = fleet 1
 # FromFromFrom = fleet 2
-fleet_event = {
+country_event = {
 	id = mem_space_monster_attacks.3
 	title = mem_space_monster_attacks.3.name
 	desc = mem_space_monster_attacks.3.desc
@@ -162,6 +216,7 @@ fleet_event = {
 	is_triggered_only = yes
 	
 	trigger = {
+		is_ai = no
 		FROMFROMFROM = {
 			has_fleet_flag = mem_space_monster_attacks_crystal
 			NOT = {
@@ -171,25 +226,21 @@ fleet_event = {
 	}
 	
 	immediate = {
-		owner = {
-			capital_scope = { save_event_target_as = pc_home }
-		}
+		capital_scope = { save_event_target_as = pc_home }
 	}
 	
 	option = {
 		name = mem_space_monster_attacks.3.a
-		owner = {
-			add_monthly_resource_mult = {
-				resource = minerals
-				value = @tier3materialreward
-				min = @tier3materialmin
-				max = @tier3materialmax
-			}
-			enable_special_project = {
-				name = MEM_SPACE_MONSTER_ATTACKS_CRYSTAL_STUDY
-				location = event_target:pc_home
-				owner = root.owner
-			}
+		add_monthly_resource_mult = {
+			resource = minerals
+			value = @tier3materialreward
+			min = @tier3materialmin
+			max = @tier3materialmax
+		}
+		enable_special_project = {
+			name = MEM_SPACE_MONSTER_ATTACKS_CRYSTAL_STUDY
+			location = event_target:pc_home
+			owner = root
 		}
 	}
 }
@@ -199,7 +250,7 @@ fleet_event = {
 # From = owner of fleet 2 (destroyed)
 # FromFrom = fleet 1
 # FromFromFrom = fleet 2
-fleet_event = {
+country_event = {
 	id = mem_space_monster_attacks.4
 	title = mem_space_monster_attacks.4.name
 	desc = mem_space_monster_attacks.4.desc
@@ -209,31 +260,28 @@ fleet_event = {
 	is_triggered_only = yes
 	
 	trigger = {
+		is_ai = no
 		FROMFROMFROM = {
 			has_fleet_flag = mem_space_monster_attacks_crystal_finished
 		}
 	}
 	
 	immediate = {
-		owner = {
-			capital_scope = { save_event_target_as = pc_home }
-		}
+		capital_scope = { save_event_target_as = pc_home }
 	}
 	
 	option = {
 		name = mem_space_monster_attacks.4.a
-		owner = {
-			add_monthly_resource_mult = {
-				resource = minerals
-				value = @tier3materialreward
-				min = @tier3materialmin
-				max = @tier3materialmax
-			}
-			enable_special_project = {
-				name = MEM_SPACE_MONSTER_ATTACKS_CRYSTAL_STUDY
-				location = event_target:pc_home
-				owner = root.owner
-			}
+		add_monthly_resource_mult = {
+			resource = minerals
+			value = @tier3materialreward
+			min = @tier3materialmin
+			max = @tier3materialmax
+		}
+		enable_special_project = {
+			name = MEM_SPACE_MONSTER_ATTACKS_CRYSTAL_STUDY
+			location = event_target:pc_home
+			owner = root
 		}
 	}
 }
@@ -248,7 +296,7 @@ country_event = {
 	is_triggered_only = yes
 	
 	option = {
-		name = mem_space_monster_attacks.5.a
+		name = mem_spacea_monster_attacks.5.a
 		IF = {
 			limit = {
 				NOT = {
@@ -360,11 +408,13 @@ planet_event = {
 	
 	option = {
 		name = mem_space_monster_attacks.8.a
-		add_monthly_resource_mult = {
-			resource = minerals
-			value = 50
-			min = 1000
-			max = 1600
+		owner = {
+			add_monthly_resource_mult = {
+				resource = minerals
+				value = 50
+				min = 1000
+				max = 1600
+			}
 		}
 	}
 }
