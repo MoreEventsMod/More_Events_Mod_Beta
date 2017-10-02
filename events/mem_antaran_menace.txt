@@ -37,6 +37,7 @@ planet_event = {
 	
 	trigger = {
 		is_colony = yes
+		is_under_colonization = no
 		is_capital = no
 		NOR = {
 			has_planet_flag = mem_antarans_raided_planet #this is a timed flag set when the planet is raided 
@@ -381,6 +382,7 @@ country_event = {
 					limit = {
 						any_owned_planet = {
 							is_colony = yes
+							is_under_colonization = no
 							is_capital = no
 							NOT = {
 								has_planet_flag = mem_antarans_raided_planet
@@ -431,6 +433,7 @@ country_event = {
 						random_owned_planet = {
 							limit = {
 								is_colony = yes
+								is_under_colonization = no
 							}
 							set_timed_planet_flag = {
 								flag = mem_antarans_raiding_target
@@ -1918,13 +1921,26 @@ fleet_event = {
 						orbit_planet = this
 					}
 				}
-				wait = 500
+				wait = {
+					duration = 120
+				}
+				effect = {
+					id = mem_antarans_action.2
+					solar_system = {
+						random_system_planet = { 
+							limit = {
+								has_planet_flag = mem_antarans_raiding_target
+							}
+							planet_event = { id = mem_antarans.111 }
+						}
+					}
+				}
 			}
 		}
 	}
 }
 
-# Planet has reached zero health and now gets debuff and owner flags are being changed
+# Planet has been raided and now gets debuff and owner flags are being changed
 planet_event = {
 	id = mem_antarans.111
 	hide_window = yes
@@ -1932,9 +1948,23 @@ planet_event = {
 	is_triggered_only = yes
 	
 	trigger = {
-		FROM = {
-			has_country_flag = mem_antarans_country
-		}
+		solar_system = {
+            any_ship_in_system = { 
+                fleet = {
+                    exists = this
+					OR = {
+						has_fleet_flag = mem_antarans_fleet_1
+						has_fleet_flag = mem_antarans_fleet_2
+						has_fleet_flag = mem_antarans_fleet_3
+						has_fleet_flag = mem_antarans_fleet_4
+						has_fleet_flag = mem_antarans_fleet_5
+					}
+                    orbit = {
+                        is_same_value = root
+                    }
+                }
+            }
+        }
 	}
 	
 	immediate = {
@@ -2132,7 +2162,7 @@ fleet_event = {
 		queue_actions = {
 			move_to = event_target:mem_antarans_rift
 			effect = {
-				id = mem_antarans_action.2
+				id = mem_antarans_action.3
 				delete_fleet  = this
 			}
 		}
