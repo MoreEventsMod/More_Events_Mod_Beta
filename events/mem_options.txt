@@ -12,11 +12,18 @@ event = {
 	is_triggered_only = yes
 	
 	immediate = {
-		random_country = {
+		IF = {
 			limit = {
-				is_ai = no
+				NOT = {
+					count_country = { limit = { is_ai = no } count > 1 }
+				}
 			}
-			country_event = { id = mem_options.2 days = 5 }
+			random_country = {
+				limit = {
+					is_ai = no
+				}
+				country_event = { id = mem_options.2 days = 5 }
+			}
 		}
 	}
 }
@@ -106,6 +113,9 @@ country_event = {
 	# LEX Submenu
 	option = {
 		name = mem_options.4.a
+		trigger = { #TODO get a real flag from Space Core to connect to
+			has_global_flag = lex_flag
+		}
 		hidden_effect = {
 			country_event = { id = mem_options.5 }
 		}
@@ -134,8 +144,9 @@ country_event = {
 						is_planet_class = pc_gaia
 						is_planet_class = pc_ringworld_habitable
 					}
-					NOT = {
+					NOR = {
 						has_modifier = mem_paradise_world
+						has_planet_flag = mem_paradise_blocked
 					}
 				}
 				add_modifier = {
@@ -172,6 +183,14 @@ country_event = {
 		name = mem_options.4.e
 		hidden_effect = {
 			country_event = { id = mem_options.7 }
+		}
+	}
+	
+	# Orila Preview
+	option = {
+		name = mem_options.4.f
+		hidden_effect = {
+			country_event = { id = mem_options.11 }
 		}
 	}
 	
@@ -466,6 +485,51 @@ country_event = {
 		}
 	}
 	
+	# extinct abductors
+	option = {
+		name = mem_options.8.f
+		hidden_effect = {
+			set_timed_country_flag = { flag = mem_spawn_extinct_abductors days = 2 }
+			country_event = { id = mem_options.10 days = 1}
+		}
+	}
+	
+	# Back to previous Menu
+	option = {
+		name = mem_options.back
+		hidden_effect = {
+			country_event = { id = mem_options.7 }
+		}
+	}
+	
+	# Exit EVENT
+	option = {
+		name = mem_options.exit
+	}
+}
+
+# Force spawn events submenu
+country_event = {
+	id = mem_options.9
+	title = mem_options.9.name
+	desc = mem_options.9.desc
+	picture = GFX_evt_mem_options
+	
+	is_triggered_only = yes
+	
+	# Start Space Crystal Attack
+	option = {
+		name = mem_options.9.a
+		hidden_effect = {
+			random_owned_planet = {
+				limit = {
+					is_colony = yes
+				}
+				planet_event = { id = mem_space_monster_attacks.1 days = 1}
+			}
+		}
+	}
+	
 	# Back to previous Menu
 	option = {
 		name = mem_options.back
@@ -491,6 +555,34 @@ country_event = {
 	is_triggered_only = yes
 	
 	immediate = {
+		IF = {
+			limit = {
+				has_country_flag = mem_spawn_extinct_abductors
+			}
+			capital_scope = {
+				closest_system = {
+					limit = {
+						NOT = {
+							any_planet = {
+								is_capital = yes
+							}
+						}
+						any_planet = {
+							is_planet_class = pc_barren
+							has_anomaly = no
+						}
+					}
+					random_system_planet = {
+						limit = {
+							is_planet_class = pc_barren
+							has_anomaly = no
+						}
+						add_anomaly = mem_extinct_abductors_category
+						save_event_target_as = mem_anomaly_target
+					}
+				}
+			}
+		}
 		IF = {
 			limit = {
 				has_country_flag = mem_spawn_lava_fortress
@@ -577,5 +669,73 @@ country_event = {
 	
 	option = {
 		name = "OK"
+	}
+}
+
+# Orila Preview menu
+country_event = {
+	id = mem_options.11
+	title = mem_options.11.name
+	desc = mem_options.11.desc
+	picture = GFX_evt_mem_options
+	
+	is_triggered_only = yes
+	
+	# Standard Drone
+	option = {
+		name = mem_options.11.a
+		hidden_effect = {
+			country_event = { id = mem_orila_test.1 }
+			country_event = { id = mem_options.11 }
+		}
+	}
+	
+	# Command Drone
+	option = {
+		name = mem_options.11.b
+		hidden_effect = {
+			country_event = { id = mem_orila_test.2 }
+			country_event = { id = mem_options.11 }
+		}
+	}
+	
+	# Escort
+	option = {
+		name = mem_options.11.c
+		hidden_effect = {
+			country_event = { id = mem_orila_test.3 }
+			country_event = { id = mem_options.11 }
+		}
+	}
+	
+	# Strike Cruiser
+	option = {
+		name = mem_options.11.d
+		hidden_effect = {
+			country_event = { id = mem_orila_test.4 }
+			country_event = { id = mem_options.11 }
+		}
+	}
+	
+	# Leviathan
+	option = {
+		name = mem_options.11.e
+		hidden_effect = {
+			country_event = { id = mem_orila_test.5 }
+			country_event = { id = mem_options.11 }
+		}
+	}
+	
+	# Back to previous Menu
+	option = {
+		name = mem_options.back
+		hidden_effect = {
+			country_event = { id = mem_options.4 }
+		}
+	}
+	
+	# Exit EVENT
+	option = {
+		name = mem_options.exit
 	}
 }
