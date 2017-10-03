@@ -2,21 +2,28 @@
 
 namespace = mem_food_constructor
 
-# Step 1: Found food constructor
+#Gatekeeper event
+
 planet_event = {
-	id = mem_food_constructor.1
-	title = "mem_food_constructor.1.name"
-	desc = "mem_food_constructor.1.desc"
-	picture = GFX_evt_mem_strange_apparatus
-	location = ROOT
+	id = mem_food_constructor.1000
+	
+	hide_window = yes
+	
+	mean_time_to_happen = {
+		months = 1000
+	}
 	
 	trigger = {
+		years_passed = 25
 		has_owner = yes
 		original_owner = yes
 		is_homeworld = no
-		owner = { is_ai = no }
+		owner = { 
+			is_ai = no 
+			NOT = { has_ethic = ethic_gestalt_consciousness } #Will write special texts later, probably
+		}
 		has_ground_combat = no
-		num_pops > 0
+		num_pops > 3
 		is_capital = no
 		is_ringworld = no
 		NOR = {
@@ -31,9 +38,29 @@ planet_event = {
 	}
 	
 	immediate = {
+		set_global_flag = mem_food_constructor_global
+		random_list = {
+			75 = {  }
+			25 = {
+				planet_event = { id = mem_food_constructor.1 }
+			}
+		}
+	}
+}
+
+# Step 1: Found food constructor
+planet_event = {
+	id = mem_food_constructor.1
+	title = "mem_food_constructor.1.name"
+	desc = "mem_food_constructor.1.desc"
+	picture = GFX_evt_mem_strange_apparatus
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	immediate = {
 		set_planet_flag = mem_food_constructor_step1
 		set_planet_flag = colony_event
-		set_global_flag = mem_food_constructor_global
 		solar_system = {
 			set_star_flag = mem_food_constructor_home
 		}
@@ -42,10 +69,6 @@ planet_event = {
 			days = -1
 		}
 		planet_event = { id = mem_food_constructor.2 days = 360 random = 1440 }
-	}
-	
-	mean_time_to_happen = {
-		months = 5000
 	}
 	
 	option = {
@@ -1098,6 +1121,7 @@ planet_event = {
 
 	trigger = {
 		has_planet_flag = mem_food_constructor_step5
+		NOT = { is_planet_class = pc_gaia }
 	}
 	
 	mean_time_to_happen = {
