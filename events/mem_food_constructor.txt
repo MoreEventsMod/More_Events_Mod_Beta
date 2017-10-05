@@ -2,21 +2,28 @@
 
 namespace = mem_food_constructor
 
-# Step 1: Found food constructor
+#Gatekeeper event
+
 planet_event = {
-	id = mem_food_constructor.1
-	title = "mem_food_constructor.1.name"
-	desc = "mem_food_constructor.1.desc"
-	picture = GFX_evt_mem_strange_apparatus
-	location = ROOT
+	id = mem_food_constructor.1000
+	
+	hide_window = yes
+	
+	mean_time_to_happen = {
+		months = 1000
+	}
 	
 	trigger = {
+		years_passed = 25
 		has_owner = yes
 		original_owner = yes
 		is_homeworld = no
-		owner = { is_ai = no }
+		owner = { 
+			is_ai = no 
+			NOT = { has_ethic = ethic_gestalt_consciousness } #Will write special texts later, probably
+		}
 		has_ground_combat = no
-		num_pops > 0
+		num_pops > 3
 		is_capital = no
 		is_ringworld = no
 		NOR = {
@@ -31,9 +38,29 @@ planet_event = {
 	}
 	
 	immediate = {
+		set_global_flag = mem_food_constructor_global
+		random_list = {
+			75 = {  }
+			25 = {
+				planet_event = { id = mem_food_constructor.1 }
+			}
+		}
+	}
+}
+
+# Step 1: Found food constructor
+planet_event = {
+	id = mem_food_constructor.1
+	title = "mem_food_constructor.1.name"
+	desc = "mem_food_constructor.1.desc"
+	picture = GFX_evt_mem_strange_apparatus
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	immediate = {
 		set_planet_flag = mem_food_constructor_step1
 		set_planet_flag = colony_event
-		set_global_flag = mem_food_constructor_global
 		solar_system = {
 			set_star_flag = mem_food_constructor_home
 		}
@@ -42,10 +69,6 @@ planet_event = {
 			days = -1
 		}
 		planet_event = { id = mem_food_constructor.2 days = 360 random = 1440 }
-	}
-	
-	mean_time_to_happen = {
-		months = 5000
 	}
 	
 	option = {
@@ -440,10 +463,20 @@ planet_event = {
 								is_planet_class = pc_toxic
 							}
 						}
+						NOR = {
+							any_ship_in_system = {
+								exists = owner
+								owner = { is_same_value = root.owner }
+							}
+							any_planet = {
+								has_owner = yes
+								owner = { is_same_value = root.owner }
+							}
+						}
 						distance = {
-						source = event_target:origin
-						min_distance = 10
-						max_distance = 100
+							source = event_target:origin
+							min_distance = 10
+							max_distance = 100
 						}
 						NOT = {
 							has_star_flag = hostile_system
@@ -685,6 +718,69 @@ ship_event = {
 						min_distance = 20
 						max_distance = 60
 						initializer = "mem_food_constructor_reesan_system"
+					}
+				}
+				random_country = {
+					limit = { has_country_flag = mem_food_constructor_reesan_country }
+					IF = {
+						limit = {
+							root.owner = { fleet_power < 5000 }
+						}
+						add_modifier = { modifier = mem_food_constructor_debuff_0 days = -1 }
+					}
+					IF = {
+						limit = {
+							root.owner = { fleet_power < 15000 }
+						}
+						add_modifier = { modifier = mem_food_constructor_debuff_1 days = -1 }
+					}
+					IF = {
+						limit = {
+							root.owner = { fleet_power < 25000 }
+						}
+						add_modifier = { modifier = mem_food_constructor_debuff_2 days = -1 }
+					}
+					IF = {
+						limit = {
+							root.owner = { fleet_power < 35000 }
+						}
+						add_modifier = { modifier = mem_food_constructor_debuff_3 days = -1 }
+					}
+					IF = {
+						limit = {
+							root.owner = { fleet_power < 45000 }
+						}
+						add_modifier = { modifier = mem_food_constructor_debuff_4 days = -1 }
+					}
+					IF = {
+						limit = {
+							root.owner = { fleet_power > 55000 }
+						}
+						add_modifier = { modifier = mem_food_constructor_buff_0 days = -1 }
+					}
+					IF = {
+						limit = {
+							root.owner = { fleet_power > 65000 }
+						}
+						add_modifier = { modifier = mem_food_constructor_buff_1 days = -1 }
+					}
+					IF = {
+						limit = {
+							root.owner = { fleet_power > 75000 }
+						}
+						add_modifier = { modifier = mem_food_constructor_buff_2 days = -1 }
+					}
+					IF = {
+						limit = {
+							root.owner = { fleet_power > 85000 }
+						}
+						add_modifier = { modifier = mem_food_constructor_buff_3 days = -1 }
+					}
+					IF = {
+						limit = {
+							root.owner = { fleet_power > 100000 }
+						}
+						add_modifier = { modifier = mem_food_constructor_buff_4 days = -1 }
 					}
 				}
 			}
@@ -1035,6 +1131,7 @@ planet_event = {
 
 	trigger = {
 		has_planet_flag = mem_food_constructor_step5
+		NOT = { is_planet_class = pc_gaia }
 	}
 	
 	mean_time_to_happen = {
