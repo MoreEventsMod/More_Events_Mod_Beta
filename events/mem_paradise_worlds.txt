@@ -1,0 +1,149 @@
+##################################
+# More Event Mod Paradise worlds
+# by Malthus
+##################################
+
+namespace = mem_paradise_worlds
+
+event = {
+	id = mem_paradise_worlds.1
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_country = {
+			limit = {
+				is_ai = no
+			}
+			country_event = { id = mem_paradise_worlds.2 days = 4 }
+		}
+	}
+}
+
+# Game Start Event to add the planet modifier
+country_event = {
+	id = mem_paradise_worlds.2
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		every_planet = {
+			limit = {
+				OR = {
+					is_planet_class = pc_gaia
+					is_planet_class = pc_ringworld_habitable
+				}
+				NOT = {
+					has_planet_flag = mem_paradise_blocked
+				}
+			}
+			add_modifier = {
+				modifier = mem_paradise_world
+				days = -1
+			}
+		}
+	}
+}
+
+#yearly check for planets that miss the modifier or those that should not have it anymore
+event = {
+	id = mem_paradise_worlds.3
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = {
+			has_global_flag = mem_paradise_worlds_OFF
+		}
+	}
+	
+	immediate = {
+		#add to planets that need the modifier
+		IF = {
+			limit = {
+				any_system = {
+					any_planet = {
+						OR = {
+							is_planet_class = pc_gaia
+							is_planet_class = pc_ringworld_habitable
+						}
+						NOR = {
+							has_modifier = mem_paradise_world
+							has_planet_flag = mem_paradise_blocked
+						}
+					}
+				}
+			}
+			every_planet = {
+				limit = {
+					OR = {
+						is_planet_class = pc_gaia
+						is_planet_class = pc_ringworld_habitable
+					}
+					NOR = {
+						has_modifier = mem_paradise_world
+						has_planet_flag = mem_paradise_blocked
+					}
+				}
+				add_modifier = {
+					modifier = mem_paradise_world
+					days = -1
+				}
+			}
+		}
+		#remove from planets that should not have the modifier
+		IF = {
+			limit = {
+				any_system = {
+					any_planet = {
+						NOR = {
+							is_planet_class = pc_gaia
+							is_planet_class = pc_ringworld_habitable
+						}
+						has_modifier = mem_paradise_world
+					}
+				}
+			}
+			every_planet = {
+				limit = {
+					NOR = {
+						is_planet_class = pc_gaia
+						is_planet_class = pc_ringworld_habitable
+					}
+					has_modifier = mem_paradise_world
+				}
+				remove_modifier = mem_paradise_world
+			}
+		}
+	}
+}
+
+# Planet has been terraformed
+# This = Planet
+# From = Terraformer
+#Terraforming has finished
+planet_event = {
+	id = mem_paradise_worlds.4
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		is_planet_class = pc_gaia
+	}
+	
+	immediate = {
+		add_modifier = {
+			modifier = mem_paradise_world
+			days = -1
+		}
+		remove_modifier = hazardous_weather
+		remove_modifier = wild_storms
+		remove_modifier = bleak_planet
+		remove_modifier = unbalanced_ecosystem
+		remove_modifier = hostile_environment
+	}
+}

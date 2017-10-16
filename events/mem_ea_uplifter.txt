@@ -5,6 +5,16 @@
 
 namespace = mem_ea_uplifter
 
+@tier1influencecontact = 7
+@tier1influencecontactxenophile = 8
+@tier1influencecontactmin = 20
+@tier1influencecontactmax = 80
+
+@tier2influencecontact = 10
+@tier2influencecontactxenophile = 12
+@tier2influencecontactmin = 40
+@tier2influencecontactmax = 100
+
 @tier1materialreward = 6
 @tier1materialmin = 100
 @tier1materialmax = 500
@@ -17,6 +27,9 @@ namespace = mem_ea_uplifter
 @tier4materialreward = 24
 @tier4materialmin = 350
 @tier4materialmax = 2000
+@tier5materialreward = 48
+@tier5materialmin = 700
+@tier5materialmax = 4000
 
 @tier1influencereward = 6
 @tier1influencemin = 40
@@ -30,6 +43,12 @@ namespace = mem_ea_uplifter
 @tier4influencereward = 24
 @tier4influencemin = 150
 @tier4influencemax = 300
+@tier5influencereward = 36
+@tier5influencemin = 250
+@tier5influencemax = 500
+@tier6influencereward = 48
+@tier6influencemin = 300
+@tier6influencemax = 600
 
 @tier1researchreward = 6
 @tier1researchmin = 60
@@ -43,6 +62,9 @@ namespace = mem_ea_uplifter
 @tier4researchreward = 24
 @tier4researchmin = 150
 @tier4researchmax = 500
+@tier5researchreward = 48
+@tier5researchmin = 300
+@tier5researchmax = 1000
 
 ################################################################################
 ################################################################################
@@ -57,11 +79,12 @@ ship_event = {
     id = mem_ea_uplifter.1
     title = mem_ea_uplifter.1.name
     desc = mem_ea_uplifter.1.desc
-    picture = GFX_evt_alien_ruins
+    picture = GFX_evt_mem_orila_pods
     show_sound = event_mystic_reveal
 	location = FROM   
     is_triggered_only = yes
     immediate = {
+		set_global_flag = mem_ea_uplifter_quest_started
     	owner = {
     		set_country_flag = mem_extinct_abductors_finder
 			# leads to story event "Remnants" (first contact stuff)
@@ -87,7 +110,7 @@ ship_event = {
 	id = mem_ea_uplifter.2
 	title = mem_ea_uplifter.2.name
 	desc = mem_ea_uplifter.2.desc
-	picture = GFX_evt_alien_ruins
+	picture = GFX_evt_mem_orila_pods
 	show_sound = event_scanner
 	location = FROM
 	is_triggered_only = yes	
@@ -98,7 +121,14 @@ ship_event = {
 				event_chain = "mem_ea_uplifter_chain"
 				target = root
 			}
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
 		}
+		leader = { add_experience = 200 }
 		hidden_effect = {
 			solar_system = { set_star_flag = mem_ea_uplifter_system_0 }
 			owner = {
@@ -565,6 +595,15 @@ ship_event = {
 	}
 	option = {
 		name = mem_ea_uplifter.7.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+		leader = { add_experience = 200 }
 		hidden_effect = {
 			owner = {
 				if = {
@@ -601,6 +640,15 @@ ship_event = {
 	}
 	option = {
 		name = mem_ea_uplifter.8.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+		leader = { add_experience = 200 }
 		hidden_effect = {
 			owner = {
 				if = {
@@ -637,6 +685,15 @@ ship_event = {
 	}
 	option = {
 		name = mem_ea_uplifter.9.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+		leader = { add_experience = 200 }
 		hidden_effect = {
 			owner = {
 				if = {
@@ -709,6 +766,7 @@ ship_event = {
 	}	
 	option = {
 		name = mem_ea_uplifter.101.a
+		leader = { add_experience = 100 }
 		hidden_effect = {
 			closest_system = {
 				random_system_planet = {
@@ -755,6 +813,7 @@ ship_event = {
 				add_deposit = d_enormous1_mineral_deposit
 			}
 		}
+		leader = { add_experience = 100 }
 		hidden_effect = {
 			owner = {
 				if = {
@@ -777,6 +836,7 @@ ship_event = {
 				add_deposit = d_vast_physics_deposit
 			}
 		}
+		leader = { add_experience = 100 }
 		hidden_effect = {
 			owner = {
 				if = {
@@ -848,7 +908,7 @@ country_event = {
 	id = mem_ea_uplifter.13
 	title = mem_ea_uplifter.13.name
 	desc = mem_ea_uplifter.13.desc
-	picture = GFX_evt_archaeological_dig
+	picture = GFX_evt_mem_orila_pods
 	show_sound = event_scanner
 	is_triggered_only = yes
 	immediate = {
@@ -1065,11 +1125,6 @@ country_event = {
 		}
 		end_event_chain = "mem_ea_uplifter_homesystem_chain"
 		response_text = mem_ea_uplifter.17.a.response
-#		replaced by new civic
-#		add_modifier = {
-#			modifier = "mem_ea_knowledge_of_the_ancients"
-#			days = -1
-#		}
 		IF = {
 			limit = {
 				has_civic = civic_mechanists
@@ -1156,62 +1211,31 @@ country_event = {
 				limit = {
 					has_planet_flag = mem_ea_harilla
 				}
-				change_pc = "pc_mem_destroyed_barren"
+				change_pc = "pc_barren"
+				set_planet_entity = {
+                    entity = "barren_planet_01_destroyed_entity"
+                }
 			}
-			if = {
+			every_ambient_object = {
 				limit = {
-					has_technology = "tech_warp_drive_1"
+					has_ambient_object_flag = mem_ea_harilla_shield
 				}
-				create_fleet = { name = "The Last Orila" }
-				last_created_fleet = {
-					set_owner = Root
-					create_ship_design = {
-						design = "Onell"
-					}
-					create_ship = {
-						name = "Pride of Harilla"
-						design = last_created_design
-					}
-					set_location = event_target:mem_ea_uplifter_ship_spawn
-				}
+				destroy_ambient_object = this
 			}
-			if = {
-				limit = {
-					has_technology = "tech_hyper_drive_1"
+			create_fleet = { name = "The Last Orila" }
+			last_created_fleet = {
+				set_owner = Root
+				create_ship = {
+					name = "Sleipnir"
+					design = "Derelict Sleipnir I"
+					graphical_culture = "mem_ancient_01"
+					prefix = no
+					upgradable = no
 				}
-				create_fleet = { name = "The Last Orila" }
-				last_created_fleet = {
-					set_owner = Root
-					create_ship_design = {
-						design = "Jakson"
-					}
-					create_ship = {
-						name = "Pride of Harilla"
-						design = last_created_design
-					}
-					set_location = event_target:mem_ea_uplifter_ship_spawn
-				}
+				set_location = event_target:mem_ea_uplifter_ship_spawn
+				set_fleet_flag = mem_last_orila_fleet
 			}
-			if = {
-				limit = {
-					NOR = {
-						has_technology = "tech_warp_drive_1"
-						has_technology = "tech_hyper_drive_1"
-					}
-				}
-				create_fleet = { name = "The Last Orila" }
-				last_created_fleet = {
-					set_owner = Root
-					create_ship_design = {
-						design = "Carta"
-					}
-					create_ship = {
-						name = "Pride of Harilla"
-						design = last_created_design
-					}
-					set_location = event_target:mem_ea_uplifter_ship_spawn
-				}
-			}
+			set_country_flag = mem_last_orila_start
 		}
 	}
 	option = { # This is not our way -- get a country modifier giving + 5 % happiness "We make our own destiny"
@@ -1233,7 +1257,16 @@ country_event = {
 				limit = {
 					has_planet_flag = mem_ea_harilla
 				}
-				change_pc = "pc_mem_destroyed_barren"
+				change_pc = "pc_barren"
+				set_planet_entity = {
+                    entity = "barren_planet_01_destroyed_entity"
+                }
+			}
+			every_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_ea_harilla_shield
+				}
+				destroy_ambient_object = this
 			}
 		}
 	}
@@ -1254,7 +1287,16 @@ country_event = {
 				limit = {
 					has_planet_flag = mem_ea_harilla
 				}
-				change_pc = "pc_mem_destroyed_barren"
+				change_pc = "pc_barren"
+				set_planet_entity = {
+                    entity = "barren_planet_01_destroyed_entity"
+                }
+			}
+			every_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_ea_harilla_shield
+				}
+				destroy_ambient_object = this
 			}
 		}
 	}
@@ -1266,72 +1308,36 @@ country_event = {
 		}
 		end_event_chain = "mem_ea_uplifter_homesystem_chain"
 		response_text = mem_ea_uplifter.17.d.response
-#		replaced by new civic
-#		add_modifier = {
-#			modifier = "mem_ea_knowledge_of_the_ancients"
-#			days = -1
-#		}
 		hidden_effect = {
 			random_planet = {
 				limit = {
 					has_planet_flag = mem_ea_harilla
 				}
-				change_pc = "pc_mem_destroyed_barren"
+				change_pc = "pc_barren"
+				set_planet_entity = {
+                    entity = "barren_planet_01_destroyed_entity"
+                }
 			}
-			if = {
+			every_ambient_object = {
 				limit = {
-					has_technology = "tech_warp_drive_1"
+					has_ambient_object_flag = mem_ea_harilla_shield
 				}
-				create_fleet = { name = "The Last Orila" }
-				last_created_fleet = {
-					set_owner = Root
-					create_ship_design = {
-						design = "Onell"
-					}
-					create_ship = {
-						name = "Pride of Harilla"
-						design = last_created_design
-					}
-					set_location = event_target:mem_ea_uplifter_ship_spawn
-				}
+				destroy_ambient_object = this
 			}
-			if = {
-				limit = {
-					has_technology = "tech_hyper_drive_1"
+			create_fleet = { name = "The Last Orila" }
+			last_created_fleet = {
+				set_owner = Root
+				create_ship = {
+					name = "Sleipnir"
+					design = "Derelict Sleipnir I"
+					graphical_culture = "mem_ancient_01"
+					prefix = no
+					upgradable = no
 				}
-				create_fleet = { name = "The Last Orila" }
-				last_created_fleet = {
-					set_owner = Root
-					create_ship_design = {
-						design = "Jakson"
-					}
-					create_ship = {
-						name = "Pride of Harilla"
-						design = last_created_design
-					}
-					set_location = event_target:mem_ea_uplifter_ship_spawn
-				}
+				set_location = event_target:mem_ea_uplifter_ship_spawn
+				set_fleet_flag = mem_last_orila_fleet
 			}
-			if = {
-				limit = {
-					nor = {
-						has_technology = "tech_warp_drive_1"
-						has_technology = "tech_hyper_drive_1"
-					}
-				}
-				create_fleet = { name = "The Last Orila" }
-				last_created_fleet = {
-					set_owner = Root
-					create_ship_design = {
-						design = "Carta"
-					}
-					create_ship = {
-						name = "Pride of Harilla"
-						design = last_created_design
-					}
-					set_location = event_target:mem_ea_uplifter_ship_spawn
-				}
-			}
+			set_country_flag = mem_last_orila_start
 			if = {
 				limit = { has_ethic = "ethic_fanatic_materialist" }
 				country_remove_ethic = "ethic_fanatic_materialist"
