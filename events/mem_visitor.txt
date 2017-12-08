@@ -1,0 +1,2005 @@
+########################
+# A Visitor
+# Code and text by ViolentBeetle
+########################
+
+namespace = mem_visitor
+
+@tier1materialreward = 6
+@tier1materialmin = 100
+@tier1materialmax = 500
+@tier2materialreward = 12
+@tier2materialmin = 150
+@tier2materialmax = 1000
+@tier3materialreward = 18
+@tier3materialmin = 250
+@tier3materialmax = 1500
+@tier4materialreward = 24
+@tier4materialmin = 350
+@tier4materialmax = 2000
+
+@tier1influencereward = 6
+@tier1influencemin = 40
+@tier1influencemax = 100
+@tier2influencereward = 12
+@tier2influencemin = 80
+@tier2influencemax = 175
+@tier3influencereward = 18
+@tier3influencemin = 125
+@tier3influencemax = 250
+@tier4influencereward = 24
+@tier4influencemin = 150
+@tier4influencemax = 300
+
+@tier1researchreward = 6
+@tier1researchmin = 60
+@tier1researchmax = 150
+@tier2researchreward = 12
+@tier2researchmin = 90
+@tier2researchmax = 250
+@tier3researchreward = 18
+@tier3researchmin = 120
+@tier3researchmax = 350
+@tier4researchreward = 24
+@tier4researchmin = 150
+@tier4researchmax = 500
+
+################################################################################
+################################################################################
+################################################################################
+ 
+# Happens on planet with obervation post with either passive or active observation
+
+# Event setup (HIDDEN)
+planet_event = {
+	id = mem_visitor.1
+	hide_window = yes
+	
+	trigger = {
+		has_observation_outpost = yes
+		NOT = {
+			has_global_flag = mem_visitor
+		}
+			
+			
+		
+		observation_outpost = { 
+			OR = { 
+				has_mission = passive_observation
+				has_mission = specimen_collection
+			}
+		}
+		observation_outpost_owner = {
+			is_ai = no
+			NOT = { has_ethic = ethic_gestalt_consciousness }
+		}
+		owner = {
+			is_country_type = primitive
+			OR = {
+					has_country_flag = stone_age
+					has_country_flag = bronze_age
+					has_country_flag = iron_age
+					has_country_flag = late_medieval_age
+					has_country_flag = renaissance_age
+					has_country_flag = steam_age
+					has_country_flag = industrial_age
+					has_country_flag = machine_age
+					has_country_flag = atomic_age
+			}
+			
+		}
+	}
+	
+	mean_time_to_happen = {
+		months = 5000
+		#months = 1
+	}
+	
+	immediate = {
+		observation_outpost_owner = {
+			limit = { 
+				is_ai = no
+			}
+			country_event = { id = mem_visitor.2 }
+			set_country_flag = mem_visitor_country
+		}
+		set_planet_flag = mem_visitor_planet
+		set_global_flag = mem_visitor
+		
+		save_global_event_target_as = mem_visitor_planet
+	}
+}
+
+#Impact event
+country_event = {
+	id = mem_visitor.2
+	title = "mem_visitor.2.name"
+	desc = "mem_visitor.2.desc"
+	picture = GFX_evt_atmospheric_entry
+	show_sound = event_super_explosion
+	
+	
+	is_triggered_only = yes
+	
+	#Recovery options
+	option = {
+		name = mem_visitor.2a
+		custom_tooltip = mem_visitor.2a.tooltip
+		
+		trigger = {
+			NOR = {
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_xenophile
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
+			}
+		}
+		hidden_effect = {
+			country_event = {
+				id = mem_visitor.3
+				days = 14
+			}
+		}
+	}
+	
+	option = {
+		name = mem_visitor.2a.phile
+		custom_tooltip = mem_visitor.2a.tooltip
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_xenophile
+				
+			}
+		}
+		
+		hidden_effect = {
+			country_event = {
+				id = mem_visitor.3
+				days = 14
+			}
+		}
+	}
+	
+	option = {
+		name = mem_visitor.2a.phobe
+		custom_tooltip = mem_visitor.2a.tooltip
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
+				
+			}
+		}
+		
+		hidden_effect = {
+			country_event = {
+				id = mem_visitor.3
+				days = 14
+			}
+		}
+	}
+	
+	#Abandonment options
+	option = {
+		name = mem_visitor.2b
+		custom_tooltip = mem_visitor.2b.tooltip
+		
+		trigger = {
+			NOR = {
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_xenophile
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
+			}
+		}
+		hidden_effect = {
+			country_event = {
+				id = mem_visitor.6
+				days = 14
+			}
+		}
+	}
+	
+	option = {
+		name = mem_visitor.2b.phile
+		custom_tooltip = mem_visitor.2b.tooltip
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_xenophile
+				
+			}
+		}
+		
+		hidden_effect = {
+			country_event = {
+				id = mem_visitor.6
+				days = 14
+			}
+		}
+	}
+	
+	option = {
+		name = mem_visitor.2b.phobe
+		custom_tooltip = mem_visitor.2b.tooltip
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
+				
+			}
+		}
+		
+		hidden_effect = {
+			country_event = {
+				id = mem_visitor.6
+				days = 14
+			}
+		}
+	}
+	
+	#Sterelization option
+	
+	option = {
+		name = mem_visitor.2c
+		custom_tooltip = mem_visitor.2c.tooltip
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_militarist
+				has_ethic = ethic_militarist
+			}
+		}
+		
+		hidden_effect = {
+			country_event = {
+				id = mem_visitor.5
+				days = 7
+			}
+		}
+	}
+}
+
+#HIDDEN: Recovery disambig
+
+country_event = {
+	id = mem_visitor.3
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = {
+			has_global_flag = mem_visitor_finished
+		}
+	}
+	
+	immediate = {
+		random_planet = {
+			limit = {
+				has_planet_flag = mem_visitor_planet
+			}
+			
+		}
+		
+		IF = {
+			limit = {
+				event_target:mem_visitor_planet = {
+					owner = {
+						OR = {
+							has_country_flag = stone_age
+							has_country_flag = bronze_age
+							has_country_flag = iron_age
+						}
+					}
+				}
+			}
+			
+			random_list = {
+				80 = {
+					country_event = {
+						id = mem_visitor.31
+					}
+				}
+				20 = {
+					country_event = {
+						id = mem_visitor.32
+					}
+				}
+			}
+		}
+		
+		IF = {
+			limit = {
+				event_target:mem_visitor_planet = {
+					owner = {
+						OR = {
+							has_country_flag = late_medieval_age
+							has_country_flag = renaissance_age
+							has_country_flag = steam_age
+						}
+					}
+				}
+			}
+			
+			random_list = {
+				50 = {
+					country_event = {
+						id = mem_visitor.31
+					}
+				}
+				50 = {
+					country_event = {
+						id = mem_visitor.32
+					}
+				}
+			}
+		}
+		
+		IF = {
+			limit = {
+				event_target:mem_visitor_planet = {
+					owner = {
+						OR = {
+							has_country_flag = industrial_age
+							has_country_flag = machine_age
+							has_country_flag = atomic_age
+						}
+					}
+				}
+			}
+			
+			random_list = {
+				40 = {
+					country_event = {
+						id = mem_visitor.31
+					}
+				}
+				60 = {
+					country_event = {
+						id = mem_visitor.32
+					}
+				}
+			}
+		}
+		
+		IF = {
+			limit = {
+				event_target:mem_visitor_planet = {
+					owner = {
+						NOR = {
+							has_country_flag = stone_age
+							has_country_flag = bronze_age
+							has_country_flag = iron_age
+							has_country_flag = late_medieval_age
+							has_country_flag = renaissance_age
+							has_country_flag = steam_age
+							has_country_flag = industrial_age
+							has_country_flag = machine_age
+							has_country_flag = atomic_age
+						}
+					}
+					}
+			}
+			
+			random_list = {
+				20 = {
+					country_event = {
+						id = mem_visitor.31
+					}
+				}
+				80 = {
+					country_event = {
+						id = mem_visitor.32
+					}
+				}
+			}
+		}
+	}
+}
+
+#Recovery: Object secured
+
+country_event = {
+	id = mem_visitor.31
+	title = "mem_visitor.31.name"
+	desc = "mem_visitor.31.desc"
+	picture = GFX_evt_satellite_in_orbit
+	show_sound = event_default
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_global_flag = mem_visitor_finished
+	}
+	
+	
+	
+	option = {
+		name = mem_visitor.31a
+		custom_tooltip = mem_visitor.31a.tooltip
+		hidden_effect = {
+			country_event = {
+				id = mem_visitor.7
+				days = 14
+			}
+		}
+		
+	}
+}
+
+#Recovery: Too late
+
+
+country_event = {
+	id = mem_visitor.32
+	title = "mem_visitor.32.name"
+	desc = "mem_visitor.32.desc"
+	picture = GFX_evt_satellite_in_orbit
+	show_sound = event_default
+	
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_visitor.32a
+		custom_tooltip = mem_visitor.32a.tooltip
+		hidden_effect = {
+			country_event = {
+				id = mem_visitor.4
+				days = 7
+			}
+		}
+	}
+	
+	option = {
+		name = mem_visitor.32b
+		custom_tooltip = mem_visitor.32b.tooltip
+		hidden_effect = {
+			country_event = {
+				id = mem_visitor.6
+				days = 14
+			}
+		}
+	}
+
+}
+
+#Theft disambig
+
+country_event = {
+	id = mem_visitor.4
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = {
+			has_global_flag = mem_visitor_finished
+		}
+	}
+	
+	immediate = {
+		random_list = {
+			33 = {
+				country_event = {
+					id = mem_visitor.41
+				}
+			}
+			33 = {
+				random_list = {
+					20 = {
+						country_event = {id = mem_visitor.42}
+					}
+					20 = {
+						country_event = {id = mem_visitor.43}
+					}
+					20 = {
+						country_event = {id = mem_visitor.44}
+					}
+					20 = {
+						IF = {
+							limit = {
+								OR = {
+									has_ethic = ethic_militarist
+									has_ethic = ethic_fanatic_militarist
+								}
+							}
+							
+							country_event = {id = mem_visitor.43}
+							
+							else = {
+								country_event = {id = mem_visitor.42}
+							}
+						}
+					}
+					20 = {
+						IF = {
+							limit = {
+								OR = {
+									has_ethic = ethic_pacifist
+									has_ethic = ethic_fanatic_pacifist
+								}
+							}
+							
+							country_event = {id = mem_visitor.44}
+							
+							else = {
+								country_event = {id = mem_visitor.42}
+							}
+						}
+					}
+				}
+			}
+			33 = {
+				country_event = {
+					id = mem_visitor.45
+				}
+			}
+		}
+	}
+}
+
+#Theft: success
+country_event = {
+	id = mem_visitor.41
+	title = "mem_visitor.41.name"
+	desc = "mem_visitor.41.desc"
+	picture = GFX_evt_smugglers_in_bar
+	show_sound = event_default
+	
+	immediate = {
+		set_global_flag = mem_visitor_finished
+	}
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_visitor.41a
+		custom_tooltip = mem_visitor.31a.tooltip
+		hidden_effect = {
+			country_event = {
+				id = mem_visitor.7
+				days = 14
+			}
+		}
+		
+	}
+}
+
+#Theft: unfortunate incident
+country_event = {
+	id = mem_visitor.42
+	title = "mem_visitor.42.name"
+	desc = "mem_visitor.42.desc"
+	picture = GFX_evt_smugglers_in_bar
+	show_sound = event_ground_battle
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_global_flag = mem_visitor_finished
+		random_list = {
+			80 = {
+			}
+			20 = {
+				random_planet = {
+					limit = {
+						has_planet_flag = mem_visitor_planet
+					}
+					
+					owner = {
+						shift_ethic = "ethic_xenophobe"
+						random_owned_pop = { pop_change_ethic = "ethic_xenophobe" }
+					}
+					
+				}
+			}
+		}
+		
+		random_list = {
+			80 = {
+			}
+			20 = {
+				random_planet = {
+					limit = {
+						has_planet_flag = mem_visitor_planet
+					}
+					
+					owner = {
+						shift_ethic = "ethic_militarist"
+						random_owned_pop = { pop_change_ethic = "ethic_militarist" }
+					}
+					
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_visitor.42a
+		custom_tooltip = mem_visitor.42a.tooltip
+		hidden_effect = {
+			country_event = {
+				id = mem_visitor.7
+				days = 14
+			}
+		}
+		
+		
+		
+	}
+}
+
+#Theft: Bloodbath
+
+country_event = {
+	id = mem_visitor.43
+	title = "mem_visitor.43.name"
+	desc = "mem_visitor.43.desc"
+	picture = GFX_evt_burning_settlement
+	show_sound = event_ground_battle
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_global_flag = mem_visitor_finished
+		random_list = {
+			20 = {
+			}
+			80 = {
+				random_planet = {
+					limit = {
+						has_planet_flag = mem_visitor_planet
+					}
+					
+					owner = {
+						shift_ethic = "ethic_xenophobe"
+						random_owned_pop = { pop_change_ethic = "ethic_xenophobe" }
+					}
+					
+				}
+			}
+		}
+		
+		random_list = {
+			20 = {
+			}
+			80 = {
+				random_planet = {
+					limit = {
+						has_planet_flag = mem_visitor_planet
+					}
+					
+					owner = {
+						shift_ethic = "ethic_militarist"
+						random_owned_pop = { pop_change_ethic = "ethic_militarist" }
+					}
+					
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_visitor.43a
+		custom_tooltip = mem_visitor.43a.tooltip
+		
+		trigger = {
+			NOR = {
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophile
+				has_ethic = ethic_xenophobe
+			}
+		}
+		hidden_effect = {
+			country_event = {
+				id = mem_visitor.7
+				days = 14
+			}
+		}
+		
+	}
+	
+	option = {
+		name = mem_visitor.43a.phile
+		custom_tooltip = mem_visitor.43a.tooltip
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_xenophile
+			}
+		}
+		
+		hidden_effect = {
+			country_event = {
+				id = mem_visitor.7
+				days = 14
+			}
+		}
+		
+	}
+	
+	option = {
+		name = mem_visitor.43a.phobe
+		custom_tooltip = mem_visitor.43a.tooltip
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
+			}
+		}
+		
+		hidden_effect = {
+			country_event = {
+				id = mem_visitor.7
+				days = 14
+			}
+		}
+		
+	}
+}
+
+#Theft: Disaster
+country_event = {
+	id = mem_visitor.44
+	title = "mem_visitor.44.name"
+	desc = "mem_visitor.44.desc"
+	picture = GFX_evt_burning_settlement
+	show_sound = event_ground_battle
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_list = {
+			50 = {
+			}
+			50 = {
+				random_planet = {
+					limit = {
+						has_planet_flag = mem_visitor_planet
+					}
+					
+					owner = {
+						shift_ethic = "ethic_xenophobe"
+						random_owned_pop = { pop_change_ethic = "ethic_xenophobe" }
+					}
+					
+				}
+			}
+		}
+		
+		random_list = {
+			50 = {
+			}
+			50 = {
+				random_planet = {
+					limit = {
+						has_planet_flag = mem_visitor_planet
+					}
+					
+					owner = {
+						shift_ethic = "ethic_militarist"
+						random_owned_pop = { pop_change_ethic = "ethic_militarist" }
+					}
+					
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_visitor.44a
+		custom_tooltip = mem_visitor.44a.tooltip
+		
+		trigger = {
+			NOR = {
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
+			}
+		}
+		
+		hidden_effect = {
+			country_event = {
+				id = mem_visitor.6
+				days = 30
+			}
+		}
+	}
+	
+	option = {
+		name = mem_visitor.44a.phobe
+		custom_tooltip = mem_visitor.44a.tooltip
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
+			}
+		}
+		
+		hidden_effect = {
+			country_event = {
+				id = mem_visitor.6
+				days = 30
+			}
+		}
+	}
+	
+}
+
+#Theft: Failure
+country_event = {
+	id = mem_visitor.45
+	title = "mem_visitor.45.name"
+	desc = "mem_visitor.45.desc"
+	picture = GFX_evt_smugglers_in_bar
+	show_sound = event_default
+	
+	is_triggered_only = yes
+
+	option = {
+		name = mem_visitor.45a
+		custom_tooltip = mem_visitor.45a.tooltip
+		
+		hidden_effect = {
+			country_event = {
+				id = mem_visitor.6
+				days = 30
+			}
+		}
+	}
+	
+	
+}
+
+#Sterelization: Initial
+
+country_event = {
+	id = mem_visitor.5
+	title = "mem_visitor.5.name"
+	desc = "mem_visitor.5.desc"
+	picture = GFX_evt_nuclear_explosion
+	show_sound = event_super_explosion
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = {
+			has_global_flag = mem_visitor_finished
+		}
+	}
+	
+	option = {
+		name = mem_visitor.5a
+		custom_tooltip = mem_visitor.5a.tooltip
+		
+		add_influence = 25
+		
+		hidden_effect = {
+			random_list = {
+				50 = {
+					set_global_flag = mem_visitor_finished
+				}
+				50 = {
+					country_event = {
+						id = mem_visitor.51
+						days = 30
+					}
+				}
+			}
+		}
+	}
+}
+
+#Sterelization aftermath
+country_event = {
+	id = mem_visitor.51
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = {
+			has_global_flag = mem_visitor_finished
+		}
+	}
+	
+	immediate = {
+		IF = {
+			limit = {
+				event_target:mem_visitor_planet = {
+					owner = {
+						has_country_flag = stone_age
+						has_country_flag = bronze_age
+						has_country_flag = iron_age
+						has_country_flag = late_medieval_age
+						has_country_flag = renaissance_age
+					}
+				}
+			}
+			
+			country_event = {
+				id = mem_visitor.52
+			}
+			
+			else = {
+				random_list = {
+					33 = {
+						country_event = {
+							id = mem_visitor.52
+						}
+					}
+					33 = {
+						country_event = {
+							id = mem_visitor.53
+						}
+					}
+					33 = {
+						country_event = {
+							id = mem_visitor.54
+						}
+					}
+				}
+			}
+		}
+		
+	}
+}
+
+#Sterelization:Religion
+country_event = {
+	id = mem_visitor.52
+	title = "mem_visitor.52.name"
+	desc = "mem_visitor.52.desc"
+	picture = GFX_evt_medieval_alien_civilization
+	show_sound = event_conversation
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		event_target:mem_visitor_planet = {
+			owner = {
+				shift_ethic = "ethic_spiritualist"
+				random_owned_pop = { pop_change_ethic = "ethic_spiritualist" }
+			}
+		}
+		set_global_flag = mem_visitor_finished
+	}
+	
+	option = {
+		name = mem_visitor.52a
+		custom_tooltip = mem_visitor.52a.tooltip
+	}
+	
+}
+
+#Sterelization: Alien plot
+country_event = {
+	id = mem_visitor.53
+	title = "mem_visitor.53.name"
+	desc = "mem_visitor.53.desc"
+	picture = GFX_evt_galactic_senate
+	show_sound = event_radio_chatter
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		event_target:mem_visitor_planet = {
+			owner = {
+				random_list = {
+					33 = {
+						shift_ethic = "ethic_militarist"
+						random_owned_pop = { pop_change_ethic = "ethic_militarist" }
+					}
+					33 = {
+						shift_ethic = "ethic_xenophobe"
+						random_owned_pop = { pop_change_ethic = "ethic_xenophobe" }
+					}
+					33 = {
+						shift_ethic = "ethic_materialist"
+						random_owned_pop = { pop_change_ethic = "ethic_materialist" }
+					}
+				}
+			}
+		}
+		set_global_flag = mem_visitor_finished
+	}
+	
+	option = {
+		name = mem_visitor.53a
+		custom_tooltip = mem_visitor.53a.tooltip
+		
+		trigger = {
+			NOR = {
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_xenophile
+			}
+		}
+	}
+	
+	option = {
+		name = mem_visitor.53a.phile
+		custom_tooltip = mem_visitor.53a.tooltip
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_xenophile
+			}
+		}
+	}
+	
+}
+
+#Sterelization: Tension
+country_event = {
+	id = mem_visitor.54
+	title = "mem_visitor.54.name"
+	desc = "mem_visitor.54.desc"
+	picture = GFX_evt_galactic_senate
+	show_sound = event_radio_chatter
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		event_target:mem_visitor_planet = {
+			owner = {
+				shift_ethic = "ethic_militarist"
+				random_owned_pop = { pop_change_ethic = "ethic_militarist" }
+				
+				#And then they might nuke themselves
+				
+				
+			}
+			random_list = {
+				90 = {
+				}
+				10 = {
+					IF = {
+						limit = {
+							OR = {
+								has_country_flag = atomic_age
+								has_country_flag = early_space_age
+							}
+						}
+						planet_event = {
+							id = primitive.130
+							days = 360
+							random = 360
+						}
+					}
+				}
+			}
+		}
+		set_global_flag = mem_visitor_finished
+	}
+	
+	option = {
+		name = mem_visitor.54a
+		custom_tooltip = mem_visitor.54a.tooltip
+		trigger = {
+			NOR = {
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_xenophile
+			}
+		}
+	}
+	
+	option = {
+		name = mem_visitor.54a.phile
+		custom_tooltip = mem_visitor.54a.tooltip
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_xenophile
+			}
+		}
+	}
+	
+}
+
+#Natives have it disambig
+
+country_event = {
+	id = mem_visitor.6
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = {
+			has_global_flag = mem_visitor_finished
+		}
+	}
+	
+	immediate = {
+		random_list = {
+			25 = {
+				country_event = {
+					id = mem_visitor.61
+				}
+			}
+			75 = {
+				IF = {
+					limit = {
+						event_target:mem_visitor_planet = {
+							owner = {
+								has_country_flag = stone_age
+								has_country_flag = bronze_age
+								has_country_flag = iron_age
+								has_country_flag = late_medieval_age
+								has_country_flag = renaissance_age
+							}
+						}
+					}
+					
+					country_event = {
+						id = mem_visitor.62
+					}
+					
+					else = {
+						random_list = {
+							50 = {country_event = {id = mem_visitor.63}}
+							50 = {country_event = {id = mem_visitor.64}}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+#Lost and never found
+country_event = {
+	id = mem_visitor.61
+	title = "mem_visitor.61.name"
+	desc = "mem_visitor.61.desc"
+	picture = GFX_evt_atmospheric_entry
+	show_sound = event_default
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_global_flag = mem_visitor_finished
+	}
+	
+	option = {
+		name = mem_visitor.61a
+	}
+}
+
+#Prophet from the stars
+country_event = {
+	id = mem_visitor.62
+	title = "mem_visitor.62.name"
+	desc = "mem_visitor.62.desc"
+	picture = GFX_evt_medieval_alien_civilization
+	show_sound = event_conversation
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_global_flag = mem_visitor_finished
+		
+		event_target:mem_visitor_planet = {
+			owner = {
+				shift_ethic = "ethic_spiritualist"
+				random_owned_pop = { pop_change_ethic = "ethic_spiritualist" }
+			}
+		}
+	}
+	
+	option = {
+		name = mem_visitor.62a
+		custom_tooltip = mem_visitor.62a.tooltip
+		add_society_research = 500
+		add_influence = 20
+	}
+}
+
+#Alien menace
+
+country_event = {
+	id = mem_visitor.63
+	title = "mem_visitor.63.name"
+	desc = "mem_visitor.63.desc"
+	picture = GFX_evt_galactic_senate
+	show_sound = event_radio_chatter
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_global_flag = mem_visitor_finished
+		
+		event_target:mem_visitor_planet = {
+			owner = {
+				random_list = {
+					33 = {
+						shift_ethic = "ethic_xenophobe"
+						random_owned_pop = { pop_change_ethic = "ethic_xenophobe" }
+					}
+					33 = {
+						shift_ethic = "ethic_materialist"
+						random_owned_pop = { pop_change_ethic = "ethic_materialist" }
+					}
+					33 = {
+						shift_ethic = "ethic_militarist"
+						random_owned_pop = { pop_change_ethic = "ethic_militarist" }
+					}
+				}
+			}
+		}
+	}
+	
+	option = {
+		trigger = {
+			NOR = {
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
+			}
+		}
+		
+		name = mem_visitor.63a
+		custom_tooltip = mem_visitor.63a.tooltip
+		
+		add_society_research = 250
+		add_influence = 20
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
+			}
+		}
+		
+		name = mem_visitor.63a.phobe
+		custom_tooltip = mem_visitor.63a.tooltip
+		
+		add_society_research = 250
+		add_influence = 20
+	}
+}
+
+#Alien teacher
+
+country_event = {
+	id = mem_visitor.64
+	title = "mem_visitor.64.name"
+	desc = "mem_visitor.64.desc"
+	picture = GFX_evt_galactic_senate
+	show_sound = event_radio_chatter
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_global_flag = mem_visitor_finished
+		
+		event_target:mem_visitor_planet = {
+			owner = {
+				random_list = {
+					50 = {
+						shift_ethic = "ethic_xenophile"
+						random_owned_pop = { pop_change_ethic = "ethic_xenophile" }
+					}
+					50 = {
+						shift_ethic = "ethic_materialist"
+						random_owned_pop = { pop_change_ethic = "ethic_materialist" }
+					}
+				}
+				
+				#Here goes bumping primitives one era ahead
+				
+				IF = {
+					limit = {has_country_flag = industrial_age}
+					country_event = {id = primitive.10 days = 360 random = 3600}
+				}
+				IF = {
+					limit = {has_country_flag = machine_age}
+					country_event = {id = primitive.12 days = 360 random = 3600}
+				}
+				IF = {
+					limit = {has_country_flag = atomic_age}
+					country_event = {id = primitive.14 days = 360 random = 3600}
+				}
+				IF = {
+					limit = {has_country_flag = steam_age}
+					country_event = {id = primitive.28 days = 360 random = 3600}
+				}
+			}
+		}
+	}
+	
+	option = {
+		trigger = {
+			NOR = {
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_xenophile
+			}
+		}
+		
+		name = mem_visitor.64a
+		custom_tooltip = mem_visitor.64a.tooltip
+		
+		add_society_research = 250
+		add_influence = 20
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
+			}
+		}
+		
+		name = mem_visitor.64a.phobe
+		custom_tooltip = mem_visitor.64a.tooltip
+		
+		add_society_research = 250
+		add_influence = 20
+	}
+	
+	option = {
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_xenophile
+			}
+		}
+		
+		name = mem_visitor.64a.phile
+		custom_tooltip = mem_visitor.64a.tooltip
+		
+		add_society_research = 250
+		add_influence = 20
+	}
+}
+
+#Object is our disambig
+
+country_event = {
+	id = mem_visitor.7
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_list = {
+			25 = { country_event = {id = mem_visitor.71}}
+			25 = { country_event = {id = mem_visitor.72}}
+			25 = { country_event = {id = mem_visitor.73}}
+			25 = { country_event = {id = mem_visitor.74}}
+		}
+	}
+}
+
+#Blank slug
+
+country_event = {
+	id = mem_visitor.71
+	title = "mem_visitor.71.name"
+	desc = "mem_visitor.71.desc"
+	picture = GFX_evt_atmospheric_entry
+	show_sound = event_default
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_visitor.71a
+		
+		add_monthly_resource_mult = {
+			resource = engineering_research
+			value = @tier3researchreward
+			min = @tier3researchmin
+			max = @tier3researchmax
+		}
+	}
+}
+
+#Maniac Orb
+
+country_event = {
+	id = mem_visitor.72
+	title = "mem_visitor.72.name"
+	desc = "mem_visitor.72.desc"
+	picture = GFX_evt_mem_strange_apparatus
+	show_sound = event_laboratory_sound
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_visitor.72a
+		custom_tooltip = mem_visitor.72a.tooltip
+		
+		trigger = {
+			NOT = {
+				has_policy_flag = ai_outlawed
+			}
+		}
+		hidden_effect = {
+			country_event = {
+				id = mem_visitor.8
+				days = 45
+			}
+		}
+	}
+	
+	option = {
+		name = mem_visitor.72b
+		
+		trigger = {
+			NOR = {
+				has_ethic = ethic_fanatic_spiritualist
+				has_ethic = ethic_spiritualist
+			}
+			has_policy_flag = ai_outlawed
+		}
+		
+		add_influence = 25
+	}
+	
+	option = {
+		name = mem_visitor.72c
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_spiritualist
+				has_ethic = ethic_spiritualist
+			}
+			has_policy_flag = ai_outlawed
+		}
+		
+		add_influence = 50
+		add_modifier = {
+			modifier = mem_visitor_destroyed_the_machine
+			days = 3600
+		}
+	}
+	
+	option = {
+		name = mem_visitor.72d
+		
+		random_list = {
+			50 = {
+				IF = {
+					limit = {
+						not = {has_technology = tech_administrative_ai}
+					}
+					
+					add_research_option = tech_administrative_ai
+					add_tech_progress = {
+						tech = tech_administrative_ai
+						progress = 0.10
+					}
+					
+					else = {
+						IF = {
+							limit = {
+								not = {has_technology = tech_self_aware_logic}
+								has_technology = tech_administrative_ai
+							}
+							
+							add_research_option = tech_self_aware_logic
+							add_tech_progress = {
+								tech = tech_self_aware_logic
+								progress = 0.10
+							}
+							
+							else = {
+								IF = {
+									limit = {
+										not = {has_technology = tech_sapient_ai}
+										has_technology = tech_self_aware_logic
+									}
+									
+									add_research_option = tech_sapient_ai
+									add_tech_progress = {
+										tech = tech_sapient_ai
+										progress = 0.10
+									}
+									
+									else = {
+										add_monthly_resource_mult = {
+											resource = physics_research
+											value = @tier4researchreward
+											min = @tier4researchmin
+											max = @tier4researchmax
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			50 = {
+				IF = {
+					limit = {
+						not = {has_technology = tech_combat_computers_1}
+					}
+					
+					add_research_option = tech_combat_computers_1
+					add_tech_progress = {
+						tech = tech_combat_computers_1
+						progress = 0.10
+					}
+					
+					else = {
+						IF = {
+							limit = {
+								not = {has_technology = tech_combat_computers_1}
+								has_technology = tech_combat_computers_2
+							}
+							
+							add_research_option = tech_combat_computers_2
+							add_tech_progress = {
+								tech = tech_combat_computers_2
+								progress = 0.10
+							}
+							
+							else = {
+								IF = {
+									limit = {
+										not = {has_technology = tech_combat_computers_2}
+										has_technology = tech_combat_computers_3
+									}
+									
+									add_research_option = tech_combat_computers_3
+									add_tech_progress = {
+										tech = tech_combat_computers_3
+										progress = 0.10
+									}
+									
+									else = {
+										add_monthly_resource_mult = {
+											resource = physics_research
+											value = @tier4researchreward
+											min = @tier4researchmin
+											max = @tier4researchmax
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	
+}
+
+#Petulant orb
+country_event = {
+	id = mem_visitor.73
+	title = "mem_visitor.73.name"
+	desc = "mem_visitor.73.desc"
+	picture = GFX_evt_mem_strange_apparatus
+	show_sound = event_radio_chatter
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_visitor.73a
+		
+		enable_special_project = {
+			name = MEM_VISITOR_SEND_ORB_INTO_SPACE
+			location = capital_scope
+			owner = root
+		}
+	}
+	
+	option = {
+		name = mem_visitor.73b
+		
+		trigger = {
+			NOT = {
+				has_policy_flag = ai_outlawed
+			}
+		}
+		
+		add_modifier = {
+			modifier = mem_visitor_comedy
+			days = 3600
+		}
+	}
+	
+	option = {
+		name = mem_visitor.72b
+		
+		trigger = {
+			NOR = {
+				has_ethic = ethic_fanatic_spiritualist
+				has_ethic = ethic_spiritualist
+			}
+			has_policy_flag = ai_outlawed
+		}
+		
+		add_influence = 25
+	}
+	
+	option = {
+		name = mem_visitor.72c
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_spiritualist
+				has_ethic = ethic_spiritualist
+			}
+			has_policy_flag = ai_outlawed
+		}
+		
+		add_influence = 50
+		add_modifier = {
+			modifier = mem_visitor_destroyed_the_machine
+			days = 3600
+		}
+	}
+	
+	option = {
+		name = mem_visitor.72d
+		
+		random_list = {
+			50 = {
+				IF = {
+					limit = {
+						not = {has_technology = tech_administrative_ai}
+					}
+					
+					add_research_option = tech_administrative_ai
+					add_tech_progress = {
+						tech = tech_administrative_ai
+						progress = 0.10
+					}
+					
+					else = {
+						IF = {
+							limit = {
+								not = {has_technology = tech_self_aware_logic}
+								has_technology = tech_administrative_ai
+							}
+							
+							add_research_option = tech_self_aware_logic
+							add_tech_progress = {
+								tech = tech_self_aware_logic
+								progress = 0.10
+							}
+							
+							else = {
+								IF = {
+									limit = {
+										not = {has_technology = tech_sapient_ai}
+										has_technology = tech_self_aware_logic
+									}
+									
+									add_research_option = tech_sapient_ai
+									add_tech_progress = {
+										tech = tech_sapient_ai
+										progress = 0.10
+									}
+									
+									else = {
+										add_monthly_resource_mult = {
+											resource = physics_research
+											value = @tier3researchreward
+											min = @tier3researchmin
+											max = @tier3researchmax
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			50 = {
+				IF = {
+					limit = {
+						not = {has_technology = tech_combat_computers_1}
+					}
+					
+					add_research_option = tech_combat_computers_1
+					add_tech_progress = {
+						tech = tech_combat_computers_1
+						progress = 0.10
+					}
+					
+					else = {
+						IF = {
+							limit = {
+								not = {has_technology = tech_combat_computers_1}
+								has_technology = tech_combat_computers_2
+							}
+							
+							add_research_option = tech_combat_computers_2
+							add_tech_progress = {
+								tech = tech_combat_computers_2
+								progress = 0.10
+							}
+							
+							else = {
+								IF = {
+									limit = {
+										not = {has_technology = tech_combat_computers_2}
+										has_technology = tech_combat_computers_3
+									}
+									
+									add_research_option = tech_combat_computers_3
+									add_tech_progress = {
+										tech = tech_combat_computers_3
+										progress = 0.10
+									}
+									
+									else = {
+										add_monthly_resource_mult = {
+											resource = physics_research
+											value = @tier3researchreward
+											min = @tier3researchmin
+											max = @tier3researchmax
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+#Sent orb into space
+planet_event = {
+	id = mem_visitor.731
+	title = "mem_visitor.731.name"
+	desc = "mem_visitor.731.desc"
+	picture = GFX_evt_ship_in_orbit
+	show_sound = event_ship_thrusters
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_visitor.731a
+		
+		trigger = {
+			owner = {
+				NOR = {
+					has_policy_flag = ai_outlawed
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_xenophobe
+				}
+			}
+		}
+		
+		owner = {
+			add_modifier = {
+				modifier = mem_visitor_looking_at_sky
+				days = 3600
+			}
+		}
+	}
+	
+	option = {
+		name = mem_visitor.731b
+	
+		trigger = {
+			owner = {
+				OR = {
+					has_policy_flag = ai_outlawed
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_xenophobe
+				}
+			}
+		}
+		owner = {
+			add_influence = 50
+		}
+	}
+}
+
+#Knowledge bank
+
+country_event = {
+	id = mem_visitor.74
+	title = "mem_visitor.74.name"
+	desc = "mem_visitor.74.desc"
+	picture = GFX_evt_mem_strange_apparatus
+	show_sound = event_laboratory_sound
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_visitor.74a
+		
+		add_modifier = {
+			modifier = mem_visitor_knowledge
+			days = 3600
+		}
+	}
+	
+	option = {
+		name = mem_visitor.74b
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
+			}
+		}
+		
+		add_influence = 25
+		
+		add_modifier = {
+			modifier = mem_visitor_knowledge_rejected
+			days = 3600
+		}
+	}
+}
+
+#Maniac orb disambiguation
+
+country_event = {
+	id = mem_visitor.8
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_list = {
+			33 = {
+				country_event = {id = mem_visitor.81}
+			}
+			33 = {
+				country_event = {id = mem_visitor.82}
+			}
+			33 = {
+				country_event = {id = mem_visitor.83}
+			}
+		}
+	}
+}
+
+#No deal
+country_event = {
+	id = mem_visitor.81
+	title = "mem_visitor.81.name"
+	desc = "mem_visitor.81.desc"
+	picture = GFX_evt_mem_strange_apparatus
+	show_sound = event_default
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_visitor.81a
+	}
+}
+
+#Agreement
+
+country_event = {
+	id = mem_visitor.82
+	title = "mem_visitor.82.name"
+	desc = "mem_visitor.82.desc"
+	picture = GFX_evt_mem_strange_apparatus
+	show_sound = event_default
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_visitor.82a
+		
+		add_modifier = {
+			modifier = mem_visitor_maniac_agreement
+			days = -1
+		}
+	}
+}
+
+#Maniac orb escaped
+country_event = {
+	id = mem_visitor.83
+	title = "mem_visitor.83.name"
+	desc = "mem_visitor.83.desc"
+	picture = GFX_evt_mem_strange_apparatus
+	show_sound = event_default
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_visitor.83a
+		
+		add_modifier = {
+			modifier = mem_visitor_maniac_escape
+			days = 3600
+		}
+		
+		hidden_effect = {
+			country_event = {
+				id = mem_visitor.84 
+				days = 3600
+			}
+		}
+	}
+}
+
+#Orb finally found
+country_event = {
+	id = mem_visitor.84
+	title = "mem_visitor.84.name"
+	desc = "mem_visitor.84.desc"
+	picture = GFX_evt_mem_strange_apparatus
+	show_sound = event_default
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_visitor.84a
+	}
+}
+
+#Failure event - must get triggered if quest holder has no observation post
+planet_event = {
+
+	id = mem_visitor.9
+	hide_window = yes
+	
+	trigger = {
+		has_planet_flag = mem_visitor_planet
+		
+		OR = {
+			has_observation_outpost = no
+			observation_outpost_owner = {
+				NOT = {
+					has_country_flag = mem_visitor_country
+				}
+			}
+		}
+		NOT = {
+			has_global_flag = mem_visitor_finished
+		}
+	}
+	
+	immediate = {
+		random_country = {
+			limit = {
+				has_country_flag = mem_visitor_country
+			}
+			
+			country_event = { id = mem_visitor.91}
+		}
+		set_global_flag = mem_visitor_finished
+	}
+
+}
+
+#Failure notification
+country_event = {
+	id = mem_visitor.91
+	title = "mem_visitor.91.name"
+	desc = "mem_visitor.91.desc"
+	picture = GFX_evt_exploding_ship
+	show_sound = event_default
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = UNFORTUNATE
+	}
+}
