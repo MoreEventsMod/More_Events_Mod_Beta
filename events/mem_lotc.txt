@@ -1941,7 +1941,19 @@ ship_event = {
 ship_event = {
 	id = mem_lotc.31
 	title = mem_lotc.31.name
-	desc = mem_lotc.31.desc
+	desc = {
+		text = mem_lotc.31.desc
+		trigger = {
+			owner = { NOT = { has_country_flag = mem_lotc_fallback } }
+		}
+	}
+	
+	desc = {
+		text = mem_lotc.31.desc.fallback
+		trigger = {
+			owner = { has_country_flag = mem_lotc_fallback }
+		}
+	}
 	
 	is_triggered_only = yes
 	
@@ -1958,12 +1970,24 @@ ship_event = {
 		}
 		owner = {
 			has_country_flag = mem_lotc_deduced_colony
-			NOT = { has_country_flag = mem_lotc_found_colony }
+			NOT = { has_country_flag = mem_lotc_final_phase }
+			OR = {
+				NOT = { has_country_flag = mem_lotc_found_colony }
+				NOR = { 
+					has_country_flag = mem_lotc_fallback
+					has_country_flag = mem_lotc_killed_guard
+				}
+			}
 		}
 	}
 	
 	immediate = {
 		owner = {
+			if = {
+				limit = { has_country_flag = mem_lotc_found_colony }
+				set_country_flag = mem_lotc_fallback
+			}
+			set_country_flag = mem_lotc_final_phase
 			set_country_flag = mem_lotc_found_colony
 		}
 	}
@@ -1977,6 +2001,7 @@ ship_event = {
 			limit = {
 				has_planet_flag = mem_lotc_colony_gas
 			}
+			save_event_target_as = mem_lotc_final
 			enable_special_project = {
 				name = "MEM_LOTC_FINAL"
 				location = this
@@ -2001,7 +2026,20 @@ country_event = {
 	}
 	
 	immediate = {
-		set_country_flag = mem_lotc_killed_guard 
+		set_country_flag = mem_lotc_killed_guard
+		fromfrom.solar_system = {
+			IF = {
+				limit = {
+					any_ship_in_system = {
+						owner = { has_country_flag = mem_lotc_found_colony NOT = { is_same_value = root } }
+					}
+				}
+				random_country = {
+					limit = { has_country_flag = mem_lotc_found_colony }
+					country_event = { id = mem_lotc.37 }
+				}
+			}
+		}
 	}
 }
 
@@ -2019,6 +2057,11 @@ country_event = {
 		FROMFROMFROM = {
 			has_fleet_flag = mem_lotc_guards
 		}
+		has_country_flag = mem_lotc_found_colony
+	}
+	
+	immediate = {
+		set_country_flag = mem_lotc_final_phase
 	}
 	
 	option = {
@@ -2218,7 +2261,7 @@ country_event = {
 				effect = {
 					create_ship_design = {
 						design = "NAME_mem_lotc_battleship"
-						ftl = root.owner
+						ftl = root
 					}
 					set_owner = root
 					create_ship = {
@@ -2232,6 +2275,37 @@ country_event = {
 					}
 					set_location = event_target:mem_lotc_final
 				}
+			}
+		}
+	}
+}
+
+#Fallback event in case we are present and defenders are destroyed
+country_event = {
+	id = mem_lotc.37
+	title = mem_lotc.33.name
+	desc = mem_lotc.33.desc
+	
+	picture = GFX_evt_gas_giant
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_country_flag = mem_lotc_final_phase
+	}
+	
+	option = {
+		name = mem_lotc.31a
+		
+		random_planet = {
+			limit = {
+				has_planet_flag = mem_lotc_colony_gas
+			}
+			save_event_target_as = mem_lotc_final
+			enable_special_project = {
+				name = "MEM_LOTC_FINAL"
+				location = this
+				owner = root
 			}
 		}
 	}
