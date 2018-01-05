@@ -4,8 +4,10 @@
 
 namespace = mem_ancient_robots
 
+#set it to happen on_colony_4_years_old (as mtth of 36 months before). Left all condition and probabilities as they were.
+
 # Start of event sequence
-# happens on colonizing planet
+# happens on_colony_4_years_old
 planet_event = {
 	id = mem_ancient_robots.1
 	hide_window = yes
@@ -29,12 +31,16 @@ planet_event = {
 	}
 	immediate = {
 		random_list = {
-			7 = { set_planet_flag = mem_ancient_robot_spawn_set }
+			7 = {
+				set_planet_flag = mem_ancient_robot_spawn_set
+				planet_event = { id = mem_ancient_robots.201 }				
+			}
 			93 = {}
 		}
 	}
 }
 
+#removed mtth and triggers directly through previous event.
 planet_event = {
 	id = mem_ancient_robots.201
 	title = mem_ancient_robots.201.name
@@ -43,7 +49,7 @@ planet_event = {
 	show_sound = event_default
 	location = ROOT
 	
-	mean_time_to_happen = { months = 36 }
+	is_triggered_only = yes
 	
 	trigger = { # Change trigger mechanism to accord with other colony events
 		NOT = {
@@ -459,30 +465,30 @@ country_event = {
 	}
 }
 
+#set this to on_planet_attackers_win (Vanilla uses this approach with e.g. colony.114)
 # Retaking the planet
-planet_event = {
+country_event = {
 	id = mem_ancient_robots.2111
 	title = mem_ancient_robots.211.name
 	desc = mem_ancient_robots.211.desc
 	picture = GFX_evt_ground_combat
 	show_sound = event_ground_battle
 	location = root
+	
+	is_triggered_only = yes
 
 	trigger = {
-		has_owner = yes
-		owner = {
-			is_ai = no
-		}
-		has_planet_flag = mem_super_robot_attack
-		is_occupied_flag = no
-		has_ground_combat = no
+		is_same_value = fromfrom.owner
+		is_ai = no
+		fromfrom = { has_planet_flag = mem_super_robot_attack }
+		
 		NOT = {
 			has_global_flag = mem_ancient_robot_cancel
 		}
 	}
 	
 	immediate = {
-		remove_planet_flag = mem_super_robot_attack
+		fromfrom = { remove_planet_flag = mem_super_robot_attack }
 	}
 	
 	option = {
@@ -490,8 +496,8 @@ planet_event = {
 		# Set up special project to lay siege to the AI
 		enable_special_project = {
 			name = MEM_SIEGE_PROJECT
-			location = root
-			owner = root.owner
+			location = fromfrom
+			owner = fromfrom.owner
 		}
 	}
 }
