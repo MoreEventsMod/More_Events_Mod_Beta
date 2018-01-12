@@ -49,104 +49,58 @@ namespace = mem_duel_ritual
 ################################################################################
 ################################################################################
  
-# Primitives with the right ethics and tech era have ground combat on their planet
-# Flag is set for planet and primitive country
+
+# Triggers country_event for the attacker upon victory
+# (Before controller is switched)
+# This = country, leader attacker
+# From = country, planet owner
+# FromFrom = planet
 country_event = {
 	id = mem_duel_ritual.1
-	hide_window = yes
-
-	trigger = {
-		is_primitive = yes
-		NOT = {
-			has_country_flag = mem_prim_inv
-		}
-		any_owned_planet  = {
-			has_ground_combat = yes
-		}
-		any_owned_pop = {
-			OR = {
-				pop_has_ethic = ethic_xenophobe
-				pop_has_ethic = ethic_fanatic_xenophobe
-				pop_has_ethic = ethic_militarist
-				pop_has_ethic = ethic_fanatic_militarist
-			}
-		}
-		OR = {
-			has_country_flag = stone_age
-			has_country_flag = bronze_age
-			has_country_flag = iron_age
-			has_country_flag = late_medieval_age
-			has_country_flag = renaissance_age
-			has_country_flag = steam_age
-		}
-	}
-
-	immediate = {
-		save_event_target_as = mem_duel_ritual_planet
-		set_country_flag = mem_prim_inv
-		every_owned_planet = {
-			set_planet_flag = mem_prim_inv
-		}
-		every_owned_pop = {
-			set_timed_pop_flag = { 
-				flag = mem_duel_ritual 
-				days = 720
-			}
-		}
-		country_event = { id = mem_duel_ritual.2 days = 120 random = 0 } # 4 months
-	}
-}
-
-# Event to clean up the flags in case the ground fighting was either infighting between the natives (pyramid event) or invasion failed
-country_event = {
-	id = mem_duel_ritual.2
 	hide_window = yes
 	is_triggered_only = yes
 
 	trigger = {
-		is_primitive = yes
-		has_country_flag = mem_prim_inv
-	}
-
-	immediate = {
-		remove_country_flag = mem_prim_inv
-		every_owned_planet = {
-			remove_planet_flag = mem_prim_inv
-		}
-		every_owned_pop = {
-			remove_pop_flag = mem_duel_ritual
-		}
-	}
-}
-
-# Event starts for the player or AI empire that has a planet which was formerly owned by primitives and was invaded
-# the planet flag gets removed in the process so it will only fire as soon as the planet gets its new owner
-country_event = {
-	id = mem_duel_ritual.3
-	hide_window = yes
-
-	trigger = {
-		NOT = {
-			has_country_flag = mem_duel_ritual
-		}
+		is_country_type = default
 		is_primitive = no
-		any_owned_planet  = {
-			has_planet_flag = mem_prim_inv
+		from = {
+			is_primitive = yes
+			OR = {
+				has_country_flag = stone_age
+				has_country_flag = bronze_age
+				has_country_flag = iron_age
+				has_country_flag = late_medieval_age
+				has_country_flag = renaissance_age
+				has_country_flag = steam_age
+			}
+		}
+		fromfrom = {
+			any_owned_pop = {
+				OR = {
+					pop_has_ethic = ethic_xenophobe
+					pop_has_ethic = ethic_fanatic_xenophobe
+					pop_has_ethic = ethic_militarist
+					pop_has_ethic = ethic_fanatic_militarist
+				}
+			}
 		}
 	}
 
 	immediate = {
-		every_owned_planet  = {
-			limit = {
-				has_planet_flag = mem_prim_inv
-			}
-			remove_planet_flag = mem_prim_inv
+		fromfrom = {
 			set_planet_flag = mem_duel_ritual
+			save_event_target_as = mem_duel_ritual_planet
+			every_owned_pop = {
+				set_timed_pop_flag = { 
+					flag = mem_duel_ritual 
+					days = 720
+				}
+			}
 			random_list = {
 				60 = { planet_event = { id = mem_duel_ritual.4 days = 180 random = 25 } }	# Event happens after some time
-				40 = { remove_planet_flag = mem_duel_ritual }	# nothing happens and event can happen after next invasion of other primitive race
+				40 = { }	# nothing happens and event can happen after next invasion of other primitive race
 			}
-		}	
+		}
 	}
 }
 
@@ -299,8 +253,6 @@ planet_event = {
 	is_triggered_only = yes
 	
 	diplomatic = yes
-	
-	is_triggered_only = yes
 	
 	picture_event_data = {
 		portrait = event_target:mem_duel_ritual_species
