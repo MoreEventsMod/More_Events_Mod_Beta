@@ -2,6 +2,43 @@
 
 namespace = mem_food_constructor
 
+#monthly pulse to spare a bit of CPU on the mtth trigger
+event = {
+	id = mem_food_constructor.99
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		every_country = {
+			limit = {
+				is_ai = no
+				any_owned_planet = {
+					original_owner = yes
+					is_homeworld = no
+					has_ground_combat = no
+					num_pops > 3
+					is_capital = no
+					is_ringworld = no
+					NOR = {
+						is_planet_class = pc_gaia
+						is_planet_class = pc_habitat
+						is_planet_class = pc_shrouded
+						
+						
+						has_planet_flag = colony_event
+						
+					}
+				}
+			}
+			set_timed_country_flag = {
+				flag = mem_food_constructor_possible
+				days = 31
+			}
+		}
+	}
+}
+				
+
 #Gatekeeper event
 
 country_event = {
@@ -14,27 +51,11 @@ country_event = {
 	}
 	
 	trigger = {
-		years_passed > 50
+		mid_game_years_passed  > 0
+		is_ai = no
 		NOT = { has_global_flag = mem_food_constructor_global }
-		is_ai = no 
+		has_country_flag = mem_food_constructor_possible
 		NOT = { has_ethic = ethic_gestalt_consciousness } #Will write special texts later, probably
-		any_owned_planet = {
-			original_owner = yes
-			is_homeworld = no
-			has_ground_combat = no
-			num_pops > 3
-			is_capital = no
-			is_ringworld = no
-			NOR = {
-				is_planet_class = pc_gaia
-				is_planet_class = pc_habitat
-				is_planet_class = pc_shrouded
-				
-				
-				has_planet_flag = colony_event
-				
-			}
-		}
 	}
 	
 	immediate = {
@@ -71,7 +92,18 @@ country_event = {
 planet_event = {
 	id = mem_food_constructor.1
 	title = "mem_food_constructor.1.name"
-	desc = "mem_food_constructor.1.desc"
+	desc = {
+		text = "mem_food_constructor.1.desc"
+		trigger = { owner = { NOT = { has_ethic = ethic_gestalt_consciousness } } }
+	}
+	desc = {
+		text = "mem_food_constructor.1.desc.machine"
+		trigger = { owner = { has_authority = auth_machine_intelligence } }
+	}
+	desc = {
+		text = "mem_food_constructor.1.desc.hive"
+		trigger = { owner = { has_authority = auth_hive_mind } }
+	}
 	picture = GFX_evt_mem_strange_apparatus
 	location = ROOT
 	
@@ -104,7 +136,8 @@ planet_event = {
 					has_ethic = ethic_fanatic_spiritualist
 					has_ethic = ethic_spiritualist
 					has_ethic = ethic_fanatic_xenophobe
-					has_ethic = ethic_xenophobe				
+					has_ethic = ethic_xenophobe
+					has_authority = auth_machine_intelligence
 				}
 			}
 		}
@@ -176,13 +209,34 @@ planet_event = {
 		
 		
 	}
+	
+	option = {
+		name = mem_food_constructor.1.machine
+		custom_tooltip = mem_food_constructor.1.tooltip
+		
+		trigger = {
+			owner = { has_authority = auth_machine_intelligence }
+		}
+	}
+	
 }
 
 #Step 2: Troubles begin
 planet_event = {
 	id = mem_food_constructor.2
 	title = "mem_food_constructor.2.name"
-	desc = "mem_food_constructor.2.desc"
+	desc = {
+		text = "mem_food_constructor.2.desc"
+		trigger = { owner = {  NOT = { has_ethic = ethic_gestalt_consciousness } } } 
+	}
+	desc = {
+		text = "mem_food_constructor.2.desc.machine"
+		trigger = { owner = { has_authority = auth_machine_intelligence } } 
+	}
+	desc = {
+		text = "mem_food_constructor.2.desc.hive"
+		trigger = { owner = {  has_authority = auth_hive_mind } } 
+	}
 	picture = GFX_evt_news_room
 	location = ROOT
 	
@@ -264,7 +318,18 @@ planet_event = {
 planet_event = {
 	id = mem_food_constructor.3
 	title = "mem_food_constructor.3.name"
-	desc = "mem_food_constructor.3.desc"
+	desc = {
+		text = "mem_food_constructor.3.desc"
+		trigger = { owner = { NOT = { has_ethic = ethic_gestalt_consciousness } } } 
+	}
+	desc = {
+		text = "mem_food_constructor.3.desc.machine"
+		trigger = { owner = { has_authority = auth_machine_intelligence } } 
+	}
+	desc = {
+		text = "mem_food_constructor.3.desc.hive"
+		trigger = { owner = { has_authority = auth_hive_mind } } 
+	}
 	picture = GFX_evt_news_room
 	location = ROOT
 	
@@ -384,7 +449,14 @@ planet_event = {
 planet_event = {
 	id = mem_food_constructor.4
 	title = "mem_food_constructor.4.name"
-	desc = "mem_food_constructor.4.desc"
+	desc = {
+		text = "mem_food_constructor.4.desc"
+		trigger = { owner = { NOT = { has_authority = auth_machine_intelligence } } }
+	}
+	desc = {
+		text = "mem_food_constructor.4.desc.machine"
+		trigger = { owner = { has_authority = auth_machine_intelligence } }
+	}
 	picture = GFX_evt_news_room
 	location = ROOT
 	
@@ -393,9 +465,7 @@ planet_event = {
 		has_planet_flag = mem_food_constructor_step3
 	}
 	
-	mean_time_to_happen = {
-		months = 36
-	}
+	is_triggered_only = yes
 	
 	immediate = {
 		remove_planet_flag = mem_food_constructor_step3
@@ -412,7 +482,19 @@ planet_event = {
 		name = mem_food_constructor.4a
 		custom_tooltip = mem_food_constructor.4.tooltip
 		
+		trigger = {
+			owner = { NOT = { has_authority = auth_machine_intelligence } }
+		}
 		
+	}
+	
+	option = {
+		name = mem_food_constructor.4.machine
+		custom_tooltip = mem_food_constructor.4.tooltip
+		
+		trigger = {
+			owner = { has_authority = auth_machine_intelligence }
+		}
 		
 	}
 
@@ -625,7 +707,7 @@ ship_event = {
 						}
 					}
 				}
-				closest_system = {
+				fromfrom = {
 					spawn_system = {
 						min_distance = 30
 						max_distance = 80
@@ -714,7 +796,18 @@ ship_event = {
 
 	id = mem_food_constructor.9
 	title = mem_food_constructor.9.name
-	desc = mem_food_constructor.9.desc
+	desc = {
+		text = "mem_food_constructor.9.desc"
+		trigger = { NOT = { has_ethic = ethic_gestalt_consciousness } }
+	}
+	desc = {
+		text = "mem_food_constructor.9.desc.machine"
+		trigger = { has_authority = auth_machine_intelligence }
+	}
+	desc = {
+		text = "mem_food_constructor.9.desc.hive"
+		trigger = { has_authority = auth_hive_mind }
+	}
 	picture = GFX_evt_mem_horror_corridor
 	location = ROOT
 	
@@ -735,7 +828,7 @@ ship_event = {
 					limit = { has_star_flag = mem_food_constructor_home }
 					spawn_system = {
 						min_distance = 20
-						max_distance = 60
+						max_distance = 100
 						initializer = "mem_food_constructor_reesan_system"
 					}
 				}
@@ -1026,7 +1119,18 @@ country_event = {
 ship_event = {
 	id = mem_food_constructor.13
 	title = mem_food_constructor.13.name
-	desc = mem_food_constructor.13.desc
+	desc = {
+		text = "mem_food_constructor.13.desc"
+		trigger = { NOT = { has_ethic = ethic_gestalt_consciousness } }
+	}
+	desc = {
+		text = "mem_food_constructor.13.desc.machine"
+		trigger = { has_authority = auth_machine_intelligence }
+	}
+	desc = {
+		text = "mem_food_constructor.13.desc.hive"
+		trigger = { has_authority = auth_hive_mind }
+	}
 	picture = GFX_evt_fallen_empire
 	location = ROOT
 	
@@ -1088,7 +1192,18 @@ ship_event = {
 planet_event = {
 	id = mem_food_constructor.14
 	title = mem_food_constructor.14.name
-	desc = mem_food_constructor.14.desc
+	desc = {
+		text = "mem_food_constructor.14.desc"
+		trigger = { NOT = { has_ethic = ethic_gestalt_consciousness } }
+	}
+	desc = {
+		text = "mem_food_constructor.14.desc.machine"
+		trigger = { has_authority = auth_machine_intelligence }
+	}
+	desc = {
+		text = "mem_food_constructor.14.desc.hive"
+		trigger = { has_authority = auth_hive_mind }
+	}
 	picture = GFX_evt_animal_wildlife
 	location = ROOT
 	
@@ -1146,13 +1261,21 @@ planet_event = {
 planet_event = {
 	id = mem_food_constructor.15
 	title = mem_food_constructor.15.name
-	desc = mem_food_constructor.15.desc
+	desc = {
+		text = "mem_food_constructor.14.desc"
+		trigger = { NOT = { has_authority = auth_machine_intelligence } }
+	}
+	desc = {
+		text = "mem_food_constructor.14.desc.machine"
+		trigger = { has_authority = auth_machine_intelligence }
+	}
 	picture = GFX_evt_animal_wildlife
 	location = ROOT
 
 	trigger = {
 		has_planet_flag = mem_food_constructor_step5
 		NOT = { is_planet_class = pc_gaia }
+		NOT = { is_planet_class = pc_machine }
 	}
 	
 	mean_time_to_happen = {
@@ -1174,6 +1297,7 @@ planet_event = {
 					has_ethic = ethic_spiritualist
 					has_ethic = ethic_fanatic_xenophile
 					has_ethic = ethic_xenophile
+					has_authority = auth_machine_intelligence
 				}
 			}
 		}
@@ -1206,6 +1330,19 @@ planet_event = {
 					has_ethic = ethic_fanatic_xenophile
 					has_ethic = ethic_xenophile
 				}
+			}
+		}
+		
+		change_pc = pc_gaia
+	}
+	
+	option = {
+		name = mem_food_constructor.15.machine
+		
+		
+		trigger = {
+			owner = {
+				has_authority = auth_machine_intelligence
 			}
 		}
 		
