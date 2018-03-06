@@ -206,10 +206,17 @@ ship_event = {
 	option = {
 		name = mem_ashes.2.a
 		
-		enable_special_project = {
-			name = MEM_ASHES_REVIVE
-			location = owner.capital_scope
-			owner = this
+		IF = {
+			limit = {
+				owner = {
+					NOT = { has_valid_civic = civic_machine_assimilator }
+				}
+			}
+			enable_special_project = {
+				name = MEM_ASHES_REVIVE
+				location = owner.capital_scope
+				owner = this
+			}
 		}
 		
 		IF = {
@@ -224,6 +231,17 @@ ship_event = {
 			}
 			enable_special_project = {
 				name = MEM_ASHES_AUTOPSY
+				location = owner.capital_scope
+				owner = this
+			}
+		}
+		
+		IF = {
+			limit = {
+				owner = { has_valid_civic = civic_machine_assimilator }
+			}
+			enable_special_project = {
+				name = MEM_ASHES_ASSIMILATION
 				location = owner.capital_scope
 				owner = this
 			}
@@ -489,15 +507,37 @@ country_event = {
 	option = {
 		name = mem_ashes.4.a
 		
+		trigger = {
+			NOR = {
+				is_materialist = yes
+				has_authority = auth_machine_intelligence
+			}
+		}
+	}
+	
+	option = {
+		name = mem_ashes.4.b
+		
+		trigger = {
+			is_materialist = yes
+		}
+	}
+	
+	option = {
+		name = mem_ashes.4.c
+		
+		trigger = {
+			has_authority = auth_machine_intelligence
+		}
+	}
+	
+	after = {
 		add_monthly_resource_mult = {
 			resource = society_research
 			value = @tier5researchreward
 			min = @tier5researchmin
 			max = @tier5researchmax
 		}
-	}
-	
-	after = {
 		end_event_chain = mem_ashes_chain
 	}
 }
@@ -647,5 +687,91 @@ country_event = {
 				}
 			}
 		}
+	}
+}
+
+#Assimilation special
+country_event = {
+	id = mem_ashes.7
+	title = mem_ashes.7.name
+	desc = mem_ashes.7.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_society_research
+	
+	immediate = {
+		generate_cyborg_treats = yes
+		random_owned_planet = {
+			limit = {
+				any_tile = { has_pop = no has_blocker = no }
+			}
+			save_event_target_as = planet_to_colonize
+		}
+		IF = {
+			limit = { exists = event_target:planet_to_colonize }
+			create_species = {
+				# name = Ysmir
+				class = random_non_machine
+				portrait = random
+				traits = {
+					trait = trait_cybernetic
+				}
+				traits = random
+				homeworld = event_target:planet_to_colonize
+			}
+			else = {
+				create_species = {
+					# name = Ysmir
+					class = random_non_machine
+					portrait = random
+					traits = {
+						trait = trait_cybernetic
+					}
+					traits = random
+					homeworld = root.capital_scope
+				}
+			}
+		}
+		last_created_species = { save_event_target_as = their_species }
+	}
+	
+	option = {
+		name = mem_ashes.7.a
+		IF = {
+			limit = { exists = event_target:planet_to_colonize }
+			custom_tooltip = mem_ashes.7.a.tooltip
+		}
+		
+		allow = {
+			custom_tooltip = {
+				text = mem_ashes_need_free_space
+				exists = event_target:planet_to_colonize
+			}
+		}
+		
+		hidden_effect = {
+			event_target:planet_to_colonize = {
+				best_tile_for_pop = {
+					create_pop = { species = event_target:their_species }
+				}
+				last_created_pop = {
+					set_citizenship_type = {
+						type = citizenship_full_machine
+						country = root
+					}
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_ashes.7.b
+		
+		add_influence = 30
+	}
+	
+	after = {
+		end_event_chain = mem_ashes_chain
 	}
 }
