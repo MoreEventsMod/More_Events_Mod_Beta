@@ -4,8 +4,10 @@
 
 namespace = mem_ancient_robots
 
+#set it to happen on_colony_4_years_old (as mtth of 36 months before). Left all condition and probabilities as they were.
+
 # Start of event sequence
-# happens on colonizing planet
+# happens on_colony_4_years_old
 planet_event = {
 	id = mem_ancient_robots.1
 	hide_window = yes
@@ -18,6 +20,9 @@ planet_event = {
 		owner = {
 			is_country_type = default
 			is_ai = no
+			NOT = {
+				has_ethic = ethic_gestalt_consciousness
+			}
 		}
 		planet_size > 19
 		any_tile = {
@@ -26,12 +31,16 @@ planet_event = {
 	}
 	immediate = {
 		random_list = {
-			7 = { set_planet_flag = mem_ancient_robot_spawn_set }
+			7 = {
+				set_planet_flag = mem_ancient_robot_spawn_set
+				planet_event = { id = mem_ancient_robots.201 days = 360 random = 350 }				
+			}
 			93 = {}
 		}
 	}
 }
 
+#removed mtth and triggers directly through previous event.
 planet_event = {
 	id = mem_ancient_robots.201
 	title = mem_ancient_robots.201.name
@@ -40,14 +49,20 @@ planet_event = {
 	show_sound = event_default
 	location = ROOT
 	
-	mean_time_to_happen = { months = 36 }
+	is_triggered_only = yes
 	
 	trigger = { # Change trigger mechanism to accord with other colony events
+		NOT = {
+			has_global_flag = mem_ancient_robots_fired
+		}
 		has_planet_flag = mem_ancient_robot_spawn_set
 		has_owner = yes
 		owner = {
 			is_ai = no
 			is_country_type = default
+			NOT = {
+				has_ethic = ethic_gestalt_consciousness
+			}
 		}
 		original_owner = yes
 		num_pops > 1
@@ -450,30 +465,29 @@ country_event = {
 	}
 }
 
+#set this to on_planet_attackers_win (Vanilla uses this approach with e.g. colony.114)
 # Retaking the planet
-planet_event = {
+country_event = {
 	id = mem_ancient_robots.2111
 	title = mem_ancient_robots.211.name
 	desc = mem_ancient_robots.211.desc
 	picture = GFX_evt_ground_combat
 	show_sound = event_ground_battle
-	location = root
+	location = capital_scope
+	
+	is_triggered_only = yes
 
 	trigger = {
-		has_owner = yes
-		owner = {
-			is_ai = no
-		}
-		has_planet_flag = mem_super_robot_attack
-		is_occupied_flag = no
-		has_ground_combat = no
+		NOT = { has_country_flag = mem_these_are_evil_robots }
+		fromfrom = { has_planet_flag = mem_super_robot_attack }
+		
 		NOT = {
 			has_global_flag = mem_ancient_robot_cancel
 		}
 	}
 	
 	immediate = {
-		remove_planet_flag = mem_super_robot_attack
+		fromfrom = { remove_planet_flag = mem_super_robot_attack }
 	}
 	
 	option = {
@@ -481,8 +495,8 @@ planet_event = {
 		# Set up special project to lay siege to the AI
 		enable_special_project = {
 			name = MEM_SIEGE_PROJECT
-			location = root
-			owner = root.owner
+			location = fromfrom
+			owner = fromfrom.owner
 		}
 	}
 }
@@ -721,7 +735,7 @@ country_event = {
 		FROMFROM = {
 			remove_planet_flag = mem_super_robot_attack_2
 			remove_modifier = mem_under_siege
-			destroy_colony = { keep_buildings = no }
+			destroy_colony = yes
 			change_pc = pc_nuked
 		}
 	}
@@ -785,7 +799,6 @@ planet_event = {
 	
 	immediate = {
 		set_planet_flag = mem_super_robot_attack
-		set_planet_health = 0
 		owner = {
 			save_event_target_as = mem_ancient_robots_planet_owner
 		}
