@@ -6,8 +6,300 @@ namespace = mem_space_race
 #Initialisaton event
 country_event = {
 	id = mem_space_race.1
-	name = mem_space_race.1.name
+	title = mem_space_race.1.name
 	desc = mem_space_race.1.desc
 	
-	picture = 
+	picture = GFX_evt_alien_propaganda
+	
+	trigger = {
+		NOT = { has_global_flag = mem_space_race_happened }
+		is_at_war = no
+		is_country_type = default
+		NOR = {
+			has_country_flag = mem_space_race_declined
+			has_ethic = ethic_gestalt_consciousness
+			has_ethic = ethic_fanatic_xenophobe
+			has_civic = civic_fanatic_purifiers
+		}
+		count_country = {
+			count > 6
+			limit = {
+				is_country_type = default
+				has_communications = root
+				is_at_war = no
+				NOR = {
+					has_civic = civic_fanatic_purifiers
+					has_civic = civic_machine_terminator
+					has_civic = civic_hive_devouring_swarm
+				}
+			}
+		}
+		OR = {
+			is_ai = no
+			any_country = {
+				is_ai = no
+				is_at_war = no
+				has_communications = root
+			}
+		}
+		years_passed = 30
+	}
+	
+	mean_time_to_happen = {
+		years = 100
+		
+		modifier = {
+			factor = 2
+			has_ethic = ethic_xenophobe
+		}
+		modifier = {
+			factor = 0.5
+			OR = {
+				has_ethic = ethic_xenophile
+				has_ethic = ethic_fanatic_xenophile
+			}
+		}
+		modifier = {
+			factor = 0.75
+			OR = {
+				has_ethic = ethic_materialist
+				has_ethic = ethic_fanatic_materialist
+				has_ethic = ethic_egalitarian
+				has_ethic = ethic_fanatic_egalitarian
+			}
+			NOT = { has_ethic = ethic_xenophobe }
+		}
+		modifier = {
+			factor = 10
+			is_ai = yes
+		}
+	}
+	
+	immediate = {
+		set_global_flag = mem_space_race_happened
+	}
+	
+	option = {
+		name = mem_space_race.1.a
+		
+		ai_chance = { factor = 9 }
+		
+		set_country_flag = mem_space_race_accepted
+		hidden_effect = {
+			every_country = {
+				limit = {
+					is_country_type = default
+					has_communications = root
+					NOT = { is_same_value = root }
+					is_at_war = no
+				}
+				set_country_flag = mem_space_race_considering
+				country_event = { id = mem_space_race.2 }
+			}
+		}
+	}
+	
+	option = {
+		name = mem_space_race.1.b
+		
+		ai_chance = { factor = 1 }
+		
+		remove_global_flag = mem_space_race_happened
+		set_timed_global_flag = {
+			flag = mem_space_race_happened
+			days = 3600
+		}
+		set_country_flag = mem_space_race_declined
+	}
+}
+
+#Invitation received
+country_event = {
+	id = mem_space_race.2
+	title = mem_space_race.2.name
+	desc = mem_space_race.2.desc
+	
+	diplomatic = yes
+	
+	picture_event_data = {
+		portrait = from
+		planet_background = from
+		graphical_culture = from
+		city_level = from
+		room = from
+	}
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_space_race.2.a
+		
+		allow = {
+			custom_tooltip = {
+				fail_text = mem_space_race_must_be_diplomatic
+				NOR = {
+					has_civic = civic_fanatic_purifiers
+					has_civic = civic_machine_terminator
+					has_civic = civic_hive_devouring_swarm
+				}
+			}
+		}
+		
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 2
+				OR = {
+					has_civic = civic_machine_servitor
+					is_xenophile = yes
+				}
+			}
+			modifier = {
+				factor = 1.5
+				OR = {
+					is_pacifist = yes
+					is_materialist = yes
+					is_egalitarian = yes
+				}
+			}
+			modifier = {
+				factor = 0.1
+				is_xenophobe = yes
+			}
+		}
+		
+		set_country_flag = mem_space_race_accepted
+	}
+	
+	option = {
+		name = mem_space_race.2.b
+		trigger = {
+			NOR = {
+				has_civic = civic_fanatic_purifiers
+				has_civic = civic_machine_terminator
+				has_civic = civic_hive_devouring_swarm
+				has_civic = civic_inwards_perfection
+			}
+		}
+		add_influence = 20
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 0.1
+				OR = {
+					has_civic = civic_machine_servitor
+					is_xenophile = yes
+				}
+			}
+			modifier = {
+				factor = 0.5
+				OR = {
+					is_pacifist = yes
+					is_materialist = yes
+					is_egalitarian = yes
+				}
+			}
+			modifier = {
+				factor = 2
+				OR = {
+					is_xenophobe = yes
+					has_ethic = ethic_gestalt_consciousness
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_space_race.2.b.psycho
+		trigger = {
+			OR = {
+				has_civic = civic_fanatic_purifiers
+				has_civic = civic_machine_terminator
+				has_civic = civic_hive_devouring_swarm
+			}
+		}
+		add_influence = 50
+	}
+	
+	option = {
+		name = mem_space_race.2.b.inwards
+		trigger = {
+			has_civic = civic_inwards_perfection
+		}
+		add_influence = 30
+		ai_chance = {
+			factor = 50
+			has_civic = civic_inwards_perfection
+		}
+	}
+	
+	after = {
+		remove_country_flag = mem_space_race_considering
+		hidden_effect = {
+			FROM = { country_event = { id = mem_space_race.3 days = 30 } }
+		}
+	}
+}
+
+#Checking for completion of a poll
+country_event = {
+	id = mem_space_race.3
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		NOR = {
+			any_country = { has_country_flag = mem_space_race_considering }
+			has_global_flag = mem_space_race_consideration_complete
+		}
+	}
+	
+	immediate = {
+		set_global_flag = mem_space_race_consideration_complete
+		
+		IF = { #Checking if we have at least 5 participants
+			limit = {
+				count_country = {
+					count > 4
+					limit = {
+						has_country_flag = mem_space_race_accepted
+					}
+				}				
+			}
+			country_event = { id = mem_space_race.4 }
+			else = { country_event = { id = mem_space_race.5 } }
+		}
+	}
+}
+
+#Successful recruiting
+country_event = {
+	id = mem_space_race.4
+	title = mem_space_race.4.name
+	desc = mem_space_race.4.desc
+	
+	picture = GFX_evt_alien_propaganda
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_space_race.4.a
+	}
+}
+
+#Failed
+country_event = {
+	id = mem_space_race.5
+	title = mem_space_race.5.name
+	desc = mem_space_race.5.desc
+	
+	picture = GFX_evt_alien_propaganda
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_space_race.5.a
+	}
 }
