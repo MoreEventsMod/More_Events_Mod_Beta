@@ -3,7 +3,7 @@
 
 namespace = mem_space_race
 
-#Initialisaton event
+#Initializaton event
 country_event = {
 	id = mem_space_race.1
 	title = mem_space_race.1.name
@@ -85,6 +85,7 @@ country_event = {
 		ai_chance = { factor = 9 }
 		
 		set_country_flag = mem_space_race_accepted
+		set_country_flag = mem_space_race_host
 		hidden_effect = {
 			every_country = {
 				limit = {
@@ -287,6 +288,14 @@ country_event = {
 	option = {
 		name = mem_space_race.4.a
 	}
+	
+	after = {
+		every_country = {
+			limit = { has_country_flag = mem_space_race_accepted }
+			country_event = { id = mem_space_race.6 days = 30 }
+			country_event = { id = mem_space_race.7 days = 30 } #Polling to remove those who would go to war in the mean time
+		}
+	}
 }
 
 #Failed
@@ -301,5 +310,302 @@ country_event = {
 	
 	option = {
 		name = mem_space_race.5.a
+	}
+}
+
+@base_score = 1
+@unfocus_score = 3
+@spread_score = 4 
+@focus_score = 6 
+
+#Choosing the focus
+country_event = {
+	id = mem_space_race.6
+	title = mem_space_race.6.name
+	desc = mem_space_race.6.desc
+	
+	picture = GFX_evt_space_hangar
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		is_at_war = no
+		NOT = { has_global_flag = mem_space_race_cancelled }
+	}
+	
+	immediate = {
+		#handing out base score for shields
+		IF = {
+			limit = { has_technology = tech_shields_1 }
+			change_variable = { which = mem_space_race_shields value = @base_score }
+		}
+		IF = {
+			limit = { has_technology = tech_shields_2 }
+			change_variable = { which = mem_space_race_shields value = @base_score }
+		}
+		IF = {
+			limit = { has_technology = tech_shields_3 }
+			change_variable = { which = mem_space_race_shields value = @base_score }
+		}
+		IF = {
+			limit = { has_technology = tech_shields_4 }
+			change_variable = { which = mem_space_race_shields value = @base_score }
+		}
+		IF = {
+			limit = { has_technology = tech_shields_5 }
+			change_variable = { which = mem_space_race_shields value = @base_score }
+		}
+		
+		#For thrusters
+		change_variable = { which = mem_space_race_thrust value = @base_score } #Only 4 levels are available, so one is free
+		IF = {
+			limit = { has_technology = tech_thrusters_1 }
+			change_variable = { which = mem_space_race_thrust value = @base_score }
+		}
+		IF = {
+			limit = { has_technology = tech_thrusters_2 }
+			change_variable = { which = mem_space_race_thrust value = @base_score }
+		}
+		IF = {
+			limit = { has_technology = tech_thrusters_3 }
+			change_variable = { which = mem_space_race_thrust value = @base_score }
+		}
+		IF = {
+			limit = { has_technology = tech_thrusters_4 }
+			change_variable = { which = mem_space_race_thrust value = @base_score }
+		}
+		
+		#For armour
+		IF = {
+			limit = { has_technology = tech_ship_armor_1 }
+			change_variable = { which = mem_space_race_armor value = @base_score }
+		}
+		IF = {
+			limit = { has_technology = tech_ship_armor_2 }
+			change_variable = { which = mem_space_race_armor value = @base_score }
+		}
+		IF = {
+			limit = { has_technology = tech_ship_armor_3 }
+			change_variable = { which = mem_space_race_armor value = @base_score }
+		}
+		IF = {
+			limit = { has_technology = tech_ship_armor_4 }
+			change_variable = { which = mem_space_race_armor value = @base_score }
+		}
+		IF = {
+			limit = { has_technology = tech_ship_armor_5 }
+			change_variable = { which = mem_space_race_armor value = @base_score }
+		}
+	}
+	
+	option = {
+		name = mem_space_race.6.a
+		
+		ai_chance = { factor = 3 }
+		
+		multiply_variable = { which = mem_space_race_shields value = @spread_score }
+		multiply_variable = { which = mem_space_race_thrust value = @spread_score }
+		multiply_variable = { which = mem_space_race_armor value = @spread_score }
+	}
+	
+	option = {
+		name = mem_space_race.6.b
+		
+		ai_chance = { factor = 1 }
+		
+		multiply_variable = { which = mem_space_race_shields value = @focus_score }
+		multiply_variable = { which = mem_space_race_thrust value = @unfocus_score }
+		multiply_variable = { which = mem_space_race_armor value = @unfocus_score }
+	}
+	
+	option = {
+		name = mem_space_race.6.c
+		
+		ai_chance = { factor = 1 }
+		
+		multiply_variable = { which = mem_space_race_shields value = @unfocus_score }
+		multiply_variable = { which = mem_space_race_thrust value = @focus_score }
+		multiply_variable = { which = mem_space_race_armor value = @unfocus_score }
+	}
+	
+	option = {
+		name = mem_space_race.6.d
+		
+		ai_chance = { factor = 1 }
+		
+		multiply_variable = { which = mem_space_race_shields value = @unfocus_score }
+		multiply_variable = { which = mem_space_race_thrust value = @unfocus_score }
+		multiply_variable = { which = mem_space_race_armor value = @focus_score }
+	}
+	
+	after = { 
+		remove_country_flag = mem_space_race_accepted 
+		set_country_flag = mem_space_race_participating
+		FROM = { country_event = { id = mem_space_race.8 days = 30 } }
+	}
+}
+
+#We can't go to race, we are at war
+country_event = {
+	id = mem_space_race.7
+	title = mem_space_race.7.name
+	desc = mem_space_race.7.desc
+	
+	picture = GFX_evt_alien_propaganda
+	
+	is_triggered_only  = yes
+	
+	trigger = {
+		is_at_war = yes
+		NOT = { has_global_flag = mem_space_race_cancelled }
+	}
+	
+	immediate = {
+		remove_country_flag = mem_space_race_accepted 
+		FROM = { country_event = { id = mem_space_race.8 days = 30 } }
+	}
+	
+	option = {
+		name = UNFORTUNATE
+	}
+	
+	after = {
+		hidden_effect = {
+			IF = {
+				limit = { has_country_flag = mem_space_race_host }
+				set_timed_global_flag = mem_space_race_cancelled
+			}
+		}
+	}
+}
+
+#Bounce back to the host
+country_event = {
+	id = mem_space_race.8
+	title = mem_space_race.8.name
+	desc = mem_space_race.8.desc
+	
+	picture = GFX_evt_towel
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		has_country_flag = mem_space_race_participating
+		NOT = { has_global_flag = mem_space_race_cancelled }
+	}
+	
+	immediate = {
+		every_country = {
+			limit = {
+				has_country_flag = mem_space_race_participating
+			}
+			root = {
+				change_variable = {
+					which = mem_space_race_count_participants
+					value = 1
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_space_race.8.a
+	}
+	
+	after = {
+		country_event = { id = mem_space_race.9 days = 30 random = 60 }
+	}
+}
+
+#Hidden event to wind racers down
+country_event = {
+	id = mem_space_race.9
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = { has_global_flag = mem_space_race_cancelled }
+	}
+	
+	immediate = {
+		random_list = {
+			33 = {
+				set_timed_country_flag = { flag = mem_space_race_shield_race days = 1 }
+			}
+			33 = {
+				set_timed_country_flag = { flag = mem_space_race_thrust_race days = 1 }
+			}
+			33 = {
+				set_timed_country_flag = { flag = mem_space_race_armor_race days = 1 }
+			}
+		}
+		while = {
+			limit = { NOT = { has_country_flag = mem_space_race_done_round } }
+			random_country = {
+				limit = { has_country_flag = mem_space_race_participating }
+				random_list = {
+					1 = {
+						change_variable = { which = mem_space_race_shields value = 1 }
+						IF = {
+							limit = { 
+								prev = { has_country_flag = mem_space_race_shield_race }
+								check_variable = { which = mem_space_race_shields value < 1 }
+							}
+							save_event_target_as = eliminated
+							prev = { set_timed_country_flag = { flag = mem_space_race_done_round days = 1 } }
+						}
+						
+						modifier = {
+							factor = 2
+							prev = { has_country_flag = mem_space_race_shield_race }
+						}
+						modifier = {
+							factor = 0
+							check_variable = { which = mem_space_race value < 1 }
+						}
+					}
+					1 = {
+						change_variable = { which = mem_space_race_shields value = 1 }
+						IF = {
+							limit = { 
+								prev = { has_country_flag = mem_space_race_thrust_race }
+								check_variable = { which = mem_space_race_thrust value < 1 }
+							}
+							save_event_target_as = eliminated
+							prev = { set_timed_country_flag = { flag = mem_space_race_done_round days = 1 } }
+						}
+						
+						modifier = {
+							factor = 2
+							prev = { has_country_flag = mem_space_race_thrust_race }
+						}
+						modifier = {
+							factor = 0
+							check_variable = { which = mem_space_race_thrust value < 1 }
+						}
+					}
+					1 = {
+						change_variable = { which = mem_space_race_armor value = 1 }
+						IF = {
+							limit = { 
+								prev = { has_country_flag = mem_space_race_armor_race }
+								check_variable = { which = mem_space_race_armor value < 1 }
+							}
+							save_event_target_as = eliminated
+							prev = { set_timed_country_flag = { flag = mem_space_race_done_round days = 1 } }
+						}
+						
+						modifier = {
+							factor = 2
+							prev = { has_country_flag = mem_space_race_armor_race }
+						}
+						modifier = {
+							factor = 0
+							check_variable = { which = mem_space_race_armor value < 1 }
+						}
+					}
+				}
+			}
+		}
 	}
 }
