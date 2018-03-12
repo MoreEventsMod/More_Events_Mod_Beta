@@ -518,6 +518,7 @@ country_event = {
 }
 
 #Hidden event to wind racers down
+@rebound = 3
 country_event = {
 	id = mem_space_race.9
 	hide_window = yes
@@ -607,17 +608,71 @@ country_event = {
 				}
 			}
 		}
-		event_target:eliminated = {		
-			country_event = { id = mem_space_race.10 }
-			country_event = { id = mem_space_race.11 }
-			country_event = { id = mem_space_race.12 }
-			country_event = { id = mem_space_race.13 }
-			remove_country_flag = mem_space_race_participating
-			set_country_flag = mem_space_race_former_participant
+		IF = {
+			limit = {
+				check_variable = {
+					which = mem_space_race_count_participants
+					value > 3
+				}
+			}
+			event_target:eliminated = {		
+				country_event = { id = mem_space_race.10 }
+				remove_country_flag = mem_space_race_participating
+				set_country_flag = mem_space_race_former_participant
+			}
+			else = {
+				IF = {
+					limit = {
+						check_variable = {
+							which = mem_space_race_count_participants
+							value = 3
+						}
+					}
+					event_target:eliminated = {
+						save_event_target_as = third_place
+						country_event = { id = mem_space_race.11 }
+						remove_country_flag = mem_space_race_participating
+						set_country_flag = mem_space_race_former_participant
+					}
+					else = {
+						event_target:eliminated = {
+							save_event_target_as = second_place
+							remove_country_flag = mem_space_race_participating
+							set_country_flag = mem_space_race_former_participant
+						}
+						random_country = {
+							limit = { has_country_flag = mem_space_race_participating }
+							save_event_target_as = first_place
+						}
+						country_event = { id = mem_space_race.12 }
+					}
+				}
+			}
 		}
+		every_country = {
+			limit = { has_country_flag = mem_space_race_participating }
+			change_variable = {
+				which = mem_space_race_shields
+				value = @rebound
+			}
+			change_variable = {
+				which = mem_space_race_thrust
+				value = @rebound
+			}
+			change_variable = {
+				which = mem_space_race_armor
+				value = @rebound
+			}
+		}
+		change_variable = {
+			which = mem_space_race_count_participants
+			value = -1
+		}
+		country_event = { id = mem_space_race.9 days = 30 random = 60 }
 	}
 }
 
+#Notified of non-winning place
 country_event = {
 	id = mem_space_race.10
 	title = mem_space_race.10.name
@@ -625,28 +680,66 @@ country_event = {
 	
 	picture = GFX_evt_machine_space_battle
 	
-	trigger = {
-		FROM = {
-			check_variable = {
-				which = mem_space_race_count_participants
-				value > 3
-			}
-		}
-	}
+	is_triggered_only = yes
 	
 	option = {
-		name = OK
+		name = mem_space_race.10.a
 	}
 	
 	after = {
-		hidden_effect = {
-			FROM = {
-				change_variable = {
-					which = mem_space_race_count_participants
-					value = -1
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 6
+			min = 10
+			max = 1000
+		}
+	}
+}
+
+#Notified of third place
+country_event = {
+	id = mem_space_race.11
+	title = mem_space_race.11.name
+	desc = mem_space_race.11.desc
+	
+	picture = GFX_evt_machine_space_battle
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_space_race.11.a
+	}
+	
+	after = {
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 12
+			min = 10
+			max = 2000
+		}
+	}
+}
+
+#Processing end of race
+country_event = {
+	id = mem_space_race.12
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		event_target:third_place = { country_event = { id = mem_space_race.13 } }
+		event_target:second_place = { country_event = { id = mem_space_race.14 } }
+		event_target:first_place = { country_event = { id = mem_space_race.15 } }
+		every_country = {
+			limit = {
+				has_country_flag = mem_space_race_former_participant
+				NOR = {
+					is_same_value = event_target:third_place
+					is_same_value = event_target:second_place
+					is_same_value = event_target:first_place
 				}
-				country_event = { id = mem_space_race.9 days = 30 random = 60 }
 			}
+			country_event = { id = mem_space_race.16 }
 		}
 	}
 }
