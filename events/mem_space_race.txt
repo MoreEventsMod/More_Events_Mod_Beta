@@ -648,8 +648,8 @@ country_event = {
 		set_variable = { which = mem_space_race_sudden_death_counter value = 0 }
 		IF = {
 			limit = {
-				check_variable = {
-					which = mem_space_race_count_participants
+				count_country = {
+					limit = { has_country_flag = mem_space_race_participating }
 					value > 3
 				}
 			}
@@ -661,9 +661,9 @@ country_event = {
 			else = {
 				IF = {
 					limit = {
-						check_variable = {
-							which = mem_space_race_count_participants
-							value = 3
+						count_country = {
+							limit = { has_country_flag = mem_space_race_participating }
+							value > 3
 						}
 					}
 					event_target:eliminated = {
@@ -680,6 +680,8 @@ country_event = {
 						}
 						random_country = {
 							limit = { has_country_flag = mem_space_race_participating }
+							remove_country_flag = mem_space_race_participating
+							set_country_flag = mem_space_race_former_participant
 							save_event_target_as = first_place
 						}
 						country_event = { id = mem_space_race.12 }
@@ -706,7 +708,15 @@ country_event = {
 			which = mem_space_race_count_participants
 			value = -1
 		}
-		country_event = { id = mem_space_race.9 days = 30 random = 60 }
+		IF = {
+			limit = {
+				count_country = {
+					limit = { has_country_flag = mem_space_race_participating }
+					value > 0
+				}
+			}
+			country_event = { id = mem_space_race.9 days = 10 random = 30 }
+		}
 		log = "[eliminated.GetName] is out. [Root.mem_space_race_count_participants] are still racing"
 	}
 }
