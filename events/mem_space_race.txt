@@ -42,7 +42,7 @@ country_event = {
 				has_communications = root
 			}
 		}
-		years_passed = 30
+		years_passed > 30
 	}
 	
 	mean_time_to_happen = {
@@ -229,8 +229,11 @@ country_event = {
 		}
 		add_influence = 30
 		ai_chance = {
-			factor = 50
-			has_civic = civic_inwards_perfection
+			factor = 1
+			modifier = {
+				factor = 50
+				has_civic = civic_inwards_perfection
+			}
 		}
 	}
 	
@@ -473,7 +476,7 @@ country_event = {
 		hidden_effect = {
 			IF = {
 				limit = { has_country_flag = mem_space_race_host }
-				set_timed_global_flag = mem_space_race_cancelled
+				set_global_flag = mem_space_race_cancelled
 			}
 		}
 	}
@@ -491,10 +494,12 @@ country_event = {
 	
 	trigger = {
 		has_country_flag = mem_space_race_participating
+		NOT = { has_country_flag = mem_space_race_received_a_go }
 		NOT = { has_global_flag = mem_space_race_cancelled }
 	}
 	
 	immediate = {
+		set_country_flag = mem_space_race_received_a_go
 		every_country = {
 			limit = {
 				has_country_flag = mem_space_race_participating
@@ -549,7 +554,7 @@ country_event = {
 				limit = { has_country_flag = mem_space_race_participating }
 				random_list = {
 					1 = {
-						change_variable = { which = mem_space_race_shields value = 1 }
+						change_variable = { which = mem_space_race_shields value = -1 }
 						IF = {
 							limit = { 
 								prev = { has_country_flag = mem_space_race_shield_race }
@@ -569,7 +574,7 @@ country_event = {
 						}
 					}
 					1 = {
-						change_variable = { which = mem_space_race_shields value = 1 }
+						change_variable = { which = mem_space_race_thrust value = -1 }
 						IF = {
 							limit = { 
 								prev = { has_country_flag = mem_space_race_thrust_race }
@@ -589,7 +594,7 @@ country_event = {
 						}
 					}
 					1 = {
-						change_variable = { which = mem_space_race_armor value = 1 }
+						change_variable = { which = mem_space_race_armor value = -1 }
 						IF = {
 							limit = { 
 								prev = { has_country_flag = mem_space_race_armor_race }
@@ -679,7 +684,24 @@ country_event = {
 country_event = {
 	id = mem_space_race.10
 	title = mem_space_race.10.name
-	desc = mem_space_race.10.desc
+	desc = {
+		text = mem_space_race.10.desc.shield
+		trigger = {
+			FROM = { has_country_flag = mem_space_race_shield_race }
+		}
+	}
+	desc = {
+		text = mem_space_race.10.desc.thrust
+		trigger = {
+			FROM = { has_country_flag = mem_space_race_thrust_race }
+		}
+	}
+	desc = {
+		text = mem_space_race.10.desc.armor
+		trigger = {
+			FROM = { has_country_flag = mem_space_race_armor_race }
+		}
+	}
 	
 	picture = GFX_evt_machine_space_battle
 	
@@ -697,7 +719,24 @@ country_event = {
 country_event = {
 	id = mem_space_race.11
 	title = mem_space_race.11.name
-	desc = mem_space_race.11.desc
+	desc = {
+		text = mem_space_race.11.desc.shield
+		trigger = {
+			FROM = { has_country_flag = mem_space_race_shield_race }
+		}
+	}
+	desc = {
+		text = mem_space_race.11.desc.thrust
+		trigger = {
+			FROM = { has_country_flag = mem_space_race_thrust_race }
+		}
+	}
+	desc = {
+		text = mem_space_race.11.desc.armor
+		trigger = {
+			FROM = { has_country_flag = mem_space_race_armor_race }
+		}
+	}
 	
 	picture = GFX_evt_machine_space_battle
 	
@@ -718,9 +757,9 @@ country_event = {
 	is_triggered_only = yes
 	
 	immediate = {
-		event_target:third_place = { country_event = { id = mem_space_race.13 } }
+		event_target:third_place = { country_event = { id = mem_space_race.15 } }
 		event_target:second_place = { country_event = { id = mem_space_race.14 } }
-		event_target:first_place = { country_event = { id = mem_space_race.15 } }
+		event_target:first_place = { country_event = { id = mem_space_race.13 } }
 		every_country = {
 			limit = {
 				has_country_flag = mem_space_race_former_participant
@@ -731,6 +770,262 @@ country_event = {
 				}
 			}
 			country_event = { id = mem_space_race.16 }
+		}
+	}
+}
+
+@tier1researchreward = 6
+@tier1researchmin = 60
+@tier1researchmax = 150
+@tier2researchreward = 12
+@tier2researchmin = 90
+@tier2researchmax = 250
+@tier3researchreward = 18
+@tier3researchmin = 120
+@tier3researchmax = 350
+@tier4researchreward = 24
+@tier4researchmin = 150
+@tier4researchmax = 500
+@tier5researchreward = 48
+@tier5researchmin = 300
+@tier5researchmax = 1000
+
+#First place notified
+country_event = {
+	id = mem_space_race.13
+	title = mem_space_race.13.name
+	desc = mem_space_race.13.desc
+	
+	picture = GFX_evt_alien_propaganda
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_space_race.13.a
+		
+		trigger = {
+			NOR = {
+				has_authority = auth_machine_intelligence
+				has_authority = auth_hive_mind
+				is_xenophobe = no
+				is_militarist = no
+				is_authoritarian = no
+			}
+		}
+	}
+	
+	option = {
+		name = mem_space_race.13.a.machine
+		
+		trigger = {
+			has_authority = auth_machine_intelligence
+		}
+	}
+	
+	option = {
+		name = mem_space_race.13.a.hive
+		
+		trigger = {
+			has_authority = auth_hive_mind
+		}
+	}
+	
+	option = {
+		name = mem_space_race.13.a.auth
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_authoritarian
+				has_ethic = ethic_fanatic_authoritarian
+				has_ethic = ethic_militarist
+				has_ethic = ethic_fanatic_militarist
+			}
+		}
+	}
+	
+	after = {
+		add_monthly_resource_mult = {
+			resource = engineering_research
+			value = @tier5researchreward
+			min = @tier5researchmin
+			max = @tier5researchmax
+		}
+		
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 18
+			min = 10
+			max = 2000
+		}
+	}
+}
+
+#Second place notification
+country_event = {
+	id = mem_space_race.14
+	title = mem_space_race.14.name
+	desc = mem_space_race.14.desc
+	
+	picture = GFX_evt_alien_propaganda
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_space_race.14.a
+		
+		trigger = {
+			NOR = {
+				has_authority = auth_machine_intelligence
+				has_authority = auth_hive_mind
+				is_xenophobe = no
+				is_militarist = no
+				is_authoritarian = no
+			}
+		}
+	}
+	
+	option = {
+		name = mem_space_race.14.a.machine
+		
+		trigger = {
+			has_authority = auth_machine_intelligence
+		}
+	}
+	
+	option = {
+		name = mem_space_race.14.a.hive
+		
+		trigger = {
+			has_authority = auth_hive_mind
+		}
+	}
+	
+	option = {
+		name = mem_space_race.14.a.auth
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_authoritarian
+				has_ethic = ethic_fanatic_authoritarian
+				has_ethic = ethic_militarist
+				has_ethic = ethic_fanatic_militarist
+			}
+		}
+	}
+	
+	after = {
+		add_monthly_resource_mult = {
+			resource = engineering_research
+			value = @tier5researchreward
+			min = @tier5researchmin
+			max = @tier5researchmax
+		}
+		
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 12
+			min = 10
+			max = 1500
+		}
+	}
+}
+
+#Third place notification
+country_event = {
+	id = mem_space_race.15
+	title = mem_space_race.15.name
+	desc = mem_space_race.15.desc
+	
+	picture = GFX_evt_alien_propaganda
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_space_race.15.a
+		
+		trigger = {
+			NOR = {
+				has_authority = auth_machine_intelligence
+				has_authority = auth_hive_mind
+				is_xenophobe = no
+				is_militarist = no
+				is_authoritarian = no
+			}
+		}
+	}
+	
+	option = {
+		name = mem_space_race.15.a.machine
+		
+		trigger = {
+			has_authority = auth_machine_intelligence
+		}
+	}
+	
+	option = {
+		name = mem_space_race.15.a.hive
+		
+		trigger = {
+			has_authority = auth_hive_mind
+		}
+	}
+	
+	option = {
+		name = mem_space_race.15.a.auth
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_authoritarian
+				has_ethic = ethic_fanatic_authoritarian
+				has_ethic = ethic_militarist
+				has_ethic = ethic_fanatic_militarist
+			}
+		}
+	}
+	
+	after = {
+		add_monthly_resource_mult = {
+			resource = engineering_research
+			value = @tier5researchreward
+			min = @tier5researchmin
+			max = @tier5researchmax
+		}
+		
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 6
+			min = 10
+			max = 1000
+		}
+	}
+}
+
+#Loser notification
+country_event = {
+	id = mem_space_race.16
+	title = mem_space_race.16.name
+	desc = mem_space_race.16.desc
+	
+	picture = GFX_evt_alien_propaganda
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = OK
+	}
+	
+	after = {
+		add_monthly_resource_mult = {
+			resource = engineering_research
+			value = @tier5researchreward
+			min = @tier5researchmin
+			max = @tier5researchmax
 		}
 	}
 }
