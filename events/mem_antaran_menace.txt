@@ -14,6 +14,8 @@ namespace = mem_antarans
 # mem_antarans.4   |Notification Event that a Rift is forming
 # mem_antarans.5   |Rift opens and fleet spawn events get linked
 # mem_antarans.10  |Establishing communications with every country that does not already know them (is started at fleet spawn 100 and 101)
+# mem_antarans.20  |Information event about a known empire being attacked
+# mem_antarans.21  |Information event about an unknown empire being attacked
 # mem_antarans.98  |Test Event for the Rift
 # mem_antarans.99  |Test Event to show Targets
 ########################################################
@@ -26,6 +28,16 @@ namespace = mem_antarans
 # mem_antarans.111 |Planet has been raided and now gets debuff and owner flags are being changed
 # mem_antarans.112 |Fleet event sending Raiding/Retaliation fleet home to the rift and let them vanish
 # mem_antarans.113 |Delete Rift after fleet has left (on monthly pulse)
+########################################################
+# Introductionary Events
+########################################################
+# mem_antarans.200 |Visiting a system with a broken/shattered planet (flagged in the first event)
+# mem_antarans.201 |Finished Project on first broken world
+# mem_antarans.202 |Finished Anomaly Version 1
+# mem_antarans.203 |Finished Anomaly Version 2
+# mem_antarans.204 |Finished Anomaly Version 3
+# mem_antarans.205 |Finished Anomaly Version 4
+# mem_antarans.206 |Finished Anomaly Version 5
 
 # Setup Event at Game Start for randomly disabling the Crisis
 event = {
@@ -38,9 +50,62 @@ event = {
 #				set_global_flag = mem_antarans_disabled
 #			}
 			1 = {
-				set_timed_global_flag = {
-					flag = mem_antarans_recent_attack
-					days = 9000 # 25 years
+#				set_timed_global_flag = {
+#					flag = mem_antarans_recent_attack
+#					days = 9000 # 25 years
+#				}
+				set_global_flag = mem_antarans_enabled
+				every_country = {
+					limit = {
+						is_country_type = default
+					}
+					random_list = {
+						1 = {
+							capital_scope = {
+								solar_system = {
+									random_neighbor_system = {
+										random_neighbor_system = {
+											limit = {
+												NOT = {
+													has_star_flag = empire_home_system
+												}
+												any_planet = {
+													OR = {
+														is_planet_class = pc_barren
+														is_planet_class = pc_barren_cold
+														is_planet_class = pc_toxic
+														is_planet_class = pc_frozen
+													}
+												}
+											}
+											set_star_flag = mem_antaran_destroyed_planet_system
+											random_system_planet = {
+												limit = {
+													OR = {
+														is_planet_class = pc_barren
+														is_planet_class = pc_barren_cold
+														is_planet_class = pc_toxic
+														is_planet_class = pc_frozen
+													}
+												}
+												random_list = {
+													1 = {
+														change_pc = pc_shattered
+													}
+													1 = {
+														change_pc = pc_broken
+													}
+												}
+												set_planet_flag = mem_antaran_destroyed_planet
+											}
+										}
+									}
+								}
+							}
+						}
+						1 = {
+						}
+					}
 				}
 			}
 		}
@@ -53,6 +118,7 @@ event = {
 	hide_window = yes
 	
 	trigger = {
+		has_global_flag = mem_antarans_enabled
 		NOT = {
 			has_global_flag = mem_antarans_disabled
 		}
@@ -287,7 +353,7 @@ event = {
 						has_communications = event_target:mem_antarans_target_5
 					}
 				}
-				#country_event = { id = mem_antarans.# days = 60 random = 10 }
+				country_event = { id = mem_antarans.20 days = 60 random = 10 }
 				ELSE = {
 					IF = { # checks if the country has contact to another country that has contact to one of the targeted empires
 						limit = {
@@ -309,7 +375,7 @@ event = {
 								}
 							}
 						}
-						#country_event = { id = mem_antarans.## days = 90 random = 10 }
+						country_event = { id = mem_antarans.21 days = 90 random = 10 }
 					}
 				}
 			}
@@ -347,7 +413,7 @@ country_event = {
 						}
 					}
 					create_ambient_object = { # TODO exchange that later with a custom made one from frog
-						type = "mem_antaran_rift_object"
+						type = "mem_antaran_wormhole_big_object"
 					}
 					random_system_ambient_object = {
 						limit = { is_same_value = last_created_ambient_object }
@@ -399,7 +465,7 @@ country_event = {
 								}
 							}
 							create_ambient_object = { # TODO exchange that later with a custom made one by frog
-								type = "mem_antaran_rift_object"
+								type = "mem_antaran_wormhole_small_object"
 							}
 							random_system_ambient_object = {
 								limit = { is_same_value = last_created_ambient_object }
@@ -437,7 +503,7 @@ country_event = {
 									}
 								}
 								create_ambient_object = { # TODO exchange that later with a custom made one by frog
-									type = "mem_antaran_rift_object"
+									type = "mem_antaran_wormhole_small_object"
 								}
 								random_system_ambient_object = {
 									limit = { is_same_value = last_created_ambient_object }
@@ -676,6 +742,74 @@ country_event = {
 			}
 			establish_communications_no_message = ROOT
 		}
+	}
+}
+
+country_event = {
+	id = mem_antarans.20
+	title = mem_antarans.20.name
+	desc = { # for those not having met them
+		text = mem_antarans.20a.desc
+		trigger = {
+			NOT = { 
+				has_country_flag = mem_antarans_met
+			}
+		}
+	}
+	desc = { # for those who have met them before
+		text = mem_antarans.20b.desc
+		trigger = {
+			has_country_flag = mem_antarans_met
+		}
+	}
+
+	picture = GFX_evt_mem_space_battle # TODO we will need custom art for a picture of one of those rifts opening
+	location = event_target:mem_antaran_victim
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_country = {
+			limit = {
+				has_communications = event_target:mem_antarans_target_1
+				has_communications = event_target:mem_antarans_target_2
+				has_communications = event_target:mem_antarans_target_3
+				has_communications = event_target:mem_antarans_target_4
+				has_communications = event_target:mem_antarans_target_5
+			}
+			save_event_target_as = mem_antaran_victim
+		}
+	}
+	
+	option = {
+		name = "WORRYING"
+	}
+}
+
+country_event = {
+	id = mem_antarans.21
+	title = mem_antarans.21.name
+	desc = { # for those not having met them
+		text = mem_antarans.21a.desc
+		trigger = {
+			NOT = { 
+				has_country_flag = mem_antarans_met
+			}
+		}
+	}
+	desc = { # for those who have met them before
+		text = mem_antarans.21b.desc
+		trigger = {
+			has_country_flag = mem_antarans_met
+		}
+	}
+
+	picture = GFX_evt_mem_space_battle # TODO we will need custom art for a picture of one of those rifts opening
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "WORRYING"
 	}
 }
 
@@ -2286,6 +2420,299 @@ event = {
 	}
 }
 
+# Triggers event when ship enters a system
+# Scope = Ship
+# From = System
+# FromFrom = Country
+ship_event = {
+	id = mem_antarans.200
+	title = mem_antarans.200.name
+	desc = { # haven't seen anything antaran related so far
+		text = mem_antarans.200a.desc
+		trigger = {
+			FromFrom = {
+				NOT = {
+					has_country_flag = mem_antaran_destroyed_planet_found
+				}
+			}
+		}
+	}
+	desc = { # only seen another destroyed planet so far
+		text = mem_antarans.200b.desc
+		trigger = {
+			FromFrom = {
+				NOT = {
+					has_country_flag = mem_antarans_met
+				}
+				has_country_flag = mem_antaran_destroyed_planet_found
+			}
+		}
+	}
+	desc = { # already met the antarans and seen a destroyed planet
+		text = mem_antarans.200c.desc
+		trigger = {
+			FromFrom = {
+				has_country_flag = mem_antarans_met
+				has_country_flag = mem_antaran_destroyed_planet_found
+			}
+		}
+	}
+	
+	picture = GFX_evt_mem_space_battle # TODO we will need custom art for a picture of one of those rifts opening
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		From = {
+			has_star_flag = mem_antaran_destroyed_planet_system
+		}
+	}
+	
+	immediate = {
+		From = {
+			remove_star_flag = mem_antaran_destroyed_planet_system
+		}
+		IF = {
+			limit = {
+				FromFrom = {
+					NOT = {
+						has_country_flag = mem_antaran_destroyed_planet_found
+					}
+				}
+			}
+			FromFrom = {
+				set_country_flag = mem_antaran_destroyed_planet_found
+			}
+		}
+	}
+	
+	option = {
+		name = WORRYING
+	}
+}
+
+# Finished Project on first broken world
+ship_event = {
+	id = mem_antarans.201
+	title = mem_antarans.201.name
+	desc = {
+		text = mem_antarans.201a.desc
+		trigger = {
+			owner = {
+				NOT = {
+					has_country_flag = mem_antarans_met
+				}
+			}
+		}
+	}
+	desc = {
+		text = mem_antarans.201b.desc
+		trigger = {
+			owner = {
+				has_country_flag = mem_antarans_met
+			}
+		}
+	}
+	picture = GFX_evt_mem_orila_pods
+	show_sound = event_scanner
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_antarans.201.a
+	}
+}
+
+# Finished Anomaly Version 1
+ship_event = {
+	id = mem_antarans.202
+	title = mem_antarans.202.name
+	desc = mem_antarans.202.desc
+	picture = GFX_evt_mining_station
+	show_sound = event_ship_bridge
+	location = FROM
+	
+	is_triggered_only = yes
+			
+	immediate = {
+		From = { orbital_deposit_tile = { clear_deposits = yes } }
+		owner = {
+			set_country_flag = mem_antaran_destroyed_colony_a_found
+		}
+	}
+
+	option = {
+		name = WORRYING
+		From = { 
+			orbital_deposit_tile = {
+				add_deposit = d_vast_engineering_deposit
+			}
+		}
+	}
+}
+
+# Finished Anomaly Version 2
+ship_event = {
+	id = mem_antarans.203
+	title = mem_antarans.203.name
+	desc = mem_antarans.203.desc
+	picture = GFX_evt_mining_station
+	show_sound = event_ship_bridge
+	location = FROM
+	
+	is_triggered_only = yes
+			
+	immediate = {
+		From = { orbital_deposit_tile = { clear_deposits = yes } }
+		owner = {
+			set_country_flag = mem_antaran_destroyed_colony_b_found
+		}
+	}
+
+	option = {
+		name = WORRYING
+		From = { 
+			orbital_deposit_tile = {
+				add_deposit = d_vast_engineering_deposit
+			}
+		}
+	}
+}
+
+# Finished Anomaly Version 3
+ship_event = {
+	id = mem_antarans.204
+	title = mem_antarans.204.name
+	desc = mem_antarans.204.desc
+	picture = GFX_evt_mining_station
+	show_sound = event_ship_bridge
+	location = FROM
+	
+	is_triggered_only = yes
+			
+	immediate = {
+		From = { orbital_deposit_tile = { clear_deposits = yes } }
+		owner = {
+			set_country_flag = mem_antaran_destroyed_colony_c_found
+		}
+	}
+
+	option = {
+		name = WORRYING
+		From = { 
+			orbital_deposit_tile = {
+				add_deposit = d_vast_engineering_deposit
+			}
+		}
+	}
+}
+
+# Finished Anomaly Version 4
+ship_event = {
+	id = mem_antarans.205
+	title = mem_antarans.205.name
+	desc = mem_antarans.205.desc
+	picture = GFX_evt_mining_station
+	show_sound = event_ship_bridge
+	location = FROM
+	
+	is_triggered_only = yes
+			
+	immediate = {
+		From = { orbital_deposit_tile = { clear_deposits = yes } }
+		owner = {
+			set_country_flag = mem_antaran_destroyed_colony_d_found
+		}
+	}
+
+	option = {
+		name = WORRYING
+		From = { 
+			orbital_deposit_tile = {
+				add_deposit = d_vast_engineering_deposit
+			}
+		}
+	}
+}
+
+# Finished Anomaly Version 5
+ship_event = {
+	id = mem_antarans.206
+	title = mem_antarans.206.name
+	desc = mem_antarans.206.desc
+	picture = GFX_evt_mining_station
+	show_sound = event_ship_bridge
+	location = FROM
+	
+	is_triggered_only = yes
+			
+	immediate = {
+		From = { orbital_deposit_tile = { clear_deposits = yes } }
+	}
+
+	option = {
+		name = WORRYING
+		From = { 
+			orbital_deposit_tile = {
+				add_deposit = d_vast_engineering_deposit
+			}
+		}
+	}
+}
+
+# Test Event deleting flagged objects
+country_event = {
+	id = mem_antarans.96
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_ambient_object = {
+			limit = {
+				has_ambient_object_flag = mem_antarans_test
+			}
+			destroy_ambient_object = THIS
+		}
+	}
+}
+
+# Test Event for the wormhole station
+country_event = {
+	id = mem_antarans.97
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_owned_planet = {
+			limit = {
+				is_capital = yes
+			}
+			solar_system = {
+				random_system_planet = {
+					limit = {
+						is_star = yes
+					}
+					create_ambient_object = { # TODO exchange that later with a custom made one from frog
+						type = "mem_antaran_wormhole_station_object"
+					}
+					last_created_ambient_object = {
+						set_location = {
+							target = prev
+							distance = 250
+							angle = random
+						}
+						set_ambient_object_flag = mem_antarans_test
+						save_event_target_as = mem_antarans_test
+					}
+				}
+			}
+		}
+	}
+}
+
 # Test Event for the Rift
 country_event = {
 	id = mem_antarans.98
@@ -2304,7 +2731,7 @@ country_event = {
 						is_star = yes
 					}
 					create_ambient_object = { # TODO exchange that later with a custom made one from frog
-						type = "mem_antaran_rift_object"
+						type = "mem_antaran_wormhole_small_object"
 					}
 					last_created_ambient_object = {
 						set_location = {
@@ -2312,8 +2739,8 @@ country_event = {
 							distance = 250
 							angle = random
 						}
-						set_ambient_object_flag = mem_antarans_rift
-						save_event_target_as = mem_antarans_rift
+						set_ambient_object_flag = mem_antarans_test
+						save_event_target_as = mem_antarans_test
 					}
 				}
 			}
