@@ -82,7 +82,13 @@ country_event = {
 	option = {
 		name = mem_space_race.1.a
 		
-		ai_chance = { factor = 9 }
+		ai_chance = { 
+			factor = 9 
+			modifier = {
+				factor = 0
+				income < 10
+			}
+		}
 		
 		set_country_flag = mem_space_race_accepted
 		set_country_flag = mem_space_race_host
@@ -97,6 +103,10 @@ country_event = {
 				set_country_flag = mem_space_race_considering
 				country_event = { id = mem_space_race.2 }
 			}
+		}
+		add_modifier = {
+			modifier = mem_space_race_host
+			days = -1
 		}
 	}
 	
@@ -170,6 +180,10 @@ country_event = {
 		}
 		
 		set_country_flag = mem_space_race_accepted
+		add_modifier = {
+			modifier = mem_space_race_participant
+			days = -1
+		}
 		log = "[Root.GetName] accepted"
 	}
 	
@@ -297,10 +311,12 @@ country_event = {
 	}
 	
 	after = {
-		every_country = {
-			limit = { has_country_flag = mem_space_race_accepted }
-			country_event = { id = mem_space_race.6 days = 30 }
-			country_event = { id = mem_space_race.7 days = 30 } #Polling to remove those who would go to war in the mean time
+		hidden_effect = {
+			every_country = {
+				limit = { has_country_flag = mem_space_race_accepted }
+				country_event = { id = mem_space_race.6 days = 30 }
+				country_event = { id = mem_space_race.7 days = 30 } #Polling to remove those who would go to war in the mean time
+			}
 		}
 		log = "Race can get started"
 	}
@@ -328,6 +344,7 @@ country_event = {
 				country_event = { id = mem_space_race.20 }
 			}
 		}
+		remove_modifier = mem_space_race_host
 	}
 }
 
@@ -470,6 +487,10 @@ country_event = {
 		hidden_effect = {
 			FROM = { country_event = { id = mem_space_race.8 days = 30 } }
 		}
+		IF = {
+			limit = { has_modifier = mem_space_race_participant }
+			remove_modifier = mem_space_race_participant
+		}
 	}
 }
 
@@ -504,6 +525,8 @@ country_event = {
 				set_global_flag = mem_space_race_cancelled
 			}
 		}
+		remove_modifier = mem_space_race_participant
+		remove_modifier = mem_space_race_host
 	}
 }
 
@@ -772,6 +795,10 @@ country_event = {
 	}
 	
 	after = {
+		IF = {
+			limit = { has_modifier = mem_space_race_participant }
+			remove_modifier = mem_space_race_participant
+		}
 	}
 }
 
@@ -807,6 +834,10 @@ country_event = {
 	}
 	
 	after = {
+		IF = {
+			limit = { has_modifier = mem_space_race_participant }
+			remove_modifier = mem_space_race_participant
+		}
 	}
 }
 
@@ -817,6 +848,7 @@ country_event = {
 	is_triggered_only = yes
 	
 	immediate = {
+		remove_modifier = mem_space_race_host
 		event_target:third_place = { country_event = { id = mem_space_race.15 } }
 		event_target:second_place = { country_event = { id = mem_space_race.14 } }
 		event_target:first_place = { country_event = { id = mem_space_race.13 } }
@@ -932,6 +964,10 @@ country_event = {
 				40 = {  }
 			}
 		}
+		IF = {
+			limit = { has_modifier = mem_space_race_participant }
+			remove_modifier = mem_space_race_participant
+		}
 	}
 }
 
@@ -1016,6 +1052,10 @@ country_event = {
 				25 = { country_event = { id = mem_space_race.18 days = 60 random = 300 } }
 				50 = {  }
 			}
+		}
+		IF = {
+			limit = { has_modifier = mem_space_race_participant }
+			remove_modifier = mem_space_race_participant
 		}
 	}
 }
@@ -1104,6 +1144,10 @@ country_event = {
 				60 = {  }
 			}
 		}
+		IF = {
+			limit = { has_modifier = mem_space_race_participant }
+			remove_modifier = mem_space_race_participant
+		}
 	}
 }
 
@@ -1183,6 +1227,10 @@ country_event = {
 				10 = { country_event = { id = mem_space_race.18 days = 60 random = 300 } }
 				80 = {  }
 			}
+		}
+		IF = {
+			limit = { has_modifier = mem_space_race_participant }
+			remove_modifier = mem_space_race_participant
 		}
 	}
 }
@@ -1313,6 +1361,11 @@ country_event = {
 	
 	option = {
 		name = mem_space_race.20.a
+		
+		IF = {
+			limit = { has_modifier = mem_space_race_participant }
+			remove_modifier = mem_space_race_participant
+		}
 	}
 }
 
@@ -1342,6 +1395,7 @@ country_event = {
 			}
 			country_event = { id = mem_space_race.22 }
 		}
+		remove_modifier = mem_space_race_host
 	}
 	
 	option = {
@@ -1360,5 +1414,24 @@ country_event = {
 	
 	option = {
 		name = mem_space_race.22.a
+		
+		IF = {
+			limit = { has_modifier = mem_space_race_participant }
+			remove_modifier = mem_space_race_participant
+		}
+	}
+}
+
+#Cleaner event - in case of emergency
+event = {
+	id = mem_space_race.9999
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		every_country = {
+			remove_modifier = mem_space_race_host
+			remove_modifier = mem_space_race_participant
+		}
 	}
 }
