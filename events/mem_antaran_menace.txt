@@ -16,7 +16,10 @@ namespace = mem_antarans
 # mem_antarans.10  |Establishing communications with every country that does not already know them (is started at fleet spawn 100 and 101)
 # mem_antarans.20  |Information event about a known empire being attacked
 # mem_antarans.21  |Information event about an unknown empire being attacked
+# mem_antarans.40  |Finishing investigation of first Rift
 # mem_antarans.50  |Retaliation Fleet has been destroyed by target empire ready to progress quest
+# mem_antarans.51  |Antaran system spawned
+# mem_antarans.52  |Wormhole connection established
 # mem_antarans.98  |Test Event for the Rift
 # mem_antarans.99  |Test Event to show Targets
 ########################################################
@@ -396,6 +399,22 @@ country_event = {
 			limit = {
 				has_country_flag = mem_antarans_retaliation
 			}
+			IF = {
+				limit = {
+					is_ai = no
+					NOT = {
+						has_country_flag = mem_antarans_rift_investigation
+					}
+				}
+				capital_scope = {
+					enable_special_project = {
+						name = MEM_ANTARANS_RIFT_INVESTIGATION
+						location = this
+						owner = root
+					}
+				}
+				set_country_flag = mem_antarans_rift_investigation
+			}
 			random_owned_planet = {
 				limit = {
 					is_capital = yes
@@ -444,6 +463,22 @@ country_event = {
 							}
 						}
 					}
+					IF = {
+						limit = {
+							is_ai = no
+							NOT = {
+								has_country_flag = mem_antarans_rift_investigation
+							}
+						}
+						capital_scope = {
+							enable_special_project = {
+								name = MEM_ANTARANS_RIFT_INVESTIGATION
+								location = this
+								owner = root
+							}
+						}
+						set_country_flag = mem_antarans_rift_investigation
+					}
 					random_owned_planet = {
 						limit = {
 							is_colony = yes
@@ -485,6 +520,22 @@ country_event = {
 					# start overnext event to open the rift and spawn enemy fleet
 					country_event = { id = mem_antarans.5 days = 30 }
 					ELSE = { # failsafe target - if not even the capital is left there is nothing happening anyway
+						IF = {
+							limit = {
+								is_ai = no
+								NOT = {
+									has_country_flag = mem_antarans_rift_investigation
+								}
+							}
+							capital_scope = {
+								enable_special_project = {
+									name = MEM_ANTARANS_RIFT_INVESTIGATION
+									location = this
+									owner = root
+								}
+							}
+							set_country_flag = mem_antarans_rift_investigation
+						}
 						random_owned_planet = {
 							limit = {
 								is_colony = yes
@@ -814,6 +865,34 @@ country_event = {
 	}
 }
 
+# Finishing first Rift investigation
+country_event = {
+	id = mem_antarans.40
+	title = mem_antarans.40.name
+	desc = mem_antarans.40a.desc
+
+	picture = GFX_evt_mem_space_battle # TODO change
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "WORRYING"
+		IF = {
+			limit = {
+				NOR = {
+					has_technology = tech_wormhole_stabilization
+					has_tech_option = tech_wormhole_stabilization
+				}
+			}
+			add_research_option = tech_wormhole_stabilization
+		}
+		hidden_effect = {
+			add_seen_bypass_type = wormhole
+		}
+	}
+}
+
+# Retaliation Fleet destroyed
 country_event = {
 	id = mem_antarans.50
 	title = mem_antarans.50.name
@@ -821,7 +900,83 @@ country_event = {
 
 	picture = GFX_evt_mem_space_battle # TODO change
 	
+	trigger = {
+		has_technology = tech_wormhole_stabilization
+	}
+	
 	is_triggered_only = yes
+	
+	immediate = {
+		set_country_flag = mem_antarans_rift_creation_start
+	}
+	
+	option = {
+		name = "WORRYING"
+		capital_scope = {
+			enable_special_project = {
+				name = MEM_ANTARANS_RIFT_STABILIZATION
+				location = this
+				owner = root
+			}
+		}
+	}
+}
+
+# Antaran system spawned
+country_event = {
+	id = mem_antarans.51
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_system = {
+			limit = {
+				is_rim_system = yes
+			}
+			spawn_system = { 
+				min_distance = 70 
+				max_distance = 150
+				initializer = "mem_antaran_homesystem"
+				hyperlane = no 
+				is_discovered = yes
+			}
+		}
+		country_event = { id = mem_antarans.52 days = 1 }
+	}
+}
+
+# Wormhole connection established
+country_event = {
+	id = mem_antarans.52
+	title = mem_antarans.52.name
+	desc = mem_antarans.52.desc
+
+	picture = GFX_evt_mem_space_battle # TODO change
+	is_triggered_only = yes
+
+	immediate = {
+		capital_scope = {
+			solar_system = {
+				random_system = {
+					limit = {
+						has_star_flag = mem_antaran_homesystem
+					}
+					prev = { # done this way to ensure we don't spawn "orphan" wormholes (wormholes that aren't linked to anything)
+							spawn_natural_wormhole = {
+							random_pos = yes
+							orbit_angle = 360
+						}
+					}
+					spawn_natural_wormhole = {
+						random_pos = yes
+						orbit_angle = 360
+					}
+					link_wormholes = prev
+				}
+			}
+		}
+	}
 	
 	option = {
 		name = "WORRYING"
@@ -1710,7 +1865,6 @@ country_event = {
 														}
 													}
 													ROOT = {
-														set_country_flag = mem_antarans_rift_creation_start
 														country_event = { id = mem_antarans.50 days = 2}
 													}
 												}
