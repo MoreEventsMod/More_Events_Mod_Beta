@@ -1,0 +1,443 @@
+######################################################
+# Space Monster Attacks
+# Text by Malthus
+# Code by Malthus
+######################################################
+
+namespace = mem_space_monster_attacks
+
+@tier1materialreward = 6
+@tier1materialmin = 100
+@tier1materialmax = 500
+@tier2materialreward = 12
+@tier2materialmin = 150
+@tier2materialmax = 1000
+@tier3materialreward = 18
+@tier3materialmin = 250
+@tier3materialmax = 1500
+@tier4materialreward = 24
+@tier4materialmin = 350
+@tier4materialmax = 2000
+@tier5materialreward = 48
+@tier5materialmin = 700
+@tier5materialmax = 4000
+
+planet_event = {
+	id = mem_space_monster_attacks.1000
+	hide_window = yes
+	fire_only_once = yes
+	
+	trigger = {
+		NOT = {
+			has_global_flag = mem_space_monster_attacks_crystal
+		}
+		NOT = { is_planet_class = pc_habitat }
+		has_owner = yes
+		owner = {
+			is_ai = no
+		}
+		is_colony = yes
+		is_capital = no
+	}
+	
+	mean_time_to_happen = {
+		months = 250
+		#months = 1
+	}
+	
+	immediate = {
+		set_global_flag = mem_space_monster_attacks_crystal
+		random_list = {
+			90 = {}
+			10 = { planet_event = { id = mem_space_monster_attacks.1 } }
+		}
+	}
+}
+
+planet_event = {
+	id = mem_space_monster_attacks.1
+	title = mem_space_monster_attacks.1.name
+	desc = mem_space_monster_attacks.1.desc
+	picture = GFX_evt_mem_giant_crystal
+	show_sound = event_yellow_alert
+	location = event_target:mem_space_monster_attacks_crystal
+	is_triggered_only = yes
+	
+	immediate = {
+		set_planet_flag = mem_space_monster_attack_target
+		solar_system  = {
+			random_system_planet = {
+				limit = { is_star = yes }
+				create_ambient_object = {
+					type = "mem_dummy_object"
+					location = THIS
+				}
+				last_created_ambient_object = {
+					set_location = {
+						target = prev
+						distance = 250
+						angle = random
+					}
+					set_ambient_object_flag = mem_space_monster_attacks_crystal_dummy
+					save_event_target_as = mem_space_monster_attacks_crystal_spawn
+				}
+				create_crystal_country = yes
+				event_target:crystal_country = {
+					create_fleet = {
+						name = "Crystal Fleet"
+						settings = {
+							spawn_debris = no
+						}
+					}
+					last_created_fleet = {
+						save_event_target_as = mem_space_monster_attacks_crystal
+						set_owner = prev
+						create_ship = {
+							name = "Saphiron"
+							design = "Ancient Crystal Entity"
+						}
+						set_location = {
+							target = event_target:mem_space_monster_attacks_crystal_spawn
+							distance = 250
+							angle = random
+						}
+						set_fleet_stance = aggressive
+						set_aggro_range_measure_from = self
+						set_aggro_range = 2000
+						set_fleet_flag = mem_space_monster_attacks_crystal
+						queue_actions = {
+							repeat = {
+								find_closest_planet = {
+									trigger = {
+										id = mem_space_monster_attacks_crystal.1
+										has_planet_flag = mem_space_monster_attack_target
+									}
+									found_planet = {
+										orbit_planet = this
+										wait = {
+											duration = 10
+										}
+										effect = {
+											id = mem_space_monster_attacks_crystal.2
+											random_planet = { 
+												limit = {
+													has_planet_flag = mem_space_monster_attack_target
+												}
+												planet_event = { id = mem_space_monster_attacks.2 }
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}	
+	option = {
+		name = mem_space_monster_attacks.1.a
+	}
+}
+
+# crytal has bombarded the colony
+planet_event = {
+	id = mem_space_monster_attacks.2
+	title = mem_space_monster_attacks.2.name
+	desc = mem_space_monster_attacks.2.desc
+	picture = GFX_evt_burning_settlement
+	show_sound = event_yellow_alert
+	location = this
+	is_triggered_only = yes
+	
+	immediate = {
+		random_country = {
+			limit = {
+				any_owned_fleet = {
+					has_fleet_flag = mem_space_monster_attacks_crystal
+				}
+			}
+			random_owned_fleet = {
+				limit = {
+					has_fleet_flag = mem_space_monster_attacks_crystal
+				}
+				set_fleet_flag = mem_space_monster_attacks_crystal_finished
+				clear_fleet_actions = this
+				queue_actions = {
+					repeat = {
+						move_to = event_target:mem_space_monster_attacks_crystal_spawn
+						effect = {
+							id = mem_space_monster_attacks_crystal.3
+							delete_fleet  = this
+						}
+					}
+				}
+			}
+		}
+		random_tile = {
+			limit = {
+				has_building = yes
+				is_ruined = no
+			}
+			set_ruined = yes
+		}
+		random_tile = {
+			limit = {
+				has_building = yes
+				is_ruined = no
+			}
+			set_ruined = yes
+		}
+		random_tile = {
+			limit = {
+				has_building = yes
+				is_ruined = no
+			}
+			set_ruined = yes
+		}
+		random_tile = {
+			limit = {
+				has_building = yes
+				is_ruined = no
+			}
+			set_ruined = yes
+		}
+		planet_event = { id = mem_space_monster_attacks.6 days = 180 random = 30 }
+	}
+	
+	option = {
+		name = mem_space_monster_attacks.2.a
+	}
+}
+
+# crystal has been destroyed before bombarding the colony
+# This = owner of fleet 1 (combatant)
+# From = owner of fleet 2 (destroyed)
+# FromFrom = fleet 1
+# FromFromFrom = fleet 2
+country_event = {
+	id = mem_space_monster_attacks.3
+	title = mem_space_monster_attacks.3.name
+	desc = mem_space_monster_attacks.3.desc
+	picture = GFX_evt_mem_giant_crystal
+	show_sound = event_ship_bridge
+	location = this
+	is_triggered_only = yes
+	
+	trigger = {
+		is_ai = no
+		FROMFROMFROM = {
+			has_fleet_flag = mem_space_monster_attacks_crystal
+			NOT = {
+				has_fleet_flag = mem_space_monster_attacks_crystal_finished
+			}
+		}
+	}
+	
+	immediate = {
+		capital_scope = { save_event_target_as = pc_home }
+	}
+	
+	option = {
+		name = mem_space_monster_attacks.3.a
+		add_monthly_resource_mult = {
+			resource = minerals
+			value = @tier3materialreward
+			min = @tier3materialmin
+			max = @tier3materialmax
+		}
+		enable_special_project = {
+			name = MEM_SPACE_MONSTER_ATTACKS_CRYSTAL_STUDY
+			location = event_target:pc_home
+			owner = root
+		}
+	}
+}
+
+# crystal has been destroyed after bombarding the colony
+# This = owner of fleet 1 (combatant)
+# From = owner of fleet 2 (destroyed)
+# FromFrom = fleet 1
+# FromFromFrom = fleet 2
+country_event = {
+	id = mem_space_monster_attacks.4
+	title = mem_space_monster_attacks.4.name
+	desc = mem_space_monster_attacks.4.desc
+	picture = GFX_evt_mem_giant_crystal
+	show_sound = event_ship_bridge
+	location = this
+	is_triggered_only = yes
+	
+	trigger = {
+		is_ai = no
+		FROMFROMFROM = {
+			has_fleet_flag = mem_space_monster_attacks_crystal_finished
+		}
+	}
+	
+	immediate = {
+		capital_scope = { save_event_target_as = pc_home }
+	}
+	
+	option = {
+		name = mem_space_monster_attacks.4.a
+		add_monthly_resource_mult = {
+			resource = minerals
+			value = @tier3materialreward
+			min = @tier3materialmin
+			max = @tier3materialmax
+		}
+		enable_special_project = {
+			name = MEM_SPACE_MONSTER_ATTACKS_CRYSTAL_STUDY
+			location = event_target:pc_home
+			owner = root
+		}
+	}
+}
+
+#Project finished
+country_event = {
+	id = mem_space_monster_attacks.5
+	title = mem_space_monster_attacks.5.name
+	desc = mem_space_monster_attacks.5.desc
+	picture = GFX_evt_mem_giant_crystal
+	show_sound = event_default
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_space_monster_attacks.5.a
+		IF = {
+			limit = {
+				NOT = {
+					has_technology = tech_crystal_armor_2
+				}
+			}
+			add_research_option = tech_crystal_armor_2
+			add_tech_progress = {
+				tech = tech_crystal_armor_2
+				progress = 0.10
+			}
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = 50
+				min = 1500
+				max = 2500
+			}
+			ELSE = {
+				add_monthly_resource_mult = {
+					resource = society_research
+					value = 50
+					min = 2500
+					max = 4000
+				}
+			}
+		}
+	}
+}
+
+# crystals grow everywhere, what now?
+planet_event = {
+	id = mem_space_monster_attacks.6
+	title = mem_space_monster_attacks.6.name
+	desc = mem_space_monster_attacks.6.desc
+	picture = GFX_evt_burning_settlement
+	show_sound = event_yellow_alert
+	location = this
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_space_monster_attacks.6.a
+		custom_tooltip = mem_space_monster_attacks.6.a.tooltip
+		add_modifier = {
+			modifier = mem_crystal_harvest
+			days = -1
+		}
+		hidden_effect = {
+			IF = {
+				limit = {
+					NOT ={
+						has_modifier = bleak_planet
+					}
+				}
+				planet_event = { id = mem_space_monster_attacks.7 days = 1800 random = 360 }
+			}
+		}
+	}
+	option = {
+		name = mem_space_monster_attacks.6.b
+		custom_tooltip = mem_space_monster_attacks.6.b.tooltip
+		add_modifier = {
+			modifier = mem_crystal_study
+			days = -1
+		}
+		hidden_effect = {
+			IF = {
+				limit = {
+					NOT ={
+						has_modifier = bleak_planet
+					}
+				}
+				planet_event = { id = mem_space_monster_attacks.7 days = 1800 random = 360 }
+			}
+		}
+	}
+	option = {
+		name = mem_space_monster_attacks.6.c
+		custom_tooltip = mem_space_monster_attacks.6.c.tooltip
+		add_modifier = {
+			modifier = mem_crystal_removal
+			days = 1800
+		}		
+		hidden_effect = {
+			planet_event = { id = mem_space_monster_attacks.8 days = 1800 }
+		}
+	}
+}
+
+# planet turns bleak
+planet_event = {
+	id = mem_space_monster_attacks.7
+	title = mem_space_monster_attacks.7.name
+	desc = mem_space_monster_attacks.7.desc
+	picture = GFX_evt_burning_settlement
+	show_sound = event_yellow_alert
+	location = this
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_space_monster_attacks.7.a
+		add_modifier = {
+			modifier = bleak_planet
+			days = -1
+		}
+		IF = {
+			limit = {
+				has_modifier = lush_planet
+			}
+			remove_modifier = lush_planet
+		}
+	}
+}
+
+# crystals removed
+planet_event = {
+	id = mem_space_monster_attacks.8
+	title = mem_space_monster_attacks.8.name
+	desc = mem_space_monster_attacks.8.desc
+	picture = GFX_evt_burning_settlement
+	show_sound = event_yellow_alert
+	location = this
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_space_monster_attacks.8.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = minerals
+				value = 50
+				min = 1000
+				max = 1600
+			}
+		}
+	}
+}

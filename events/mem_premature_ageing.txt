@@ -1,0 +1,227 @@
+################################
+# Premature Ageing
+# Code by:		Tuttu
+# Writing by:	ViolentBeetle
+################################
+
+namespace = mem_premature_ageing
+
+# Anomaly survey failure
+ship_event = {
+	id = mem_premature_ageing.1
+	title = "mem_premature_ageing.1.name"
+	desc = "mem_premature_ageing.1.desc"
+	picture = GFX_evt_star_yellow
+	show_sound = event_scanner
+	location = FROM
+	
+	is_triggered_only = yes
+			
+	option = {
+		name = "mem_premature_ageing.1.a"
+	}
+}
+
+# Anomaly survey success
+ship_event = {
+	id = mem_premature_ageing.2
+	title = "mem_premature_ageing.2.name"
+	desc = "mem_premature_ageing.2.desc"
+	picture = GFX_evt_star_yellow
+	show_sound = event_scanner
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		FROM = { 
+			save_event_target_as = mem_premature_ageing_star
+		}
+	
+		if = { 
+			limit = {
+				ROOT.Owner = { has_ethic = ethic_materialist }			
+			}
+			random_list = {
+				15 = { ROOT.Owner = { set_country_flag = mem_premature_ageing_alternate_ending } }
+				85 = { ROOT.Owner = { set_country_flag = mem_premature_ageing_normal_ending } }
+			}
+			else = {
+				if = { 
+					limit = {
+						ROOT.Owner = { has_ethic = ethic_fanatic_materialist }				
+					}
+					random_list = {
+						20 = { ROOT.Owner = { set_country_flag = mem_premature_ageing_alternate_ending } }
+						80 = { ROOT.Owner = { set_country_flag = mem_premature_ageing_normal_ending } }
+					}
+					else = {
+						random_list = {
+							05 = { ROOT.Owner = { set_country_flag = mem_premature_ageing_alternate_ending } }
+							95 = { ROOT.Owner = { set_country_flag = mem_premature_ageing_normal_ending } }
+						}
+					}
+				}
+			}
+		}
+	}	
+	
+	option = {
+		trigger = {
+			ROOT.Owner = { has_country_flag = mem_premature_ageing_normal_ending }
+		}
+		name = mem_premature_ageing.2.normal
+		ROOT.owner = { add_physics_research = 500 }
+	}
+	
+	option = {
+		trigger = {
+			ROOT.Owner = { has_country_flag = mem_premature_ageing_alternate_ending }
+		}
+		name = mem_premature_ageing.2.alternate
+		ROOT.owner = { add_physics_research = 500 }
+		FROM = {
+			enable_special_project = {
+				name = "MEM_PREMATURE_AGEING_WEAPON_TRACING_PROJECT"
+				owner = ROOT
+				location = THIS
+			}
+		}
+	}
+}
+
+# First Special project completed - Find the weapon's origin system
+ship_event = {
+	id = mem_premature_ageing.3
+	title = "mem_premature_ageing.3.name"
+	desc = "mem_premature_ageing.3.desc"
+	picture = GFX_evt_ship_in_orbit
+	show_sound = event_scanner
+	location = event_target:mem_premature_ageing_star
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		owner = {
+			set_country_flag = mem_premature_ageing_enter_system
+		}
+	}
+	
+	option = {
+		name = FANTASTIC
+		hidden_effect = {
+			IF = {
+				limit = {
+					any_system = {
+						distance = {
+							source = event_target:mem_premature_ageing_star
+							max_distance = 200
+							min_distance = 100
+						}
+						any_planet = { is_asteroid = yes }
+						has_presence = no
+					}
+				}
+				random_system = {
+					limit = {
+						distance = {
+							source = event_target:mem_premature_ageing_star
+							max_distance = 200
+							min_distance = 100
+						}
+						any_planet = { is_asteroid = yes }
+						has_presence = no
+					}
+					random_system_planet = {
+						limit = { is_asteroid = yes }
+						set_planet_flag = mem_premature_ageing_star_weapon_origin_planet
+						save_event_target_as = mem_premature_ageing_star_weapon_origin_planet
+					}
+					set_star_flag = mem_premature_ageing_weapon_system
+				}
+				ELSE = {
+					closest_system = {
+						limit = {
+							any_planet = { is_asteroid = yes }
+							has_presence = no
+						}
+						random_system_planet = {
+							limit = { is_asteroid = yes }
+							set_planet_flag = mem_premature_ageing_star_weapon_origin_planet
+							save_event_target_as = mem_premature_ageing_star_weapon_origin_planet
+						}
+						set_star_flag = mem_premature_ageing_weapon_system
+					}
+				}
+			}
+		}
+		begin_event_chain = {
+			event_chain = "mem_premature_ageing_chain"
+			target = ROOT.Owner
+        }
+		create_point_of_interest = {
+			id = mem_premature_ageing_weapon_origin.1
+			name = "mem_premature_ageing_weapon_origin.1.name"
+			desc = "mem_premature_ageing_weapon_origin.1.desc"
+			event_chain = "mem_premature_ageing_chain"
+			location = event_target:mem_premature_ageing_star_weapon_origin_planet
+		}
+	}
+}
+
+# On entering the weapon's origin system
+ship_event = {
+	id = mem_premature_ageing.4
+	is_triggered_only = yes
+	hide_window = yes
+	
+	trigger = {
+		owner = { has_country_flag = mem_premature_ageing_enter_system }
+		FROM = { has_star_flag = mem_premature_ageing_weapon_system }
+	}
+	
+	immediate = {
+		owner = {
+			remove_country_flag = mem_premature_ageing_enter_system
+			add_event_chain_counter = { 
+				event_chain = "mem_premature_ageing_chain" 
+				counter = "mem_premature_ageing_asteroid_checked" 
+				amount = 1 
+			}
+			remove_point_of_interest = mem_premature_ageing_weapon_origin.1
+		}
+	
+		FROM = {
+			random_system_planet = {
+				limit = { has_planet_flag = mem_premature_ageing_star_weapon_origin_planet }
+				save_event_target_as = mem_premature_ageing_star_weapon_origin_planet
+				enable_special_project = {
+					name = "MEM_PREMATURE_AGEING_WEAPON_ANALYZE_PROJECT"
+					owner = ROOT
+					location = THIS
+				}				
+			}			
+		}
+	}
+}
+
+# Second Special project completed - Analyze the weapon's "remains"
+ship_event = {
+	id = mem_premature_ageing.5
+	title = "mem_premature_ageing.5.name"
+	desc = "mem_premature_ageing.5.desc"
+	picture = GFX_evt_ship_in_orbit
+	show_sound = event_scanner
+	location = event_target:mem_premature_ageing_star_weapon_origin_planet
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = FANTASTIC
+		
+		ROOT.Owner = {
+			add_modifier = { modifier = "mem_premature_ageing_solar_extinguisher_tech" days = -1 }
+			end_event_chain = mem_premature_ageing_chain
+		}
+	}
+}
