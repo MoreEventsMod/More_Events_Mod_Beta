@@ -186,8 +186,15 @@ planet_event = {
 			2 = { 
 				planet_event = { id = mem_death_world.4 } 
 			}
-			1 = { 
+			15 = { 
 				planet_event = { id = mem_death_world.5 } 
+				modifier = {
+					factor = 0
+					check_variable = {
+						which = mem_death_world_counter
+						value < 24
+					}
+				}
 			}
 			1 = { 
 				planet_event = { id = mem_death_world.6 } 
@@ -198,8 +205,15 @@ planet_event = {
 			2 = { 
 				planet_event = { id = mem_death_world.8 } 
 			}
-			1 = { 
-				planet_event = { id = mem_death_world.9 } 
+			15 = { 
+				planet_event = { id = mem_death_world.9 }
+				modifier = {
+					factor = 0
+					check_variable = {
+						which = mem_death_world_counter
+						value < 48
+					}
+				}
 			}
 			1 = { 
 				planet_event = { id = mem_death_world.10 } 
@@ -214,10 +228,15 @@ planet_event = {
 					factor = 0
 					OR = {
 						NOT = { has_planet_flag = mem_death_world_advanced }
-						has_planet_flag = mem_death_world_looking
+						has_owner = no
+						owner = { has_country_flag = mem_death_world_looking }
 					}
 				}
 			}
+		}
+		change_variable = {
+			which = mem_death_world_counter
+			value = 1
 		}
 		planet_event = { id = mem_death_world.100 days = 30 random = 60 }
 	}
@@ -671,13 +690,12 @@ planet_event = {
 		has_planet_flag = mem_death_world_advanced
 		has_owner = yes
 		NOT = {
-			has_planet_flag = mem_death_world_looking
+			owner = { has_country_flag = mem_death_world_looking }
 		}
-		has_owner = yes
 	}
 	
 	immediate = {
-		set_planet_flag = mem_death_world_looking
+		owner = { set_country_flag = mem_death_world_looking }
 	}
 	
 	#Option for extermination
@@ -1698,6 +1716,34 @@ planet_event = {
 		
 		owner = {
 			end_event_chain = "mem_death_world_chain"
+		}
+	}
+}
+
+#On ownership of death world changed, disable event chain and reset flag for those not owning one
+planet_event = {
+	id = mem_death_world.30
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		has_planet_flag = mem_death_world_planet
+		NOT = { has_planet_flag = mem_death_world_finished }
+	}
+	
+	immediate = {
+		every_country = {
+			limit = {
+				has_country_flag = mem_death_world_looking
+				NOT = {
+					any_owned_planet = {
+						has_planet_flag = mem_death_world_planet
+						NOT = { has_planet_flag = mem_death_world_finished }
+					}
+				}
+			}
+			end_event_chain = "mem_death_world_chain"
+			remove_country_flag = mem_death_world_looking
 		}
 	}
 }
