@@ -61,6 +61,7 @@ country_event = {
 	
 	immediate = {
 		set_global_flag = mem_colony_ship_started
+		set_country_flag = mem_colony_ship_space_owner
 		random_system_within_border = {
 			limit = {
 				NOT = {
@@ -140,9 +141,9 @@ country_event = {
 			effect = {
 				establish_communications_no_message = root
 			}
-			auto_delete = no
+			# auto_delete = no
 			flag = {
-				icon={
+				icon = {
 					category = "zoological"
 					file = "flag_zoological_14.dds"
 				}
@@ -164,18 +165,34 @@ country_event = {
 			effect = {
 				set_owner = event_target:interloper_country
 				set_fleet_flag = mem_colony_ship_interloper_fleet
+				save_event_target_as = interloper_fleet
 				create_ship = {
 					name = "NAME_MEM_Unidentified_Vessel_Name"
 					design = "NAME_MEM_Unidentified_Vessel"
+					# design = "NAME_Righteous"
 				}
 				set_location = {
 					target = event_target:the_system.star
-					distance = 120
+					distance = 300
 					angle = random
 				}
-				fleet_event = {
-					id = mem_colony_ship.3
-					days = 15
+				queue_actions = {
+					find_closest_planet = {
+						trigger = {
+							id = mem_colony_ship.ship_trigger.1
+							is_same_value = event_target:the_planet
+						}
+						found_planet = {
+							wait = { duration = 10 }
+							orbit_planet = this
+							effect = {
+								id = mem_colony_ship.ship_trigger.2
+								event_target:the_planet = {
+									planet_event = { id = mem_colony_ship.4 }
+								}
+							}
+						}
+					}
 				}
 			}
 		}
@@ -198,22 +215,81 @@ country_event = {
 }
 
 #Fleet begins its movement towards the planet
-fleet_event = {
+country_event = {
 	id = mem_colony_ship.3
-	hide_window = yes
+	title = mem_colony_ship.3.name
+	desc = mem_colony_ship.3.desc
+	
 	is_triggered_only = yes
 	
-	immediate = {
-		clear_fleet_actions = yes
-		queue_actions = {
-			move_to = event_target:the_planet
-			orbit_planet = event_target:the_planet
-			effect = {
-				id = mem_colony_ship.ship_trigger.1
-				event_target:the_planet = {
-					planet_event = { id = mem_colony_ship.4 }
-				}
+	picture = GFX_evt_debris
+	show_sound = event_ship_explosion
+	
+	trigger = {
+		FROMFROMFROM = { has_fleet_flag = mem_colony_ship_interloper_fleet }
+		has_country_flag = mem_colony_ship_space_owner
+	}
+	
+	option = {
+		name = mem_colony_ship.3.a
+		
+		trigger = {
+			is_militarist = no
+			is_xenophobe = no
+			NOT = { has_ethic = ethic_gestalt_consciousness }
+		}
+		
+		add_influence = 50
+	}
+	
+	option = {
+		name = mem_colony_ship.3.b
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_militarist
+				has_ethic = ethic_fanatic_militarist
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_fanatic_xenophobe
+				has_authority = auth_hive_mind
 			}
+			NOT = { has_valid_civic = civic_fanatic_purifiers }
+		}
+		
+		add_influence = 50
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 3
+			min = 10
+			max = 1000
+		}
+	}
+	
+	option = {
+		name = mem_colony_ship.3.c
+		
+		trigger = {
+			has_authority = auth_machine_intelligence
+			NOT = { has_civic = civic_machine_terminator }
+		}
+		
+		add_influence = 50
+	}
+	
+	option = {
+		name = mem_colony_ship.3.d
+		
+		trigger = {
+			has_civic = civic_machine_terminator
+			has_valid_civic = civic_fanatic_purifiers
+		}
+		
+		add_influence = 50
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 6
+			min = 15
+			max = 1500
 		}
 	}
 }
@@ -223,4 +299,251 @@ planet_event = {
 	id = mem_colony_ship.4
 	hide_window = yes
 	is_triggered_only = yes
+	
+	immediate = {
+		event_target:interloper_fleet = { delete_fleet = this }
+		IF = { #Fallback in case some genius colonizes the planet before the ship arrives
+			limit = { exists = owner }
+			planet_event = { id = mem_colony_ship.5 }
+			break = yes
+		}
+		random_list = {
+			15 = {
+				planet_event = { id = mem_colony_ship.5 }
+			}
+			85 = {
+				planet_event = { id = mem_colony_ship.7 }
+			}
+		}
+	}
+}
+
+#The ship crashed
+planet_event = {
+	id = mem_colony_ship.5
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		random_tile = {
+			limit = { has_pop = no has_building = no }
+			set_blocker = mem_tb_colony_crater
+			set_deposit = d_rich_society_deposit
+			add_deposit = d_rich_engineering_deposit
+		}
+		solar_system.space_owner = {
+			country_event = { id = mem_colony_ship.6 }
+		}
+	}
+}
+
+#Notify the space owner
+country_event = {
+	id = mem_colony_ship.6
+	title = mem_colony_ship.6.name
+	desc = mem_colony_ship.6.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_atmospheric_entry
+	show_sound = event_ship_explosion
+	
+	option = {
+		name = mem_colony_ship.6.a
+	}
+}
+
+#The ship landed successfully
+planet_event = {
+	id = mem_colony_ship.7
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		create_country = {
+			name = random
+			authority = random
+			civics = {
+				civic = mem_colony_ship_civic_one
+				civic = mem_colony_ship_civic_two
+			}
+			species = event_target:interloper_country
+			ethos = random
+			flag = {
+				icon = {
+					category = "zoological"
+					file = "flag_zoological_14.dds"
+				}
+				background = {
+					category = "backgrounds"
+					file = "circle.dds"
+				}
+				colors = {
+					"turquoise"
+					"dark_blue"
+					"null"
+					"null"
+				}
+			}
+			type = primitive
+			effect = {
+				establish_communications_no_message = root.solar_system.space_owner
+			}
+		}
+		last_created_country = { 
+			save_event_target_as = landed_country 
+			set_primitive_age = mem_recently_colonized_age
+			set_country_flag = mem_colony_ship_recently_colonized
+			set_country_flag = mem_colony_ship_colonial_nation
+			IF = { #I'm a lazy bastard and don't want no purifier primitives
+				limit = { has_ethic = ethic_fanatic_xenophobe }
+				shift_ethic = ethic_xenophile
+			}
+		}
+		create_colony = {
+			owner = event_target:landed_country
+			species = event_target:landed_country
+			ethos = owner
+		}
+		random_tile = {
+			limit = { has_building = "building_colony_shelter" }
+			remove_building = yes
+			set_deposit = d_mineral_deposit
+		}
+		while = {
+			count = 2
+			random_tile = {
+				limit = {
+					has_blocker = no
+					has_grown_pop = no
+					has_growing_pop = no
+				}
+				create_pop = {
+					species = event_target:landed_country
+				}
+				set_deposit = d_farmland_deposit
+			}	
+		}
+		solar_system.space_owner = { country_event = { id = mem_colony_ship.8 } }
+		planet_event = { id = mem_colony_ship.9 days = 1800 }
+		planet_event = { id = mem_colony_ship.9 days = 3600 }
+		planet_event = { id = mem_colony_ship.9 days = 5400 }
+		# country_event = { id = mem_colony_ship.10 days = 12000 random = 24000 }
+	}
+}
+
+#Space owner is notified that the ship had landed
+country_event = {
+	id = mem_colony_ship.8
+	title = mem_colony_ship.8.name
+	desc = mem_colony_ship.8.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_big_landing_ship
+	show_sound = event_ship_thrusters
+	
+	option = {
+		name = mem_colony_ship.8.a
+	}
+	
+	option = {
+		name = mem_colony_ship.8.b
+		custom_tooltip = mem_colony_ship.8.b.tooltip
+	}
+	
+	option = {
+		name = mem_colony_ship.8.c
+		custom_tooltip = mem_colony_ship.8.b.tooltip
+		exclusive_trigger = {
+			OR = {
+				has_valid_civic = civic_fanatic_purifiers
+				has_valid_civic = civic_machine_terminator
+				has_valid_civic = civic_hive_devouring_swarm
+			}
+		}
+	}
+}
+
+#Gradual infrastructure setup
+planet_event = {
+	id = mem_colony_ship.9
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		exists = owner
+		owner = { is_country_type = primitive }
+	}
+	
+	immediate = {
+		random_tile = {
+			limit = { has_pop = yes has_building = no }
+			IF = {
+				limit = { has_deposit = d_farmland_deposit }
+				set_building = building_primitive_farm
+				else = { set_building = building_primitive_factory }
+			}
+		}
+	}
+}
+
+#Contacting them
+country_event = {
+	id = mem_colony_ship.10
+	title = mem_colony_ship.10.name
+	desc = mem_colony_ship.10.desc
+	
+	is_triggered_only = yes
+	
+	diplomatic = yes
+	
+	trigger = {
+		exists = event_target:landed_country
+		event_target:landed_country = { is_country_type = primitive }
+	}
+	
+	picture_event_data = {
+		portrait = event_target:landed_country.ruler
+		room = mem_server_room
+	}
+	
+	option = {
+		name = mem_colony_ship.10.a
+		
+		trigger = {
+			is_militarist = no
+			is_xenophobe = no
+			NOT = { has_ethic = ethic_gestalt_consciousness }
+		}
+	}
+	
+	option = {
+		name = mem_colony_ship.10.b
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_militarist
+				has_ethic = ethic_fanatic_militarist
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
+	}
+	
+	option = {
+		name = mem_colony_ship.10.c
+		
+		trigger = {
+			has_authority = auth_machine_intelligence
+		}
+	}
+	
+	option = {
+		name = mem_colony_ship.10.d
+		
+		trigger = {
+			has_authority = auth_hive_mind
+		}
+	}
 }
