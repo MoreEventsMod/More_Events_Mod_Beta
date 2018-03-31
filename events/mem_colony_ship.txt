@@ -455,6 +455,7 @@ country_event = {
 	option = {
 		name = mem_colony_ship.8.b
 		custom_tooltip = mem_colony_ship.8.b.tooltip
+		add_influence = 100
 	}
 	
 	option = {
@@ -497,7 +498,24 @@ planet_event = {
 country_event = {
 	id = mem_colony_ship.10
 	title = mem_colony_ship.10.name
-	desc = mem_colony_ship.10.desc
+	desc = {
+		text = mem_colony_ship.10.desc
+		trigger = {
+			NOR = {
+				has_authority = auth_machine_intelligence
+				is_species_class = ROBOT
+			}
+		}
+	}
+	desc = {
+		text = mem_colony_ship.10.desc.machine
+		trigger = {
+			OR = {
+				has_authority = auth_machine_intelligence
+				is_species_class = ROBOT
+			}
+		}
+	}
 	
 	is_triggered_only = yes
 	
@@ -517,9 +535,15 @@ country_event = {
 		name = mem_colony_ship.10.a
 		
 		trigger = {
-			is_militarist = no
-			is_xenophobe = no
 			NOT = { has_ethic = ethic_gestalt_consciousness }
+		}
+		
+		add_influence = -50
+		custom_tooltip = mem_colony_ship.10.a.tooltip
+		hidden_effect = {
+			event_target:the_planet = {
+				set_owner = root
+			}
 		}
 	}
 	
@@ -527,11 +551,41 @@ country_event = {
 		name = mem_colony_ship.10.b
 		
 		trigger = {
-			OR = {
-				has_ethic = ethic_militarist
-				has_ethic = ethic_fanatic_militarist
-				has_ethic = ethic_xenophobe
-				has_ethic = ethic_fanatic_xenophobe
+			NOT = { has_valid_civic = civic_inwards_perfection }
+		}
+		
+		custom_tooltip = mem_colony_ship.10.b.tooltip
+		hidden_effect = {
+			event_target:landed_country = {
+				set_country_type = default
+				set_subject_of = {
+					who = root
+					subject_type = protectorate
+				}
+				add_influence = 300
+				add_minerals = 2000
+				add_food = 500
+				add_energy = 1000
+				change_government = random
+				set_name = random
+			}
+			event_target:the_system = {
+				if = {
+					limit = {
+						exists = starbase
+						starbase = { owner = { is_same_value = root } }
+					}
+					starbase = {
+						set_owner = event_target:landed_country
+					}						
+				}
+				every_system_planet = {
+					limit = {
+						exists = owner
+						owner = { is_same_value = root }
+					}
+					set_owner = event_target:landed_country			
+				}
 			}
 		}
 	}
@@ -540,7 +594,42 @@ country_event = {
 		name = mem_colony_ship.10.c
 		
 		trigger = {
-			has_authority = auth_machine_intelligence
+			has_valid_civic = civic_inwards_perfection
+		}
+		
+		custom_tooltip = mem_colony_ship.10.c.tooltip
+		hidden_effect = {
+			event_target:landed_country = {
+				set_country_type = default
+				set_subject_of = {
+					who = root
+					subject_type = tributary
+				}
+				add_influence = 300
+				add_minerals = 2000
+				add_food = 500
+				add_energy = 1000
+				change_government = random
+				set_name = random
+			}
+			event_target:the_system = {
+				if = {
+					limit = {
+						exists = starbase
+						starbase = { owner = { is_same_value = root } }
+					}
+					starbase = {
+						set_owner = event_target:landed_country
+					}						
+				}
+				every_system_planet = {
+					limit = {
+						exists = owner
+						owner = { is_same_value = root }
+					}
+					set_owner = event_target:landed_country			
+				}
+			}
 		}
 	}
 	
@@ -548,13 +637,31 @@ country_event = {
 		name = mem_colony_ship.10.d
 		
 		trigger = {
-			has_authority = auth_hive_mind
+			has_valid_civic = civic_machine_servitor
+		}
+		
+		add_monthly_resource_mult = {
+			resource = unity
+			amount = 3
+			min = 15
+			max = 1000
+		}
+		custom_tooltip = mem_colony_ship.10.d.tooltip
+		hidden_effect = {
+			event_target:the_planet = {
+				set_owner = root
+				add_organic_sanctuaries = yes
+				random_tile = {
+					limit = { has_pop = no has_blocker = no}
+					create_pop = { species = root }
+				}
+			}
 		}
 	}
 	
-	after = {
-		hidden_effect = {
-			country_event = { id = mem_colony_ship.11 }
-		}
+	option = {
+		name = mem_colony_ship.10.e
+		custom_tooltip = mem_colony_ship.8.b.tooltip
+		add_influence = 100
 	}
 }
