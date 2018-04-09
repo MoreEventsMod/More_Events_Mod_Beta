@@ -1,6 +1,6 @@
 #Pre-FTL colony ship
 #By ViolentBeetle
-#Idea by r/GarlicBow
+#Idea by r/GarlicBow (Partially)
 
 namespace = mem_colony_ship
 
@@ -435,10 +435,16 @@ planet_event = {
 			}	
 		}
 		solar_system.space_owner = { country_event = { id = mem_colony_ship.8 } }
+		create_army = {
+			name = "Colonial Militia"
+			owner = root.owner
+			species = root.owner
+			type = "industrial_army"
+		}
 		planet_event = { id = mem_colony_ship.9 days = 1800 }
 		planet_event = { id = mem_colony_ship.9 days = 3600 }
 		planet_event = { id = mem_colony_ship.9 days = 5400 }
-		# country_event = { id = mem_colony_ship.10 days = 12000 random = 24000 }
+		planet_event = { id = mem_colony_ship.11 days = 12000 random = 24000 }
 	}
 }
 
@@ -500,6 +506,12 @@ planet_event = {
 				set_building = building_primitive_farm
 				else = { set_building = building_primitive_factory }
 			}
+		}
+		create_army = {
+			name = "Colonial Militia"
+			owner = root.owner
+			species = root.owner
+			type = "industrial_army"
 		}
 	}
 }
@@ -672,5 +684,74 @@ country_event = {
 		name = mem_colony_ship.10.e
 		custom_tooltip = mem_colony_ship.10.e.tooltip
 		add_influence = 100
+	}
+}
+
+#Advancing the primitives
+planet_event = {
+	id = mem_colony_ship.11
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		exists = owner
+		owner = {
+			is_country_type = primitive
+			has_country_flag = mem_colony_ship_recently_colonized
+		}
+	}
+	
+	immediate = {
+		random_tile = {
+			limit = { has_pop = no has_blocker = no has_building = no }
+			create_pop = { species = root.owner }
+			set_building = building_primitive_factory
+		}
+		random_tile = {
+			limit = { has_pop = no has_blocker = no has_building = no }
+			create_pop = { species = root.owner }
+			set_building = building_primitive_farm
+		}
+		random_tile = {
+			limit = { has_pop = no has_building = no }
+			set_blocker = tb_decrepit_dwellings
+		}
+		random_tile = {
+			limit = { has_pop = no has_building = no }
+			set_blocker = tb_failing_infrastructure
+		}
+		remove_country_flag = mem_colony_ship_recently_colonized
+		set_country_flag = early_space_age
+		set_primitive_age = early_space_age
+		remove_all_armies = yes
+		remove_all_armies = yes
+		while = {
+			count = 4
+			create_army = {
+				name = "NAME_Post-Atomic_Army"
+				owner = root.owner
+				species = root.owner
+				type = "postatomic_army"
+			}
+		}
+		observation_outpost_owner = {
+			country_event = { id = mem_colony_ship.12 }
+		}
+	}
+}
+
+country_event = {
+	id = mem_colony_ship.12
+	title = mem_colony_ship.12.name
+	desc = mem_colony_ship.12.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_metropolis
+	location = from
+	show_sound = event_radio_chatter
+	
+	option = {
+		name = OK
 	}
 }
