@@ -1,0 +1,736 @@
+namespace = mem_rogue_drone
+
+@tier1materialreward = 6
+@tier1materialmin = 100
+@tier1materialmax = 500
+@tier2materialreward = 12
+@tier2materialmin = 150
+@tier2materialmax = 1000
+@tier3materialreward = 18
+@tier3materialmin = 250
+@tier3materialmax = 1500
+@tier4materialreward = 24
+@tier4materialmin = 350
+@tier4materialmax = 2000
+
+@tier1influencereward = 6
+@tier1influencemin = 40
+@tier1influencemax = 100
+@tier2influencereward = 12
+@tier2influencemin = 80
+@tier2influencemax = 175
+@tier3influencereward = 18
+@tier3influencemin = 125
+@tier3influencemax = 250
+@tier4influencereward = 24
+@tier4influencemin = 150
+@tier4influencemax = 300
+
+@tier1researchreward = 6
+@tier1researchmin = 60
+@tier1researchmax = 150
+@tier2researchreward = 12
+@tier2researchmin = 90
+@tier2researchmax = 250
+@tier3researchreward = 18
+@tier3researchmin = 120
+@tier3researchmax = 350
+@tier4researchreward = 24
+@tier4researchmin = 150
+@tier4researchmax = 500
+
+#Rogue Drone
+#Idea and writing by Maria and CriticalDawn
+#Code by ViolentBeetle
+
+#Drone escape setting up
+country_event = {
+	id = mem_rogue_drone.1
+	title = mem_rogue_drone.1.name
+	desc = mem_rogue_drone.1.desc
+	
+	picture = GFX_evt_society_research
+	
+	mean_time_to_happen = {
+		days = 30
+	}
+	
+	trigger = {
+		has_authority = auth_hive_mind
+		is_country_type = default
+		any_neighbor_country = {
+			is_country_type = default
+			has_communications = root
+			NOT = { has_ethic = ethic_gestalt_consciousness }
+			OR = {
+				is_ai = no
+				ROOT = { is_ai = no }
+			}
+		}
+		num_owned_planets > 1
+		NOT = { has_global_flag = mem_rogue_drone }
+	}
+	
+	immediate = {
+		set_global_flag = mem_rogue_drone
+		add_influence = -50
+		save_event_target_as = origin
+		random_owned_planet = {
+			limit = {
+				is_capital = no
+			}
+			save_event_target_as = hiveplanet
+		}
+		random_neighbor_country = {
+			limit = {
+				is_country_type = default
+				has_communications = root
+				OR = {
+					is_ai = no
+					ROOT = { is_ai = no }
+				}
+				NOT = { has_ethic = ethic_gestalt_consciousness }
+			}
+			save_event_target_as = receiver
+			country_event = {
+				id = mem_rogue_drone.2
+			}
+		}
+	}
+	
+	option = {
+		name = WORRYING
+	}
+}
+
+#Drone receiver
+country_event = {
+	id = mem_rogue_drone.2
+	title = mem_rogue_drone.2.name
+	desc = mem_rogue_drone.2.desc
+	
+	picture = GFX_evt_ship_in_orbit
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_rogue_drone.2a
+		
+		
+		hidden_effect = {
+			event_target:origin = {
+				country_event = {
+					id = mem_rogue_drone.8
+					days = 14
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_rogue_drone.2b
+		
+		trigger = {
+			NOT = { has_ethic = ethic_fanatic_xenophile }
+		}
+		
+		ai_chance = {
+			factor = 2
+			modifier = {
+				factor = 3
+				has_ethic = ethic_xenophile
+			}
+		}
+		hidden_effect = {
+			country_event = {
+				id = mem_rogue_drone.4
+			}
+		}
+	}
+	
+	option = {
+		name = mem_rogue_drone.2b.phile
+		
+		trigger = {
+			has_ethic = ethic_fanatic_xenophile 
+		}
+		
+		ai_chance = {
+			factor = 10
+		}
+		
+		hidden_effect = {
+			country_event = {
+				id = mem_rogue_drone.4
+			}
+		}
+	}
+	
+	option = {
+		name = mem_rogue_drone.2c
+		
+		trigger = {
+			NOR = {
+				has_ethic = ethic_fanatic_xenophile
+			}
+		}
+		
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 1000
+				has_civic = civic_fanatic_purifiers
+			}
+			modifier = {
+				factor = 3
+				has_ethic = ethic_fanatic_xenophobe
+			}
+			modifier = {
+				factor = 2
+				has_ethic = ethic_xenophobe
+			}
+			modifier = {
+				factor = 0.2
+				OR = {
+					has_ethic = ethic_fanatic_pacifist
+					has_ethic = ethic_pacifist
+				}
+			}
+		}
+		
+			event_target:origin = {
+				add_opinion_modifier = {
+					who = ROOT
+					modifier = mem_rogue_drone_busted
+				}
+				hidden_effect = {
+					country_event = { 
+						id = mem_rogue_drone.11 
+					}
+				}
+			}
+		
+	}
+}
+
+#Handover
+country_event = {
+	id = mem_rogue_drone.3
+	title = mem_rogue_drone.3.name
+	desc = mem_rogue_drone.3.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_throne_room
+	
+	immediate = {
+		
+	}
+	
+	option = {
+		name = OK
+		
+		add_monthly_resource_mult = {
+			resource = society_research
+			value = @tier3researchreward
+			min = @tier3researchmin
+			max = @tier3researchmax
+		}
+		
+		
+	}
+}
+
+#Creating drone for chat
+country_event = {
+	id = mem_rogue_drone.4
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		create_leader = {
+			species = event_target:origin.owner_species
+			type = scientist
+			name = "Drone 7/9"
+			skill = 3
+			event_leader = yes
+			traits = {
+				add_trait = leader_trait_expertise_industry
+				add_trait = mem_rogue_drone_trait
+			}
+		}
+		last_created_leader = {
+			save_event_target_as = drone
+			exile_leader_as = drone
+		}
+		IF = {
+			limit = {
+				is_ai = no
+			}
+			country_event = {
+				id = mem_rogue_drone.5
+			}
+			else = {
+				country_event = {
+					id = mem_rogue_drone.6
+					days = 7
+				}
+			}
+		}
+	}
+}
+
+#Chat with drone
+country_event = {
+	id = mem_rogue_drone.5
+	title = TRANSMISSION
+	desc = mem_rogue_drone.5.desc
+	
+	
+	diplomatic = yes
+	
+	is_triggered_only = yes
+	
+	picture_event_data = {
+		portrait = event_target:drone
+		room = ethic_spaceship_room
+	}
+	
+	option = {
+		name = mem_rogue_drone.5a
+				
+		country_event = {
+			id = mem_rogue_drone.51
+		}
+	}
+	
+}
+
+#Who are you?
+country_event = {
+	id = mem_rogue_drone.51
+	title = TRANSMISSION
+	desc = mem_rogue_drone.51.desc
+	
+	
+	diplomatic = yes
+	
+	is_triggered_only = yes
+	
+	picture_event_data = {
+		portrait = event_target:drone
+		room = ethic_spaceship_room
+	}
+	
+	option = {
+		name = mem_rogue_drone.51a
+		response_text = mem_rogue_drone.51a.response
+		is_dialog_only = yes
+	}
+	
+	option = {
+		name = mem_rogue_drone.51b
+				
+		country_event = {
+			id = mem_rogue_drone.52
+		}
+	}
+	
+}
+
+#What are you planning to do?
+
+country_event = {
+	id = mem_rogue_drone.52
+	title = TRANSMISSION
+	desc = mem_rogue_drone.52.desc
+	
+	
+	diplomatic = yes
+	
+	is_triggered_only = yes
+	
+	picture_event_data = {
+		portrait = event_target:drone
+		room = ethic_spaceship_room
+	}
+	
+	option = {
+		name = mem_rogue_drone.51a
+		response_text = mem_rogue_drone.51a.response
+		is_dialog_only = yes
+	}
+	
+	option = {
+		name = mem_rogue_drone.52a
+				
+		country_event = {
+			id = mem_rogue_drone.6
+			days = 7
+		}
+	}
+	
+}
+
+#Decide now
+country_event = {
+	id = mem_rogue_drone.6
+	title = mem_rogue_drone.6.name
+	desc = mem_rogue_drone.6.desc
+	picture = GFX_evt_throne_room
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_rogue_drone.6a
+		custom_tooltip = mem_rogue_drone.6a.tooltip
+		
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 10
+				root = {
+					opinion = {
+						who = event_target:origin
+						value < -10
+					}
+				}
+			}
+			modifier = {
+				factor = 0.1
+				root = {
+					opinion = {
+						who = event_target:origin
+						value > 50
+					}
+				}
+			}
+		}
+		
+		trigger = {
+			NAND = {
+				OR = {
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_xenophobe
+				}
+				OR = {
+					has_ethic = ethic_fanatic_pacifist
+					has_ethic = ethic_pacifist
+				}
+			}
+		}
+		
+		event_target:origin = {
+			add_opinion_modifier = {
+				who = ROOT
+				modifier = mem_rogue_drone_refused
+			}
+			hidden_effect = {
+				country_event = {
+					id = mem_rogue_drone.9
+				}
+			}
+		}
+		hidden_effect = {	
+			create_fleet = {
+				name = ""
+				effect = {
+					set_owner = root
+					
+					create_ship = {
+						name = "Pod 7/9"
+						random_existing_design = science
+						graphical_culture = event_target:origin
+					}
+					
+					set_location = root.capital_scope
+					
+					set_leader = drone
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_rogue_drone.6b
+		
+		ai_chance = {
+			factor = 10
+			
+			modifier = {
+				factor = 0.1
+				root = {
+					opinion = {
+						who = event_target:origin
+						value < -10
+					}
+				}
+			}
+			modifier = {
+				factor = 10
+				root = {
+					opinion = {
+						who = event_target:origin
+						value > 50
+					}
+				}
+			}
+			
+		}
+		
+		trigger = {
+			NOT = { has_ethic = ethic_fanatic_xenophile }
+		}
+		
+		hidden_effect = {
+			event_target:origin = {		
+				country_event = {
+					id = mem_rogue_drone.8
+					days = 14
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_rogue_drone.6c
+		
+		ai_chance = {
+			factor = 10
+		}
+		
+		hidden_effect = {
+			country_event = {
+				id = mem_rogue_drone.7
+				days = 14
+			}
+		}
+	}
+}
+
+#Drone study
+country_event = {
+	id = mem_rogue_drone.7
+	title = mem_rogue_drone.7.name
+	desc = mem_rogue_drone.7.desc
+	
+	picture = GFX_evt_society_research
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		event_target:origin = {
+			add_opinion_modifier = {
+				who = ROOT
+				modifier = mem_rogue_drone_refused
+			}
+			country_event = {
+				id = mem_rogue_drone.10
+			}
+		}
+	}
+	
+	option = {
+		name = OK
+		
+		add_monthly_resource_mult = {
+			resource = society_research
+			value = @tier4researchreward
+			min = @tier4researchmin
+			max = @tier4researchmax
+		}
+	}
+}
+
+#Hive mind notified of drone return
+
+country_event = {
+	id = mem_rogue_drone.8
+	title = mem_rogue_drone.8.name
+	desc = mem_rogue_drone.8.desc
+	
+	picture = GFX_evt_society_research
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		event_target:origin = {
+			add_opinion_modifier = {
+				who = event_target:receiver
+				modifier = mem_rogue_drone_handover
+			}
+		}
+	}
+	
+	option = {
+		name = mem_rogue_drone.8a
+		
+		ai_chance = {
+			factor = 10
+			
+			modifier = {
+				factor = 2
+				root = {
+					opinion = {
+						who = event_target:receiver
+						value > 0
+					}
+				}
+			}
+			modifier = {
+				factor = 0.5
+				root = {
+					opinion = {
+						who = event_target:receiver
+						value < 0
+					}
+				}
+			}
+			modifier = {
+				factor = 0
+				root = {
+					opinion = {
+						who = event_target:receiver
+						value < -100
+					}
+				}
+			}
+			
+		}
+		
+		add_influence = 50
+		add_unity = 50
+		
+		hidden_effect = {
+			event_target:receiver = {
+				country_event = {
+					id = mem_rogue_drone.3
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_rogue_drone.8b
+		
+		ai_chance = {
+			factor = 10
+			
+			modifier = {
+				factor = 0.5
+				root = {
+					opinion = {
+						who = event_target:receiver
+						value > 0
+					}
+				}
+			}
+			modifier = {
+				factor = 2
+				root = {
+					opinion = {
+						who = event_target:receiver
+						value < 0
+					}
+				}
+			}
+			modifier = {
+				factor = 0
+				root = {
+					opinion = {
+						who = event_target:receiver
+						value > 100
+					}
+				}
+			}
+			
+		}
+		
+		add_influence = 50
+		add_unity = 50
+		
+	
+		event_target:receiver = {
+			hidden_effect = {
+				country_event = {
+					id = mem_rogue_drone.12
+				}
+			}
+			add_opinion_modifier = {
+				who = ROOT
+				modifier = mem_rogue_drone_ungrateful
+			}
+		}
+		
+	}
+}
+
+#Hive mind notified of drone adoption
+country_event = {
+	id = mem_rogue_drone.9
+	title = mem_rogue_drone.9.name
+	desc = mem_rogue_drone.9.desc
+	
+	picture = GFX_evt_society_research
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		add_unity = -50
+	}
+	
+	option = {
+		name = mem_rogue_drone.9a
+	}
+}
+
+#Hive mind notified of drone study
+country_event = {
+	id = mem_rogue_drone.10
+	title = mem_rogue_drone.10.name
+	desc = mem_rogue_drone.10.desc
+	
+	picture = GFX_evt_society_research
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		add_unity = -50
+	}
+	
+	option = {
+		name = mem_rogue_drone.10a
+	}
+}
+
+#Hive mind notified of drone destruction
+country_event = {
+	id = mem_rogue_drone.11
+	title = mem_rogue_drone.11.name
+	desc = mem_rogue_drone.11.desc
+	
+	picture = GFX_evt_society_research
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_rogue_drone.11a
+	}
+}
+
+#Non-hive notified that hive mind is a jerk
+country_event = {
+	id = mem_rogue_drone.12
+	title = mem_rogue_drone.12.name
+	desc = mem_rogue_drone.12.desc
+	
+	picture = GFX_evt_society_research
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_rogue_drone.12a
+	}
+}

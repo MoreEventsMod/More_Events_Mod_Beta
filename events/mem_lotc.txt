@@ -1,0 +1,2312 @@
+#Legacy of the Carcharorion
+#AKA The Unponounceable Welsh event chain
+#By ViolentBeetle
+
+namespace = mem_lotc
+
+@min_distance = 20
+@max_distance = 60
+
+@tier1researchreward = 6
+@tier1researchmin = 60
+@tier1researchmax = 150
+@tier2researchreward = 12
+@tier2researchmin = 90
+@tier2researchmax = 250
+@tier3researchreward = 18
+@tier3researchmin = 120
+@tier3researchmax = 350
+@tier4researchreward = 24
+@tier4researchmin = 150
+@tier4researchmax = 500
+@tier5researchreward = 48
+@tier5researchmin = 300
+@tier5researchmax = 1000
+
+# Anomaly survey success
+ship_event = {
+	id = mem_lotc.1
+	title = "mem_lotc.1.name"
+	desc = "mem_lotc.1.desc"
+	picture = "GFX_evt_dead_city"
+	is_triggered_only = yes
+	
+	immediate = {
+    	owner = {
+    		set_country_flag = mem_lotc_finder
+			# leads to story event "Remnants" (first contact stuff)
+			country_event = { id = story.5 days = 30 }
+    	}
+		
+		from = {
+			set_planet_flag = mem_lotc_start
+			save_event_target_as = start
+			solar_system = {
+				set_star_flag = mem_lotc_start_system
+			}
+		}
+    }
+
+	option = {
+		name = mem_lotc.1a
+		
+		begin_event_chain = {
+			event_chain = "mem_lotc_first_chain"
+			target = root.owner
+		}
+		
+		hidden_effect = {
+		
+			#FIRST PROJECT
+			IF = {
+				limit = {
+					any_system = {
+						any_planet = {is_planet_class = pc_ocean }
+						distance = {
+							source = event_target:start
+							max_distance = @max_distance
+							min_distance = @min_distance
+						}
+						NOT = { has_star_flag = mem_lotc_start_system }
+					}
+				}
+				
+				random_planet = {
+					limit = {
+						is_planet_class = pc_ocean
+						distance = {
+							source = event_target:start
+							max_distance = @max_distance
+							min_distance = @min_distance
+						}
+						solar_system = { 
+							NOT = { has_star_flag = mem_lotc_start_system } 
+						}
+					}
+					set_planet_flag = mem_lotc_first
+				}
+				
+				else = {
+					IF = {
+						limit = {
+							any_system = {
+								OR = {
+									any_planet = {is_planet_class = pc_continental }
+									any_planet = {is_planet_class = pc_gaia }
+								}
+								distance = {
+									source = event_target:start
+									max_distance = @max_distance
+									min_distance = @min_distance
+								}
+								NOT = { has_star_flag = mem_lotc_start_system }
+							}
+						}
+						
+						random_planet = {
+							limit = {
+								OR = {
+									is_planet_class = pc_continental
+									is_planet_class = pc_gaia 
+								}
+								distance = {
+									source = event_target:start
+									max_distance = @max_distance
+									min_distance = @min_distance
+								}
+								solar_system = { 
+									NOT = { has_star_flag = mem_lotc_start_system } 
+								}
+							}
+							set_planet_flag = mem_lotc_first
+						}
+						
+						else = {
+							IF = {
+								limit = {
+									any_system = {
+										any_planet = {is_planet_class = pc_tropical }
+										distance = {
+											source = event_target:start
+											max_distance = @max_distance
+											min_distance = @min_distance
+										}
+										NOT = { has_star_flag = mem_lotc_start_system }
+									}
+								}
+								
+								random_planet = {
+									limit = {
+										is_planet_class = pc_tropical
+										distance = {
+											source = event_target:start
+											max_distance = @max_distance
+											min_distance = @min_distance
+										}
+										solar_system = { 
+											NOT = { has_star_flag = mem_lotc_start_system } 
+										}
+									}
+									set_planet_flag = mem_lotc_first
+								}
+								
+								else = {
+									#FALLBACK INITIALIZER
+									event_target:start = {
+										spawn_system = {
+											max_distance = @max_distance
+											min_distance = @min_distance
+											initializer = "mem_lotc_first_init"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			#SECOND PROJECT
+			event_target:start = {
+				spawn_system = {
+					max_distance = @max_distance
+					min_distance = @min_distance
+					initializer = "mem_lotc_second_init"
+				}
+			}
+			
+			#THIRD PROJECT
+			IF = {
+				limit = {
+					any_system = {
+						any_planet = { is_planet_class = pc_gas_giant }
+						NOT = { has_star_flag = mem_lotc_second }
+						NOT = { any_planet = { has_planet_flag = mem_lotc_first } }
+						distance = {
+							source = event_target:start
+							max_distance = @max_distance
+							min_distance = @min_distance
+						}
+						NOT = { has_star_flag = mem_lotc_start_system }
+					}		
+				}
+				
+				random_planet = {
+					limit = {
+						is_planet_class = pc_gas_giant
+						distance = {
+							source = event_target:start
+							max_distance = @max_distance
+							min_distance = @min_distance
+						}
+						solar_system = { 
+							NOT = { has_star_flag = mem_lotc_start_system } 
+							NOT = { has_star_flag = mem_lotc_second }
+							NOT = { any_planet = { has_planet_flag = mem_lotc_first } }
+						}
+					}
+					set_planet_flag = mem_lotc_third
+				}
+				
+				else = {
+					#FALLBACK SPAWN
+					event_target:start = {
+						spawn_system = {
+							max_distance = @max_distance
+							min_distance = @min_distance
+							initializer = "mem_lotc_third_init"
+						}
+					}
+				}
+			}
+			
+			#FOURTH PROJECT
+			IF = {
+				limit = {
+					any_system = {
+						OR = {
+							any_planet = { is_planet_class = pc_barren }
+							any_planet = { is_planet_class = pc_barren_cold }
+						}
+						NOT = { has_star_flag = mem_lotc_second }
+						NOT = { any_planet = { has_planet_flag = mem_lotc_first } }
+						NOT = { any_planet = { has_planet_flag = mem_lotc_third } }
+						distance = {
+							source = event_target:start
+							max_distance = @max_distance
+							min_distance = @min_distance
+						}
+						NOT = { has_star_flag = mem_lotc_start_system }
+					}		
+				}
+				
+				random_planet = {
+					limit = {
+						OR = {
+							is_planet_class = pc_barren
+							is_planet_class = pc_barren_cold
+						}
+						distance = {
+							source = event_target:start
+							max_distance = @max_distance
+							min_distance = @min_distance
+						}
+						solar_system = { 
+							NOT = { has_star_flag = mem_lotc_start_system } 
+						}
+					}
+					set_planet_flag = mem_lotc_fourth
+				}
+				
+				else = {
+					#FALLBACK SPAWN
+					event_target:start = {
+						spawn_system = {
+							max_distance = @max_distance
+							min_distance = @min_distance
+							initializer = "mem_lotc_fourth_init"
+						}
+					}
+				}
+			}
+
+		
+		
+			#PROJECT ASSIGNMENT
+			random_planet = {
+				limit = {
+					has_planet_flag = mem_lotc_first
+				}
+				enable_special_project = {
+					name = "MEM_LOTC_FIRST"
+					location = this
+					owner = root
+				}
+			}
+			
+			random_system = {
+				limit = {
+					has_star_flag = mem_lotc_second
+				}
+				save_event_target_as = second_system
+			}
+			create_point_of_interest = {
+				id = mem_lotc_poi.2
+				name = "mem_lotc_poi.2"
+				desc = "mem_lotc_poi.2.desc"
+				event_chain = mem_lotc_first_chain
+				location = event_target:second_system
+			}
+			owner = {
+				set_country_flag = mem_lotc_going_for_it
+			}
+			
+			random_planet = {
+				limit = {
+					has_planet_flag = mem_lotc_third
+				}
+				enable_special_project = {
+					name = "MEM_LOTC_THIRD"
+					location = this
+					owner = root
+				}
+			}
+			random_planet = {
+				limit = {
+					has_planet_flag = mem_lotc_fourth
+				}
+				enable_special_project = {
+					name = "MEM_LOTC_FOURTH"
+					location = this
+					owner = root
+				}
+			}
+		}
+	}
+}
+
+#First set: wet planet
+ship_event = {
+	id = mem_lotc.2
+	title = mem_lotc.2.name
+	desc = mem_lotc.2.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_mem_horror_corridor
+	
+	option = {
+		name = mem_lotc.2a
+		
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "mem_lotc_first_chain" 
+				counter = mem_lotc_clues 
+				amount = 1 
+			}
+			
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+			
+			hidden_effect = {
+				country_event = { id = mem_lotc.11 }
+			}
+		}
+	}
+}
+
+#Cruiser action
+#On action: Entering the second system, notified of the ship
+ship_event = {
+	id = mem_lotc.3
+	title = mem_lotc.3.name
+	desc = mem_lotc.3.desc
+	picture = GFX_evt_ship_in_orbit
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			has_country_flag = mem_lotc_going_for_it
+			NOT = { has_country_flag = mem_lotc_found_the_second }
+		}
+		from = {
+			has_star_flag = mem_lotc_second
+			NOT = { 
+				any_ship_in_system = {
+					has_ship_flag = mem_lotc_disabled_cruiser
+				}
+			}
+		}
+	}
+	
+	immediate = {
+		owner = {
+			set_country_flag = mem_lotc_found_the_second
+			random_country = {
+				limit = { has_country_flag = mem_lotc_theguys }
+				establish_communications_no_message = prev
+			}
+		}
+	}
+	
+	option = {
+		name = OK
+	}
+}
+
+#On action: cruiser taken out
+
+
+
+#Third set: gas giant
+ship_event = {
+	id = mem_lotc.4
+	title = mem_lotc.4.name
+	desc = mem_lotc.4.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_mem_hive_cities
+	
+	option = {
+		name = mem_lotc.4a
+		
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "mem_lotc_first_chain" 
+				counter = mem_lotc_clues 
+				amount = 1 
+			}
+			
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+			
+			hidden_effect = {
+				country_event = { id = mem_lotc.11 }
+			}
+		}
+	}
+}
+
+#Fourth set: barren
+ship_event = {
+	id = mem_lotc.5
+	title = mem_lotc.5.name
+	desc = mem_lotc.5.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_mining_operations
+	
+	option = {
+		name = mem_lotc.5a
+		
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "mem_lotc_first_chain" 
+				counter = mem_lotc_clues 
+				amount = 1 
+			}
+			hidden_effect = {
+				country_event = { id = mem_lotc.11 }
+			}
+		}
+	}
+}
+
+#Ship disabled: Event for NPC
+ship_event = {
+	id = mem_lotc.6
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		has_ship_flag = mem_lotc_cruiser
+	}
+	
+	immediate = {
+		set_ship_flag = mem_lotc_disabled_cruiser
+		IF = {
+			limit = {
+				from.owner = {
+					has_country_flag = mem_lotc_going_for_it
+				}
+			}
+			from.owner = {
+				set_country_flag = mem_lotc_shot_cruiser
+				country_event = {
+					id = mem_lotc.7
+				}
+			}
+			else = {
+				IF = {
+					limit = {
+						any_country = {
+							has_country_flag = mem_lotc_found_the_second
+						}
+					}
+					every_country = {
+						limit = {
+							has_country_flag = mem_lotc_found_the_second
+						}
+						country_event = {
+							id = mem_lotc.8
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+#Notified, if the player shot it
+country_event = {
+	id = mem_lotc.7
+	title = mem_lotc.7.name
+	desc = mem_lotc.7.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_exploding_ship
+	
+	option = {
+		name = mem_lotc.7a
+		
+		from = {
+			enable_special_project = {
+				name = "MEM_LOTC_BOARDING_CRUISER"
+				location = this
+				owner = root
+			}
+		}
+		
+		hidden_effect = {
+			remove_point_of_interest = mem_lotc_poi.2
+		}
+	}
+}
+
+#Notified, player didn't take it out, but was aware of it
+country_event = {
+	id = mem_lotc.8
+	title = mem_lotc.8.name
+	desc = mem_lotc.8.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_exploding_ship
+	
+	option = {
+		name = mem_lotc.8a
+		
+		from = {
+			enable_special_project = {
+				name = "MEM_LOTC_BOARDING_CRUISER"
+				location = this
+				owner = root
+			}
+		}
+		
+		hidden_effect = {
+			remove_point_of_interest = mem_lotc_poi.2
+		}
+	}
+}
+
+#on_action: Entered the system and found ship disabled
+ship_event = {
+	id = mem_lotc.9
+	title = mem_lotc.9.name
+	desc = mem_lotc.9.desc
+	picture = GFX_evt_ship_in_orbit
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			has_country_flag = mem_lotc_going_for_it
+			NOT = { has_country_flag = mem_lotc_found_the_second }
+		}
+		from = {
+			has_star_flag = mem_lotc_second
+			
+			any_ship_in_system = {
+				has_ship_flag = mem_lotc_disabled_cruiser
+			}
+			
+		}
+	}
+	
+	immediate = {
+		owner = {
+			set_country_flag = mem_lotc_found_the_second
+			random_country = {
+				limit = { has_country_flag = mem_lotc_theguys }
+				establish_communications_no_message = prev
+			}
+		}
+	}
+	
+	option = {
+		name = mem_lotc.9a
+		
+		from = {
+			random_fleet_in_system = {
+				limit = {
+					has_fleet_flag = mem_lotc_cruiser
+				}
+				
+				enable_special_project = {
+					name = "MEM_LOTC_BOARDING_CRUISER"
+					location = this
+					owner = root
+				}
+			}
+		}
+		
+		hidden_effect = {
+			owner = {
+				remove_point_of_interest = mem_lotc_poi.2
+			}
+		}
+	}
+}
+
+#Boarding complete
+ship_event = {
+	id = mem_lotc.10
+	title = mem_lotc.10.name
+	desc = mem_lotc.10.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_interior_battle
+	
+	immediate = {
+		solar_system = { 
+			random_fleet_in_system = {
+				limit = { has_fleet_flag = mem_lotc_cruiser }
+				destroy_fleet = this
+			}
+		}
+	}
+	
+	option = {
+		name = mem_lotc.10a
+		
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "mem_lotc_first_chain" 
+				counter = mem_lotc_clues 
+				amount = 1 
+			}
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+			hidden_effect = {
+				country_event = { id = mem_lotc.11 }
+			}
+		}
+	}
+}
+
+#All 4 complete
+country_event = {
+	id = mem_lotc.11
+	title = mem_lotc.11.name
+	desc = mem_lotc.11.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_star_chart
+	
+	trigger = {
+		has_completed_event_chain_counter = {
+			event_chain = "mem_lotc_first_chain" 
+			counter = "mem_lotc_clues" 
+		}
+		NOT = { has_country_flag = mem_lotc_deduced_homeworld }
+	}
+	
+	immediate = {
+		set_country_flag = mem_lotc_deduced_homeworld
+		random_system = {
+			limit = { has_star_flag = mem_lotc_start_system }
+			save_event_target_as = start
+		}
+	}
+	
+	option = {
+		name = mem_lotc.11a
+		
+		hidden_effect = {
+			event_target:start = {
+				spawn_system = {
+					max_distance = @max_distance
+					min_distance = @min_distance
+					initializer = "mem_lotc_homeworld_init"
+				}
+			}
+			random_system = {
+				limit = { has_star_flag = mem_lotc_homeworld }
+				save_event_target_as = homeworld
+			}
+			
+			
+		}
+		
+		create_point_of_interest = {
+			id = mem_lotc_poi.5
+			name = "mem_lotc_poi.5"
+			desc = "mem_lotc_poi.5.desc"
+			event_chain = mem_lotc_first_chain
+			location = event_target:homeworld
+		}
+		
+		set_country_flag = mem_lotc_homeworld_coor
+	}
+	
+}
+
+#ON ACTION: Entering the system
+ship_event = {
+	id = mem_lotc.12
+	title = mem_lotc.12.name
+	desc = mem_lotc.12.desc
+	
+	picture = GFX_evt_ship_in_orbit
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			has_country_flag = mem_lotc_homeworld_coor
+			NOT = { has_country_flag = mem_lotc_homeworld_found }
+		}
+		from = {
+			has_star_flag = mem_lotc_homeworld
+		}
+	}
+	
+	immediate = {
+		owner = { 
+			set_country_flag = mem_lotc_homeworld_found 
+			save_event_target_as = ship_owner
+		}
+		solar_system = {
+			every_system_planet = {
+				surveyed = {
+					set_surveyed = yes
+					surveyor = event_target:ship_owner
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_lotc.12a
+		
+		owner = { end_event_chain = mem_lotc_first_chain }
+		
+		
+		
+		begin_event_chain = {
+			event_chain = "mem_lotc_second_chain"
+			target = root.owner
+		}
+		
+		hidden_effect = {
+			#Venus
+			random_planet = {
+				limit = { has_planet_flag = mem_lotc_I }
+				save_event_target_as = venus
+				enable_special_project = {
+					name = "MEM_LOTC_I"
+					location = this
+					owner = root
+				}
+			}
+			random_planet = {
+				limit = { has_planet_flag = mem_lotc_Ia }
+				save_event_target_as = venus_1
+				enable_special_project = {
+					name = "MEM_LOTC_IA"
+					location = this
+					owner = root
+				}
+			}
+			#Earth
+			random_planet = {
+				limit = { has_planet_flag = mem_lotc_II }
+				save_event_target_as = terraforming_candidate_1
+				enable_special_project = {
+					name = "MEM_LOTC_II"
+					location = this
+					owner = root
+				}
+			}
+			random_planet = {
+				limit = { has_planet_flag = mem_lotc_IIa }
+				save_event_target_as = luna
+				enable_special_project = {
+					name = "MEM_LOTC_IIA"
+					location = this
+					owner = root
+				}
+			}
+			#Mars
+			random_planet = {
+				limit = { has_planet_flag = mem_lotc_III }
+				save_event_target_as = terraforming_candidate_2
+				enable_special_project = {
+					name = "MEM_LOTC_III"
+					location = this
+					owner = root
+				}
+			}
+			random_planet = {
+				limit = { has_planet_flag = mem_lotc_IIIa }
+				save_event_target_as = phobos
+				enable_special_project = {
+					name = "MEM_LOTC_IIIA"
+					location = this
+					owner = root
+				}
+			}
+			#Asteroid
+			random_planet = {
+				limit = { has_planet_flag = mem_lotc_as }
+				save_event_target_as = the_asteroid
+				enable_special_project = {
+					name = "MEM_LOTC_AS"
+					location = this
+					owner = root
+				}
+			}
+			#Jupiter
+			# random_planet = {
+				# limit = { has_planet_flag = mem_lotc_IV }
+				# enable_special_project = {
+					# name = "MEM_LOTC_IV"
+					# location = this
+					# owner = root
+				# }
+			# }
+			random_planet = {
+				limit = { has_planet_flag = mem_lotc_IVa }
+				save_event_target_as = jupiter_1
+				enable_special_project = {
+					name = "MEM_LOTC_IVA"
+					location = this
+					owner = root
+				}
+			}
+			random_planet = {
+				limit = { has_planet_flag = mem_lotc_IVb }
+				save_event_target_as = jupiter_2
+				enable_special_project = {
+					name = "MEM_LOTC_IVB"
+					location = this
+					owner = root
+				}
+			}
+			#Saturn
+			random_planet = {
+				limit = { has_planet_flag = mem_lotc_V }
+				save_event_target_as = saturn
+				enable_special_project = {
+					name = "MEM_LOTC_V"
+					location = this
+					owner = root
+				}
+			}
+			random_planet = {
+				limit = { has_planet_flag = mem_lotc_Va }
+				save_event_target_as = saturn_1
+				enable_special_project = {
+					name = "MEM_LOTC_VA"
+					location = this
+					owner = root
+				}
+			}
+			random_planet = {
+				limit = { has_planet_flag = mem_lotc_Vb}
+				save_event_target_as = saturn_2
+				enable_special_project = {
+					name = "MEM_LOTC_VB"
+					location = this
+					owner = root
+				}
+			}
+			#Pluto
+			random_planet = {
+				limit = { has_planet_flag = mem_lotc_VI }
+				save_event_target_as = pluto
+				enable_special_project = {
+					name = "MEM_LOTC_VI"
+					location = this
+					owner = root
+				}
+			}
+		}
+		
+	}
+}
+
+#Venus
+ship_event = {
+	id = mem_lotc.13
+	title = mem_lotc.13.name
+	desc = mem_lotc.13.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_toxic
+	
+	immediate = {
+		owner = {
+			IF = { 
+				limit = { has_country_flag = mem_lotc_homeworld_once }
+				country_event = { id = mem_lotc.27 days = 21 } 
+			}
+			set_country_flag = mem_lotc_homeworld_once
+		}
+	}
+	
+	option = {
+		name = mem_lotc.13a
+		
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "mem_lotc_second_chain" 
+				counter = mem_lotc_surveyed 
+				amount = 1 
+			}
+			hidden_effect = {
+				country_event = {
+					id = mem_lotc.28
+				}
+			}
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		event_target:venus = {
+			orbital_deposit_tile = {
+				add_deposit = d_rich_engineering_deposit
+				add_deposit = d_rich_society_deposit
+			}
+		}
+		
+	}	
+}
+
+#Venus-A
+ship_event = {
+	id = mem_lotc.14
+	title = mem_lotc.14.name
+	desc = mem_lotc.14.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_molten
+	
+	immediate = {
+		owner = {
+			IF = { 
+				limit = { has_country_flag = mem_lotc_homeworld_once }
+				country_event = { id = mem_lotc.27 days = 21 } 
+			}
+			set_country_flag = mem_lotc_homeworld_once
+			
+		}
+	}
+	
+	option = {
+		name = mem_lotc.14a
+		
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "mem_lotc_second_chain" 
+				counter = mem_lotc_surveyed 
+				amount = 1 
+			}
+			hidden_effect = {
+				country_event = {
+					id = mem_lotc.28
+				}
+			}
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		event_target:venus_1 = {
+			orbital_deposit_tile = {
+				add_deposit = d_immense_mineral_deposit
+			}
+		}
+	}	
+}
+
+#Earth
+ship_event = {
+	id = mem_lotc.15
+	title = mem_lotc.15.name
+	desc = mem_lotc.15.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_dead_city
+	
+	immediate = {
+		owner = {
+			IF = { 
+				limit = { has_country_flag = mem_lotc_homeworld_once }
+				country_event = { id = mem_lotc.27 days = 21 } 
+			}
+			set_country_flag = mem_lotc_homeworld_once
+		}
+	}
+	
+	option = {
+		name = mem_lotc.15a
+		
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "mem_lotc_second_chain" 
+				counter = mem_lotc_surveyed 
+				amount = 1 
+			}
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier4researchreward
+				min = @tier4researchmin
+				max = @tier4researchmax
+			}
+			hidden_effect = {
+				country_event = {
+					id = mem_lotc.28
+				}
+			}
+		}
+		
+		# custom_tooltip = mem_lotc_terraforming_candidate_tooltip_1
+		# hidden_effect = {
+			# event_target:terraforming_candidate_1 = {
+				# add_modifier = {
+					# modifier = "terraforming_candidate"
+					# days = -1
+				# }
+				# orbital_deposit_tile = {
+					# add_deposit = d_immense_society_deposit
+				# }
+			# }		
+		# }
+		
+	}	
+}
+
+#Luna
+ship_event = {
+	id = mem_lotc.16
+	title = mem_lotc.16.name
+	desc = mem_lotc.16.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_dead_city
+	
+	immediate = {
+		owner = {
+			IF = { 
+				limit = { has_country_flag = mem_lotc_homeworld_once }
+				country_event = { id = mem_lotc.27 days = 21 } 
+			}
+			set_country_flag = mem_lotc_homeworld_once
+			
+		}
+		
+	}
+	
+	option = {
+		name = mem_lotc.16a
+		
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "mem_lotc_second_chain" 
+				counter = mem_lotc_surveyed 
+				amount = 1 
+			}
+			hidden_effect = {
+				country_event = {
+					id = mem_lotc.28
+				}
+			}
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		event_target:luna = {
+			orbital_deposit_tile = {
+				add_deposit = d_vast_society_deposit
+			}
+		}
+	}	
+}
+
+#Mars
+ship_event = {
+	id = mem_lotc.17
+	title = mem_lotc.17.name
+	desc = mem_lotc.17.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_dead_city
+	
+	immediate = {
+		owner = {
+			IF = { 
+				limit = { has_country_flag = mem_lotc_homeworld_once }
+				country_event = { id = mem_lotc.27 days = 21 } 
+			}
+			set_country_flag = mem_lotc_homeworld_once
+		}
+	}
+	
+	option = {
+		name = mem_lotc.17a
+		
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "mem_lotc_second_chain" 
+				counter = mem_lotc_surveyed 
+				amount = 1 
+			}
+			hidden_effect = {
+				country_event = {
+					id = mem_lotc.28
+				}
+			}
+		}
+		
+		custom_tooltip = mem_lotc_terraforming_candidate_tooltip_2
+		hidden_effect = {
+			event_target:terraforming_candidate_2 = {
+				add_modifier = {
+					modifier = "terraforming_candidate"
+					days = -1
+				}
+			}		
+		}
+		
+	}	
+}
+
+#Phobos
+ship_event = {
+	id = mem_lotc.18
+	title = mem_lotc.18.name
+	desc = mem_lotc.18.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_cold_barren
+	
+	immediate = {
+		owner = {
+			IF = { 
+				limit = { has_country_flag = mem_lotc_homeworld_once }
+				country_event = { id = mem_lotc.27 days = 21 } 
+			}
+			set_country_flag = mem_lotc_homeworld_once
+		}
+	}
+	
+	option = {
+		name = mem_lotc.18a
+		
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "mem_lotc_second_chain" 
+				counter = mem_lotc_surveyed 
+				amount = 1 
+			}
+			hidden_effect = {
+				country_event = {
+					id = mem_lotc.28
+				}
+			}
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		
+	}	
+}
+
+#Asteroid
+ship_event = {
+	id = mem_lotc.19
+	title = mem_lotc.19.name
+	desc = mem_lotc.19.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_mem_big_asteroid
+	
+	immediate = {
+		owner = {
+			IF = { 
+				limit = { has_country_flag = mem_lotc_homeworld_once }
+				country_event = { id = mem_lotc.27 days = 21 } 
+			}
+			set_country_flag = mem_lotc_homeworld_once
+		}
+	}
+	
+	option = {
+		name = mem_lotc.19a
+		
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "mem_lotc_second_chain" 
+				counter = mem_lotc_surveyed 
+				amount = 1 
+			}
+			hidden_effect = {
+				country_event = {
+					id = mem_lotc.28
+				}
+			}
+		}
+		event_target:the_asteroid = {
+			orbital_deposit_tile = {
+				add_deposit = d_immense_mineral_deposit
+			}
+		}
+		
+	}	
+}
+
+#Jupiter
+# ship_event = {
+	# id = mem_lotc.20
+	# title = mem_lotc.20.name
+	# desc = mem_lotc.20.desc
+	
+	# is_triggered_only = yes
+	
+	# picture = GFX_evt_mem_big_asteroid
+	
+	# immediate = {
+		# owner = {
+			# IF = { 
+				# limit = { has_country_flag = mem_lotc_homeworld_once }
+				# country_event = { id = mem_lotc.27 days = 21 } 
+			# }
+			# set_country_flag = mem_lotc_homeworld_once
+		# }
+	# }
+	
+	# option = {
+		# name = mem_lotc.20a
+		
+		# owner = {
+			# add_event_chain_counter = {
+				# event_chain = "mem_lotc_second_chain" 
+				# counter = mem_lotc_surveyed 
+				# amount = 1 
+			# }
+			# hidden_effect = {
+				# country_event = {
+					# id = mem_lotc.28
+				# }
+			# }
+		# }
+		
+	# }	
+# }
+
+#Jupiter-A
+ship_event = {
+	id = mem_lotc.21
+	title = mem_lotc.21.name
+	desc = mem_lotc.21.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_outpost
+	
+	immediate = {
+		owner = {
+			IF = { 
+				limit = { has_country_flag = mem_lotc_homeworld_once }
+				country_event = { id = mem_lotc.27 days = 21 } 
+			}
+			set_country_flag = mem_lotc_homeworld_once
+		}
+	}
+	
+	option = {
+		name = mem_lotc.21a
+		
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "mem_lotc_second_chain" 
+				counter = mem_lotc_surveyed 
+				amount = 1 
+			}
+			hidden_effect = {
+				country_event = {
+					id = mem_lotc.28
+				}
+			}
+		}
+		event_target:jupiter_1 = {
+			orbital_deposit_tile = {
+				add_deposit = d_vast_mineral_deposit
+				add_deposit = d_vast_energy_deposit
+			}
+		}
+	}	
+}
+
+#Jupiter-B
+ship_event = {
+	id = mem_lotc.22
+	title = mem_lotc.22.name
+	desc = mem_lotc.22.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_mining_operations
+	
+	immediate = {
+		owner = {
+			IF = { 
+				limit = { has_country_flag = mem_lotc_homeworld_once }
+				country_event = { id = mem_lotc.27 days = 21 } 
+			}
+			set_country_flag = mem_lotc_homeworld_once
+		}
+	}
+	
+	option = {
+		name = mem_lotc.22a
+		
+		trigger = {
+			owner = { has_technology = tech_neural_implants }
+		}
+		
+	}
+
+	option = {
+		name = mem_lotc.22b
+		
+		trigger = {
+			owner = {
+				NOT = { has_technology = tech_neural_implants }
+				has_policy_flag = slavery_not_allowed
+			}
+		}
+	}
+	
+	option = {
+		name = mem_lotc.22c
+		
+		trigger = {
+			owner = {
+				NOT = { has_technology = tech_neural_implants }
+				has_policy_flag = slavery_allowed
+			}
+		}
+		
+		owner = {
+			add_research_option = tech_neural_implants
+			add_tech_progress = {
+				tech = tech_neural_implants
+				progress = 0.25
+			}
+		}
+		
+	}
+	
+	after = {
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "mem_lotc_second_chain" 
+				counter = mem_lotc_surveyed 
+				amount = 1 
+			}
+			hidden_effect = {
+				country_event = {
+					id = mem_lotc.28
+				}
+			}
+		}
+	}
+}
+
+#Saturn
+ship_event = {
+	id = mem_lotc.23
+	title = mem_lotc.23.name
+	desc = mem_lotc.23.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_gas_giant
+	
+	immediate = {
+		owner = {
+			IF = { 
+				limit = { has_country_flag = mem_lotc_homeworld_once }
+				country_event = { id = mem_lotc.27 days = 21 } 
+			}
+			set_country_flag = mem_lotc_homeworld_once
+		}
+	}
+	
+	option = {
+		name = mem_lotc.23a
+		
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "mem_lotc_second_chain" 
+				counter = mem_lotc_surveyed 
+				amount = 1 
+			}
+			hidden_effect = {
+				country_event = {
+					id = mem_lotc.28
+				}
+			}
+		}
+		event_target:saturn = {
+			orbital_deposit_tile = {
+				add_deposit = d_rich_engineering_deposit
+				add_deposit = d_rich_physics_deposit
+			}
+		}
+		
+	}	
+}
+
+#Saturn-A
+ship_event = {
+	id = mem_lotc.24
+	title = mem_lotc.24.name
+	desc = mem_lotc.24.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_mem_horror_corridor
+	
+	immediate = {
+		owner = {
+			IF = { 
+				limit = { has_country_flag = mem_lotc_homeworld_once }
+				country_event = { id = mem_lotc.27 days = 21 } 
+			}
+			set_country_flag = mem_lotc_homeworld_once
+		}
+	}
+	
+	option = {
+		name = mem_lotc.24a
+		
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "mem_lotc_second_chain" 
+				counter = mem_lotc_surveyed 
+				amount = 1 
+			}
+			hidden_effect = {
+				country_event = {
+					id = mem_lotc.28
+				}
+			}
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		event_target:saturn_1 = {
+			orbital_deposit_tile = {
+				add_deposit = d_rich_physics_deposit
+			}
+		}
+		
+	}	
+}
+
+#Saturn-B
+ship_event = {
+	id = mem_lotc.25
+	title = mem_lotc.25.name
+	desc = mem_lotc.25.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_mem_horror_corridor
+	
+	immediate = {
+		owner = {
+			IF = { 
+				limit = { has_country_flag = mem_lotc_homeworld_once }
+				country_event = { id = mem_lotc.27 days = 21 } 
+			}
+			set_country_flag = mem_lotc_homeworld_once
+		}
+	}
+	
+	option = {
+		name = mem_lotc.25a
+		
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "mem_lotc_second_chain" 
+				counter = mem_lotc_surveyed 
+				amount = 1 
+			}
+			hidden_effect = {
+				country_event = {
+					id = mem_lotc.28
+				}
+			}
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+		event_target:saturn_2 = {
+			orbital_deposit_tile = {
+				add_deposit = d_physics_deposit
+				add_deposit = d_society_deposit
+			}
+		}
+	}	
+}
+
+#Pluto
+ship_event = {
+	id = mem_lotc.26
+	title = mem_lotc.26.name
+	desc = mem_lotc.26.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_ship_in_orbit
+	
+	immediate = {
+		owner = {
+			IF = { 
+				limit = { has_country_flag = mem_lotc_homeworld_once }
+				country_event = { id = mem_lotc.27 days = 21 } 
+			}
+			set_country_flag = mem_lotc_homeworld_once
+		}
+	}
+	
+	option = {
+		name = mem_lotc.26a
+		
+		owner = {
+			add_event_chain_counter = {
+				event_chain = "mem_lotc_second_chain" 
+				counter = mem_lotc_surveyed 
+				amount = 1 
+			}
+			hidden_effect = {
+				country_event = {
+					id = mem_lotc.28
+				}
+			}
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+		
+	}	
+}
+
+#Some things are better left buried
+country_event = {
+	id = mem_lotc.27
+	title = mem_lotc.27.name
+	desc = mem_lotc.27.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_unknown_ships
+	
+	trigger = {
+		NOT = { has_global_flag = mem_lotc_reenforcements_arrived }
+	}
+	
+	immediate = {
+		set_global_flag = mem_lotc_reenforcements_arrived
+		random_system = {
+			limit = {
+				has_star_flag = mem_lotc_homeworld
+			}
+			random_system_planet = {
+				limit = { is_star = yes }
+				planet_event = { id = mem_lotc.29 }
+				#planet_event = { id = mem_lotc.29 }
+			}
+		}
+	}
+	
+	option = {
+		name = mem_lotc.27a
+	}
+}
+
+
+#Succesfully found
+country_event = {
+	id = mem_lotc.28
+	title = mem_lotc.28.name
+	desc = mem_lotc.28.desc
+	picture = GFX_evt_star_chart
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		has_completed_event_chain_counter = {
+			event_chain = "mem_lotc_second_chain" 
+			counter = "mem_lotc_surveyed" 
+		}
+		NOT = { has_country_flag = mem_lotc_deduced_colony }
+	}
+	
+	immediate = {
+		set_country_flag = mem_lotc_deduced_colony
+		 random_system = {
+			 limit = { has_star_flag = mem_lotc_homeworld }
+			 save_event_target_as = start
+		 }
+	}
+	
+	option = {
+		name = mem_lotc.11a
+		
+		hidden_effect = {
+			event_target:start = {
+				spawn_system = {
+					max_distance = @max_distance
+					min_distance = @min_distance
+					initializer = "mem_lotc_colony_init"
+				}
+			}
+			random_system = {
+				limit = { has_star_flag = mem_lotc_colony }
+				save_event_target_as = colony
+			}
+			
+			
+		}
+		
+		end_event_chain = "mem_lotc_second_chain"
+		
+		begin_event_chain = {
+			event_chain = "mem_lotc_third_chain"
+			target = root
+		}
+		
+		create_point_of_interest = {
+			id = mem_lotc_poi.6
+			name = "mem_lotc_poi.6"
+			desc = "mem_lotc_poi.6.desc"
+			event_chain = mem_lotc_third_chain
+			location = event_target:colony
+		}
+		
+		set_country_flag = mem_lotc_colony_coor
+	}
+}
+
+
+#Hidden event: Placing ships
+planet_event = {
+	id = mem_lotc.29
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		solar_system = {
+			random_system_planet = {
+				limit = {
+					NOT = { has_planet_flag = mem_lotc_target_set }
+				}
+				set_planet_flag = mem_lotc_target_set
+				save_event_target_as = target_1
+			}
+			
+			random_system_planet = {
+				limit = {
+					NOT = { has_planet_flag = mem_lotc_target_set }
+				}
+				set_planet_flag = mem_lotc_target_set
+				save_event_target_as = target_2
+			}
+			
+			random_system_planet = {
+				limit = {
+					NOT = { has_planet_flag = mem_lotc_target_set }
+				}
+				set_planet_flag = mem_lotc_target_set
+				save_event_target_as = target_3
+			}
+			
+			random_system_planet = {
+				limit = {
+					NOT = { has_planet_flag = mem_lotc_target_set }
+				}
+				set_planet_flag = mem_lotc_target_set
+				save_event_target_as = target_4
+			}
+			
+			random_system_planet = {
+				limit = {
+					NOT = { has_planet_flag = mem_lotc_target_set }
+				}
+				set_planet_flag = mem_lotc_target_set
+				save_event_target_as = target_5
+			}
+			
+			random_system_planet = {
+				limit = {
+					NOT = { has_planet_flag = mem_lotc_target_set }
+				}
+				set_planet_flag = mem_lotc_target_set
+				save_event_target_as = target_6
+			}
+			
+			random_system_planet = {
+				limit = {
+					NOT = { has_planet_flag = mem_lotc_target_set }
+				}
+				set_planet_flag = mem_lotc_target_set
+				save_event_target_as = target_7
+			}
+			
+			random_system_planet = {
+				limit = {
+					NOT = { has_planet_flag = mem_lotc_target_set }
+				}
+				set_planet_flag = mem_lotc_target_set
+				save_event_target_as = target_7
+			}
+		}
+		random_country = {
+			limit = { has_country_flag = mem_lotc_theguys }
+			save_event_target_as = owners
+		}
+		create_fleet = {
+			name = "Carcharorion ghosts"
+			
+			effect = {
+				add_modifier = { modifier = pirate_power days = -1 }
+				set_fleet_stance = aggressive
+				set_aggro_range_measure_from = self
+				set_aggro_range = 100
+				set_owner = event_target:owners
+				while = {
+					count = 2
+					create_ship = {
+						name = "NAME_mem_lotc_battleship"
+						design = "NAME_mem_lotc_battleship"
+					}
+				}
+				while = {
+					count = 6
+					create_ship = {
+						name = "NAME_mem_lotc_cruiser"
+						design = "NAME_mem_lotc_cruiser"
+					}
+				}
+				while = {
+					count = 20
+					create_ship = {
+						name = "NAME_mem_lotc_destroyer"
+						design = "NAME_mem_lotc_destroyer"
+					}
+				}
+				while = {
+					count = 36
+					create_ship = {
+						name = "NAME_mem_lotc_corvette"
+						design = "NAME_mem_lotc_corvette"
+					}
+				}
+				set_location = {
+					target = root
+					distance = 400
+					angle = random
+				}
+				
+				queue_actions = {
+					repeat = {
+						find_closest_planet = {
+							trigger = {
+								id = mem_lotc.target_1
+								is_planet = event_target:target_1
+							}
+							found_planet = {
+								move_to = this
+								orbit_planet = this
+							}
+						}
+						find_closest_planet = {
+							trigger = {
+								id = mem_lotc.target_2
+								is_planet = event_target:target_2
+							}
+							found_planet = {
+								move_to = this
+								orbit_planet = this
+							}
+						}
+						find_closest_planet = {
+							trigger = {
+								id = mem_lotc.target_3
+								is_planet = event_target:target_3
+							}
+							found_planet = {
+								move_to = this
+								orbit_planet = this
+							}
+						}
+						find_closest_planet = {
+							trigger = {
+								id = mem_lotc.target_4
+								is_planet = event_target:target_4
+							}
+							found_planet = {
+								move_to = this
+								orbit_planet = this
+							}
+						}
+						find_closest_planet = {
+							trigger = {
+								id = mem_lotc.target_5
+								is_planet = event_target:target_5
+							}
+							found_planet = {
+								move_to = this
+								orbit_planet = this
+							}
+						}
+						find_closest_planet = {
+							trigger = {
+								id = mem_lotc.target_6
+								is_planet = event_target:target_6
+							}
+							found_planet = {
+								move_to = this
+								orbit_planet = this
+							}
+						}
+						find_closest_planet = {
+							trigger = {
+								id = mem_lotc.target_7
+								is_planet = event_target:target_7
+							}
+							found_planet = {
+								move_to = this
+								orbit_planet = this
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+#ON ACTION: Entering the final system, hostiles are present
+ship_event = {
+	id = mem_lotc.30
+	title = mem_lotc.30.name
+	desc = mem_lotc.30.desc
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		from = {
+			has_star_flag = mem_lotc_colony
+			any_ship_in_system = {
+				fleet = {
+					has_fleet_flag = mem_lotc_guards
+				}
+			}
+		}
+		owner = {
+			has_country_flag = mem_lotc_deduced_colony
+			NOT = { has_country_flag = mem_lotc_found_colony }
+		}
+	}
+	
+	immediate = {
+		owner = {
+			set_country_flag = mem_lotc_found_colony
+		}
+	}
+	
+	picture = GFX_evt_ship_in_orbit
+	
+	option = {
+		name = OK
+	}
+}
+
+#ON ACTION: Entering the final system, hostiles are somehow dead
+ship_event = {
+	id = mem_lotc.31
+	title = mem_lotc.31.name
+	desc = {
+		text = mem_lotc.31.desc
+		trigger = {
+			owner = { NOT = { has_country_flag = mem_lotc_fallback } }
+		}
+	}
+	
+	desc = {
+		text = mem_lotc.31.desc.fallback
+		trigger = {
+			owner = { has_country_flag = mem_lotc_fallback }
+		}
+	}
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		from = {
+			has_star_flag = mem_lotc_colony
+			NOT = {
+				any_ship_in_system = {
+					fleet = {
+						has_fleet_flag = mem_lotc_guards
+					}
+				}
+			}
+		}
+		owner = {
+			has_country_flag = mem_lotc_deduced_colony
+			NOT = { has_country_flag = mem_lotc_final_phase }
+			OR = {
+				NOT = { has_country_flag = mem_lotc_found_colony }
+				NOR = { 
+					has_country_flag = mem_lotc_fallback
+					has_country_flag = mem_lotc_killed_guard
+				}
+			}
+		}
+	}
+	
+	immediate = {
+		owner = {
+			if = {
+				limit = { has_country_flag = mem_lotc_found_colony }
+				set_country_flag = mem_lotc_fallback
+			}
+			set_country_flag = mem_lotc_final_phase
+			set_country_flag = mem_lotc_found_colony
+		}
+	}
+	
+	picture = GFX_evt_ship_in_orbit
+	
+	option = {
+		name = mem_lotc.31a
+		
+		random_planet = {
+			limit = {
+				has_planet_flag = mem_lotc_colony_gas
+			}
+			save_event_target_as = mem_lotc_final
+			enable_special_project = {
+				name = "MEM_LOTC_FINAL"
+				location = this
+				owner = root
+			}
+		}
+	}
+}
+
+#ON ACTION: Hidden event to mark empire that shoots down fleets
+country_event = {
+	id = mem_lotc.32
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		FROMFROMFROM = {
+			has_fleet_flag = mem_lotc_guards
+		}
+	}
+	
+	immediate = {
+		set_country_flag = mem_lotc_killed_guard
+		fromfrom.solar_system = {
+			IF = {
+				limit = {
+					any_ship_in_system = {
+						owner = { has_country_flag = mem_lotc_found_colony NOT = { is_same_value = root } }
+					}
+				}
+				random_country = {
+					limit = { has_country_flag = mem_lotc_found_colony }
+					country_event = { id = mem_lotc.37 }
+				}
+			}
+		}
+	}
+}
+
+#After defeating
+country_event = {
+	id = mem_lotc.33
+	title = mem_lotc.33.name
+	desc = mem_lotc.33.desc
+	
+	picture = GFX_evt_gas_giant
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		FROMFROMFROM = {
+			has_fleet_flag = mem_lotc_guards
+		}
+		has_country_flag = mem_lotc_found_colony
+	}
+	
+	immediate = {
+		set_country_flag = mem_lotc_final_phase
+	}
+	
+	option = {
+		name = mem_lotc.31a
+		
+		random_planet = {
+			limit = {
+				has_planet_flag = mem_lotc_colony_gas
+			}
+			save_event_target_as = mem_lotc_final
+			enable_special_project = {
+				name = "MEM_LOTC_FINAL"
+				location = this
+				owner = root
+			}
+		}
+	}
+}
+
+#Contact established
+ship_event = {
+	id = mem_lotc.34
+	title = mem_lotc.34.name
+	desc = mem_lotc.34.desc
+	
+	picture = GFX_evt_gas_giant
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = ONSCREEN
+		hidden_effect = {
+			owner = {
+				country_event = { id = mem_lotc.35 }
+			}
+		}
+	}
+}
+
+#Conversation
+country_event = {
+	id = mem_lotc.35
+	title = "TRANSMISSION"
+	desc = "mem_lotc.35.desc"
+	
+	diplomatic = yes
+	
+	is_triggered_only = yes
+	
+	picture_event_data = {
+		room = no_video_feed_room
+	}
+	
+	option = {
+		name = mem_lotc.35a
+		response_text = mem_lotc.35a.response
+		
+		hidden_effect = {
+			country_event = { id = mem_lotc.36 days = 5 }
+		}
+	}
+	
+	option = {
+		name = mem_lotc.35b
+		response_text = mem_lotc.35b.response
+		is_dialog_only = yes
+	}
+	
+	option = {
+		name = mem_lotc.35c
+		response_text = mem_lotc.35c.response
+		is_dialog_only = yes
+	}
+	
+	option = {
+		name = mem_lotc.35d
+		response_text = mem_lotc.35d.response
+		is_dialog_only = yes
+		
+		trigger = {
+			has_country_flag = mem_lotc_killed_guard
+		}
+	}
+}
+
+#The end. Get the reward
+country_event = {
+	id = mem_lotc.36
+	title = mem_lotc.36.name
+	desc = mem_lotc.36.desc
+	
+	picture = GFX_evt_ship_in_orbit
+	location = event_target:mem_lotc_final
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_country = {
+			limit = { has_country_flag = mem_lotc_theguys }
+			save_event_target_as = mem_lotc_theguys
+		}
+	}
+	
+	option = {
+		name = mem_lotc.36a
+		
+		trigger = {
+			NOR = {
+				has_ethic = ethic_materialist
+				has_ethic = ethic_fanatic_materialist
+				has_ethic = ethic_spiritualist
+				has_ethic = ethic_fanatic_spiritualist
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophile
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_pacifist
+				has_ethic = ethic_fanatic_pacifist
+				has_ethic = ethic_militarist
+				has_ethic = ethic_fanatic_militarist
+			}
+		}
+	}
+	
+	option = {
+		name = mem_lotc.36a.mat
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_materialist
+				has_ethic = ethic_fanatic_materialist
+			}
+		}
+	}
+	
+	option = {
+		name = mem_lotc.36a.sp
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_spiritualist
+				has_ethic = ethic_fanatic_spiritualist
+			}
+		}
+	}
+	
+	option = {
+		name = mem_lotc.36a.phile
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_xenophile
+				has_ethic = ethic_fanatic_xenophile
+			}
+		}
+	}
+	
+	option = {
+		name = mem_lotc.36a.phobe
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
+	}
+	
+	option = {
+		name = mem_lotc.36a.mil
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_militarist
+				has_ethic = ethic_fanatic_militarist
+			}
+		}
+	}
+	
+	option = {
+		name = mem_lotc.36a.pac
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_pacifist
+				has_ethic = ethic_fanatic_pacifist
+			}
+		}
+	}
+	
+	after = {
+		end_event_chain = mem_lotc_third_chain
+		custom_tooltip = mem_lotc.36.tooltip
+		hidden_effect = {
+			create_fleet = {
+				name = NAME_mem_lotc_legacy_fleet
+				effect = {
+					# create_ship_design = {
+						# design = "NAME_mem_lotc_battleship"
+					# }
+					set_owner = root
+					create_ship = {
+						name = "NAME_mem_lotc_reward_ship"
+						design = "NAME_mem_lotc_battleship"
+						graphical_culture = event_target:mem_lotc_theguys
+						# upgradable = no
+						effect = {
+							add_modifier = { modifier = mem_lotc_reward_ship days = -1 }
+						}
+					}
+					set_location = event_target:mem_lotc_final
+				}
+			}
+		}
+	}
+}
+
+#Fallback event in case we are present and defenders are destroyed
+country_event = {
+	id = mem_lotc.37
+	title = mem_lotc.33.name
+	desc = mem_lotc.33.desc
+	
+	picture = GFX_evt_gas_giant
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_country_flag = mem_lotc_final_phase
+	}
+	
+	option = {
+		name = mem_lotc.31a
+		
+		random_planet = {
+			limit = {
+				has_planet_flag = mem_lotc_colony_gas
+			}
+			save_event_target_as = mem_lotc_final
+			enable_special_project = {
+				name = "MEM_LOTC_FINAL"
+				location = this
+				owner = root
+			}
+		}
+	}
+}
