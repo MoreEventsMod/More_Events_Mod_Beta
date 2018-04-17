@@ -1,0 +1,1025 @@
+######################################
+# Under the Blanket
+# Original idea by: GoldMath
+# Code by:          Tuttu
+# Writing by:       GoldMath
+######################################
+
+namespace = mem_under_blanket
+
+#TODO : Sounds
+
+# Initial event. Triggered by on_action "on_colony_1_year_old"
+planet_event = {
+	id = mem_under_blanket.1
+	title = "mem_under_blanket.1.name"
+	desc = "mem_under_blanket.1.desc"
+	picture = GFX_evt_mining_operations
+	show_sound = event_alien_signal
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		Root.Owner = { NOT = { has_country_flag = mem_under_blanket_done } }
+		NOT = { has_planet_flag = colony_event }
+	}
+	
+	# Used for easier localization and planet selection
+	immediate = {
+		save_event_target_as = mem_under_blanket_planet			
+		Root.Owner = { set_country_flag = mem_under_blanket_done }
+		set_planet_flag = colony_event
+	}
+	
+	option = {
+		trigger = {
+			root.owner = {
+				OR = {
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+				}
+			}
+		}
+		name = "mem_under_blanket.1.materialist"
+		hidden_effect = {
+			planet_event = { id = mem_under_blanket.2 days = 10 random = 2 }
+		}
+	}
+	
+	option = {
+		trigger = {
+			root.owner = {
+				OR = {
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		name = "mem_under_blanket.1.xenomilit"
+		hidden_effect = {
+			planet_event = { id = mem_under_blanket.2 days = 10 random = 2 }
+		}
+	}
+	
+	option = {
+		trigger = {
+			root.owner = {
+				NOR = {
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		name = "mem_under_blanket.1.others"
+		hidden_effect = {
+			planet_event = { id = mem_under_blanket.2 days = 10 random = 2 }
+		}
+	}
+	
+	option = {
+		name = "mem_under_blanket.1.deny"
+		Root.Owner = { add_influence = 100 }
+		
+		hidden_effect = {
+			random_list = {
+				05 = { 
+					set_planet_flag = mem_under_blanket_delayed_attack
+					planet_event = { id = mem_under_blanket.10 days = 100 random = 10 } 
+				}
+				95 = {}
+			}
+		}
+	}
+}
+
+# Leader Selection
+planet_event = {
+	id = mem_under_blanket.2
+	title = "mem_under_blanket.2.name"
+	desc = "mem_under_blanket.2.desc"
+	picture = GFX_evt_galactic_senate
+	show_sound = event_conversation
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		hidden_effect = {
+			#First leader selection (Expert)
+			if = {	
+				limit = {
+					Root.Owner = {
+						any_owned_leader  = {
+							leader_class = scientist
+							OR = {
+								has_level = 4
+								has_level = 5
+							}
+						}	
+					}
+				}
+				Root.Owner = {
+					random_owned_leader = {
+						limit = {			
+							leader_class = scientist
+							OR = {
+								has_level = 4
+								has_level = 5
+							}
+						}
+						set_leader_flag = mem_under_blanket_firstleader
+						save_event_target_as = mem_under_blanket_firstleader
+					}	
+				}
+				else = {
+					Root.Owner = {
+						random_owned_leader = {
+							limit = { leader_class = scientist }
+							set_leader_flag = mem_under_blanket_firstleader_random
+							save_event_target_as = mem_under_blanket_firstleader_random
+						}	
+					}
+				}
+			}
+			#Second leader selection (Rookie)
+			if = {	
+				limit = {
+					Root.Owner = {
+						any_owned_leader  = {
+							leader_class = scientist
+							OR = {
+								has_level = 1
+								has_level = 2
+							}
+							NOR = {
+								has_leader_flag = mem_under_blanket_firstleader
+								has_leader_flag = mem_under_blanket_firstleader_random
+							}
+						}	
+					}
+				}
+				Root.Owner = {
+					random_owned_leader = {
+						limit = {			
+							leader_class = scientist
+							OR = {
+								has_level = 1
+								has_level = 2
+							}
+							NOR = {
+								has_leader_flag = mem_under_blanket_firstleader
+								has_leader_flag = mem_under_blanket_firstleader_random
+							}
+						}
+						set_leader_flag = mem_under_blanket_secondleader
+						save_event_target_as = mem_under_blanket_secondleader
+					}	
+				}
+				else = {
+					Root.Owner = {
+						random_owned_leader = {
+							limit = { 
+								leader_class = scientist 
+								NOR = {
+									has_leader_flag = mem_under_blanket_firstleader
+									has_leader_flag = mem_under_blanket_firstleader_random
+								}
+							}
+							set_leader_flag = mem_under_blanket_secondleader_random
+							save_event_target_as = mem_under_blanket_secondleader_random
+						}	
+					}
+				}
+			}	
+			#Third leader selection (Always random)
+			Root.Owner = {
+				random_owned_leader = {
+					limit = {			
+						leader_class = scientist
+						NOR = {
+							has_leader_flag = mem_under_blanket_firstleader
+							has_leader_flag = mem_under_blanket_firstleader_random
+							has_leader_flag = mem_under_blanket_secondleader
+							has_leader_flag = mem_under_blanket_secondleader_random
+						}
+					}
+					set_leader_flag = mem_under_blanket_thirdleader
+					save_event_target_as = mem_under_blanket_thirdleader
+				}	
+			}					
+		}
+	}
+	
+	# Option available if firt leader (Expert) is not random
+	option = {
+		trigger = {
+			Root.Owner = {
+				any_owned_leader = { has_leader_flag = mem_under_blanket_firstleader }	
+			}		
+		}
+		name = "mem_under_blanket.2.firstleader"
+		Root.Owner = {
+			random_owned_leader = {
+				limit = {			
+					has_leader_flag = mem_under_blanket_firstleader
+				}
+				set_leader_flag = mem_under_blanket_selectedleader
+				save_event_target_as = mem_under_blanket_selectedleader
+			}	
+		}
+		hidden_effect = {
+			planet_event = { id = mem_under_blanket.3 days = 40 random = 4 }
+		}
+	}
+	
+	# Option available if firt leader is random
+	option = {
+		trigger = {
+			Root.Owner = {
+				any_owned_leader = { has_leader_flag = mem_under_blanket_firstleader_random }	
+			}		
+		}
+		name = "mem_under_blanket.2.firstleader.random"
+		Root.Owner = {
+			random_owned_leader = {
+				limit = {			
+					has_leader_flag = mem_under_blanket_firstleader_random
+				}
+				set_leader_flag = mem_under_blanket_selectedleader
+				save_event_target_as = mem_under_blanket_selectedleader
+			}	
+		}		
+		hidden_effect = {
+			planet_event = { id = mem_under_blanket.3 days = 40 random = 4 }
+		}
+	}
+	
+	# Option available if second leader (Rookie) is not random
+	option = {
+		trigger = {
+			Root.Owner = {
+				any_owned_leader = { has_leader_flag = mem_under_blanket_secondleader }	
+			}		
+		}
+		name = "mem_under_blanket.2.secondleader"
+		Root.Owner = {
+			random_owned_leader = {
+				limit = {			
+					has_leader_flag = mem_under_blanket_secondleader
+				}
+				set_leader_flag = mem_under_blanket_selectedleader
+				save_event_target_as = mem_under_blanket_selectedleader
+			}	
+		}	
+		hidden_effect = {
+			planet_event = { id = mem_under_blanket.3 days = 40 random = 4 }
+		}
+	}
+	
+	# Option available if second leader is random
+	option = {
+		trigger = {
+			Root.Owner = {
+				any_owned_leader = { has_leader_flag = mem_under_blanket_secondleader_random }	
+			}		
+		}
+		name = "mem_under_blanket.2.secondleader.random"
+		Root.Owner = {
+			random_owned_leader = {
+				limit = {			
+					has_leader_flag = mem_under_blanket_secondleader_random
+				}
+				set_leader_flag = mem_under_blanket_selectedleader
+				save_event_target_as = mem_under_blanket_selectedleader
+			}	
+		}
+		hidden_effect = {
+			planet_event = { id = mem_under_blanket.3 days = 40 random = 4 }
+		}
+	}
+	
+	# Option for the third leader (Always random)
+	option = {
+		trigger = {
+			Root.Owner = {
+				any_owned_leader = { has_leader_flag = mem_under_blanket_thirdleader }	
+			}		
+		}
+		name = "mem_under_blanket.2.thirdleader"
+		Root.Owner = {
+			random_owned_leader = {
+				limit = {			
+					has_leader_flag = mem_under_blanket_thirdleader
+				}
+				set_leader_flag = mem_under_blanket_selectedleader
+				save_event_target_as = mem_under_blanket_selectedleader
+			}	
+		}	
+		hidden_effect = {
+			planet_event = { id = mem_under_blanket.3 days = 40 random = 4 }
+		}		
+	}
+}
+
+# Ground Team
+planet_event = {
+	id = mem_under_blanket.3
+	title = "mem_under_blanket.3.name"
+	desc = "mem_under_blanket.3.desc"
+	picture = GFX_evt_in_the_dark
+	show_sound = event_yellow_alert
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	# Retreat
+	option = {		
+		trigger = {
+			root.owner = {
+				OR = {
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}		
+		name = "mem_under_blanket.3.retreat.xenomilit"
+		hidden_effect = {
+			random_list = {
+				30 = { planet_event = { id = mem_under_blanket.4 } }
+				35 = { planet_event = { id = mem_under_blanket.5 } }
+				35 = { planet_event = { id = mem_under_blanket.6 } }
+			}
+		}
+	}
+	
+	# Retreat
+	option = {		
+		trigger = {
+			root.owner = {
+				NOR = {
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}		
+		name = "mem_under_blanket.3.retreat.others"
+		hidden_effect = {
+			random_list = {
+				30 = { planet_event = { id = mem_under_blanket.4 } }
+				35 = { planet_event = { id = mem_under_blanket.5 } }
+				35 = { planet_event = { id = mem_under_blanket.6 } }
+			}
+		}		
+	}
+	
+	# First Contact
+	option = {
+		trigger = {
+			root.owner = {
+				OR = {
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+				}
+			}
+		}
+		name = "mem_under_blanket.3.contact.materialist"
+		hidden_effect = {
+			random_list = {
+				30 = { planet_event = { id = mem_under_blanket.7 days = 20 random = 3 } }
+				35 = { planet_event = { id = mem_under_blanket.8 days = 20 random = 3 } }
+				35 = { planet_event = { id = mem_under_blanket.9 days = 20 random = 3 } }
+				35 = { planet_event = { id = mem_under_blanket.10 days = 20 random = 3 } }
+			}
+		}	
+	}
+	
+	# First Contact
+	option = {
+		trigger = {
+			root.owner = {
+				OR = {
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		name = "mem_under_blanket.3.contact.xenomilit"
+		hidden_effect = {
+			random_list = {
+				30 = { planet_event = { id = mem_under_blanket.7 days = 20 random = 3 } }
+				35 = { planet_event = { id = mem_under_blanket.8 days = 20 random = 3 } }
+				35 = { planet_event = { id = mem_under_blanket.9 days = 20 random = 3 } }
+				35 = { planet_event = { id = mem_under_blanket.10 days = 20 random = 3 } }
+			}
+		}
+	}
+	
+	# First Contact
+	option = {
+		trigger = {
+			root.owner = {
+				NOR = {
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		name = "mem_under_blanket.3.contact.others"
+		hidden_effect = {
+			random_list = {
+				30 = { planet_event = { id = mem_under_blanket.7 days = 20 random = 3 } }
+				35 = { planet_event = { id = mem_under_blanket.8 days = 20 random = 3 } }
+				35 = { planet_event = { id = mem_under_blanket.9 days = 20 random = 3 } }
+				35 = { planet_event = { id = mem_under_blanket.10 days = 20 random = 3 } }
+			}
+		}
+	}
+}
+
+# Retreat - First Outcome
+planet_event = {
+	id = mem_under_blanket.4
+	title = "mem_under_blanket.4.name"
+	desc = "mem_under_blanket.4.desc"
+	picture = GFX_evt_landing_ship
+	show_sound = event_super_explosion
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	# Militarist & Xenophobe
+	option = {			
+		trigger = {
+			root.owner = {
+				OR = {
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		name = "mem_under_blanket.4.xenomilit"
+		event_target:mem_under_blanket_selectedleader = {
+			if = {
+				limit = { NOT = { has_trait = leader_trait_substance_abuser } }				
+				add_trait = leader_trait_substance_abuser
+			}	
+			if = {
+				limit = { NOT = { has_trait = leader_trait_paranoid } }				
+				add_trait = leader_trait_paranoid
+			}
+		}
+	}
+	
+	# Others
+	option = {			
+		trigger = {
+			root.owner = {
+				NOR = {
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		name = "mem_under_blanket.4.others"
+		event_target:mem_under_blanket_selectedleader = {
+			if = {
+				limit = { NOT = { has_trait = leader_trait_substance_abuser } }				
+				add_trait = leader_trait_substance_abuser
+			}	
+			if = {
+				limit = { NOT = { has_trait = leader_trait_paranoid } }				
+				add_trait = leader_trait_paranoid
+			}
+		}
+	}
+}
+
+# Retreat - Second Outcome
+planet_event = {
+	id = mem_under_blanket.5
+	title = "mem_under_blanket.5.name"
+	desc = "mem_under_blanket.5.desc"
+	picture = GFX_evt_society_research
+	show_sound = event_laboratory_sound
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	# Militarist & Xenophobe
+	option = {			
+		trigger = {
+			root.owner = {
+				OR = {
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		name = "mem_under_blanket.5.xenomilit"
+		Root.Owner = {
+			if = {
+				limit = {
+					has_tech_option = tech_morphogenetic_field_mastery
+				}
+				add_tech_progress = {
+					tech = tech_morphogenetic_field_mastery
+					progress = 0.25
+				}
+				else = {
+					add_research_option = tech_morphogenetic_field_mastery
+					add_tech_progress = {
+						tech = tech_morphogenetic_field_mastery
+						progress = 0.25
+					}
+				}
+			}
+		}
+	}
+	
+	# Others
+	option = {			
+		trigger = {
+			root.owner = {
+				NOR = {
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		name = "mem_under_blanket.5.others"
+		Root.Owner = {
+			if = {
+				limit = {
+					has_tech_option = tech_morphogenetic_field_mastery
+				}
+				add_tech_progress = {
+					tech = tech_morphogenetic_field_mastery
+					progress = 0.25
+				}
+				else = {
+					add_research_option = tech_morphogenetic_field_mastery
+					add_tech_progress = {
+						tech = tech_morphogenetic_field_mastery
+						progress = 0.25
+					}
+				}
+			}
+		}
+	}
+}
+
+# Retreat - Third Outcome
+planet_event = {
+	id = mem_under_blanket.6
+	title = "mem_under_blanket.6.name"
+	desc = "mem_under_blanket.6.desc"
+	picture = GFX_evt_mem_laboratory
+	show_sound = event_mystic_reveal_light
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	# Militarist & Xenophobe
+	option = {			
+		trigger = {
+			root.owner = {
+				OR = {
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		name = "mem_under_blanket.6.xenomilit"
+		Root.Owner = {
+			add_society_research = 100
+		}
+		event_target:mem_under_blanket_selectedleader = {
+			if = {
+				limit = { NOT = { has_trait = leader_trait_archaeologist } }				
+				add_trait = leader_trait_archaeologist
+			}	
+		}
+	}
+	
+	# Others
+	option = {			
+		trigger = {
+			root.owner = {
+				NOR = {
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		name = "mem_under_blanket.6.others"
+		Root.Owner = {
+			add_society_research = 100
+		}
+		event_target:mem_under_blanket_selectedleader = {
+			if = {
+				limit = { NOT = { has_trait = leader_trait_archaeologist } }				
+				add_trait = leader_trait_archaeologist
+			}	
+		}
+	}
+}
+
+# First Contact - First Outcome
+planet_event = {
+	id = mem_under_blanket.7
+	title = "mem_under_blanket.7.name"
+	desc = "mem_under_blanket.7.desc"
+	picture = GFX_evt_animal_wildlife
+	show_sound = event_alien_nature
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	# Militarist & Xenophobe
+	option = {			
+		trigger = {
+			root.owner = {
+				OR = {
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		name = "mem_under_blanket.7.xenomilit"
+		
+		#event_target:mem_under_blanket_planet = {
+			if = {
+				limit = {
+					any_tile = {
+						has_building = no
+						has_deposit = no
+					}					
+				}
+				random_tile = {
+					limit = {
+						has_building = no
+						has_deposit = no					
+					}
+					hidden_effect = { clear_deposits = yes }
+					add_deposit = d_alien_pets_deposit
+				}
+				else = {
+					if = {
+						limit = {
+							any_tile = {
+								has_building = no
+								OR = {
+									has_deposit = d_society_deposit
+									has_deposit = d_rich_society_deposit
+									has_deposit = d_vast_society_deposit
+								}
+							}					
+						}
+						random_tile = {
+							limit = {
+								has_building = no
+								OR = {
+									has_deposit = d_society_deposit
+									has_deposit = d_rich_society_deposit
+									has_deposit = d_vast_society_deposit
+								}					
+							}
+							hidden_effect = { clear_deposits = yes }
+							add_deposit = d_alien_pets_deposit
+						}
+						else = {
+							if = {
+								limit = {
+									any_tile = {
+										NOR = {
+											has_deposit = d_betharian_deposit
+											has_deposit = d_alien_pets_deposit
+										}
+									}					
+								}
+								random_tile = {
+									limit = {
+										NOR = {
+											has_deposit = d_betharian_deposit
+											has_deposit = d_alien_pets_deposit
+										}					
+									}
+									hidden_effect = { clear_deposits = yes }
+									add_deposit = d_alien_pets_deposit
+								}
+							}
+						}
+					}				
+				}
+			}
+		#}
+	}
+	
+	# Others
+	option = {			
+		trigger = {
+			root.owner = {
+				NOR = {
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		name = "mem_under_blanket.7.others"
+		
+		#event_target:mem_under_blanket_planet = {
+			if = {
+				limit = {
+					any_tile = {
+						has_building = no
+						has_deposit = no
+					}					
+				}
+				random_tile = {
+					limit = {
+						has_building = no
+						has_deposit = no					
+					}
+					hidden_effect = { clear_deposits = yes }
+					add_deposit = d_alien_pets_deposit
+				}
+				else = {
+					if = {
+						limit = {
+							any_tile = {
+								has_building = no
+								OR = {
+									has_deposit = d_society_deposit
+									has_deposit = d_rich_society_deposit
+									has_deposit = d_vast_society_deposit
+								}
+							}					
+						}
+						random_tile = {
+							limit = {
+								has_building = no
+								OR = {
+									has_deposit = d_society_deposit
+									has_deposit = d_rich_society_deposit
+									has_deposit = d_vast_society_deposit
+								}					
+							}
+							hidden_effect = { clear_deposits = yes }
+							add_deposit = d_alien_pets_deposit
+						}
+						else = {
+							if = {
+								limit = {
+									any_tile = {
+										NOR = {
+											has_deposit = d_betharian_deposit
+											has_deposit = d_alien_pets_deposit
+										}
+									}					
+								}
+								random_tile = {
+									limit = {
+										NOR = {
+											has_deposit = d_betharian_deposit
+											has_deposit = d_alien_pets_deposit
+										}					
+									}
+									hidden_effect = { clear_deposits = yes }
+									add_deposit = d_alien_pets_deposit
+								}
+							}
+						}
+					}				
+				}
+			}
+		#}
+	}
+}
+
+# First Contact - Second Outcome
+planet_event = {
+	id = mem_under_blanket.8
+	title = "mem_under_blanket.8.name"
+	desc = "mem_under_blanket.8.desc"
+	picture = GFX_evt_alien_nature
+	show_sound = event_alien_nature
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	# Xenophobe
+	option = {			
+		trigger = {
+			root.owner = {
+				OR = {					
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		name = "mem_under_blanket.8.xenophobe"
+		Root.Owner = { add_society_research = 300 }
+	}
+	
+	# Others
+	option = {			
+		trigger = {
+			root.owner = {
+				NOR = {
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		name = "mem_under_blanket.8.others"
+		Root.Owner = { add_society_research = 300 }
+	}
+}
+
+# First Contact - Third Outcome
+planet_event = {
+	id = mem_under_blanket.9
+	title = "mem_under_blanket.9.name"
+	desc = "mem_under_blanket.9.desc"
+	picture = GFX_evt_landing_ship
+	show_sound = event_ground_battle
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	# Militarist & Xenophobe
+	option = {			
+		trigger = {
+			root.owner = {
+				OR = {
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		name = "mem_under_blanket.9.xenomilit"
+		event_target:mem_under_blanket_selectedleader = { 
+			hidden_effect = { unassign_leader = this }
+			kill_leader = { type = scientist show_notification = no } 
+		}
+	}
+	
+	# Others
+	option = {			
+		trigger = {
+			root.owner = {
+				NOR = {
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		name = "mem_under_blanket.9.others"
+		event_target:mem_under_blanket_selectedleader = { 
+			hidden_effect = { unassign_leader = this }
+			kill_leader = { type = scientist show_notification = no } 
+		}
+	}
+}
+
+# First Contact - Fourth Outcome
+planet_event = {
+	id = mem_under_blanket.10
+	title = "mem_under_blanket.10.name"
+	desc = {
+		text = "mem_under_blanket.10.desc"
+		show_sound = event_swarm_started
+		trigger = { NOT = { has_planet_flag = mem_under_blanket_delayed_attack } }
+	}
+	desc = {
+		text = "mem_under_blanket.10.desc.delayed"
+		show_sound = event_swarm_started
+		trigger = { has_planet_flag = mem_under_blanket_delayed_attack }
+	}
+	picture = GFX_evt_burning_settlement
+	location = ROOT
+	
+	is_triggered_only = yes
+	
+	# Militarist & Xenophobe
+	option = {			
+		trigger = {
+			root.owner = {
+				OR = {
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		name = "mem_under_blanket.10.xenomilit"
+		custom_tooltip = mem_under_blanket.10.tooltip
+		
+		if = {
+			limit = {
+				NOT = { has_planet_flag = mem_under_blanket_delayed_attack }
+				exists = event_target:mem_under_blanket_selectedleader
+			}
+			event_target:mem_under_blanket_selectedleader = { 
+				hidden_effect = { unassign_leader = this }
+				kill_leader = { type = scientist show_notification = no } 
+			}
+		}
+		random_tile = {
+			limit = {
+				NOR = {
+					has_building = building_colony_shelter
+					has_building = building_capital_1
+					has_building = building_capital_2
+					has_building = building_capital_3
+				}
+				has_pop = yes
+			}							
+			hidden_effect = { 
+				kill_pop = yes
+				set_blocker = tb_dangerous_wildlife 
+			}
+		}
+	}
+	
+	# Others
+	option = {			
+		trigger = {
+			root.owner = {
+				NOR = {
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		name = "mem_under_blanket.10.others"
+		custom_tooltip = mem_under_blanket.10.tooltip
+		
+		if = {
+			limit = {
+				NOT = { has_planet_flag = mem_under_blanket_delayed_attack }
+				exists = event_target:mem_under_blanket_selectedleader
+			}
+			event_target:mem_under_blanket_selectedleader = { 
+				hidden_effect = { unassign_leader = this }
+				kill_leader = { type = scientist show_notification = no } 
+			}
+		}
+		
+		random_tile = {
+			limit = {
+				NOR = {
+					has_building = building_colony_shelter
+					has_building = building_capital_1
+					has_building = building_capital_2
+					has_building = building_capital_3
+				}
+				has_pop = yes
+			}				
+			hidden_effect = { 
+				kill_pop = yes 
+				set_blocker = tb_dangerous_wildlife 
+			}
+		}
+	}
+}

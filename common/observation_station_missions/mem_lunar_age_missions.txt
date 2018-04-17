@@ -1,0 +1,118 @@
+# Example
+
+#example = {
+#	icon = "GFX_fleet_mission_button_passive_observation"
+#	country_modifier = "propaganda"
+#	planet_modifier = "propaganda"
+#
+#	cost = {
+#		energy = 1
+#		society_research = 1
+#		influence = 2
+#	}
+#
+#	gain = {
+#		society_research = 6
+#	}
+#
+#	monthly_progress = 0.04
+#	completion_event = example.1
+#
+#	potential = {
+#		OR = {
+#			has_ethic = "ethic_xenophile"
+#			has_ethic = "ethic_fanatic_xenophile"
+#		}
+#	}
+#	valid = {
+#		OR = {
+#			has_ethic = "ethic_xenophile"
+#			has_ethic = "ethic_fanatic_xenophile"
+#		}
+#	}
+#}
+
+@enlighten_soc_cost = 5
+@enlighten_nrg_cost = 10
+
+# Technological Enlightenment - Special for Lunar age
+mem_lunar_technological_enlightenment = {
+	icon = "GFX_fleet_task_technological_enlightenment_action"
+	small_icon = 3
+	
+	cost = {
+		society_research = @enlighten_soc_cost
+		energy = @enlighten_nrg_cost
+	}
+
+	monthly_progress = 0.025
+	#monthly_progress = 0.1 #Accelerated for testing purposes
+	completion_event = mem_lunar_age.500
+
+	potential = {
+		FROM = {
+			exists = owner
+			owner = {
+				OR = {
+					has_country_flag = mem_lunar_age
+					has_country_flag = mem_lunar_age_colony
+				}
+			}
+		}
+	}
+
+	valid = {
+		has_policy_flag = enlightenment_allowed
+		custom_tooltip = {
+			fail_text = CANNOT_ENLIGHTEN_FANATIC_XENOPHOBE
+			FROM = {
+				exists = owner
+				owner = { NOT = { has_ethic = ethic_fanatic_xenophobe } }
+			}		
+		}
+		custom_tooltip = {
+			fail_text = mem_lunar_age_cant_englighten
+			OR = {
+				NOT = { has_global_flag = mem_lunar_age_path_chosen }
+				has_global_flag = mem_lunar_age_path_complete
+			}
+		}
+		custom_tooltip = {
+			fail_text = mem_lunar_age_promised
+			NAND = {
+				has_country_flag = mem_lunar_age_promised
+				FROM = {
+					exists = owner
+					owner = { has_country_flag = mem_lunar_age_colony }
+				}
+				any_country = {
+					is_country_type = primitive
+					has_country_flag = mem_lunar_age
+					capital_scope = {
+						OR = {
+							has_observation_outpost = no
+							observation_outpost = {
+								NOT = { has_mission = mem_lunar_technological_enlightenment }
+							}
+							observation_outpost_owner = {
+								NOT = { is_same_value = root }
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	ai_weight = {
+		weight = 10
+		modifier = {
+			factor = 0
+			NOT = { has_ai_personality_behaviour = uplifter }
+		}
+		modifier = {
+			factor = 0
+			energy < 1000
+		}
+	}
+}

@@ -7,20 +7,91 @@
 
 namespace = mem_spiritualists_pilgrimage
 
-# Waiting Mid-game to trigger the event (+35 years)
+#set flag for performance reasons -CC (monthly)
+event = {
+	id = mem_spiritualists_pilgrimage.999
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = { any_country = { years_passed > 35 } }
+
+	immediate = {
+		every_country = {
+			limit = {
+				years_passed > 35
+				is_country_type = default
+				NOT = {
+					has_ethic = ethic_gestalt_consciousness
+				}
+				NOR = {	
+					has_civic = civic_fanatic_purifiers
+					has_global_flag = pilgrimage_in_progress 
+					has_country_flag = pilgrims_received
+				}
+				any_neighbor_country = {
+					is_country_type = default
+					NOR = {
+						prev = {
+							is_rival = prev
+						}
+						is_rival = prev
+						has_civic = civic_fanatic_purifiers
+						has_ethic = ethic_gestalt_consciousness
+					}
+					prev = {
+						any_owned_planet = { 
+							is_capital = yes
+							closest_system = { 
+								has_access_fleet = prevprevprev
+							}
+						}
+					}
+					OR = {
+						has_ethic = "ethic_spiritualist"
+						has_ethic = "ethic_fanatic_spiritualist"
+					}
+					NOR = {			
+						# Prevent the same country to do the pilgrimage again
+						has_country_flag = spiritualists_pilgrimage_ongoing
+						has_country_flag = spiritualists_pilgrimage_done
+					}
+				}
+			}
+			set_timed_country_flag = {
+				flag = mem_perf_spiritualists_pilgrimage_possible
+				days = 31
+			}
+		}
+	}
+}
+
+#trigger event with simplified flag
 country_event = {
 	id = mem_spiritualists_pilgrimage.1
 	hide_window = yes
 	
 	trigger = {
-		years_passed = 35
+		has_country_flag = mem_perf_spiritualists_pilgrimage_possible
+	}
+	
+	mean_time_to_happen = {
+		months = 70
+		modifier = {
+			# 10 more time if xenophobic
+			factor = 2
+			OR = {
+				has_ethic = "ethic_xenophobe"
+				has_ethic = "ethic_fanatic_xenophobe"
+			}
+		}
 	}
 	
 	immediate = {
-		set_global_flag = mem_35_years_passed
+		country_event = { id = mem_spiritualists_pilgrimage.2 }
 	}
 }
 
+#actual event (retains the original triggers)
 # Spiritualist pilgrimage started
 country_event = {
 	id = mem_spiritualists_pilgrimage.2
@@ -36,9 +107,17 @@ country_event = {
 		room = event_target:pilgrims_origin 
 	}
 	
-	trigger = {		
-		has_global_flag = mem_35_years_passed
+	is_triggered_only = yes
+	
+	trigger = {
+		years_passed > 35
+		is_country_type = default
+		
+		NOT = {
+			has_ethic = ethic_gestalt_consciousness
+		}
 		NOR = {	
+			has_civic = civic_fanatic_purifiers
 			has_global_flag = pilgrimage_in_progress 
 			has_country_flag = pilgrims_received
 		}
@@ -49,6 +128,8 @@ country_event = {
 					is_rival = prev
 				}
 				is_rival = root
+				has_civic = civic_fanatic_purifiers
+				has_ethic = ethic_gestalt_consciousness
 			}
 			ROOT = {
 				any_owned_planet = { 
@@ -66,18 +147,6 @@ country_event = {
 				# Prevent the same country to do the pilgrimage again
 				has_country_flag = spiritualists_pilgrimage_ongoing
 				has_country_flag = spiritualists_pilgrimage_done
-			}
-		}
-	}
-	
-	mean_time_to_happen = {
-		months = 70
-		modifier = {
-			# 10 more time if xenophobic
-			factor = 2
-			OR = {
-				has_ethic = "ethic_xenophobe"
-				has_ethic = "ethic_fanatic_xenophobe"
 			}
 		}
 	}
@@ -127,7 +196,7 @@ country_event = {
 						is_colony = yes
 						is_capital = no
 					} 
-				save_event_target_as = pilgrims_destination 
+					save_event_target_as = pilgrims_destination 
 				} 
 			}
 		}

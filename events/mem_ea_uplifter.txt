@@ -5,6 +5,16 @@
 
 namespace = mem_ea_uplifter
 
+@tier1influencecontact = 7
+@tier1influencecontactxenophile = 8
+@tier1influencecontactmin = 20
+@tier1influencecontactmax = 80
+
+@tier2influencecontact = 10
+@tier2influencecontactxenophile = 12
+@tier2influencecontactmin = 40
+@tier2influencecontactmax = 100
+
 @tier1materialreward = 6
 @tier1materialmin = 100
 @tier1materialmax = 500
@@ -17,6 +27,9 @@ namespace = mem_ea_uplifter
 @tier4materialreward = 24
 @tier4materialmin = 350
 @tier4materialmax = 2000
+@tier5materialreward = 48
+@tier5materialmin = 700
+@tier5materialmax = 4000
 
 @tier1influencereward = 6
 @tier1influencemin = 40
@@ -30,6 +43,12 @@ namespace = mem_ea_uplifter
 @tier4influencereward = 24
 @tier4influencemin = 150
 @tier4influencemax = 300
+@tier5influencereward = 36
+@tier5influencemin = 250
+@tier5influencemax = 500
+@tier6influencereward = 48
+@tier6influencemin = 300
+@tier6influencemax = 600
 
 @tier1researchreward = 6
 @tier1researchmin = 60
@@ -43,6 +62,9 @@ namespace = mem_ea_uplifter
 @tier4researchreward = 24
 @tier4researchmin = 150
 @tier4researchmax = 500
+@tier5researchreward = 48
+@tier5researchmin = 300
+@tier5researchmax = 1000
 
 ################################################################################
 ################################################################################
@@ -57,11 +79,12 @@ ship_event = {
     id = mem_ea_uplifter.1
     title = mem_ea_uplifter.1.name
     desc = mem_ea_uplifter.1.desc
-    picture = GFX_evt_alien_ruins
+    picture = GFX_evt_mem_orila_pods
     show_sound = event_mystic_reveal
 	location = FROM   
     is_triggered_only = yes
     immediate = {
+		set_global_flag = mem_ea_uplifter_quest_started
     	owner = {
     		set_country_flag = mem_extinct_abductors_finder
 			# leads to story event "Remnants" (first contact stuff)
@@ -87,7 +110,7 @@ ship_event = {
 	id = mem_ea_uplifter.2
 	title = mem_ea_uplifter.2.name
 	desc = mem_ea_uplifter.2.desc
-	picture = GFX_evt_alien_ruins
+	picture = GFX_evt_mem_orila_pods
 	show_sound = event_scanner
 	location = FROM
 	is_triggered_only = yes	
@@ -98,7 +121,14 @@ ship_event = {
 				event_chain = "mem_ea_uplifter_chain"
 				target = root
 			}
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
 		}
+		leader = { add_experience = 200 }
 		hidden_effect = {
 			solar_system = { set_star_flag = mem_ea_uplifter_system_0 }
 			owner = {
@@ -119,40 +149,10 @@ ship_event = {
 						has_star_flag = mem_ea_uplifter_system_0
 					}
 					is_pirate_system = no
-					has_owner = no
+					has_presence = no
 				}
 				save_event_target_as = mem_ea_uplifter_system_1
 				set_star_flag = mem_ea_uplifter_system_1
-			}
-			# Check if system has been found
-			IF = {
-				limit = {
-					any_system = {
-						has_star_flag = mem_ea_uplifter_system_1
-					}
-				}
-				# If system is already flagged nothing happens
-				# Else second try to target system
-				ELSE = {
-					random_system = {
-						limit = {
-							any_planet = {
-								is_planet_class = pc_toxic
-							}
-							distance = {
-								source = event_target:capital
-								max_distance = 80
-								min_distance = 2
-							}
-							NOT = {
-								has_star_flag = mem_ea_uplifter_system_0
-							}
-							is_pirate_system = no
-						}
-						save_event_target_as = mem_ea_uplifter_system_1
-						set_star_flag = mem_ea_uplifter_system_1
-					}
-				}
 			}
 			# Check if system has been found
 			IF = {
@@ -202,48 +202,16 @@ ship_event = {
 						max_distance = 80
 						min_distance = 2
 					}
-					NOT = {
+					NOR = {
 						has_star_flag = mem_ea_uplifter_system_0
 						has_star_flag = mem_ea_uplifter_system_1
 						has_star_flag = mem_ea_uplifter_system_2
 					}
 					is_pirate_system = no
-					has_owner = no
+					has_presence = no
 				}
 				save_event_target_as = mem_ea_uplifter_system_3
 				set_star_flag = mem_ea_uplifter_system_3
-			}
-			# Check if system has been found
-			IF = {
-				limit = {
-					any_system = {
-						has_star_flag = mem_ea_uplifter_system_3
-					}
-				}
-				# If system is already flagged nothing happens
-				# Else second try to target system
-				ELSE = {
-					random_system = {
-						limit = {
-							any_planet = {
-								is_planet_class = pc_frozen
-							}
-							distance = {
-								source = event_target:capital
-								max_distance = 80
-								min_distance = 2
-							}
-							NOT = {
-								has_star_flag = mem_ea_uplifter_system_0
-								has_star_flag = mem_ea_uplifter_system_1
-								has_star_flag = mem_ea_uplifter_system_2
-							}
-							is_pirate_system = no
-						}
-						save_event_target_as = mem_ea_uplifter_system_3
-						set_star_flag = mem_ea_uplifter_system_3
-					}
-				}
 			}
 			# Check if system has been found
 			IF = {
@@ -272,7 +240,7 @@ ship_event = {
 			# First try to target system
 			random_system = {
 			limit = {
-					any_planet {
+					any_planet = {
 						OR = {
 							is_planet_class = pc_barren
 							is_planet_class = pc_barren_cold
@@ -283,51 +251,17 @@ ship_event = {
 						max_distance = 80
 						min_distance = 2
 					}
-					NOT = {
+					NOR = {
 						has_star_flag = mem_ea_uplifter_system_0
 						has_star_flag = mem_ea_uplifter_system_1
 						has_star_flag = mem_ea_uplifter_system_2
 						has_star_flag = mem_ea_uplifter_system_3
 					}
 					is_pirate_system = no
-					has_owner = no
+					has_presence = no
 				}
 				save_event_target_as = mem_ea_uplifter_system_4
 				set_star_flag = mem_ea_uplifter_system_4
-			}
-			# Check if system has been found
-			IF = {
-				limit = {
-					any_system = {
-						has_star_flag = mem_ea_uplifter_system_4
-					}
-				}
-				# If system is already flagged nothing happens
-				# Else second try to target system
-				ELSE = {
-					random_system = {
-						limit = {
-							any_planet = {
-								is_planet_class = pc_barren
-								is_planet_class = pc_barren_cold
-							}
-							distance = {
-								source = event_target:capital
-								max_distance = 80
-								min_distance = 2
-							}
-							NOT = {
-								has_star_flag = mem_ea_uplifter_system_0
-								has_star_flag = mem_ea_uplifter_system_1
-								has_star_flag = mem_ea_uplifter_system_2
-								has_star_flag = mem_ea_uplifter_system_3
-							}
-							is_pirate_system = no
-						}
-						save_event_target_as = mem_ea_uplifter_system_4
-						set_star_flag = mem_ea_uplifter_system_4
-					}
-				}
 			}
 			# Check if system has been found
 			IF = {
@@ -565,6 +499,15 @@ ship_event = {
 	}
 	option = {
 		name = mem_ea_uplifter.7.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+		leader = { add_experience = 200 }
 		hidden_effect = {
 			owner = {
 				if = {
@@ -601,6 +544,15 @@ ship_event = {
 	}
 	option = {
 		name = mem_ea_uplifter.8.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+		leader = { add_experience = 200 }
 		hidden_effect = {
 			owner = {
 				if = {
@@ -637,6 +589,15 @@ ship_event = {
 	}
 	option = {
 		name = mem_ea_uplifter.9.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+		leader = { add_experience = 200 }
 		hidden_effect = {
 			owner = {
 				if = {
@@ -709,6 +670,7 @@ ship_event = {
 	}	
 	option = {
 		name = mem_ea_uplifter.101.a
+		leader = { add_experience = 100 }
 		hidden_effect = {
 			closest_system = {
 				random_system_planet = {
@@ -755,6 +717,7 @@ ship_event = {
 				add_deposit = d_enormous1_mineral_deposit
 			}
 		}
+		leader = { add_experience = 100 }
 		hidden_effect = {
 			owner = {
 				if = {
@@ -777,6 +740,7 @@ ship_event = {
 				add_deposit = d_vast_physics_deposit
 			}
 		}
+		leader = { add_experience = 100 }
 		hidden_effect = {
 			owner = {
 				if = {
@@ -848,7 +812,7 @@ country_event = {
 	id = mem_ea_uplifter.13
 	title = mem_ea_uplifter.13.name
 	desc = mem_ea_uplifter.13.desc
-	picture = GFX_evt_archaeological_dig
+	picture = GFX_evt_mem_orila_pods
 	show_sound = event_scanner
 	is_triggered_only = yes
 	immediate = {
@@ -1065,87 +1029,309 @@ country_event = {
 		}
 		end_event_chain = "mem_ea_uplifter_homesystem_chain"
 		response_text = mem_ea_uplifter.17.a.response
-#		replaced by new civic
-#		add_modifier = {
-#			modifier = "mem_ea_knowledge_of_the_ancients"
-#			days = -1
-#		}
 		IF = {
 			limit = {
-				has_civic = civic_mechanists
+				has_technology = tech_galactic_administration
 			}
 			IF = {
 				limit = {
-					has_authority = auth_democratic
+					has_civic = civic_life_seeded
 				}
-				change_government = {
-					authority = "auth_democratic"
-					civics = {
-						civic = civic_mem_the_way
-						civic = civic_mechanists
+				IF = {
+					limit = {
+						has_authority = auth_democratic
+					}
+					change_government = {
+						authority = "auth_democratic"
+						civics = {
+							civic = civic_mem_the_way
+							civic = civic_life_seeded
+							civic = civic_efficient_bureaucracy
+							civic = civic_mining_guilds
+						}
+					}
+					ELSE = {
+						change_government = {
+							authority = "auth_oligarchic"
+							civics = {
+								civic = civic_mem_the_way
+								civic = civic_life_seeded
+								civic = civic_efficient_bureaucracy
+								civic = civic_mining_guilds
+							}
+						}
 					}
 				}
-				ELSE = {
+			}
+			IF = {
+				limit = {
+					has_civic = civic_post_apocalyptic
+				}
+				IF = {
+					limit = {
+						has_authority = auth_democratic
+					}
 					change_government = {
-						authority = "auth_oligarchic"
+						authority = "auth_democratic"
+						civics = {
+							civic = civic_mem_the_way
+							civic = civic_post_apocalyptic
+							civic = civic_efficient_bureaucracy
+							civic = civic_mining_guilds
+						}
+					}
+					ELSE = {
+						change_government = {
+							authority = "auth_oligarchic"
+							civics = {
+								civic = civic_mem_the_way
+								civic = civic_post_apocalyptic
+								civic = civic_efficient_bureaucracy
+								civic = civic_mining_guilds
+							}
+						}
+					}
+				}
+			}
+			IF = {
+				limit = {
+					has_civic = civic_mechanists
+				}
+				IF = {
+					limit = {
+						has_authority = auth_democratic
+					}
+					change_government = {
+						authority = "auth_democratic"
 						civics = {
 							civic = civic_mem_the_way
 							civic = civic_mechanists
+							civic = civic_efficient_bureaucracy
+							civic = civic_mining_guilds
+						}
+					}
+					ELSE = {
+						change_government = {
+							authority = "auth_oligarchic"
+							civics = {
+								civic = civic_mem_the_way
+								civic = civic_mechanists
+								civic = civic_efficient_bureaucracy
+								civic = civic_mining_guilds
+							}
 						}
 					}
 				}
 			}
-		}
-		IF = {
-			limit = {
-				has_civic = civic_syncretic_evolution
-			}
 			IF = {
 				limit = {
-					has_authority = auth_democratic
+					has_civic = civic_syncretic_evolution
 				}
-				change_government = {
-					authority = "auth_democratic"
-					civics = {
-						civic = civic_mem_the_way
-						civic = civic_syncretic_evolution
+				IF = {
+					limit = {
+						has_authority = auth_democratic
 					}
-				}
-				ELSE = {
 					change_government = {
-						authority = "auth_oligarchic"
+						authority = "auth_democratic"
 						civics = {
 							civic = civic_mem_the_way
 							civic = civic_syncretic_evolution
+							civic = civic_efficient_bureaucracy
+							civic = civic_mining_guilds
+						}
+					}
+					ELSE = {
+						change_government = {
+							authority = "auth_oligarchic"
+							civics = {
+								civic = civic_mem_the_way
+								civic = civic_syncretic_evolution
+								civic = civic_efficient_bureaucracy
+								civic = civic_mining_guilds
+							}
 						}
 					}
 				}
 			}
-		}
-		IF = {
-			limit = {
-				NOR = {
-					has_civic = civic_syncretic_evolution
-					has_civic = civic_mechanists
-				}
-			}
 			IF = {
 				limit = {
-					has_authority = auth_democratic
-				}
-				change_government = {
-					authority = "auth_democratic"
-					civics = {
-						civic = civic_mem_the_way
-						civic = civic_efficient_bureaucracy
+					NOR = {
+						has_civic = civic_syncretic_evolution
+						has_civic = civic_mechanists
+						has_civic = civic_life_seeded
+						has_civic = civic_post_apocalyptic
 					}
 				}
-				ELSE = {
+				IF = {
+					limit = {
+						has_authority = auth_democratic
+					}
 					change_government = {
-						authority = "auth_oligarchic"
+						authority = "auth_democratic"
 						civics = {
 							civic = civic_mem_the_way
 							civic = civic_efficient_bureaucracy
+							civic = civic_mining_guilds
+							civic = civic_functional_architecture
+							
+						}
+					}
+					ELSE = {
+						change_government = {
+							authority = "auth_oligarchic"
+							civics = {
+								civic = civic_mem_the_way
+								civic = civic_efficient_bureaucracy
+								civic = civic_mining_guilds
+								civic = civic_functional_architecture
+							}
+						}
+					}
+				}
+			}
+			ELSE = {
+				IF = {
+					limit = {
+						has_civic = civic_life_seeded
+					}
+					IF = {
+						limit = {
+							has_authority = auth_democratic
+						}
+						change_government = {
+							authority = "auth_democratic"
+							civics = {
+								civic = civic_mem_the_way
+								civic = civic_life_seeded
+								civic = civic_efficient_bureaucracy
+							}
+						}
+						ELSE = {
+							change_government = {
+								authority = "auth_oligarchic"
+								civics = {
+									civic = civic_mem_the_way
+									civic = civic_life_seeded
+									civic = civic_efficient_bureaucracy
+								}
+							}
+						}
+					}
+				}
+				IF = {
+					limit = {
+						has_civic = civic_post_apocalyptic
+					}
+					IF = {
+						limit = {
+							has_authority = auth_democratic
+						}
+						change_government = {
+							authority = "auth_democratic"
+							civics = {
+								civic = civic_mem_the_way
+								civic = civic_post_apocalyptic
+								civic = civic_efficient_bureaucracy
+							}
+						}
+						ELSE = {
+							change_government = {
+								authority = "auth_oligarchic"
+								civics = {
+									civic = civic_mem_the_way
+									civic = civic_post_apocalyptic
+									civic = civic_efficient_bureaucracy
+								}
+							}
+						}
+					}
+				}
+				IF = {
+					limit = {
+						has_civic = civic_mechanists
+					}
+					IF = {
+						limit = {
+							has_authority = auth_democratic
+						}
+						change_government = {
+							authority = "auth_democratic"
+							civics = {
+								civic = civic_mem_the_way
+								civic = civic_mechanists
+								civic = civic_efficient_bureaucracy
+							}
+						}
+						ELSE = {
+							change_government = {
+								authority = "auth_oligarchic"
+								civics = {
+									civic = civic_mem_the_way
+									civic = civic_mechanists
+									civic = civic_efficient_bureaucracy
+								}
+							}
+						}
+					}
+				}
+				IF = {
+					limit = {
+						has_civic = civic_syncretic_evolution
+					}
+					IF = {
+						limit = {
+							has_authority = auth_democratic
+						}
+						change_government = {
+							authority = "auth_democratic"
+							civics = {
+								civic = civic_mem_the_way
+								civic = civic_syncretic_evolution
+								civic = civic_efficient_bureaucracy
+							}
+						}
+						ELSE = {
+							change_government = {
+								authority = "auth_oligarchic"
+								civics = {
+									civic = civic_mem_the_way
+									civic = civic_syncretic_evolution
+									civic = civic_efficient_bureaucracy
+								}
+							}
+						}
+					}
+				}
+				IF = {
+					limit = {
+						NOR = {
+							has_civic = civic_syncretic_evolution
+							has_civic = civic_mechanists
+							has_civic = civic_life_seeded
+							has_civic = civic_post_apocalyptic
+						}
+					}
+					IF = {
+						limit = {
+							has_authority = auth_democratic
+						}
+						change_government = {
+							authority = "auth_democratic"
+							civics = {
+								civic = civic_mem_the_way
+								civic = civic_efficient_bureaucracy
+								civic = civic_mining_guilds
+							}
+						}
+						ELSE = {
+							change_government = {
+								authority = "auth_oligarchic"
+								civics = {
+									civic = civic_mem_the_way
+									civic = civic_efficient_bureaucracy
+									civic = civic_mining_guilds
+								}
+							}
 						}
 					}
 				}
@@ -1156,10 +1342,7 @@ country_event = {
 				limit = {
 					has_planet_flag = mem_ea_harilla
 				}
-				change_pc = "pc_barren"
-				set_planet_entity = {
-                    entity = "barren_planet_01_destroyed_entity"
-                }
+				change_pc = "pc_shattered"
 			}
 			every_ambient_object = {
 				limit = {
@@ -1167,60 +1350,27 @@ country_event = {
 				}
 				destroy_ambient_object = this
 			}
-			if = {
-				limit = {
-					has_technology = "tech_warp_drive_1"
+			create_fleet = { name = "The Last Orila" }
+			last_created_fleet = {
+				set_owner = Root
+				create_ship = {
+					name = "Sleipnir"
+					design = "Derelict Sleipnir I"
+					graphical_culture = "mem_ancient_01"
+					prefix = no
+					upgradable = no
 				}
-				create_fleet = { name = "The Last Orila" }
-				last_created_fleet = {
-					set_owner = Root
-					create_ship_design = {
-						design = "Onell"
+				last_created_ship = {
+					add_modifier = {
+						modifier = mem_last_orila_ship_disengage_buff
+						days = -1
 					}
-					create_ship = {
-						name = "Pride of Harilla"
-						design = last_created_design
-					}
-					set_location = event_target:mem_ea_uplifter_ship_spawn
 				}
+				set_location = event_target:mem_ea_uplifter_ship_spawn
+				set_fleet_flag = mem_last_orila_fleet
 			}
-			if = {
-				limit = {
-					has_technology = "tech_hyper_drive_1"
-				}
-				create_fleet = { name = "The Last Orila" }
-				last_created_fleet = {
-					set_owner = Root
-					create_ship_design = {
-						design = "Jakson"
-					}
-					create_ship = {
-						name = "Pride of Harilla"
-						design = last_created_design
-					}
-					set_location = event_target:mem_ea_uplifter_ship_spawn
-				}
-			}
-			if = {
-				limit = {
-					NOR = {
-						has_technology = "tech_warp_drive_1"
-						has_technology = "tech_hyper_drive_1"
-					}
-				}
-				create_fleet = { name = "The Last Orila" }
-				last_created_fleet = {
-					set_owner = Root
-					create_ship_design = {
-						design = "Carta"
-					}
-					create_ship = {
-						name = "Pride of Harilla"
-						design = last_created_design
-					}
-					set_location = event_target:mem_ea_uplifter_ship_spawn
-				}
-			}
+			country_event = { id = mem_last_orila.1 days = 750 random = 375 }
+#			set_country_flag = mem_last_orila_start
 		}
 	}
 	option = { # This is not our way -- get a country modifier giving + 5 % happiness "We make our own destiny"
@@ -1242,10 +1392,7 @@ country_event = {
 				limit = {
 					has_planet_flag = mem_ea_harilla
 				}
-				change_pc = "pc_barren"
-				set_planet_entity = {
-                    entity = "barren_planet_01_destroyed_entity"
-                }
+				change_pc = "pc_shattered"
 			}
 			every_ambient_object = {
 				limit = {
@@ -1272,10 +1419,7 @@ country_event = {
 				limit = {
 					has_planet_flag = mem_ea_harilla
 				}
-				change_pc = "pc_barren"
-				set_planet_entity = {
-                    entity = "barren_planet_01_destroyed_entity"
-                }
+				change_pc = "pc_shattered"
 			}
 			every_ambient_object = {
 				limit = {
@@ -1293,20 +1437,12 @@ country_event = {
 		}
 		end_event_chain = "mem_ea_uplifter_homesystem_chain"
 		response_text = mem_ea_uplifter.17.d.response
-#		replaced by new civic
-#		add_modifier = {
-#			modifier = "mem_ea_knowledge_of_the_ancients"
-#			days = -1
-#		}
 		hidden_effect = {
 			random_planet = {
 				limit = {
 					has_planet_flag = mem_ea_harilla
 				}
-				change_pc = "pc_barren"
-				set_planet_entity = {
-                    entity = "barren_planet_01_destroyed_entity"
-                }
+				change_pc = "pc_shattered"
 			}
 			every_ambient_object = {
 				limit = {
@@ -1314,60 +1450,21 @@ country_event = {
 				}
 				destroy_ambient_object = this
 			}
-			if = {
-				limit = {
-					has_technology = "tech_warp_drive_1"
+			create_fleet = { name = "The Last Orila" }
+			last_created_fleet = {
+				set_owner = Root
+				create_ship = {
+					name = "Sleipnir"
+					design = "Derelict Sleipnir I"
+					graphical_culture = "mem_ancient_01"
+					prefix = no
+					upgradable = no
 				}
-				create_fleet = { name = "The Last Orila" }
-				last_created_fleet = {
-					set_owner = Root
-					create_ship_design = {
-						design = "Onell"
-					}
-					create_ship = {
-						name = "Pride of Harilla"
-						design = last_created_design
-					}
-					set_location = event_target:mem_ea_uplifter_ship_spawn
-				}
+				set_location = event_target:mem_ea_uplifter_ship_spawn
+				set_fleet_flag = mem_last_orila_fleet
 			}
-			if = {
-				limit = {
-					has_technology = "tech_hyper_drive_1"
-				}
-				create_fleet = { name = "The Last Orila" }
-				last_created_fleet = {
-					set_owner = Root
-					create_ship_design = {
-						design = "Jakson"
-					}
-					create_ship = {
-						name = "Pride of Harilla"
-						design = last_created_design
-					}
-					set_location = event_target:mem_ea_uplifter_ship_spawn
-				}
-			}
-			if = {
-				limit = {
-					nor = {
-						has_technology = "tech_warp_drive_1"
-						has_technology = "tech_hyper_drive_1"
-					}
-				}
-				create_fleet = { name = "The Last Orila" }
-				last_created_fleet = {
-					set_owner = Root
-					create_ship_design = {
-						design = "Carta"
-					}
-					create_ship = {
-						name = "Pride of Harilla"
-						design = last_created_design
-					}
-					set_location = event_target:mem_ea_uplifter_ship_spawn
-				}
-			}
+			country_event = { id = mem_last_orila.1 days = 750 random = 375 }
+#			set_country_flag = mem_last_orila_start
 			if = {
 				limit = { has_ethic = "ethic_fanatic_materialist" }
 				country_remove_ethic = "ethic_fanatic_materialist"
@@ -1438,40 +1535,153 @@ country_event = {
 		}
 		IF = {
 			limit = {
-				has_civic = civic_mechanists
+				has_technology = tech_galactic_administration
 			}
-			change_government = {
-				authority = "auth_oligarchic"
-				civics = {
-					civic = civic_mem_the_way
-					civic = civic_mechanists
+			IF = {
+				limit = {
+					has_civic = civic_life_seeded
+				}
+				change_government = {
+					authority = "auth_oligarchic"
+					civics = {
+						civic = civic_mem_the_way
+						civic = civic_life_seeded
+						civic = civic_efficient_bureaucracy
+						civic = civic_functional_architecture
+					}
 				}
 			}
-		}
-		IF = {
-			limit = {
-				has_civic = civic_syncretic_evolution
-			}
-			change_government = {
-				authority = "auth_oligarchic"
-				civics = {
-					civic = civic_mem_the_way
-					civic = civic_syncretic_evolution
+			IF = {
+				limit = {
+					has_civic = civic_post_apocalyptic
+				}
+				change_government = {
+					authority = "auth_oligarchic"
+					civics = {
+						civic = civic_mem_the_way
+						civic = civic_post_apocalyptic
+						civic = civic_efficient_bureaucracy
+						civic = civic_functional_architecture
+					}
 				}
 			}
-		}
-		IF = {
-			limit = {
-				NOR = {
-					has_civic = civic_syncretic_evolution
+			IF = {
+				limit = {
 					has_civic = civic_mechanists
 				}
+				change_government = {
+					authority = "auth_oligarchic"
+					civics = {
+						civic = civic_mem_the_way
+						civic = civic_mechanists
+						civic = civic_efficient_bureaucracy
+						civic = civic_functional_architecture
+					}
+				}
 			}
-			change_government = {
-				authority = "auth_oligarchic"
-				civics = {
-					civic = civic_mem_the_way
-					civic = civic_efficient_bureaucracy
+			IF = {
+				limit = {
+					has_civic = civic_syncretic_evolution
+				}
+				change_government = {
+					authority = "auth_oligarchic"
+					civics = {
+						civic = civic_mem_the_way
+						civic = civic_syncretic_evolution
+						civic = civic_efficient_bureaucracy
+						civic = civic_functional_architecture
+					}
+				}
+			}
+			IF = {
+				limit = {
+					NOR = {
+						has_civic = civic_syncretic_evolution
+						has_civic = civic_mechanists
+						has_civic = civic_life_seeded
+						has_civic = civic_post_apocalyptic
+					}
+				}
+				change_government = {
+					authority = "auth_oligarchic"
+					civics = {
+						civic = civic_mem_the_way
+						civic = civic_efficient_bureaucracy
+						civic = civic_mining_guilds
+						civic = civic_functional_architecture
+					}
+				}
+			}
+			ELSE = {
+				IF = {
+					limit = {
+						has_civic = civic_life_seeded
+					}
+					change_government = {
+						authority = "auth_oligarchic"
+						civics = {
+							civic = civic_mem_the_way
+							civic = civic_life_seeded
+							civic = civic_efficient_bureaucracy
+						}
+					}
+				}
+				IF = {
+					limit = {
+						has_civic = civic_post_apocalyptic
+					}
+					change_government = {
+						authority = "auth_oligarchic"
+						civics = {
+							civic = civic_mem_the_way
+							civic = civic_post_apocalyptic
+							civic = civic_efficient_bureaucracy
+						}
+					}
+				}
+				IF = {
+					limit = {
+						has_civic = civic_mechanists
+					}
+					change_government = {
+						authority = "auth_oligarchic"
+						civics = {
+							civic = civic_mem_the_way
+							civic = civic_mechanists
+							civic = civic_efficient_bureaucracy
+						}
+					}
+				}
+				IF = {
+					limit = {
+						has_civic = civic_syncretic_evolution
+					}
+					change_government = {
+						authority = "auth_oligarchic"
+						civics = {
+							civic = civic_mem_the_way
+							civic = civic_syncretic_evolution
+							civic = civic_efficient_bureaucracy
+						}
+					}
+				}
+				IF = {
+					limit = {
+						NOR = {
+							has_civic = civic_syncretic_evolution
+							has_civic = civic_mechanists
+							has_civic = civic_life_seeded
+							has_civic = civic_post_apocalyptic
+						}
+					}
+					change_government = {
+						authority = "auth_oligarchic"
+						civics = {
+							civic = civic_mem_the_way
+							civic = civic_efficient_bureaucracy
+							civic = civic_mining_guilds
+						}
+					}
 				}
 			}
 		}
