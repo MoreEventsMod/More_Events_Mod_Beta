@@ -1,0 +1,76 @@
+#Formics
+#By ViolentBeetle
+
+namespace = mem_formics
+
+#Initial anomaly and maintenance routine
+ship_event = {
+	id = mem_formics.100
+	title = mem_formics.100.name
+	desc = mem_formics.100.desc
+	
+	is_triggered_only = yes
+	
+	location = FROM
+	picture = GFX_evt_underground_civilization
+	
+	immediate = {
+		FROM = {
+			set_planet_flag = colony_event
+			random_tile = {
+				remove_blocker = yes
+				set_deposit = d_society_deposit
+				set_building = mem_formics_primary_mound
+			}
+			planet_event = { id = mem_formics.101 days = 30 }
+		}
+	}
+	
+	option = {
+		name = mem_formics.1.a
+		custom_tooltip = mem_formics.1.a.tooltip
+	}
+}
+
+#Maintenance loop
+planet_event = {
+	id = mem_formics.101
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		has_building = mem_formics_primary_mound
+	}
+	
+	immediate = {
+		
+		IF = {
+			limit = {
+				has_owner = yes
+				any_tile = {
+					has_building = mem_formics_primary_mound
+					has_pop = yes
+					pop = {
+						is_enslaved = no
+						is_being_purged = no
+					}
+				}
+				owner = {
+					check_variable = {
+						which = mem_formics_counter
+						value < 1000
+					}
+					NOT = { has_country_flag = mem_formics_ended }
+				}
+			}
+			owner = {
+				change_variable = {
+					which = mem_formics_counter
+					value = 1
+				}
+			}
+		}
+		
+		planet_event = { id = mem_formics.101 days = 30 }
+	}
+}
