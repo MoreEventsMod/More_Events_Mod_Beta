@@ -1,0 +1,169 @@
+#Refuling Station
+#By ViolentBeetle
+
+namespace = mem_refuel
+
+#Initial discovery
+ship_event = {
+	id = mem_refuel.1
+	title = mem_refuel.1.name
+	desc = mem_refuel.1.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_mem_freighter_fleet
+	location = FROM
+	
+	immediate = {
+		from = {
+			orbital_deposit_tile = { clear_deposits = yes }
+		}
+		owner = { country_event = { id = story.5 days = 30 } }
+		fleet = {
+			set_event_locked = yes
+		}
+	}
+	
+	option = {
+		name = mem_refuel.1.a
+		
+		add_modifier = {
+			modifier = mem_refuel_modifier
+			days = 1080
+		}
+		custom_tooltip = mem_refuel.1.a.tooltip
+		hidden_effect = {
+			random_list = {
+				33 = { ship_event = { id = mem_refuel.2 days = 1 random = 1079 } }
+				66 = {  }
+			}
+		}
+	}
+	
+	option = {
+		name = mem_refuel.1.b
+		
+		FROM = {
+			orbital_deposit_tile = { add_deposit = d_vast_energy_deposit }
+		}
+	}
+	
+	option = {
+		name = mem_refuel.1.c
+		
+		trigger = {
+			exists = leader
+			leader = { has_trait = leader_trait_expertise_voidcraft }
+		}
+		
+		FROM = {
+			orbital_deposit_tile = { 
+				add_deposit = d_immense_engineering_deposit 
+				add_deposit = d_immense_physics_deposit
+			}
+		}
+		leader = { add_experience = 100 }
+	}
+	
+	option = {
+		name = mem_refuel.1.d
+		
+		trigger = {
+			exists = leader
+			NOT = { leader = { has_trait = leader_trait_expertise_voidcraft } }
+		}
+		
+		leader = { add_trait = leader_trait_expertise_voidcraft }
+	}
+	
+	option = {
+		name = mem_refuel.1.e
+		
+		owner = { add_influence = 30 }
+	}
+	
+	after = {
+		hidden_effect = {
+			fleet = {
+				set_event_locked = no
+			}
+		}
+	}
+}
+
+#BOOM!
+ship_event = {
+	id = mem_refuel.2
+	title = mem_refuel.2.name
+	desc = mem_refuel.2.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_exploding_ship
+	location = ROOT
+	show_sound = event_ship_explosion
+	
+	immediate = {
+		fleet = {
+			kill_leader = { type = scientist show_notification = no}
+		}
+		destroy_ship = root
+	}
+	
+	option = {
+		name = TERRIBLE
+		
+		tooltip = {
+			destroy_ship = root
+		}
+	}
+}
+
+#Regular failure
+ship_event = {
+	id = mem_refuel.20
+	title = mem_refuel.20.name
+	desc = mem_refuel.20.desc
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		owner = { country_event = { id = story.5 days = 30 } }
+	}
+	
+	picture = GFX_evt_gas_giant
+	location = FROMFROM
+	
+	option = {
+		name = mem_refuel.20.a
+	}
+}
+
+#Critical failure
+ship_event = {
+	id = mem_refuel.30
+	title = mem_refuel.30.name
+	desc = mem_refuel.30.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_exploding_ship
+	location = FROMFROM
+	show_sound = event_ship_explosion
+	
+	immediate = {
+		fleet = {
+			kill_leader = { type = scientist show_notification = no}
+		}
+		destroy_ship = root
+		owner = { country_event = { id = story.5 days = 30 } }
+	}
+	
+	option = {
+		name = TERRIBLE
+		
+		tooltip = {
+			destroy_ship = root
+		}
+	}
+}
