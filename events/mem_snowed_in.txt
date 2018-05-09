@@ -3,6 +3,22 @@
 
 namespace = mem_snowed_in
 
+@tier1researchreward = 6
+@tier1researchmin = 60
+@tier1researchmax = 150
+@tier2researchreward = 12
+@tier2researchmin = 90
+@tier2researchmax = 250
+@tier3researchreward = 18
+@tier3researchmin = 120
+@tier3researchmax = 350
+@tier4researchreward = 24
+@tier4researchmin = 150
+@tier4researchmax = 500
+@tier5researchreward = 48
+@tier5researchmin = 300
+@tier5researchmax = 1000
+
 #Anomaly solution
 ship_event = {
 	id = mem_snowed_in.1
@@ -97,25 +113,68 @@ country_event = {
 	desc = { 
 		text = mem_snowed_in.3.desc.first
 		trigger = {
-			has_global_flag = mem_snowed_in_first_time_done
+			NOT = { has_global_flag = mem_snowed_in_first_time_done }
 		}
 	}
 	desc = { 
 		text = mem_snowed_in.3.desc.second
 		trigger = {
-			NOT = { has_global_flag = mem_snowed_in_first_time_done }
+			has_global_flag = mem_snowed_in_first_time_done
 		}
 	}
 	
 	is_triggered_only = yes
 	
+	picture = GFX_evt_outpost
+	location = event_target:the_planet
+	
 	immediate = {
+		IF = {
+			limit = {
+				NOT = { has_global_flag = mem_snowed_in_first_time_done }
+			}
+			create_species = {
+				name = Yotunn
+				plural = Yotunns
+				class = random_non_machine
+				portrait = random
+				traits = {
+					trait = trait_mem_snowed_in_survivors
+					trait = trait_adaptive
+					trait = trait_communal
+					trait = trait_slow_breeders
+				}
+			}
+			create_country = {
+				type = faction
+				auto_delete = no
+				species = last_created_species
+			}
+			last_created_country = { 
+				save_event_target_as = snowed_in_species 
+				set_country_flag = mem_snowed_in_species
+			}
+		}
 		set_country_flag = mem_snowed_in_detected_civilisation
 		event_target:the_planet = {
 			remove_modifier = mem_snowed_in_ruins
 			add_modifier = {
 				modifier = mem_snowed_in_civilisation
 				days = -1
+			}
+			while = {
+				count = 2
+				random_list = {
+					25 = {
+						change_variable = { which = mem_snowed_in_survivors_count value = 1 }
+					}
+					50 = {
+						change_variable = { which = mem_snowed_in_survivors_count value = 2 }
+					}
+					25 = {
+						change_variable = { which = mem_snowed_in_survivors_count value = 3 }
+					}
+				}
 			}
 		}
 	}
@@ -133,6 +192,7 @@ country_event = {
 			}
 		}
 		
+		set_country_flag = mem_snowed_in_has_project
 		enable_special_project = {
 			name = MEM_SNOWED_IN_ESTABLISH_CONTACT
 			location = event_target:the_planet
@@ -151,7 +211,7 @@ country_event = {
 	option = {
 		name = mem_snowed_in.3.b
 		
-		ai_chance = { factor = 0.1 }
+		ai_chance = { factor = 25 } #AI should favour doing nothing so player had better chance to interact with them
 	}
 	
 	option = {
@@ -164,6 +224,7 @@ country_event = {
 			}
 		}
 		
+		set_country_flag = mem_snowed_in_has_project
 		enable_special_project = {
 			name = MEM_SNOWED_IN_DESTROY
 			location = event_target:the_planet
@@ -185,6 +246,7 @@ country_event = {
 			}
 		}
 		
+		set_country_flag = mem_snowed_in_has_project
 		enable_special_project = {
 			name = MEM_SNOWED_IN_ASSAULT
 			location = event_target:the_planet
@@ -231,5 +293,224 @@ planet_event = {
 				country_event = { id = mem_snowed_in.3 }
 			}
 		}
+		IF = {
+			limit = {
+				exists = space_owner
+				space_owner = { has_country_flag = mem_snowed_in_accepting_refugees }
+			}
+			space_owner = {
+				random_owned_planet = {
+					limit = { any_tile = { has_pop = no has_blocker = no } }
+					best_tile_for_pop = {
+						create_pop = { species = event_target:mem_snowed_in_species }
+					}
+					root = {
+						change_variable = { which = mem_snowed_in_survivors_count value = -1 }
+					}
+				}
+			}
+		}
+		IF = {
+			limit = {
+				check_variable = { which = mem_snowed_in_survivors_count value < 1 }
+			}
+			mem_snowed_in_finalize = yes
+		}
 	}
 }
+
+#Following successful contact
+country_event = {
+	id = mem_snowed_in.5
+	title = mem_snowed_in.5.name
+	desc = mem_snowed_in.5.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_outpost
+	location = event_target:the_planet
+	
+	immediate = {
+		set_country_flag = mem_snowed_in_made_contact
+		remove_country_flag = mem_snowed_in_has_project
+		IF = {
+			limit = {
+				NOT = { has_global_flag = mem_snowed_in_someone_made_contact }
+				set_country_flag = mem_snowed_in_we_made_first_contact
+			}
+		}
+		set_global_flag = mem_snowed_in_someone_made_contact
+	}
+	
+	option = {
+		name = ONSCREEN
+		hidden_effect = {
+			country_event = { id = mem_snowed_in.6 }
+		}
+	}
+}
+
+#Diplomatic window
+country_event = {
+	id = mem_snowed_in.6
+	title = mem_snowed_in.6.name
+	desc = { 
+		text = mem_snowed_in.6.desc.first
+		trigger = {
+			has_country_flag = mem_snowed_in_we_made_first_contact 
+		}
+	}
+	desc = { 
+		text = mem_snowed_in.6.desc.second
+		trigger = {
+			NOT = { has_country_flag = mem_snowed_in_we_made_first_contact  }
+		}
+	}
+	
+	diplomatic = yes
+	
+	picture_event_data = {
+		portrait = event_target:snowed_in_species
+		room = mem_server_room
+	}
+	
+	option = {
+		name = mem_snowed_in.6.a
+		response_text = mem_server_room.6.a.respose
+		is_dialog_only = yes
+	}
+	
+	option = {
+		name = mem_snowed_in.6.b
+		custom_tooltip = mem_snowed_in.6.b.tooltip
+		set_country_flag = mem_snowed_in_accepting_refugees
+		
+		trigger = {
+			OR = {
+				NOT = { has_ethic = ethic_gestalt_consciousness }
+				has_valid_civic = civic_machine_servitor
+			}
+		}
+		
+		ai_chance = { 
+			factor = 100 
+			modifier = {
+				is_xenopobe = yes
+				factor = 0
+			}
+		}
+	}
+	
+	option = {
+		name = mem_snowed_in.6.c
+		response_text = mem_snowed_in.6.c.response
+		
+		trigger = {
+			NOT = { has_ethic = ethic_gestalt_consciousness }
+			is_xenophobe = no
+		}
+		
+		ai_chance = { factor = 10 }
+	}
+	
+	option = {
+		name = mem_snowed_in.6.c.gestalt
+		response_text = mem_snowed_in.6.c.respose
+		
+		trigger = {
+			has_ethic = ethic_gestalt_consciousness
+		}
+		
+		ai_chance = { factor = 10 }
+	}
+	
+	option = {
+		name = mem_snowed_in.6.c.xenophobe
+		response_text = mem_snowed_in.6.c.xenophobe.response
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
+		
+		add_influence = 50
+		
+		ai_chance = { factor = 1000 }
+	}
+	
+	option = {
+		name = mem_snowed_in.6.d
+		response_text = mem_snowed_in.6.d.response
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_materialist
+				has_ethic = ethic_fanatic_materialist
+				species = { has_trait = trait_cybernetic }
+				has_ascension_perk = ap_the_flesh_is_weak
+			}
+			is_xenophobe = no
+		}
+		
+		allow = {
+			influence > 50
+		}
+		
+		ai_chance = { factor = 100 }
+		
+		add_influence = -50
+		add_monthly_resource_mult = {
+			resource = society_research
+			value = @tier3researchreward
+			min = @tier3researchmin
+			max = @tier1researchmax
+		}
+		add_monthly_resource_mult = {
+			resource = engineering_research
+			value = @tier3researchreward
+			min = @tier3researchmin
+			max = @tier1researchmax
+		}
+		
+		hidden_effect = { #Don't know why I do this. For flavour maybe?
+			IF = {
+				limit = { has_ascension_perk = ap_the_flesh_is_weak }
+				event_target:snowed_in_species = {
+					modify_species = {
+						add_trait = trait_cybernetic
+					}
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_server_room.6.e
+		response_text = mem_server_room.6.e.response
+		
+		allow = {
+			influence > 50
+		}
+		
+		ai_chance = { factor = 100 }
+		
+		add_influence = -50
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 6
+			min = 10
+			max = 600
+		}
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_spiritualist
+				has_ethic = ethic_fanatic_spiritualist
+			}
+			is_xenophobe = no
+		}
+	}
+}
+
