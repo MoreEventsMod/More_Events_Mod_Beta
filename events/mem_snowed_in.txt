@@ -1,0 +1,235 @@
+#Snowed In
+#By ViolentBeetle
+
+namespace = mem_snowed_in
+
+#Anomaly solution
+ship_event = {
+	id = mem_snowed_in.1
+	title = mem_snowed_in.1.name
+	desc = mem_snowed_in.1.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_outpost
+	location = FROM
+	
+	immediate = {
+		from = {
+			orbital_deposit_tile = { clear_deposits = yes }
+			save_event_target_as = the_planet
+		}
+	}
+	
+	option = {
+		name = INTERESTING
+		
+		from = {
+			add_modifier = {
+				modifier = mem_snowed_in_ruins
+				days = -1
+			}
+			orbital_deposit_tile = {
+				add_deposit = d_immense_societ_deposit
+				add_deposit = d_rich_engineering_deposit
+			}
+			hidden_effect = {
+				planet_event = { id = mem_snowed_in.2 days = 360 }
+			}
+		}
+	}
+}
+
+#First loop - discover signs of life
+planet_event = {
+	id = mem_snowed_in.2
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = { has_global_flag = mem_snowed_in_first_loop_done }
+	}
+	
+	immediate = {
+		random_list = {
+			70 = { 
+				planet_event = { id = mem_snowed_in.2 days = 360 }
+			}
+			10 = {
+				set_global_flag = mem_snowed_in_first_loop_done
+				space_owner = { country_event = { id = mem_snowed_in.3 } }
+				modifier = {
+					factor = 0
+					NAND = { 
+						exists = space_owner 
+						has_research_station = yes 
+					}
+				}
+				modifier = {
+					factor = 0.1
+					exists = space_owner
+					space_owner = { is_ai = yes }
+				}
+			}
+			20 = {
+				set_global_flag = mem_snowed_in_first_loop_done
+				modifier = {
+					factor = 0
+					NAND = { 
+						exists = space_owner 
+						has_research_station = yes 
+					}
+				}
+				modifier = {
+					factor = 0.1
+					exists = space_owner
+					space_owner = { is_ai = yes }
+				}
+			}
+		}
+	}
+}
+
+#Notification
+country_event = {
+	id = mem_snowed_in.3
+	title = mem_snowed_in.3.name
+	desc = { 
+		text = mem_snowed_in.3.desc.first
+		trigger = {
+			has_global_flag = mem_snowed_in_first_time_done
+		}
+	}
+	desc = { 
+		text = mem_snowed_in.3.desc.second
+		trigger = {
+			NOT = { has_global_flag = mem_snowed_in_first_time_done }
+		}
+	}
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_country_flag = mem_snowed_in_detected_civilisation
+		event_target:the_planet = {
+			remove_modifier = mem_snowed_in_ruins
+			add_modifier = {
+				modifier = mem_snowed_in_civilisation
+				days = -1
+			}
+		}
+	}
+	
+	option = {
+		name = mem_snowed_in.3.a
+		
+		trigger = {
+			NOR = {
+				has_ethic = ethic_fanatic_xenophobe
+				has_valid_civic = civic_fanatic_purifiers
+				has_valid_civic = civic_hive_devouring_swarm
+				has_valid_civic = civic_machine_terminator
+				has_valid_civic = civic_machine_assimilator
+			}
+		}
+		
+		enable_special_project = {
+			name = MEM_SNOWED_IN_ESTABLISH_CONTACT
+			location = event_target:the_planet
+			owner = root
+		}
+		
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 0
+				has_valid_civic = civic_inwards_perfection
+			}
+		}
+	}
+	
+	option = {
+		name = mem_snowed_in.3.b
+		
+		ai_chance = { factor = 0.1 }
+	}
+	
+	option = {
+		name = mem_snowed_in.3.c
+		
+		trigger = {
+			OR = {
+				has_valid_civic = civic_fanatic_purifiers
+				has_valid_civic = civic_machine_terminator
+			}
+		}
+		
+		enable_special_project = {
+			name = MEM_SNOWED_IN_DESTROY
+			location = event_target:the_planet
+			owner = root
+		}
+		
+		ai_chance = {
+			factor = 10
+		}
+	}
+	
+	option = {
+		name = mem_snowed_in.3.d
+		
+		trigger = {
+			OR = {
+				has_valid_civic = civic_fanatic_purifiers
+				has_valid_civic = civic_machine_terminator
+			}
+		}
+		
+		enable_special_project = {
+			name = MEM_SNOWED_IN_ASSAULT
+			location = event_target:the_planet
+			owner = root
+		}
+		
+		ai_chance = {
+			factor = 10
+		}
+	}
+	
+	after = {
+		custom_tooltip = mem_snowed_in.3.tooltip
+		set_global_flag = mem_snowed_in_first_time_done
+		hidden_effect = {
+			event_target:the_planet = {
+				planet_event = { id = mem_snowed_in.4 days = 360 }
+			}
+		}
+	}
+}
+
+#Second loop - processing various interactions
+planet_event = {
+	id = mem_snowed_in.4
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = { has_global_flag = mem_snowed_in_complete }
+	}
+	
+	immediate = {
+		planet_event = { id = mem_snowed_in.4 days = 360 }
+		IF = {
+			limit = {
+				exists = space_owner
+				has_research_station = yes
+				space_owner = {
+					NOT = { has_country_flag = mem_snowed_in_detected_civilisation }
+				}
+			}
+			space_owner = {
+				country_event = { id = mem_snowed_in.3 }
+			}
+		}
+	}
+}
