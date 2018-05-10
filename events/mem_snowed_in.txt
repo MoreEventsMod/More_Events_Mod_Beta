@@ -443,6 +443,7 @@ country_event = {
 	option = {
 		name = mem_snowed_in.6.d
 		response_text = mem_snowed_in.6.d.response
+		set_country_flag = mem_server_room_gave_tech
 		
 		trigger = {
 			OR = {
@@ -465,13 +466,13 @@ country_event = {
 			resource = society_research
 			value = @tier3researchreward
 			min = @tier3researchmin
-			max = @tier1researchmax
+			max = @tier3researchmax
 		}
 		add_monthly_resource_mult = {
 			resource = engineering_research
 			value = @tier3researchreward
 			min = @tier3researchmin
-			max = @tier1researchmax
+			max = @tier3researchmax
 		}
 		
 		hidden_effect = { #Don't know why I do this. For flavour maybe?
@@ -514,3 +515,139 @@ country_event = {
 	}
 }
 
+#Orbital bombing for extrerminators
+country_event = {
+	id = mem_snowed_in.7
+	title = mem_snowed_in.7.name
+	desc = mem_snowed_in.7.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_nuclear_explosion
+	location = event_target:the_planet
+	
+	immediate = {
+		event_target:the_planet = {
+			orbital_deposit_tile = {
+				clear_deposits = yes
+				add_deposit = d_rich_society_deposit
+			}
+			remove_modifier = mem_snowed_in_civilisation
+			add_modifier = {
+				modifier = mem_snowed_in_civilisation_destroyed
+				days = -1
+			}
+		}
+		mem_snowed_in_finalize = yes
+	}
+	
+	option = {
+		name = EXCELLENT
+		custom_tooltip = mem_snowed_in.7.tooltip
+		
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 6
+			min = 10
+			max = 600
+		}
+	}
+}
+
+#Invasion successful
+country_event = {
+	id = mem_snowed_in.8
+	title = mem_snowed_in.8.name
+	desc = mem_snowed_in.8.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_interior_battle
+	location = event_target:the_planet
+	
+	option = {
+		name = mem_snowed_in.8.a
+		
+		trigger = {
+			has_valid_civic = civic_hive_devouring_swarm
+		}
+		
+		add_modifier = {
+			modifier = mem_snowed_in_eat_everyone
+			days = 1080
+		}
+	}
+	
+	option = {
+		name = mem_snowed_in.8.b
+		
+		trigger = {
+			has_valid_civic = civic_machine_assimilator
+		}
+		
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 3
+			min = 5
+			max = 300
+		}
+		add_monthly_resource_mult = {
+			resource = society_research
+			value = @tier2researchreward
+			min = @tier2researchmin
+			max = @tier2researchmax
+		}
+	}
+	
+	option = {
+		name = mem_snowed_in.8.c
+		custom_tooltip = mem_snowed_in.8.c.tooltip
+		
+		trigger = {
+			has_valid_civic = civic_machine_assimilator
+		}
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 2
+			min = 5
+			max = 200
+		}
+		add_monthly_resource_mult = {
+			resource = society_research
+			value = @tier2researchreward
+			min = @tier2researchmin
+			max = @tier2researchmax
+		}
+		hidden_effect = {
+			event_target:mem_snowed_in_species = {
+				modify_species = {
+					add_trait = trait_cybernetic
+				}
+			}
+			while = {
+				limit = {
+					event_target:the_planet = {
+						check_variable = { which = mem_snowed_in_survivors_count value > 0 }
+					}
+				}
+				random_owned_planet = {
+					limit = {
+						any_tile = { has_pop = no has_blocker = no }
+					}
+					best_tile_for_pop = {
+						create_pop = { species = mem_snowed_in_species }
+					}
+					last_created_pop = {
+						set_citizenship_type = {
+							type = citizenship_full_machine
+							country = root
+						}
+					}
+				}
+				event_target:the_planet = {
+					change_variable = { which = mem_snowed_in_survivors_count value = -1 }
+				}
+			}
+		}
+	}
+}
