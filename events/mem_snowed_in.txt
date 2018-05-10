@@ -46,7 +46,7 @@ ship_event = {
 				days = -1
 			}
 			orbital_deposit_tile = {
-				add_deposit = d_immense_societ_deposit
+				add_deposit = d_immense_society_deposit
 				add_deposit = d_rich_engineering_deposit
 			}
 			hidden_effect = {
@@ -163,29 +163,29 @@ country_event = {
 					}
 				}
 			}
-		}
-		set_country_flag = mem_snowed_in_detected_civilisation
-		event_target:the_planet = {
-			remove_modifier = mem_snowed_in_ruins
-			add_modifier = {
-				modifier = mem_snowed_in_civilisation
-				days = -1
-			}
-			while = {
-				count = 2
-				random_list = {
-					25 = {
-						change_variable = { which = mem_snowed_in_survivors_count value = 1 }
-					}
-					50 = {
-						change_variable = { which = mem_snowed_in_survivors_count value = 2 }
-					}
-					25 = {
-						change_variable = { which = mem_snowed_in_survivors_count value = 3 }
+			event_target:the_planet = {
+				remove_modifier = mem_snowed_in_ruins
+				add_modifier = {
+					modifier = mem_snowed_in_civilisation
+					days = -1
+				}
+				while = {
+					count = 2
+					random_list = {
+						30 = {
+							change_variable = { which = mem_snowed_in_survivors_count value = 1 }
+						}
+						50 = {
+							change_variable = { which = mem_snowed_in_survivors_count value = 2 }
+						}
+						20 = {
+							change_variable = { which = mem_snowed_in_survivors_count value = 3 }
+						}
 					}
 				}
 			}
 		}
+		set_country_flag = mem_snowed_in_detected_civilisation
 	}
 	
 	option = {
@@ -268,8 +268,13 @@ country_event = {
 	}
 	
 	after = {
-		custom_tooltip = mem_snowed_in.3.tooltip
-		set_global_flag = mem_snowed_in_first_time_done
+		IF = {
+			limit = {
+				NOT = { has_global_flag = mem_snowed_in_first_time_done }
+			}
+			custom_tooltip = mem_snowed_in.3.tooltip
+			set_global_flag = mem_snowed_in_first_time_done
+		}
 		hidden_effect = {
 			event_target:the_planet = {
 				planet_event = { id = mem_snowed_in.4 days = 360 }
@@ -309,9 +314,12 @@ planet_event = {
 			}
 			space_owner = {
 				random_owned_planet = {
-					limit = { any_tile = { has_pop = no has_blocker = no } }
+					limit = { 
+						habitability = { who = event_target:snowed_in_species.species value > 0.2 }
+						any_tile = { has_pop = no has_blocker = no } 
+					}
 					best_tile_for_pop = {
-						create_pop = { species = event_target:mem_snowed_in_species }
+						create_pop = { species = event_target:snowed_in_species }
 					}
 					root = {
 						change_variable = { which = mem_snowed_in_survivors_count value = -1 }
@@ -325,7 +333,7 @@ planet_event = {
 			}
 			orbital_deposit_tile = {
 				clear_deposits = yes
-				add_deposit = d_rich_societ_deposit
+				add_deposit = d_rich_society_deposit
 				add_deposit = d_rich_engineering_deposit
 			}
 			remove_modifier = mem_snowed_in_civilisation
@@ -334,6 +342,7 @@ planet_event = {
 				days = -1
 			}
 			mem_snowed_in_finalize = yes
+			space_owner = { country_event = { id = mem_snowed_in.9 } }
 		}
 	}
 }
@@ -355,8 +364,8 @@ country_event = {
 		IF = {
 			limit = {
 				NOT = { has_global_flag = mem_snowed_in_someone_made_contact }
-				set_country_flag = mem_snowed_in_we_made_first_contact
 			}
+			set_country_flag = mem_snowed_in_we_made_first_contact
 		}
 		set_global_flag = mem_snowed_in_someone_made_contact
 	}
@@ -414,7 +423,7 @@ country_event = {
 		ai_chance = { 
 			factor = 100 
 			modifier = {
-				is_xenopobe = yes
+				is_xenophobe = yes
 				factor = 0
 			}
 		}
@@ -434,7 +443,7 @@ country_event = {
 	
 	option = {
 		name = mem_snowed_in.6.c.gestalt
-		response_text = mem_snowed_in.6.c.respose
+		response_text = mem_snowed_in.6.c.response
 		
 		trigger = {
 			has_ethic = ethic_gestalt_consciousness
@@ -653,7 +662,7 @@ country_event = {
 			max = @tier2researchmax
 		}
 		hidden_effect = {
-			event_target:mem_snowed_in_species = {
+			event_target:snowed_in_species = {
 				modify_species = {
 					add_trait = trait_cybernetic
 				}
@@ -669,7 +678,7 @@ country_event = {
 						any_tile = { has_pop = no has_blocker = no }
 					}
 					best_tile_for_pop = {
-						create_pop = { species = mem_snowed_in_species }
+						create_pop = { species = event_target:snowed_in_species }
 					}
 					last_created_pop = {
 						set_citizenship_type = {
@@ -687,5 +696,20 @@ country_event = {
 	
 	after = {
 		custom_tooltip = mem_snowed_in.7.tooltip
+	}
+}
+
+country_event = {
+	id = mem_snowed_in.9
+	title = mem_snowed_in.9.name
+	desc = mem_snowed_in.9.desc
+	
+	is_triggered_only = yes
+	
+	location = event_target:the_planet
+	picture = GFX_evt_outpost
+	
+	option = {
+		name = OK
 	}
 }
