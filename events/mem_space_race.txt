@@ -3,13 +3,10 @@
 
 namespace = mem_space_race
 
-#Initializaton event
+#Gatekeeping event to control probabilities better without MTTH modifiers
 country_event = {
-	id = mem_space_race.1
-	title = mem_space_race.1.name
-	desc = mem_space_race.1.desc
-	
-	picture = GFX_evt_alien_propaganda
+	id = mem_space_race.1000
+	hide_window = yes
 	
 	trigger = {
 		NOT = { has_global_flag = mem_space_race_happened }
@@ -45,35 +42,56 @@ country_event = {
 		}
 	}
 	
-	mean_time_to_happen = {
-		years = 100
-		
-		modifier = {
-			factor = 2
-			has_ethic = ethic_xenophobe
-		}
-		modifier = {
-			factor = 0.75
-			OR = {
-				has_ethic = ethic_xenophile
-				has_ethic = ethic_fanatic_xenophile
+	mean_time_to_happen = { years = 100 }
+	
+	immediate = {
+		random_list = {
+			10 = {
+				modifier = {
+					factor = 10
+					is_ai = yes
+				}
 			}
-		}
-		modifier = {
-			factor = 0.9
-			OR = {
-				has_ethic = ethic_materialist
-				has_ethic = ethic_fanatic_materialist
-				has_ethic = ethic_egalitarian
-				has_ethic = ethic_fanatic_egalitarian
+			10 = { 
+				country_event = { id = mem_space_race.1 } 
+				modifier = {
+					factor = 0.5
+					has_ethic = ethic_xenophobe
+				}
+				modifier = {
+					factor = 2
+					OR = {
+						has_ethic = ethic_xenophile
+						has_ethic = ethic_fanatic_xenophile
+					}
+				}
+				modifier = {
+					factor = 1.5
+					OR = {
+						has_ethic = ethic_materialist
+						has_ethic = ethic_fanatic_materialist
+						has_ethic = ethic_egalitarian
+						has_ethic = ethic_fanatic_egalitarian
+					}
+					NOT = { has_ethic = ethic_xenophobe }
+				}
 			}
-			NOT = { has_ethic = ethic_xenophobe }
-		}
-		modifier = {
-			factor = 10
-			is_ai = yes
+			20 = {
+				set_global_flag = mem_space_race_happened #No event in this game
+			}
 		}
 	}
+}
+
+#Initializaton event
+country_event = {
+	id = mem_space_race.1
+	title = mem_space_race.1.name
+	desc = mem_space_race.1.desc
+	
+	picture = GFX_evt_alien_propaganda
+	
+	is_triggered_only = yes
 	
 	immediate = {
 		set_global_flag = mem_space_race_happened
