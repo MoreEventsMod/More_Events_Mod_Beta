@@ -47,6 +47,8 @@ namespace = mem_antarans
 event = {
 	id = mem_antarans.1
 	hide_window = yes
+
+	is_triggered_only = yes
 	
 	immediate = {
 		random_list = {
@@ -120,6 +122,8 @@ event = {
 event = {
 	id = mem_antarans.2
 	hide_window = yes
+
+	is_triggered_only = yes
 	
 	trigger = {
 		has_global_flag = mem_antarans_enabled
@@ -358,30 +362,28 @@ event = {
 					}
 				}
 				country_event = { id = mem_antarans.20 days = 60 random = 10 }
-				ELSE = {
-					IF = { # checks if the country has contact to another country that has contact to one of the targeted empires
-						limit = {
-							NOR = {
-								has_communications = event_target:mem_antarans_target_1
-								has_communications = event_target:mem_antarans_target_2
-								has_communications = event_target:mem_antarans_target_3
-								has_communications = event_target:mem_antarans_target_4
-								has_communications = event_target:mem_antarans_target_5
-							}
-							any_country = {
-								has_communications = prev
-								OR = {
-									has_communications = event_target:mem_antarans_target_1
-									has_communications = event_target:mem_antarans_target_2
-									has_communications = event_target:mem_antarans_target_3
-									has_communications = event_target:mem_antarans_target_4
-									has_communications = event_target:mem_antarans_target_5
-								}
-							}
+			}
+			ELSE_IF = { # checks if the country has contact to another country that has contact to one of the targeted empires
+				limit = {
+					NOR = {
+						has_communications = event_target:mem_antarans_target_1
+						has_communications = event_target:mem_antarans_target_2
+						has_communications = event_target:mem_antarans_target_3
+						has_communications = event_target:mem_antarans_target_4
+						has_communications = event_target:mem_antarans_target_5
+					}
+					any_country = {
+						has_communications = prev
+						OR = {
+							has_communications = event_target:mem_antarans_target_1
+							has_communications = event_target:mem_antarans_target_2
+							has_communications = event_target:mem_antarans_target_3
+							has_communications = event_target:mem_antarans_target_4
+							has_communications = event_target:mem_antarans_target_5
 						}
-						country_event = { id = mem_antarans.21 days = 90 random = 10 }
 					}
 				}
+				country_event = { id = mem_antarans.21 days = 90 random = 10 }
 			}
 		}
 	}
@@ -395,25 +397,25 @@ country_event = {
 	is_triggered_only = yes
 	
 	immediate = {
+		IF = {
+			limit = {
+				is_ai = no
+				NOT = {
+					has_country_flag = mem_antarans_rift_investigation
+				}
+			}
+			capital_scope = {
+				enable_special_project = {
+					name = MEM_ANTARANS_RIFT_INVESTIGATION
+					location = this
+					owner = root
+				}
+			}
+			set_country_flag = mem_antarans_rift_investigation
+		}
 		IF = { # check if the empire is target of a retaliation
 			limit = {
 				has_country_flag = mem_antarans_retaliation
-			}
-			IF = {
-				limit = {
-					is_ai = no
-					NOT = {
-						has_country_flag = mem_antarans_rift_investigation
-					}
-				}
-				capital_scope = {
-					enable_special_project = {
-						name = MEM_ANTARANS_RIFT_INVESTIGATION
-						location = this
-						owner = root
-					}
-				}
-				set_country_flag = mem_antarans_rift_investigation
 			}
 			random_owned_planet = {
 				limit = {
@@ -451,131 +453,97 @@ country_event = {
 			country_event = { id = mem_antarans.4 days = 5 }
 			# start overnext event to open the rift and spawn enemy fleet
 			country_event = { id = mem_antarans.5 days = 30 }
-			ELSE = {
-				IF = { # failsafe check if valid raiding target has been lost in the meantime because of a war or something else - check here and use normal raiding target
-					limit = {
-						any_owned_planet = {
-							is_colony = yes
-							is_under_colonization = no
-							is_capital = no
-							NOT = {
-								has_planet_flag = mem_antarans_raided_planet
-							}
-						}
-					}
-					IF = {
-						limit = {
-							is_ai = no
-							NOT = {
-								has_country_flag = mem_antarans_rift_investigation
-							}
-						}
-						capital_scope = {
-							enable_special_project = {
-								name = MEM_ANTARANS_RIFT_INVESTIGATION
-								location = this
-								owner = root
-							}
-						}
-						set_country_flag = mem_antarans_rift_investigation
-					}
-					random_owned_planet = {
-						limit = {
-							is_colony = yes
-							is_capital = no
-							NOT = {
-								has_planet_flag = mem_antarans_raided_planet
-							}
-						}
-						set_timed_planet_flag = {
-							flag = mem_antarans_raiding_target
-							days = 600
-						}
-						solar_system = {
-							random_system_planet = {
-								limit = {
-									is_star = yes
-								}
-								THIS = {
-									save_event_target_as = mem_antarans_target_sun
-								}
-							}
-							create_ambient_object = { # TODO exchange that later with a custom made one by frog
-								type = "mem_antaran_wormhole_small_object"
-							}
-							random_system_ambient_object = {
-								limit = { is_same_value = last_created_ambient_object }
-								set_location = {
-									target = event_target:mem_antarans_target_sun
-									distance = 150
-									angle = random
-								}
-								set_ambient_object_flag = mem_antarans_rift
-								save_event_target_as = mem_antarans_rift
-							}
-						}
-					}
-					# start next event to notify the player
-					country_event = { id = mem_antarans.4 days = 5 }
-					# start overnext event to open the rift and spawn enemy fleet
-					country_event = { id = mem_antarans.5 days = 30 }
-					ELSE = { # failsafe target - if not even the capital is left there is nothing happening anyway
-						IF = {
-							limit = {
-								is_ai = no
-								NOT = {
-									has_country_flag = mem_antarans_rift_investigation
-								}
-							}
-							capital_scope = {
-								enable_special_project = {
-									name = MEM_ANTARANS_RIFT_INVESTIGATION
-									location = this
-									owner = root
-								}
-							}
-							set_country_flag = mem_antarans_rift_investigation
-						}
-						random_owned_planet = {
-							limit = {
-								is_colony = yes
-								is_under_colonization = no
-							}
-							set_timed_planet_flag = {
-								flag = mem_antarans_raiding_target
-								days = 600
-							}
-							solar_system = {
-								random_system_planet = {
-									limit = {
-										is_star = yes
-									}
-									THIS = {
-										save_event_target_as = mem_antarans_target_sun
-									}
-								}
-								create_ambient_object = { # TODO exchange that later with a custom made one by frog
-									type = "mem_antaran_wormhole_small_object"
-								}
-								random_system_ambient_object = {
-									limit = { is_same_value = last_created_ambient_object }
-									set_location = {
-										target = event_target:mem_antarans_target_sun
-										distance = 150
-										angle = random
-									}
-									set_ambient_object_flag = mem_antarans_rift
-									save_event_target_as = mem_antarans_rift
-								}
-							}
-						}
-						# start next event to notify the player
-						country_event = { id = mem_antarans.4 days = 5 }
-						# start overnext event to open the rift and spawn enemy fleet
-						country_event = { id = mem_antarans.5 days = 30 }
+		}
+		ELSE_IF = { # failsafe check if valid raiding target has been lost in the meantime because of a war or something else - check here and use normal raiding target
+			limit = {
+				any_owned_planet = {
+					is_colony = yes
+					is_under_colonization = no
+					is_capital = no
+					NOT = {
+						has_planet_flag = mem_antarans_raided_planet
 					}
 				}
 			}
+			random_owned_planet = {
+				limit = {
+					is_colony = yes
+					is_capital = no
+					NOT = {
+						has_planet_flag = mem_antarans_raided_planet
+					}
+				}
+				set_timed_planet_flag = {
+					flag = mem_antarans_raiding_target
+					days = 600
+				}
+				solar_system = {
+					random_system_planet = {
+						limit = {
+							is_star = yes
+						}
+						THIS = {
+							save_event_target_as = mem_antarans_target_sun
+						}
+					}
+					create_ambient_object = { # TODO exchange that later with a custom made one by frog
+						type = "mem_antaran_wormhole_small_object"
+					}
+					random_system_ambient_object = {
+						limit = { is_same_value = last_created_ambient_object }
+						set_location = {
+							target = event_target:mem_antarans_target_sun
+							distance = 150
+							angle = random
+						}
+						set_ambient_object_flag = mem_antarans_rift
+						save_event_target_as = mem_antarans_rift
+					}
+				}
+			}
+			# start next event to notify the player
+			country_event = { id = mem_antarans.4 days = 5 }
+			# start overnext event to open the rift and spawn enemy fleet
+			country_event = { id = mem_antarans.5 days = 30 }
+		}
+		ELSE = { # failsafe target - if not even the capital is left there is nothing happening anyway
+			random_owned_planet = {
+				limit = {
+					is_colony = yes
+					is_under_colonization = no
+				}
+				set_timed_planet_flag = {
+					flag = mem_antarans_raiding_target
+					days = 600
+				}
+				solar_system = {
+					random_system_planet = {
+						limit = {
+							is_star = yes
+						}
+						THIS = {
+							save_event_target_as = mem_antarans_target_sun
+						}
+					}
+					create_ambient_object = { # TODO exchange that later with a custom made one by frog
+						type = "mem_antaran_wormhole_small_object"
+					}
+					random_system_ambient_object = {
+						limit = { is_same_value = last_created_ambient_object }
+						set_location = {
+							target = event_target:mem_antarans_target_sun
+							distance = 150
+							angle = random
+						}
+						set_ambient_object_flag = mem_antarans_rift
+						save_event_target_as = mem_antarans_rift
+					}
+				}
+			}
+			# start next event to notify the player
+			country_event = { id = mem_antarans.4 days = 5 }
+			# start overnext event to open the rift and spawn enemy fleet
+			country_event = { id = mem_antarans.5 days = 30 }
 		}
 		last_created_ambient_object = {
 			IF = {
@@ -657,7 +625,7 @@ country_event = {
 	option = {
 		name = mem_antarans.4.a
 		trigger = {
-			NOT = {
+			NOR = {
 				has_country_flag = mem_antarans_met
 				has_country_flag = mem_antarans_retaliation
 			}
@@ -691,7 +659,7 @@ country_event = {
 	desc = { # for first encounter
 		text = mem_antarans.5a.desc
 		trigger = {
-			NOT = { 
+			NOR = { 
 				has_country_flag = mem_antarans_retaliation
 				has_country_flag = mem_antarans_met
 			}
@@ -726,7 +694,7 @@ country_event = {
 		}
 		IF = { #in case of first raiding encounter
 			limit = {
-				NOT = {
+				NOR = {
 					has_country_flag = mem_antarans_retaliation
 					has_country_flag = mem_antarans_met
 				}
@@ -751,7 +719,7 @@ country_event = {
 	option = {
 		name = mem_antarans.5.a
 		trigger = {
-			NOT = {
+			NOR = {
 				has_country_flag = mem_antarans_met
 				has_country_flag = mem_antarans_retaliation
 			}
@@ -1014,39 +982,39 @@ country_event = {
 					establish_communications_no_message = ROOT
 				}	
 			}
-			ELSE = { # otherwise the antaran country is created and saved as event target
-				create_country = {
-					name = "The Dark Ones"
-					type = mem_antarans
-					flag = {
-						icon = {
-							category = "domination"
-							file = "domination_21.dds"
-						}
-						background= {
-							category = "backgrounds"
-							file = "00_solid.dds"
-						}
-						colors={
-							"black"
-							"dark_purple"
-							"null"
-							"null"
-						}
+		}
+		ELSE = { # otherwise the antaran country is created and saved as event target
+			create_country = {
+				name = "The Dark Ones"
+				type = mem_antarans
+				flag = {
+					icon = {
+						category = "domination"
+						file = "domination_21.dds"
+					}
+					background= {
+						category = "backgrounds"
+						file = "00_solid.dds"
+					}
+					colors={
+						"black"
+						"dark_purple"
+						"null"
+						"null"
 					}
 				}
-				last_created_country = {
-					set_country_flag = mem_antarans_country
-					set_graphical_culture = fallen_empire_04
-					save_event_target_as = mem_antarans_country
-					IF = {
-						limit = {
-							NOT = {
-								has_communications = ROOT
-							}
+			}
+			last_created_country = {
+				set_country_flag = mem_antarans_country
+				set_graphical_culture = fallen_empire_04
+				save_event_target_as = mem_antarans_country
+				IF = {
+					limit = {
+						NOT = {
+							has_communications = ROOT
 						}
-						establish_communications_no_message = ROOT
 					}
+					establish_communications_no_message = ROOT
 				}
 			}
 		}
@@ -1177,39 +1145,39 @@ country_event = {
 					establish_communications_no_message = ROOT
 				}		
 			}
-			ELSE = { # otherwise the antaran country is created and saved as event target
-				create_country = {
-					name = "The Dark Ones"
-					type = mem_antarans
-					flag = {
-						icon = {
-							category = "domination"
-							file = "domination_21.dds"
-						}
-						background= {
-							category = "backgrounds"
-							file = "00_solid.dds"
-						}
-						colors={
-							"black"
-							"dark_purple"
-							"null"
-							"null"
-						}
+		}
+		ELSE = { # otherwise the antaran country is created and saved as event target
+			create_country = {
+				name = "The Dark Ones"
+				type = mem_antarans
+				flag = {
+					icon = {
+						category = "domination"
+						file = "domination_21.dds"
+					}
+					background= {
+						category = "backgrounds"
+						file = "00_solid.dds"
+					}
+					colors={
+						"black"
+						"dark_purple"
+						"null"
+						"null"
 					}
 				}
-				last_created_country = {
-					set_country_flag = mem_antarans_country
-					set_graphical_culture = fallen_empire_04
-					save_event_target_as = mem_antarans_country
-					IF = {
-						limit = {
-							NOT = {
-								has_communications = ROOT
-							}
+			}
+			last_created_country = {
+				set_country_flag = mem_antarans_country
+				set_graphical_culture = fallen_empire_04
+				save_event_target_as = mem_antarans_country
+				IF = {
+					limit = {
+						NOT = {
+							has_communications = ROOT
 						}
-						establish_communications_no_message = ROOT
 					}
+					establish_communications_no_message = ROOT
 				}
 			}
 		}
@@ -1768,116 +1736,125 @@ country_event = {
 	}
 	
 	immediate = {
+		# check for 1
 		IF = {
 			limit = {
 				FROMFROMFROM ={
 					has_fleet_flag = mem_antarans_fleet_1
 				}
+				NOT = {
+					any_country = {
+						has_country_flag = mem_antarans_target_1
+					}
+				}
+			}
+			ROOT = {
+				set_country_flag = mem_antarans_retaliation
+				set_country_flag = mem_antarans_target_1
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_1
+				}
+				any_country = {
+					has_country_flag = mem_antarans_target_1
+					NOT = {
+						has_country_flag = mem_antarans_retaliation
+					}
+					is_same_value = ROOT
+				}
+			}
+			ROOT = {
+				set_country_flag = mem_antarans_retaliation
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_1
+				}
+				any_country = {
+					has_country_flag = mem_antarans_target_1
+					NOT = {
+						has_country_flag = mem_antarans_retaliation
+					}
+					NOT = {
+						is_same_value = ROOT
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					has_country_flag = mem_antarans_target_1
+				}
+				remove_country_flag = mem_antarans_target_1
+			}
+			ROOT = {
+				set_country_flag = mem_antarans_retaliation
+				set_country_flag = mem_antarans_target_1
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_1
+				}
+				any_country = {
+					has_country_flag = mem_antarans_target_1
+					has_country_flag = mem_antarans_retaliation
+					NOT = {
+						is_same_value = ROOT
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					has_country_flag = mem_antarans_target_1
+				}
+				remove_country_flag = mem_antarans_target_1
+				remove_country_flag = mem_antarans_retaliation
+			}
+			ROOT = {
+				set_country_flag = mem_antarans_retaliation
+				set_country_flag = mem_antarans_target_1
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_1
+				}
+				any_country = {
+					has_country_flag = mem_antarans_target_1
+					has_country_flag = mem_antarans_retaliation
+					is_same_value = ROOT
+				}
+			}
+			ROOT = {
+				remove_country_flag = mem_antarans_retaliation
+				remove_country_flag = mem_antarans_target_1
 			}
 			IF = {
 				limit = {
-					NOT = {
-						any_country = {
-							has_country_flag = mem_antarans_target_1
+					ROOT = {
+						is_ai = no
+						NOT = {
+							has_country_flag = mem_antarans_rift_creation_start
 						}
 					}
 				}
 				ROOT = {
-					set_country_flag = mem_antarans_retaliation
-					set_country_flag = mem_antarans_target_1
+					set_country_flag = mem_antarans_rift_creation_start
+					country_event = { id = mem_antarans.50 days = 2}
 				}
-				ELSE = {
-					IF = {
-						limit = {
-							any_country = {
-								has_country_flag = mem_antarans_target_1
-								NOT = {
-									has_country_flag = mem_antarans_retaliation
-								}
-								is_same_value = ROOT
-							}
-						}
-						ROOT = {
-							set_country_flag = mem_antarans_retaliation
-						}
-						ELSE = {
-							IF = {
-								limit = {
-									any_country = {
-										has_country_flag = mem_antarans_target_1
-										NOT = {
-											has_country_flag = mem_antarans_retaliation
-										}
-										NOT = {
-											is_same_value = ROOT
-										}
-									}
-								}
-								random_country = {
-									limit = {
-										has_country_flag = mem_antarans_target_1
-									}
-									remove_country_flag = mem_antarans_target_1
-								}
-								ROOT = {
-									set_country_flag = mem_antarans_retaliation
-									set_country_flag = mem_antarans_target_1
-								}
-								ELSE = {
-									IF = {
-										limit = {
-											any_country = {
-												has_country_flag = mem_antarans_target_1
-												has_country_flag = mem_antarans_retaliation
-												NOT = {
-													is_same_value = ROOT
-												}
-											}
-										}
-										random_country = {
-											limit = {
-												has_country_flag = mem_antarans_target_1
-											}
-											remove_country_flag = mem_antarans_target_1
-											remove_country_flag = mem_antarans_retaliation
-										}
-										ROOT = {
-											set_country_flag = mem_antarans_retaliation
-											set_country_flag = mem_antarans_target_1
-										}
-										ELSE = {
-											IF = {
-												limit = {
-													any_country = {
-														has_country_flag = mem_antarans_target_1
-														has_country_flag = mem_antarans_retaliation
-														is_same_value = ROOT
-													}
-												}
-												ROOT = {
-													remove_country_flag = mem_antarans_retaliation
-													remove_country_flag = mem_antarans_target_1
-												}
-												IF = {
-													limit = {
-														ROOT = {
-															is_ai = no
-															NOT = {
-																has_country_flag = mem_antarans_rift_creation_start
-															}
-														}
-													}
-													ROOT = {
-														country_event = { id = mem_antarans.50 days = 2}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
+			}
+		}
+		IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_1
 				}
 			}
 			random_ambient_object = {
@@ -1887,117 +1864,125 @@ country_event = {
 				destroy_ambient_object = THIS
 			}
 		}
+		# check for 2
 		IF = {
 			limit = {
 				FROMFROMFROM ={
 					has_fleet_flag = mem_antarans_fleet_2
 				}
+				NOT = {
+					any_country = {
+						has_country_flag = mem_antarans_target_2
+					}
+				}
+			}
+			ROOT = {
+				set_country_flag = mem_antarans_retaliation
+				set_country_flag = mem_antarans_target_2
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_2
+				}
+				any_country = {
+					has_country_flag = mem_antarans_target_2
+					NOT = {
+						has_country_flag = mem_antarans_retaliation
+					}
+					is_same_value = ROOT
+				}
+			}
+			ROOT = {
+				set_country_flag = mem_antarans_retaliation
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_2
+				}
+				any_country = {
+					has_country_flag = mem_antarans_target_2
+					NOT = {
+						has_country_flag = mem_antarans_retaliation
+					}
+					NOT = {
+						is_same_value = ROOT
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					has_country_flag = mem_antarans_target_2
+				}
+				remove_country_flag = mem_antarans_target_2
+			}
+			ROOT = {
+				set_country_flag = mem_antarans_retaliation
+				set_country_flag = mem_antarans_target_2
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_2
+				}
+				any_country = {
+					has_country_flag = mem_antarans_target_2
+					has_country_flag = mem_antarans_retaliation
+					NOT = {
+						is_same_value = ROOT
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					has_country_flag = mem_antarans_target_2
+				}
+				remove_country_flag = mem_antarans_target_2
+				remove_country_flag = mem_antarans_retaliation
+			}
+			ROOT = {
+				set_country_flag = mem_antarans_retaliation
+				set_country_flag = mem_antarans_target_2
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_2
+				}
+				any_country = {
+					has_country_flag = mem_antarans_target_2
+					has_country_flag = mem_antarans_retaliation
+					is_same_value = ROOT
+				}
+			}
+			ROOT = {
+				remove_country_flag = mem_antarans_retaliation
+				remove_country_flag = mem_antarans_target_2
 			}
 			IF = {
 				limit = {
-					NOT = {
-						any_country = {
-							has_country_flag = mem_antarans_target_2
+					ROOT = {
+						is_ai = no
+						NOT = {
+							has_country_flag = mem_antarans_rift_creation_start
 						}
 					}
 				}
 				ROOT = {
-					set_country_flag = mem_antarans_retaliation
-					set_country_flag = mem_antarans_target_2
+					set_country_flag = mem_antarans_rift_creation_start
+					country_event = { id = mem_antarans.50 days = 2}
 				}
-				ELSE = {
-					IF = {
-						limit = {
-							any_country = {
-								has_country_flag = mem_antarans_target_2
-								NOT = {
-									has_country_flag = mem_antarans_retaliation
-								}
-								is_same_value = ROOT
-							}
-						}
-						ROOT = {
-							set_country_flag = mem_antarans_retaliation
-						}
-						ELSE = {
-							IF = {
-								limit = {
-									any_country = {
-										has_country_flag = mem_antarans_target_2
-										NOT = {
-											has_country_flag = mem_antarans_retaliation
-										}
-										NOT = {
-											is_same_value = ROOT
-										}
-									}
-								}
-								random_country = {
-									limit = {
-										has_country_flag = mem_antarans_target_2
-									}
-									remove_country_flag = mem_antarans_target_2
-								}
-								ROOT = {
-									set_country_flag = mem_antarans_retaliation
-									set_country_flag = mem_antarans_target_2
-								}
-								ELSE = {
-									IF = {
-										limit = {
-											any_country = {
-												has_country_flag = mem_antarans_target_2
-												has_country_flag = mem_antarans_retaliation
-												NOT = {
-													is_same_value = ROOT
-												}
-											}
-										}
-										random_country = {
-											limit = {
-												has_country_flag = mem_antarans_target_2
-											}
-											remove_country_flag = mem_antarans_target_2
-											remove_country_flag = mem_antarans_retaliation
-										}
-										ROOT = {
-											set_country_flag = mem_antarans_retaliation
-											set_country_flag = mem_antarans_target_2
-										}
-										ELSE = {
-											IF = {
-												limit = {
-													any_country = {
-														has_country_flag = mem_antarans_target_2
-														has_country_flag = mem_antarans_retaliation
-														is_same_value = ROOT
-													}
-												}
-												ROOT = {
-													remove_country_flag = mem_antarans_retaliation
-													remove_country_flag = mem_antarans_target_2
-												}
-												IF = {
-													limit = {
-														ROOT = {
-															is_ai = no
-															NOT = {
-																has_country_flag = mem_antarans_rift_creation_start
-															}
-														}
-													}
-													ROOT = {
-														set_country_flag = mem_antarans_rift_creation_start
-														country_event = { id = mem_antarans.50 days = 2}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
+			}
+		}
+		IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_2
 				}
 			}
 			random_ambient_object = {
@@ -2007,117 +1992,125 @@ country_event = {
 				destroy_ambient_object = THIS
 			}
 		}
+		# check for 3
 		IF = {
 			limit = {
 				FROMFROMFROM ={
 					has_fleet_flag = mem_antarans_fleet_3
 				}
+				NOT = {
+					any_country = {
+						has_country_flag = mem_antarans_target_3
+					}
+				}
+			}
+			ROOT = {
+				set_country_flag = mem_antarans_retaliation
+				set_country_flag = mem_antarans_target_3
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_3
+				}
+				any_country = {
+					has_country_flag = mem_antarans_target_3
+					NOT = {
+						has_country_flag = mem_antarans_retaliation
+					}
+					is_same_value = ROOT
+				}
+			}
+			ROOT = {
+				set_country_flag = mem_antarans_retaliation
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_3
+				}
+				any_country = {
+					has_country_flag = mem_antarans_target_3
+					NOT = {
+						has_country_flag = mem_antarans_retaliation
+					}
+					NOT = {
+						is_same_value = ROOT
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					has_country_flag = mem_antarans_target_3
+				}
+				remove_country_flag = mem_antarans_target_3
+			}
+			ROOT = {
+				set_country_flag = mem_antarans_retaliation
+				set_country_flag = mem_antarans_target_3
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_3
+				}
+				any_country = {
+					has_country_flag = mem_antarans_target_3
+					has_country_flag = mem_antarans_retaliation
+					NOT = {
+						is_same_value = ROOT
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					has_country_flag = mem_antarans_target_3
+				}
+				remove_country_flag = mem_antarans_target_3
+				remove_country_flag = mem_antarans_retaliation
+			}
+			ROOT = {
+				set_country_flag = mem_antarans_retaliation
+				set_country_flag = mem_antarans_target_3
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_3
+				}
+				any_country = {
+					has_country_flag = mem_antarans_target_3
+					has_country_flag = mem_antarans_retaliation
+					is_same_value = ROOT
+				}
+			}
+			ROOT = {
+				remove_country_flag = mem_antarans_retaliation
+				remove_country_flag = mem_antarans_target_3
 			}
 			IF = {
 				limit = {
-					NOT = {
-						any_country = {
-							has_country_flag = mem_antarans_target_3
+					ROOT = {
+						is_ai = no
+						NOT = {
+							has_country_flag = mem_antarans_rift_creation_start
 						}
 					}
 				}
 				ROOT = {
-					set_country_flag = mem_antarans_retaliation
-					set_country_flag = mem_antarans_target_3
+					set_country_flag = mem_antarans_rift_creation_start
+					country_event = { id = mem_antarans.50 days = 2}
 				}
-				ELSE = {
-					IF = {
-						limit = {
-							any_country = {
-								has_country_flag = mem_antarans_target_3
-								NOT = {
-									has_country_flag = mem_antarans_retaliation
-								}
-								is_same_value = ROOT
-							}
-						}
-						ROOT = {
-							set_country_flag = mem_antarans_retaliation
-						}
-						ELSE = {
-							IF = {
-								limit = {
-									any_country = {
-										has_country_flag = mem_antarans_target_3
-										NOT = {
-											has_country_flag = mem_antarans_retaliation
-										}
-										NOT = {
-											is_same_value = ROOT
-										}
-									}
-								}
-								random_country = {
-									limit = {
-										has_country_flag = mem_antarans_target_3
-									}
-									remove_country_flag = mem_antarans_target_3
-								}
-								ROOT = {
-									set_country_flag = mem_antarans_retaliation
-									set_country_flag = mem_antarans_target_3
-								}
-								ELSE = {
-									IF = {
-										limit = {
-											any_country = {
-												has_country_flag = mem_antarans_target_3
-												has_country_flag = mem_antarans_retaliation
-												NOT = {
-													is_same_value = ROOT
-												}
-											}
-										}
-										random_country = {
-											limit = {
-												has_country_flag = mem_antarans_target_3
-											}
-											remove_country_flag = mem_antarans_target_3
-											remove_country_flag = mem_antarans_retaliation
-										}
-										ROOT = {
-											set_country_flag = mem_antarans_retaliation
-											set_country_flag = mem_antarans_target_3
-										}
-										ELSE = {
-											IF = {
-												limit = {
-													any_country = {
-														has_country_flag = mem_antarans_target_3
-														has_country_flag = mem_antarans_retaliation
-														is_same_value = ROOT
-													}
-												}
-												ROOT = {
-													remove_country_flag = mem_antarans_retaliation
-													remove_country_flag = mem_antarans_target_3
-												}
-												IF = {
-													limit = {
-														ROOT = {
-															is_ai = no
-															NOT = {
-																has_country_flag = mem_antarans_rift_creation_start
-															}
-														}
-													}
-													ROOT = {
-														set_country_flag = mem_antarans_rift_creation_start
-														country_event = { id = mem_antarans.50 days = 2}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
+			}
+		}
+		IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_3
 				}
 			}
 			random_ambient_object = {
@@ -2127,117 +2120,125 @@ country_event = {
 				destroy_ambient_object = THIS
 			}
 		}
+		# check for 4
 		IF = {
 			limit = {
 				FROMFROMFROM ={
 					has_fleet_flag = mem_antarans_fleet_4
 				}
+				NOT = {
+					any_country = {
+						has_country_flag = mem_antarans_target_4
+					}
+				}
+			}
+			ROOT = {
+				set_country_flag = mem_antarans_retaliation
+				set_country_flag = mem_antarans_target_4
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_4
+				}
+				any_country = {
+					has_country_flag = mem_antarans_target_4
+					NOT = {
+						has_country_flag = mem_antarans_retaliation
+					}
+					is_same_value = ROOT
+				}
+			}
+			ROOT = {
+				set_country_flag = mem_antarans_retaliation
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_4
+				}
+				any_country = {
+					has_country_flag = mem_antarans_target_4
+					NOT = {
+						has_country_flag = mem_antarans_retaliation
+					}
+					NOT = {
+						is_same_value = ROOT
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					has_country_flag = mem_antarans_target_4
+				}
+				remove_country_flag = mem_antarans_target_4
+			}
+			ROOT = {
+				set_country_flag = mem_antarans_retaliation
+				set_country_flag = mem_antarans_target_4
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_4
+				}
+				any_country = {
+					has_country_flag = mem_antarans_target_4
+					has_country_flag = mem_antarans_retaliation
+					NOT = {
+						is_same_value = ROOT
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					has_country_flag = mem_antarans_target_4
+				}
+				remove_country_flag = mem_antarans_target_4
+				remove_country_flag = mem_antarans_retaliation
+			}
+			ROOT = {
+				set_country_flag = mem_antarans_retaliation
+				set_country_flag = mem_antarans_target_4
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_4
+				}
+				any_country = {
+					has_country_flag = mem_antarans_target_4
+					has_country_flag = mem_antarans_retaliation
+					is_same_value = ROOT
+				}
+			}
+			ROOT = {
+				remove_country_flag = mem_antarans_retaliation
+				remove_country_flag = mem_antarans_target_4
 			}
 			IF = {
 				limit = {
-					NOT = {
-						any_country = {
-							has_country_flag = mem_antarans_target_4
+					ROOT = {
+						is_ai = no
+						NOT = {
+							has_country_flag = mem_antarans_rift_creation_start
 						}
 					}
 				}
 				ROOT = {
-					set_country_flag = mem_antarans_retaliation
-					set_country_flag = mem_antarans_target_4
+					set_country_flag = mem_antarans_rift_creation_start
+					country_event = { id = mem_antarans.50 days = 2}
 				}
-				ELSE = {
-					IF = {
-						limit = {
-							any_country = {
-								has_country_flag = mem_antarans_target_4
-								NOT = {
-									has_country_flag = mem_antarans_retaliation
-								}
-								is_same_value = ROOT
-							}
-						}
-						ROOT = {
-							set_country_flag = mem_antarans_retaliation
-						}
-						ELSE = {
-							IF = {
-								limit = {
-									any_country = {
-										has_country_flag = mem_antarans_target_4
-										NOT = {
-											has_country_flag = mem_antarans_retaliation
-										}
-										NOT = {
-											is_same_value = ROOT
-										}
-									}
-								}
-								random_country = {
-									limit = {
-										has_country_flag = mem_antarans_target_4
-									}
-									remove_country_flag = mem_antarans_target_4
-								}
-								ROOT = {
-									set_country_flag = mem_antarans_retaliation
-									set_country_flag = mem_antarans_target_4
-								}
-								ELSE = {
-									IF = {
-										limit = {
-											any_country = {
-												has_country_flag = mem_antarans_target_4
-												has_country_flag = mem_antarans_retaliation
-												NOT = {
-													is_same_value = ROOT
-												}
-											}
-										}
-										random_country = {
-											limit = {
-												has_country_flag = mem_antarans_target_4
-											}
-											remove_country_flag = mem_antarans_target_4
-											remove_country_flag = mem_antarans_retaliation
-										}
-										ROOT = {
-											set_country_flag = mem_antarans_retaliation
-											set_country_flag = mem_antarans_target_4
-										}
-										ELSE = {
-											IF = {
-												limit = {
-													any_country = {
-														has_country_flag = mem_antarans_target_4
-														has_country_flag = mem_antarans_retaliation
-														is_same_value = ROOT
-													}
-												}
-												ROOT = {
-													remove_country_flag = mem_antarans_retaliation
-													remove_country_flag = mem_antarans_target_4
-												}
-												IF = {
-													limit = {
-														ROOT = {
-															is_ai = no
-															NOT = {
-																has_country_flag = mem_antarans_rift_creation_start
-															}
-														}
-													}
-													ROOT = {
-														set_country_flag = mem_antarans_rift_creation_start
-														country_event = { id = mem_antarans.50 days = 2}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
+			}
+		}
+		IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_4
 				}
 			}
 			random_ambient_object = {
@@ -2247,117 +2248,125 @@ country_event = {
 				destroy_ambient_object = THIS
 			}
 		}
+		# check for 5
 		IF = {
 			limit = {
 				FROMFROMFROM ={
 					has_fleet_flag = mem_antarans_fleet_5
 				}
+				NOT = {
+					any_country = {
+						has_country_flag = mem_antarans_target_5
+					}
+				}
+			}
+			ROOT = {
+				set_country_flag = mem_antarans_retaliation
+				set_country_flag = mem_antarans_target_5
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_5
+				}
+				any_country = {
+					has_country_flag = mem_antarans_target_5
+					NOT = {
+						has_country_flag = mem_antarans_retaliation
+					}
+					is_same_value = ROOT
+				}
+			}
+			ROOT = {
+				set_country_flag = mem_antarans_retaliation
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_5
+				}
+				any_country = {
+					has_country_flag = mem_antarans_target_5
+					NOT = {
+						has_country_flag = mem_antarans_retaliation
+					}
+					NOT = {
+						is_same_value = ROOT
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					has_country_flag = mem_antarans_target_5
+				}
+				remove_country_flag = mem_antarans_target_5
+			}
+			ROOT = {
+				set_country_flag = mem_antarans_retaliation
+				set_country_flag = mem_antarans_target_5
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_5
+				}
+				any_country = {
+					has_country_flag = mem_antarans_target_5
+					has_country_flag = mem_antarans_retaliation
+					NOT = {
+						is_same_value = ROOT
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					has_country_flag = mem_antarans_target_5
+				}
+				remove_country_flag = mem_antarans_target_5
+				remove_country_flag = mem_antarans_retaliation
+			}
+			ROOT = {
+				set_country_flag = mem_antarans_retaliation
+				set_country_flag = mem_antarans_target_5
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_5
+				}
+				any_country = {
+					has_country_flag = mem_antarans_target_5
+					has_country_flag = mem_antarans_retaliation
+					is_same_value = ROOT
+				}
+			}
+			ROOT = {
+				remove_country_flag = mem_antarans_retaliation
+				remove_country_flag = mem_antarans_target_5
 			}
 			IF = {
 				limit = {
-					NOT = {
-						any_country = {
-							has_country_flag = mem_antarans_target_5
+					ROOT = {
+						is_ai = no
+						NOT = {
+							has_country_flag = mem_antarans_rift_creation_start
 						}
 					}
 				}
 				ROOT = {
-					set_country_flag = mem_antarans_retaliation
-					set_country_flag = mem_antarans_target_5
+					set_country_flag = mem_antarans_rift_creation_start
+					country_event = { id = mem_antarans.50 days = 2}
 				}
-				ELSE = {
-					IF = {
-						limit = {
-							any_country = {
-								has_country_flag = mem_antarans_target_5
-								NOT = {
-									has_country_flag = mem_antarans_retaliation
-								}
-								is_same_value = ROOT
-							}
-						}
-						ROOT = {
-							set_country_flag = mem_antarans_retaliation
-						}
-						ELSE = {
-							IF = {
-								limit = {
-									any_country = {
-										has_country_flag = mem_antarans_target_5
-										NOT = {
-											has_country_flag = mem_antarans_retaliation
-										}
-										NOT = {
-											is_same_value = ROOT
-										}
-									}
-								}
-								random_country = {
-									limit = {
-										has_country_flag = mem_antarans_target_5
-									}
-									remove_country_flag = mem_antarans_target_5
-								}
-								ROOT = {
-									set_country_flag = mem_antarans_retaliation
-									set_country_flag = mem_antarans_target_5
-								}
-								ELSE = {
-									IF = {
-										limit = {
-											any_country = {
-												has_country_flag = mem_antarans_target_5
-												has_country_flag = mem_antarans_retaliation
-												NOT = {
-													is_same_value = ROOT
-												}
-											}
-										}
-										random_country = {
-											limit = {
-												has_country_flag = mem_antarans_target_5
-											}
-											remove_country_flag = mem_antarans_target_5
-											remove_country_flag = mem_antarans_retaliation
-										}
-										ROOT = {
-											set_country_flag = mem_antarans_retaliation
-											set_country_flag = mem_antarans_target_5
-										}
-										ELSE = {
-											IF = {
-												limit = {
-													any_country = {
-														has_country_flag = mem_antarans_target_5
-														has_country_flag = mem_antarans_retaliation
-														is_same_value = ROOT
-													}
-												}
-												ROOT = {
-													remove_country_flag = mem_antarans_retaliation
-													remove_country_flag = mem_antarans_target_5
-												}
-												IF = {
-													limit = {
-														ROOT = {
-															is_ai = no
-															NOT = {
-																has_country_flag = mem_antarans_rift_creation_start
-															}
-														}
-													}
-													ROOT = {
-														set_country_flag = mem_antarans_rift_creation_start
-														country_event = { id = mem_antarans.50 days = 2}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
+			}
+		}
+		IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_antarans_fleet_5
 				}
 			}
 			random_ambient_object = {
@@ -2489,42 +2498,42 @@ planet_event = {
 				}
 				set_ruined = yes
 			}
-			ELSE = {
-				random_tile = {
-					limit = {
-						has_building = yes
-						is_ruined = no
-					}
-					set_ruined = yes
+		}
+		ELSE = {
+			random_tile = {
+				limit = {
+					has_building = yes
+					is_ruined = no
 				}
-				random_tile = {
-					limit = {
-						has_building = yes
-						is_ruined = no
-					}
-					set_ruined = yes
+				set_ruined = yes
+			}
+			random_tile = {
+				limit = {
+					has_building = yes
+					is_ruined = no
 				}
-				random_tile = {
-					limit = {
-						has_building = yes
-						is_ruined = no
-					}
-					set_ruined = yes
+				set_ruined = yes
+			}
+			random_tile = {
+				limit = {
+					has_building = yes
+					is_ruined = no
 				}
-				random_tile = {
-					limit = {
-						has_building = yes
-						is_ruined = no
-					}
-					set_ruined = yes
+				set_ruined = yes
+			}
+			random_tile = {
+				limit = {
+					has_building = yes
+					is_ruined = no
 				}
-				random_tile = {
-					limit = {
-						has_building = yes
-						is_ruined = no
-					}
-					set_ruined = yes
+				set_ruined = yes
+			}
+			random_tile = {
+				limit = {
+					has_building = yes
+					is_ruined = no
 				}
+				set_ruined = yes
 			}
 		}
 		solar_system = {
