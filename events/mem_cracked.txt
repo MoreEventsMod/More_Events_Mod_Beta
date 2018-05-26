@@ -1,0 +1,314 @@
+#Cracked Asteroid
+#By ViolentBeetle
+
+namespace = mem_cracked
+
+ship_event = {
+	id = mem_cracked.1
+	title = mem_cracked.1.name
+	desc = mem_cracked.1.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_mem_big_asteroid
+	location = FROM
+	show_sound = event_ship_bridge
+	
+	immediate = {
+		FROM = {
+			orbital_deposit_tile = { clear_deposits = yes }
+			save_event_target_as = the_asteroid
+		}
+	}
+	
+	option = {
+		name = mem_cracked.1.a
+		
+		enable_special_project = {
+			name = MEM_CRACKED_CUT_OUT
+			location = from
+			owner = root.owner
+		}
+		
+	}
+	
+	option = {
+		name = mem_cracked.1.b
+		FROM = {
+			orbital_deposit_tile = {
+				add_deposit = d_immense_engineering_deposit
+				add_deposit = d_immense_physics_deposit				
+			}
+		}
+	}
+	
+	option = {
+		name = mem_cracked.1.c
+		
+		trigger = {
+			exists = leader
+			leader = {
+				OR = {
+					has_trait = leader_trait_spark_of_genius
+					has_trait = leader_trait_meticulous
+					has_trait = leader_trait_expertise_particles
+					# has_trait = leader_trait_expertise_field_manipulation
+				}
+			}
+			owner = {
+				NAND = {
+					has_technology = tech_hyper_drive_3
+					has_technology = tech_wormhole_stabilization
+				}
+			}
+		}
+		
+		FROM = {
+			orbital_deposit_tile = {
+				add_deposit = d_rich_engineering_deposit
+				add_deposit = d_rich_physics_deposit				
+			}
+		}
+		owner = {
+			random_list = {
+				66 = {
+					IF = {
+						limit = { NOT = { has_technology = tech_hyper_drive_2 } }
+						add_tech_progress = { tech = tech_hyper_drive_2 progress = 0.2 }
+						add_research_option = tech_hyper_drive_2
+					}
+					ELSE_IF = {
+						limit = { NOT = { has_technology = tech_hyper_drive_3 } }
+						add_tech_progress = { tech = tech_hyper_drive_3 progress = 0.2 }
+						add_research_option = tech_hyper_drive_3
+					}
+					modifier = {
+						factor = 0
+						has_technology = tech_hyper_drive_3
+					}
+				}
+				33 = {
+					add_tech_progress = { tech = tech_wormhole_stabilization progress = 0.05 }
+					add_research_option = tech_wormhole_stabilization
+					modifier = {
+						factor = 0
+						has_technology = tech_wormhole_stabilization
+					}
+				}
+			}
+		}
+	}
+}
+
+#Cut out warship
+ship_event = {
+	id = mem_cracked.2
+	title = mem_cracked.2.name
+	desc = mem_cracked.2.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_mem_big_asteroid
+	location = event_target:the_asteroid
+	show_sound = event_ship_bridge
+	
+	option = {
+		name = EXCELLENT
+		custom_tooltip = mem_cracked.2.tooltip
+		
+		hidden_effect = {
+			create_fleet = {
+				name = "Newcomer"
+				effect = {
+					set_owner = root.owner
+					random_list = {
+						25 = {
+							create_ship = {
+								name = Newcomer
+								design = NAME_MEM_Extradimension_Big
+								graphical_culture = extra_dimensional_02
+								effect = { add_modifier = { modifier = mem_cracked_ship_war_buff days = -1 } }
+							}
+						}
+						75 = {
+							create_ship = {
+								name = Newcomer
+								design = NAME_MEM_Extradimension_Small
+								graphical_culture = extra_dimensional_02
+								effect = { add_modifier = { modifier = mem_cracked_ship_war_buff days = -1 } }
+							}
+						}
+					}
+					set_location = event_target:the_asteroid
+				}
+			}
+		}
+	}
+}
+
+#Cut out science ship
+ship_event = {
+	id = mem_cracked.3
+	title = mem_cracked.3.name
+	desc = mem_cracked.3.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_mem_big_asteroid
+	location = event_target:the_asteroid
+	show_sound = event_ship_bridge
+	
+	option = {
+		name = EXCELLENT
+		custom_tooltip = mem_cracked.3.tooltip
+		
+		hidden_effect = {
+			owner = {
+				save_event_target_as = owner_country
+				create_fleet = {
+					name = "Newcomer"
+					effect = {
+						set_owner = prev
+						create_ship_design = {
+							design = "NAME_Prototype"
+						}
+						create_ship = {
+							name = "Newcomer"
+							design = last_created_design
+							graphical_culture = "extra_dimensional_02"
+							prefix = no
+							effect = { add_modifier = { modifier = mem_cracked_ship_mod days = -1 } }
+						}
+						set_location = event_target:the_asteroid
+					}
+				}
+			}
+		}
+	}
+}
+
+#Cut out nothing
+ship_event = {
+	id = mem_cracked.4
+	title = mem_cracked.4.name
+	desc = mem_cracked.4.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_mem_big_asteroid
+	location = event_target:the_asteroid
+	show_sound = event_ship_bridge
+	
+	option = {
+		name = mem_cracked.4.a
+		
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+		}
+	}
+}
+
+#Cut out hostiles
+ship_event = {
+	id = mem_cracked.5
+	title = mem_cracked.5.name
+	desc = mem_cracked.5.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_mem_big_asteroid
+	location = event_target:the_asteroid
+	show_sound = event_red_alert
+	
+	immediate = {
+		create_country = {
+			name = "Unwelcome Guests"
+			type = faction
+		}
+		create_fleet = {
+			name = "Unwelcome Guests"
+			effect = {
+				set_owner = last_created_country
+				create_ship = {
+					name = "Big Newcomer"
+					design = NAME_MEM_Extradimension_Big
+					graphical_culture = extra_dimensional_02
+					effect = { add_modifier = { modifier = mem_cracked_ship_war_buff days = -1 } }
+				}
+				create_ship = {
+					name = "Little Newcomer"
+					design = NAME_MEM_Extradimension_Small
+					graphical_culture = extra_dimensional_02
+					effect = { add_modifier = { modifier = mem_cracked_ship_war_buff days = -1 } }
+				}
+				set_location = event_target:the_asteroid
+				set_fleet_stance = aggressive
+			}
+		}
+	}
+	
+	option = {
+		name = mem_cracked.5.a
+	}
+}
+
+#Alternate anomaly outcome
+ship_event = {
+	id = mem_cracked.10
+	title = mem_cracked.10.name
+	desc = mem_cracked.10.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_mem_big_asteroid
+	location = FROM
+	show_sound = event_ship_bridge
+	
+	immediate = {
+		# set_graphical_culture = extra_dimensional_03
+	}
+	
+	option = {
+		name = mem_cracked.10.a
+		
+		add_modifier = { modifier = mem_cracked_ship_mod days = -1 }
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+		}
+	}
+}
+
+#Failure
+ship_event = {
+	id = mem_cracked.9999
+	title = mem_cracked.9999.name
+	desc = mem_cracked.9999.desc
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		FROMFROM = { orbital_deposit_tile = { clear_deposits = yes } }
+	}
+	
+	picture = GFX_evt_mem_big_asteroid
+	location = FromFrom
+	show_sound = event_ship_bridge
+	
+	option = {
+		name = mem_cracked.9999.a
+		
+		FROMFROM = {
+			orbital_deposit_tile = { add_deposit = d_rich_physics_deposit }
+		}
+	}
+}
