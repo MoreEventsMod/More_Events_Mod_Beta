@@ -1,0 +1,550 @@
+#Synthetic sun
+#By ViolentBeetle
+
+namespace = mem_synthetic_sun
+
+@MTTH = 5000
+@MTTHAI = 1000
+
+#Gatekeeper to spare the game unnecessary evaluation and to prevent this event from always triggering
+
+planet_event = {
+	id = mem_synthetic_sun.999
+	hide_window = yes
+	
+	mean_time_to_happen = {
+		months = @MTTH
+	}
+	
+	trigger = {
+		NOT = { has_global_flag = mem_synthetic_sun }
+		NOT = { has_planet_flag = colony_event }
+		exists = owner
+		owner = {
+			OR = {
+				is_ai = no
+				is_country_type = default
+			}
+		}
+		num_pops > 3
+		is_capital = no
+		has_moon = yes
+		NOT = {
+			any_moon = { has_owner = yes }
+		}
+		any_moon = {
+			OR = {
+				is_planet_class = pc_barren
+				is_planet_class = pc_barren_cold
+			}
+		}
+		OR = {
+			is_planet_class = "pc_desert"
+			is_planet_class = "pc_tropical"
+			is_planet_class = "pc_arid"
+			is_planet_class = "pc_ocean"
+			is_planet_class = "pc_tundra"
+			is_planet_class = "pc_arctic"
+			is_planet_class = "pc_continental"
+			is_planet_class = "pc_alpine"
+			is_planet_class = "pc_savannah"
+		}
+	}
+	
+	immediate = {
+		random_list = {
+			30 = {
+				set_global_flag = mem_synthetic_sun
+				set_planet_flag = colony_event
+				planet_event = { id = mem_synthetic_sun.1 }
+				modifier = {
+					factor = 0.1
+					owner = { is_ai = yes }
+				}
+			}
+			70 = {
+				IF = {
+					limit = {
+						owner = { is_ai = no }
+					}
+					set_global_flag = mem_synthetic_sun
+				}
+			}
+		}
+	}
+}
+
+#Beginning
+planet_event = {
+	id = mem_synthetic_sun.1
+	title = mem_synthetic_sun.1.name
+	desc = mem_synthetic_sun.1.desc
+	location = root
+	
+	picture = GFX_evt_in_the_dark
+	
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		save_event_target_as = the_planet
+		random_moon = {
+			limit = {
+				OR = {
+					is_planet_class = pc_barren
+					is_planet_class = pc_barren_cold
+				}
+			}
+			save_event_target_as = the_moon
+		}
+	}
+	
+	option = {
+		name = mem_synthetic_sun.1a
+		ai_chance = { factor = 1 }
+		
+		enable_special_project = {
+			name = "MEM_SYNTHETIC_SUN_EXPLORE"
+			location = event_target:the_moon
+			owner = root
+		}
+	}
+	
+	option = {
+		name = mem_synthetic_sun.1b
+		ai_chance = { factor = 0 }
+		
+		owner = {
+			add_influence = 100
+		}
+	}
+}
+
+#First survey done
+ship_event = {
+	id = mem_synthetic_sun.2
+	title = mem_synthetic_sun.2.name
+	desc = mem_synthetic_sun.2.desc
+	location = root
+	
+	picture = GFX_evt_cold_barren
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_synthetic_sun.2a
+		
+		begin_event_chain = {
+			event_chain = "mem_synthetic_sun_chain"
+			target = root
+		}
+		
+		enable_special_project = {
+			name = "MEM_SYNTHETIC_SUN_ACTIVATE"
+			location = event_target:the_moon
+			owner = root
+		}
+		
+		enable_special_project = {
+			name = "MEM_SYNTHETIC_SUN_DISMANTLE"
+			location = event_target:the_moon
+			owner = root
+		}
+	}
+}
+
+#Dismantle the project
+
+ship_event = {
+	id = mem_synthetic_sun.3
+	title = mem_synthetic_sun.3.name
+	desc = mem_synthetic_sun.3.desc
+	location = root
+	
+	picture = GFX_evt_cold_barren
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = OK
+		
+		owner = {
+			end_event_chain = mem_synthetic_sun_chain
+			
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+			
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+			
+			add_monthly_resource_mult = {
+				resource = minerals
+				value = @tier2materialreward
+				min = @tier2materialmin
+				max = @tier2materialmax
+			}
+		}
+	}
+}
+
+#Activation complete
+ship_event = {
+	id = mem_synthetic_sun.4
+	title = mem_synthetic_sun.4.name
+	desc = mem_synthetic_sun.4.desc
+	location = root
+	
+	picture = GFX_evt_cold_barren
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_synthetic_sun.4a
+		
+		owner = { end_event_chain = mem_synthetic_sun_chain }
+	
+		hidden_effect = {
+			event_target:the_planet = {
+				planet_event = {
+					id = mem_synthetic_sun.5
+					days = 120
+				}
+			}
+		}
+	}
+}
+
+planet_event = {
+	id = mem_synthetic_sun.5
+	
+	is_triggered_only = yes
+	
+	hide_window = yes
+	
+	immediate = {
+		random_list = {
+			60 = { planet_event = { id = mem_synthetic_sun.6 } } #Synthetic sun works
+			10 = { planet_event = { id = mem_synthetic_sun.9 } } #Synthetic sun of death
+			5 = { planet_event = { id = mem_synthetic_sun.10 } } #Burned the planet
+			15 = { planet_event = { id = mem_synthetic_sun.11 } } #Detonated the moon
+			10 = { planet_event = { id = mem_synthetic_sun.12 } } #Fizzle out
+		}
+	}
+}
+
+#Synthetic sun works as advertised
+planet_event = {
+	id = mem_synthetic_sun.6
+	title = mem_synthetic_sun.6.name
+	desc = mem_synthetic_sun.6.desc
+	location = root
+	
+	picture = GFX_evt_star_white
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		event_target:the_moon = {
+			change_pc = pc_mem_synthetic_sun
+			#set_planet_entity = { entity = "m_star_class_star_entity" }
+			orbital_deposit_tile = {
+				clear_deposits = yes
+				add_deposit = d_vast_energy_deposit
+			} 
+			prevent_anomaly = yes
+		}
+		add_modifier = {
+			modifier = mem_synthetic_sun_modifier
+			days = -1
+		}
+		random_list = {
+			50 = { }
+			40 = { 
+				planet_event = { id = mem_synthetic_sun.7 days = 30 } 
+			}
+			10 = { 
+				planet_event = { id = mem_synthetic_sun.8 days = 30 }  
+			}
+		}
+	}
+	
+	option = {
+		name = FASCINATING
+		
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+	}
+}
+
+#Synthetic sun causes climate change
+planet_event = {
+	id = mem_synthetic_sun.7
+	title = mem_synthetic_sun.7.name
+	
+	desc = {
+		#text = mem_synthetic_sun.7.cold
+		trigger = {
+			success_text = {
+				text = mem_synthetic_sun.7.cold
+				OR = {
+					is_planet_class = pc_arctic
+					is_planet_class = pc_alpine
+					is_planet_class = pc_tundra
+				}
+			}
+			fail_text = {
+				text = mem_synthetic_sun.7.wet
+				OR = {
+					is_planet_class = pc_arctic
+					is_planet_class = pc_alpine
+					is_planet_class = pc_tundra
+				}
+			}
+		}
+	}
+	
+	location = root
+	
+	picture = GFX_evt_star_white
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		OR = {
+			is_planet_class = "pc_tropical"
+			is_planet_class = "pc_ocean"
+			is_planet_class = "pc_tundra"
+			is_planet_class = "pc_arctic"
+			is_planet_class = "pc_continental"
+			is_planet_class = "pc_alpine"
+		}
+	}
+	
+	immediate = {
+		remove_modifier = mem_synthetic_sun_modifier
+		IF = {
+			limit = {
+				OR = {
+					is_planet_class = "pc_ocean"
+					is_planet_class = "pc_continental"
+					is_planet_class = "pc_tropical"
+				}
+			}
+			random_list = {
+				33 = { change_pc = pc_savannah }
+				33 = { change_pc = pc_arid }
+				33 = { change_pc = pc_desert }
+			}
+		}
+		IF = {
+			limit = {
+				OR = {
+					is_planet_class = "pc_tundra"
+					is_planet_class = "pc_arctic"
+					is_planet_class = "pc_alpine"
+				}
+			}
+			random_list = {
+				33 = { change_pc = pc_ocean }
+				33 = { change_pc = pc_continental }
+				33 = { change_pc = pc_tropical }
+			}
+		}
+	}
+	
+	option = {
+		name = INTERESTING
+		custom_tooltip = mem_synthetic_sun.7a.tooltip
+	}
+}
+
+#Synthetic sun causes planet to become gaia
+planet_event = {
+	id = mem_synthetic_sun.8
+	title = mem_synthetic_sun.8.name
+	desc = mem_synthetic_sun.8.desc
+	location = root
+	
+	picture = GFX_evt_star_white
+	
+	trigger = {
+		NOT = { is_planet_class = pc_gaia }
+	}
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = AMAZING
+		change_pc = pc_gaia
+	}
+}
+
+#Synthetic sun of death
+planet_event = {
+	id = mem_synthetic_sun.9
+	title = mem_synthetic_sun.9.name
+	desc = mem_synthetic_sun.9.desc
+	
+	location = root
+	
+	picture = GFX_evt_star_white
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		event_target:the_moon = {
+			change_pc = pc_mem_synthetic_sun
+			#set_planet_entity = { entity = "m_star_class_star_entity" }
+			orbital_deposit_tile = {
+				clear_deposits = yes
+				add_deposit = d_vast_energy_deposit
+			} 
+			prevent_anomaly = yes
+		}
+		add_modifier = {
+			modifier = mem_synthetic_sun_radiation
+			days = -1
+		}
+		change_pc = pc_nuked
+		set_planet_flag = primitives_nuked_themselves
+	}
+	
+	option = {
+		name = TERRIBLE
+		
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+	}
+}
+
+#Burned the planet for good
+planet_event = {
+	id = mem_synthetic_sun.10
+	title = mem_synthetic_sun.10.name
+	desc = mem_synthetic_sun.10.desc
+	
+	location = root
+	
+	picture = GFX_evt_star_white
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		event_target:the_moon = {
+			change_pc = pc_mem_synthetic_sun
+			#set_planet_entity = { entity = "m_star_class_star_entity" }
+			orbital_deposit_tile = {
+				clear_deposits = yes
+				add_deposit = d_vast_energy_deposit
+			} 
+			prevent_anomaly = yes
+		}
+		every_tile = {
+			kill_pop = yes
+			remove_building = yes
+		}
+		change_pc = pc_molten
+		#set_planet_entity = { entity = "barren_planet_01_destroyed_entity" }
+	}
+	
+	option = {
+		name = TERRIBLE
+		
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+	}
+}
+
+#Blew up the moon
+planet_event = {
+	id = mem_synthetic_sun.11
+	title = mem_synthetic_sun.11.name
+	desc = mem_synthetic_sun.11.desc
+	
+	location = root
+	
+	picture = GFX_evt_molten
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		event_target:the_moon = {
+			change_pc = pc_shattered
+			orbital_deposit_tile = {
+				clear_deposits = yes
+				add_deposit = d_vast_physics_deposit
+			} 
+			prevent_anomaly = yes
+		}
+		add_modifier = {
+			modifier = mem_synthetic_sun_rain
+			days = 360
+		}
+	}
+	
+	option = {
+		name = mem_synthetic_sun.11a
+		
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+		}
+	}
+}
+
+#Fizzled out
+planet_event = {
+	id = mem_synthetic_sun.12
+	title = mem_synthetic_sun.12.name
+	desc = mem_synthetic_sun.12.desc
+	
+	location = root
+	
+	picture = GFX_evt_cold_barren
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_synthetic_sun.12a
+		
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
+			}
+		}
+	}
+
+}

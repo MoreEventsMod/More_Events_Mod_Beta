@@ -1,0 +1,204 @@
+#
+#By ViolentBeetle
+
+namespace = mem_diversity
+
+country_event = {
+	id = mem_diversity.1
+	title = mem_diversity.1.name
+	desc = mem_diversity.1.desc
+	# desc = {
+		# text = mem_diversity.1.admiral
+		# trigger = {
+			# has_country_flag = mem_diversity_admiral
+		# }
+	# }
+	# desc = {
+		# text = mem_diversity.1.general
+		# trigger = {
+			# has_country_flag = mem_diversity_general
+		# }
+	# }
+	# desc = {
+		# text = mem_diversity.1.scientist
+		# trigger = {
+			# has_country_flag = mem_diversity_scientist
+		# }
+	# }
+	# desc = {
+		# text = mem_diversity.1.governor
+		# trigger = {
+			# has_country_flag = mem_diversity_governor
+		# }
+	# }
+	
+	picture = GFX_evt_alien_segregation
+	show_sound = event_radio_chatter
+	
+	mean_time_to_happen = {
+		months = 5000
+	}
+	
+	trigger = {
+		is_country_type = default
+		NOT = { has_country_flag = mem_diversity }
+		any_owned_pop = {
+			species = { pops_have_happiness = yes }
+			OR = {
+				has_citizenship_type = { country = root type = citizenship_limited }
+				has_citizenship_type = { country = root type = citizenship_caste_system_limited }
+				has_citizenship_type = { country = root type = citizenship_slavery }
+			}
+		}
+	}
+	
+	immediate = {
+		set_country_flag = mem_diversity
+		random_list = {
+			25 = { set_country_flag = mem_diversity_admiral }
+			25 = { set_country_flag = mem_diversity_general }
+			25 = { set_country_flag = mem_diversity_scientist }
+			25 = { set_country_flag = mem_diversity_governor }
+		}
+		random_owned_pop = {
+			limit = {
+				species = { pops_have_happiness = yes }
+				OR = {
+					has_citizenship_type = { country = root type = citizenship_limited }
+					has_citizenship_type = { country = root type = citizenship_caste_system_limited }
+					has_citizenship_type = { country = root type = citizenship_slavery }
+				}
+			}
+			save_event_target_as = oppressed_species
+		}
+	}
+	
+	option = {
+		name = mem_diversity.1.a
+		
+		add_energy = -50
+		
+		IF = {
+			limit = { has_country_flag = mem_diversity_admiral }
+			custom_tooltip = mem_diversity_admiral
+			hidden_effect = {
+				create_leader = {
+					type = admiral
+					species = event_target:oppressed_species.species
+					skill = 2
+					event_leader = yes
+					traits = {
+						trait = mem_diversity_outsider
+						trait = leader_trait_adaptable
+						trait = leader_trait_trickster
+					}
+				}
+			}
+		}
+		ELSE_IF = {
+			limit = { has_country_flag = mem_diversity_general }
+			custom_tooltip = mem_diversity_general
+			hidden_effect = {
+				create_leader = {
+					type = general
+					species = event_target:oppressed_species.species
+					skill = 2
+					event_leader = yes
+					traits = {
+						trait = mem_diversity_outsider
+						trait = leader_trait_adaptable
+						trait = leader_trait_charismatic
+					}
+				}
+			}
+		}
+		ELSE_IF = {
+			limit = { has_country_flag = mem_diversity_scientist }
+			custom_tooltip = mem_diversity_scientist
+			hidden_effect = {
+				create_leader = {
+					type = scientist
+					species = event_target:oppressed_species.species
+					skill = 2
+					event_leader = yes
+					traits = {
+						trait = mem_diversity_outsider
+						trait = leader_trait_adaptable
+						trait = leader_trait_spark_of_genius
+					}
+				}
+			}
+		}
+		ELSE_IF = {
+			limit = { has_country_flag = mem_diversity_governor }
+			custom_tooltip = mem_diversity_governor
+			hidden_effect = {
+				create_leader = {
+					type = governor
+					species = event_target:oppressed_species.species
+					skill = 2
+					event_leader = yes
+					traits = {
+						trait = mem_diversity_outsider
+						trait = leader_trait_adaptable
+						trait = leader_trait_intellectual
+					}
+				}
+			}
+		}
+		custom_tooltip = mem_diversity.1.a.tooltip
+		hidden_effect = {
+			every_owned_pop = {
+				limit = {
+					OR = {
+						has_citizenship_type = { country = root type = citizenship_full }
+						has_citizenship_type = { country = root type = citizenship_caste_system }
+					}
+					NOT = { has_ethic = ethic_xenophile }
+				}
+				IF = {
+					limit = { has_ethic = ethic_xenophobe }
+					add_modifier = { modifier = mem_diversity_outraged_xenophobe days = 720 }
+				}
+				ELSE = { add_modifier = { modifier = mem_diversity_outraged days = 360 } }
+			}
+			every_owned_pop = {
+				limit = { is_same_species = event_target:oppressed_species }
+				add_modifier = { modifier = mem_diversity_hired days = 720 }
+			}
+		}
+		add_modifier = {
+			modifier = mem_diversity
+			days = 720
+		}
+	}
+	
+	option = {
+		name = mem_diversity.1.b
+	}
+	
+	option = {
+		name = mem_diversity.1.c
+		
+		trigger = {
+			OR = {
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
+			}
+		}
+		
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 3
+			min = 1
+			max = 500
+		}
+		custom_tooltip = mem_diversity.1.c.tooltip
+		hidden_effect = {
+			every_owned_pop = {
+				limit = { is_same_species = event_target:oppressed_species }
+				add_modifier = { modifier = mem_diversity_humiliated days = 720 }
+			}
+		}
+	}
+}
