@@ -1,0 +1,180 @@
+#Blacksite
+#By ViolentBeetle
+
+namespace = mem_blacksite
+
+@days_for_cycle = 1
+@random_for_cycle = 1
+
+#Gatekeeper event
+country_event = {
+    id = mem_blacksite.1
+    hide_window = yes
+
+    mean_time_to_happen = {
+        months = 500
+    }
+
+    trigger = {
+        NOT = { has_global_flag = mem_blacksite_happened }
+        is_ai = no
+        is_country_type = default
+        years_passed > 10
+        is_at_war = no
+        any_country = {
+            has_established_contact = ROOT
+            is_country_type = fallen_empire
+            OR = {
+                has_ethic = ethic_fanatic_materialist
+                has_ethic = ethic_fanatic_spiritualist
+                has_ethic = ethic_fanatic_xenophile
+            }
+        }
+        any_planet_within_border = {
+            OR = {
+                is_planet_class = pc_barren
+                is_planet_class = pc_barren_cold
+                is_planet_class = pc_toxic
+                is_planet_class = pc_frozen
+            }
+            has_anomaly = no
+            has_owner = no
+            orbital_deposit_tile = { has_deposit = no }
+            solar_system = {
+                any_planet = { is_colonizable = no }
+            }
+        }
+    }
+
+    immediate = {
+        set_global_flag = mem_blacksite_happened
+        random_list = {
+            0 = {  }
+            35 = {
+                random_planet_within_border = {
+                    limit = {
+                        OR = {
+                            is_planet_class = pc_barren
+                            is_planet_class = pc_barren_cold
+                            is_planet_class = pc_toxic
+                            is_planet_class = pc_frozen
+                        }
+                        has_anomaly = no
+                        has_owner = no
+                        orbital_deposit_tile = { has_deposit = no }
+                        solar_system = {
+                            any_planet = { is_colonizable = no }
+                        }
+                    }
+                    save_event_target_as = blacksite_planet
+                    set_planet_flag = mem_blacksite_planet
+                }
+                random_country = {
+                    limit = {
+                        has_established_contact = ROOT
+                        is_country_type = fallen_empire
+                        OR = {
+                            has_ethic = ethic_fanatic_materialist
+                            has_ethic = ethic_fanatic_spiritualist
+                            has_ethic = ethic_fanatic_xenophile
+                        }
+                    }
+                    save_event_target_as = blacksite_fallen_empire
+                    set_country_flag = mem_blacksite_fallen_empire
+                }
+                set_country_flag = mem_blacksite_country
+                country_event = { id = mem_blacksite.2 }
+            }
+        }
+    }
+}
+
+#Initial greeting
+country_event = {
+    id = mem_blacksite.2
+    title = mem_blacksite.2.name
+    desc = mem_blacksite.2.desc
+
+    is_triggered_only = yes
+    location = event_target:blacksite_planet
+    diplomatic = yes
+
+    picture_event_data = {
+		portrait = event_target:blacksite_fallen_empire
+		planet_background = event_target:blacksite_fallen_empire
+		graphical_culture = event_target:blacksite_fallen_empire
+		city_level = event_target:blacksite_fallen_empire
+		room = event_target:blacksite_fallen_empire.ruler
+    }
+    
+    #Accept
+    option = {
+        name = mem_blacksite.2.a
+        event_target:blacksite_fallen_empire = {
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_opinion_agreed
+            }
+        }
+        custom_tooltip = mem_blacksite.2.a.tooltip
+        hidden_effect = {
+            event_target:blacksite_planet = {
+                add_modifier = {
+                    modifier = mem_blacksite_active
+                    days = -1
+                }
+                planet_event = {
+                    id = mem_blacksite.3
+                    days = @days_for_cycle
+                    random = @random_for_cycle
+                }
+            }
+        }
+    }
+
+    #Decline
+    option = {
+        name = mem_blacksite.2.b
+    }
+
+    #Question
+    option = {
+        name = mem_blacksite.2.c
+        response_text = mem_blacksite.2.c.response
+        is_dialog_only = yes
+    }
+}
+
+#Disambig event to tell what happens next
+planet_event = {
+    id = mem_blacksite.3
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        IF = {
+            limit = {
+                NAND = {
+                    exists = space_owner
+                    space_owner = {
+                        has_country_flag = mem_blacksite_country
+                    }
+                    exists = event_target:blacksite_fallen_empire
+                }
+            }
+            remove_modifier = mem_blacksite_active
+        }
+        ELSE = {
+            FROM = {
+                random_list = {
+                    1 = { #Successful
+                        country_event = { id = mem_blacksite.4 }
+                    }
+                    1 = { #Self-destruct
+                        country_event = { id = mem_blacksite.5 }
+                    }
+                }
+            }
+        }
+    }
+}
