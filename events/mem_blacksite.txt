@@ -845,6 +845,7 @@ ship_event = {
             exile_leader_as = mem_blacksite_runaway
         }
         destroy_ship = this
+        set_country_flag = mem_blacksite_leader_escaped
         owner = {
             country_event = { id = mem_blacksite.620 days = 120 random = 360 }
         }
@@ -1065,3 +1066,86 @@ country_event = {
     }
 }
 
+#Disambiguation for the synth leader
+country_event = {
+    id = mem_blacksite.620
+    is_triggered_only = yes
+    hide_window = yes
+
+    trigger = {
+        exists = event_target:blacksite_recovered_leader
+    }
+
+    immediate = {
+        random_list = {
+            50 = { #Benign outcome
+                modifier = {
+                    factor = 0
+                    has_country_flag = mem_blacksite_leader_escaped
+                }
+            }
+            50 = { #Negative outcomes
+                IF = { #Runaway - if commanding a ship
+                    limit = {
+                        any_owned_ship = {
+                            exists = leader
+                            leader = { is_same_value = event_target:blacksite_recovered_leader }
+                        }
+                    }
+                    random_owned_ship = {
+                        limit = {
+                            exists = leader
+                            leader = { is_same_value = event_target:blacksite_recovered_leader }
+                        }
+                        ship_event = { id = mem_blacksite.631 }
+                    }
+                }
+                ELSE = {
+                    random_list = {
+                        5 = { #Trashed his own department
+                            country_event = { id = mem_blacksite.632 }
+                            modifier = {
+                                factor = 0
+                                event_target:blacksite_recovered_leader = {
+                                    NOR = {
+                                        is_researching_area = engineering 
+                                        is_researching_area = physics 
+                                        is_researching_area = society
+                                    }
+                                }
+                            }
+                        }
+                        2 = { #Trashing everything
+                            country_event = { id = mem_blacksite.633 }
+                        }
+                        20 = { #Hacked by Curator
+                            country_event = { id = mem_blacksite.634 }
+                            modifier = {
+                                factor = 0
+                                NOT = {
+                                    any_owned_leader = {
+                                        has_trait = leader_trait_curator
+                                    }
+                                }
+                            }
+                        }
+                        3 = { #Custom AI assistant uprising
+                            country_event = { id = mem_blacksite.635 }
+                            modifier = {
+                                factor = 0
+                                NOT = {
+                                    any_owned_leader = {
+                                        OR = {
+                                            has_trait = leader_trait_custom_AI_assistant
+                                            has_trait = leader_trait_sapient_AI_assistant
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
