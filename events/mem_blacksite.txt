@@ -732,3 +732,96 @@ country_event = {
         }
     }
 }
+
+#Disambiguation for fate of psionic leader
+country_event = {
+    id = mem_blacksite.620
+    is_triggered_only = yes
+    hide_window = yes
+
+    trigger = {
+        exists = event_target:blacksite_recovered_leader
+    }
+
+    immediate = {
+        random_list = {
+            50 = { #Benign outcome
+                modifier = {
+                    factor = 0
+                    has_country_flag = mem_blacksite_leader_escaped
+                }
+            }
+            50 = { #Negative outcomes
+                IF = { #Runaway - if commanding a ship
+                    limit = {
+                        any_owned_ship = {
+                            exists = leader
+                            leader = { is_same_value = event_target:blacksite_recovered_leader }
+                        }
+                    }
+                    random_owned_ship = {
+                        limit = {
+                            exists = leader
+                            leader = { is_same_value = event_target:blacksite_recovered_leader }
+                        }
+                        ship_event = { id = mem_blacksite.621 }
+                    }
+                }
+                ELSE = {
+                    random_list = {
+                        5 = { #Trashed his own department
+                            country_event = { id = mem_blacksite.622 }
+                            modifier = {
+                                factor = 0
+                                event_target:blacksite_recovered_leader = {
+                                    NOR = {
+                                        is_researching_area = engineering 
+                                        is_researching_area = physics 
+                                        is_researching_area = society
+                                    }
+                                }
+                            }
+                        }
+                        2 = { #Trashing everything
+                            country_event = { id = mem_blacksite.623 }
+                        }
+                        20 = { #Smitten by a chosen one
+                            country_event = { id = mem_blacksite.624 }
+                            modifier = {
+                                factor = 0
+                                NOT = {
+                                    any_owned_leader = {
+                                        OR = {
+                                            has_trait = leader_trait_admiral_chosen
+                                            has_trait = leader_trait_general_chosen
+                                            has_trait = leader_trait_scientist_chosen
+                                            has_trait = leader_trait_governor_chosen
+                                            has_trait = leader_trait_ruler_chosen
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        3 = { #Psionic rampage
+                            country_event = { id = mem_blacksite.625 }
+                            modifier = {
+                                factor = 0
+                                NOT = {
+                                    any_owned_leader = {
+                                        OR = {
+                                            has_trait = leader_trait_admiral_psionic
+                                            has_trait = leader_trait_general_psionic
+                                            has_trait = leader_trait_scientist_psionic
+                                            has_trait = leader_trait_governor_psionic
+                                            has_trait = leader_trait_ruler_psionic
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
