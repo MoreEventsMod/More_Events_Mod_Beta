@@ -1,0 +1,351 @@
+#The Native Problem
+#By ViolentBeetle
+
+namespace = mem_native_problem
+
+#Preparing operation
+planet_event = {
+    id = mem_native_problem.1
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        years_passed > 15
+        exists = owner
+        NOT = { has_planet_flag = colony_event }
+        original_owner = yes
+        owner = {
+            is_ai = no
+            NOT = { has_country_flag = mem_native_problem }
+            NOT = { has_ethic = ethic_gestalt_consciousness }
+            species = {
+                NOR = {
+                    is_species_class = ROBOT
+                    is_species_class = MACHINE
+                }
+            }
+        }
+        any_owned_pop = {
+            is_non_sapient_robot = no
+        }
+    }
+
+    immediate = {
+        random_list = {
+            97 = {}
+            3 = {
+                set_planet_flag = colony_event
+                owner = {
+                    set_country_flag = mem_native_problem
+                }
+                planet_event = { id = mem_native_problem.2 days = 120 random = 120 }
+            }
+        }
+    }
+}
+
+#Event chain start
+planet_event = {
+    id = mem_native_problem.2
+    title = mem_native_problem.2.name
+    desc = mem_native_problem.2.desc
+
+    picture = GFX_evt_colony_settlement
+    location = ROOT
+    show_sound = event_scanner
+
+    is_triggered_only = yes
+
+    trigger = {
+        original_owner = yes
+    }
+
+    immediate = {
+        add_modifier = {
+            modifier = mem_native_problem_fear
+            days = -1
+        }
+    }
+
+    option = {
+        name = mem_native_problem.2.a
+    }
+
+    option = {
+        name = mem_native_problem.2.purifiers
+
+        exclusive_trigger = {
+            owner = {
+                has_valid_civic = civic_fanatic_purifiers
+            }
+        }
+    }
+
+    after = {
+        tooltip = {
+            add_modifier = {
+                modifier = mem_native_problem_fear
+                days = -1
+            }
+        }
+        hidden_effect = {
+            planet_event = {
+                id = mem_native_problem.3
+                days = 180
+                random = 360
+            }
+        }
+    }
+}
+
+#Terror continues, proposed solution
+planet_event = {
+    id = mem_native_problem.3
+    title = mem_native_problem.3.name
+    desc = mem_native_problem.3.desc
+
+    picture = GFX_evt_colony_settlement
+    location = ROOT
+    show_sound = event_scanner
+
+    is_triggered_only = yes
+
+    trigger = {
+        original_owner = yes
+    }
+
+    immediate = {
+        owner = {
+            create_saved_leader = {
+                name = random
+                key = mem_native_problem_leader
+                species = this
+                type = general
+                skill = 1
+                effect = {
+                    add_trait = mem_leader_trait_native_problem_general
+                    save_event_target_as = the_guy
+                }
+            }
+        }
+    }
+
+    #Just destroy the tunnels
+    option = {
+        name = mem_native_problem.3.a
+        custom_tooltip = mem_native_problem.3.a.tooltip
+
+        trigger = {
+            owner = {
+                OR = {
+                    has_ethic = ethic_militarist
+                    has_ethic = ethic_fanatic_militarist
+                    has_ethic = ethic_xenophobe
+                    has_ethic = ethic_fanatic_xenophobe
+                    has_ethic = ethic_authoritarian
+                    has_ethic = ethic_fanatic_authoritarian
+                }
+            }
+        }
+        owner = {
+            add_monthly_resource_mult = {
+                resource = unity
+                value = @tier2unityreward
+                min = @tier2unitymin
+                max = @tier2unitymax
+            }
+        }
+        remove_modifier = mem_native_problem_fear
+    }
+
+    #Same as above, but for purifiers using exclusive trigger. To avoid possible trigger clutter
+    option = {
+        name = mem_native_problem.3.a
+        custom_tooltip = mem_native_problem.3.a.tooltip
+
+        exclusive_trigger = {
+            owner = {
+                has_valid_civic = civic_fanatic_purifiers
+            }
+        }
+        owner = {
+            add_monthly_resource_mult = {
+                resource = unity
+                value = @tier2unityreward
+                min = @tier2unitymin
+                max = @tier2unitymax
+            }
+        }
+        remove_modifier = mem_native_problem_fear
+    }
+
+    #Go into the tunnels
+    option = {
+        name = mem_native_problem.3.b
+        custom_tooltip = mem_native_problem.3.b.tooltip
+        
+        hidden_effect = {
+            random_list = {
+                50 = {
+                    planet_event = {
+                        id = mem_native_problem.4
+                        days = 360
+                        random = 360
+                    }
+                }
+                50 = {
+                    planet_event = {
+                        id = mem_native_problem.5
+                        days = 360
+                        random = 360
+                    }
+                }
+            }
+        }
+    }
+
+    option = {
+        name = mem_native_problem.3.c
+        custom_tooltip = mem_native_problem.3.c.tooltip
+
+        trigger = {
+            owner = {
+                OR = {
+                    has_ethic = ethic_pacifist
+                    has_ethic = ethic_fanatic_pacifist
+                    has_ethic = ethic_egalitarian
+                    has_ethic = ethic_fanatic_egalitarian
+                    has_ethic = ethic_xenophile
+                    has_ethic = ethic_fanatic_xenophile
+                }
+            }
+        }
+        
+        hidden_effect = {
+            planet_event = {
+                id = mem_native_problem.5
+                days = 360
+                random = 1080
+            }
+        }
+    }
+}
+
+#Mysterious fellow dies
+planet_event = {
+    id = mem_native_problem.4
+    title = mem_native_problem.4.name
+    desc = mem_native_problem.4.desc
+
+    picture = GFX_evt_derelict_interior
+    location = ROOT
+    show_sound = event_scanner
+
+    is_triggered_only = yes
+
+    trigger = {
+        original_owner = yes
+    }
+
+    option = {
+        name = mem_native_problem.4.a
+
+        remove_modifier = mem_native_problem_fear
+    }
+}
+
+#Fellow captured
+planet_event = {
+    id = mem_native_problem.5
+    title = mem_native_problem.5.name
+    desc = mem_native_problem.5.desc
+
+    picture = GFX_evt_derelict_interior
+    location = ROOT
+    show_sound = event_scanner
+
+    is_triggered_only = yes
+
+    trigger = {
+        original_owner = yes
+    }
+
+    immediate = {
+    }
+
+    option = {
+        name = mem_native_problem.5.a
+
+        trigger = {
+            owner = {
+                OR = {
+                    has_ethic = ethic_authoritarian
+                    has_ethic = ethic_fanatic_authoritarian
+                }
+            }
+        }
+
+        owner = { add_influence = 200 }
+    }
+
+    option = {
+        name = mem_native_problem.5.b
+
+        trigger = {
+            owner = {
+                NOR = {
+                    has_ethic = ethic_authoritarian
+                    has_ethic = ethic_fanatic_authoritarian
+                }
+            }
+        }
+
+        owner = { add_influence = 100 }
+    }
+
+    option = {
+        name = mem_native_problem.5.c
+
+        allow = {
+            owner = {
+                free_leader_slots > 0
+            }
+        }
+
+        custom_tooltip = mem_native_problem.5.c.tooltip
+        owner = {
+            IF = {
+            limit = { 
+                event_target:the_guy = { has_trait = leader_trait_eager }
+            }
+            add_influence = -25
+            }
+            ELSE = {
+                add_influence = -50
+            }
+            activate_saved_leader = {
+                add_to_owned = yes
+                key = mem_native_problem_leader
+            }
+        }
+    }
+
+    after = {
+        remove_modifier = mem_native_problem_fear
+    }
+}
+
+#Ownerless planet - remove modifier
+planet_event = {
+    id = mem_native_problem.6
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        has_modifier = mem_native_problem_fear
+    }
+
+    immediate = {
+        remove_modifier = mem_native_problem_fear
+    }
+}
