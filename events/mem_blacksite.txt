@@ -22,6 +22,10 @@ country_event = {
         }
         is_ai = no
         is_country_type = default
+        NOR = { 
+            has_ethic = ethic_gestalt_consciousness
+            has_valid_civic = civic_fanatic_purifiers
+         }
         years_passed > 10
         is_at_war = no
         any_country = {
@@ -267,6 +271,7 @@ country_event = {
 
         event_target:blacksite_planet = {
             remove_modifier = mem_blacksite_active
+            remove_planet_flag = mem_blacksite_planet
         }
     }
 }
@@ -291,6 +296,7 @@ country_event = {
         event_target:blacksite_planet = {
             change_pc = pc_shattered
             remove_modifier = mem_blacksite_active
+            remove_planet_flag = mem_blacksite_planet
             add_modifier = {
                 modifier = mem_blacksite_debris
                 days = -1
@@ -371,6 +377,7 @@ country_event = {
 
         event_target:blacksite_planet = {
             remove_modifier = mem_blacksite_active
+            remove_planet_flag = mem_blacksite_planet
             add_modifier = {
                 modifier = mem_blacksite_blackout
                 days = -1
@@ -395,6 +402,7 @@ country_event = {
 
         event_target:blacksite_planet = {
             remove_modifier = mem_blacksite_active
+            remove_planet_flag = mem_blacksite_planet
             add_modifier = {
                 modifier = mem_blacksite_blackout
                 days = -1
@@ -412,6 +420,7 @@ country_event = {
 
         event_target:blacksite_planet = {
             remove_modifier = mem_blacksite_active
+            remove_planet_flag = mem_blacksite_planet
             add_modifier = {
                 modifier = mem_blacksite_blackout
                 days = -1
@@ -1537,6 +1546,7 @@ country_event = {
         event_target:blacksite_planet = {
             change_pc = pc_shattered
             remove_modifier = mem_blacksite_active
+            remove_planet_flag = mem_blacksite_planet
             add_modifier = {
                 modifier = mem_blacksite_debris
                 days = -1
@@ -1801,7 +1811,7 @@ country_event = {
         }
         hidden_effect = {
             random_list = {
-                65 = {  }
+                # 65 = {  } #Don't forget to bring back
                 35 = {
                     country_event = { id = mem_blacksite.810 days = 360 random = 360 }
                 }
@@ -1828,7 +1838,7 @@ country_event = {
                 35 = { #Attack
                     country_event = { id = mem_blacksite.830 days = 360 random = 360 }
                 }
-                40 = {}
+                # 40 = {} #Don't forget to bring back
             }
         }
     }
@@ -2175,6 +2185,86 @@ country_event = {
             add_modifier = {
                 modifier = mem_blacksite_terror
                 days = 1080
+            }
+        }
+    }
+}
+
+#Planet has been destroyed by a planet killer
+planet_event = {
+    id = mem_blacksite.1000
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        has_planet_flag = mem_blacksite_planet
+        any_country = {
+            has_country_flag = mem_blacksite_fallen_empire
+        }
+    }
+
+    immediate = {
+        random_country = {
+            limit = { has_country_flag = mem_blacksite_fallen_empire }
+            save_event_target_as = mem_blacksite_fallen_empire
+        }
+        from.owner = {
+            country_event = { id = mem_blacksite.1001 days = 30 }
+        }
+    }
+}
+
+#Diplomatic window 
+country_event = {
+    id = mem_blacksite.1001
+    title = mem_blacksite.1001.name
+    desc = mem_blacksite.1001.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		portrait = event_target:blacksite_fallen_empire
+		planet_background = event_target:blacksite_fallen_empire
+		graphical_culture = event_target:blacksite_fallen_empire
+		city_level = event_target:blacksite_fallen_empire
+		room = event_target:blacksite_fallen_empire.ruler
+    }
+
+    immediate = {
+        event_target:blacksite_fallen_empire = {
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_destroyed
+            }
+            remove_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_opinion_agreed
+            }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.1001.a
+    }
+
+    option = {
+        name = mem_blacksite.1001.a.mat
+        trigger = {
+            OR = {
+                has_ethic = ethic_materialist
+                has_ethic = ethic_fanatic_materialist
+            }
+        }
+    }
+
+    after = {
+        tooltip = {
+            event_target:blacksite_fallen_empire = {
+                add_opinion_modifier = {
+                    who = ROOT
+                    modifier = mem_blacksite_destroyed
+                }
             }
         }
     }
