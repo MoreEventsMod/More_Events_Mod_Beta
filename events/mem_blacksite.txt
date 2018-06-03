@@ -158,7 +158,7 @@ country_event = {
                     days = @days_for_cycle
                     random = @random_for_cycle
                 }
-                set_country_flag = mem_blacksite_planet
+                set_planet_flag = mem_blacksite_planet
             }
         }
     }
@@ -189,6 +189,10 @@ planet_event = {
     hide_window = yes
     is_triggered_only = yes
 
+    trigger = {
+        NOT = { has_planet_flag = mem_blacksite_destroyed }
+    }
+
     immediate = {
         IF = {
             limit = {
@@ -205,19 +209,19 @@ planet_event = {
         ELSE = {
             FROM = {
                 random_list = {
-                    1 = { #Successful
+                    25 = { #Successful
                         country_event = { id = mem_blacksite.400 }
                     }
-                    1 = { #Self-destruct
+                    10 = { #Self-destruct
                         country_event = { id = mem_blacksite.500 }
                     }
-                    1 = { #Going dark
+                    25 = { #Going dark
                         country_event = { id = mem_blacksite.600 }
                     }
-                    1 = { #Infestation
+                    15 = { #Infestation
                         country_event = { id = mem_blacksite.700 }
                     }
-                    1000 = { #Manhunt
+                    25 = { #Manhunt
                         country_event = { id = mem_blacksite.800 }
                     }
                 }
@@ -1832,13 +1836,13 @@ country_event = {
         }
         hidden_effect = {
             random_list = {
-                25 = { #Recruitment opportunity
+                45 = { #Recruitment opportunity
                     country_event = { id = mem_blacksite.820 days = 360 random = 360 }
                 }
-                35 = { #Attack
+                25 = { #Attack
                     country_event = { id = mem_blacksite.830 days = 360 random = 360 }
                 }
-                # 40 = {} #Don't forget to bring back
+                # 30 = {} #Don't forget to bring back
             }
         }
     }
@@ -2050,15 +2054,15 @@ country_event = {
                 50 = {
                     country_event = {
                         id = mem_blacksite.620
-                        days = 360
-                        random = 3600
+                        days = @recovery_basetime
+                        random = @recovery_random_rogue
                     }
                 }
                 50 = {
                     country_event = {
                         id = mem_blacksite.610
-                        days = 360
-                        random = 360
+                        days = @recovery_basetime
+                        random = @recovery_random_request
                     }
                 }
             }
@@ -2124,15 +2128,15 @@ country_event = {
                 50 = {
                     country_event = {
                         id = mem_blacksite.630
-                        days = 360
-                        random = 3600
+                        days = @recovery_basetime
+                        random = @recovery_random_rogue
                     }
                 }
                 50 = {
                     country_event = {
                         id = mem_blacksite.610
-                        days = 360
-                        random = 360
+                        days = @recovery_basetime
+                        random = @recovery_random_request
                     }
                 }
             }
@@ -2204,9 +2208,11 @@ planet_event = {
     }
 
     immediate = {
+        remove_modifier = mem_blacksite_active
+        set_planet_flag = mem_blacksite_destroyed
         random_country = {
             limit = { has_country_flag = mem_blacksite_fallen_empire }
-            save_event_target_as = mem_blacksite_fallen_empire
+            save_event_target_as = blacksite_fallen_empire
         }
         from.owner = {
             country_event = { id = mem_blacksite.1001 days = 30 }
@@ -2222,6 +2228,7 @@ country_event = {
 
     is_triggered_only = yes
     diplomatic = yes
+    location = FROM
 
     picture_event_data = {
 		portrait = event_target:blacksite_fallen_empire
@@ -2254,6 +2261,16 @@ country_event = {
             OR = {
                 has_ethic = ethic_materialist
                 has_ethic = ethic_fanatic_materialist
+            }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.1001.a.mil
+        trigger = {
+            OR = {
+                has_ethic = ethic_militarist
+                has_ethic = ethic_fanatic_militarist
             }
         }
     }
