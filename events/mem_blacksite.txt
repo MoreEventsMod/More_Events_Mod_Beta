@@ -16,7 +16,10 @@ country_event = {
     }
 
     trigger = {
-        NOT = { has_global_flag = mem_blacksite_happened }
+        NOR = { 
+            has_global_flag = mem_blacksite_happened 
+            has_country_flag = mem_blacksite_requested
+        }
         is_ai = no
         is_country_type = default
         years_passed > 10
@@ -55,10 +58,16 @@ country_event = {
     }
 
     immediate = {
-        set_global_flag = mem_blacksite_happened
+        set_country_flag = mem_blacksite_requested
         random_list = {
-            0 = {  }
+            0 = { 
+                modifier = {
+                    add = 900
+                    is_ai = yes
+                }
+             }
             35 = {
+                set_global_flag = mem_blacksite_happened
                 random_planet_within_border = {
                     limit = {
                         OR = {
@@ -197,10 +206,10 @@ planet_event = {
                     1 = { #Self-destruct
                         country_event = { id = mem_blacksite.500 }
                     }
-                    1 = { #Going dark
+                    1000 = { #Going dark
                         country_event = { id = mem_blacksite.600 }
                     }
-                    1000 = { #Infestation
+                    1 = { #Infestation
                         country_event = { id = mem_blacksite.700 }
                     }
                     1 = { #Manhunt
@@ -419,18 +428,18 @@ ship_event = {
     immediate = {
         owner = {
             random_list = {
-                1 = { #Empty
+                0 = { #Empty
                     country_event = { id = mem_blacksite.602 }
                 }
-                1 = { #Surviving scientist
+                0 = { #Surviving scientist
                     country_event = { id = mem_blacksite.603 }
                 }
                 2 = { #Psionic construct
                     country_event = { id = mem_blacksite.604 }
                     modifier = {
                         factor = 0
-                        exists = event_target:blacklist_fallen_empire
-                        event_target:blacklist_fallen_empire = {
+                        exists = event_target:blacksite_fallen_empire
+                        event_target:blacksite_fallen_empire = {
                             has_ethic = ethic_fanatic_materialist
                         }
                     }
@@ -439,8 +448,8 @@ ship_event = {
                     country_event = { id = mem_blacksite.605 }
                     modifier = {
                         factor = 0
-                        exists = event_target:blacklist_fallen_empire
-                        event_target:blacklist_fallen_empire = {
+                        exists = event_target:blacksite_fallen_empire
+                        event_target:blacksite_fallen_empire = {
                             has_ethic = ethic_fanatic_spiritualist
                         }
                     }
@@ -538,6 +547,10 @@ country_event = {
     }
 }
 
+@recovery_basetime = 10
+@recovery_random_request = 10
+@recovery_random_rogue = 10
+
 #Psi-construct
 country_event = {
     id = mem_blacksite.604
@@ -581,15 +594,15 @@ country_event = {
                 50 = {
                     country_event = {
                         id = mem_blacksite.620
-                        days = 360
-                        random = 3600
+                        days = @recovery_basetime
+                        random = @recovery_random_rogue
                     }
                 }
                 50 = {
                     country_event = {
                         id = mem_blacksite.610
-                        days = 360
-                        random = 360
+                        days = @recovery_basetime
+                        random = @recovery_random_request
                     }
                 }
             }
@@ -665,15 +678,15 @@ country_event = {
                 50 = {
                     country_event = {
                         id = mem_blacksite.630
-                        days = 360
-                        random = 3600
+                        days = @recovery_basetime
+                        random = @recovery_random_rogue
                     }
                 }
                 50 = {
                     country_event = {
                         id = mem_blacksite.610
-                        days = 360
-                        random = 360
+                        days = @recovery_basetime
+                        random = @recovery_random_request
                     }
                 }
             }
@@ -751,10 +764,10 @@ country_event = {
                         is_species_class = ROBOT
                     }
                 }
-                country_event = { id = mem_blacksite.630 }
+                country_event = { id = mem_blacksite.630 days = 1 random = @recovery_random_rogue }
             }
             ELSE = {
-                country_event = { id = mem_blacksite.620 }
+                country_event = { id = mem_blacksite.620 days = 1 random = @recovery_random_rogue }
             }
         }
     }
@@ -772,7 +785,7 @@ country_event = {
 
     immediate = {
         random_list = {
-            50 = { #Benign outcome
+            0 = { #Benign outcome
                 modifier = {
                     factor = 0
                     has_country_flag = mem_blacksite_leader_escaped
@@ -1031,6 +1044,13 @@ country_event = {
 
     option = {
         name = mem_blacksite.623.a
+
+        tooltip = {
+            add_modifier = {
+                modifier = mem_blacksite_trashed_everything
+                days = 1800
+            }
+        }
     }
 }
 
@@ -1065,6 +1085,10 @@ country_event = {
 
     option = {
         name = mem_blacksite.624.a
+
+        event_target:blacksite_chosen_one = {
+            add_skill = 1
+        }
     }
 }
 
@@ -1125,7 +1149,7 @@ country_event = {
         }
     }
     desc = {
-        text = mem_blacksite.626.desc.cyborg
+        text = mem_blacksite.626.desc.machine
         trigger = {
             species = { 
                 OR = {
@@ -1139,6 +1163,16 @@ country_event = {
     show_sound = event_radio_chatter
 
     is_triggered_only = yes
+
+    immediate = {
+        event_target:blacksite_recovered_leader = {
+            kill_leader = { type = scientist show_notification = no }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.626.a
+    }
 }
 
 #Disambiguation for the synth leader
@@ -1153,7 +1187,7 @@ country_event = {
 
     immediate = {
         random_list = {
-            50 = { #Benign outcome
+            0 = { #Benign outcome
                 modifier = {
                     factor = 0
                     has_country_flag = mem_blacksite_leader_escaped
@@ -1387,6 +1421,11 @@ country_event = {
 
     option = {
         name = mem_blacksite.633.a
+
+        add_modifier = {
+            modifier = mem_blacksite_trashed_everything
+            days = 1800
+        }
     }
 }
 
@@ -1807,19 +1846,19 @@ country_event = {
     desc = {
         text = mem_blacksite.810.xenophile
         trigger = {
-            event_target:blacklist_fallen_empire = { has_ethic = ethic_fanatic_xenophile }
+            event_target:blacksite_fallen_empire = { has_ethic = ethic_fanatic_xenophile }
         }
     }
     desc = {
         text = mem_blacksite.810.materialist
         trigger = {
-            event_target:blacklist_fallen_empire = { has_ethic = ethic_fanatic_materialist }
+            event_target:blacksite_fallen_empire = { has_ethic = ethic_fanatic_materialist }
         }
     }
     desc = {
         text = mem_blacksite.810.spiritualist
         trigger = {
-            event_target:blacklist_fallen_empire = { has_ethic = ethic_fanatic_spiritualist }
+            event_target:blacksite_fallen_empire = { has_ethic = ethic_fanatic_spiritualist }
         }
     }
 
@@ -1838,7 +1877,7 @@ country_event = {
     immediate = {
         IF = {
             limit = {
-                event_target:blacklist_fallen_empire = { has_ethic = ethic_fanatic_xenophile }
+                event_target:blacksite_fallen_empire = { has_ethic = ethic_fanatic_xenophile }
             }
             create_saved_leader = {
                 name = "NAME_MEM_Special_Counsel"
@@ -1854,7 +1893,7 @@ country_event = {
         }
         ELSE_IF = {
             limit = {
-                event_target:blacklist_fallen_empire = { has_ethic = ethic_fanatic_materialist }
+                event_target:blacksite_fallen_empire = { has_ethic = ethic_fanatic_materialist }
             }
             create_saved_leader = {
                 name = "NAME_MEM_Deputy_Overseer"
@@ -1870,7 +1909,7 @@ country_event = {
         }
         ELSE_IF = {
             limit = {
-                event_target:blacklist_fallen_empire = { has_ethic = ethic_fanatic_spiritualist }
+                event_target:blacksite_fallen_empire = { has_ethic = ethic_fanatic_spiritualist }
             }
             create_saved_leader = {
                 name = "NAME_MEM_High_Inquisitor"
@@ -1890,19 +1929,19 @@ country_event = {
         name = mem_blacksite.810.a
         IF = {
             limit = {
-                event_target:blacklist_fallen_empire = { has_ethic = ethic_fanatic_xenophile }
+                event_target:blacksite_fallen_empire = { has_ethic = ethic_fanatic_xenophile }
             }
             custom_tooltip = mem_blacksite.810.a.general
         }
         ELSE_IF = {
             limit = {
-                event_target:blacklist_fallen_empire = { has_ethic = ethic_fanatic_materialist }
+                event_target:blacksite_fallen_empire = { has_ethic = ethic_fanatic_materialist }
             }
             custom_tooltip = mem_blacksite.810.a.scientist
         }
         ELSE_IF = {
             limit = {
-                event_target:blacklist_fallen_empire = { has_ethic = ethic_fanatic_spiritualist }
+                event_target:blacksite_fallen_empire = { has_ethic = ethic_fanatic_spiritualist }
             }
             custom_tooltip = mem_blacksite.810.a.governor
         }
@@ -1937,8 +1976,8 @@ country_event = {
                 country_event = { id = mem_blacksite.821 }
                 modifier = {
                     factor = 0
-                    exists = event_target:blacklist_fallen_empire
-                    event_target:blacklist_fallen_empire = {
+                    exists = event_target:blacksite_fallen_empire
+                    event_target:blacksite_fallen_empire = {
                         has_ethic = ethic_fanatic_materialist
                     }
                 }
@@ -1947,8 +1986,8 @@ country_event = {
                 country_event = { id = mem_blacksite.822 }
                 modifier = {
                     factor = 0
-                    exists = event_target:blacklist_fallen_empire
-                    event_target:blacklist_fallen_empire = {
+                    exists = event_target:blacksite_fallen_empire
+                    event_target:blacksite_fallen_empire = {
                         has_ethic = ethic_fanatic_spiritualist
                     }
                 }
