@@ -791,92 +791,85 @@ country_event = {
 			event_chain = mem_last_orila_3_chain
 			target = root
 		}
+		capital_scope = {
+			solar_system = {
+				set_star_flag = mem_last_orila_capital
+			}
+		}
+		set_country_flag = mem_last_orila_restoration
 	}
 	
 	option = {
 		name = mem_last_orila.12.a
 		capital_scope = {
-			enable_special_project = {
-				name = "MEM_LAST_ORILA_RESTORATION_1"
-				location = this
-				owner = root
-			}
+#			enable_special_project = {
+#				name = "MEM_LAST_ORILA_RESTORATION_1"
+#				location = this
+#				owner = root
+#			}
+			#TODO POI
 		}
 	}
 }
 
-ship_event = {
+country_event = {
 	id = mem_last_orila.13
 	hide_window = yes
 	
-	is_triggered_only = yes
+#	is_triggered_only = yes
+
+	trigger = {
+		has_country_flag = mem_last_orila_restoration
+		NOT = {
+			has_country_flag = mem_last_orila_restoration_done
+		}
+		any_owned_fleet = {
+			has_fleet_flag = mem_last_orila_fleet
+			solar_system = {
+				has_star_flag = mem_last_orila_capital
+			}
+		}
+	}
+
+	mean_time_to_happen = {
+		months = 1
+	}
 	
 	immediate = {
-		owner = {
-			capital_scope = {
-				solar_system = {
-					set_star_flag = mem_last_orila_capital
+		set_country_flag = mem_last_orila_quest_end_fleet_tracking
+		capital_scope = {
+			create_ambient_object = {
+				type = "mem_pride_of_harilla_restoration_object"
+				location = THIS
+			}
+			last_created_ambient_object = { 
+				set_ambient_object_flag = mem_last_orila_restoration_object
+				enable_special_project = {
+					name = "MEM_LAST_ORILA_RESTORATION_2"
+					location = this
+					owner = root.owner
 				}
+			}
+		}
+		random_owned_fleet = {
+			limit = {
+				has_fleet_flag = mem_last_orila_fleet
 			}
 			IF = {
 				limit = {
-					any_owned_fleet = {
-						has_fleet_flag = mem_last_orila_fleet
-						solar_system = {
-							has_star_flag = mem_last_orila_capital
-						}
+					exists = leader
+					leader = {
+						leader_class = scientist
 					}
 				}
-				set_country_flag = mem_last_orila_quest_end_fleet_tracking
-				capital_scope = {
-					create_ambient_object = {
-						type = "mem_pride_of_harilla_restoration_object"
-						location = THIS
-					}
-					last_created_ambient_object = { 
-						set_ambient_object_flag = mem_last_orila_restoration_object
-						enable_special_project = {
-							name = "MEM_LAST_ORILA_RESTORATION_2"
-							location = this
-							owner = root.owner
-						}
-					}
-				}
-				random_owned_fleet = {
-					limit = {
-						has_fleet_flag = mem_last_orila_fleet
-					}
-					IF = {
-						limit = {
-							exists = leader
-							leader = {
-								leader_class = scientist
-							}
-						}
-						leader = {
-							unassign_leader = this
-						}
-					}
-					set_fleet_flag = mem_last_orila_delete
+				leader = {
+					unassign_leader = this
 				}
 			}
-			ELSE = {
-				country_event = { id = mem_last_orila.14 }
-				end_event_chain = mem_last_orila_3_chain
-				begin_event_chain = {
-					event_chain = mem_last_orila_3_chain
-					target = root
-				}
-				capital_scope = {
-					enable_special_project = {
-						name = "MEM_LAST_ORILA_RESTORATION_1"
-						location = this
-						owner = root.owner
-					}
-				}
-			}
-			country_event = { id = mem_last_orila.16 days = 1 }
+			set_fleet_flag = mem_last_orila_delete
 		}
+		set_country_flag = mem_last_orila_restoration_done
+		country_event = { id = mem_last_orila.16 days = 1 }
 	}
 }
 
