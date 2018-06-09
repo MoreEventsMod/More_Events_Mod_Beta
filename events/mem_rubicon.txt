@@ -1,0 +1,89 @@
+#Rubicon system
+#By ViolentBeetle
+
+namespace = mem_rubicon
+
+#Introductory event on gaining intel
+ship_event = {
+    id = mem_rubicon.1
+    title = mem_rubicon.1.name
+    desc = mem_rubicon.1.desc
+
+    location = FROM
+    picture = GFX_evt_ruined_system
+
+    is_triggered_only = yes
+
+    trigger = {
+        from = {
+            has_star_flag = mem_rubicon_system
+            any_ship_in_system = {
+                owner = {
+                    has_country_flag = mem_rubicon_country
+                }
+            }
+        }
+        owner = {
+            NOT = {
+                has_country_flag = mem_rubiconid_intro
+            }
+        }
+    }
+
+    immediate = {
+        owner = {
+            set_country_flag = mem_rubiconid_intro
+        }
+        random_country = {
+            limit = {
+                has_country_flag = mem_rubicon_country
+            }
+            establish_communications_no_message = root.owner
+        }
+    }
+
+    option = {
+        name = mem_rubicon.1.a
+    }
+}
+
+#Anomaly research completion
+ship_event = {
+    id = mem_rubicon.2
+    title = mem_rubicon.2.name
+    desc = mem_rubicon.2.desc
+
+    location = FROM
+    picture = GFX_evt_asteroid_field
+
+    is_triggered_only = yes
+
+    option = {
+        name = mem_rubicon.2.a
+        custom_tooltip = mem_rubicon.2.a.tooltip
+
+        hidden_effect = {
+            FROM = {
+                orbital_deposit_tile = {
+                    set_deposit = d_enormous1_engineering_deposit
+                }
+                add_modifier = {
+                    modifier = mem_rubicon_hidden_ship
+                    days = -1
+                }
+                planet_event = { id = mem_rubicon.3 }
+            }
+        }
+    }
+}
+
+#Timer loop
+planet_event = {
+    id = mem_rubicon.3
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        planet_event = { id = mem_rubicon.3 days = 20 random = 700 }
+    }
+}
