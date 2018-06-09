@@ -77,13 +77,308 @@ ship_event = {
     }
 }
 
+@time_limit = 2
+
 #Timer loop
 planet_event = {
     id = mem_rubicon.3
     hide_window = yes
     is_triggered_only = yes
 
+    trigger = {
+        NOT = {
+            has_global_flag = mem_rubicon_completed
+        }
+    }
+
     immediate = {
-        planet_event = { id = mem_rubicon.3 days = 20 random = 700 }
+        IF = {
+            limit = {
+                has_research_station = yes
+                exists = space_owner
+                space_owner = {
+                    check_variable = {
+                        which = mem_rubicon_timer
+                        value < @time_limit
+                    }
+                }
+            }
+            space_owner = {
+                change_variable = {
+                    which = mem_rubicon_timer
+                    value = 1
+                }
+                IF = {
+                    limit = {
+                        check_variable = {
+                            which = mem_rubicon_timer
+                            value = @time_limit
+                        }
+                        NOT = {
+                            has_country_flag = mem_rubicon_gained_news
+                        }
+                    }
+                    country_event = {
+                        id = mem_rubicon.4
+                    }
+                }
+            }
+        }
+        planet_event = { id = mem_rubicon.3 days = 2 random = 70 }
+    }
+}
+
+#We are ready to issue a project
+country_event = {
+    id = mem_rubicon.4
+    title = mem_rubicon.4.name
+    desc = mem_rubicon.4.desc
+
+    location = FROM
+    picture = GFX_evt_ruined_system
+
+    is_triggered_only = yes
+
+    immediate = {
+        set_country_flag = mem_rubicon_gained_news
+        FROM = {
+            save_event_target_as = the_planet
+        }
+    }
+
+    option = {
+        name = mem_rubicon.4.a
+
+        enable_special_project = {
+            name = "MEM_RUBICON_EXPEDITION"
+            location = FROM
+            owner = ROOT
+        }
+    }
+}
+
+#Project completion - time to reap your reward
+ship_event = {
+    id = mem_rubicon.5
+    title = mem_rubicon.5.name
+    desc = mem_rubicon.5.desc
+
+    location = event_target:the_planet
+    picture = GFX_evt_ruined_system
+
+    is_triggered_only = yes
+
+    trigger = {
+        NOT = {
+            has_global_flag = mem_rubicon_completed
+        }
+    }
+
+    immediate = {
+        set_global_flag = mem_rubicon_completed
+    }
+
+    option = {
+        name = mem_rubicon.5.a
+        custom_tooltip = mem_rubicon.5.a.tooltip
+
+        allow = {
+            owner = {
+                NOT = {
+                    has_policy_flag = ai_outlawed
+                }
+            }
+        }
+
+        ai_chance = {
+            factor = 100
+            modifier = {
+                factor = 0
+                owner = {
+                    OR = {
+                        has_ethic = ethic_spiritualist
+                        has_ethic = ethic_fanatic_spiritualist
+                        has_policy_flag = ai_outlawed
+                    }
+                }
+            }
+        }
+
+        hidden_effect = {
+            create_species = {
+                name = NAME_MEM_Rubicon_AI
+                class = ROBOT
+            }
+            owner = {
+                create_leader = {
+                    name = NAME_MEM_Rubicon_Fleetmind
+                    type = admiral
+                    effect = {
+                        save_event_target_as = the_admiral
+                    }
+                }
+            }
+            create_fleet = {
+                name = "NAME_MEM_Rubicon_reward"
+                effect = {
+                    set_owner = ROOT.owner
+                    set_location = event_target:the_planet
+                    create_ship = {
+                        design = "NAME_MEM_Rubicon_Worldmender"
+                    }
+                    set_leader = event_target:the_admiral
+                }
+            }
+        }
+    }
+
+    option = {
+        name = mem_rubicon.5.b
+        custom_tooltip = mem_rubicon.5.b.tooltip
+
+        trigger = {
+            owner = {
+                OR = {
+                    has_ethic = ethic_spiritualist
+                    has_ethic = ethic_fanatic_spiritualist
+                    has_policy_flag = ai_outlawed
+                }
+            }
+        }
+
+        ai_chance = {
+            factor = 100
+        }
+
+        hidden_effect = {
+            create_fleet = {
+                name = "NAME_MEM_Rubicon_reward"
+                effect = {
+                    set_owner = ROOT.owner
+                    set_location = event_target:the_planet
+                    create_ship = {
+                        design = "NAME_MEM_Rubicon_Worldmender"
+                    }
+                }
+            }
+        }
+        owner = {
+            add_monthly_resource_mult = {
+                resource = unity
+                value = @tier3unityreward
+                min = @tier3unitymin
+                max = @tier3unitymax
+            }
+        }
+    }
+
+    option = {
+        name = mem_rubicon.5.c
+        custom_tooltip = mem_rubicon.5.c.tooltip
+
+        ai_chance = {
+            factor = 125
+            modifier = {
+                factor = 0
+                event_target:the_planet = { #No Gaia for Xenos
+                    NAND = {
+                        exists = space_owner
+                        space_owner = { is_same_value = root }
+                    }
+                }
+            }
+            modifier = {
+                factor = 0
+                owner = { has_authority = auth_machine_intelligence }
+            }
+        }
+
+        hidden_effect = {
+            owner = {
+                country_event = { id = mem_rubicon.6 days = 30 }
+            }
+        }
+    }
+
+    option = {
+        name = mem_rubicon.5.d
+
+        ai_chance = {
+            factor = 50
+        }
+        owner = {
+            add_modifier = {
+                modifier = mem_rubicon_melder_archives
+                days = -1
+            }
+            IF = {
+                limit = {
+                    NOT = { has_technology = tech_terrestrial_sculpting }
+                }
+
+                add_research_option = tech_terrestrial_sculpting
+                add_tech_progress = {
+                    tech = tech_terrestrial_sculpting
+                    progress = 0.50
+                }
+            }
+        }
+    }
+
+    after = {
+        hidden_effect = {
+            every_playable_country = {
+                limit = {
+                    has_country_flag = mem_rubicon_gained_news
+                }
+                abort_special_project = {
+                    name = MEM_RUBICON_EXPEDITION
+                    location = event_target:the_planet
+                }
+            }
+            event_target:the_planet = {
+                remove_modifier = mem_rubicon_hidden_ship
+                orbital_deposit_tile = {
+                    set_deposit = d_rich_engineering_deposit
+                }
+            }
+        }
+    }
+}
+
+#Final event if terraforming is complete
+country_event = {
+    id = mem_rubicon.6
+    title = mem_rubicon.6.name
+    desc = mem_rubicon.6.desc
+
+    location = event_target:the_planet
+    picture = GFX_evt_gaia
+
+    is_triggered_only = yes
+
+    option = {
+        name = EXCELLENT
+
+        event_target:the_planet = {
+            change_pc = pc_gaia
+            change_planet_size = -9
+            reroll_planet = yes
+            add_modifier = {
+                modifier = mem_rubicon_mended_ecosystem
+                days = -1
+            }
+            solar_system = {
+                set_asteroid_belt = {
+                    radius = 0
+                }
+                every_system_planet = {
+                    limit = {
+                        is_asteroid = yes
+                    }
+                    remove_planet = yes
+                }
+            }
+        }
     }
 }
