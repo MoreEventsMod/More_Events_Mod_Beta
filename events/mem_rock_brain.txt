@@ -28,7 +28,12 @@ planet_event = {
 	immediate = {
 		set_planet_flag = mem_rock_brain_event_open
 		space_owner = {
-			country_event = { id = mem_rock_brain.201 }
+			random_list = {
+				1 = { country_event = { id = mem_rock_brain.201 } }
+				1000 = {
+					country_event = { id = mem_rock_brain.301 } 
+				}
+			}
 		}
 	}
 }
@@ -243,3 +248,263 @@ country_event = {
 	}
 }
 
+#Getting eaten by rock brain
+#This addition is by ViolentBeetle
+
+country_event = {
+	id = mem_rock_brain.301
+	title = mem_rock_brain.301.name
+	desc = mem_rock_brain.301.desc
+
+	location = FROM
+	picture = GFX_evt_mining_station
+	is_triggered_only = yes
+
+	trigger = {
+		any_owned_leader = {
+			leader_class = scientist
+			OR = {
+				is_researching_area = engineering 
+				is_researching_area = physics 
+				is_researching_area = society
+			}
+			species = {
+				NOR = {
+					is_species_class = ROBOT
+					is_species_class = MACHINE
+				}
+			}
+		}
+	}
+
+	immediate = {
+		FROM = {
+			save_event_target_as = mem_rock_brain_planet
+		}
+		set_country_flag = mem_rock_brain_event_fired
+		random_owned_leader = {
+			limit = {
+				leader_class = scientist
+				OR = {
+					is_researching_area = engineering 
+					is_researching_area = physics 
+					is_researching_area = society
+				}
+				species = {
+					NOR = {
+						is_species_class = ROBOT
+						is_species_class = MACHINE
+					}
+				}
+			}
+			save_event_target_as = rock_brain_leader
+			IF = {
+				limit = { is_researching_area = engineering }
+				prev = {
+					set_country_flag = mem_rock_brain_engineering
+				}
+			}
+			ELSE_IF = {
+				limit = { is_researching_area = society }
+				prev = {
+					set_country_flag = mem_rock_brain_society
+				}
+			}
+			ELSE = {
+				prev = {
+					set_country_flag = mem_rock_brain_physics
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_rock_brain.301.a
+		custom_tooltip = mem_rock_brain.301.a.tooltip
+
+		hidden_effect = {
+			event_target:rock_brain_leader = {
+				exile_leader_as = mem_rock_brain_exiled_leader
+			}
+			random_list = {
+				60 = {
+					country_event = {
+						id = mem_rock_brain.302
+						days = 60
+						random = 60
+					}
+				}
+				40 = {
+					country_event = {
+						id = mem_rock_brain.303
+						days = 60
+						random = 60
+					}
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_rock_brain.301.b
+	}
+}
+
+#Success
+country_event = {
+	id = mem_rock_brain.302
+	title = mem_rock_brain.302.name
+	desc = mem_rock_brain.302.desc
+
+	location = event_target:mem_rock_brain_planet
+	picture = GFX_evt_mining_station
+	is_triggered_only = yes
+
+	option = {
+		name = mem_rock_brain.302.a
+		custom_tooltip = mem_rock_brain.302.a.tooltip
+
+		hidden_effect = {
+			country_event = {
+				id = mem_rock_brain.310
+				days = 30
+			}
+		}
+		event_target:mem_rock_brain_planet = {
+			add_modifier = {
+				modifier = mem_rock_brain_eater_of_scientists
+				days = -1
+			}
+		}	
+	}
+}
+
+#Failure
+country_event = {
+	id = mem_rock_brain.303
+	title = mem_rock_brain.303.name
+	desc = mem_rock_brain.303.desc
+
+	location = event_target:mem_rock_brain_planet
+	picture = GFX_evt_mining_station
+	is_triggered_only = yes
+
+	option = {
+		name = mem_rock_brain.303.a
+		custom_tooltip = mem_rock_brain.303.a.tooltip
+		event_target:mem_rock_brain_planet = {
+			add_modifier = {
+				modifier = mem_rock_brain_eater_of_scientists
+				days = -1
+			}
+		}
+	}
+}
+
+#Follow-up from success
+
+country_event = {
+	id = mem_rock_brain.310
+	title = mem_rock_brain.310.name
+	desc = mem_rock_brain.310.desc
+
+	location = event_target:mem_rock_brain_planet
+	picture = GFX_evt_hive
+	is_triggered_only = yes
+
+	option = {
+		name = ONSCREEN
+
+		hidden_effect = {
+			country_event = {
+				id = mem_rock_brain.311
+			}
+		}
+		event_target:mem_rock_brain_planet = {
+			remove_modifier = mem_rock_brain_eater_of_scientists
+		}	
+	}
+}
+
+#Diplomatic convo
+country_event = {
+	id = mem_rock_brain.311
+	title = TRANSMISSION
+	desc = mem_rock_brain.311.desc
+
+	location = event_target:mem_rock_brain_planet
+	diplomatic = yes
+	is_triggered_only = yes
+
+	picture_event_data = {
+		room = no_video_feed_room
+	}
+
+	option = {
+		name = mem_rock_brain.311.a
+		custom_tooltip = mem_rock_brain.311.a.tooltip
+
+		event_target:mem_rock_brain_planet = {
+			set_name = event_target:rock_brain_leader
+			orbital_deposit_tile = {
+				clear_deposits = yes
+				IF = {
+					limit = {
+						root = {
+							has_country_flag = mem_rock_brain_engineering
+						}
+					}
+					add_deposit = d_enormous2_engineering_deposit
+				}
+				ELSE = {
+					add_deposit = d_enormous1_engineering_deposit
+				}
+				IF = {
+					limit = {
+						root = {
+							has_country_flag = mem_rock_brain_society
+						}
+					}
+					add_deposit = d_enormous2_society_deposit
+				}
+				ELSE = {
+					add_deposit = d_enormous1_society_deposit
+				}
+				IF = {
+					limit = {
+						root = {
+							has_country_flag = mem_rock_brain_physics
+						}
+					}
+					add_deposit = d_enormous2_physics_deposit
+				}
+				ELSE = {
+					add_deposit = d_enormous1_physics_deposit
+				}
+			}
+			add_modifier = {
+				modifier = mem_rock_brain_merged_thoughts
+				days = -1
+			}
+		}
+	}
+
+	option = { #Are you alright
+		name = mem_rock_brain.311.b
+		response_text = mem_rock_brain.311.b.reponse
+		is_dialog_only = yes
+	}
+
+	option = { #Can we rescue you
+		name = mem_rock_brain.311.c
+		response_text = mem_rock_brain.311.c.reponse
+		is_dialog_only = yes
+	}
+
+	option = { #Can you share some insights?
+		name = mem_rock_brain.311.d
+		response_text = mem_rock_brain.311.d.reponse
+		is_dialog_only = yes
+	}
+
+}
