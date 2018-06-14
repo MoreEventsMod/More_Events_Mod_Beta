@@ -20,6 +20,7 @@ ship_event = {
                 modifier = mem_towers_forest
                 days = -1
             }
+            save_event_target_as = the_planet
         }
     }
 
@@ -35,13 +36,91 @@ ship_event = {
 
     option = {
         name = mem_towers.100.b
+        custom_tooltip = mem_towers.100.b.tooltip
 
         owner = {
+            random_owned_planet = {
+                limit = {
+                    count_pops > 0
+                    NOR = {
+                        is_a_habitable_planet_megastructure = yes
+                        is_planet_class = pc_gaia
+                        is_planet_class = pc_nuked
+                        #is_capital = yes
+                    }
+                }
+                save_event_target_as = sulfur_planet
+            }
+            hidden_effect = {
+                country_event = { id = mem_towers.101 days = 30 }
+            }
+        }
+    }
+}
+
+#Checking if planet even exist, executing possible scope
+country_event = {
+    id = mem_towers.101
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        random_list = {
+            30 = {
+                country_event = { id = mem_towers.103 } #Fail
+            }
+            70 = {
+                country_event = { id = mem_towers.102 } #Success
+                modifier = {
+                    factor = 0
+                    NOT = { 
+                        exists = event_target:sulfur_planet 
+                    }
+                }
+            }
+        }
+    }
+}
+
+#Transplant candidate found
+country_event = {
+    id = mem_towers.102
+    title = mem_towers.102.name
+    desc = mem_towers.102.desc
+
+    picture = GFX_evt_toxic
+    location = event_target:sulfur_planet
+
+    is_triggered_only = yes
+
+    option = {
+        name = mem_towers.102.a
+
+        event_target:sulfur_planet = {
             add_modifier = {
                 modifier = mem_towers_forest_power
                 days = -1
             }
         }
+    }
+
+    option = {
+        name = mem_towers.102.b
+    }
+}
+
+#Transplant candidate not found
+country_event = {
+    id = mem_towers.103
+    title = mem_towers.103.name
+    desc = mem_towers.103.desc
+
+    picture = GFX_evt_toxic
+
+    is_triggered_only = yes
+
+    option = {
+        name = mem_towers.103.b
     }
 }
 
