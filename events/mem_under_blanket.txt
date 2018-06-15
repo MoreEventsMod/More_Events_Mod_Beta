@@ -19,14 +19,14 @@ planet_event = {
 	is_triggered_only = yes
 	
 	trigger = {
-		Root.Owner = { 
-			NOT = { 
-				has_country_flag = mem_under_blanket_done
-				is_ai = no
-				#TODO : S'assurer que le joueur a au moins 4 leaders disponibles
+		Root.Owner = { NOT = { has_country_flag = mem_under_blanket_done } }
+		NOT = { has_planet_flag = colony_event }
+		ROOT = {
+			NOR = { 
+				is_planet_class = pc_ringworld_habitable
+				is_planet_class = pc_habitat
 			}
 		}
-		NOT = { has_planet_flag = colony_event }
 	}
 	
 	# Used for easier localization and planet selection
@@ -122,10 +122,7 @@ planet_event = {
 					Root.Owner = {
 						any_owned_leader  = {
 							leader_class = scientist
-							OR = {
-								has_level = 4
-								has_level = 5
-							}
+							has_level > 5
 						}	
 					}
 				}
@@ -133,23 +130,21 @@ planet_event = {
 					random_owned_leader = {
 						limit = {			
 							leader_class = scientist
-							OR = {
-								has_level = 4
-								has_level = 5
-							}
+							has_level > 5
 						}
 						set_leader_flag = mem_under_blanket_expert_leader
 						save_event_target_as = mem_under_blanket_expert_leader
 					}	
 				}
-				else = {
-					Root.Owner = {
-						random_owned_leader = {
-							limit = { leader_class = scientist }
-							set_leader_flag = mem_under_blanket_expert_leader_random
-							save_event_target_as = mem_under_blanket_expert_leader_random
-						}	
-					}
+				
+			}
+			else = {
+				Root.Owner = {
+					random_owned_leader = {
+						limit = { leader_class = scientist }
+						set_leader_flag = mem_under_blanket_expert_leader_random
+						save_event_target_as = mem_under_blanket_expert_leader_random
+					}	
 				}
 			}
 			#Second leader selection (Rookie)
@@ -158,10 +153,7 @@ planet_event = {
 					Root.Owner = {
 						any_owned_leader  = {
 							leader_class = scientist
-							OR = {
-								has_level = 1
-								has_level = 2
-							}
+							has_level < 3
 							NOR = {
 								has_leader_flag = mem_under_blanket_expert_leader
 								has_leader_flag = mem_under_blanket_expert_leader_random
@@ -173,10 +165,7 @@ planet_event = {
 					random_owned_leader = {
 						limit = {			
 							leader_class = scientist
-							OR = {
-								has_level = 1
-								has_level = 2
-							}
+							has_level < 3
 							NOR = {
 								has_leader_flag = mem_under_blanket_expert_leader
 								has_leader_flag = mem_under_blanket_expert_leader_random
@@ -185,23 +174,23 @@ planet_event = {
 						set_leader_flag = mem_under_blanket_newbie_leader
 						save_event_target_as = mem_under_blanket_newbie_leader
 					}	
-				}
-				else = {
-					Root.Owner = {
-						random_owned_leader = {
-							limit = { 
-								leader_class = scientist 
-								NOR = {
-									has_leader_flag = mem_under_blanket_expert_leader
-									has_leader_flag = mem_under_blanket_expert_leader_random
-								}
-							}
-							set_leader_flag = mem_under_blanket_newbie_leader_random
-							save_event_target_as = mem_under_blanket_newbie_leader_random
-						}	
-					}
-				}
+				}				
 			}	
+			else = {
+				Root.Owner = {
+					random_owned_leader = {
+						limit = { 
+							leader_class = scientist 
+							NOR = {
+								has_leader_flag = mem_under_blanket_expert_leader
+								has_leader_flag = mem_under_blanket_expert_leader_random
+							}
+						}
+						set_leader_flag = mem_under_blanket_newbie_leader_random
+						save_event_target_as = mem_under_blanket_newbie_leader_random
+					}	
+				}
+			}
 			#Third leader selection (Always random)
 			Root.Owner = {
 				random_owned_leader = {
@@ -228,7 +217,7 @@ planet_event = {
 				any_owned_leader = { has_leader_flag = mem_under_blanket_expert_leader }	
 			}		
 		}
-		name = "mem_under_blanket.2.firstleader"
+		name = "mem_under_blanket.2.expertleader"
 		Root.Owner = {
 			random_owned_leader = {
 				limit = {			
@@ -237,9 +226,6 @@ planet_event = {
 				set_leader_flag = mem_under_blanket_selectedleader
 				save_event_target_as = mem_under_blanket_selectedleader
 			}	
-		}
-		hidden_effect = {
-			planet_event = { id = mem_under_blanket.3 days = 40 random = 4 }
 		}
 	}
 	
@@ -250,7 +236,7 @@ planet_event = {
 				any_owned_leader = { has_leader_flag = mem_under_blanket_expert_leader_random }	
 			}		
 		}
-		name = "mem_under_blanket.2.firstleader.random"
+		name = "mem_under_blanket.2.expertleader.random"
 		Root.Owner = {
 			random_owned_leader = {
 				limit = {			
@@ -260,9 +246,6 @@ planet_event = {
 				save_event_target_as = mem_under_blanket_selectedleader
 			}	
 		}		
-		hidden_effect = {
-			planet_event = { id = mem_under_blanket.3 days = 40 random = 4 }
-		}
 	}
 	
 	# Option available if second leader (Rookie) is not random
@@ -282,9 +265,6 @@ planet_event = {
 				save_event_target_as = mem_under_blanket_selectedleader
 			}	
 		}	
-		hidden_effect = {
-			planet_event = { id = mem_under_blanket.3 days = 40 random = 4 }
-		}
 	}
 	
 	# Option available if second leader is random
@@ -304,9 +284,6 @@ planet_event = {
 				save_event_target_as = mem_under_blanket_selectedleader
 			}	
 		}
-		hidden_effect = {
-			planet_event = { id = mem_under_blanket.3 days = 40 random = 4 }
-		}
 	}
 	
 	# Option for the third leader (Always random)
@@ -325,10 +302,12 @@ planet_event = {
 				set_leader_flag = mem_under_blanket_selectedleader
 				save_event_target_as = mem_under_blanket_selectedleader
 			}	
-		}	
+		}			
+	}
+	after = {
 		hidden_effect = {
 			planet_event = { id = mem_under_blanket.3 days = 40 random = 4 }
-		}		
+		}	
 	}
 }
 
@@ -342,8 +321,6 @@ planet_event = {
 	location = ROOT
 	
 	is_triggered_only = yes
-	
-	immediate = { set_planet_flag = mem_under_blanket_step_ground_team }
 	
 	# Retreat
 	option = {		
@@ -364,7 +341,6 @@ planet_event = {
 				35 = { planet_event = { id = mem_under_blanket.11 } }
 				35 = { planet_event = { id = mem_under_blanket.12 } }
 			}
-			set_planet_flag = mem_under_blanket_choice_retreat
 		}
 	}
 	
@@ -387,7 +363,6 @@ planet_event = {
 				35 = { planet_event = { id = mem_under_blanket.11 } }
 				35 = { planet_event = { id = mem_under_blanket.12 } }
 			}
-			set_planet_flag = mem_under_blanket_choice_retreat
 		}		
 	}
 	
@@ -409,7 +384,6 @@ planet_event = {
 				35 = { planet_event = { id = mem_under_blanket.22 days = 20 random = 3 } }
 				35 = { planet_event = { id = mem_under_blanket.23 days = 20 random = 3 } }
 			}
-			set_planet_flag = mem_under_blanket_choice_first_contact
 		}	
 	}
 	
@@ -433,7 +407,6 @@ planet_event = {
 				35 = { planet_event = { id = mem_under_blanket.22 days = 20 random = 3 } }
 				35 = { planet_event = { id = mem_under_blanket.23 days = 20 random = 3 } }
 			}
-			set_planet_flag = mem_under_blanket_choice_first_contact
 		}
 	}
 	
@@ -459,7 +432,6 @@ planet_event = {
 				35 = { planet_event = { id = mem_under_blanket.22 days = 20 random = 3 } }
 				35 = { planet_event = { id = mem_under_blanket.23 days = 20 random = 3 } }
 			}
-			set_planet_flag = mem_under_blanket_choice_first_contact
 		}
 	}
 }
@@ -474,12 +446,7 @@ planet_event = {
 	location = ROOT
 	
 	is_triggered_only = yes
-	
-	immediate = { 
-		remove_planet_flag = mem_under_blanket_step_ground_team
-		set_planet_flag = mem_under_blanket_step_retreat 
-	}
-	
+		
 	# Militarist & Xenophobe
 	option = {			
 		trigger = {
@@ -534,12 +501,7 @@ planet_event = {
 	location = ROOT
 	
 	is_triggered_only = yes
-	
-	immediate = { 
-		remove_planet_flag = mem_under_blanket_step_ground_team
-		set_planet_flag = mem_under_blanket_step_retreat 
-	}
-	
+
 	# Militarist & Xenophobe
 	option = {			
 		trigger = {
@@ -574,21 +536,28 @@ planet_event = {
 		Root.Owner = {
 			if = {
 				limit = {
+					has_technology = tech_morphogenetic_field_mastery
+				}
+				#TODO : Reprendre ici --> Ajouter récompense
+			}
+			if = {
+				limit = {
 					has_tech_option = tech_morphogenetic_field_mastery
 				}
 				add_tech_progress = {
 					tech = tech_morphogenetic_field_mastery
 					progress = 0.25
-				}
-				else = {
-					add_research_option = tech_morphogenetic_field_mastery
-					add_tech_progress = {
-						tech = tech_morphogenetic_field_mastery
-						progress = 0.25
-					}
+				}				
+			}
+			else = {
+				add_research_option = tech_morphogenetic_field_mastery
+				add_tech_progress = {
+					tech = tech_morphogenetic_field_mastery
+					progress = 0.25
 				}
 			}
 		}
+
 		hidden_effect = {
 			set_planet_flag = mem_under_blanket_youngling_captured
 			random_list = {
