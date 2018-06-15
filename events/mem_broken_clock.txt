@@ -1,0 +1,212 @@
+#Broken Clock
+#By ViolentBeetle
+
+namespace = mem_broken_clock
+
+#Graphic test event - transformation
+
+planet_event = {
+    id = mem_broken_clock.9999
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        change_pc = pc_a_star
+        solar_system = {
+            IF = {
+                limit = {
+                    exists = starbase
+                }
+                starbase = {
+                    delete_ship = this
+                }
+            }
+            random_system_planet = {
+                limit = {
+                    has_planet_flag = mem_broken_clock_homeworld
+                }
+                change_pc = pc_ocean
+                create_species = {
+                    name = Tester
+                    plural = Testers
+                    adjective = Tester
+                    class = random_non_machine
+                    portrait = random
+                    traits = random
+                    homeworld = this
+                }
+                create_country = {
+                    type = default
+                    name = random
+                    species = last_created_species
+                    ethos = {
+                        ethic = ethic_fanatic_xenophobe
+                        ethic = ethic_militarist
+                    }
+                    authority = auth_imperial
+                    civics = {
+                        civic = civic_fanatic_purifiers
+                        civic = random
+                    }
+                    effect = {
+                        save_event_target_as = unwelcome_guests
+                        mem_broken_clock_give_tech = yes
+                        add_modifier = {
+                            modifier = mem_broken_clock_ai_cheat
+                            days = -1
+                        }
+                        add_influence = 1000
+                        add_minerals = 10000
+                        add_energy = 10000
+                        add_food = 200
+                        add_100_unity_per_year_passed = yes
+                    }
+                }
+                prev = {
+                    create_starbase = {
+                        owner = event_target:unwelcome_guests
+                        size = starbase_starfortress
+                        module = shipyard
+                        building = crew_quarters
+                        effect = {
+                            set_starbase_module = {
+                                slot = 1
+                                module = shipyard
+                            }
+                            set_starbase_module = {
+                                slot = 2
+                                module = shipyard
+                            }
+                            set_starbase_module = {
+                                slot = 3
+                                module = anchorage
+                            }
+                            set_starbase_module = {
+                                slot = 4
+                                module = anchorage
+                            }
+                            set_starbase_module = {
+                                slot = 5
+                                module = anchorage
+                            }
+                        }
+                    }
+                }
+                set_owner = event_target:unwelcome_guests
+                every_tile = {
+                    create_pop = {
+                        species = event_target:unwelcome_guests
+                    }
+                }
+                random_tile = {
+                    limit = {
+                        num_adjacent_tiles > 3
+                        has_building = no
+                    }
+                    set_building = building_capital_3
+                }
+                random_tile = {
+                    limit = {
+                        has_building = no
+                        NOT = {
+                            any_neighboring_tile = {
+                                OR = {
+                                    has_building = "building_capital_1"
+                                    has_building = "building_capital_2"
+                                    has_building = "building_capital_3"
+                                }
+                            }
+                        }
+                    }
+                    set_building = building_hypercomms_forum
+                }
+                random_tile = {
+                    limit = {
+                        has_building = no
+                        any_neighboring_tile = {
+                            OR = {
+                                has_building = "building_capital_1"
+                                has_building = "building_capital_2"
+                                has_building = "building_capital_3"
+                            }
+                        }
+                    }
+                    set_building = building_dark_matter_power_plant
+                }
+                random_tile = {
+                    limit = {
+                        has_building = no
+                        any_neighboring_tile = {
+                            OR = {
+                                has_building = "building_capital_1"
+                                has_building = "building_capital_2"
+                                has_building = "building_capital_3"
+                            }
+                        }
+                    }
+                    set_building = building_ancient_factory
+                }
+                mem_broken_clock_set_buildings = yes
+            }
+
+            every_system_planet = {
+                limit = {
+                    is_planet_class = pc_ringworld_habitable_damaged
+                }
+                change_pc = pc_ringworld_habitable
+                set_owner = event_target:unwelcome_guests
+                every_tile = {
+                    create_pop = {
+                        species = event_target:unwelcome_guests
+                    }
+                }
+                random_tile = {
+                    limit = {
+                        num_adjacent_tiles > 3
+                        has_building = no
+                    }
+                    set_building = building_capital_2
+                }
+                random_tile = {
+                    limit = {
+                        has_building = no
+                        NOT = {
+                            any_neighboring_tile = {
+                                OR = {
+                                    has_building = "building_capital_1"
+                                    has_building = "building_capital_2"
+                                    has_building = "building_capital_3"
+                                }
+                            }
+                        }
+                    }
+                    set_building = building_hypercomms_forum
+                }
+                mem_broken_clock_set_buildings = yes
+            }
+            every_system_planet = {
+                limit = {
+                    is_planet_class = pc_ringworld_tech_damaged
+                }
+                change_pc = pc_ringworld_tech
+            }
+            every_system_planet = {
+                limit = {
+                    is_planet_class = pc_ringworld_seam_damaged
+                }
+                change_pc = pc_ringworld_seam
+            }
+            event_target:unwelcome_guests = {
+                while = {
+                    count = 5
+                    random_owned_planet = {
+                        prev = { create_fleet_from_naval_cap = 0.1 }
+                        last_created_fleet = {
+                            set_location = prev
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
