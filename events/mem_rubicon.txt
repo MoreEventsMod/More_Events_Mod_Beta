@@ -142,7 +142,7 @@ country_event = {
     immediate = {
         set_country_flag = mem_rubicon_gained_news
         FROM = {
-            save_event_target_as = the_planet
+            save_global_event_target_as = mem_rubicon_core_planet
         }
     }
 
@@ -163,7 +163,7 @@ ship_event = {
     title = mem_rubicon.5.name
     desc = mem_rubicon.5.desc
 
-    location = event_target:the_planet
+    location = event_target:mem_rubicon_core_planet
     diplomatic = yes
 
     picture_event_data = {
@@ -187,10 +187,10 @@ ship_event = {
                 }
                 abort_special_project = {
                     type = MEM_RUBICON_EXPEDITION
-                    location = event_target:the_planet
+                    location = event_target:mem_rubicon_core_planet
                 }
             }
-            event_target:the_planet = {
+            event_target:mem_rubicon_core_planet = {
                 remove_modifier = mem_rubicon_hidden_ship
                 orbital_deposit_tile = {
                     set_deposit = d_rich_engineering_deposit
@@ -205,7 +205,9 @@ ship_event = {
 
         allow = {
             owner = {
-                NOT = {
+                NOR = {
+                    has_ethic = ethic_spiritualist
+                    has_ethic = ethic_fanatic_spiritualist
                     has_policy_flag = ai_outlawed
                 }
             }
@@ -260,10 +262,13 @@ ship_event = {
                 name = "NAME_MEM_Rubicon_reward"
                 effect = {
                     set_owner = ROOT.owner
-                    set_location = event_target:the_planet
+                    set_location = event_target:mem_rubicon_core_planet
                     create_ship = {
                         name = "NAME_MEM_Rubicon_Worldmender"
                         design = "NAME_MEM_Rubicon_Worldmender"
+                        effect = {
+                            set_ship_flag = mem_rubicon_mender_ship
+                        }
                     }
                     set_leader = event_target:the_admiral
                 }
@@ -307,9 +312,13 @@ ship_event = {
                 name = "NAME_MEM_Rubicon_reward"
                 effect = {
                     set_owner = ROOT.owner
-                    set_location = event_target:the_planet
+                    set_location = event_target:mem_rubicon_core_planet
                     create_ship = {
+                        name = "NAME_MEM_Rubicon_Worldmender"
                         design = "NAME_MEM_Rubicon_Worldmender"
+                        effect = {
+                            set_ship_flag = mem_rubicon_mender_ship
+                        }
                     }
                 }
             }
@@ -351,7 +360,7 @@ ship_event = {
             factor = 125
             modifier = {
                 factor = 0
-                event_target:the_planet = { #No Gaia for Xenos
+                event_target:mem_rubicon_core_planet = { #No Gaia for Xenos
                     NAND = {
                         exists = space_owner
                         space_owner = { is_same_value = root }
@@ -423,7 +432,7 @@ country_event = {
     title = mem_rubicon.6.name
     desc = mem_rubicon.6.desc
 
-    location = event_target:the_planet
+    location = event_target:mem_rubicon_core_planet
     picture = GFX_evt_gaia
 
     is_triggered_only = yes
@@ -431,7 +440,7 @@ country_event = {
     option = {
         name = EXCELLENT
 
-        event_target:the_planet = {
+        event_target:mem_rubicon_core_planet = {
             change_pc = pc_gaia
             change_planet_size = -9
             reroll_planet = yes
@@ -461,7 +470,7 @@ country_event = {
     title = mem_rubicon.7.name
     desc = mem_rubicon.7.desc
 
-    location = event_target:the_planet
+    location = event_target:mem_rubicon_core_planet
     picture = GFX_evt_alien_nature
 
     is_triggered_only = yes
@@ -469,7 +478,7 @@ country_event = {
     option = {
         name = mem_rubicon.7.a
 
-        event_target:the_planet = {
+        event_target:mem_rubicon_core_planet = {
             random_list = {
                 33 = {
                     change_pc = pc_tropical
@@ -509,7 +518,7 @@ country_event = {
     title = mem_rubicon.8.name
     desc = mem_rubicon.8.desc
 
-    location = event_target:the_planet
+    location = event_target:mem_rubicon_core_planet
     picture = GFX_evt_junkheap
 
     is_triggered_only = yes
@@ -517,7 +526,7 @@ country_event = {
     option = {
         name = mem_rubicon.8.a
 
-        event_target:the_planet = {
+        event_target:mem_rubicon_core_planet = {
             change_pc = pc_nuked
             set_planet_flag = primitives_nuked_themselves
             set_planet_flag = colony_event
@@ -548,7 +557,7 @@ country_event = {
     title = mem_rubicon.9.name
     desc = mem_rubicon.9.desc
 
-    location = event_target:the_planet
+    location = event_target:mem_rubicon_core_planet
     picture = GFX_evt_warm_barren
 
     is_triggered_only = yes
@@ -556,7 +565,7 @@ country_event = {
     option = {
         name = mem_rubicon.9.a
 
-        event_target:the_planet = {
+        event_target:mem_rubicon_core_planet = {
             change_pc = pc_barren
             change_planet_size = -9
             solar_system = {
@@ -582,6 +591,7 @@ country_event = {
 
     trigger = {
         has_modifier = mem_rubicon_mender_archives
+        # always = no
     }
 
     immediate = {
@@ -589,11 +599,12 @@ country_event = {
             limit = {
                 NOT = {
                     any_owned_ship = {
-                        is_ship_size = mem_rubicon_mender
+                        has_ship_flag = mem_rubicon_mender_ship
                     }
                 }
             }
+            remove_modifier = mem_rubicon_mender_archives
         }
-        remove_modifier = mem_rubicon_mender_archives
+        country_event = { id = mem_rubicon.10 days = 30 }
     }
 }
