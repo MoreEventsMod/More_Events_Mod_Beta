@@ -164,7 +164,11 @@ ship_event = {
     desc = mem_rubicon.5.desc
 
     location = event_target:the_planet
-    picture = GFX_evt_ruined_system
+    diplomatic = yes
+
+    picture_event_data = {
+		room = no_video_feed_room
+	}
 
     is_triggered_only = yes
 
@@ -176,6 +180,23 @@ ship_event = {
 
     immediate = {
         set_global_flag = mem_rubicon_completed
+        hidden_effect = {
+            every_playable_country = {
+                limit = {
+                    has_country_flag = mem_rubicon_gained_news
+                }
+                abort_special_project = {
+                    type = MEM_RUBICON_EXPEDITION
+                    location = event_target:the_planet
+                }
+            }
+            event_target:the_planet = {
+                remove_modifier = mem_rubicon_hidden_ship
+                orbital_deposit_tile = {
+                    set_deposit = d_rich_engineering_deposit
+                }
+            }
+        }
     }
 
     option = {
@@ -229,6 +250,11 @@ ship_event = {
                         save_event_target_as = the_admiral
                     }
                 }
+                add_modifier = {
+                    modifier = mem_rubicon_mender_archives
+                    days = -1
+                }
+                country_event = { id = mem_rubicon.10 days = 30 }
             }
             create_fleet = {
                 name = "NAME_MEM_Rubicon_reward"
@@ -240,6 +266,19 @@ ship_event = {
                         design = "NAME_MEM_Rubicon_Worldmender"
                     }
                     set_leader = event_target:the_admiral
+                }
+            }
+        }
+        owner = {
+            IF = {
+                limit = {
+                    NOT = { has_technology = tech_terrestrial_sculpting }
+                }
+
+                add_research_option = tech_terrestrial_sculpting
+                add_tech_progress = {
+                    tech = tech_terrestrial_sculpting
+                    progress = 0.50
                 }
             }
         }
@@ -274,6 +313,13 @@ ship_event = {
                     }
                 }
             }
+            owner = {
+                add_modifier = {
+                    modifier = mem_rubicon_mender_archives
+                    days = -1
+                }
+                country_event = { id = mem_rubicon.10 days = 30 }
+            }
         }
         owner = {
             add_monthly_resource_mult = {
@@ -282,12 +328,24 @@ ship_event = {
                 min = @tier3unitymin
                 max = @tier3unitymax
             }
+            IF = {
+                limit = {
+                    NOT = { has_technology = tech_terrestrial_sculpting }
+                }
+
+                add_research_option = tech_terrestrial_sculpting
+                add_tech_progress = {
+                    tech = tech_terrestrial_sculpting
+                    progress = 0.50
+                }
+            }
         }
     }
 
     option = {
         name = mem_rubicon.5.c
         custom_tooltip = mem_rubicon.5.c.tooltip
+        default_hide_option = yes
 
         ai_chance = {
             factor = 125
@@ -306,56 +364,56 @@ ship_event = {
             }
         }
 
-        hidden_effect = {
-            owner = {
-                country_event = { id = mem_rubicon.6 days = 30 }
+        random_list = {
+            35 = {
+                custom_tooltip = mem_rubicon.5.c.tooltip.gaia
+                hidden_effect = {
+                    owner = {
+                        country_event = { id = mem_rubicon.6 days = 30 }
+                    }
+                }
+            }
+            20 = {
+                custom_tooltip = mem_rubicon.5.c.tooltip.regular
+                hidden_effect = {
+                    owner = {
+                        country_event = { id = mem_rubicon.7 days = 30 }
+                    }
+                }
+            }
+            20 = {
+                custom_tooltip = mem_rubicon.5.c.tooltip.tomb
+                hidden_effect = {
+                    owner = {
+                        country_event = { id = mem_rubicon.8 days = 30 }
+                    }
+                }
+            }
+            25 = {
+                custom_tooltip = mem_rubicon.5.c.tooltip.barren
+                hidden_effect = {
+                    owner = {
+                        country_event = { id = mem_rubicon.9 days = 30 }
+                    }
+                }
             }
         }
     }
 
     option = {
         name = mem_rubicon.5.d
-
-        ai_chance = {
-            factor = 50
-        }
-        owner = {
-            add_modifier = {
-                modifier = mem_rubicon_melder_archives
-                days = -1
-            }
-            IF = {
-                limit = {
-                    NOT = { has_technology = tech_terrestrial_sculpting }
-                }
-
-                add_research_option = tech_terrestrial_sculpting
-                add_tech_progress = {
-                    tech = tech_terrestrial_sculpting
-                    progress = 0.50
-                }
-            }
-        }
+        response_text = mem_rubicon.5.d.response
+        is_dialog_only = yes
     }
-
-    after = {
-        hidden_effect = {
-            every_playable_country = {
-                limit = {
-                    has_country_flag = mem_rubicon_gained_news
-                }
-                abort_special_project = {
-                    type = MEM_RUBICON_EXPEDITION
-                    location = event_target:the_planet
-                }
-            }
-            event_target:the_planet = {
-                remove_modifier = mem_rubicon_hidden_ship
-                orbital_deposit_tile = {
-                    set_deposit = d_rich_engineering_deposit
-                }
-            }
-        }
+    option = {
+        name = mem_rubicon.5.e
+        response_text = mem_rubicon.5.e.response
+        is_dialog_only = yes
+    }
+    option = {
+        name = mem_rubicon.5.f
+        response_text = mem_rubicon.5.f.response
+        is_dialog_only = yes
     }
 }
 
@@ -377,6 +435,7 @@ country_event = {
             change_pc = pc_gaia
             change_planet_size = -9
             reroll_planet = yes
+            set_planet_flag = colony_event
             add_modifier = {
                 modifier = mem_rubicon_mended_ecosystem
                 days = -1
@@ -393,5 +452,148 @@ country_event = {
                 }
             }
         }
+    }
+}
+
+#Final event if terraforming is partial success
+country_event = {
+    id = mem_rubicon.7
+    title = mem_rubicon.7.name
+    desc = mem_rubicon.7.desc
+
+    location = event_target:the_planet
+    picture = GFX_evt_alien_nature
+
+    is_triggered_only = yes
+
+    option = {
+        name = mem_rubicon.7.a
+
+        event_target:the_planet = {
+            random_list = {
+                33 = {
+                    change_pc = pc_tropical
+                }
+                33 = {
+                    change_pc = pc_savannah
+                }
+                33 = {
+                    change_pc = pc_tundra
+                }
+            }
+            change_planet_size = -9
+            set_planet_flag = colony_event
+            reroll_planet = yes
+            add_modifier = {
+                modifier = mem_rubicon_mended_ecosystem
+                days = -1
+            }
+            solar_system = {
+                set_asteroid_belt = {
+                    radius = 0
+                }
+                every_system_planet = {
+                    limit = {
+                        is_asteroid = yes
+                    }
+                    remove_planet = yes
+                }
+            }
+        }
+    }
+}
+
+#Terraforming complete: Tomb
+country_event = {
+    id = mem_rubicon.8
+    title = mem_rubicon.8.name
+    desc = mem_rubicon.8.desc
+
+    location = event_target:the_planet
+    picture = GFX_evt_junkheap
+
+    is_triggered_only = yes
+
+    option = {
+        name = mem_rubicon.8.a
+
+        event_target:the_planet = {
+            change_pc = pc_nuked
+            set_planet_flag = primitives_nuked_themselves
+            set_planet_flag = colony_event
+            change_planet_size = -9
+            reroll_planet = yes
+            add_modifier = {
+                modifier = mem_rubicon_mended_ecosystem
+                days = -1
+            }
+            solar_system = {
+                set_asteroid_belt = {
+                    radius = 0
+                }
+                every_system_planet = {
+                    limit = {
+                        is_asteroid = yes
+                    }
+                    remove_planet = yes
+                }
+            }
+        }
+    }
+}
+
+#Complete failure of terraforming
+country_event = {
+    id = mem_rubicon.9
+    title = mem_rubicon.9.name
+    desc = mem_rubicon.9.desc
+
+    location = event_target:the_planet
+    picture = GFX_evt_warm_barren
+
+    is_triggered_only = yes
+
+    option = {
+        name = mem_rubicon.9.a
+
+        event_target:the_planet = {
+            change_pc = pc_barren
+            change_planet_size = -9
+            solar_system = {
+                set_asteroid_belt = {
+                    radius = 0
+                }
+                every_system_planet = {
+                    limit = {
+                        is_asteroid = yes
+                    }
+                    remove_planet = yes
+                }
+            }
+        }
+    }
+}
+
+#Hidden event to evaluate if the country still has the ship and thus allowed to keep modifier
+country_event = {
+    id = mem_rubicon.10
+    is_triggered_only = yes
+    hide_window = yes
+
+    trigger = {
+        has_modifier = mem_rubicon_mender_archives
+    }
+
+    immediate = {
+        IF = {
+            limit = {
+                NOT = {
+                    any_owned_ship = {
+                        is_ship_size = mem_rubicon_mender
+                    }
+                }
+            }
+        }
+        remove_modifier = mem_rubicon_mender_archives
     }
 }
