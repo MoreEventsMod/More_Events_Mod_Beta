@@ -51,6 +51,7 @@ namespace = mem_vazurans
 # mem_vazurans.253 |Crashed vazuran ship on asteroid excavated
 # mem_vazurans.254 |Anomaly done, project spawn
 # mem_vazurans.255 |Drifting vazuran wreckage found in deep space
+# mem_vazurans.256 |Wreckage investigation finished
 # mem_vazurans.260 |Project finished, damper field research added
 
 # Setup Event at Game Start for randomly disabling the Crisis
@@ -903,23 +904,26 @@ country_event = {
 	is_triggered_only = yes
 	
 	immediate = {
-		random_system = {
-			limit = {
-				is_rim_system = yes
-			}
+		no_scope = {
+			# makes system positions originate from galactic core
 			spawn_system = { 
-				min_distance = 70 
-				max_distance = 150
+				min_distance >= 550
+				max_distance <= 560
+				min_orientation_angle = 96
+				max_orientation_angle = 102
 				initializer = "mem_vazuran_homesystem"
-				hyperlane = no 
-				is_discovered = yes
+				# is_discovered = yes
 			}
+		}
+		every_system = {
+			limit = { has_star_flag = mem_antaran_homesystem }
+			isolate_system = yes
 		}
 		country_event = { id = mem_vazurans.52 days = 1 }
 	}
 }
 
-# Wormhole connection established
+# Dimensional Portal constructed
 country_event = {
 	id = mem_vazurans.52
 	title = mem_vazurans.52.name
@@ -931,21 +935,13 @@ country_event = {
 	immediate = {
 		capital_scope = {
 			solar_system = {
-				random_system = {
-					limit = {
-						has_star_flag = mem_vazuran_homesystem
-					}
-					prev = { # done this way to ensure we don't spawn "orphan" wormholes (wormholes that aren't linked to anything)
-							spawn_natural_wormhole = {
-							random_pos = yes
-							orbit_angle = 360
-						}
-					}
-					spawn_natural_wormhole = {
-						random_pos = yes
-						orbit_angle = 360
-					}
-					link_wormholes = prev
+				set_star_flag = mem_vazuran_portal
+				spawn_megastructure = {
+					type = "mem_vazuran_gateway"
+					distance = 300
+					#random_pos = yes
+					orbit_angle = 360		# range of the randomization
+					location = this
 				}
 			}
 		}
@@ -3161,6 +3157,72 @@ ship_event = {
 	
 	option = {
 		name = mem_vazurans.254.a
+		owner = {
+			capital_scope = {
+				enable_special_project = {
+					name = MEM_VAZURANS_DAMPER_FIELD_GENERATOR_INVESTIGATION
+					location = this
+					owner = root.owner
+				}
+			}
+		}
+	}
+}
+
+# Drifting vazuran wreckage found in deep space
+country_event = {
+	id = mem_vazurans.255
+	title = mem_vazurans.255.name
+	desc = mem_vazurans.255.desc
+	picture = GFX_evt_asteroid_approaching_planet
+	show_sound = event_ship_bridge
+	location = event_target:mem_vazurans_wreckage
+	is_triggered_only = yes
+
+	immediate = {
+		random_system_within_border = {
+			random_system_planet = {
+				limit = {
+					is_star = yes
+				}
+				create_ambient_object = { # TODO exchange that later with a custom made one from frog
+					type = "mem_pride_of_harilla_object"
+				}
+				last_created_ambient_object = {
+					set_location = {
+						target = prev
+						distance = 250
+						angle = random
+					}
+					set_ambient_object_flag = mem_vazurans_wreckage
+					save_event_target_as = mem_vazurans_wreckage
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_vazurans.255.a
+		enable_special_project = {
+			name = MEM_VAZURANS_WRECKAGE_INVESTIGATION
+			location = event_target:mem_vazurans_wreckage
+			owner = root
+		}
+	}
+}
+
+# wreckage investigation finished
+ship_event = {
+	id = mem_vazurans.256
+	title = mem_vazurans.256.name
+	desc = mem_vazurans.256.desc
+	picture = GFX_evt_asteroid_approaching_planet
+	show_sound = event_ship_bridge
+	location = FROM
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_vazurans.256.a
 		owner = {
 			capital_scope = {
 				enable_special_project = {
