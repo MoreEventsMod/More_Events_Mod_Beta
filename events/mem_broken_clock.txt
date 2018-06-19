@@ -3,10 +3,146 @@
 
 namespace = mem_broken_clock
 
-#Graphic test event - transformation
+#On ship entering the system
+ship_event = {
+    id = mem_broken_clock.1
+    title = mem_broken_clock.1.name
+    desc = mem_broken_clock.1.desc
 
+    is_triggered_only = yes
+
+    trigger = {
+        NOT = {
+            has_global_flag = mem_broken_clock_return_happened
+        }
+        FROM = {
+            has_star_flag = mem_broken_clock_system
+        }
+        owner = {
+            NOT = {
+                has_country_flag = mem_broken_clock_encountered
+            }
+        }
+    }
+
+    location = FROM
+    picture = GFX_evt_clocks
+    show_sound = event_scanner
+
+    option = {
+        name = mem_broken_clock.1.a
+    }
+}
+
+@notification_time = 1
+@notification_random = 29 #Change to 359 after testing
+
+@arrival_time = 100 #Change to some actual numbers
+@arrival_random = 300
+
+#The pulse to start the event on mid-game
+event = {
+    id = mem_broken_clock.2
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        random_system = {
+            limit = { has_star_flag = mem_broken_clock_system }
+        }
+        star = {
+           planet_event = { 
+               id = mem_broken_clock.100 
+               days = @notification_time 
+               random = @notification_random 
+            } 
+        }
+    }
+}
+
+#Fun begins
 planet_event = {
-    id = mem_broken_clock.9999
+    id = mem_broken_clock.100
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        IF = {
+            limit = {
+                exists = space_owner
+            }
+            space_owner = {
+                country_event = { id = mem_broken_clock.101 }
+            }
+        }
+        every_country = {
+            limit = {
+                OR = {
+                    has_country_flag = mem_broken_clock_encountered
+                    intel_level = {
+                        level > medium
+                        system = root.solar_system
+                    }
+                }
+                NAND = {
+                    exists = root.space_owner
+                    is_same_value = root.space_owner
+                }
+            }
+            country_event = { id = mem_broken_clock.102 }
+        }
+        planet_event = {
+            id = mem_broken_clock.200
+            days = @arrival_time
+            random = @arrival_random
+        }
+    }
+}
+
+#Worrying news
+country_event = {
+    id = mem_broken_clock.101
+    title = mem_broken_clock.101.name
+    desc = mem_broken_clock.101.desc
+
+    is_triggered_only = yes
+
+    location = FROM
+    picture = GFX_evt_clocks
+    show_sound = event_scanner
+
+    option = {
+        name = mem_broken_clock.101.a
+    }
+}
+
+#Worrying news to anyone other than space owner
+country_event = {
+    id = mem_broken_clock.102
+    title = mem_broken_clock.102.name
+    desc = mem_broken_clock.102.desc
+
+    is_triggered_only = yes
+
+    location = FROM
+    picture = GFX_evt_clocks
+    show_sound = event_scanner
+
+    option = {
+        name = mem_broken_clock.102.a
+    }
+}
+
+#Next step
+planet_event = {
+    id = mem_broken_clock.200
+    hide_window = yes
+    is_triggered_only = yes
+} 
+
+#System being transformed
+planet_event = {
+    id = mem_broken_clock.1000
     hide_window = yes
     is_triggered_only = yes
 
