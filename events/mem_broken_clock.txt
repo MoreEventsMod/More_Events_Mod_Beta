@@ -25,6 +25,12 @@ ship_event = {
         }
     }
 
+    immediate = {
+        owner = {
+            set_country_flag = mem_broken_clock_encountered
+        }
+    }
+
     location = FROM
     picture = GFX_evt_clocks
     show_sound = event_scanner
@@ -49,13 +55,13 @@ event = {
     immediate = {
         random_system = {
             limit = { has_star_flag = mem_broken_clock_system }
-        }
-        star = {
-           planet_event = { 
-               id = mem_broken_clock.100 
-               days = @notification_time 
-               random = @notification_random 
-            } 
+            star = {
+                planet_event = { 
+                    id = mem_broken_clock.100 
+                    days = @notification_time 
+                    random = @notification_random 
+                } 
+            }
         }
     }
 }
@@ -92,7 +98,7 @@ planet_event = {
             country_event = { id = mem_broken_clock.102 }
         }
         planet_event = {
-            id = mem_broken_clock.200
+            id = mem_broken_clock.1000
             days = @arrival_time
             random = @arrival_random
         }
@@ -133,13 +139,6 @@ country_event = {
     }
 }
 
-#Next step
-planet_event = {
-    id = mem_broken_clock.200
-    hide_window = yes
-    is_triggered_only = yes
-} 
-
 #System being transformed
 planet_event = {
     id = mem_broken_clock.1000
@@ -147,6 +146,7 @@ planet_event = {
     is_triggered_only = yes
 
     immediate = {
+        set_global_flag = mem_broken_clock_return_happened
         change_pc = pc_a_star
         solar_system = {
             IF = {
@@ -154,6 +154,10 @@ planet_event = {
                     exists = starbase
                 }
                 starbase = {
+                    owner = { 
+                        save_event_target_as = former_owner
+                        country_event = { id = mem_broken_clock.1001 }
+                     }
                     fleet = { delete_fleet = this }
                 }
             }
@@ -162,6 +166,17 @@ planet_event = {
                     is_planet_class = pc_habitat
                 }
                 remove_planet = yes
+            }
+            every_system_planet = {
+                limit = {
+                    exists = owner
+                }
+                every_tile = {
+                    limit = {
+                        has_pop = yes
+                    }
+                    kill_pop = yes
+                }
             }
             random_system_planet = {
                 limit = {
@@ -630,17 +645,350 @@ planet_event = {
                     }
                 }
                 country_event = { id = game_start.9 }
+                set_timed_country_flag = { flag = day_0 days = 7 }
+                event_target:former_owner = {
+                    country_event = { id = mem_broken_clock.1002 days = 7 } #Empire will make contact - after all the event targets are set
+                }
             }
         }
     }
 }
 
-fleet_event = {
-    id = mem_broken_clock.9000
-    hide_window = yes
+#Our whole system has vanished, oh my god!
+country_event = {
+    id = mem_broken_clock.1001
+    title = mem_broken_clock.1001.name
+    desc = mem_broken_clock.1001.desc
+
     is_triggered_only = yes
 
-    immediate = {
-        set_location = no_scope
+    location = FROM
+    picture = GFX_evt_clocks
+    show_sound = event_scanner
+    
+    option = {
+        name = mem_broken_clock.1001.a
+        default_hide_option = yes
+    }
+
+    option = {
+        name = mem_broken_clock.1001.a.phobe
+        trigger = {
+            OR = {
+                has_ethic = ethic_fanatic_xenophobe
+                has_ethic = ethic_xenophobe
+                has_ethic = ethic_militarist
+                has_ethic = ethic_fanatic_militarist
+            }
+        }
+    }
+}
+
+#Quicky hailing
+country_event = {
+    id = mem_broken_clock.1002
+    title = mem_broken_clock.1002.name
+    desc = mem_broken_clock.1002.desc
+
+    is_triggered_only = yes
+
+    location = FROM
+    picture = GFX_evt_star_chart
+    show_sound = event_alien_signal
+
+    option = {
+        name = ONSCREEN
+
+        hidden_effect = {
+            establish_communications_no_message = event_target:unwelcome_guests
+            IF = {
+                limit = {
+                    event_target:unwelcome_guests = { has_authority = auth_imperial }
+                }
+                country_event = {
+                    id = mem_broken_clock.1003
+                }
+            }
+            ELSE_IF = {
+                limit = {
+                    event_target:unwelcome_guests = { has_authority = auth_machine_intelligence }
+                }
+                country_event = {
+                    id = mem_broken_clock.1004
+                }
+            }
+            ELSE_IF = {
+                limit = {
+                    event_target:unwelcome_guests = { has_authority = auth_hive_mind }
+                }
+                country_event = {
+                    id = mem_broken_clock.1005
+                }
+            }
+        }
+    }
+}
+
+#Purifier Greetings
+country_event = {
+    id = mem_broken_clock.1003
+    title = TRANSMISSION
+    desc = mem_broken_clock.1003.desc
+
+    diplomatic = yes
+    location = event_target:unwelcome_guests.capital_scope
+    is_triggered_only = yes
+
+    picture_event_data = {
+		portrait = event_target:unwelcome_guests
+		planet_background = event_target:unwelcome_guests
+		graphical_culture = event_target:unwelcome_guests
+		city_level = event_target:unwelcome_guests
+		room = event_target:unwelcome_guests.ruler
+	}
+
+    option = {
+        name = mem_broken_clock.1003.generic
+        default_hide_option = yes
+    }
+
+    option = {
+        name = mem_broken_clock.1003.agressive
+        trigger = {
+            OR = {
+                has_ethic = ethic_fanatic_xenophobe
+                has_ethic = ethic_xenophobe
+                has_ethic = ethic_militarist
+                has_ethic = ethic_fanatic_militarist
+            }
+            NOR = {
+                is_pacifist = yes
+                has_valid_civic = civic_fanatic_purifiers
+                has_valid_civic = civic_machine_terminator
+                has_valid_civic = civic_hive_devouring_swarm
+            }
+        }
+    }
+
+    option = {
+        name = mem_broken_clock.1003.purifier
+        trigger = {
+            OR = {
+                has_valid_civic = civic_fanatic_purifiers
+                has_valid_civic = civic_hive_devouring_swarm
+                has_valid_civic = civic_machine_terminator
+            }
+        }
+    }
+
+    option = {
+        name = mem_broken_clock.1003.peacekeeper
+        trigger = {
+            OR = {
+                AND = {
+                    OR = {
+                        has_ethic = ethic_xenophile
+                        has_ethic = ethic_fanatic_xenophile
+                    }
+                    OR = {
+                        has_ethic = ethic_militarist
+                        has_ethic = ethic_fanatic_militarist
+                    }
+                }
+                has_valid_civic = civic_machine_servitor
+            }
+        }
+    }
+
+    option = {
+        name = mem_broken_clock.1003.friendly
+        trigger = {
+            OR = {
+                has_ethic = ethic_xenophile
+                has_ethic = ethic_fanatic_xenophile
+                has_ethic = ethic_pacifist
+                has_ethic = ethic_fanatic_pacifist
+            }
+        }
+    }
+}
+
+#Terminator Greetings
+country_event = {
+    id = mem_broken_clock.1004
+    title = TRANSMISSION
+    desc = mem_broken_clock.1004.desc
+
+    diplomatic = yes
+    location = event_target:unwelcome_guests.capital_scope
+    is_triggered_only = yes
+
+    picture_event_data = {
+		portrait = event_target:unwelcome_guests
+		planet_background = event_target:unwelcome_guests
+		graphical_culture = event_target:unwelcome_guests
+		city_level = event_target:unwelcome_guests
+		room = event_target:unwelcome_guests.ruler
+	}
+
+    option = {
+        name = mem_broken_clock.1003.generic
+        default_hide_option = yes
+    }
+
+    option = {
+        name = mem_broken_clock.1003.agressive
+        trigger = {
+            OR = {
+                has_ethic = ethic_fanatic_xenophobe
+                has_ethic = ethic_xenophobe
+                has_ethic = ethic_militarist
+                has_ethic = ethic_fanatic_militarist
+            }
+            NOR = {
+                is_pacifist = yes
+                has_valid_civic = civic_fanatic_purifiers
+                has_valid_civic = civic_machine_terminator
+                has_valid_civic = civic_hive_devouring_swarm
+            }
+        }
+    }
+
+    option = {
+        name = mem_broken_clock.1003.purifier
+        trigger = {
+            OR = {
+                has_valid_civic = civic_fanatic_purifiers
+                has_valid_civic = civic_hive_devouring_swarm
+            }
+        }
+    }
+
+    option = {
+        name = mem_broken_clock.1004.terminator
+        trigger = {
+            has_valid_civic = civic_machine_terminator
+        }
+    }
+
+    option = {
+        name = mem_broken_clock.1003.peacekeeper
+        trigger = {
+            OR = {
+                AND = {
+                    OR = {
+                        has_ethic = ethic_xenophile
+                        has_ethic = ethic_fanatic_xenophile
+                    }
+                    OR = {
+                        has_ethic = ethic_militarist
+                        has_ethic = ethic_fanatic_militarist
+                    }
+                }
+                has_valid_civic = civic_machine_servitor
+            }
+        }
+    }
+
+    option = {
+        name = mem_broken_clock.1003.friendly
+        trigger = {
+            OR = {
+                has_ethic = ethic_xenophile
+                has_ethic = ethic_fanatic_xenophile
+                has_ethic = ethic_pacifist
+                has_ethic = ethic_fanatic_pacifist
+            }
+        }
+    }
+}
+
+#Swarm Greetings
+country_event = {
+    id = mem_broken_clock.1005
+    title = TRANSMISSION
+    desc = mem_broken_clock.1005.desc
+
+    diplomatic = yes
+    location = event_target:unwelcome_guests.capital_scope
+    is_triggered_only = yes
+
+    picture_event_data = {
+		portrait = event_target:unwelcome_guests
+		planet_background = event_target:unwelcome_guests
+		graphical_culture = event_target:unwelcome_guests
+		city_level = event_target:unwelcome_guests
+		room = event_target:unwelcome_guests.ruler
+	}
+
+    option = {
+        name = mem_broken_clock.1003.generic
+        default_hide_option = yes
+    }
+
+    option = {
+        name = mem_broken_clock.1003.agressive
+        trigger = {
+            OR = {
+                has_ethic = ethic_fanatic_xenophobe
+                has_ethic = ethic_xenophobe
+                has_ethic = ethic_militarist
+                has_ethic = ethic_fanatic_militarist
+            }
+            NOR = {
+                is_pacifist = yes
+                has_valid_civic = civic_fanatic_purifiers
+                has_valid_civic = civic_machine_terminator
+                has_valid_civic = civic_hive_devouring_swarm
+            }
+        }
+    }
+
+    option = {
+        name = mem_broken_clock.1003.purifier
+        trigger = {
+            OR = {
+                has_valid_civic = civic_fanatic_purifiers
+                has_valid_civic = civic_machine_terminator
+            }
+        }
+    }
+
+    option = {
+        name = mem_broken_clock.1005.swarm
+        trigger = {
+            has_valid_civic = civic_hive_devouring_swarm
+        }
+    }
+
+    option = {
+        name = mem_broken_clock.1003.peacekeeper
+        trigger = {
+            OR = {
+                AND = {
+                    OR = {
+                        has_ethic = ethic_xenophile
+                        has_ethic = ethic_fanatic_xenophile
+                    }
+                    OR = {
+                        has_ethic = ethic_militarist
+                        has_ethic = ethic_fanatic_militarist
+                    }
+                }
+                has_valid_civic = civic_machine_servitor
+            }
+        }
+    }
+
+    option = {
+        name = mem_broken_clock.1003.friendly
+        trigger = {
+            OR = {
+                has_ethic = ethic_xenophile
+                has_ethic = ethic_fanatic_xenophile
+                has_ethic = ethic_pacifist
+                has_ethic = ethic_fanatic_pacifist
+            }
+        }
     }
 }
