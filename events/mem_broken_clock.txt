@@ -66,6 +66,24 @@ event = {
     }
 }
 
+#Country event: Newcomers intersect with new and exciting countries
+country_event = {
+    id = mem_broken_clock.3
+    is_triggered_only = yes
+    hide_window = yes
+
+    trigger = {
+        has_country_flag = mem_broken_clock_newcomers
+        has_country_flag = day_0
+    }
+
+    immediate = {
+        FROM = {
+            set_country_flag = mem_broken_clock_encountered_newcomers
+        }
+    }
+}
+
 #Fun begins
 planet_event = {
     id = mem_broken_clock.100
@@ -156,6 +174,7 @@ planet_event = {
                 starbase = {
                     owner = { 
                         save_event_target_as = former_owner
+                        set_country_flag = mem_broken_clock_encountered_newcomers
                         country_event = { id = mem_broken_clock.1001 }
                      }
                     fleet = { delete_fleet = this }
@@ -166,6 +185,11 @@ planet_event = {
                     is_planet_class = pc_habitat
                 }
                 remove_planet = yes
+            }
+            every_fleet_in_system = {
+                owner = {
+                    set_country_flag = mem_broken_clock_encountered_newcomers
+                }
             }
             every_system_planet = {
                 limit = {
@@ -242,6 +266,7 @@ planet_event = {
                             }
                             effect = {
                                 save_event_target_as = unwelcome_guests
+                                set_country_flag = mem_broken_clock_newcomers
                                 mem_broken_clock_give_tech = yes
                                 add_modifier = {
                                     modifier = mem_broken_clock_ai_cheat
@@ -305,6 +330,7 @@ planet_event = {
                             }
                             effect = {
                                 save_event_target_as = unwelcome_guests
+                                set_country_flag = mem_broken_clock_newcomers
                                 mem_broken_clock_give_tech = yes
                                 set_graphical_culture = reptilian_01
                                 add_modifier = {
@@ -371,6 +397,7 @@ planet_event = {
                             }
                             effect = {
                                 save_event_target_as = unwelcome_guests
+                                set_country_flag = mem_broken_clock_newcomers
                                 mem_broken_clock_give_tech = yes
                                 add_modifier = {
                                     modifier = mem_broken_clock_ai_cheat
@@ -646,9 +673,7 @@ planet_event = {
                 }
                 country_event = { id = game_start.9 }
                 set_timed_country_flag = { flag = day_0 days = 7 }
-                event_target:former_owner = {
-                    country_event = { id = mem_broken_clock.1002 days = 7 } #Empire will make contact - after all the event targets are set
-                }
+                country_event = { id = mem_broken_clock.10020 days = 7 } #Empire will make contact - after all the event targets are set
             }
         }
     }
@@ -684,6 +709,28 @@ country_event = {
     }
 }
 
+#Newcomer empire breaks radiosilence
+country_event = {
+    id = mem_broken_clock.10020
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        every_country = {
+            limit = {
+                has_country_flag = mem_broken_clock_encountered_newcomers
+            }
+            establish_communications_no_message = root
+            IF = {
+                limit = {
+                    is_ai = no
+                }
+                country_event = { id = mem_broken_clock.1002 }
+            }
+        }
+    }
+}
+
 #Quicky hailing
 country_event = {
     id = mem_broken_clock.1002
@@ -700,7 +747,6 @@ country_event = {
         name = ONSCREEN
 
         hidden_effect = {
-            establish_communications_no_message = event_target:unwelcome_guests
             IF = {
                 limit = {
                     event_target:unwelcome_guests = { has_authority = auth_imperial }
