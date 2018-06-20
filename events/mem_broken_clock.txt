@@ -167,41 +167,6 @@ planet_event = {
         set_global_flag = mem_broken_clock_return_happened
         change_pc = pc_a_star
         solar_system = {
-            IF = {
-                limit = {
-                    exists = starbase
-                }
-                starbase = {
-                    owner = { 
-                        save_event_target_as = former_owner
-                        set_country_flag = mem_broken_clock_encountered_newcomers
-                        country_event = { id = mem_broken_clock.1001 }
-                     }
-                    fleet = { delete_fleet = this }
-                }
-            }
-            every_system_planet = {
-                limit = {
-                    is_planet_class = pc_habitat
-                }
-                remove_planet = yes
-            }
-            every_fleet_in_system = {
-                owner = {
-                    set_country_flag = mem_broken_clock_encountered_newcomers
-                }
-            }
-            every_system_planet = {
-                limit = {
-                    exists = owner
-                }
-                every_tile = {
-                    limit = {
-                        has_pop = yes
-                    }
-                    kill_pop = yes
-                }
-            }
             random_system_planet = {
                 limit = {
                     has_planet_flag = mem_broken_clock_homeworld
@@ -267,6 +232,7 @@ planet_event = {
                             effect = {
                                 save_event_target_as = unwelcome_guests
                                 set_country_flag = mem_broken_clock_newcomers
+                                set_timed_country_flag = { flag = day_0 days = 7 }
                                 mem_broken_clock_give_tech = yes
                                 add_modifier = {
                                     modifier = mem_broken_clock_ai_cheat
@@ -331,6 +297,7 @@ planet_event = {
                             effect = {
                                 save_event_target_as = unwelcome_guests
                                 set_country_flag = mem_broken_clock_newcomers
+                                set_timed_country_flag = { flag = day_0 days = 7 }
                                 mem_broken_clock_give_tech = yes
                                 set_graphical_culture = reptilian_01
                                 add_modifier = {
@@ -398,6 +365,7 @@ planet_event = {
                             effect = {
                                 save_event_target_as = unwelcome_guests
                                 set_country_flag = mem_broken_clock_newcomers
+                                set_timed_country_flag = { flag = day_0 days = 7 }
                                 mem_broken_clock_give_tech = yes
                                 add_modifier = {
                                     modifier = mem_broken_clock_ai_cheat
@@ -413,6 +381,47 @@ planet_event = {
                     }
                 }
                 prev = {
+                    IF = {
+                        limit = {
+                            exists = starbase
+                        }
+                        starbase = {
+                            owner = { 
+                                save_event_target_as = former_owner
+                                set_country_flag = mem_broken_clock_former_owner
+                                set_country_flag = mem_broken_clock_encountered_newcomers
+                                country_event = { id = mem_broken_clock.1001 }
+                             }
+                            fleet = { delete_fleet = this }
+                        }
+                    }
+                    every_system_planet = {
+                        limit = {
+                            is_planet_class = pc_habitat
+                        }
+                        remove_planet = yes
+                    }
+                    every_country = {
+                        limit = {
+                            intel_level = {
+                                level > low
+                                system = prev
+                            }
+                        }
+                        country_event = { id = mem_broken_clock.1001 }
+                        set_country_flag = mem_broken_clock_encountered_newcomers
+                    }
+                    every_system_planet = {
+                        limit = {
+                            exists = owner
+                        }
+                        every_tile = {
+                            limit = {
+                                has_pop = yes
+                            }
+                            kill_pop = yes
+                        }
+                    }
                     create_starbase = {
                         owner = event_target:unwelcome_guests
                         size = starbase_starfortress
@@ -672,8 +681,7 @@ planet_event = {
                     }
                 }
                 country_event = { id = game_start.9 }
-                set_timed_country_flag = { flag = day_0 days = 7 }
-                country_event = { id = mem_broken_clock.10020 days = 7 } #Empire will make contact - after all the event targets are set
+                # country_event = { id = mem_broken_clock.2000 days = 7 } #Empire will make contact - after all the event targets are set
             }
         }
     }
@@ -690,20 +698,52 @@ country_event = {
     location = FROM
     picture = GFX_evt_clocks
     show_sound = event_scanner
-    
+
+    immediate = {
+        establish_communications_no_message = event_target:unwelcome_guests
+    }
+
     option = {
         name = mem_broken_clock.1001.a
-        default_hide_option = yes
     }
 
     option = {
         name = mem_broken_clock.1001.a.phobe
-        trigger = {
-            OR = {
-                has_ethic = ethic_fanatic_xenophobe
-                has_ethic = ethic_xenophobe
-                has_ethic = ethic_militarist
-                has_ethic = ethic_fanatic_militarist
+
+        exclusive_trigger = {
+            has_ethic = ethic_fanatic_militarist
+            has_ethic = ethic_militarist
+            has_ethic = ethic_fanatic_xenophobe
+            has_ethic = ethic_xenophobe
+        }
+    }
+    
+    after = {
+
+        hidden_effect = {
+            IF = {
+                limit = {
+                    event_target:unwelcome_guests = { has_authority = auth_imperial }
+                }
+                country_event = {
+                    id = mem_broken_clock.1003
+                }
+            }
+            ELSE_IF = {
+                limit = {
+                    event_target:unwelcome_guests = { has_authority = auth_machine_intelligence }
+                }
+                country_event = {
+                    id = mem_broken_clock.1004
+                }
+            }
+            ELSE_IF = {
+                limit = {
+                    event_target:unwelcome_guests = { has_authority = auth_hive_mind }
+                }
+                country_event = {
+                    id = mem_broken_clock.1005
+                }
             }
         }
     }
@@ -711,7 +751,7 @@ country_event = {
 
 #Newcomer empire breaks radiosilence
 country_event = {
-    id = mem_broken_clock.10020
+    id = mem_broken_clock.2000
     hide_window = yes
     is_triggered_only = yes
 
@@ -731,7 +771,7 @@ country_event = {
     }
 }
 
-#Quicky hailing
+#Quicky hailing - likely deprecated
 country_event = {
     id = mem_broken_clock.1002
     title = mem_broken_clock.1002.name
