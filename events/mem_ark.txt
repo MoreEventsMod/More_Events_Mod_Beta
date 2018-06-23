@@ -35,7 +35,7 @@ ship_event = {
     }
 }
 
-#Issuing of chains
+#Actual notification
 country_event = {
     id = mem_ark.2
     title = mem_ark.2.name
@@ -58,11 +58,114 @@ country_event = {
 
     option = {
         name = mem_ark.2.a
+        custom_tooltip = mem_ark.2.a.tooltip
+    }
+}
+
+#MTTH event to trigger project
+planet_event = {
+    id = mem_ark.3
+    hide_window = yes
+
+    mean_time_to_happen = {
+        years = 1
+    }
+
+    trigger = {
+        has_planet_flag = mem_ark_homeworld
+        NOT = { has_global_flag = mem_ark_finished }
+        exists = owner
+        OR = {
+            AND = {
+                owner = { is_country_type = primitive }
+                has_observation_outpost = yes
+                observation_outpost_owner = {
+                    NOT = {
+                        has_country_flag = mem_ark_received_project
+                    }
+                }
+            }
+            owner = { 
+                NOR = {
+                    is_country_type = primitive 
+                    has_country_flag = mem_ark_received_project
+                }
+            }
+        }
+    }
+
+    immediate = {
+        save_event_target_as = the_planet
+        IF = {
+            limit = {
+                owner = { is_country_type = primitive }
+            }
+            observation_outpost_owner = {
+                country_event = { id = mem_ark.4 }
+            }
+        }
+        ELSE = {
+            planet_event = { id = mem_ark.5 }
+        }
+    }
+}
+
+#Observation outpost owner receives project
+country_event = {
+    id = mem_ark.4
+    title = mem_ark.4.name
+    desc = mem_ark.4.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_satellite_in_orbit
+    location = event_target:the_planet
+
+    immediate = {
+        set_country_flag = mem_ark_received_project
+    }
+
+    option = {
+        name = mem_ark.4.a
 
         enable_special_project = {
             name = MEM_ARK_PROJECT
             location = event_target:the_planet
             owner = root
+        }
+    }
+
+    option = {
+        name = NOTIME
+
+        add_influence = 50
+    }
+}
+
+#Planet owner realises it's time
+planet_event = {
+    id = mem_ark.5
+    title = mem_ark.4.name
+    desc = mem_ark.5.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_satellite_in_orbit
+    location = event_target:the_planet
+
+    immediate = {
+        owner = {
+            set_country_flag = mem_ark_received_project
+        }
+    }
+
+    option = {
+        name = mem_ark.4.a
+
+        enable_special_project = {
+            name = MEM_ARK_PROJECT
+            location = event_target:the_planet
+            owner = root.owner
         }
 
         ai_chance = {
@@ -73,15 +176,20 @@ country_event = {
     option = {
         name = NOTIME
 
-        add_influence = 30
+        owner = { add_influence = 50 }
+
+        ai_chance = {
+            factor = 0
+        }
     }
 }
 
+
 #Project completed
 ship_event = {
-    id = mem_ark.3
-    title = mem_ark.3.name
-    desc = mem_ark.3.desc
+    id = mem_ark.100
+    title = mem_ark.100.name
+    desc = mem_ark.100.desc
 
     is_triggered_only = yes
 
@@ -89,8 +197,8 @@ ship_event = {
     location = event_target:the_planet
 
     option = {
-        name = mem_ark.3.a
-        custom_tooltip = mem_ark.3.a.tooltip
+        name = mem_ark.100.a
+        custom_tooltip = mem_ark.100.a.tooltip
 
         ai_chance = {
             factor = 1
@@ -166,6 +274,7 @@ ship_event = {
                         limit = { has_pop = no }
                         create_pop = { species = event_target:mem_ark_sky_people }
                     }
+                    planet_event = { id = mem_ark.101 days = 120 }
                 }
                 set_global_flag = mem_ark_finished
                 destroy_ambient_object = event_target:mem_ark_station
@@ -174,7 +283,7 @@ ship_event = {
     }
 
     option = {
-        name = mem_ark.3.b
+        name = mem_ark.100.b
 
         owner = { add_influence = 50 }
 
@@ -184,7 +293,7 @@ ship_event = {
     }
 
     option = {
-        name = mem_ark.3.c
+        name = mem_ark.100.c
 
         ai_chance = {
             factor = 1
@@ -239,3 +348,259 @@ ship_event = {
     }
 }
 
+#Hidden event to determine the fate of the sky people
+planet_event = {
+    id = mem_ark.101
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        exists = owner
+        owner = {
+            is_country_type = primitive
+        }
+        any_owned_pop = {
+            is_species = event_target:mem_ark_sky_people
+        }
+    }
+    
+    immediate = {
+        random_list = {
+            1 = { #Peace through superior knowledge
+                owner = {
+                    shift_ethic = ethic_materialist
+                    change_dominant_species = { species = event_target:mem_ark_sky_people }
+                    set_name = random
+                    remove_country_flag = late_medieval_age
+                    remove_country_flag = recently_advanced
+                    set_country_flag = machine_age
+                    set_primitive_age = machine_age
+                    change_country_flag = {
+                        icon = {
+                            category = "special"
+                            file = "primitive.dds"
+                        }
+                        background= {
+                            category = "backgrounds"
+                            file = "new_dawn.dds"
+                        }
+                        colors={
+                            "yellow"
+                            "orange"
+                            "null"
+                            "null"
+                        }
+                    }
+                    set_graphical_culture = industrial_01
+                }
+                IF = {
+                    limit = { exists = observation_outpost_owner }
+                    observation_outpost_owner = {
+                        country_event = { id = mem_ark.102 }
+                    }
+                }
+
+                modifier = {
+                    add = 2
+                    owner = { has_ethic = ethic_materialist }
+                }
+                modifier = {
+                    add = 4
+                    owner = { has_ethic = ethic_fanatic_materialist }
+                }
+            }
+            1 = { #Superior firepower conquest
+                owner = {
+                    random_list = {
+                        50 = { shift_ethic = ethic_militarist }
+                        50 = { shift_ethic = ethic_xenophobe }
+                    }
+                    change_dominant_species = { species = event_target:mem_ark_sky_people }
+                    set_name = random
+                    remove_country_flag = late_medieval_age
+                    remove_country_flag = recently_advanced
+                    set_country_flag = industrial_age
+                    set_primitive_age = industrial_age
+                    change_country_flag = {
+                        icon = {
+                            category = "special"
+                            file = "primitive.dds"
+                        }
+                        background= {
+                            category = "backgrounds"
+                            file = "new_dawn.dds"
+                        }
+                        colors={
+                            "beige"
+                            "yellow"
+                            "null"
+                            "null"
+                        }
+                    }
+                    set_graphical_culture = industrial_01
+                }
+                IF = {
+                    limit = { exists = observation_outpost_owner }
+                    observation_outpost_owner = {
+                        country_event = { id = mem_ark.103 }
+                    }
+                }
+
+                modifier = {
+                    add = 1
+                    owner = { has_ethic = ethic_militarist }
+                }
+                modifier = {
+                    add = 2
+                    owner = { has_ethic = ethic_fanatic_militarist }
+                }
+                modifier = {
+                    add = 1
+                    owner = { has_ethic = ethic_xenophobe }
+                }
+                modifier = {
+                    add = 2
+                    owner = { has_ethic = ethic_fanatic_xenophobe }
+                }
+            }
+            1 = { #Peaceful co-existence
+                owner = {
+                    random_list = {
+                        50 = { shift_ethic = ethic_pacifist }
+                        50 = { shift_ethic = ethic_xenophile }
+                    }
+                }
+                IF = {
+                    limit = { exists = observation_outpost_owner }
+                    observation_outpost_owner = {
+                        country_event = { id = mem_ark.104 }
+                    }
+                }
+
+                modifier = {
+                    add = 1
+                    owner = { has_ethic = ethic_pacifist }
+                }
+                modifier = {
+                    add = 2
+                    owner = { has_ethic = ethic_fanatic_pacifist }
+                }
+                modifier = {
+                    add = 1
+                    owner = { has_ethic = ethic_xenophile }
+                }
+                modifier = {
+                    add = 2
+                    owner = { has_ethic = ethic_fanatic_xenophile }
+                }
+            }
+
+            1 = { #Godhood
+                owner = {
+                    shift_ethic = ethic_spiritualist
+                    change_dominant_species = { species = event_target:mem_ark_sky_people }
+                    set_name = random
+                    remove_country_flag = late_medieval_age
+                    remove_country_flag = recently_advanced
+                    set_country_flag = steam_age
+                    set_primitive_age = steam_age
+                    change_country_flag = {
+                        icon = {
+                            category = "special"
+                            file = "primitive.dds"
+                        }
+                        background= {
+                            category = "backgrounds"
+                            file = "new_dawn.dds"
+                        }
+                        colors={
+                            "orange"
+                            "red"
+                            "null"
+                            "null"
+                        }
+                    }
+                }
+                IF = {
+                    limit = { exists = observation_outpost_owner }
+                    observation_outpost_owner = {
+                        country_event = { id = mem_ark.105 }
+                    }
+                }
+
+                modifier = {
+                    add = 2
+                    owner = { has_ethic = ethic_spiritualist }
+                }
+                modifier = {
+                    add = 4
+                    owner = { has_ethic = ethic_fanatic_spiritualist }
+                }
+            }
+        }
+    }
+}
+
+#Notification of materialist resolution
+country_event = {
+    id = mem_ark.102
+    title = mem_ark.102.name
+    desc = mem_ark.102.desc
+
+    pictrue = GFX_evt_mem_native_interaction
+    location = event_target:the_planet
+
+    is_triggered_only = yes
+
+    option = {
+        name = INTERESTING
+    }
+}
+
+#Notification of conquest
+country_event = {
+    id = mem_ark.103
+    title = mem_ark.103.name
+    desc = mem_ark.103.desc
+
+    pictrue = GFX_evt_ground_combat
+    location = event_target:the_planet
+
+    is_triggered_only = yes
+
+    option = {
+        name = INTERESTING
+    }
+}
+
+#Notification of peaceful relations
+country_event = {
+    id = mem_ark.104
+    title = mem_ark.104.name
+    desc = mem_ark.104.desc
+
+    pictrue = GFX_evt_alien_cavemen
+    location = event_target:the_planet
+
+    is_triggered_only = yes
+
+    option = {
+        name = INTERESTING
+    }
+}
+
+#Notification of spiritual antics
+country_event = {
+    id = mem_ark.105
+    title = mem_ark.105.name
+    desc = mem_ark.105.desc
+
+    pictrue = GFX_evt_khan_throne_room
+    location = event_target:the_planet
+
+    is_triggered_only = yes
+
+    option = {
+        name = INTERESTING
+    }
+}
