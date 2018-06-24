@@ -18,8 +18,9 @@ namespace = mem_vazurans
 # mem_vazurans.21  |Information event about an unknown empire being attacked
 # mem_vazurans.40  |Finishing investigation of first Rift
 # mem_vazurans.50  |Retaliation Fleet has been destroyed by target empire ready to progress quest
-# mem_vazurans.51  |Vazuran system spawned
-# mem_vazurans.52  |#####
+# mem_vazurans.51  |Stabilization tech researched and project to stabilize rift set
+# mem_vazurans.52  |Vazuran system spawned
+# mem_vazurans.53  |Player being informed about established connection
 # mem_vazurans.98  |Test Event for the Rift
 # mem_vazurans.99  |Test Event to show Targets
 ########################################################
@@ -854,7 +855,7 @@ country_event = {
 country_event = {
 	id = mem_vazurans.40
 	title = mem_vazurans.40.name
-	desc = mem_vazurans.40a.desc
+	desc = mem_vazurans.40.desc
 
 	picture = GFX_evt_mem_space_battle # TODO change
 	
@@ -862,7 +863,6 @@ country_event = {
 	
 	option = {
 		name = "WORRYING"
-		add_research_option = tech_mem_vazuran_rift_stabilization
 	}
 }
 
@@ -870,18 +870,42 @@ country_event = {
 country_event = {
 	id = mem_vazurans.50
 	title = mem_vazurans.50.name
-	desc = mem_vazurans.50a.desc
+	desc = mem_vazurans.50.desc
 
 	picture = GFX_evt_mem_space_battle # TODO change
-	
-	trigger = {
-		has_technology = tech_wormhole_stabilization
-	}
 	
 	is_triggered_only = yes
 	
 	immediate = {
 		set_country_flag = mem_vazurans_rift_creation_start
+	}
+	
+	option = {
+		name = "WORRYING"
+		add_research_option = tech_mem_vazuran_rift_stabilization
+	}
+}
+
+country_event = {
+	id = mem_vazurans.51
+	title = mem_vazurans.51.name
+	desc = mem_vazurans.51.desc
+
+	picture = GFX_evt_mem_space_battle # TODO change
+	
+	trigger = {
+		has_technology = tech_mem_vazuran_rift_stabilization
+		Not = {
+			has_country_flag = mem_vazurans_rift_stabilization_started
+		}
+	}
+	
+	mean_time_to_happen = {
+		days = 30
+	}
+	
+	immediate = {
+		set_country_flag = mem_vazurans_rift_stabilization_started
 	}
 	
 	option = {
@@ -898,7 +922,7 @@ country_event = {
 
 # vazuran system spawned
 country_event = {
-	id = mem_vazurans.51
+	id = mem_vazurans.52
 	hide_window = yes
 	
 	is_triggered_only = yes
@@ -919,15 +943,15 @@ country_event = {
 			limit = { has_star_flag = mem_antaran_homesystem }
 			isolate_system = yes
 		}
-		country_event = { id = mem_vazurans.52 days = 1 }
+		country_event = { id = mem_vazurans.53 days = 1 }
 	}
 }
 
 # Dimensional Portal constructed
 country_event = {
-	id = mem_vazurans.52
-	title = mem_vazurans.52.name
-	desc = mem_vazurans.52.desc
+	id = mem_vazurans.53
+	title = mem_vazurans.53.name
+	desc = mem_vazurans.53.desc
 
 	picture = GFX_evt_mem_space_battle # TODO change
 	is_triggered_only = yes
@@ -1033,26 +1057,7 @@ country_event = {
 				limit = {
 					has_ambient_object_flag = mem_vazurans_rift
 				}
-				create_fleet = {
-					name = "Raiders"
-					settings = {
-						spawn_debris = no 
-						is_boss = no
-					}
-					effect = {
-						set_owner = event_target:mem_vazurans_country
-						create_ship = {
-							name = random
-							design = "Supremacy"
-							graphical_culture = "fallen_empire_04"
-						}
-						set_location = {
-							target = PREV
-							distance = 0
-							angle = random 
-						}
-					}
-				}
+				create_mem_vazuran_retaliation_fleet = yes
 				last_created_fleet = { # fleet flag for bombarding event
 					set_fleet_flag = mem_vazurans_fleet
 					set_fleet_stance = aggressive
@@ -1204,41 +1209,7 @@ country_event = {
 							}
 						}
 					}
-					create_fleet = {
-						name = "Raiders"
-						settings = {
-							spawn_debris = no 
-							is_boss = no
-						}
-						effect = {
-							set_owner = event_target:mem_vazurans_country
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							set_location = {
-								target = PREV
-								distance = 0
-								angle = random 
-							}
-						}
-					}
+					create_mem_vazuran_corvette_stage_fleet = yes
 				}
 				IF = { # raiding fleet if not having researched cruisers yet
 					limit = {
@@ -1249,46 +1220,7 @@ country_event = {
 							}
 						}
 					}
-					create_fleet = {
-						name = "Raiders"
-						settings = {
-							spawn_debris = no 
-							is_boss = no
-						}
-						effect = {
-							set_owner = event_target:mem_vazurans_country
-							create_ship = {
-								name = random
-								design = "Supremacy"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							set_location = {
-								target = PREV
-								distance = 0
-								angle = random 
-							}
-						}
-					}
+					create_mem_vazuran_destroyer_stage_fleet = yes
 				}
 				IF = { # raiding fleet if not having researched battleships yet
 					limit = {
@@ -1299,66 +1231,7 @@ country_event = {
 							}
 						}
 					}
-					create_fleet = {
-						name = "Raiders"
-						settings = {
-							spawn_debris = no 
-							is_boss = no
-						}
-						effect = {
-							set_owner = event_target:mem_vazurans_country
-							create_ship = {
-								name = random
-								design = "Supremacy"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Supremacy"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Supremacy"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							set_location = {
-								target = PREV
-								distance = 0
-								angle = random 
-							}
-						}
-					}
+					create_mem_vazuran_cruiser_stage_fleet = yes
 				}
 				IF = { # raiding fleet if not having researched any xl t1 weapon yet
 					limit = {
@@ -1371,86 +1244,7 @@ country_event = {
 							}
 						}
 					}
-					create_fleet = {
-						name = "Raiders"
-						settings = {
-							spawn_debris = no 
-							is_boss = no
-						}
-						effect = {
-							set_owner = event_target:mem_vazurans_country
-							create_ship = {
-								name = random
-								design = "Supremacy"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Supremacy"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Supremacy"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Supremacy"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							set_location = {
-								target = PREV
-								distance = 0
-								angle = random 
-							}
-						}
-					}
+					create_mem_vazuran_battleship_stage_fleet = yes
 				}
 				IF = { # raiding fleet if not having researched any xl t2 weapon yet
 					limit = {
@@ -1467,91 +1261,7 @@ country_event = {
 							}
 						}
 					}
-					create_fleet = {
-						name = "Raiders"
-						settings = {
-							spawn_debris = no 
-							is_boss = no
-						}
-						effect = {
-							set_owner = event_target:mem_vazurans_country
-							create_ship = {
-								name = random
-								design = "Supremacy"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Supremacy"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Supremacy"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Supremacy"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Supremacy"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							set_location = {
-								target = PREV
-								distance = 0
-								angle = random 
-							}
-						}
-					}
+					create_mem_vazuran_xl_01_stage_fleet = yes
 				}
 				IF = { # raiding fleet if having researched any xl t2 weapon
 					limit = {
@@ -1563,96 +1273,7 @@ country_event = {
 							}
 						}
 					}
-					create_fleet = {
-						name = "Raiders"
-						settings = {
-							spawn_debris = no 
-							is_boss = no
-						}
-						effect = {
-							set_owner = event_target:mem_vazurans_country
-							create_ship = {
-								name = random
-								design = "Supremacy"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Supremacy"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Supremacy"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Supremacy"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Supremacy"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Supremacy"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							create_ship = {
-								name = random
-								design = "Glory"
-								graphical_culture = "fallen_empire_04"
-							}
-							set_location = {
-								target = PREV
-								distance = 0
-								angle = random 
-							}
-						}
-					}
+					create_mem_vazuran_xl_02_stage_fleet = yes
 				}
 				last_created_fleet = { # fleet flag for bombarding event
 					set_fleet_flag = mem_vazurans_fleet
@@ -3254,6 +2875,64 @@ country_event = {
 	}
 }
 
+# planet class change test for headquarters habitat
+planet_event = {
+	id = mem_vazurans.94
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		change_pc = pc_mem_vazuran_habitat
+		solar_system = {
+#			spawn_system = { 
+#				min_distance >= 30
+#				max_distance <= 50
+#				initializer = "mem_vazuran_homesystem"
+#				# is_discovered = yes
+#			}
+#			spawn_planet = {
+#				class = "pc_mem_vazuran_habitat"
+#				location = root
+#				orbit_location = yes
+#				orbit_angle_offset = 45
+#				orbit_distance_offset = 9.899
+#				size = 25
+#				has_ring = no
+#				
+#				init_effect = {
+#					set_name = "HABITAT_PLANET_NAME"
+		#				set_planet_entity = {
+		#					entity = "orbital_habitat_entity"
+		#					graphical_culture = fromfrom
+		#				}
+#					surveyed = {
+#						set_surveyed = yes
+#						surveyor = FROM
+#					}
+#					set_all_comms_surveyed = yes
+#					while = {
+#						limit = {
+#							any_tile = { has_blocker = yes }
+#						}
+#						random_tile = {
+#							limit = { has_blocker = yes }
+#							remove_blocker = yes
+#						}
+#					}
+#					set_planet_flag = megastructure
+#					set_planet_flag = habitat
+#				}
+#			}
+#			spawn_megastructure = { 
+#                type = "spy_orb_4" 
+#                location = prev
+#                owner = space_owner
+#            }
+		}
+	}
+}
+
 # spawn testfleet at capital
 country_event = {
 	id = mem_vazurans.95
@@ -3296,41 +2975,42 @@ country_event = {
 			}
 		}
 		capital_scope = {
-			create_fleet = {
-				name = "Raiders"
-				settings = {
-					spawn_debris = no 
-					is_boss = no
-				}
-				effect = {
-					set_owner = event_target:mem_vazurans_country
-					create_ship = {
-						name = random
-						design = "Glory"
-						graphical_culture = "fallen_empire_04"
-					}
-					create_ship = {
-						name = random
-						design = "Glory"
-						graphical_culture = "fallen_empire_04"
-					}
-					create_ship = {
-						name = random
-						design = "Glory"
-						graphical_culture = "fallen_empire_04"
-					}
-					create_ship = {
-						name = random
-						design = "Glory"
-						graphical_culture = "fallen_empire_04"
-					}
-					set_location = {
-						target = PREV
-						distance = 0
-						angle = random 
-					}
-				}
-			}
+			create_mem_vazuran_retaliation_fleet = yes
+#			create_fleet = {
+#				name = "Raiders"
+#				settings = {
+#					spawn_debris = no 
+#					is_boss = no
+#				}
+#				effect = {
+#					set_owner = event_target:mem_vazurans_country
+#					create_ship = {
+#						name = random
+#						design = "Vazuran_Cruiser"
+#						graphical_culture = "mem_ancient_02"
+#					}
+#					create_ship = {
+#						name = random
+#						design = "Vazuran_Escort"
+#						graphical_culture = "mem_ancient_02"
+#					}
+#					create_ship = {
+#						name = random
+#						design = "Vazuran_Control_Drone"
+#						graphical_culture = "mem_ancient_02"
+#					}
+#					create_ship = {
+#						name = random
+#						design = "Vazuran_Combat_Drone"
+#						graphical_culture = "mem_ancient_02"
+#					}
+#					set_location = {
+#						target = PREV
+#						distance = 0
+#						angle = random 
+#					}
+#				}
+#			}
 		}
 	}
 }
