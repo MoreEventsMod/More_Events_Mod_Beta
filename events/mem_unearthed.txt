@@ -1,0 +1,145 @@
+#Unearthed
+#By ViolentBeetle
+
+namespace = mem_unearthed
+
+#Initial event - setting up
+country_event = {
+    id = mem_unearthed.1
+    hide_window = yes
+
+    trigger = {
+        NOT = {
+            has_global_flag = mem_unearthed_happened
+        }
+        is_country_type = primitive
+        OR = {
+            has_country_flag = steam_age
+            has_country_flag = industrial_age
+            has_country_flag = machine_age
+        }
+        capital_scope = {
+            has_observation_outpost = yes
+            observation_outpost = {
+                OR = {
+                    has_mission = passive_observation
+                    has_mission = specimen_collection
+                }
+            }
+            observation_outpost_owner = {
+                is_ai = no
+            }
+        }
+    }
+
+    mean_time_to_happen = {
+        months = 5000
+    }
+
+    immediate = {
+        set_global_flag = mem_unearthed_happened
+        random_list = {
+            1 = { set_global_flag = mem_unearthed_blight }
+            1 = { set_global_flag = mem_unearthed_tripod }
+            1 = { set_global_flag = mem_unearthed_bomb }
+            1 = { set_global_flag = mem_unearthed_colony }
+            1 = { set_global_flag = mem_unearthed_technology }
+            1 = { set_global_flag = mem_unearthed_glow }
+        }
+        set_country_flag = mem_unearched_country
+        save_event_target_as = the_primitives
+        capital_scope = {
+            save_event_target_as = the_planet
+            observation_outpost_owner = {
+                save_event_target_as = outpost_owner
+                country_event = { id = mem_unearthed.2 }
+            }
+        }
+    }
+}
+
+#Starting event
+country_event = {
+    id = mem_unearthed.2
+    title = mem_unearthed.1.name
+    desc = mem_unearthed.1.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_archaeological_dig
+    location = event_target:the_planet
+
+    option = { #Let them keep it
+        name = mem_unearthed.2.a
+
+        hidden_effect = {
+            event_target:the_planet = {
+                planet_event = { id = mem_unearthed.100 days = 720 }
+            }
+        }
+    }
+
+    option = { #Steal it
+        name = mem_unearthed.2.b
+        set_global_flag = mem_unearthed_tried_to_steal
+
+        enable_special_project = {
+            name = MEM_UNEARTHED_STEAL_IT
+            location = event_target:the_planet
+            owner = root
+        }
+    }
+}
+
+#Planetside event: Capsule is active
+planet_event = {
+    id = mem_unearthed.100
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        owner = {
+            is_country_type = primitive
+        }
+    }
+
+    immediate = {
+        switch = {
+            trigger = has_global_flag
+            mem_unearthed_blight = {
+                planet_event = { id = mem_unearthed.110 }
+            }
+            mem_unearthed_tripod = {
+                planet_event = { id = mem_unearthed.120 }
+            }
+            mem_unearthed_bomb = {
+                planet_event = { id = mem_unearthed.130 }
+            }
+            mem_unearthed_colony = {
+                planet_event = { id = mem_unearthed.140 }
+            }
+            mem_unearthed_technology = {
+                planet_event = { id = mem_unearthed.150 }
+            }
+            mem_unearthed_glow = {
+                planet_event = { id = mem_unearthed.160 }
+            }
+        }
+    }
+}
+
+#Blight
+planet_event = {
+    id = mem_unearthed.110
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        IF = {
+            limit = {
+                has_observation_outpost = yes
+            }
+            observation_outpost_owner = { country_event = { id = mem_unearthed.111 } }
+        }
+    }
+}
