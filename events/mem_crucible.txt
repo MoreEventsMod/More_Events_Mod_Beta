@@ -35,7 +35,34 @@ planet_event = {
             which = mem_crucible_timer
             value = 1
         }
-        IF = {
+        IF = { #Above all else, checking for hostile observation action being taken - instant shrouding if yes
+            limit = {
+                has_observation_outpost = yes
+                observation_outpost = {
+                    NOR = {
+                        has_mission = passive_observation
+                        has_mission = specimen_collection
+                    }
+                }
+            }
+            observation_outpost_owner = {
+                set_country_flag = mem_crucible_took_hostile_action
+                country_event = { id = mem_crucible.6 }
+            }
+            every_tile = {
+                kill_pop = yes
+                remove_building = yes
+            }
+            change_pc = pc_shrouded
+        }
+        ELSE_IF = { #Checking if someone took over
+            limit = {
+                exists = owner
+                owner = { NOT = { is_country_type = primitive } }
+            }
+            planet_event = { id = mem_crucible.7 }
+        }
+        ELSE_IF = { #If country is still primitive check whenever they should advance
             limit = {                
                 exists = owner
                 owner = {
@@ -52,12 +79,18 @@ planet_event = {
                 value = 0
             }
         }
-        ELSE_IF = {
+        ELSE_IF = { #If they are shrouded, check whenever they should de-shroud
             limit = {
                 is_planet_class = pc_shrouded
                 check_variable = {
                     which = mem_crucible_timer
                     value > 14
+                }
+                NAND = { #If you took any hostile action against the planet, it will not de-shroud, until someone else takes over the system
+                    exists = space_owner
+                    space_owner = {
+                        has_country_flag = mem_crucible_took_hostile_action
+                    }
                 }
             }
             change_pc = pc_gaia
@@ -119,7 +152,7 @@ planet_event = {
                 }
             }
         }
-        ELSE_IF = {
+        ELSE_IF = { #If something weird happened to a planet, reform it as shrouded. Mark space owner as hostile, he probably broke it
             limit = {
                 NOR = {
                     is_planet_class = pc_gaia
@@ -127,6 +160,12 @@ planet_event = {
                 }
             }
             change_pc = pc_shrouded
+            IF = {
+                limit = { exists = space_owner }
+                space_owner = {
+                    set_country_flag = mem_crucible_took_hostile_action
+                }
+            }
         }
 
         #Checking if it's time for observer to step in
@@ -240,6 +279,55 @@ country_event = {
                 which = mem_crucible_witnessed_death
                 value > 1
             }
+        }
+    }
+}
+
+#Notification that planet reacted to hostile action
+country_event = {
+    id = mem_crucible.6
+    title = mem_crucible.6.name
+    desc = mem_crucible.6.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_shrouded
+    location = FROM
+    show_sound = event_mystic_reveal
+    
+    option = {
+        name = mem_crucible.6.a
+    }
+}
+
+#Planet event - why did you conquer the planet
+planet_event = {
+    id = mem_crucible.7
+    title = mem_crucible.7.name
+    desc = mem_crucible.7.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_shrouded
+    location = ROOT
+    show_sound = event_mystic_reveal
+
+    immediate = {
+        owner = {
+            set_country_flag = mem_crucible_took_hostile_action
+        }
+        every_tile = {
+            kill_pop = yes
+            remove_building = yes
+        }
+        change_pc = pc_shrouded
+    }
+
+    option = {
+        name = mem_crucible.7.a
+
+        tooltip = {
+            change_pc = pc_shrouded
         }
     }
 }
