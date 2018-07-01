@@ -1,0 +1,245 @@
+#Crucible
+#By ViolentBeetle
+
+namespace = mem_crucible
+
+#Initiation of the maintenance loop
+event = {
+    id = mem_crucible.1
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        has_global_flag = mem_crucible_system_spawned
+    }
+
+    immediate = {
+        random_planet = {
+            limit = { has_planet_flag = mem_crucible_planet }
+            planet_event = { id = mem_crucible.2 }
+        }
+    }
+}
+
+@maintenance_loop = 1
+@maintenance_loop_random = 9
+
+#Planet's maintenance loop
+planet_event = {
+    id = mem_crucible.2
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        change_variable = {
+            which = mem_crucible_timer
+            value = 1
+        }
+        IF = {
+            limit = {                
+                exists = owner
+                owner = {
+                    is_country_type = primitive
+                }
+                check_variable = {
+                    which = mem_crucible_timer
+                    value > 9
+                }
+            }
+            owner = { mem_crucible_advance_ages = yes }
+            set_variable = {
+                which = mem_crucible_timer
+                value = 0
+            }
+        }
+        ELSE_IF = {
+            limit = {
+                is_planet_class = pc_shrouded
+                check_variable = {
+                    which = mem_crucible_timer
+                    value > 14
+                }
+            }
+            change_pc = pc_gaia
+            reroll_planet = yes
+            orbital_deposit_tile = {
+                clear_deposits = yes
+            }
+            event_target:mem_crucible_country = {
+                set_country_type = primitive
+                clear_ethos = yes
+                country_add_ethic = ethic_fanatic_xenophobe
+                random_list = {
+                    1 = { country_add_ethic = ethic_militarist }
+                    1 = { country_add_ethic = ethic_pacifist }
+                    1 = { country_add_ethic = ethic_egalitarian }
+                    1 = { country_add_ethic = ethic_authoritarian }
+                    1 = { country_add_ethic = ethic_spiritualist }
+                    1 = { country_add_ethic = ethic_materialist }
+                }
+                set_country_flag = stone_age
+                set_primitive_age = stone_age
+                remove_country_flag = mem_crucible_insanity_age
+                change_government = {
+                    authority = random
+                    civics = {
+                        civic = civic_secret_of_fire
+                        civic = civic_the_wheel
+                    }
+                }
+                set_graphical_culture = preindustrial_01
+            }
+            set_owner = event_target:mem_crucible_country
+            set_name = Volch
+            while = {
+                count = 5
+                random_tile = {
+                    limit = { has_pop = no is_orbital_tile = no }
+                    remove_blocker = yes
+                    create_pop = { species = owner }
+                    set_deposit = d_farmland_deposit
+                }
+            }
+            create_army = {
+                name = "NAME_Primitive_Army"
+                owner = event_target:mem_crucible_country
+                species = event_target:mem_crucible_country
+                type = "primitive_army"
+            }
+            set_variable = {
+                which = mem_crucible_timer
+                value = 0
+            }
+
+            IF = {
+                limit = { exists = space_owner }
+                space_owner = {
+                    set_country_flag = mem_crucible_witnessed_rebirth
+                    country_event = { id = mem_crucible.5 }
+                }
+            }
+        }
+        ELSE_IF = {
+            limit = {
+                NOR = {
+                    is_planet_class = pc_gaia
+                    is_planet_class = pc_shrouded
+                }
+            }
+            change_pc = pc_shrouded
+        }
+
+        #Checking if it's time for observer to step in
+        IF = {
+            limit = { 
+                has_observation_outpost = yes 
+                observation_outpost_owner = {
+                    has_country_flag = mem_crucible_witnessed_rebirth
+                    check_variable = {
+                        which = mem_crucible_witnessed_death
+                        value > 2
+                    }
+                }
+            }
+            #Notifying player goes here
+        }
+
+        #Return to loop
+        planet_event = { id = mem_crucible.2 days = @maintenance_loop random = @maintenance_loop_random }
+    }
+}
+
+#Notification of Insanity Age
+country_event = {
+    id = mem_crucible.3
+    title = mem_crucible.3.name
+    desc = mem_crucible.3.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_burning_settlement
+    location = FROM
+    show_sound = event_public_unrest
+
+    option = {
+        name = mem_crucible.3.a
+    }
+}
+
+#Notification of shrouding
+country_event = {
+    id = mem_crucible.4
+    title = mem_crucible.4.name
+    desc = {
+        text = mem_crucible.4.desc.first
+        check_variable = {
+            which = mem_crucible_witnessed_death
+            value = 1
+        }
+    }
+    desc = {
+        text = mem_crucible.4.desc.latter
+        check_variable = {
+            which = mem_crucible_witnessed_death
+            value > 1
+        }
+    }
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_shrouded
+    location = FROM
+    show_sound = event_mystic_reveal
+
+    option = {
+        name = mem_crucible.4.a
+    }
+}
+
+#Notification of de-shrouding
+country_event = {
+    id = mem_crucible.5
+    title = mem_crucible.5.name
+    desc = {
+        text = mem_crucible.5.desc.never_seen_death
+        check_variable = {
+            which = mem_crucible_witnessed_death
+            value = 0
+        }
+    }
+    desc = {
+        text = mem_crucible.5.desc.seen_death
+        check_variable = {
+            which = mem_crucible_witnessed_death
+            value = 1
+        }
+    }
+    desc = {
+        text = mem_crucible.5.desc.seen_many_deaths
+        check_variable = {
+            which = mem_crucible_witnessed_death
+            value > 1
+        }
+    }
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_shrouded
+    location = FROM
+    show_sound = event_mystic_reveal
+
+    option = {
+        name = mem_crucible.5.a
+    }
+
+    option = {
+        name = mem_crucible.5.a
+
+        exclusive_trigger = {
+            check_variable = {
+                which = mem_crucible_witnessed_death
+                value > 1
+            }
+        }
+    }
+}
