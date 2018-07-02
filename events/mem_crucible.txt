@@ -191,6 +191,7 @@ planet_event = {
         #Checking if it's time for observer to step in
         IF = {
             limit = { 
+                NOT = { has_global_flag = mem_crucible_someone_was_offered_quest }
                 has_observation_outpost = yes 
                 observation_outpost_owner = {
                     NOT = { has_country_flag = mem_crucible_offered_quest }
@@ -499,13 +500,14 @@ country_event = {
 
     immediate = {
         set_country_flag = mem_crucible_offered_quest
+        set_global_flag = mem_crucible_someone_was_offered_quest
     }
 
     option = {
         name = mem_crucible.100.a
 
         begin_event_chain = {
-            event_chain = mem_crucible_study_chain
+            event_chain = mem_crucible_chain
             target = this
         }
         hidden_effect = {
@@ -527,5 +529,174 @@ country_event = {
         custom_tooltip = mem_crucible.100.b.tooltip
 
         set_country_flag = mem_crucible_ignore_events
+        remove_global_flag = mem_crucible_someone_was_offered_quest
+    }
+}
+
+# Completed homeworld survey
+ship_event = {
+    id = mem_crucible.101
+    title = mem_crucible.101.name
+    desc = mem_crucible.101.desc
+
+    is_triggered_only = yes
+
+    location = event_target:mem_crucible_planet
+    picture = GFX_evt_hive_mind
+    show_sound = event_mystic_reveal
+
+    option = {
+        name = mem_crucible.101.a
+    }
+
+    after = {
+        owner = {
+            add_monthly_resource_mult = {
+				resource = unity
+				value = @tier3unityreward
+				min = @tier3unitymin
+				max = @tier3unitymax
+			}
+        }
+        hidden_effect = {
+            owner = {
+                set_country_flag = mem_crucible_examined_homeworld
+                country_event = {
+                    id = mem_crucible.200
+                    days = 30
+                }
+            }
+        }
+    }
+}
+
+# Completion of controller planet survey
+ship_event = {
+    id = mem_crucible.102
+    title = mem_crucible.102.name
+    desc = mem_crucible.102.desc
+
+    is_triggered_only = yes
+
+    location = event_target:mem_crucible_controller_planet
+    picture = GFX_evt_shrouded
+    show_sound = event_mystic_reveal
+
+    option = {
+        name = mem_crucible.102.a
+    }
+
+    after = {
+        owner = {
+            add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+        }
+        hidden_effect = {
+            owner = {
+                set_country_flag = mem_crucible_examined_controller
+                country_event = {
+                    id = mem_crucible.200
+                    days = 30
+                }
+            }
+        }
+    }
+}
+
+# After two events are complete
+country_event = {
+    id = mem_crucible.200
+    title = mem_crucible.200.name
+    desc = mem_crucible.200.desc
+
+    is_triggered_only = yes
+
+    location = event_target:mem_crucible_controller_planet.solar_system
+    picture = GFX_evt_space_monster
+    location = event_mystic_reveal
+
+    trigger = {
+        has_country_flag = mem_crucible_examined_homeworld
+        has_country_flag = mem_crucible_examined_controller
+        NOT = {
+            has_country_flag = mem_crucible_received_final_project
+        }
+    }
+
+    immediate = {
+        set_country_flag = mem_crucible_received_final_project
+    }
+
+    option = {
+        name = mem_crucible.200.a
+
+        add_influence = 100
+        enable_special_project = {
+            name = MEM_CRUCIBLE_CONTACT_THE_CONTROLLER
+            location = event_target:mem_crucible_controller_planet
+            owner = root
+        }
+    }
+
+    option = {
+        name = mem_crucible.200.b
+        custom_tooltip = mem_crucible.100.b.tooltip
+
+        add_influence = 200
+        set_country_flag = mem_crucible_ignore_events
+        remove_global_flag = mem_crucible_someone_was_offered_quest
+    }
+}
+
+# Contact enabled
+ship_event = {
+    id = mem_crucible.201
+    title = mem_crucible.201.name
+    desc = mem_crucible.201.desc
+
+    is_triggered_only = yes
+
+    location = event_target:mem_crucible_controller_planet
+    picture = GFX_evt_space_monster
+    location = event_mystic_reveal
+
+    option = {
+        name = ONSCREEN
+
+        hidden_effect = {
+            owner = {
+                country_event = { id = mem_crucible.202 }
+            }
+        }
+    }
+}
+
+# Diplomatic event
+country_event = {
+    id = mem_crucible.202
+    title = mem_crucible.202.name
+    desc = mem_crucible.202.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+    location = event_target:mem_crucible_controller_planet
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+    
+    option = { #Disable the controller
+        name = mem_crucible.202.a
+    }
+
+    option = { #Solve the controller's problem
+        name = mem_crucible.202.b
+    }
+
+    option = {
+        name = mem_crucible.202.c
     }
 }
