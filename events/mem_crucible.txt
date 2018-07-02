@@ -656,8 +656,8 @@ country_event = {
     }
 }
 
-# Contact enabled
-ship_event = {
+# Contact made
+country_event = {
     id = mem_crucible.201
     title = mem_crucible.201.name
     desc = mem_crucible.201.desc
@@ -668,40 +668,29 @@ ship_event = {
     picture = GFX_evt_space_monster
     location = event_mystic_reveal
 
-    option = {
-        name = ONSCREEN
+    option = { #Disable the controller
+        name = mem_crucible.201.a
+        custom_tooltip = mem_crucible.201.a.tooltip
 
         hidden_effect = {
-            owner = {
-                country_event = { id = mem_crucible.202 }
+            event_target:mem_crucible_planet = {
+                every_tile = {
+                    kill_pop = yes
+                    remove_building = yes
+                }
+                change_pc = pc_shrouded
+                planet_event = { id = mem_crucible.300 days = 60 }
             }
+            country_event = { id = mem_crucible.302 days = 90 }
         }
-    }
-}
-
-# Diplomatic event
-country_event = {
-    id = mem_crucible.202
-    title = mem_crucible.202.name
-    desc = mem_crucible.202.desc
-
-    is_triggered_only = yes
-    diplomatic = yes
-    location = event_target:mem_crucible_controller_planet
-    picture_event_data = {
-		room = no_video_feed_room
-    }
-    
-    option = { #Disable the controller
-        name = mem_crucible.202.a
     }
 
     option = { #Solve the controller's problem
-        name = mem_crucible.202.b
+        name = mem_crucible.201.b
     }
 
     option = { #Change parameters 
-        name = mem_crucible.202.c
+        name = mem_crucible.201.c
 
         trigger = {
             OR = {
@@ -712,13 +701,217 @@ country_event = {
     }
 
     option = { #Hijack controller
-        name = mem_crucible.202.d
+        name = mem_crucible.201.d
 
         trigger = {
             OR = {
                 has_authority = auth_machine_intelligence
                 has_trait = trait_cybernetic
                 has_trait = trait_robotic_3
+            }
+        }
+    }
+
+    option = { #Screw you guys
+        name = mem_crucible.201.e
+
+        add_influence = 300
+        set_country_flag = mem_crucible_ignore_events
+        remove_global_flag = mem_crucible_someone_was_offered_quest
+    }
+}
+
+################
+# FINAL EVENTS #
+################
+
+# Delayed effect on shrouded planet
+planet_event = {
+    id = mem_crucible.300
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        create_country = {
+            name = "True Voldareen"
+            type = mem_blacksite_faction #Destroying outposts
+            flag = {
+                icon = {
+                    category = spherical
+                    file = flag_spherical_1.dds
+                }
+                background = {
+                    category = backgrounds
+                    file = triangle_split.dds
+                }
+                colors = {
+                    "red"
+                    "pink"
+                    "null"
+                    "null"
+                }
+            }
+        }
+        create_fleet = {
+            name = "True Voldareen"
+            effect = {
+                set_owner = last_created_country
+                set_location = root
+                create_ship = {
+                    design = NAME_Corrupted_Avatar
+                }
+                set_fleet_stance = aggressive
+                set_aggro_range_measure_from = self
+                set_aggro_range = 500
+            }
+        }
+        change_pc = pc_gaia
+        reroll_planet = yes
+        orbital_deposit_tile = {
+            clear_deposits = yes
+        }
+        IF = {
+            limit = { exists = space_owner }
+            space_owner = {
+                country_event = { id = mem_crucible.301 }
+            }
+        }
+    }
+}
+
+#Notification
+country_event = {
+    id = mem_crucible.301
+    title = mem_crucible.301.name
+    desc = mem_crucible.301.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_space_monster
+    location = event_target:mem_crucible_controller_planet
+    show_sound = event_mystic_reveal
+
+    option = {
+        name = mem_crucible.301.a
+    }
+}
+
+#Fallen empire dislike
+country_event = {
+    id = mem_crucible.302
+    title = TRANSMISSION
+    desc = {
+        text = mem_crucible.302.xenophile
+        trigger = {
+            event_target:angry_empire = {
+                OR = {
+                    has_ethic = ethic_fanatic_xenophile
+                    has_ethic = ethic_fanatic_materialist
+                }
+            }
+        }
+    }
+    desc = {
+        text = mem_crucible.302.xenophobe
+        trigger = {
+            event_target:angry_empire = {
+                OR = {
+                    has_ethic = ethic_fanatic_xenophobe
+                    has_ethic = ethic_fanatic_spiritualist
+                }
+            }
+        }
+    }
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		portrait = event_target:angry_empire
+		planet_background = event_target:angry_empire
+		graphical_culture = event_target:angry_empire
+		city_level = event_target:angry_empire
+		room = event_target:angry_empire.ruler
+    }
+    
+    trigger = {
+        any_country = {
+            is_country_type = fallen_empire
+            OR = {
+                has_ethic = ethic_fanatic_xenophobe
+                has_ethic = ethic_fanatic_spiritualist
+                has_ethic = ethic_fanatic_xenophile
+                has_ethic = ethic_fanatic_materialist
+            }
+        }
+    }
+
+    immediate = {
+        random_country = {
+            limit = {
+                is_country_type = fallen_empire
+                OR = {
+                    has_ethic = ethic_fanatic_xenophobe
+                    has_ethic = ethic_fanatic_spiritualist
+                    has_ethic = ethic_fanatic_xenophile
+                    has_ethic = ethic_fanatic_materialist
+                }
+            }
+            save_event_target_as = angry_empire
+        }
+        every_country = {
+            limit = {
+                is_country_type = fallen_empire
+                OR = {
+                    has_ethic = ethic_fanatic_xenophobe
+                    has_ethic = ethic_fanatic_spiritualist
+                    has_ethic = ethic_fanatic_xenophile
+                    has_ethic = ethic_fanatic_materialist
+                }
+            }
+            establish_communications_no_message = root
+        }
+    }
+
+    option = {
+        name = mem_crucible.302.a
+    }
+
+    option = {
+        name = mem_crucible.302.b
+
+        trigger = {
+            OR = {
+                has_ethic = ethic_materialist
+                has_ethic = ethic_fanatic_materialist
+            }
+        }
+    }
+
+    option = {
+        name = mem_crucible.302.c
+
+        trigger = {
+            OR = {
+                has_ethic = ethic_egalitarian
+                has_ethic = ethic_fanatic_egalitarian
+                has_ethic = ethic_pacifist
+                has_ethic = ethic_fanatic_pacifist
+                has_ethic = ethic_xenophile
+                has_ethic = ethic_fanatic_xenophile
+            }
+        }
+    }
+
+    option = {
+        name = mem_crucible.302.d
+
+        trigger = {
+            OR = {
+                has_ethic = ethic_fanatic_xenophobe
+                has_ethic = ethic_xenophobe
+                has_ethic = ethic_fanatic_militarist
+                has_ethic = ethic_militarist
             }
         }
     }
