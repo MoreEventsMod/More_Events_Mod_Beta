@@ -30,6 +30,10 @@ planet_event = {
     hide_window = yes
     is_triggered_only = yes
 
+    trigger = {
+        NOT = { has_planet_flag = mem_crucible_stop_the_loop }
+    }
+
     immediate = {
         change_variable = {
             which = mem_crucible_timer
@@ -186,6 +190,7 @@ planet_event = {
             limit = { 
                 has_observation_outpost = yes 
                 observation_outpost_owner = {
+                    NOT = { has_country_flag = mem_crucible_offered_quest }
                     has_country_flag = mem_crucible_witnessed_rebirth
                     check_variable = {
                         which = mem_crucible_witnessed_death
@@ -194,6 +199,16 @@ planet_event = {
                 }
             }
             #Notifying player goes here
+        }
+
+        #Checking if somebody shattered controller planet somehow
+        event_target:mem_crucible_controller_planet = {
+            IF = {
+                limit = {
+                    NOT = { is_planet_class = pc_shrouded }
+                }
+                change_pc = pc_shrouded
+            }
         }
 
         #Return to loop
@@ -285,6 +300,10 @@ country_event = {
     }
 
     is_triggered_only = yes
+
+    trigger = {
+        NOT = { has_country_flag = mem_crucible_ignore_events }
+    }
 
     picture = GFX_evt_alien_cavemen
     location = FROM
@@ -391,4 +410,37 @@ ship_event = {
 			}
 		}
 	}
+}
+
+
+####################
+# ACTUAL STORYLINE #
+####################
+
+# Well, let's get triggered
+country_event = {
+    id = mem_crucible.100
+    title = mem_crucible.100.name
+    desc = mem_crucible.100.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_hive_mind
+    location = FROM
+    show_sound = event_mystic_reveal
+
+    immediate = {
+        set_country_flag = mem_crucible_offered_quest
+    }
+
+    option = {
+        name = mem_crucible.100.a
+    }
+
+    option = {
+        name = mem_crucible.100.b
+        custom_tooltip = mem_crucible.100.b.tooltip
+
+        set_country_flag = mem_crucible_ignore_events
+    }
 }
