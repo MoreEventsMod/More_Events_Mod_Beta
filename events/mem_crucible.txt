@@ -678,6 +678,7 @@ country_event = {
                     kill_pop = yes
                     remove_building = yes
                 }
+                set_planet_flag = mem_crucible_stop_the_loop
                 change_pc = pc_shrouded
                 planet_event = { id = mem_crucible.300 days = 60 }
             }
@@ -687,6 +688,12 @@ country_event = {
 
     option = { #Solve the controller's problem
         name = mem_crucible.201.b
+
+        enable_special_project = {
+            name = MEM_CRUCIBLE_SOLVE_THE_PROBLEM
+            location = event_target:mem_crucible_controller_planet
+            owner = root
+        }
     }
 
     option = { #Change parameters 
@@ -697,6 +704,11 @@ country_event = {
                 has_trait = trait_latent_psionic
                 has_trait = trait_psionic
             }
+        }
+        enable_special_project = {
+            name = MEM_CRUCIBLE_CHANGE_THE_PROBLEM
+            location = event_target:mem_crucible_controller_planet
+            owner = root
         }
     }
 
@@ -709,6 +721,7 @@ country_event = {
                 has_trait = trait_cybernetic
                 has_trait = trait_robotic_3
             }
+            always = no #Maybe add it later, be prepared
         }
     }
 
@@ -918,5 +931,152 @@ country_event = {
                 has_ethic = ethic_militarist
             }
         }
+    }
+}
+
+#Problem solved
+country_event = {
+    id = mem_crucible.310
+    title = mem_crucible.310.name
+    desc = mem_crucible.310.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_space_monster
+    location = event_target:mem_crucible_controller_planet
+    show_sound = event_mystic_reveal
+
+    immediate = {
+        event_target:mem_crucible_controller_planet = {
+            change_pc = pc_nuked
+            reroll_planet = yes
+            every_tile = {
+                limit = { has_blocker = yes }
+                remove_blocker = yes
+            }
+            orbital_deposit_tile = {
+                clear_deposits = yes
+                set_building = mem_building_crucible_controller
+            }
+            set_planet_flag = primtives_nuked_themselves
+            set_planet_flag = colony_event
+            set_planet_flag = mem_crucible_stop_the_loop
+        }
+        event_target:mem_crucible_planet = {
+            every_tile = {
+                kill_pop = yes
+                remove_building = yes
+            }
+            change_pc = pc_barren_cold
+            set_planet_flag = mem_crucible_stop_the_loop
+        }
+    }
+
+    option = {
+        name = EXCELLENT
+    }
+}
+
+#Changing the problem
+country_event = {
+    id = mem_crucible.320
+    title = mem_crucible.320.name
+    desc = mem_crucible.320.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_space_monster
+    location = event_target:mem_crucible_controller_planet
+    show_sound = event_mystic_reveal
+
+    immediate = {
+        event_target:mem_crucible_controller_planet = {
+            change_pc = pc_nuked
+            reroll_planet = yes
+            every_tile = {
+                limit = { has_blocker = yes }
+                remove_blocker = yes
+            }
+            orbital_deposit_tile = {
+                clear_deposits = yes
+                set_building = mem_building_crucible_controller
+            }
+            set_planet_flag = primtives_nuked_themselves
+            set_planet_flag = colony_event
+        }
+        event_target:mem_crucible_country = {
+            clear_ethos = yes
+            country_add_ethic = ethic_xenophile
+            country_add_ethic = ethic_pacifist
+            country_add_ethic = ethic_spiritualist
+        }
+        event_target:mem_crucible_planet = {
+            IF = {
+                limit = {
+                    NOT = { is_planet_class = pc_gaia }
+                }
+                change_pc = pc_gaia
+                reroll_planet = yes
+                event_target:mem_crucible_country = {
+                    set_country_type = primtiive
+                    set_country_flag = stone_age
+                    set_primitive_age = stone_age
+                    remove_country_flag = mem_crucible_insanity_age
+                    change_government = {
+                        authority = random
+                        civics = {
+                            civic = civic_secret_of_fire
+                            civic = civic_the_wheel
+                        }
+                    }
+                    set_graphical_culture = preindustrial_01
+                }
+                set_owner = event_target:mem_crucible_country
+                set_name = Volch
+                while = {
+                    count = 5
+                    random_tile = {
+                        limit = { has_pop = no is_orbital_tile = no }
+                        remove_blocker = yes
+                        create_pop = { species = owner }
+                        set_deposit = d_farmland_deposit
+                    }
+                }
+                create_army = {
+                    name = "NAME_Primitive_Army"
+                    owner = event_target:mem_crucible_country
+                    species = event_target:mem_crucible_country
+                    type = "primitive_army"
+                }
+            }
+            ELSE = {
+                set_owner = event_target:mem_crucible_country
+                set_name = Volch
+                every_owned_pop = {
+                    random_list = {
+                        1 = { pop_change_ethic = ethic_xenophile }
+                        1 = { pop_change_ethic = ethic_pacifist }
+                        1 = { pop_change_ethic = ethic_spiritualist }
+                    }
+                }
+                event_target:mem_crucible_country = {
+                    IF = {
+                        limit = { has_country_flag = mem_crucible_insanity_age }
+                        set_country_flag = industrial_age
+                        set_primitive_age = industrial_age
+                        prev = {
+                            every_tile = {
+                                set_ruined = no
+                            }
+                        }
+                    }
+                }
+            }
+            set_planet_flag = mem_crucible_stop_the_loop
+        }
+    }
+
+    option = {
+        name = EXCELLENT
     }
 }
