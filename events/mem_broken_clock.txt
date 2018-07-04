@@ -1,0 +1,1148 @@
+#Broken Clock
+#By ViolentBeetle
+
+namespace = mem_broken_clock
+
+#On ship entering the system
+ship_event = {
+    id = mem_broken_clock.1
+    title = mem_broken_clock.1.name
+    desc = mem_broken_clock.1.desc
+
+    is_triggered_only = yes
+
+    trigger = {
+        NOT = {
+            has_global_flag = mem_broken_clock_return_happened
+        }
+        FROM = {
+            has_star_flag = mem_broken_clock_system
+        }
+        owner = {
+            NOT = {
+                has_country_flag = mem_broken_clock_encountered
+            }
+        }
+    }
+
+    immediate = {
+        owner = {
+            set_country_flag = mem_broken_clock_encountered
+        }
+    }
+
+    location = FROM
+    picture = GFX_evt_clocks
+    show_sound = event_scanner
+
+    option = {
+        name = mem_broken_clock.1.a
+    }
+}
+
+@notification_time = 1
+@notification_random = 29 #Change to 359 after testing
+
+@arrival_time = 100 #Change to some actual numbers
+@arrival_random = 300
+
+#The pulse to start the event on mid-game
+event = {
+    id = mem_broken_clock.2
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        random_system = {
+            limit = { has_star_flag = mem_broken_clock_system }
+            star = {
+                planet_event = { 
+                    id = mem_broken_clock.100 
+                    days = @notification_time 
+                    random = @notification_random 
+                } 
+            }
+        }
+    }
+}
+
+#Country event: Newcomers intersect with new and exciting countries
+country_event = {
+    id = mem_broken_clock.3
+    is_triggered_only = yes
+    hide_window = yes
+
+    trigger = {
+        has_country_flag = mem_broken_clock_newcomers
+        has_country_flag = day_0
+    }
+
+    immediate = {
+        FROM = {
+            set_country_flag = mem_broken_clock_encountered_newcomers
+        }
+    }
+}
+
+#Fun begins
+planet_event = {
+    id = mem_broken_clock.100
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        IF = {
+            limit = {
+                exists = space_owner
+            }
+            space_owner = {
+                country_event = { id = mem_broken_clock.101 }
+            }
+        }
+        every_country = {
+            limit = {
+                OR = {
+                    has_country_flag = mem_broken_clock_encountered
+                    intel_level = {
+                        level > medium
+                        system = root.solar_system
+                    }
+                }
+                NAND = {
+                    exists = root.space_owner
+                    is_same_value = root.space_owner
+                }
+            }
+            country_event = { id = mem_broken_clock.102 }
+        }
+        planet_event = {
+            id = mem_broken_clock.1000
+            days = @arrival_time
+            random = @arrival_random
+        }
+    }
+}
+
+#Worrying news
+country_event = {
+    id = mem_broken_clock.101
+    title = mem_broken_clock.101.name
+    desc = mem_broken_clock.101.desc
+
+    is_triggered_only = yes
+
+    location = FROM
+    picture = GFX_evt_clocks
+    show_sound = event_scanner
+
+    option = {
+        name = mem_broken_clock.101.a
+    }
+}
+
+#Worrying news to anyone other than space owner
+country_event = {
+    id = mem_broken_clock.102
+    title = mem_broken_clock.102.name
+    desc = mem_broken_clock.102.desc
+
+    is_triggered_only = yes
+
+    location = FROM
+    picture = GFX_evt_clocks
+    show_sound = event_scanner
+
+    option = {
+        name = mem_broken_clock.102.a
+    }
+}
+
+#System being transformed
+planet_event = {
+    id = mem_broken_clock.1000
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        set_global_flag = mem_broken_clock_return_happened
+        change_pc = pc_a_star
+        solar_system = {
+            random_system_planet = {
+                limit = {
+                    has_planet_flag = mem_broken_clock_homeworld
+                }
+                random_list = {
+                    33 = {
+                        change_pc = pc_ocean
+                    }
+                    33 = {
+                        change_pc = pc_arid
+                    }
+                    33 = {
+                        change_pc = pc_tundra
+                    }
+                }
+                random_list = {
+                    33 = {
+                        create_species = {
+                            name = Rakkan
+                            plural = Rakkans
+                            adjective = Rakkan
+                            class = MAM
+                            portrait = mam14
+                            name_list = MAM4
+                            traits = {
+                                trait = trait_strong
+                                trait = trait_industrious
+                                trait = trait_fleeting
+                            }
+                            homeworld = this
+                        }
+                        create_country = {
+                            type = mem_broken_clock_country
+                            name = "Dool'Rakkan Reborn"
+                            species = last_created_species
+                            name_list = MAM4
+                            ethos = {
+                                ethic = ethic_fanatic_xenophobe
+                                ethic = ethic_militarist
+                            }
+                            authority = auth_imperial
+                            civics = {
+                                civic = civic_fanatic_purifiers
+                                civic = civic_warrior_culture
+                                civic = civic_distinguished_admiralty
+                            }
+                            flag = {
+                                icon = {
+                                    category = ornate
+                                    file = flag_ornate_16.dds
+                                }
+                                background = {
+                                    category = backgrounds
+                                    file = triangle_split.dds
+                                }
+                                colors = {
+                                    "red_orange"
+                                    "burgundy"
+                                    "null"
+                                    "null"
+                                }
+                            }
+                            day_zero_contact = no
+                            effect = {
+                                save_event_target_as = unwelcome_guests
+                                set_country_flag = mem_broken_clock_newcomers
+                                set_timed_country_flag = { flag = day_0 days = 7 }
+                                mem_broken_clock_give_tech = yes
+                                add_modifier = {
+                                    modifier = mem_broken_clock_ai_cheat
+                                    days = -1
+                                }
+                            }
+                        }
+                    }
+                    33 = {
+                        create_species = {
+                            name = SEI
+                            plural = SEI
+                            adjective = SEI
+                            class = MACHINE
+                            portrait = sd_art_robot
+                            name_list = MACHINE2
+                            traits = {
+                                trait = trait_machine_unit
+                                trait = trait_robot_recycled
+                                trait = trait_robot_mass_produced
+                            }
+                            homeworld = this
+                            effect = {
+                                apply_robotic_pop_growth_behavior = yes
+                            }
+                        }
+                        create_country = {
+                            type = mem_broken_clock_country
+                            name = "Sustained Eradication Initiative"
+                            species = last_created_species
+                            name_list = MACHINE2
+                            ethos = {
+                                ethic = ethic_gestalt_consciousness
+                            }
+                            authority = auth_machine_intelligence
+                            civics = {
+                                civic = civic_machine_terminator
+                                civic = civic_machine_rockbreakers
+                                civic = civic_machine_replication
+                            }
+                            flag = {
+                                icon = {
+                                    category = pointy
+                                    file = flag_pointy_12.dds
+                                }
+                                background = {
+                                    category = backgrounds
+                                    file = circle.dds
+                                }
+                                colors = {
+                                    "orange"
+                                    "dark_brown"
+                                    "null"
+                                    "null"
+                                }
+                            }
+                            day_zero_contact = no
+                            effect = {
+                                save_event_target_as = unwelcome_guests
+                                set_country_flag = mem_broken_clock_newcomers
+                                set_timed_country_flag = { flag = day_0 days = 7 }
+                                mem_broken_clock_give_tech = yes
+                                set_graphical_culture = reptilian_01
+                                add_modifier = {
+                                    modifier = mem_broken_clock_ai_cheat
+                                    days = -1
+                                }
+                            }
+                        }
+
+                        modifier = {
+                            factor = 0
+                            NOT = { host_has_dlc = "Synthetic Dawn Story Pack" }
+                        }
+                    }
+                    33 = {
+                        create_species = {
+                            name = Apex
+                            plural = Apices
+                            adjective = Apexi
+                            class = MOL
+                            portrait = mol6
+                            name_list = HIVE
+                            traits = {
+                                trait = trait_hive_mind
+                                trait = trait_adaptive
+                                trait = trait_strong
+                                trait = trait_repugnant
+                            }
+                            homeworld = this
+                        }
+                        create_country = {
+                            type = mem_broken_clock_country
+                            name = "Apex Organism"
+                            species = last_created_species
+                            name_list = HIVE
+                            ethos = {
+                                ethic = ethic_gestalt_consciousness
+                            }
+                            authority = auth_hive_mind
+                            civics = {
+                                civic = civic_hive_devouring_swarm
+                                civic = civic_hive_strength_of_legions
+                                civic = civic_hive_subspace_ephapse
+                            }
+                            flag = {
+                                icon = {
+                                    category = zoological
+                                    file = flag_zoological_18.dds
+                                }
+                                background = {
+                                    category = backgrounds
+                                    file = vertical.dds
+                                }
+                                colors = {
+                                    "dark_blue"
+                                    "dark_purple"
+                                    "null"
+                                    "null"
+                                }
+                            }
+                            day_zero_contact = no
+                            effect = {
+                                save_event_target_as = unwelcome_guests
+                                set_country_flag = mem_broken_clock_newcomers
+                                set_timed_country_flag = { flag = day_0 days = 7 }
+                                mem_broken_clock_give_tech = yes
+                                add_modifier = {
+                                    modifier = mem_broken_clock_ai_cheat
+                                    days = -1
+                                }
+                            }
+                        }
+                    }
+                }
+                prev = {
+                    IF = {
+                        limit = {
+                            exists = starbase
+                        }
+                        starbase = {
+                            owner = { 
+                                save_event_target_as = former_owner
+                                set_country_flag = mem_broken_clock_former_owner
+                                set_country_flag = mem_broken_clock_encountered_newcomers
+                                establish_communications_no_message = event_target:unwelcome_guests
+                                establish_contact = { who = event_target:unwelcome_guests location = root.solar_system }
+                                country_event = { id = mem_broken_clock.1001 }
+                             }
+                            fleet = { delete_fleet = this }
+                        }
+                    }
+                    every_system_planet = {
+                        limit = {
+                            is_planet_class = pc_habitat
+                        }
+                        remove_planet = yes
+                    }
+                    every_country = {
+                        limit = {
+                            intel_level = {
+                                level > low
+                                system = prev
+                            }
+                        }
+                        establish_communications_no_message = event_target:unwelcome_guests
+                        establish_contact = { who = event_target:unwelcome_guests location = root.solar_system }
+                        country_event = { id = mem_broken_clock.1001 }
+                        set_country_flag = mem_broken_clock_encountered_newcomers
+                    }
+                    every_system_planet = {
+                        limit = {
+                            exists = owner
+                        }
+                        every_tile = {
+                            limit = {
+                                has_pop = yes
+                            }
+                            kill_pop = yes
+                        }
+                    }
+                    create_starbase = {
+                        owner = event_target:unwelcome_guests
+                        size = starbase_starfortress
+                        module = shipyard
+                        module = shipyard
+                        module = anchorage
+                        module = anchorage
+                        module = gun_battery
+                        module = missile_battery
+
+                        building = disruption_field
+                        building = target_uplink_computer
+                        building = defense_grid
+                        effect = {
+                            while = {
+                                count = 20
+                                create_ship = {
+                                    name = random
+                                    random_existing_design = military_station_small
+                                }
+                            }
+                        }
+                    }
+                }
+                set_owner = event_target:unwelcome_guests
+                every_tile = {
+                    create_pop = {
+                        species = event_target:unwelcome_guests
+                    }
+                }
+                random_tile = {
+                    limit = {
+                        num_adjacent_tiles > 3
+                        has_building = no
+                    }
+                    IF = {
+                        limit = { event_target:unwelcome_guests = { has_authority = auth_machine_intelligence } }
+                        set_building = building_machine_capital_3
+                    }
+                    ELSE = {
+                        set_building = building_capital_3
+                    }
+                    set_deposit = d_rich_energy_deposit
+                }
+                random_tile = {
+                    limit = {
+                        has_building = no
+                    }
+                    set_building = building_power_hub_1
+                    set_deposit = d_energy_deposit
+                }
+                random_tile = {
+                    limit = {
+                        has_building = no
+                        NOT = {
+                            any_neighboring_tile = {
+                                OR = {
+                                    has_building = "building_capital_1"
+                                    has_building = "building_capital_2"
+                                    has_building = "building_capital_3"
+                                }
+                            }
+                        }
+                    }
+                    set_building = building_stronghold
+                }
+                random_tile = {
+                    limit = {
+                        has_building = no
+                        NOT = {
+                            any_neighboring_tile = {
+                                OR = {
+                                    has_building = "building_capital_1"
+                                    has_building = "building_capital_2"
+                                    has_building = "building_capital_3"
+                                }
+                            }
+                        }
+                    }
+                    set_building = building_hypercomms_forum
+                }
+                random_tile = {
+                    limit = {
+                        has_building = no
+                        any_neighboring_tile = {
+                            OR = {
+                                has_building = "building_capital_1"
+                                has_building = "building_capital_2"
+                                has_building = "building_capital_3"
+                            }
+                        }
+                    }
+                    set_building = building_dark_matter_power_plant
+                }
+                random_tile = {
+                    limit = {
+                        has_building = no
+                        any_neighboring_tile = {
+                            OR = {
+                                has_building = "building_capital_1"
+                                has_building = "building_capital_2"
+                                has_building = "building_capital_3"
+                            }
+                        }
+                    }
+                    set_building = building_ancient_factory
+                }
+                mem_broken_clock_set_buildings = yes
+            }
+
+            every_system_planet = {
+                limit = {
+                    has_planet_flag = mem_broken_clock_mining_moon
+                }
+                change_pc = pc_barren
+                orbital_deposit_tile = {
+                    set_deposit = d_immense_energy_deposit
+                    add_deposit = d_immense_mineral_deposit
+                    add_deposit = d_energy_deposit
+                    add_deposit = d_mineral_deposit
+                }
+                create_mining_station = {
+                    owner = event_target:unwelcome_guests
+                }
+            }
+            random_system_planet = {
+                limit = {
+                    has_planet_flag = mem_broken_clock_toxic_moon
+                }
+                change_pc = pc_molten
+                orbital_deposit_tile = {
+                    set_deposit = d_enormous2_energy_deposit
+                }
+                create_mining_station = {
+                    owner = event_target:unwelcome_guests
+                }
+            }
+            random_system_planet = {
+                limit = {
+                    has_planet_flag = mem_broken_clock_frozen_moon
+                }
+                change_pc = pc_frozen
+                orbital_deposit_tile = {
+                    set_deposit = d_enormous2_mineral_deposit
+                }
+                create_mining_station = {
+                    owner = event_target:unwelcome_guests
+                }
+            }
+
+            every_system_planet = {
+                limit = {
+                    is_planet_class = pc_ringworld_habitable_damaged
+                }
+                change_pc = pc_ringworld_habitable
+                set_owner = event_target:unwelcome_guests
+                every_tile = {
+                    create_pop = {
+                        species = event_target:unwelcome_guests
+                    }
+                }
+                random_tile = {
+                    limit = {
+                        num_adjacent_tiles > 3
+                        has_building = no
+                    }
+                    IF = {
+                        limit = { event_target:unwelcome_guests = { has_authority = auth_machine_intelligence } }
+                        set_building = building_machine_capital_2
+                    }
+                    ELSE = {
+                        set_building = building_capital_2
+                    }
+                    set_deposit = d_rich_energy_deposit
+                }
+                random_tile = {
+                    limit = {
+                        has_building = no
+                    }
+                    set_building = building_power_hub_1
+                    set_deposit = d_energy_deposit
+                }
+                random_tile = {
+                    limit = {
+                        has_building = no
+                        NOT = {
+                            any_neighboring_tile = {
+                                OR = {
+                                    has_building = "building_capital_1"
+                                    has_building = "building_capital_2"
+                                    has_building = "building_capital_3"
+                                }
+                            }
+                        }
+                    }
+                    set_building = building_stronghold
+                }
+                random_tile = {
+                    limit = {
+                        has_building = no
+                        NOT = {
+                            any_neighboring_tile = {
+                                OR = {
+                                    has_building = "building_capital_1"
+                                    has_building = "building_capital_2"
+                                    has_building = "building_capital_3"
+                                }
+                            }
+                        }
+                    }
+                    set_building = building_hypercomms_forum
+                }
+                mem_broken_clock_set_buildings = yes
+            }
+            every_system_planet = {
+                limit = {
+                    is_planet_class = pc_ringworld_tech_damaged
+                }
+                change_pc = pc_ringworld_tech
+            }
+            every_system_planet = {
+                limit = {
+                    is_planet_class = pc_ringworld_seam_damaged
+                }
+                change_pc = pc_ringworld_seam
+            }
+            random_system_planet = {
+                limit = {
+                    has_planet_flag = mem_broken_clock_gas_giant
+                }
+                mem_broken_clock_create_habitat = yes                
+            }
+            random_system_planet = {
+                limit = {
+                    has_planet_flag = mem_broken_clock_toxic_planet
+                }
+                mem_broken_clock_create_habitat = yes                
+            }
+            event_target:unwelcome_guests = {
+                set_country_type = default                
+                add_influence = 1000
+                add_minerals = 5000
+                add_energy = 5000
+                add_food = 200
+                add_100_unity_per_year_passed = yes
+                while = {
+                    count = 5
+                    random_owned_planet = {
+                        prev = { create_fleet_from_naval_cap = 0.075 }
+                        last_created_fleet = {
+                            set_location = prev
+                            set_fleet_flag = mem_broken_clock_original_navy
+                        }
+                        create_fleet = {
+                            effect = {
+                                set_owner = event_target:unwelcome_guests
+                                set_location = prev
+                                while = {
+                                    set_fleet_flag = mem_broken_clock_original_troop_transport
+                                    count = 8
+                                    IF = {
+                                        limit = {
+                                            owner = { NOT = { has_authority = auth_machine_intelligence } }
+                                        }
+                                        create_army_transport = {
+                                            army_type = "assault_army"
+                                            species = event_target:unwelcome_guests
+                                        }
+                                    }
+                                    ELSE = {
+                                        create_army_transport = {
+                                            army_type = "machine_assault_1"
+                                            species = event_target:unwelcome_guests
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                country_event = { id = game_start.9 }
+                while = {
+                    count = 4
+                    create_leader = {
+                        type = scientist
+                        effect = {
+                            add_trait = mem_broken_clock_scientist_trait
+                        }
+                    }
+                }
+                random_owned_ship = {
+                    limit = {
+                        is_ship_size = science
+                    }
+                    fleet = { 
+                        kill_leader = { type = scientist show_notification = no}
+                        set_leader = last_created_leader 
+                    }
+                }
+                while = {
+                    count = 2
+                    create_leader = {
+                        type = admiral
+                        effect = {
+                            add_trait = mem_broken_clock_admiral_trait
+                        }
+                    }
+                    random_owned_fleet = {
+                        limit = {
+                            has_fleet_flag = mem_broken_clock_original_navy
+                            NOT = { exists = leader }
+                        }
+                        set_leader = last_created_leader
+                    }
+                }
+                create_leader = {
+                    type = general
+                    effect = {
+                        add_trait = mem_broken_clock_general_trait
+                    }
+                }
+                random_owned_fleet = {
+                    limit = { has_fleet_flag = mem_broken_clock_original_troop_transport }
+                    set_leader = last_created_leader
+                }
+                create_leader = {
+                    type = governor
+                    effect = {
+                        add_trait = mem_broken_clock_governor_trait
+                    }
+                }
+                capital_scope = {
+                    # set_leader = last_created_leader
+                }
+                # country_event = { id = mem_broken_clock.2000 days = 7 } #Empire will make contact - after all the event targets are set
+            }
+        }
+    }
+}
+
+#Our whole system has vanished, oh my god!
+country_event = {
+    id = mem_broken_clock.1001
+    title = mem_broken_clock.1001.name
+    desc = mem_broken_clock.1001.desc
+
+    is_triggered_only = yes
+
+    location = FROM
+    picture = GFX_evt_clocks
+    show_sound = event_scanner
+
+    immediate = {
+        establish_communications_no_message = event_target:unwelcome_guests
+    }
+
+    option = {
+        name = mem_broken_clock.1001.a
+    }
+
+    option = {
+        name = mem_broken_clock.1001.a.phobe
+
+        exclusive_trigger = {
+            has_ethic = ethic_fanatic_militarist
+            has_ethic = ethic_militarist
+            has_ethic = ethic_fanatic_xenophobe
+            has_ethic = ethic_xenophobe
+        }
+    }
+    
+    after = {
+
+        hidden_effect = {
+            IF = {
+                limit = {
+                    event_target:unwelcome_guests = { has_authority = auth_imperial }
+                }
+                country_event = {
+                    id = mem_broken_clock.1003
+                }
+            }
+            ELSE_IF = {
+                limit = {
+                    event_target:unwelcome_guests = { has_authority = auth_machine_intelligence }
+                }
+                country_event = {
+                    id = mem_broken_clock.1004
+                }
+            }
+            ELSE_IF = {
+                limit = {
+                    event_target:unwelcome_guests = { has_authority = auth_hive_mind }
+                }
+                country_event = {
+                    id = mem_broken_clock.1005
+                }
+            }
+        }
+    }
+}
+
+#Newcomer empire breaks radiosilence
+country_event = {
+    id = mem_broken_clock.2000
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        every_country = {
+            limit = {
+                has_country_flag = mem_broken_clock_encountered_newcomers
+            }
+            establish_communications_no_message = root
+            IF = {
+                limit = {
+                    is_ai = no
+                }
+                country_event = { id = mem_broken_clock.1002 }
+            }
+        }
+    }
+}
+
+#Quicky hailing - likely deprecated
+country_event = {
+    id = mem_broken_clock.1002
+    title = mem_broken_clock.1002.name
+    desc = mem_broken_clock.1002.desc
+
+    is_triggered_only = yes
+
+    location = FROM
+    picture = GFX_evt_star_chart
+    show_sound = event_alien_signal
+
+    option = {
+        name = ONSCREEN
+
+        hidden_effect = {
+            IF = {
+                limit = {
+                    event_target:unwelcome_guests = { has_authority = auth_imperial }
+                }
+                country_event = {
+                    id = mem_broken_clock.1003
+                }
+            }
+            ELSE_IF = {
+                limit = {
+                    event_target:unwelcome_guests = { has_authority = auth_machine_intelligence }
+                }
+                country_event = {
+                    id = mem_broken_clock.1004
+                }
+            }
+            ELSE_IF = {
+                limit = {
+                    event_target:unwelcome_guests = { has_authority = auth_hive_mind }
+                }
+                country_event = {
+                    id = mem_broken_clock.1005
+                }
+            }
+        }
+    }
+}
+
+#Purifier Greetings
+country_event = {
+    id = mem_broken_clock.1003
+    title = TRANSMISSION
+    desc = mem_broken_clock.1003.desc
+
+    diplomatic = yes
+    location = event_target:unwelcome_guests.capital_scope
+    is_triggered_only = yes
+
+    picture_event_data = {
+		portrait = event_target:unwelcome_guests
+		planet_background = event_target:unwelcome_guests
+		graphical_culture = event_target:unwelcome_guests
+		city_level = event_target:unwelcome_guests
+		room = event_target:unwelcome_guests.ruler
+	}
+
+    option = {
+        name = mem_broken_clock.1003.generic
+        default_hide_option = yes
+    }
+
+    option = {
+        name = mem_broken_clock.1003.agressive
+        trigger = {
+            OR = {
+                has_ethic = ethic_fanatic_xenophobe
+                has_ethic = ethic_xenophobe
+                has_ethic = ethic_militarist
+                has_ethic = ethic_fanatic_militarist
+            }
+            NOR = {
+                is_pacifist = yes
+                has_valid_civic = civic_fanatic_purifiers
+                has_valid_civic = civic_machine_terminator
+                has_valid_civic = civic_hive_devouring_swarm
+            }
+        }
+    }
+
+    option = {
+        name = mem_broken_clock.1003.purifier
+        trigger = {
+            OR = {
+                has_valid_civic = civic_fanatic_purifiers
+                has_valid_civic = civic_hive_devouring_swarm
+                has_valid_civic = civic_machine_terminator
+            }
+        }
+    }
+
+    option = {
+        name = mem_broken_clock.1003.peacekeeper
+        trigger = {
+            OR = {
+                AND = {
+                    OR = {
+                        has_ethic = ethic_xenophile
+                        has_ethic = ethic_fanatic_xenophile
+                    }
+                    OR = {
+                        has_ethic = ethic_militarist
+                        has_ethic = ethic_fanatic_militarist
+                    }
+                }
+                has_valid_civic = civic_machine_servitor
+            }
+        }
+    }
+
+    option = {
+        name = mem_broken_clock.1003.friendly
+        trigger = {
+            OR = {
+                has_ethic = ethic_xenophile
+                has_ethic = ethic_fanatic_xenophile
+                has_ethic = ethic_pacifist
+                has_ethic = ethic_fanatic_pacifist
+            }
+        }
+    }
+}
+
+#Terminator Greetings
+country_event = {
+    id = mem_broken_clock.1004
+    title = TRANSMISSION
+    desc = mem_broken_clock.1004.desc
+
+    diplomatic = yes
+    location = event_target:unwelcome_guests.capital_scope
+    is_triggered_only = yes
+
+    picture_event_data = {
+		portrait = event_target:unwelcome_guests
+		planet_background = event_target:unwelcome_guests
+		graphical_culture = event_target:unwelcome_guests
+		city_level = event_target:unwelcome_guests
+		room = event_target:unwelcome_guests.ruler
+	}
+
+    option = {
+        name = mem_broken_clock.1003.generic
+        default_hide_option = yes
+    }
+
+    option = {
+        name = mem_broken_clock.1003.agressive
+        trigger = {
+            OR = {
+                has_ethic = ethic_fanatic_xenophobe
+                has_ethic = ethic_xenophobe
+                has_ethic = ethic_militarist
+                has_ethic = ethic_fanatic_militarist
+            }
+            NOR = {
+                is_pacifist = yes
+                has_valid_civic = civic_fanatic_purifiers
+                has_valid_civic = civic_machine_terminator
+                has_valid_civic = civic_hive_devouring_swarm
+            }
+        }
+    }
+
+    option = {
+        name = mem_broken_clock.1003.purifier
+        trigger = {
+            OR = {
+                has_valid_civic = civic_fanatic_purifiers
+                has_valid_civic = civic_hive_devouring_swarm
+            }
+        }
+    }
+
+    option = {
+        name = mem_broken_clock.1004.terminator
+        trigger = {
+            has_valid_civic = civic_machine_terminator
+        }
+    }
+
+    option = {
+        name = mem_broken_clock.1003.peacekeeper
+        trigger = {
+            OR = {
+                AND = {
+                    OR = {
+                        has_ethic = ethic_xenophile
+                        has_ethic = ethic_fanatic_xenophile
+                    }
+                    OR = {
+                        has_ethic = ethic_militarist
+                        has_ethic = ethic_fanatic_militarist
+                    }
+                }
+                has_valid_civic = civic_machine_servitor
+            }
+        }
+    }
+
+    option = {
+        name = mem_broken_clock.1003.friendly
+        trigger = {
+            OR = {
+                has_ethic = ethic_xenophile
+                has_ethic = ethic_fanatic_xenophile
+                has_ethic = ethic_pacifist
+                has_ethic = ethic_fanatic_pacifist
+            }
+        }
+    }
+}
+
+#Swarm Greetings
+country_event = {
+    id = mem_broken_clock.1005
+    title = TRANSMISSION
+    desc = mem_broken_clock.1005.desc
+
+    diplomatic = yes
+    location = event_target:unwelcome_guests.capital_scope
+    is_triggered_only = yes
+
+    picture_event_data = {
+		portrait = event_target:unwelcome_guests
+		planet_background = event_target:unwelcome_guests
+		graphical_culture = event_target:unwelcome_guests
+		city_level = event_target:unwelcome_guests
+		room = event_target:unwelcome_guests.ruler
+	}
+
+    option = {
+        name = mem_broken_clock.1003.generic
+        default_hide_option = yes
+    }
+
+    option = {
+        name = mem_broken_clock.1003.agressive
+        trigger = {
+            OR = {
+                has_ethic = ethic_fanatic_xenophobe
+                has_ethic = ethic_xenophobe
+                has_ethic = ethic_militarist
+                has_ethic = ethic_fanatic_militarist
+            }
+            NOR = {
+                is_pacifist = yes
+                has_valid_civic = civic_fanatic_purifiers
+                has_valid_civic = civic_machine_terminator
+                has_valid_civic = civic_hive_devouring_swarm
+            }
+        }
+    }
+
+    option = {
+        name = mem_broken_clock.1003.purifier
+        trigger = {
+            OR = {
+                has_valid_civic = civic_fanatic_purifiers
+                has_valid_civic = civic_machine_terminator
+            }
+        }
+    }
+
+    option = {
+        name = mem_broken_clock.1005.swarm
+        trigger = {
+            has_valid_civic = civic_hive_devouring_swarm
+        }
+    }
+
+    option = {
+        name = mem_broken_clock.1003.peacekeeper
+        trigger = {
+            OR = {
+                AND = {
+                    OR = {
+                        has_ethic = ethic_xenophile
+                        has_ethic = ethic_fanatic_xenophile
+                    }
+                    OR = {
+                        has_ethic = ethic_militarist
+                        has_ethic = ethic_fanatic_militarist
+                    }
+                }
+                has_valid_civic = civic_machine_servitor
+            }
+        }
+    }
+
+    option = {
+        name = mem_broken_clock.1003.friendly
+        trigger = {
+            OR = {
+                has_ethic = ethic_xenophile
+                has_ethic = ethic_fanatic_xenophile
+                has_ethic = ethic_pacifist
+                has_ethic = ethic_fanatic_pacifist
+            }
+        }
+    }
+}
