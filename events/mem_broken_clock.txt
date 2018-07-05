@@ -41,10 +41,10 @@ ship_event = {
 }
 
 @notification_time = 1
-@notification_random = 359 #Change to 359 after testing
+@notification_random = 10799 #Total: up to 30 years since midgame
 
-@arrival_time = 3600 #Change to some actual numbers
-@arrival_random = 14400
+@arrival_time = 360 #Change to some actual numbers
+@arrival_random = 3240
 
 #The pulse to start the event on mid-game
 event = {
@@ -750,6 +750,7 @@ planet_event = {
                     # set_leader = last_created_leader
                 }
                 # country_event = { id = mem_broken_clock.2000 days = 7 } #Empire will make contact - after all the event targets are set
+                country_event = { id = mem_broken_clock.3000 days = 14400 random = 7200 }
             }
         }
     }
@@ -1158,7 +1159,7 @@ country_event = {
             990 = {
                 country_event = { id = mem_broken_clock.3000 days = 360 }
                 modifier = { #Unlikely to happen if lost control of BC system
-                    add = 10000
+                    add = 9000
                     NOT = {
                         any_system_within_border = {
                             has_star_flag = mem_broken_clock_system
@@ -1179,12 +1180,14 @@ country_event = {
                     limit = {
                         has_established_contact = root
                     }
-                    #Notification goes here
+                    country_event = { id = mem_broken_clock.3001 }
                 }
                 
                 # If they still control their home system, kill it
-                random_owned_system = {
+                random_system_within_border = {
                     limit = { has_star_flag = mem_broken_clock_system }
+                    set_global_flag = mem_broken_clock_system_reverted
+                    save_event_target_as = broken_clock_system
                     star = { change_pc = pc_neutron_star }
                     every_system_planet = {
                         limit = {
@@ -1244,6 +1247,19 @@ country_event = {
                         change_pc = pc_ringworld_seam_damaged
                     }
                 }
+                every_country = {
+                    limit = { has_country_flag = mem_broken_clock_breakaways }
+                    every_country = {
+                        limit = {
+                            OR = {
+                                has_country_flag = mem_broken_clock_breakaways
+                                has_communications = root
+                            }
+                        }
+                        establish_communications_no_message = prev
+                    }
+                }
+                destroy_country = yes
 
                 #Bringing them progressively close to destruction if they stall
                 modifier = {
@@ -1253,13 +1269,13 @@ country_event = {
                     }
                 }
                 modifier = {
-                    factor = 2
+                    factor = 5
                     years_of_peace = {
                         value > 24
                     }
                 }
                 modifier = {
-                    factor = 2
+                    factor = 10
                     years_of_peace = {
                         value > 49
                     }
@@ -1278,6 +1294,10 @@ country_event = {
                     factor = 2
                     galaxy_percentage > 0.30
                 }
+                modifier = {
+                    factor = 25
+                    galaxy_percentage > 0.50
+                }
 
                 #Less likely to self-destruct if at war
                 modifier = {
@@ -1286,5 +1306,31 @@ country_event = {
                 }
             }
         }
+    }
+}
+
+#Epilogue
+country_event = {
+    id = mem_broken_clock.3001
+    title = mem_broken_clock.3001.name
+    desc = {
+        text = mem_broken_clock.3001.desc
+        trigger = {
+            NOT = { has_global_flag = mem_broken_clock_system_reverted }
+        }
+    }
+    desc = {
+        text = mem_broken_clock.3001.desc.system_reverted
+        trigger = {
+            has_global_flag = mem_broken_clock_system_reverted
+        }
+    }
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_clocks
+
+    option = {
+        name = mem_broken_clock.3001.a
     }
 }
