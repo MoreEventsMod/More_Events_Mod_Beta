@@ -459,3 +459,177 @@ mem_broken_clock_create_habitat = {
         }
     }
 }
+
+#Kill broken clock country and create new one from ashes
+mem_broken_clock_kill_invaders = {
+    every_owned_pop = {
+        limit = {
+            OR = {
+                is_same_species = owner_species
+                AND = {
+                    has_trait = trait_mechanical
+                    NOT = { has_trait = trait_robotic_3 }
+                }
+            }
+        }
+        kill_pop = yes
+    }
+    while = {
+        limit = {
+            any_owned_planet = {
+                num_pops > 0
+            }
+        }
+        count = 100
+        log = "Iteration begins"
+        random_owned_pop = {
+            log = "[This.Species.GetName]"
+            species = { save_event_target_as = breakaway_species }
+            IF = {
+                limit = { has_trait = trait_hive_mind }
+                planet = {
+                    create_country = {
+                        type = default
+                        species = event_target:breakaway_species
+                        ethos = {
+                            ethic = ethic_gestalt_consciousness
+                        }
+                        authority = auth_hive_mind
+                        civics = random
+                        effect = {
+                            copy_techs_from = {
+                                target = root
+                                except = { #Will need to review in case something that doesn't belong slips by
+                                    # Horizon Signal
+                                    tech_akx_worm_1
+                                    tech_akx_worm_2
+                                    tech_akx_worm_3
+                                }
+                            }
+                            save_event_target_as = breakaway_country
+                            set_country_flag = mem_broken_clock_breakaways
+                            log = "Country: [This.GetName]"
+                        }
+                    }
+                    set_owner = event_target:breakaway_country
+                    IF = {
+                        limit = { 
+                            exists = starbase 
+                            starbase = {
+                                owner = { is_same_value = root }
+                            }
+                        }
+                        starbase = {
+                            set_owner = event_target:breakaway_country
+                        }
+                    }
+                }
+            }
+            ELSE_IF = {
+                limit = { has_trait = trait_machine_unit }
+                planet = {
+                    create_country = {
+                        type = default
+                        species = event_target:breakaway_species
+                        ethos = {
+                            ethic = ethic_gestalt_consciousness
+                        }
+                        authority = auth_machine_intelligence
+                        civics = random
+                        effect = {
+                            copy_techs_from = {
+                                target = root
+                                except = { #Will need to review in case something that doesn't belong slips by
+                                    # Horizon Signal
+                                    tech_akx_worm_1
+                                    tech_akx_worm_2
+                                    tech_akx_worm_3
+                                }
+                            }
+                            log = "Country: [This.GetName]"
+                            save_event_target_as = breakaway_country
+                            set_country_flag = mem_broken_clock_breakaways
+                        }
+                    }
+                    set_owner = event_target:breakaway_country
+                    IF = {
+                        limit = { 
+                            exists = starbase 
+                            starbase = {
+                                owner = { is_same_value = root }
+                            }
+                        }
+                        starbase = {
+                            set_owner = event_target:breakaway_country
+                        }
+                    }
+                }
+            }
+            ELSE = {
+                planet = {
+                    create_country = {
+                        type = default
+                        species = event_target:breakaway_species
+                        authority = random
+                        civics = random
+                        ethos = random
+                        effect = {
+                            copy_techs_from = {
+                                target = root
+                                except = { #Will need to review in case something that doesn't belong slips by
+                                    # Horizon Signal
+                                    tech_akx_worm_1
+                                    tech_akx_worm_2
+                                    tech_akx_worm_3
+                                }
+                            }
+                            log = "Country: [This.GetName]"
+                            save_event_target_as = breakaway_country
+                            set_country_flag = mem_broken_clock_breakaways
+                        }
+                    }
+                    set_owner = event_target:breakaway_country
+                    IF = {
+                        limit = { 
+                            exists = starbase 
+                            starbase = {
+                                owner = { is_same_value = root }
+                            }
+                        }
+                        starbase = {
+                            set_owner = event_target:breakaway_country
+                        }
+                    }
+                }
+            }
+            prev = {
+                every_owned_planet = {
+                    log = "[This.GetName]"
+                    limit = {
+                        any_owned_pop = { 
+                            is_same_species = event_target:breakaway_species
+                        }
+                    }
+                    set_owner = event_target:breakaway_country
+                    IF = {
+                        limit = { 
+                            exists = starbase 
+                            starbase = {
+                                owner = { is_same_value = root }
+                            }
+                        }
+                        starbase = {
+                            set_owner = event_target:breakaway_country
+                        }
+                    }
+                }
+            }
+            event_target:breakaway_country = {
+                create_fleet_from_naval_cap = 0.5
+                last_created_fleet = {
+                    set_location = event_target:breakaway_country.capital_scope
+                }
+            }
+        }
+    }
+}
