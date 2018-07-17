@@ -13,6 +13,8 @@ namespace = mem_vazurans
 # mem_vazurans.3   |Rift Spawning for Raids
 # mem_vazurans.4   |Notification Event that a Rift is forming
 # mem_vazurans.5   |Rift opens and fleet spawn events get linked
+# mem_vazurans.6   |Vazuran Message for first raided
+# mem_vazurans.7   |Vazuran Message for retaliation
 # mem_vazurans.10  |Establishing communications with every country that does not already know them (is started at fleet spawn 100 and 101)
 # mem_vazurans.20  |Information event about a known empire being attacked
 # mem_vazurans.21  |Information event about an unknown empire being attacked
@@ -54,6 +56,10 @@ namespace = mem_vazurans
 # mem_vazurans.255 |Drifting vazuran wreckage found in deep space
 # mem_vazurans.256 |Wreckage investigation finished
 # mem_vazurans.260 |Project finished, damper field research added
+# mem_vazurans.270 |Marking player with damper field bypass as retaliation target
+# mem_vazurans.280 |Reaching Vazuran Homesystem
+# mem_vazurans.281 |Defeated Vazuran Homefleet
+# mem_vazurans.282 |Investigated Vazuran HQ
 
 # Setup Event at Game Start for randomly disabling the Crisis
 event = {
@@ -413,22 +419,6 @@ country_event = {
 	is_triggered_only = yes
 	
 	immediate = {
-		IF = {
-			limit = {
-				is_ai = no
-				NOT = {
-					has_country_flag = mem_vazurans_rift_investigation
-				}
-			}
-			capital_scope = {
-				enable_special_project = {
-					name = MEM_VAZURANS_RIFT_INVESTIGATION
-					location = this
-					owner = root
-				}
-			}
-			set_country_flag = mem_vazurans_rift_investigation
-		}
 		IF = { # check if the empire is target of a retaliation
 			limit = {
 				has_country_flag = mem_vazurans_retaliation
@@ -646,6 +636,13 @@ country_event = {
 				has_country_flag = mem_vazurans_retaliation
 			}
 		}
+		capital_scope = {
+			enable_special_project = {
+				name = MEM_VAZURANS_RIFT_INVESTIGATION
+				location = this
+				owner = root
+			}
+		}
 	}
 	
 	#response in later encounter
@@ -776,6 +773,12 @@ country_event = {
 	diplomatic = yes
 	
 	immediate = {
+		random_country = {
+			limit = {
+				is_country_type = mem_vazurans
+			}
+			save_event_target_as = mem_vazurans_country
+		}
 		set_country_flag = mem_vazurans_met
 	}
 	
@@ -810,6 +813,43 @@ country_event = {
 	}
 }
 
+# Message for retaliation
+country_event = {
+	id = mem_vazurans.7
+	title = mem_vazurans.7.name
+	desc = {
+		trigger = {
+			switch = {
+				trigger = has_country_flag
+				mem_vazurans_damer_field_bypass_researched = { text = mem_vazurans.7b.desc }
+				default = { text = mem_vazurans.7a.desc }
+			}
+		}
+	}
+	
+	is_triggered_only = yes
+	
+	diplomatic = yes
+	
+	immediate = {
+		random_country = {
+			limit = {
+				is_country_type = mem_vazurans
+			}
+			save_event_target_as = mem_vazurans_country
+		}
+	}
+	
+	picture_event_data = {
+		portrait = event_target:mem_vazurans_country
+		room = mem_server_room
+	}
+
+	option = {
+		name = mem_vazurans.7.a
+	}
+}
+
 # Establishing communications with every country that does not already know them (is started at fleet spawn 100 and 101)
 country_event = {
 	id = mem_vazurans.10
@@ -832,18 +872,17 @@ country_event = {
 country_event = {
 	id = mem_vazurans.20
 	title = mem_vazurans.20.name
-	desc = { # for those not having met them
-		text = mem_vazurans.20a.desc
-		trigger = {
-			NOT = { 
-				has_country_flag = mem_vazurans_met
+	desc = {
+		trigger = { 
+			switch = { 
+				trigger = has_country_flag
+				# for those who have met them before
+				mem_vazurans_report_1 = {text = mem_vazurans.20b.desc}
+				mem_vazurans_report_2 = {text = mem_vazurans.20c.desc}
+				mem_vazurans_report_3 = {text = mem_vazurans.20d.desc}
+				# for those not having met them
+				default = {text = mem_vazurans.20a.desc} 
 			}
-		}
-	}
-	desc = { # for those who have met them before
-		text = mem_vazurans.20b.desc
-		trigger = {
-			has_country_flag = mem_vazurans_met
 		}
 	}
 
@@ -865,6 +904,31 @@ country_event = {
 				has_communications = root
 			}
 			save_event_target_as = mem_vazuran_victim
+		}
+		IF = {
+			limit = {
+				has_country_flag = mem_vazurans_met
+			}
+			random_list = {
+				1 = {
+					set_timed_country_flag = {
+						flag = mem_vazurans_report_1
+						years = 1
+					}
+				}
+				1 = {
+					set_timed_country_flag = {
+						flag = mem_vazurans_report_2
+						years = 1
+					}
+				}
+				1 = {
+					set_timed_country_flag = {
+						flag = mem_vazurans_report_3
+						years = 1
+					}
+				}
+			}
 		}
 	}
 	
@@ -1199,30 +1263,8 @@ country_event = {
 			}
 		}
 		ELSE = { # otherwise the vazuran country is created and saved as event target
-			create_country = {
-				name = "The Dark Ones"
-				type = mem_vazurans
-				flag = {
-					icon = {
-						category = "domination"
-						file = "domination_21.dds"
-					}
-					background= {
-						category = "backgrounds"
-						file = "00_solid.dds"
-					}
-					colors={
-						"black"
-						"dark_purple"
-						"null"
-						"null"
-					}
-				}
-			}
+			create_mem_vazuran_country = yes
 			last_created_country = {
-				set_country_flag = mem_vazurans_country
-				set_graphical_culture = fallen_empire_04
-				save_event_target_as = mem_vazurans_country
 				IF = {
 					limit = {
 						NOT = {
@@ -1515,6 +1557,10 @@ country_event = {
 				}
 				ROOT = {
 					set_country_flag = mem_vazurans_rift_creation_start
+					set_timed_country_flag = {
+						flag = mem_vazurans_retaliation_fleet_destroyed
+						years = 1
+					}
 					country_event = { id = mem_vazurans.50 days = 2}
 				}
 			}
@@ -1643,6 +1689,10 @@ country_event = {
 				}
 				ROOT = {
 					set_country_flag = mem_vazurans_rift_creation_start
+					set_timed_country_flag = {
+						flag = mem_vazurans_retaliation_fleet_destroyed
+						years = 1
+					}
 					country_event = { id = mem_vazurans.50 days = 2}
 				}
 			}
@@ -1771,6 +1821,10 @@ country_event = {
 				}
 				ROOT = {
 					set_country_flag = mem_vazurans_rift_creation_start
+					set_timed_country_flag = {
+						flag = mem_vazurans_retaliation_fleet_destroyed
+						years = 1
+					}
 					country_event = { id = mem_vazurans.50 days = 2}
 				}
 			}
@@ -1899,6 +1953,10 @@ country_event = {
 				}
 				ROOT = {
 					set_country_flag = mem_vazurans_rift_creation_start
+					set_timed_country_flag = {
+						flag = mem_vazurans_retaliation_fleet_destroyed
+						years = 1
+					}
 					country_event = { id = mem_vazurans.50 days = 2}
 				}
 			}
@@ -2027,6 +2085,10 @@ country_event = {
 				}
 				ROOT = {
 					set_country_flag = mem_vazurans_rift_creation_start
+					set_timed_country_flag = {
+						flag = mem_vazurans_retaliation_fleet_destroyed
+						years = 1
+					}
 					country_event = { id = mem_vazurans.50 days = 2}
 				}
 			}
@@ -2121,6 +2183,21 @@ planet_event = {
 		set_timed_planet_flag = {
 			flag = mem_vazurans_raided_planet
 			days = 5400 # 15 years
+		}
+		IF = {
+			limit = {
+				owner = {
+					is_ai = no
+					NOT = {
+						has_country_flag = mem_vazurans_rift_creation_start
+					}
+					has_country_flag = mem_vazurans_retaliation
+				}
+			}
+			owner = {
+				set_country_flag = mem_vazurans_rift_creation_start
+				country_event = { id = mem_vazurans.50 days = 180 random = 30 }
+			}
 		}
 		IF = {
 			limit = {
@@ -2698,7 +2775,7 @@ country_event = {
 		}
 	}
 	mean_time_to_happen = {
-		years = 100
+		months = 720
 	}
 	immediate = {
 		set_country_flag = mem_vazurans_damper_field_quest
@@ -2750,11 +2827,11 @@ country_event = {
 				limit = {
 					has_planet_flag = mem_vazurans_damer_field_asteroid
 				}
-				#planet_event = { id = mem_vazurans.251 }
+				planet_event = { id = mem_vazurans.253 }
 			}
 		}
 		ELSE = {
-			#start the deep space wreckage line
+			country_event = { id = mem_vazurans.255 }
 		}
 	}
 }
@@ -2799,7 +2876,7 @@ ship_event = {
 	}
 }
 
-# Damper field anomaly 1 gets spawned
+# Damper field anomaly 2 gets spawned
 planet_event = {
 	id = mem_vazurans.253
 	title = mem_vazurans.253.name
@@ -2921,6 +2998,54 @@ country_event = {
 			days = -1
 		}
 		add_research_option = tech_mem_vazuran_damper_field_bypass 
+	}
+}
+
+# marking player with damper field bypass as retaliation target
+country_event = {
+	id = mem_vazurans.270
+	hide_window = yes
+	fire_only_once = yes
+	trigger =  {
+		has_technology = tech_mem_vazuran_damper_field_bypass
+		is_country_type = default
+		NOT = {
+			any_country = {
+				has_country_flag = mem_vazurans_target_1
+			}
+		}
+	}
+	mean_time_to_happen = {
+		months = 24
+	}
+	immediate = {
+		set_country_flag = mem_vazurans_damer_field_bypass_researched
+		set_country_flag = mem_vazurans_target_1
+		set_country_flag = mem_vazurans_retaliation
+	}
+}
+
+# mem_vazurans.280 |Reaching Vazuran Homesystem
+# mem_vazurans.281 |Defeated Vazuran Homefleet
+# mem_vazurans.282 |Investigated Vazuran HQ
+
+# spawn testsystem
+country_event = {
+	id = mem_vazurans.93
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		capital_scope = {
+			solar_system = {
+				spawn_system = { 
+					min_distance >= 30
+					max_distance <= 50
+					initializer = "mem_vazuran_event_system_01"
+				}
+			}
+		}
 	}
 }
 
