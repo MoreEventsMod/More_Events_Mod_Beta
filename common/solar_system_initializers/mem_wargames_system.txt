@@ -1,0 +1,652 @@
+mem_wargame_system = {
+    name = WARGAME
+    class = rl_trinary_stars
+
+    usage = misc_system_init
+    usage_odds = 9000 #Consider putting it outside starting cluster later. Also test for being able to get close to FE
+
+    max_instances = 1
+
+    flags = { primitive_system mem_wargame_system }
+    
+    planet = {
+        class = star
+        size = 25
+        orbit_distance = 0
+    }
+
+    change_orbit = 45
+
+    planet = {
+        count = 2
+        class = random_non_colonizable
+
+        orbit_distance = 20
+
+        moon = {
+            count = { min = 0 max = 1 }
+            class = random_non_colonizable
+            orbit_distance = 8
+        }
+    }
+
+    planet = {
+        class = pc_savannah
+        size = { min = 16 max = 20 }
+
+        orbit_distance = 20
+
+        flags = { mem_wargame_red_planet mem_wargame_planet }
+
+        init_effect = {
+            save_global_event_target_as = mem_wargame_red_team_planet
+        }
+    }
+
+    planet = {
+        count = 1
+        class = random_non_colonizable
+
+        orbit_distance = 20
+
+        moon = {
+            count = { min = 0 max = 1 }
+            class = random_non_colonizable
+            orbit_distance = 8
+        }
+    }
+
+    planet = {
+        class = pc_tundra
+        size = { min = 16 max = 20 }
+
+        orbit_distance = 20
+
+        flags = { mem_wargame_blue_planet mem_wargame_planet }
+
+        init_effect = {
+            save_global_event_target_as = mem_wargame_blue_team_planet
+        }
+    }
+
+    planet = {
+        count = 1
+        class = random_non_colonizable
+
+        orbit_distance = 20
+
+        moon = {
+            count = { min = 0 max = 1 }
+            class = random_non_colonizable
+            orbit_distance = 8
+        }
+    }
+
+    planet = {
+        class = star
+        orbit_distance = 125
+        size = 15
+        satellite_naming_policy = upper_case_roman_numerals
+
+        planet = {
+            class = random_non_colonizable
+            orbit_distance = 25
+            size = 12
+        }
+
+        planet = {
+            class = pc_gas_giant
+            orbit_distance = 30
+            size = 15
+
+            change_orbit = 10
+
+            flags = { mem_wargame_outpost_planet }
+
+            moon = {
+                count = 1
+                class = pc_toxic
+                orbit_distance = 5
+            }
+
+            moon = {
+                count = 1
+                class = pc_barren
+                orbit_distance = 5
+            }
+
+            init_effect = {
+                #Here goes anomaly and Ambient
+                create_ambient_object = {
+                    type = "mem_wargame_observer_object"
+                    location = this
+                }
+                last_created_ambient_object = {
+                    save_global_event_target_as = mem_wargame_space_station
+                }
+                prevent_anomaly = yes
+                # add_anomaly = mem_wargame_station_category
+                save_global_event_target_as = mem_wargate_station_planet
+            }
+        }
+
+        planet = {
+            count = 1
+            class = random_non_colonizable
+    
+            orbit_distance = 25
+    
+            moon = {
+                count = { min = 0 max = 1 }
+                class = random_non_colonizable
+                orbit_distance = 8
+            }
+        }
+    }
+
+    planet = {
+        class = star
+        size = 20
+        orbit_distance = 80
+        orbit_angle = 110
+        satellite_naming_policy = upper_case_roman_numerals
+
+        change_orbit = 30
+
+        planet = {
+            count = 2
+            class = random_non_colonizable
+    
+            orbit_distance = 20
+    
+            moon = {
+                count = { min = 0 max = 1 }
+                class = random_non_colonizable
+                orbit_distance = 8
+            }
+        }
+
+        planet = {
+            class = pc_desert
+            orbit_distance = 20
+            size = { min = 16 max = 20 }
+
+            flags = { mem_wargame_orange_planet mem_wargame_planet }
+
+            init_effect = {
+                save_global_event_target_as = mem_wargame_orange_team_planet
+            }
+        }
+
+        planet = {
+            count = 1
+            class = random_non_colonizable
+    
+            orbit_distance = 20
+    
+            moon = {
+                count = { min = 0 max = 1 }
+                class = random_non_colonizable
+                orbit_distance = 8
+            }
+        }
+
+        planet = {
+            class = pc_gas_giant
+            orbit_distance = 35
+
+            moon = {
+                class = random_non_colonizable
+                orbit_distance = 12
+            }
+
+            moon = {
+                class = pc_continental
+                size = { min = 12 max = 18 }
+                orbit_distance = 5
+
+                flags = { mem_wargame_green_planet mem_wargame_planet }
+
+                init_effect = {
+                    save_global_event_target_as = mem_wargame_green_team_planet
+                }
+            }
+
+            moon = {
+                class = random_non_colonizable
+                orbit_distance = 5
+            }
+        }
+    }
+
+    init_effect = { #All the stuff goes here
+        save_global_event_target_as = mem_wargame_system
+        #RED TEAM
+        event_target:mem_wargame_red_team_planet = {
+            create_species = {
+                name = random
+                class = REP
+                portrait = random
+                homeworld = this
+
+                traits = {
+                    trait = trait_natural_engineers
+                    trait = trait_quick_learners
+                }
+            }
+            create_country = {
+                name = "Red Team"
+                species = last_created
+                type = primitive
+                authority = random
+                civics = {
+                    civic = civic_increasing_urbanization
+                    civic = civic_atmospheric_pollution
+                }
+                ethos = {
+                    ethic = ethic_fanatic_militarist
+                    ethic = ethic_materialist
+                }
+                flag = {
+                    icon = {
+                        category = human
+                        file = flag_human_10.dds
+                    }
+                    background = {
+                        category = backgrounds
+                        file = 00_solid.dds
+                    }
+                    colors = {
+                        "red"
+                        "red"
+                        "null"
+                        "null"
+                    }
+                }
+            }
+            last_created_country = {
+                set_graphical_culture = industrial_01
+                set_country_flag = industrial_age
+                set_primitive_age = industrial_age
+                set_country_flag = recently_advanced
+            }
+            create_colony = {
+                owner = last_created_country
+                species = last_created
+            }
+            every_tile = {
+                limit = {
+                    has_blocker = yes
+                }
+                remove_blocker = yes
+            }
+            random_tile = {
+                limit = { has_building = "building_colony_shelter" }
+                remove_building = yes
+            }
+            while = {
+                count = 3			
+                random_tile = {
+                    limit = {
+                        has_blocker = no
+                        has_building = no
+                        has_grown_pop = no
+                    }
+                    set_blocker = tb_decrepit_dwellings
+                }
+                random_tile = {
+                    limit = {
+                        has_blocker = no
+                        has_building = no
+                        has_grown_pop = no
+                    }
+                    set_blocker = tb_failing_infrastructure		
+                }				
+            }					
+            while = {
+                count = 5
+                random_tile = {
+                    limit = {
+                        has_blocker = no
+                        has_grown_pop = no
+                        has_growing_pop = no
+                    }
+                    create_pop = {
+                        species = last_created
+                    }
+                }	
+            }
+            while = {
+                count = 2
+                random_tile = {
+                    limit = { 
+                        has_blocker = no 
+                        has_building = no 
+                        has_grown_pop = yes
+                    }
+                    set_building = "building_primitive_factory"
+                    set_deposit = d_mineral_deposit					
+                }					
+            }
+            while = {
+                count = 4
+                random_tile = {
+                    limit = { 
+                        has_blocker = no 
+                        has_building = no 
+                        has_grown_pop = yes
+                    }
+                    set_building = "building_primitive_farm"
+                    set_deposit = d_farmland_deposit				
+                }					
+            }
+            while = {
+                count = 4
+                create_army = {
+                    name = "NAME_Industrial_Army"
+                    owner = last_created
+                    species = last_created
+                    type = "industrial_army"
+                }
+            }
+        }
+
+        #BLUE TEAM
+        event_target:mem_wargame_blue_team_planet = {
+            create_species = {
+                name = random
+                class = HUM
+                portrait = random
+                homeworld = this
+
+                traits = {
+                    trait = trait_quarrelsome
+                    trait = trait_very_strong
+                }
+            }
+            create_country = {
+                name = "Blue Team"
+                species = last_created
+                type = primitive
+                authority = random
+                civics = {
+                    civic = civic_landed_nobility
+                    civic = civic_flat_world_theory
+                }
+                ethos = {
+                    ethic = ethic_fanatic_militarist
+                    ethic = ethic_egalitarian
+                }
+                flag = {
+                    icon = {
+                        category = human
+                        file = flag_human_2.dds
+                    }
+                    background = {
+                        category = backgrounds
+                        file = 00_solid.dds
+                    }
+                    colors = {
+                        "blue"
+                        "blue"
+                        "null"
+                        "null"
+                    }
+                }
+            }
+            last_created_country = {
+                set_graphical_culture = preindustrial_01
+                set_country_flag = renaissance_age 
+                set_primitive_age = renaissance_age
+                set_country_flag = recently_advanced
+            }
+            create_colony = {
+                owner = last_created_country
+                species = last_created
+            }
+            random_tile = {
+                limit = { has_building = "building_colony_shelter" }
+                remove_building = yes
+            }					
+            while = {
+                count = 3
+                random_tile = {
+                    limit = {
+                        has_blocker = no
+                        has_grown_pop = no
+                        has_growing_pop = no
+                    }
+                    create_pop = {
+                        species = last_created
+                    }
+                }	
+            }
+            while = {
+                count = 4
+                random_tile = {
+                    limit = { 
+                        has_blocker = no 
+                        has_building = no 
+                        has_grown_pop = yes
+                    }
+                    set_building = "building_primitive_farm"
+                    set_deposit = d_farmland_deposit				
+                }					
+            }
+            while = {
+                count = 3
+                create_army = {
+                    name = "NAME_Industrial_Army"
+                    owner = last_created
+                    species = last_created
+                    type = "industrial_army"
+                }
+            }
+        }
+
+        #ORANGE TEAM
+        event_target:mem_wargame_orange_team_planet = {
+            create_species = {
+                name = random
+                class = ART
+                portrait = random
+                homeworld = this
+
+                traits = {
+                    trait = trait_extremely_adaptive
+                    trait = trait_slow_breeders
+                    trait = trait_repugnant
+                }
+            }
+            create_country = {
+                name = "Orange Team"
+                species = last_created
+                type = primitive
+                authority = random
+                civics = {
+                    civic = civic_landed_nobility
+                    civic = civic_flat_world_theory
+                }
+                ethos = {
+                    ethic = ethic_fanatic_militarist
+                    ethic = ethic_xenophobe
+                }
+                flag = {
+                    icon = {
+                        category = spherical
+                        file = flag_spherical_7.dds
+                    }
+                    background = {
+                        category = backgrounds
+                        file = 00_solid.dds
+                    }
+                    colors = {
+                        "orange"
+                        "orange"
+                        "null"
+                        "null"
+                    }
+                }
+            }
+            last_created_country = {
+                set_graphical_culture = preindustrial_01
+                set_country_flag = bronze_age 
+                set_primitive_age = bronze_age
+                set_country_flag = recently_advanced
+            }
+            create_colony = {
+                owner = last_created_country
+                species = last_created
+            }
+            random_tile = {
+                limit = { has_building = "building_colony_shelter" }
+                remove_building = yes
+            }					
+            while = {
+                count = 2
+                random_tile = {
+                    limit = {
+                        has_blocker = no
+                        has_grown_pop = no
+                        has_growing_pop = no
+                    }
+                    create_pop = {
+                        species = last_created
+                    }
+                }	
+            }
+            while = {
+                count = 3
+                random_tile = {
+                    limit = { 
+                        has_blocker = no 
+                        has_building = no 
+                        has_grown_pop = yes
+                    }
+                    set_building = "building_primitive_farm"
+                    set_deposit = d_farmland_deposit				
+                }					
+            }
+            while = {
+                count = 2
+                create_army = {
+                    name = "NAME_Primitive_Army"
+                    owner = last_created
+                    species = last_created
+                    type = "primitive_army"
+                }
+            }
+        }
+
+        #GREEN TEAM
+        event_target:mem_wargame_green_team_planet = {
+            create_species = {
+                name = random
+                class = FUN
+                portrait = random
+                homeworld = this
+
+                traits = {
+                    trait = trait_traditional
+                    trait = trait_nomadic
+                }
+            }
+            create_country = {
+                name = "Green Team"
+                species = last_created
+                type = primitive
+                authority = random
+                civics = {
+                    civic = civic_landed_nobility
+                    civic = civic_flat_world_theory
+                }
+                ethos = {
+                    ethic = ethic_fanatic_militarist
+                    ethic = ethic_spiritualist
+                }
+                flag = {
+                    icon = {
+                        category = blocky
+                        file = flag_blocky_21.dds
+                    }
+                    background = {
+                        category = backgrounds
+                        file = 00_solid.dds
+                    }
+                    colors = {
+                        "green"
+                        "green"
+                        "null"
+                        "null"
+                    }
+                }
+            }
+            last_created_country = {
+                set_graphical_culture = preindustrial_01
+                set_country_flag = late_medieval_age 
+                set_primitive_age = late_medieval_age
+                set_country_flag = recently_advanced
+            }
+            create_colony = {
+                owner = last_created_country
+                species = last_created
+            }
+            random_tile = {
+                limit = { has_building = "building_colony_shelter" }
+                remove_building = yes
+            }					
+            while = {
+                count = 2
+                random_tile = {
+                    limit = {
+                        has_blocker = no
+                        has_grown_pop = no
+                        has_growing_pop = no
+                    }
+                    create_pop = {
+                        species = last_created
+                    }
+                }	
+            }
+            while = {
+                count = 3
+                random_tile = {
+                    limit = { 
+                        has_blocker = no 
+                        has_building = no 
+                        has_grown_pop = yes
+                    }
+                    set_building = "building_primitive_farm"
+                    set_deposit = d_farmland_deposit				
+                }					
+            }
+            while = {
+                count = 3
+                create_army = {
+                    name = "NAME_Primitive_Army"
+                    owner = last_created
+                    species = last_created
+                    type = "primitive_army"
+                }
+            }
+        }
+
+        #Creating ambient battlefields
+        while = {
+            count = 3
+            random_system_planet = {
+                create_ambient_object = {
+                    type = "ancient_battlefield_object"
+                    location = this
+                }
+                last_created_ambient_object = {
+                    set_location = {
+                        target = prev
+                        distance = 65
+                        angle = random
+                    }
+                }
+            }
+        }
+    }
+}
