@@ -1,0 +1,246 @@
+
+######################################
+### Writing and Coding by Caligula ###
+######################################
+
+namespace = mem_llayids
+
+
+#Initial discovery
+ship_event = {
+	id = mem_llayids.1
+	title = mem_llayids.1.name
+	desc = mem_llayids.1.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_gas_giant
+	location = FROM
+	
+	immediate = {
+		from = {
+			orbital_deposit_tile = { clear_deposits = yes }
+
+			set_planet_flag = mem_llayid_planet
+			solar_system = {
+				set_star_flag = mem_llayid_system
+			}
+
+			add_modifier = {
+				modifier = mem_llayid_planet
+				days = -1
+			}
+		}
+	}
+
+	option = {
+		name = mem_llayids.1.A
+
+		from = {
+			orbital_deposit_tile = {
+				set_deposit = d_vast_society_deposit
+			}
+		}
+
+		hidden_effect = {
+			owner = {
+				set_country_flag = mem_llayid_investigate
+			}
+		}
+
+		trigger = {
+			NOT = {
+				owner = { has_valid_civic = civic_fanatic_purifiers }
+			}
+		}
+	}
+	
+	option = {
+		name = mem_llayids.1.B
+
+		from = {
+			orbital_deposit_tile = {
+				set_deposit = d_vast_society_deposit
+			}
+		}
+
+		hidden_effect = {
+			owner = {
+				set_country_flag = mem_llayid_investigate
+			}
+		}
+
+		trigger = {
+			NOT = {
+				owner = { has_valid_civic = civic_fanatic_purifiers }
+			}
+		}
+	}
+	
+	option = {
+		name = mem_llayids.1.C
+
+		from = {
+			orbital_deposit_tile = {
+				set_deposit = d_vast_society_deposit
+			}
+		}
+
+		hidden_effect = {
+			owner = {
+				set_country_flag = mem_llayid_investigate
+				set_country_flag = mem_llayid_investigate_weapon
+			}
+		}
+
+		trigger = {
+			NOT = {
+				owner = { has_valid_civic = civic_fanatic_purifiers }
+			}
+		}
+	}
+
+	option = {
+		name = mem_llayids.1.purifier
+
+		from = {
+			orbital_deposit_tile = {
+				set_deposit = d_vast_society_deposit
+			}
+		}
+
+		hidden_effect = {
+			owner = {
+				set_country_flag = mem_llayid_investigate_weapon
+			}
+		}
+
+		trigger = {
+			owner = { has_valid_civic = civic_fanatic_purifiers }
+		}
+	}
+}
+
+
+# This = construction ship
+# From = planet it is built on
+# Fires when construction is complete,
+# immediately before station is created
+country_event = {
+	id = mem_llayids.2
+	title = mem_llayids.2.title
+	desc = mem_llayids.2.desc
+	picture = GFX_evt_space_debris
+
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			has_planet_flag = mem_llayid_planet
+		}
+		owner = {
+			OR = {
+				has_country_flag = mem_llayid_investigate
+				has_country_flag = mem_llayid_investigate_weapon
+			}
+		}
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = OK
+		
+		hidden_effect = {
+			if = {
+				limit = {
+					has_country_flag = mem_llayid_investigate
+					has_country_flag = mem_llayid_investigate_weapon
+				}
+				remove_country_flag = mem_llayid_investigate_weapon
+			}
+			if = {
+				limit = {
+					has_country_flag = mem_llayid_investigate_weapon
+					NOT = {
+						has_country_flag = mem_llayid_investigate
+					}
+				}
+				country_event = { id = mem_llayids.3 days = 720 }
+			}
+			else = {
+				country_event = { id = mem_llayids.5 days = 360 }
+			}
+		}
+	}
+}
+
+#Purifier version
+country_event = {
+	id = mem_llayids.3
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = {
+				any_system_within_border = {
+					has_star_flag = mem_llayid_system
+					any_planet = {
+						has_planet_flag = mem_llayid_planet
+						has_research_station = yes
+					}
+				}
+			}
+			country_event = { id = mem_llayids.4 }
+		}
+		else = {
+			country_event = { id = mem_llayids.3 days = 720 }
+		}
+	}
+}
+
+
+country_event = {
+	id = mem_llayids.4
+	title = mem_llayids.4.title
+	desc = mem_llayids.4.desc
+	picture = GFX_evt_space_debris
+
+	is_triggered_only = yes
+
+	immediate = {
+		remove_country_flag = mem_llayid_investigate_weapon
+	}
+
+	option = {
+		name = mem_llayids.4.A
+	}
+}
+
+
+#Normal version
+country_event = {
+	id = mem_llayids.5
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = {
+				any_system_within_border = {
+					has_star_flag = mem_llayid_system
+					any_planet = {
+						has_planet_flag = mem_llayid_planet
+						has_research_station = yes
+					}
+				}
+			}
+			country_event = { id = mem_llayids.6 }
+		}
+		else = {
+			country_event = { id = mem_llayids.5 days = 720 }
+		}
+	}
+}
