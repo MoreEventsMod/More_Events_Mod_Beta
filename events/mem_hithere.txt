@@ -55,11 +55,30 @@ country_event = {
 			last_created_species = {
 				save_global_event_target_as = mem_hithere_species
 			}
+			create_saved_leader = {
+				key = mem_hithere_professor
+				type = scientist
+				species = event_target:mem_hithere_species
+				effect = {
+					save_global_event_target_as = mem_hithere_professor
+				}
+			}
 			event_target:receiver = {
-				spawn_system = {
-					min_distance >= 40
-					max_distance <= 150
-					initializer = "mem_hithere_init"
+				random_list = {
+					70 = {
+						spawn_system = {
+							min_distance >= 40
+							max_distance <= 150
+							initializer = "mem_hithere_init_01"
+						}
+					}
+					30 = {
+						spawn_system = {
+							min_distance >= 40
+							max_distance <= 150
+							initializer = "mem_hithere_init_02"
+						}
+					}
 				}
 			}
 			
@@ -108,7 +127,7 @@ country_event = {
 	is_triggered_only = yes
 	
 	picture_event_data = {
-		portrait = event_target:mem_hithere_species
+		portrait = event_target:mem_hithere_professor
 		room = mem_server_room
 	}
 	
@@ -213,7 +232,7 @@ country_event = {
 	}
 }
 
-#Arrival
+#Arrival - nuked
 ship_event = {
 	id = mem_hithere.3
 	title = mem_hithere.3.name
@@ -231,7 +250,7 @@ ship_event = {
 			NOT = { has_country_flag = mem_hithere_visited_system }
 		}
 		from = {
-			has_star_flag = mem_hithere_system
+			has_star_flag = mem_hithere_system_nuked
 		}
 	}
 
@@ -458,6 +477,145 @@ ship_event = {
 				value = @tier2influencereward
 				min = @tier2influencemin
 				max = @tier2influencemax
+			}
+		}
+	}
+}
+
+#Arrival - ring
+ship_event = {
+	id = mem_hithere.10
+	title = mem_hithere.10.name
+	desc = mem_hithere.10.desc
+
+	is_triggered_only = yes
+
+	picture = GFX_evt_ringworld
+	show_sound = event_radio_chatter
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			has_country_flag = mem_hithere_country
+			NOT = { has_country_flag = mem_hithere_visited_system }
+		}
+		from = {
+			has_star_flag = mem_hithere_system_ring
+		}
+	}
+
+	immediate = {
+		owner = { set_country_flag = mem_hithere_visited_system }
+	}
+	
+	after = {
+		hidden_effect = {
+			owner  = {
+				end_event_chain = mem_hithere_chain
+				add_influence = 75
+			}
+		}
+	}
+
+	option = {
+		name = mem_hithere.10.a
+	}
+
+	option = {
+		name = mem_hithere.10.swarm
+
+		exclusive_trigger = {
+			owner = {
+				has_civic = civic_hive_devouring_swarm
+			}
+		}
+	}
+}
+
+#Scanning a ring segment
+ship_event = {
+	id = mem_hithere.11
+	title = mem_hithere.11.name
+	desc = mem_hithere.11.desc
+
+	is_triggered_only = yes
+
+	picture = GFX_evt_ringworld
+	show_sound = event_radio_chatter
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		from = {
+			has_planet_flag = mem_hithere_ringworld
+		}
+		owner = {
+			has_country_flag = mem_hithere_country
+		}
+	}
+
+	option = {
+		name = FASCINATING
+	}
+
+	option = {
+		name = mem_hithere.11.phile
+
+		exclusive_trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_fanatic_xenophile
+					has_ethic = ethic_xenophile
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_hithere.11.phobe
+
+		exclusive_trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_xenophobe
+				}
+				NOT = {
+					has_civic = civic_fanatic_purifiers
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_hithere.11.purifier
+
+		exclusive_trigger = {
+			owner = {
+				OR = {
+					has_civic = civic_fanatic_purifiers
+					has_civic = civic_machine_terminator
+				}
+			}
+		}
+	}
+
+	after = {
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier2influencereward
+				min = @tier2influencemin
+				max = @tier2influencemax
+			}
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
 			}
 		}
 	}
