@@ -42,6 +42,11 @@ ship_event = {
 				days = -1
 			}
 		}
+		create_point_of_interest = {
+			id = mem_llayids_poi.1
+			event_chain = mem_llayids_chain
+			location = from
+		}
 	}
 
 	option = {
@@ -181,19 +186,19 @@ ship_event = {
 # From = planet it is built on
 # Fires when construction is complete,
 # immediately before station is created
-country_event = {
+ship_event = {
 	id = mem_llayids.2
 	title = mem_llayids.2.title
 	desc = {
 		text = mem_llayids.2.desc.weapon
 		trigger = {
-			has_country_flag = mem_llayid_investigate_weapon
+			owner = { has_country_flag = mem_llayid_investigate_weapon }
 		}
 	}
 	desc = {
 		text = mem_llayids.2.desc
 		trigger = {
-			has_country_flag = mem_llayid_investigate
+			owner = { has_country_flag = mem_llayid_investigate }
 		}
 	}
 	picture = GFX_evt_space_debris
@@ -223,24 +228,26 @@ country_event = {
 		name = OK
 		
 		hidden_effect = {
-			if = {
-				limit = {
-					has_country_flag = mem_llayid_investigate
-					has_country_flag = mem_llayid_investigate_weapon
-				}
-				remove_country_flag = mem_llayid_investigate_weapon
-			}
-			if = {
-				limit = {
-					has_country_flag = mem_llayid_investigate_weapon
-					NOT = {
+			owner = {
+				if = {
+					limit = {
 						has_country_flag = mem_llayid_investigate
+						has_country_flag = mem_llayid_investigate_weapon
 					}
+					remove_country_flag = mem_llayid_investigate_weapon
 				}
-				country_event = { id = mem_llayids.3 days = 720 }
-			}
-			else = {
-				country_event = { id = mem_llayids.5 days = 360 }
+				if = {
+					limit = {
+						has_country_flag = mem_llayid_investigate_weapon
+						NOT = {
+							has_country_flag = mem_llayid_investigate
+						}
+					}
+					country_event = { id = mem_llayids.3 days = 720 }
+				}
+				else = {
+					country_event = { id = mem_llayids.5 days = 360 }
+				}
 			}
 		}
 	}
@@ -553,7 +560,11 @@ ship_event = {
 	id = mem_llayids.15
 	title = mem_llayids.15.name
 	desc = mem_llayids.15.desc
+	picture = GFX_evt_enigmatic_cache
+	location = event_target:mem_llayid_planet
 
+	is_triggered_only = yes
+	
 	immediate = {
 		event_target:mem_llayid_planet = {
 			orbital_deposit_tile = { clear_deposits = yes }
