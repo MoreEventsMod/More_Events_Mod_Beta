@@ -154,7 +154,25 @@ ship_event = {
 ship_event = {
 	id = mem_lost_emperor.5
 	title = mem_lost_emperor.5.name
-	desc = mem_lost_emperor.5.desc
+	desc = {
+		trigger = {
+			owner = {
+				NOT = {
+					has_country_flag = mem_azran_failed_before
+				}
+			}
+		}
+		text = mem_lost_emperor.5.desc
+	}
+	desc = {
+		trigger = {
+			owner = {
+				has_country_flag = mem_azran_failed_before
+			}
+		}
+		text = mem_lost_emperor.5.desc.again
+	}
+	picture = GFX_evt_unknown_ships
 
 	is_triggered_only = yes
 
@@ -163,6 +181,9 @@ ship_event = {
 			create_country = {
 				type = faction
 				name = "Azran"
+				effect = {
+					set_country_flag = mem_azran
+				}
 			}
 			create_fleet = {
 				name = "Azran"
@@ -197,7 +218,76 @@ ship_event = {
 	}
 }
 
+#You lost to Azran
+# This = owner of fleet 1 (loser)
+# From = owner of fleet 2 (winner)
+# FromFrom = fleet 1
+# FromFromFrom = fleet 2
+country_event = {
+	id = mem_lost_emperor.6
+	title = mem_lost_emperor.6.name
+	desc = mem_lost_emperor.6.desc
+	picture = GFX_evt_exploding_ship
 
+	is_triggered_only = yes
 
+	trigger = {
+		from = {
+			has_country_flag = mem_azran
+		}
+	}
 
-#Remember to despawn Azran and respawn the project if you retreat!
+	immediate = {
+		set_country_flag = mem_azran_failed_before
+		fromfromfrom = {
+			solar_system = {
+				save_event_target_as = mem_lost_emperor_system
+			}
+			delete_fleet = yes
+		}
+		from = {
+			destroy_country = yes
+		}
+	}
+
+	option = { #we will return in greater force
+		name = mem_lost_emperor.6.A
+		
+		enable_special_project = {
+			name = mem_lost_emperor_military_investigate_1
+			location = event_target:mem_lost_emperor_system.star
+		}
+	}
+	option = { #that's enough of this
+		name = mem_lost_emperor.6.B
+	}
+}
+
+#You defeated Azran
+# This = owner of fleet 1 (combatant)
+# From = owner of fleet 2 (destroyed)
+# FromFrom = fleet 1
+# FromFromFrom = fleet 2
+country_event = {
+	id = mem_lost_emperor.7
+	title = mem_lost_emperor.7.name
+	desc = mem_lost_emperor.7.desc
+	picture = GFX_evt_exploding_ship
+
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			has_country_flag = mem_azran
+		}
+	}
+
+	option = { #we will return in greater force
+		name = mem_lost_emperor.7.option
+		
+		hidden_effect = {
+			country_event = { id = mem_lost_emperor.8 days = 1 }
+		}
+	}
+}
+
