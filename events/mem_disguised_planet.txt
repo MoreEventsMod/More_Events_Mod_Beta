@@ -1,0 +1,218 @@
+#Disguised Planet
+#By ViolentBeetle
+
+namespace = mem_disguised_planet
+
+#Barren outcome
+ship_event = {
+	id = mem_disguised_planet.1
+	title = mem_disguised_planet.1.name
+	desc = mem_disguised_planet.1.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_warm_barren
+	location = FROM
+	
+	immediate = {
+		leader = { save_event_target_as = officer } #To avoid swappage
+		owner = { country_event = { id = story.5 days = 30 } }
+	}
+	
+	option = {
+		name = mem_disguised_planet.1.a
+		
+		FROM = {
+			change_pc = pc_barren
+			add_modifier = {
+				modifier = mem_disguised_planet_modifier
+				days = -1
+			}
+			orbital_deposit_tile = { set_deposit = d_immense_physics_deposit }
+		}
+		IF = {
+			limit = {
+				exists = event_target:officer
+				event_target:officer = {
+					NOT = { has_trait = leader_trait_expertise_particles }
+				}
+			}
+			event_target:officer = {
+				add_trait = leader_trait_expertise_particles
+			}
+		}
+	}
+}
+
+#Proper outcome
+ship_event = {
+	id = mem_disguised_planet.2
+	title = mem_disguised_planet.2.name
+	desc = mem_disguised_planet.2.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_ship_in_orbit
+	location = FROM
+	
+	immediate = {
+		owner = { country_event = { id = story.5 days = 30 } }
+	}
+	
+	option = {
+		name = FASCINATING
+		
+		FROM = {
+			random_list = {
+				1 = { change_pc = pc_gaia }
+				2 = { change_pc = pc_arid }
+				2 = { change_pc = pc_savannah }
+				2 = { change_pc = pc_desert }
+				2 = { change_pc = pc_continental }
+				2 = { change_pc = pc_tropical }
+				2 = { change_pc = pc_ocean }
+				2 = { change_pc = pc_alpine }
+				2 = { change_pc = pc_tundra }
+				2 = { change_pc = pc_arctic }
+				1 = { change_pc = pc_nuked }
+			}
+			add_modifier = {
+				modifier = mem_disguised_planet_modifier
+				days = -1
+			}
+			hidden_effect = {
+				change_planet_size = -1
+				reroll_planet = yes
+				orbital_deposit_tile = { set_deposit = d_immense_physics_deposit }
+				random_list = {
+					40 = {
+						# Nothing special
+					}
+					20 = {
+						random_tile = {
+							limit = { is_orbital_tile = no has_blocker = no }
+							random_list = {
+								25 = {
+									set_building = building_ancient_factory
+									set_deposit = d_mineral_deposit
+								}
+								25 = {
+									set_building = building_dark_matter_power_plant
+									set_deposit = d_energy_deposit
+								}
+								25 = {
+									set_building = building_agri_processing_complex
+									set_deposit = d_farmland_deposit
+								}
+								25 = {
+									set_building = building_ancient_archives
+									clear_deposits = yes
+								}
+							}
+						}
+					}
+					20 = {
+						while = {
+							count = 2
+							random_tile = {
+								limit = { is_orbital_tile = no }
+								set_deposit = d_alien_pets_deposit
+							}
+						}
+						IF = {
+							limit = { is_planet_class = pc_gaia }
+							random_tile = {
+								limit = { is_orbital_tile = no }
+								set_deposit = d_alien_pets_deposit
+							}
+						}
+						modifier = {
+							factor = 0
+							is_planet_class = pc_nuked
+						}
+					}
+					20 = {
+						while = {
+							count = 2
+							random_tile = {
+								limit = { is_orbital_tile = no has_building = no }
+								remove_blocker = yes
+								set_building = mem_disguised_planet_pile
+								set_deposit = d_society_deposit
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+#Shielded outcome
+ship_event = {
+	id = mem_disguised_planet.3
+	title = mem_disguised_planet.3.name
+	desc = mem_disguised_planet.3.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_shielded_planet
+	location = FROM
+	
+	immediate = {
+		leader = { save_event_target_as = officer } #To avoid swappage
+		owner = { country_event = { id = story.5 days = 30 } }
+	}
+	
+	option = {
+		name = mem_disguised_planet.3.a
+		
+		FROMFROM = {
+			change_pc = pc_shielded
+			add_modifier = {
+				modifier = mem_disguised_planet_modifier
+				days = -1
+			}
+			hidden_effect = { change_planet_size = -3 }
+			orbital_deposit_tile = { set_deposit = d_immense_physics_deposit }
+		}
+		IF = {
+			limit = {
+				exists = event_target:officer
+				event_target:officer = {
+					NOT = { has_trait = leader_trait_expertise_particles }
+				}
+			}
+			event_target:officer = {
+				add_trait = leader_trait_expertise_particles
+			}
+		}
+		IF = {
+			limit = {
+				exists = event_target:officer
+				event_target:officer = {
+					NOT = { has_trait = leader_trait_expertise_field_manipulation }
+				}
+			}
+			event_target:officer = {
+				add_trait = leader_trait_expertise_field_manipulation
+			}
+		}
+	}
+}
+
+#Failure
+ship_event = {
+	id = mem_disguised_planet.100
+	title = mem_disguised_planet.100.name
+	desc = mem_disguised_planet.100.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_ship_in_orbit
+	location = FROM
+	
+	option = {
+		name = mem_disguised_planet.100.a
+	}
+}

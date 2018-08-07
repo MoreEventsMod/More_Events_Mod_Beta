@@ -1,0 +1,765 @@
+#Among the Ashes
+#By ViolentBeetle
+
+namespace = mem_ashes
+
+@settletime = 360
+@settletimerandom = 1800
+@contacttime = 150
+
+#Anomaly Failure, let's get it over with
+ship_event = {
+	id = mem_ashes.999
+	title = mem_ashes.999.name
+	desc = mem_ashes.999.desc
+	
+	picture = GFX_evt_warm_barren
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		remove_global_flag = mem_ashes_set
+	}
+	
+	option = {
+		name = OK
+	}
+}
+
+#Initial anomaly success
+ship_event = {
+	id = mem_ashes.1
+	title = mem_ashes.1.name
+	desc = mem_ashes.1.desc
+	
+	picture = GFX_evt_in_the_dark
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_ashes.1.a
+		
+		trigger = {
+			owner = {
+				NOR = {
+					has_valid_civic = civic_fanatic_purifiers
+					has_valid_civic = civic_hive_devouring_swarm
+					has_valid_civic = civic_machine_terminator
+				}
+			}
+		}
+		
+		allow = {
+			owner = {
+				NOR = {
+					has_valid_civic = civic_fanatic_purifiers
+					has_valid_civic = civic_hive_devouring_swarm
+					has_valid_civic = civic_machine_terminator
+				}
+			}
+		}
+		
+		ai_chance = {
+			factor = 1
+		}
+		
+		from = { save_event_target_as = their_planet }
+		owner = {
+			begin_event_chain = {
+				event_chain = "mem_ashes_chain"
+				target = this
+			}
+			enable_special_project = {
+				name = MEM_ASHES_EXTRACT
+				location = event_target:their_planet
+				owner = this
+			}
+		}
+	}
+	
+	option = {
+		name = mem_ashes.1.b
+		
+		trigger = {
+			owner = {
+				NOR = {
+					has_valid_civic = civic_fanatic_purifiers
+					has_valid_civic = civic_hive_devouring_swarm
+					has_valid_civic = civic_machine_terminator
+				}
+			}
+		}
+		
+		allow = {
+			owner = {
+				NOR = {
+					has_valid_civic = civic_fanatic_purifiers
+					has_valid_civic = civic_hive_devouring_swarm
+					has_valid_civic = civic_machine_terminator
+				}
+			}
+		}
+		
+		owner = {
+			add_influence = 25
+		}
+		
+		ai_chance = {
+			factor = 4
+			modifier = {
+				factor = 0
+				owner = {
+					OR = {
+						has_ethic = ethic_fanatic_xenophile
+						has_ethic = ethic_xenophile
+						has_civic = civic_machine_servitor
+					}
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_ashes.1.c
+		
+		trigger = {
+			owner = {
+				OR = {
+					has_valid_civic = civic_fanatic_purifiers
+					has_valid_civic = civic_hive_devouring_swarm
+					has_valid_civic = civic_machine_terminator
+				}
+			}
+		}
+		
+		allow = {
+			owner = {
+				OR = {
+					has_valid_civic = civic_fanatic_purifiers
+					has_valid_civic = civic_hive_devouring_swarm
+					has_valid_civic = civic_machine_terminator
+				}
+			}
+		}
+		
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = 15
+				min = 50
+				max = 1000
+			}
+			IF = {
+				limit = { has_valid_civic = civic_hive_devouring_swarm }
+				add_modifier = {
+					modifier = mem_ashes_snack
+					days = 360
+				}
+			}
+		}
+		
+		ai_chance = {
+			factor = 500
+		}
+	}
+	
+	after = {
+		FROM = {
+			add_modifier = {
+				modifier = mem_ashes_underground
+				days = -1
+			}
+			orbital_deposit_tile = { set_deposit = d_immense_society_deposit }
+		}
+		owner = { country_event = { id = story.5 days = 30 } } #Remnants story event
+	}
+}
+
+#Extraction complete
+ship_event = {
+	id = mem_ashes.2
+	title = mem_ashes.2.name
+	desc = mem_ashes.2.desc
+	
+	picture = GFX_evt_society_research
+	location = event_target:their_planet
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_ashes.2.a
+		
+		IF = {
+			limit = {
+				owner = {
+					NOT = { has_valid_civic = civic_machine_assimilator }
+				}
+			}
+			enable_special_project = {
+				name = MEM_ASHES_REVIVE
+				location = owner.capital_scope
+				owner = this
+			}
+		}
+		
+		IF = {
+			limit = {
+				owner = {
+					NOR = {
+						has_ethic = ethic_xenophile
+						has_ethic = ethic_fanatic_xenophile
+						has_valid_civic = civic_machine_servitor
+					}
+				}
+			}
+			enable_special_project = {
+				name = MEM_ASHES_AUTOPSY
+				location = owner.capital_scope
+				owner = this
+			}
+		}
+		
+		IF = {
+			limit = {
+				owner = { has_valid_civic = civic_machine_assimilator }
+			}
+			enable_special_project = {
+				name = MEM_ASHES_ASSIMILATION
+				location = owner.capital_scope
+				owner = this
+			}
+		}
+	}
+}
+
+#Woken up
+country_event = {
+	id = mem_ashes.3
+	title = mem_ashes.3.name
+	desc = mem_ashes.3.desc
+	
+	picture = GFX_evt_society_research
+	location = event_target:planet_to_colonize
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_planet_within_border = {
+			limit = {
+				has_owner = no
+				is_colonizable = yes
+				NOR = {
+					is_planet_class = pc_habitat
+					is_planet_class = pc_ringworld_habitable
+					is_planet_class = pc_gaia
+					is_planet_class = pc_nuked
+					is_planet_class = pc_machine
+					has_modifier = holy_planet
+				}
+				# solar_system = {
+					# NOT = {
+						# any_planet = { has_owner = yes }
+					# }
+				# }
+			}
+			save_event_target_as = planet_to_colonize
+		}
+		IF = {
+			limit = { exists = event_target:planet_to_colonize }
+			create_species = {
+				# name = Ysmir
+				class = random_non_machine
+				portrait = random
+				traits = {
+					trait = mem_ashes_survivors
+				}
+				homeworld = event_target:planet_to_colonize
+			}
+		}
+		ELSE = {
+			create_species = {
+				# name = Ysmir
+				class = random_non_machine
+				portrait = random
+				traits = {
+					trait = mem_ashes_survivors
+				}
+				homeworld = root.capital_scope
+			}
+		}
+		last_created_species = { save_event_target_as = their_species }
+	}
+	
+	#Let them settle under our control
+	option = {
+		name = mem_ashes.3.a
+		custom_tooltip = mem_ashes.3.a.tooltip
+		
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 0
+				OR = {
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_xenophobe
+				}
+			}
+		}
+		
+		allow = {
+			exists = event_target:planet_to_colonize
+			NOT = { has_ethic = ethic_gestalt_consciousness }
+		}
+		trigger = {
+			exists = event_target:planet_to_colonize
+			NOT = { has_ethic = ethic_gestalt_consciousness }
+		}
+		
+		hidden_effect = {
+			event_target:planet_to_colonize = {
+				create_colony = {
+					owner = root
+					species = event_target:their_species
+				}
+				every_owned_pop = {
+					kill_pop = yes
+				}
+				best_tile_for_pop = {
+					create_pop = { species = event_target:their_species }
+				}
+				set_name = "Perseverance"
+			}
+		}
+	}
+	
+	#Cede them a system for colony
+	option = {
+		name = mem_ashes.3.b
+		custom_tooltip = mem_ashes.3.b.tooltip
+		
+		ai_chance = {
+			factor = 3
+		}
+		
+		allow = {
+			exists = event_target:planet_to_colonize
+		}
+		trigger = {
+			exists = event_target:planet_to_colonize
+		}
+		
+		hidden_effect = {
+			
+			event_target:planet_to_colonize = {
+				create_country = {
+					type = default
+					name = random
+					ethos = root
+					authority = random
+					civics = random
+					flag = random
+					species = event_target:their_species
+					day_zero_contact = no
+				}
+				last_created_country = {
+					set_timed_country_flag = { flag = day_0 days = 7 }
+					shift_ethic = ethic_xenophile
+					change_government = random
+					IF = {
+						limit = { 
+						root = { has_valid_civic = civic_inwards_perfection } 
+						}
+						set_subject_of = {
+							who = root
+							subject_type = tributary
+						}
+					}
+					ELSE = {
+						set_subject_of = {
+							who = root
+							subject_type = protectorate
+						}
+					}
+					#Let's be generous here
+					add_influence = 500
+					add_minerals = 2000
+					add_food = 200
+					add_energy = 2000
+					save_event_target_as = their_country
+				}
+				create_colony = {
+					owner = event_target:their_country
+					species = event_target:their_species
+				}
+				set_name = "Perseverance"
+				solar_system.starbase = { set_owner = event_target:their_country }
+				event_target:their_country = { set_name = random }
+			}
+			
+			establish_contact = { who = event_target:their_country location = event_target:their_country.capital_scope.solar_system }
+		}
+	}
+	
+	#Settle in our population
+	option = {
+		name = mem_ashes.3.c
+		custom_tooltip = mem_ashes.3.c.tooltip
+		
+		ai_chance = {
+			factor = 5
+			modifier = {
+				factor = 0
+				OR = {
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_xenophobe
+				}
+			}
+		}
+		
+		allow = {
+			custom_tooltip = {
+				text = mem_ashes_need_free_space
+				any_owned_planet = {
+					habitability = { who = event_target:their_species value > 0.2 }
+					any_tile = { has_blocker = no has_pop = no }
+				}
+			}
+			OR = {
+				NOT = { has_ethic = ethic_gestalt_consciousness }
+				has_civic = civic_machine_servitor
+				has_civic = civic_machine_assimilator
+			}
+		}
+		hidden_effect = {
+			random_owned_planet = {
+				limit = { 
+					habitability = { who = event_target:their_species value > 0.2 }
+					any_tile = { has_blocker = no has_pop = no }
+				}
+				best_tile_for_pop = {
+					create_pop = {
+						species = event_target:their_species
+						ethos = { ethic = ethic_xenophile }
+					}
+				}
+				clear_organic_sanctuaries = yes
+				add_organic_sanctuaries = yes
+			}
+		}
+	}
+	
+	#Send them away
+	option = {
+		name = mem_ashes.3.d
+		custom_tooltip = mem_ashes.3.d.tooltip
+		
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 10
+				NOR = {
+					has_ethic = ethic_fanatic_xenophile
+					has_ethic = ethic_xenophile
+					has_civic = civic_machine_servitor
+				}
+			}
+			
+		}
+		
+		add_influence = 50
+		hidden_effect = {
+			random_list = {
+				30 = { }
+				70 = { country_event = { id = mem_ashes.5 days = @settletime random = @settletimerandom } }
+			}
+		}
+	}
+	
+	after = {
+		end_event_chain = mem_ashes_chain
+	}
+}
+
+#Dissection
+country_event = {
+	id = mem_ashes.4
+	title = mem_ashes.4.name
+	desc = mem_ashes.4.desc
+	
+	picture = GFX_evt_society_research
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_ashes.4.a
+		
+		trigger = {
+			NOR = {
+				is_materialist = yes
+				has_authority = auth_machine_intelligence
+			}
+		}
+	}
+	
+	option = {
+		name = mem_ashes.4.b
+		
+		trigger = {
+			is_materialist = yes
+		}
+	}
+	
+	option = {
+		name = mem_ashes.4.c
+		
+		trigger = {
+			has_authority = auth_machine_intelligence
+		}
+	}
+	
+	after = {
+		add_monthly_resource_mult = {
+			resource = society_research
+			value = @tier5researchreward
+			min = @tier5researchmin
+			max = @tier5researchmax
+		}
+		end_event_chain = mem_ashes_chain
+	}
+}
+
+#Settling a distant world
+country_event = {
+	id = mem_ashes.5
+	
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_planet = {
+			limit = {
+				# always = no
+				habitability = {
+					who = event_target:their_species
+					value > 0.4
+				}
+				solar_system = {
+					NOT = { exists = space_owner }
+					distance = {
+						source = root.capital_scope.solar_system
+						min_distance >= 90
+					}
+					NOT = {
+						any_neighbor_system = {
+							exists = space_owner
+							space_owner = { is_same_value = root }
+						}						
+					}
+				}
+			}
+			save_event_target_as = planet_to_colonize_II
+		}
+		IF = {
+			limit = {
+				NOT = { exists = event_target:planet_to_colonize_II }
+			}
+			random_system = {
+				limit = {
+					distance = {
+						source = root.capital_scope.solar_system
+						min_distance >= 90
+					}
+					NOT = {
+						any_neighbor_system = {
+							exists = space_owner
+							space_owner = { is_same_value = root }
+						}						
+					}
+				}
+				spawn_system = {
+					min_distance >= 20
+					max_distance <= 50
+					initializer = mem_ashes_survivor_system
+				}
+			}
+		}
+		
+		event_target:planet_to_colonize_II = {
+			create_country = {
+				type = default
+				name = random
+				ethos = random
+				authority = random
+				civics = random
+				flag = random
+				species = event_target:their_species
+				day_zero_contact = no
+			}
+			last_created_country = {
+				shift_ethic = ethic_xenophile
+				change_government = random
+				#Let's be generous here
+				add_influence = 500
+				add_minerals = 2000
+				add_food = 200
+				add_energy = 2000
+				save_event_target_as = their_country
+			}
+			create_colony = {
+				owner = event_target:their_country
+				species = event_target:their_species
+			}
+			set_name = "Perseverance"
+			solar_system = {
+				create_starbase = {
+					size = starbase_outpost
+					owner = event_target:their_country
+				}
+			}
+			event_target:their_country = { set_name = random }
+		}
+		country_event = {
+			id = mem_ashes.6
+			days = @contacttime
+		}
+	}
+}
+
+#Diplomatic contact
+country_event = {
+	id = mem_ashes.6
+	title = mem_ashes.6.name
+	desc = mem_ashes.6.desc
+	
+	is_triggered_only = yes
+	diplomatic = yes
+	
+	trigger = {
+		exists = event_target:their_country
+		event_target:their_country = {
+			NOT = { exists = overlord }
+		}
+	}
+	
+	picture_event_data = {
+		portrait = event_target:their_country
+		planet_background = event_target:their_country
+		graphical_culture = event_target:their_country
+		city_level = event_target:their_country
+		room = event_target:their_country
+	}
+	
+	immediate = {
+		establish_communications_no_message = event_target:their_country
+	}
+	
+	option = {
+		name = mem_ashes.6.a
+		
+		add_influence = 50
+	}
+	
+	option = {
+		name = mem_ashes.6.b
+		custom_tooltip = mem_ashes.6.b.tooltip
+		hidden_effect = {
+			create_leader = {
+				type = governor
+				species = event_target:their_species
+				skill = 3
+				traits = {
+					trait = mem_ashes_leader_trait
+				}
+			}
+		}
+	}
+}
+
+#Assimilation special
+country_event = {
+	id = mem_ashes.7
+	title = mem_ashes.7.name
+	desc = mem_ashes.7.desc
+	
+	is_triggered_only = yes
+	
+	picture = GFX_evt_society_research
+	
+	immediate = {
+		generate_cyborg_treats = yes
+		random_owned_planet = {
+			limit = {
+				any_tile = { has_pop = no has_blocker = no }
+			}
+			save_event_target_as = planet_to_colonize
+		}
+		IF = {
+			limit = { exists = event_target:planet_to_colonize }
+			create_species = {
+				# name = Ysmir
+				class = random_non_machine
+				portrait = random
+				traits = {
+					trait = trait_cybernetic
+				}
+				traits = random
+				homeworld = event_target:planet_to_colonize
+			}
+		}
+		ELSE = {
+			create_species = {
+				# name = Ysmir
+				class = random_non_machine
+				portrait = random
+				traits = {
+					trait = trait_cybernetic
+				}
+				traits = random
+				homeworld = root.capital_scope
+			}
+		}
+		last_created_species = { save_event_target_as = their_species }
+	}
+	
+	option = {
+		name = mem_ashes.7.a
+		IF = {
+			limit = { exists = event_target:planet_to_colonize }
+			custom_tooltip = mem_ashes.7.a.tooltip
+		}
+		
+		allow = {
+			custom_tooltip = {
+				text = mem_ashes_need_free_space
+				exists = event_target:planet_to_colonize
+			}
+		}
+		
+		hidden_effect = {
+			event_target:planet_to_colonize = {
+				best_tile_for_pop = {
+					create_pop = { species = event_target:their_species }
+				}
+				last_created_pop = {
+					set_citizenship_type = {
+						type = citizenship_full_machine
+						country = root
+					}
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_ashes.7.b
+		
+		add_influence = 30
+	}
+	
+	after = {
+		end_event_chain = mem_ashes_chain
+	}
+}
