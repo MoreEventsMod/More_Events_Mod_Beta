@@ -12,46 +12,36 @@ event = {
 	is_triggered_only = yes
 	
 	immediate = {
-		IF = {
-			limit = {
-				is_multiplayer = no
-			}
-			random_country = {
-				limit = {
-					is_ai = no
-				}
-				country_event = { id = mem_options.2 days = 5 }
-			}
-		}
+		set_global_flag = mem_more_events_mod
 	}
 }
 
 # Game Start Event to create the project
-country_event = {
-	id = mem_options.2
-	hide_window = yes
-	
-	is_triggered_only = yes
-	
-	immediate = {
-		begin_event_chain = {
-			event_chain = mem_options_chain
-			target = THIS
-		}
-		capital_scope = {
-			enable_special_project = {
-				name = MEM_OPTIONS_PROJECT
-				location = this
-				owner = ROOT
-			}
-			enable_special_project = {
-				name = MEM_OPTIONS_REMOVAL_PROJECT
-				location = this
-				owner = ROOT
-			}
-		}
-	}
-}
+#country_event = {
+#	id = mem_options.2
+#	hide_window = yes
+#	
+#	is_triggered_only = yes
+#	
+#	immediate = {
+#		begin_event_chain = {
+#			event_chain = mem_options_chain
+#			target = THIS
+#		}
+#		capital_scope = {
+#			enable_special_project = {
+#				name = MEM_OPTIONS_PROJECT
+#				location = this
+#				owner = ROOT
+#			}
+#			enable_special_project = {
+#				name = MEM_OPTIONS_REMOVAL_PROJECT
+#				location = this
+#				owner = ROOT
+#			}
+#		}
+#	}
+#}
 
 # Bridge Event from Project to Menu
 planet_event = {
@@ -175,6 +165,14 @@ country_event = {
 		name = mem_options.4.f
 		hidden_effect = {
 			country_event = { id = mem_options.11 }
+		}
+	}
+
+	#Broken Clock
+	option = {
+		name = mem_options.4.g
+		hidden_effect = {
+			country_event = { id = mem_options.12 }
 		}
 	}
 	
@@ -718,6 +716,66 @@ country_event = {
 		}
 	}
 	
+	# Exit EVENT
+	option = {
+		name = mem_options.exit
+	}
+}
+
+#Broken Clock options
+country_event = {
+	id = mem_options.12
+	title = mem_options.12.name
+	desc = mem_options.12.desc
+	picture = GFX_evt_mem_options
+	
+	is_triggered_only = yes
+
+	#Disable the crisis
+	option = {
+		name = mem_options.12.a
+
+		trigger = {
+			NOR = {
+				has_global_flag = mem_broken_clock_prevent_triggering
+				mid_game_years_passed > 0
+			}
+		}
+
+		set_global_flag = mem_broken_clock_prevent_triggering
+	}
+
+	#Re-enable the crisis
+	option = {
+		name = mem_options.12.b
+
+		trigger = {
+			has_global_flag = mem_broken_clock_prevent_triggering
+			NOT = {
+				mid_game_years_passed > 0
+			}
+		}
+
+		remove_global_flag = mem_broken_clock_prevent_triggering
+	}
+
+	#Trigger instant death for unwelcome guests
+	option = {
+		name = mem_options.12.c
+
+		trigger = {
+			any_country = {
+				has_country_flag = mem_broken_clock_newcomers
+			}
+		}
+
+		random_country = {
+			limit = { has_country_flag = mem_broken_clock_newcomers }
+			set_global_flag = mem_broken_clock_kill_now
+			country_event = { id = mem_broken_clock.3000 }
+		}
+	}
+
 	# Exit EVENT
 	option = {
 		name = mem_options.exit
