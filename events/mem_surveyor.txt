@@ -5,6 +5,10 @@
 
 namespace = mem_surveyor
 
+###################
+### Base events ###
+###################
+
 #Initial issuing of orders. Don't feel safe enough to put it into initializer
 event = {
     id = mem_surveyor.1
@@ -35,6 +39,7 @@ fleet_event = {
 
     immediate = {
         solar_system = {
+            save_event_target_as = surveyor_system
             set_star_flag = mem_surveyor_visited
             remove_star_flag = mem_surveyor_next_target
             log = "[This.GetName] visited"
@@ -125,6 +130,7 @@ fleet_event = {
                                             value = 1
                                         }
                                     }
+                                    log = "Rebooting the cycle: [This.mem_surveyor_iteration_count]" 
                                     fleet_event = { id = mem_surveyor.2 }
                                 }
                             }
@@ -134,5 +140,208 @@ fleet_event = {
 
             }
         }
+    }
+}
+
+#Country event: Enigmatic spacefarers
+country_event = {
+    id = mem_surveyor.3
+    title = mem_surveyor.3.name
+    desc = mem_surveyor.3.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_unknown_ships
+    show_sound = event_radio_chatter
+    location = FROM
+    
+    immediate = {
+        set_country_flag = mem_surveyor_spotted_probe
+    }
+
+    option = {
+        name = INTERESTING
+    }
+}
+
+#Probe makes contact
+country_event = {
+    id = mem_surveyor.4
+    title = mem_surveyor.4.name
+    desc = mem_surveyor.4.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_unknown_ships
+    show_sound = event_radio_chatter
+    location = FROM
+    
+    immediate = {
+        set_country_flag = mem_surveyor_opened_comms
+        establish_communications_no_message = FROM
+    }
+
+    option = {
+        name = ONSCREEN
+        hidden_effect = {
+            country_event = { id = mem_surveyor.5 }
+        }
+    }
+}
+
+#Probe greetings
+country_event = {
+    id = mem_surveyor.5
+    title = MEM_SURVEYOR_PROBE_HEADER
+    desc = mem_surveyor.5.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+    location = FROMFROM
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+    
+    option = {
+        name = mem_surveyor.5.default
+    }
+
+    option = {
+        name = mem_surveyor.5.ega
+        trigger = {
+            OR = {
+                has_ethic = ethic_egalitarian
+                has_ethic = ethic_fanatic_egalitarian
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.5.aut
+        trigger = {
+            OR = {
+                has_ethic = ethic_authoritarian
+                has_ethic = ethic_fanatic_authoritarian
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.5.mat
+        trigger = {
+            OR = {
+                has_ethic = ethic_materialist
+                has_ethic = ethic_fanatic_materialist
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.5.spi
+        trigger = {
+            OR = {
+                has_ethic = ethic_spiritualist
+                has_ethic = ethic_fanatic_spiritualist
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.5.pac
+        trigger = {
+            OR = {
+                has_ethic = ethic_pacifist
+                has_ethic = ethic_fanatic_pacifist
+            }
+        }
+    }
+    
+    option = {
+        name = mem_surveyor.5.mil
+        trigger = {
+            OR = {
+                has_ethic = ethic_militarist
+                has_ethic = ethic_fanatic_militarist
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.5.phile
+        trigger = {
+            OR = {
+                has_ethic = ethic_xenophile
+                has_ethic = ethic_fanatic_xenophile
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.5.phobe
+        trigger = {
+            OR = {
+                has_ethic = ethic_xenophobe
+                has_ethic = ethic_fanatic_xenophobe
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.5.hive
+        trigger = {
+            has_authority = auth_hive_mind
+        }
+    }
+
+    option = {
+        name = mem_surveyor.5.machine
+        trigger = {
+            has_authority = auth_machine_intelligence
+        }
+    }
+
+    option = {
+        name = mem_surveyor.5.purifier
+        trigger = {
+            has_valid_civic = civic_fanatic_purifiers
+        }
+    }
+
+    option = {
+        name = mem_surveyor.5.terminator
+        trigger = {
+            has_valid_civic = civic_machine_terminator
+        }
+    }
+
+    option = {
+        name = mem_surveyor.5.swarm
+        trigger = {
+            has_valid_civic = civic_hive_devouring_swarm
+        }
+    }
+}
+
+#####################################
+### Diplomacy with friendly probe ###
+#####################################
+
+# Custom diplomacy with surveyor probe
+
+country_event = {
+    id = mem_surveyor.100
+    title = MEM_SURVEYOR_PROBE_HEADER
+    desc = mem_surveyor.100.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    trigger = {
+        always = no
+    }
+
+    picture_event_data = {
+		room = no_video_feed_room
     }
 }
