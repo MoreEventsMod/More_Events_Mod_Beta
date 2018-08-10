@@ -38,7 +38,7 @@ fleet_event = {
             set_star_flag = mem_surveyor_visited
             remove_star_flag = mem_surveyor_next_target
             log = "[This.GetName] visited"
-            closest_system = {
+            closest_system = { # Find the most appealing system
                 limit = {
                     NOR = {
                         has_star_flag = mem_surveyor_visited
@@ -66,13 +66,12 @@ fleet_event = {
         }
         clear_fleet_actions = this
         queue_actions = {
-            find_closest_system = {
+            find_closest_system = { #Try to move to targeted system
                 trigger = {
                     id = mem_surveyor.vanilla.1
                     has_star_flag = mem_surveyor_next_target
                 }
                 found_system = {
-                    log = "[This.GetName] targeted"
                     move_to = this
                     wait = 1
                     effect = {
@@ -82,21 +81,48 @@ fleet_event = {
                         }
                     }
                 }
-                failed = {
-                    effect = {
-                        id = mem_surveyor.vanilla.3
-                        log = "Found nothing"
-                        every_system = {
-                            limit = { has_star_flag = mem_surveyor_visited }
-                            remove_star_flag = mem_surveyor_visited
-                        }
-                        owner = {
-                            change_variable = {
-                                which = mem_surveyor_iteration_count
-                                value = 1
+                failed = { #If no system is flagged, no system is valid
+                    find_random_system = { #Go somewhere completely random
+                        trigger = {
+                            id = mem_surveyor.vanilla.3
+                            NOR = {
+                                has_star_flag = mem_surveyor_visited
+                                has_star_flag = hostile_system
+                                has_star_flag = sealed_system
+                                has_star_flag = lcluster
+                            }
+                            NAND = {
+                                exists = space_owner
+                                space_owner = {
+                                    OR = {
+                                        is_country_type = fallen_empire
+                                        is_country_type = awakened_empire
+                                        is_country_type = dormant_marauders
+                                        is_country_type = awakened_marauders
+                                    }
+                                }
                             }
                         }
-                        fleet_event = { id = mem_surveyor.2 }
+                        found_system = {
+                            move_to = this
+                            effect = {
+                                id = mem_surveyor.vanilla.4
+                                log = "Found nothing"
+                                every_system = {
+                                    limit = { has_star_flag = mem_surveyor_visited }
+                                    remove_star_flag = mem_surveyor_visited
+                                }
+                                root = {
+                                    owner = {
+                                        change_variable = {
+                                            which = mem_surveyor_iteration_count
+                                            value = 1
+                                        }
+                                    }
+                                    fleet_event = { id = mem_surveyor.2 }
+                                }
+                            }
+                        }
                     }
                 }
 
