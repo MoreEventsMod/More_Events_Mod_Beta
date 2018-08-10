@@ -1,0 +1,97 @@
+##########################
+#        Surveyor        #
+#   By ViolentBeetle     #
+##########################
+
+namespace = mem_surveyor
+
+#Initial issuing of orders. Don't feel safe enough to put it into initializer
+event = {
+    id = mem_surveyor.1
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        has_global_flag = mem_surveyor_is_present
+        # exists = event_target:mem_surveyor_fleet
+    }
+    
+    immediate = {
+        random_country = {
+            limit = { has_country_flag = mem_surveyor_country }
+            random_owned_fleet = {
+                fleet_event = { id = mem_surveyor.2 }
+            }
+        }
+        log = "Initialized"
+    }
+}
+
+#Fleet arrives in a system and consider what to do next
+fleet_event = {
+    id = mem_surveyor.2
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        solar_system = {
+            set_star_flag = mem_surveyor_visited
+            log = "[This.GetName] visited"
+            #Various effects go here
+        }
+        clear_fleet_actions = this
+        queue_actions = {
+            find_closest_system = {
+                trigger = {
+                    id = mem_surveyor.vanilla.1
+                    NOR = {
+                        has_star_flag = mem_surveyor_visited
+                        has_star_flag = hostile_system
+                        has_star_flag = sealed_system
+                        has_star_flag = lcluster
+                    }
+                    NAND = {
+                        exists = space_owner
+                        space_owner = {
+                            OR = {
+                                is_country_type = fallen_empire
+                                is_country_type = awakened_empire
+                                is_country_type = dormant_marauders
+                                is_country_type = awakened_marauders
+                            }
+                        }
+                    }
+                }
+                found_system = {
+                    log = "[This.GetName] targeted"
+                    move_to = this
+                    wait = 1
+                    effect = {
+                        id = mem_surveyor.vanilla.2
+                        root = {
+                            fleet_event = { id = mem_surveyor.2 }
+                        }
+                    }
+                }
+                failed = {
+                    effect = {
+                        id = mem_surveyor.vanilla.3
+                        log = "Found nothing"
+                        every_system = {
+                            limit = { has_star_flag = mem_surveyor_visited }
+                            remove_star_flag = mem_surveyor_visited
+                        }
+                        owner = {
+                            change_variable = {
+                                which = mem_surveyor_iteration_count
+                                value = 1
+                            }
+                        }
+                        fleet_event = { id = mem_surveyor.2 }
+                    }
+                }
+
+            }
+        }
+    }
+}
