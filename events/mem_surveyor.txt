@@ -59,6 +59,7 @@ fleet_event = {
                                 is_country_type = awakened_empire
                                 is_country_type = dormant_marauders
                                 is_country_type = awakened_marauders
+                                has_country_flag = mem_surveyor_attacked_surveyor
                             }
                         }
                     }
@@ -110,6 +111,7 @@ fleet_event = {
                                         is_country_type = awakened_empire
                                         is_country_type = dormant_marauders
                                         is_country_type = awakened_marauders
+                                        has_country_flag = mem_surveyor_attacked_surveyor
                                     }
                                 }
                             }
@@ -152,6 +154,7 @@ country_event = {
     is_triggered_only = yes
 
     trigger = {
+        log = "Trying to initiate first contact. [From.GetName]"
         FROM = { is_country_type = mem_surveyor_country_green }
         NOT = { has_country_flag = mem_surveyor_spotted_probe }
     }
@@ -181,6 +184,10 @@ country_event = {
     picture = GFX_evt_unknown_ships
     show_sound = event_radio_chatter
     location = FROM
+
+    trigger = {
+        NOT = { has_country_flag = mem_surveyor_attacked_surveyor }
+    }
     
     immediate = {
         set_country_flag = mem_surveyor_opened_comms
@@ -329,6 +336,27 @@ country_event = {
     }
 }
 
+#Flag about attacking probe
+country_event = {
+    id = mem_surveyor.6
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        FROM = {
+            OR = {
+                is_country_type = mem_surveyor_country_green
+                is_country_type = mem_surveyor_country_yellow
+            }
+        }
+        NOT = { has_country_flag = mem_surveyor_attacked_surveyor }
+    }
+
+    immediate = {
+        set_country_flag = mem_surveyor_attacked_surveyor
+    }
+}
+
 #####################################
 ### Diplomacy with friendly probe ###
 #####################################
@@ -340,16 +368,101 @@ country_event = {
     title = MEM_SURVEYOR_PROBE_HEADER
     
     #Generic greets
-    desc = mem_surveyor.100.desc.1
-    desc = mem_surveyor.100.desc.2
-    desc = mem_surveyor.100.desc.3
-    desc = mem_surveyor.100.desc.4
-    desc = mem_surveyor.100.desc.5
-    desc = mem_surveyor.100.desc.6
-    desc = mem_surveyor.100.desc.7
-    desc = mem_surveyor.100.desc.8
-    desc = mem_surveyor.100.desc.9
-    desc = mem_surveyor.100.desc.10
+    desc = {
+        text = mem_surveyor.100.desc.1
+        trigger = { has_country_flag = mem_surveyor_generic_responses }
+    }
+    desc = {
+        text = mem_surveyor.100.desc.2
+        trigger = { has_country_flag = mem_surveyor_generic_responses }
+    }
+    desc = {
+        text = mem_surveyor.100.desc.3
+        trigger = { has_country_flag = mem_surveyor_generic_responses }
+    }
+    desc = {
+        text = mem_surveyor.100.desc.4
+        trigger = { has_country_flag = mem_surveyor_generic_responses }
+    }
+    desc = {
+        text = mem_surveyor.100.desc.5
+        trigger = { has_country_flag = mem_surveyor_generic_responses }
+    }
+    desc = {
+        text = mem_surveyor.100.desc.6
+        trigger = { has_country_flag = mem_surveyor_generic_responses }
+    }
+    desc = {
+        text = mem_surveyor.100.desc.7
+        trigger = { has_country_flag = mem_surveyor_generic_responses }
+    }
+    desc = {
+        text = mem_surveyor.100.desc.8
+        trigger = { has_country_flag = mem_surveyor_generic_responses }
+    }
+    desc = {
+        text = mem_surveyor.100.desc.9
+        trigger = { has_country_flag = mem_surveyor_generic_responses }
+    }
+
+    #Greets when away from the player space
+    desc = {
+        text = mem_surveyor.100.away.1
+        trigger = {
+            exists = event_target:mem_surveyor_fleet.solar_system
+            mem_surveyor_in_owned_space = no
+        }
+    }
+
+    #Greets when in player's space
+    desc = {
+        text = mem_surveyor.100.here.1
+        trigger = {
+            exists = event_target:mem_surveyor_fleet.solar_system
+            mem_surveyor_in_owned_space = yes
+        }
+    }
+    desc = {
+        text = mem_surveyor.100.here.2
+        trigger = {
+            exists = event_target:mem_surveyor_fleet.solar_system
+            mem_surveyor_in_owned_space = yes
+        }
+    }
+
+    #Greets based on ethics, governments etc
+    desc = {
+        text = mem_surveyor.100.mat
+        trigger = {
+            is_materialist = yes
+        }
+    }
+    desc = {
+        text = mem_surveyor.100.spi
+        trigger = {
+            is_spiritualist = yes
+        }
+    }
+    desc = {
+        text = mem_surveyor.100.machine
+        trigger = {
+            has_authority = auth_machine_intelligence
+        }
+    }
+
+    #Probe relates to its journeys
+    desc = {
+        text = mem_surveyor.100.journey.1
+        trigger = {
+            exists = event_target:next_target
+        }
+    }
+    desc = {
+        text = mem_surveyor.100.journey.2
+        trigger = {
+            exists = event_target:visited_system
+        }
+    }
 
     is_triggered_only = yes
     diplomatic = yes
@@ -357,6 +470,7 @@ country_event = {
     trigger = {
         FROM = { is_country_type = mem_surveyor_country_green }
         NOT = { has_country_flag = mem_surveyor_diplomacy_engaged }
+        NOT = { has_country_flag = mem_surveyor_attacked_surveyor }
     }
 
     picture_event_data = {
@@ -365,6 +479,18 @@ country_event = {
 
     immediate = {
         set_country_flag = mem_surveyor_diplomacy_engaged
+        random_list = {
+            50 = { }
+            50 = { set_country_flag = mem_surveyor_generic_responses }
+        }
+        random_system = {
+            limit = { has_star_flag = mem_surveyor_next_target }
+            save_event_target_as = next_target
+        }
+        random_system = {
+            limit = { has_star_flag = mem_surveyor_visited }
+            save_event_target_as = visited_system
+        }
     }
 
     option = { #Tell us about the mission
@@ -391,6 +517,41 @@ country_event = {
 
     option = {
         name = MEM_SURVEYOR_EXIT
+        default_hide_option = yes
+        remove_country_flag = mem_surveyor_generic_responses
+        remove_country_flag = mem_surveyor_diplomacy_engaged
+    }
+}
+
+#Attempting diplo after attacking peaceful probe
+country_event = {
+    id = mem_surveyor.101
+    title = MEM_SURVEYOR_PROBE_HEADER
+    desc = mem_surveyor.101.desc.1
+    desc = mem_surveyor.101.desc.2
+    desc = mem_surveyor.101.desc.3
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    trigger = {
+        FROM = { is_country_type = mem_surveyor_country_green }
+        NOT = { has_country_flag = mem_surveyor_diplomacy_engaged }
+        NOT = { has_country_flag = mem_surveyor_attacked_surveyor }
+    }
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+
+    immediate = {
+        set_country_flag = mem_surveyor_diplomacy_engaged
+    }
+
+    option = {
+        name = MEM_SURVEYOR_EXIT
+        default_hide_option = yes
+        remove_country_flag = mem_surveyor_generic_responses
         remove_country_flag = mem_surveyor_diplomacy_engaged
     }
 }
