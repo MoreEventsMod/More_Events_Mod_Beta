@@ -590,6 +590,13 @@ country_event = {
 
     option = {
         name = mem_surveyor.mission.accept
+
+        add_modifier = {
+            modifier = mem_surveyor_science_drain
+            days = 360
+        }
+        set_country_flag = mem_surveyor_finished_quest
+        set_country_flag = mem_surveyor_reward_wait
     }
 
     option = {
@@ -622,15 +629,21 @@ country_event = {
 
     option = {
         name = mem_surveyor.mission.accept
+
+        add_minerals = -500
+        add_energy = -500
+        
+        set_country_flag = mem_surveyor_finished_quest
+        set_country_flag = mem_surveyor_reward_wait
+
+        allow = {
+            energy > 499
+            minerals > 499
+        }
     }
 
     option = {
         name = mem_surveyor.mission.decline
-        default_hide_option = yes
-    }
-
-    option = {
-        name = mem_surveyor.mission.cant_afford
         default_hide_option = yes
     }
 
@@ -657,8 +670,38 @@ country_event = {
 		room = no_video_feed_room
     }
 
+    trigger = {
+        any_owned_planet = {
+            is_capital = no
+            NOR = {
+                is_planet_class = pc_ringworld_habitable
+                is_planet_class = pc_habitat
+            }
+        }
+    }
+
+    immediate = {
+        random_owned_planet = {
+            limit = {
+                is_capital = no
+                NOR = {
+                    is_planet_class = pc_ringworld_habitable
+                    is_planet_class = pc_habitat
+                }
+            }
+            save_event_target_as = amplifier_planet
+        }
+    }
+
     option = {
         name = mem_surveyor.mission.accept
+
+        event_target:amplifier_planet = {
+            add_modifier = {
+                modifier = mem_surveyor_amplified
+                days = 360
+            }
+        }
     }
 
     option = {
@@ -685,12 +728,50 @@ country_event = {
     is_triggered_only = yes
     diplomatic = yes
 
+    trigger = {
+        any_planet_within_border = {
+            OR = {
+                is_planet_class = pc_barren
+                is_planet_class = pc_barren_cold
+                is_planet_class = pc_toxic
+                is_planet_class = pc_frozen
+                is_planet_class = pc_molten
+                is_planet_class = pc_gas_giant
+            }
+        }
+    }
+
+    immediate = {
+        random_planet_within_border = {
+            limit = {
+                OR = {
+                    is_planet_class = pc_barren
+                    is_planet_class = pc_barren_cold
+                    is_planet_class = pc_toxic
+                    is_planet_class = pc_frozen
+                    is_planet_class = pc_molten
+                    is_planet_class = pc_gas_giant
+                }
+            }
+            save_event_target_as = scannable_planet
+        }
+    }
+
     picture_event_data = {
 		room = no_video_feed_room
     }
 
     option = {
         name = mem_surveyor.mission.accept
+        custom_tooltip = mem_surveyor.106.tooltip
+
+        hidden_effect = {
+            enable_special_project = {
+                name = MEM_SURVEYOR_SCAN
+                owner = root
+                location = event_target:scannable_planet
+            }
+        }
     }
 
     option = {
@@ -723,6 +804,33 @@ country_event = {
 
     option = {
         name = mem_surveyor.mission.accept
+        custom_tooltip = mem_surveyor.107.tooltip
+
+        hidden_effect = {
+            random_list = {
+                33 = {
+                    enable_special_project = {
+                        name = MEM_SURVEYOR_HELP_PHYSICS
+                        owner = root
+                        location = capital_scope
+                    }
+                }
+                33 = {
+                    enable_special_project = {
+                        name = MEM_SURVEYOR_HELP_SOCIETY
+                        owner = root
+                        location = capital_scope
+                    }
+                }
+                33 = {
+                    enable_special_project = {
+                        name = MEM_SURVEYOR_HELP_ENGINEERING
+                        owner = root
+                        location = capital_scope
+                    }
+                }
+            }
+        }
     }
 
     option = {
