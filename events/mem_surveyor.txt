@@ -125,9 +125,9 @@ fleet_event = {
                                     limit = { has_star_flag = mem_surveyor_visited }
                                     remove_star_flag = mem_surveyor_visited
                                 }
-                                every_country = {
-                                    limit = { has_country_flag = mem_surveyor_reward_wait }
+                                every_playable_country = {
                                     remove_country_flag = mem_surveyor_reward_wait
+                                    remove_country_flag = mem_surveyor_offered_quest
                                 }
                                 root = {
                                     owner = {
@@ -908,8 +908,68 @@ country_event = {
 
     immediate = {
         remove_country_flag = mem_surveyor_finished_quest
+        set_timed_country_flag = {
+            flag = mem_surveyor_collected_reward
+            days = 3600
+        }
         random_list = { #Choosing the reward
-            1 = {  }
+            1 = { # Give survey data
+                country_event = { id = mem_surveyor.111 }
+                modifier = {
+                    factor = 0
+                    NOT = {
+                        any_system = {
+                            has_star_flag = mem_surveyor_visited
+                            any_planet = {
+                                is_surveyed = {
+                                    who = ROOT
+                                    status = no
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            1 = { # Give contacts
+                country_event = { id = mem_surveyor.112 }
+                modifier = {
+                    factor = 0
+                    NOT = {
+                        any_country = {
+                            NOT = { is_same_value = root }
+                            NOT = { has_established_contact = root }
+                            OR = {
+                                is_country_type = default
+                                is_country_type = fallen_empire
+                                is_country_type = enclave
+                                is_country_type = dormant_marauders
+                            }
+                        }
+                    }
+                }
+            }
+            1 = { # Give science
+                country_event = { id = mem_surveyor.113 }
+            }
+            1 = { # Give deposit
+                country_event = { id = mem_surveyor.114 }
+                modifier = {
+                    factor = 0
+                    NOT = { #I don't know how could it possibly be so
+                        any_planet_within_border = {
+                            is_colonizable = no
+                            is_star = no
+                        }
+                    }
+                }
+            }
+            1 = { # Give tech
+                country_event = { id = mem_surveyor.115 }
+                #Revisit once I compile all the techs
+            }
+            1 = { # Give navigation data, increase speed temporarility
+                country_event = { id = mem_surveyor.116 }
+            }
         }
     }
 }
