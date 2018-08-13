@@ -957,8 +957,18 @@ country_event = {
                     factor = 0
                     NOT = { #I don't know how could it possibly be so
                         any_planet_within_border = {
+                            OR = {
+                                is_planet_class = pc_barren
+                                is_planet_class = pc_barren_cold
+                                is_planet_class = pc_frozen
+                                is_planet_class = pc_molten
+                                is_planet_class = pc_toxic
+                                is_planet_class = pc_gas_giant
+                            }
                             is_colonizable = no
-                            is_star = no
+                            orbital_deposit_tile = {
+                                has_deposit = no
+                            }
                         }
                     }
                 }
@@ -970,6 +980,234 @@ country_event = {
             1 = { # Give navigation data, increase speed temporarility
                 country_event = { id = mem_surveyor.116 }
             }
+        }
+    }
+}
+
+#Giving survey data
+country_event = {
+    id = mem_surveyor.111
+    title = MEM_SURVEYOR_PROBE_HEADER
+    desc = mem_surveyor.111.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+
+    immediate = {
+        random_system = {
+            limit = {
+                has_star_flag = mem_surveyor_visited
+                any_planet = {
+                    is_surveyed = {
+                        who = ROOT
+                        status = no
+                    }
+                }
+            }
+            every_system_planet = {
+                surveyed = {
+                    set_surveyed = yes
+                     surveyor = root
+                 }
+            }
+        }
+
+        random_list = {
+            25 = {  }
+            50 = {
+                random_system = {
+                    limit = {
+                        has_star_flag = mem_surveyor_visited
+                        any_planet = {
+                            is_surveyed = {
+                                who = ROOT
+                                status = no
+                            }
+                        }
+                    }
+                    every_system_planet = {
+                        surveyed = {
+                            set_surveyed = yes
+                             surveyor = root
+                         }
+                    }
+                }
+            }
+            25 = {
+                while = {
+                    count = 2
+                    random_system = {
+                        limit = {
+                            has_star_flag = mem_surveyor_visited
+                            any_planet = {
+                                is_surveyed = {
+                                    who = ROOT
+                                    status = no
+                                }
+                            }
+                        }
+                        every_system_planet = {
+                            surveyed = {
+                                set_surveyed = yes
+                                 surveyor = root
+                             }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.111.a
+    }
+}
+
+#Give contact
+country_event = {
+    id = mem_surveyor.112
+    title = MEM_SURVEYOR_PROBE_HEADER
+    desc = {
+        text = mem_surveyor.112.desc.default
+        trigger = {
+            event_target:contact_country = {
+                is_country_type = default
+            }
+        }
+    }
+    desc = {
+        text = mem_surveyor.112.desc.fallen
+        trigger = {
+            event_target:contact_country = {
+                is_country_type = fallen
+            }
+        }
+    }
+    desc = {
+        text = mem_surveyor.112.desc.enclave
+        trigger = {
+            event_target:contact_country = {
+                is_country_type = enclave
+            }
+        }
+    }
+    desc = {
+        text = mem_surveyor.112.desc.mara
+        trigger = {
+            event_target:contact_country = {
+                is_country_type = dormant_marauders
+            }
+        }
+    }
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+
+    immediate = {
+        random_country = {
+            limit = {
+                NOT = { is_same_value = root }
+                NOT = { has_established_contact = root }
+                OR = {
+                    is_country_type = default
+                    is_country_type = fallen_empire
+                    is_country_type = enclave
+                    is_country_type = dormant_marauders
+                }
+            }
+            save_event_target_as = contact_country
+            establish_communications_no_message = root
+        }
+    }
+
+    option = {
+        name = mem_surveyor.112.a
+        custom_tooltip = mem_surveyor.112.a.tooltip
+    }
+}
+
+#Probe dispenses science
+country_event = {
+    id = mem_surveyor.113
+    title = MEM_SURVEYOR_PROBE_HEADER
+    desc = mem_surveyor.113.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+
+    option = {
+        name = mem_surveyor.113.a
+
+        add_monthly_resource_mult = {
+			resource = physics_research
+			value = @tier4researchreward
+			min = @tier4researchmin
+			max = @tier4researchmax
+		}
+        add_monthly_resource_mult = {
+			resource = society_research
+			value = @tier4researchreward
+			min = @tier4researchmin
+			max = @tier4researchmax
+		}
+        add_monthly_resource_mult = {
+			resource = engineering_research
+			value = @tier4researchreward
+			min = @tier4researchmin
+			max = @tier4researchmax
+		}
+    }
+}
+
+#Probe gives tech
+country_event = {
+    id = mem_surveyor.114
+    title = MEM_SURVEYOR_PROBE_HEADER
+    desc = mem_surveyor.114.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+
+    option = {
+        name = mem_surveyor.114.a
+        #Tech giveaway goes here
+    }
+}
+
+#Probe gives away modifier
+country_event = {
+    id = mem_surveyor.115
+    title = MEM_SURVEYOR_PROBE_HEADER
+    desc = mem_surveyor.114.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+
+    option = {
+        name = mem_surveyor.114.a
+        add_modifier = {
+            modifier = mem_surveyor_star_data
+            days = 1800
         }
     }
 }
