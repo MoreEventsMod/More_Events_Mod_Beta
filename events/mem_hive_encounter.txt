@@ -1,0 +1,710 @@
+#################################
+# Hive Encounter
+# Text : Caligula
+# Code : Malthus
+#################################
+
+namespace = mem_hive_encounter
+
+event = {
+    id = mem_hive_encounter.1
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        years_passed <= 31
+        NOT = {
+            has_global_flag = mem_hive_encounter_happened
+        }
+    }
+
+    immediate = {
+        IF = {
+            limit = {
+                any_country = {
+                    is_country_type = default
+                    has_authority = hive_mind
+                    is_ai = no
+                    any_country = {
+                        has_communications = PREV 
+                        is_country_type = default
+                        NOR = {
+                            has_authority = hive_mind
+                            has_authority = machine_intelligence
+                        }
+                        OR = {
+                            is_neutral_to = PREV
+                            is_friendly_to = PREV
+                            is_cordial_to = PREV
+                            is_protective_to = PREV
+                        }
+                    }
+                }
+            }
+            random_list = {
+                # nothing happens
+                1 = {}
+                # the event starts
+                1 = {
+                    set_global_flag = mem_hive_encounter_happened
+                    random_country = {
+                        limit = {
+                            is_country_type = default
+                            has_authority = hive_mind
+                            is_ai = no
+                            any_country = {
+                                has_communications = PREV 
+                                OR = {
+                                    is_neutral_to = PREV
+                                    is_friendly_to = PREV
+                                    is_cordial_to = PREV
+                                    is_protective_to = PREV
+                                }
+                            }
+                        }
+                        set_country_flag = mem_hive_encounter_hive_country
+                        random_country = {
+                            limit = {
+                                has_communications = PREV 
+                                is_country_type = default
+                                NOR = {
+                                    has_authority = hive_mind
+                                    has_authority = machine_intelligence
+                                }
+                                OR = {
+                                    is_neutral_to = PREV
+                                    is_friendly_to = PREV
+                                    is_cordial_to = PREV
+                                    is_protective_to = PREV
+                                }
+                            }
+                            set_country_flag = mem_hive_encounter_normal_country
+                        }
+                        country_event = { id = mem_hive_encounter.2 days = 30 random = 15 }
+                    }
+                }
+            }
+        }
+        ELSE_IF = {
+            limit = {
+                any_country = {
+                    is_country_type = default
+                    NOR = {
+                        has_authority = hive_mind
+                        has_authority = machine_intelligence
+                    }
+                    is_ai = no
+                    any_country = {
+                        has_communications = PREV 
+                        is_country_type = default
+                        has_authority = hive_mind
+                        OR = {
+                            is_neutral_to = PREV
+                            is_friendly_to = PREV
+                            is_cordial_to = PREV
+                            is_protective_to = PREV
+                        }
+                    }
+                }
+            }
+            random_list = {
+                # nothing happens
+                1 = {}
+                # the event starts
+                1 = {
+                    set_global_flag = mem_hive_encounter_happened
+                    random_country = {
+                        limit = {
+                            is_country_type = default
+                            NOR = {
+                                has_authority = hive_mind
+                                has_authority = machine_intelligence
+                            }
+                            is_ai = no
+                            any_country = {
+                                has_communications = PREV 
+                                is_country_type = default
+                                has_authority = hive_mind
+                                OR = {
+                                    is_neutral_to = PREV
+                                    is_friendly_to = PREV
+                                    is_cordial_to = PREV
+                                    is_protective_to = PREV
+                                }
+                            }
+                        }
+                        set_country_flag = mem_hive_encounter_normal_country
+                        random_country = {
+                            limit = {
+                                has_communications = PREV 
+                                is_country_type = default
+                                has_authority = hive_mind
+                                OR = {
+                                    is_neutral_to = PREV
+                                    is_friendly_to = PREV
+                                    is_cordial_to = PREV
+                                    is_protective_to = PREV
+                                }
+                            }
+                            set_country_flag = mem_hive_encounter_hive_country
+                        }
+                        # country gets message from hivemind event
+                        #country_event = { id = mem_hive_encounter.X days = 30 random = 15 }
+                    }
+                }
+            }
+        }
+    }
+}
+
+# Hivemind player decides wether or not to message a normal empire
+country_event = {
+    id = mem_hive_encounter.2
+    title = mem_hive_encounter.2.name
+    desc = mem_hive_encounter.2.desc
+    picture = GFX_evt_mem_placeholder
+    show_sound = TODO
+    is_triggered_only = yes
+
+    immediate = {
+        random_country = {
+            limit = {
+                has_country_flag = mem_hive_encounter_normal_country
+            }
+            save_event_target_as = mem_hive_encounter_normal_country
+        }
+    }
+
+    option = {
+        name = mem_hive_encounter.2.a
+        hidden_effect = {
+            IF = {
+                limit = {
+                    any_country = {
+                        has_country_flag = mem_hive_encounter_normal_country
+                        is_ai = no
+                    }
+                }
+                random_country = {
+                    limit = {
+                        has_country_flag = mem_hive_encounter_normal_country
+                    }
+                    country_event = { id = mem_hive_encounter.3 }
+                }
+            }
+        }
+    }
+
+    option = {
+        name = mem_hive_encounter.2.b
+
+    }
+}
+
+# Normal empire receives hive proposal
+country_event = {
+    id = mem_hive_encounter.3
+    title = mem_hive_encounter.3.name
+    desc = mem_hive_encounter.3.desc
+    is_triggered_only = yes
+    diplomatic = yes
+    
+    picture_event_data = {
+		portrait = event_target:mem_hive_encounter_hive_country
+		planet_background = event_target:mem_hive_encounter_hive_country
+		graphical_culture = event_target:mem_hive_encounter_hive_country
+		city_level = event_target:mem_hive_encounter_hive_country
+		room = event_target:mem_hive_encounter_hive_country
+    }
+    
+    immediate = {
+        random_country = {
+            limit = {
+                has_country_flag = mem_hive_encounter_hive_country
+            }
+            save_event_target_as = mem_hive_encounter_hive_country
+        }
+    }
+
+    # looking for volunteers
+    option = {
+        name = mem_hive_encounter.3.a
+        hidden_effect = {
+            IF = {
+                limit = {
+                    OR = {
+                        has_ethic = ethic_fanatic_xenophobe
+                        has_ethic = ethic_xenophobe
+                        AND = {
+                            OR = {
+                                has_faction = supremacist
+				                has_faction = isolationist
+                            }
+                            NOR = {
+                                has_faction = xenoist
+                            }
+                        }
+                    }
+                }
+                # no volunteers, choose again
+                country_event = { id = mem_hive_encounter.5 days = 30 }
+            }
+            ELSE = {
+                random_list = {
+                    # no volunteers, choose again
+                    1 = {
+                        country_event = { id = mem_hive_encounter.5 days = 30 }
+                    }
+                    # volunteers found
+                    3 = {
+                        set_global_flag = mem_hive_encounter_answer_1
+                        country_event = { id = mem_hive_encounter.4 days = 30 }
+                    }
+                }
+            }
+        }
+    }
+
+    # sending criminals
+    option = {
+        name = mem_hive_encounter.3.b
+        hidden_effect = {
+            set_global_flag = mem_hive_encounter_answer_2
+            random_country = {
+                limit = {
+                    has_country_flag = mem_hive_encounter_hive_country
+                }
+                country_event = { id = mem_hive_encounter.6 days = 30 }
+            }
+        }
+    }
+
+    # sending corpses
+    option = {
+        name = mem_hive_encounter.3.c
+        hidden_effect = {
+            set_global_flag = mem_hive_encounter_answer_3
+            random_country = {
+                limit = {
+                    has_country_flag = mem_hive_encounter_hive_country
+                }
+                country_event = { id = mem_hive_encounter.6 days = 30 }
+            }
+        }
+    }
+
+    # NOPE
+    option = {
+        name = mem_hive_encounter.3.d
+        hidden_effect = {
+            set_global_flag = mem_hive_encounter_answer_4
+            random_country = {
+                limit = {
+                    has_country_flag = mem_hive_encounter_hive_country
+                }
+                country_event = { id = mem_hive_encounter.6 days = 30 }
+            }
+        }
+    }
+}
+
+# volunteers found
+country_event = {
+    id = mem_hive_encounter.4
+    title = mem_hive_encounter.4.name
+    desc = mem_hive_encounter.4.desc
+    picture = GFX_evt_mem_placeholder
+    show_sound = TODO
+    is_triggered_only = yes
+
+    immediate = {
+        random_country = {
+            limit = {
+                has_country_flag = mem_hive_encounter_hive_country
+            }
+            save_event_target_as = mem_hive_encounter_hive_country
+            country_event = { id = mem_hive_encounter.6 }
+        }
+    }
+
+    option = {
+        name = mem_hive_encounter.4.b
+    }
+}
+
+# no volunteers found
+country_event = {
+    id = mem_hive_encounter.5
+    title = mem_hive_encounter.5.name
+    desc = mem_hive_encounter.5.desc
+    picture = GFX_evt_mem_placeholder
+    show_sound = TODO
+    is_triggered_only = yes
+
+    immediate = {
+        random_country = {
+            limit = {
+                has_country_flag = mem_hive_encounter_hive_country
+            }
+            save_event_target_as = mem_hive_encounter_hive_country
+        }
+    }
+
+    # sending criminals
+    option = {
+        name = mem_hive_encounter.3.b
+        hidden_effect = {
+            set_global_flag = mem_hive_encounter_answer_2
+            random_country = {
+                limit = {
+                    has_country_flag = mem_hive_encounter_hive_country
+                }
+                country_event = { id = mem_hive_encounter.6 days = 30 }
+            }
+        }
+    }
+
+    # sending corpses
+    option = {
+        name = mem_hive_encounter.3.c
+        hidden_effect = {
+            set_global_flag = mem_hive_encounter_answer_3
+            random_country = {
+                limit = {
+                    has_country_flag = mem_hive_encounter_hive_country
+                }
+                country_event = { id = mem_hive_encounter.6 days = 30 }
+            }
+        }
+    }
+
+    # NOPE
+    option = {
+        name = mem_hive_encounter.3.d
+        hidden_effect = {
+            set_global_flag = mem_hive_encounter_answer_4
+            random_country = {
+                limit = {
+                    has_country_flag = mem_hive_encounter_hive_country
+                }
+                country_event = { id = mem_hive_encounter.6 days = 30 }
+            }
+        }
+    }
+}
+
+# hive receives answer
+country_event = {
+    id = mem_hive_encounter.6
+    title = mem_hive_encounter.3.name
+    desc = {
+        trigger = {
+            switch = {
+                trigger = has_global_flag
+                mem_hive_encounter_answer_1 = { text = mem_hive_encounter.6.desc.a }
+                mem_hive_encounter_answer_2 = { text = mem_hive_encounter.6.desc.b }
+                mem_hive_encounter_answer_3 = { text = mem_hive_encounter.6.desc.c }
+                mem_hive_encounter_answer_4 = { text = mem_hive_encounter.6.desc.d }
+            }
+        }
+    }
+    is_triggered_only = yes
+    diplomatic = yes
+    
+    picture_event_data = {
+		portrait = event_target:mem_hive_encounter_normal_country
+		planet_background = event_target:mem_hive_encounter_normal_country
+		graphical_culture = event_target:mem_hive_encounter_normal_country
+		city_level = event_target:mem_hive_encounter_normal_country
+		room = event_target:mem_hive_encounter_normal_country
+    }
+    
+    immediate = {
+        random_country = {
+            limit = {
+                has_country_flag = mem_hive_encounter_normal_country
+            }
+            save_event_target_as = mem_hive_encounter_normal_country
+        }
+    }
+
+    option = {
+        name = mem_hive_encounter.6.a
+        trigger = {
+            OR = {
+                has_global_flag = mem_hive_encounter_answer_1
+                has_global_flag = mem_hive_encounter_answer_2
+                has_global_flag = mem_hive_encounter_answer_3
+            }
+        }
+        hidden_effect = {
+            country_event = { id = mem_hive_encounter.7 days = 30 }
+            random_country = {
+                limit = {
+                    has_country_flag = mem_hive_encounter_normal_country
+                }
+                country_event = { id = mem_hive_encounter.9 days = 30 }
+            }
+        }
+    }
+
+    option = {
+        name = mem_hive_encounter.6.b
+        trigger = {
+            has_global_flag = mem_hive_encounter_answer_4
+        }
+    }
+}
+
+# specimens arrive
+country_event = {
+    id = mem_hive_encounter.7
+    title = mem_hive_encounter.7.name
+    desc = {
+        trigger = {
+            switch = {
+                trigger = has_global_flag
+                mem_hive_encounter_answer_1 = { text = mem_hive_encounter.7.desc.a }
+                mem_hive_encounter_answer_2 = { text = mem_hive_encounter.7.desc.b }
+                mem_hive_encounter_answer_3 = { text = mem_hive_encounter.7.desc.c }
+            }
+        }
+    }
+    picture = GFX_evt_mem_placeholder
+    show_sound = TODO
+    is_triggered_only = yes
+
+    immediate = {
+        random_country = {
+            limit = {
+                has_country_flag = mem_hive_encounter_normal_country
+            }
+            save_event_target_as = mem_hive_encounter_normal_country
+        }
+    }
+
+    option = {
+        name = mem_hive_encounter.7.a
+        trigger = {
+            has_global_flag = mem_hive_encounter_answer_1
+        }
+        hidden_effect = {
+            country_event = { id = mem_hive_encounter.8 days = 360 random = 25 }
+        }
+    }
+}
+
+# results for hive
+country_event = {
+    id = mem_hive_encounter.8
+    title = mem_hive_encounter.8.name
+    desc = {
+        trigger = {
+            switch = {
+                trigger = has_global_flag
+                mem_hive_encounter_answer_1 = { text = mem_hive_encounter.8.desc.a }
+                mem_hive_encounter_answer_2 = { text = mem_hive_encounter.8.desc.a }
+                mem_hive_encounter_answer_3 = { text = mem_hive_encounter.8.desc.b }
+            }
+        }
+    }
+    picture = GFX_evt_mem_placeholder
+    show_sound = TODO
+    is_triggered_only = yes
+
+    immediate = {
+        random_country = {
+            limit = {
+                has_country_flag = mem_hive_encounter_normal_country
+            }
+            save_event_target_as = mem_hive_encounter_normal_country
+        }
+    }
+
+    option = {
+        name = mem_hive_encounter.8.a
+        hidden_effect = {
+            IF = {
+                limit = {
+                    has_global_flag = mem_hive_encounter_answer_1
+                }
+                country_event = { id = mem_hive_encounter.11 days = 180 random = 25 }
+            }
+        }
+    }
+}
+
+# drones arrive
+country_event = {
+    id = mem_hive_encounter.9
+    title = mem_hive_encounter.9.name
+    desc = mem_hive_encounter.9.desc
+    picture = GFX_evt_mem_placeholder
+    show_sound = TODO
+    is_triggered_only = yes
+
+    immediate = {
+        random_country = {
+            limit = {
+                has_country_flag = mem_hive_encounter_hive_country
+            }
+            save_event_target_as = mem_hive_encounter_hive_country
+        }
+    }
+
+    option = {
+        name = mem_hive_encounter.7.a
+    }
+}
+
+# results for normal country
+country_event = {
+    id = mem_hive_encounter.10
+    title = mem_hive_encounter.10.name
+    desc = {
+        trigger = {
+            switch = {
+                trigger = has_global_flag
+                mem_hive_encounter_drone_outcome_1 = { text = mem_hive_encounter.10.desc.a }
+                mem_hive_encounter_drone_outcome_2 = { text = mem_hive_encounter.10.desc.b }
+            }
+        }
+    }
+    picture = GFX_evt_mem_placeholder
+    show_sound = TODO
+    is_triggered_only = yes
+
+    immediate = {
+        random_country = {
+            limit = {
+                has_country_flag = mem_hive_encounter_hive_country
+            }
+            save_event_target_as = mem_hive_encounter_hive_country
+        }
+        random_list = {
+            1 = {
+                set_global_flag = mem_hive_encounter_drone_outcome_1
+            }
+            2 = {
+                set_global_flag = mem_hive_encounter_drone_outcome_2
+            }
+        }
+        IF = {
+            limit = {
+                any_owned_leader = {
+                    is_researching_area = society
+                }
+            }
+            random_owned_leader  = {
+                limit = {
+                    is_researching_area = society
+                }
+                save_event_target_as = mem_hive_encounter_leader
+            }
+        }
+        ELSE = {
+            random_owned_leader = {
+                limit = {
+                    leader_class = scientist
+                }
+                save_event_target_as = mem_hive_encounter_leader
+            }
+        }
+    }
+
+    option = {
+        name = mem_hive_encounter.10.a
+        
+    }
+}
+
+# decision for hive wether or not to send back the volunteers
+country_event = {
+    id = mem_hive_encounter.11
+    title = mem_hive_encounter.11.name
+    desc = mem_hive_encounter.11.desc
+    picture = GFX_evt_mem_placeholder
+    show_sound = TODO
+    is_triggered_only = yes
+
+    immediate = {
+        random_country = {
+            limit = {
+                has_country_flag = mem_hive_encounter_normal_country
+            }
+            save_event_target_as = mem_hive_encounter_normal_country
+        }
+    }
+
+    # send them back
+    option = {
+        name = mem_hive_encounter.11.a
+        hidden_effect = {
+            random_country = {
+                limit = {
+                    has_country_flag = mem_hive_encounter_normal_country
+                }
+                country_event = { id = mem_hive_encounter.12 days = 30 }
+            }
+        }
+    }
+
+    # keep them
+    option = {
+        name = mem_hive_encounter.11.b
+        hidden_effect = {
+            random_country = {
+                limit = {
+                    has_country_flag = mem_hive_encounter_normal_country
+                }
+                country_event = { id = mem_hive_encounter.13 days = 30 }
+            }
+        }
+    }
+}
+
+# volunteers return
+country_event = {
+    id = mem_hive_encounter.12
+    title = mem_hive_encounter.12.name
+    desc = mem_hive_encounter.12.desc
+    picture = GFX_evt_mem_placeholder
+    show_sound = TODO
+    is_triggered_only = yes
+
+    immediate = {
+        random_country = {
+            limit = {
+                has_country_flag = mem_hive_encounter_hive_country
+            }
+            save_event_target_as = mem_hive_encounter_hive_country
+        }
+    }
+
+    option = {
+        name = mem_hive_encounter.12.a
+    }
+}
+
+# volunteers missing
+country_event = {
+    id = mem_hive_encounter.13
+    title = mem_hive_encounter.13.name
+    desc = mem_hive_encounter.13.desc
+    picture = GFX_evt_mem_placeholder
+    show_sound = TODO
+    is_triggered_only = yes
+
+    immediate = {
+        random_country = {
+            limit = {
+                has_country_flag = mem_hive_encounter_hive_country
+            }
+            save_event_target_as = mem_hive_encounter_hive_country
+        }
+    }
+
+    option = {
+        name = mem_hive_encounter.13.a
+    }
+}
