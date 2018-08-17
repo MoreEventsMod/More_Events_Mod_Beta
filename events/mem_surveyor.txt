@@ -1388,3 +1388,92 @@ country_event = {
 ### BERSERKER MODE ###
 ######################
 
+#Midgame start - decide if flippage should occur (Can also be rewritten to trigger event)
+
+event = {
+    id = mem_surveyor.200
+    is_triggered_only = yes
+    hide_window = yes
+
+    trigger = {
+        any_country = {
+            is_country_type = mem_surveyor_country_green
+        }
+    }
+
+    immediate = {
+        random_country = {
+            limit = {
+                is_country_type = mem_surveyor_country_green
+            }
+            random_list = { #Make sure to adjust weights!!!
+                0 = {}
+                50 = {
+                    set_country_flag = mem_surveyor_will_go_berserk
+                }
+            }
+        }
+    }
+}
+
+# Probe decides to flip
+country_event = {
+    id = mem_surveyor.201
+    is_triggered_only = yes
+    hide_window = yes
+
+    trigger = {
+        is_country_type = mem_surveyor_country_green
+        has_country_flag = mem_surveyor_will_go_berserk
+    }
+
+    mean_time_to_happen = {
+        years = 1 #Change to something sensible!
+    }
+
+    immediate = {
+        set_country_type = mem_surveyor_country_red
+        change_country_flag = {
+            icon = {
+                category = "ornate"
+                file = "flag_ornate_4.dds"
+            }
+            background= {
+                category = "backgrounds"
+                file = "new_dawn.dds"
+            }
+            colors={
+                "red"
+                "red_orange"
+                "null"
+                "null"
+            }
+        }
+        every_playable_country = {
+            limit = {
+                is_ai = no
+                has_established_contact = root
+            }
+            country_event = { id = mem_surveyor.202 } #Players get notified
+        }
+    }
+}
+
+# Diplomatic event to notify player 
+country_event = {
+    id = mem_surveyor.202
+    title = MEM_SURVEYOR_BERSERK_HEADER
+    desc = mem_surveyor.202.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+
+    option = {
+        name = MEM_SURVEYOR_EXIT
+    }
+}
+
