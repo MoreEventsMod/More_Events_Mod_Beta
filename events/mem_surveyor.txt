@@ -65,7 +65,7 @@ fleet_event = {
                     }
                 }
                 min_steps = 1
-                max_steps = 9
+                max_steps = 1
                 set_star_flag = mem_surveyor_next_target
             }
             #Various effects go here
@@ -95,10 +95,13 @@ fleet_event = {
                     }
                 }
                 failed = { #If no system is flagged, no system is valid
-                    find_random_system = { #Go somewhere completely random
+                    wait = { duration = 10 }
+
+                    find_random_system = { #Go somewhere
                         trigger = {
                             id = mem_surveyor.vanilla.3
                             NOR = {
+                                has_star_flag = mem_surveyor_visited
                                 has_star_flag = hostile_system
                                 has_star_flag = sealed_system
                                 has_star_flag = lcluster
@@ -117,9 +120,26 @@ fleet_event = {
                             }
                         }
                         found_system = {
-                            move_to = this
                             effect = {
                                 id = mem_surveyor.vanilla.4
+                                root = {
+                                    solar_system = {
+                                        IF = {
+                                            limit = { exists = soace_owner }
+                                            random_list = {
+                                                15 = { country_event = { id = mem_surveyor.8 } }
+                                                85 = {}
+                                            }
+                                        }
+                                    }
+                                    set_location = prev.star
+                                    fleet_event = { id = mem_surveyor.2 }
+                                }
+                            }
+                        }
+                        failed = {
+                            effect = {
+                                id = mem_surveyor.vanilla.5
                                 log = "Found nothing"
                                 every_system = {
                                     limit = { has_star_flag = mem_surveyor_visited }
@@ -129,16 +149,14 @@ fleet_event = {
                                     remove_country_flag = mem_surveyor_reward_wait
                                     remove_country_flag = mem_surveyor_offered_quest
                                 }
-                                root = {
-                                    owner = {
-                                        change_variable = {
-                                            which = mem_surveyor_iteration_count
-                                            value = 1
-                                        }
+                                owner = {
+                                    change_variable = {
+                                        which = mem_surveyor_iteration_count
+                                        value = 1
                                     }
-                                    log = "Rebooting the cycle: [This.mem_surveyor_iteration_count]" 
-                                    fleet_event = { id = mem_surveyor.2 }
                                 }
+                                log = "Rebooting the cycle: [This.mem_surveyor_iteration_count]" 
+                                fleet_event = { id = mem_surveyor.2 }
                             }
                         }
                     }
