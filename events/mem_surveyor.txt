@@ -1692,5 +1692,146 @@ fleet_event = {
     }
 }
 
+# Player is informed about invasion
+planet_event = {
+    id = mem_surveyor.211
+    title = mem_surveyor.211.name
+    desc = mem_surveyor.211.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_ancient_robots_attack_01
+    location = ROOT
+
+    option = {
+        name = mem_surveyor.211.a
+    }
+}
+
+# Planet changes ownership to surveyor (On planet defenders lose)
+country_event = {
+    id = mem_surveyor.212
+    title = mem_surveyor.212.name
+    desc = mem_surveyor.212.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_ancient_robots_attack_01
+    location = FROMFROM
+
+    trigger = {
+        FROM = { is_country_type = mem_surveyor_country_red }
+    }
+
+    immediate = {
+        FROMFROM = {
+            set_owner = FROM
+            set_planet_flag = mem_surveyor_former_owner@root
+            every_owned_pop = { # Fist pass, eliminating all but one pop of each species
+                IF = {
+                    limit = {
+                        species = { has_species_flag = mem_surveyor_species_sampled }
+                    }
+                    kill_pop = yes
+                }
+                ELSE = {
+                    species = {
+                        set_species_flag = mem_surveyor_species_sampled
+                    }
+                }
+            }
+            every_owned_pop = { # Second pass, clear all the flags, edit the species
+                species = { remove_species_flag = mem_surveyor_species_sampled }
+                IF = {
+                    limit = { 
+                        OR = {
+                            has_trait = trait_machine_unit 
+                            has_trait = trait_mechanical
+                        }
+                    }
+                    kill_pop = yes
+                }
+                ELSE_IF = {
+                    limit = { has_trait = trait_hive_mind }
+                    modify_species = {
+                        species = this
+                        remove_trait = trait_hive_mind
+                        add_trait = trait_cybernetic
+                    }
+                    change_species = last_created_species
+                    create_army = {
+                        type = "Robotomite Garrison"
+                        owner = FROM
+                        species = this
+                        type = mem_surveyor_robotomites
+                    }
+                }
+                ELSE_IF = {
+                    limit = {
+                        NOT = { has_trait = trait_cybernetic }
+                    }
+                    modify_species = {
+                        species = this
+                        add_trait = trait_cybernetic
+                    }
+                    change_species = last_created_species
+                    create_army = {
+                        type = "Robotomite Garrison"
+                        owner = FROM
+                        species = this
+                        type = mem_surveyor_robotomites
+                    }
+                }
+            }
+        }
+    }
+}
+
+# Invaders are beaten
+
+country_event = {
+    id = mem_surveyor.213
+    title = mem_surveyor.213.name
+    desc = mem_surveyor.213.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_victory
+    location = FROMFROM
+
+    trigger = {
+        FROM = { is_country_type = mem_surveyor_country_red }
+    }
+
+    option = {
+        name = EXCELLENT
+    }
+}
+
+# Successfully retaking the planet
+country_event = {
+    id = mem_surveyor.214
+    title = mem_surveyor.214.name
+    desc = mem_surveyor.214.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_victory
+    location = FROMFROM
+
+    trigger = {
+        FROM = { is_country_type = mem_surveyor_country_red }
+    }
+
+    immediate = {
+        FROMFROM = { set_owner = ROOT }
+    }
+
+    option = {
+        name = EXCELLENT
+    }
+}
+
+
 
 
