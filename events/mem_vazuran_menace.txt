@@ -15,6 +15,7 @@ namespace = mem_vazurans
 # mem_vazurans.5   |Rift opens and fleet spawn events get linked
 # mem_vazurans.6   |Vazuran Message for first raided
 # mem_vazurans.7   |Vazuran Message for retaliation
+# mem_vazurans.8   |Colony lost to Vazuran Terror attack
 # mem_vazurans.10  |Establishing communications with every country that does not already know them (is started at fleet spawn 100 and 101)
 # mem_vazurans.20  |Information event about a known empire being attacked
 # mem_vazurans.21  |Information event about an unknown empire being attacked
@@ -622,7 +623,7 @@ country_event = {
 		text = mem_vazurans.4c.desc
 		trigger = { has_country_flag = mem_vazurans_retaliation }
 	}
-	picture = GFX_evt_mem_space_battle # TODO we will need custom art for a picture of one of those rifts opening
+	picture = GFX_evt_mem_placeholder # TODO we will need custom art for a picture of one of those rifts opening
 	location = event_target:mem_vazurans_target_sun
 	
 	is_triggered_only = yes
@@ -691,7 +692,7 @@ country_event = {
 		text = mem_vazurans.5c.desc
 		trigger = { has_country_flag = mem_vazurans_retaliation }
 	}
-	picture = GFX_evt_mem_space_battle # TODO we will need custom art for a picture of an opened rifts with ships coming through
+	picture = GFX_evt_mem_placeholder # TODO we will need custom art for a picture of an opened rifts with ships coming through
 	location = event_target:mem_vazurans_rift
 	
 	is_triggered_only = yes
@@ -850,6 +851,21 @@ country_event = {
 	}
 }
 
+# Colony lost to Vazuran Terror attack
+country_event = {
+	id = mem_vazurans.8
+	title = mem_vazurans.8.name
+	desc = mem_vazurans.8.desc
+	picture = GFX_evt_mem_placeholder
+	show_sound = TODO
+	location = FROM
+	is_triggered_only = yes
+
+	option = {
+		name = mem_vazurans.8.a
+	}
+}
+
 # Establishing communications with every country that does not already know them (is started at fleet spawn 100 and 101)
 country_event = {
 	id = mem_vazurans.10
@@ -869,6 +885,7 @@ country_event = {
 	}
 }
 
+# Information event about a known empire being attacked
 country_event = {
 	id = mem_vazurans.20
 	title = mem_vazurans.20.name
@@ -886,7 +903,7 @@ country_event = {
 		}
 	}
 
-	picture = GFX_evt_mem_space_battle # TODO we will need custom art for a picture of one of those rifts opening
+	picture = GFX_evt_mem_placeholder # TODO we will need custom art for a picture of one of those rifts opening
 	location = event_target:mem_vazuran_victim
 	
 	is_triggered_only = yes
@@ -937,6 +954,7 @@ country_event = {
 	}
 }
 
+# Information event about an unknown empire being attacked
 country_event = {
 	id = mem_vazurans.21
 	title = mem_vazurans.21.name
@@ -955,7 +973,7 @@ country_event = {
 		}
 	}
 
-	picture = GFX_evt_mem_space_battle # TODO we will need custom art for a picture of one of those rifts opening
+	picture = GFX_evt_mem_placeholder # TODO we will need custom art for a picture of one of those rifts opening
 	
 	is_triggered_only = yes
 	
@@ -970,7 +988,7 @@ country_event = {
 	title = mem_vazurans.40.name
 	desc = mem_vazurans.40.desc
 
-	picture = GFX_evt_mem_space_battle # TODO change
+	picture = GFX_evt_mem_placeholder # TODO change
 	
 	is_triggered_only = yes
 	
@@ -993,7 +1011,7 @@ country_event = {
 		}
 	}
 
-	picture = GFX_evt_mem_space_battle # TODO change
+	picture = GFX_evt_mem_placeholder # TODO change
 	
 	is_triggered_only = yes
 	
@@ -1021,7 +1039,7 @@ country_event = {
 	title = mem_vazurans.51.name
 	desc = mem_vazurans.51.desc
 
-	picture = GFX_evt_mem_space_battle # TODO change
+	picture = GFX_evt_mem_placeholder # TODO change
 	
 	trigger = {
 		has_technology = tech_mem_vazuran_rift_stabilization
@@ -1083,7 +1101,7 @@ country_event = {
 	title = mem_vazurans.53.name
 	desc = mem_vazurans.53.desc
 
-	picture = GFX_evt_mem_space_battle # TODO change
+	picture = GFX_evt_mem_placeholder # TODO change
 	is_triggered_only = yes
 
 	immediate = {
@@ -2207,14 +2225,6 @@ planet_event = {
 	}
 	
 	immediate = {
-		add_modifier = {
-			modifier = mem_vazurans_raided
-			days = 3600
-		}
-		set_timed_planet_flag = {
-			flag = mem_vazurans_raided_planet
-			days = 5400 # 15 years
-		}
 		IF = {
 			limit = {
 				owner = {
@@ -2235,6 +2245,14 @@ planet_event = {
 				owner = {
 					has_country_flag = mem_vazurans_retaliation
 				}
+			}
+			add_modifier = {
+				modifier = mem_vazurans_raided
+				days = 3600
+			}
+			set_timed_planet_flag = {
+				flag = mem_vazurans_raided_planet
+				days = 5400 # 15 years
 			}
 			random_tile = {
 				limit = {
@@ -2275,13 +2293,167 @@ planet_event = {
 				set_ruined = yes
 			}
 		}
+		ELSE_IF = {
+			limit = {
+				years_passed >= 100
+			}
+			random_list = {
+				5 = {
+					add_modifier = {
+						modifier = mem_vazurans_raided
+						days = 3600
+					}
+					set_timed_planet_flag = {
+						flag = mem_vazurans_raided_planet
+						days = 5400 # 15 years
+					}
+					random_tile = {
+						limit = {
+							has_building = yes
+							is_ruined = no
+						}
+						set_ruined = yes
+					}
+					random_tile = {
+						limit = {
+							has_building = yes
+							is_ruined = no
+						}
+						set_ruined = yes
+					}
+					random_tile = {
+						limit = {
+							has_building = yes
+							is_ruined = no
+						}
+						set_ruined = yes
+					}
+					random_tile = {
+						limit = {
+							has_building = yes
+							is_ruined = no
+						}
+						set_ruined = yes
+					}
+					random_tile = {
+						limit = {
+							has_building = yes
+							is_ruined = no
+						}
+						set_ruined = yes
+					}
+				}
+				2 = {
+					owner = {
+						country_event = { id = mem_vazurans.8 days = 1 }
+					}
+					every_pop = {
+						limit = {
+							planet = {
+								is_same_value = root
+							}
+						}
+						kill_pop = yes
+					}
+					random_tile = {
+						limit = {
+							has_blocker = no
+						}
+						set_blocker = tb_bomb_crater
+					}
+					random_tile = {
+						limit = {
+							has_blocker = no
+						}
+						set_blocker = tb_bomb_crater
+					}
+					random_tile = {
+						limit = {
+							has_blocker = no
+						}
+						set_blocker = tb_bomb_crater
+					}
+					random_tile = {
+						limit = {
+							has_blocker = no
+						}
+						set_blocker = tb_bomb_crater
+					}
+					random_tile = {
+						limit = {
+							has_blocker = no
+						}
+						set_blocker = tb_bomb_crater
+					}
+					every_tile = {
+						limit = {
+							has_building = yes
+							is_ruined = no
+						}
+						set_ruined = yes
+					}
+				}
+				1 = {
+					owner = {
+						country_event = { id = mem_vazurans.8 days = 1 }
+					}
+					every_pop = {
+						limit = {
+							planet = {
+								is_same_value = root
+							}
+						}
+						kill_pop = yes
+					}
+					change_pc = pc_nuked
+					random_tile = {
+						limit = {
+							has_blocker = no
+						}
+						set_blocker = tb_bomb_crater
+					}
+					random_tile = {
+						limit = {
+							has_blocker = no
+						}
+						set_blocker = tb_bomb_crater
+					}
+					random_tile = {
+						limit = {
+							has_blocker = no
+						}
+						set_blocker = tb_bomb_crater
+					}
+					random_tile = {
+						limit = {
+							has_blocker = no
+						}
+						set_blocker = tb_bomb_crater
+					}
+					random_tile = {
+						limit = {
+							has_blocker = no
+						}
+						set_blocker = tb_bomb_crater
+					}
+					every_tile = {
+						limit = {
+							has_building = yes
+							is_ruined = no
+						}
+						set_ruined = yes
+					}
+				}
+			}
+		}
 		ELSE = {
-			random_tile = {
-				limit = {
-					has_building = yes
-					is_ruined = no
-				}
-				set_ruined = yes
+			add_modifier = {
+				modifier = mem_vazurans_raided
+				days = 3600
+			}
+			set_timed_planet_flag = {
+				flag = mem_vazurans_raided_planet
+				days = 5400 # 15 years
 			}
 			random_tile = {
 				limit = {
@@ -2311,6 +2483,21 @@ planet_event = {
 				}
 				set_ruined = yes
 			}
+			random_tile = {
+				limit = {
+					has_building = yes
+					is_ruined = no
+				}
+				set_ruined = yes
+			}
+		}
+		add_modifier = {
+			modifier = mem_vazurans_raided
+			days = 3600
+		}
+		set_timed_planet_flag = {
+			flag = mem_vazurans_raided_planet
+			days = 5400 # 15 years
 		}
 		solar_system = {
 			random_fleet_in_system = {
@@ -2591,7 +2778,7 @@ ship_event = {
 	}
 	location = FROM
 	
-	picture = GFX_evt_mem_space_battle # TODO we will need custom art for a picture of one of those rifts opening
+	picture = GFX_evt_mem_placeholder # TODO we will need custom art for a picture of one of those rifts opening
 	
 	is_triggered_only = yes
 	
@@ -2661,7 +2848,7 @@ ship_event = {
 			}
 		}
 	}
-	picture = GFX_evt_mem_orila_pods
+	picture = GFX_evt_mem_placeholder
 	show_sound = event_scanner
 	location = FROM
 	
@@ -2677,7 +2864,7 @@ ship_event = {
 	id = mem_vazurans.202
 	title = mem_vazurans.202.name
 	desc = mem_vazurans.202.desc
-	picture = GFX_evt_mining_station
+	picture = GFX_evt_mem_placeholder
 	show_sound = event_ship_bridge
 	location = FROM
 	
@@ -2704,7 +2891,7 @@ ship_event = {
 	id = mem_vazurans.203
 	title = mem_vazurans.203.name
 	desc = mem_vazurans.203.desc
-	picture = GFX_evt_mining_station
+	picture = GFX_evt_mem_placeholder
 	show_sound = event_ship_bridge
 	location = FROM
 	
@@ -2731,7 +2918,7 @@ ship_event = {
 	id = mem_vazurans.204
 	title = mem_vazurans.204.name
 	desc = mem_vazurans.204.desc
-	picture = GFX_evt_mining_station
+	picture = GFX_evt_mem_placeholder
 	show_sound = event_ship_bridge
 	location = FROM
 	
@@ -2756,7 +2943,7 @@ ship_event = {
 	id = mem_vazurans.205
 	title = mem_vazurans.205.name
 	desc = mem_vazurans.205.desc
-	picture = GFX_evt_mining_station
+	picture = GFX_evt_mem_placeholder
 	show_sound = event_ship_bridge
 	location = FROM
 	
@@ -2772,7 +2959,7 @@ ship_event = {
 	id = mem_vazurans.206
 	title = mem_vazurans.206.name
 	desc = mem_vazurans.206.desc
-	picture = GFX_evt_mining_station
+	picture = GFX_evt_mem_placeholder
 	show_sound = event_ship_bridge
 	location = ROOT
 	
@@ -2872,7 +3059,7 @@ planet_event = {
 	id = mem_vazurans.251
 	title = mem_vazurans.251.name
 	desc = mem_vazurans.251.desc
-	picture = GFX_evt_asteroid_approaching_planet
+	picture = GFX_evt_mem_placeholder
 	show_sound = event_administrative_work
 	location = ROOT
 	is_triggered_only = yes
@@ -2888,7 +3075,7 @@ ship_event = {
 	id = mem_vazurans.252
 	title = mem_vazurans.252.name
 	desc = mem_vazurans.252.desc
-	picture = GFX_evt_asteroid_approaching_planet
+	picture = GFX_evt_mem_placeholder
 	show_sound = event_ship_bridge
 	location = FROM
 	is_triggered_only = yes
@@ -2912,7 +3099,7 @@ planet_event = {
 	id = mem_vazurans.253
 	title = mem_vazurans.253.name
 	desc = mem_vazurans.253.desc
-	picture = GFX_evt_asteroid_approaching_planet
+	picture = GFX_evt_mem_placeholder
 	show_sound = event_administrative_work
 	location = ROOT
 	is_triggered_only = yes
@@ -2928,7 +3115,7 @@ ship_event = {
 	id = mem_vazurans.254
 	title = mem_vazurans.254.name
 	desc = mem_vazurans.254.desc
-	picture = GFX_evt_asteroid_approaching_planet
+	picture = GFX_evt_mem_placeholder
 	show_sound = event_ship_bridge
 	location = FROM
 	is_triggered_only = yes
@@ -2952,7 +3139,7 @@ country_event = {
 	id = mem_vazurans.255
 	title = mem_vazurans.255.name
 	desc = mem_vazurans.255.desc
-	picture = GFX_evt_asteroid_approaching_planet
+	picture = GFX_evt_mem_placeholder
 	show_sound = event_ship_bridge
 	location = event_target:mem_vazurans_wreckage
 	is_triggered_only = yes
@@ -2995,7 +3182,7 @@ ship_event = {
 	id = mem_vazurans.256
 	title = mem_vazurans.256.name
 	desc = mem_vazurans.256.desc
-	picture = GFX_evt_asteroid_approaching_planet
+	picture = GFX_evt_mem_placeholder
 	show_sound = event_ship_bridge
 	location = FROM
 	is_triggered_only = yes
