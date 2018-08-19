@@ -1595,6 +1595,57 @@ fleet_event = {
         log = ".210 loop"
         solar_system = {
             remove_star_flag = mem_surveyor_next_target
+            IF = {
+                limit = {
+                    NOR = {
+                        any_ship_in_system = {
+                            exists = owner
+                            owner = { NOT = { is_country_type = mem_surveyor_country_red } }
+                        }
+                        any_planet = {
+                            exists = owner
+                            owner = { NOT = { is_country_type = mem_surveyor_country_red } }
+                        }
+                    }
+                    any_neighbor_system = {
+                        exists = space_owner
+                        space_owner = {
+                            is_same_value = root.owner
+                        }
+                    }
+                }
+                random_list = {
+                    50 = {
+                        modifier = {
+                            factor = 0
+                            any_neighbor_system = {
+                                any_planet = {
+                                    exists = owner
+                                    owner = { is_same_value = root.owner }
+                                }
+                            }
+                        }
+                    }
+                    50 = {
+                        root = {
+                            random_owned_ship = {
+                                limit = { is_ship_size = mem_surveyor_primary } #Is ship class
+                                add_modifier = { modifier = mem_surveyor_attrition days = -1 }
+                            }
+                            owner = {
+                                change_variable = {
+                                    which = mem_surveyor_attriction_counter
+                                    value = 1
+                                }
+                            }
+                        }                        
+                        create_starbase = {
+                            size = mem_surveyor_outpost
+                            owner = event_target:mem_surveyor_country
+                        }
+                    }
+                }
+            }
         }
         # IF = {
         #     limit = { is_in_combat = yes }
@@ -1684,6 +1735,7 @@ fleet_event = {
                     exists = space_owner
                     space_owner = { is_country_type = default }
                 }
+                min_steps = 1 #Apparently, landing in the same system breaks the AI
                 log = "[This.GetName] is the next target."
                 set_star_flag = mem_surveyor_next_target
                 every_playable_country = {
@@ -1783,8 +1835,8 @@ country_event = {
     immediate = {
         log = "[From.GetName] won"
         FROMFROM = {
-            set_owner = event_target:mem_surveyor_country
             set_planet_flag = mem_surveyor_former_owner@root
+            remove_modifier = land_appropriation
             every_owned_pop = { # Second pass, clear all the flags, edit the species
                 species = { remove_species_flag = mem_surveyor_species_sampled }
                 IF = {
@@ -1818,6 +1870,12 @@ country_event = {
                     }
                 }
             }
+            IF = {
+                limit = { num_pops > 0 } # Apparently ownership is sometimes passed like this
+                set_owner = event_target:mem_surveyor_country
+            }
+            planet_event = { id = mem_surveyor.217 days = 5 } #Construct outpost after conquered
+            planet_event = { id = mem_surveyor.218 days = 60 } #Construct defense fleet
         }
     }
 
@@ -1964,12 +2022,101 @@ fleet_event = {
             limit = {
                 count_fleet_ships = {
                     limit = { is_ship_size = mem_surveyor_escort }
-                    count < 7
+                    count < 3
                 }
             }
             create_ship = {
                 name = ""
                 design = NAME_MEM_Surveyor_Escort
+            }
+        }
+    }
+}
+
+# Planet constructs outpost after conquest
+planet_event = {
+    id = mem_surveyor.217
+    is_triggered_only = yes
+    hide_window = yes
+
+    trigger = {
+        exists = owner
+        owner = {
+            is_country_type = mem_surveyor_country_red
+        }
+        NOT = {
+            exists = starbase
+        }
+        solar_system = {
+            NOR = {
+                any_ship_in_system = {
+                    exists = owner
+                    owner = { NOT = { is_country_type = mem_surveyor_country_red } }
+                }
+                any_planet = {
+                    exists = owner
+                    owner = { NOT = { is_country_type = mem_surveyor_country_red } }
+                }
+            }
+        }
+    }
+
+    immediate = {
+        solar_system = {
+            create_starbase = {
+                size = mem_surveyor_outpost
+                owner = event_target:mem_surveyor_country
+            }
+        }
+    }
+}
+
+# Planet constructs defensive fleets
+planet_event = {
+    id = mem_surveyor.218
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        exists = owner
+        owner = {
+            is_country_type = mem_surveyor_country_red
+        }
+        NAND = {
+            exists = space_owner
+            space_owner = {
+                NOT = { is_same_value = root.owner }
+            }
+        }
+    }
+
+    immediate = {
+        create_fleet = {
+            name = "[Root.GetName] Robotomite Flotilla"
+            settings = { 
+                can_upgrade = no 
+                can_disband = no
+                can_change_composition = no
+                uses_naval_capacity = no
+            }
+            effect = {
+                set_location = root
+                set_owner = root.owner
+                set_fleet_flag = mem_surveyor_garrison_fleet
+                while = {
+                    count = 9
+                    create_ship = {
+                        name = ""
+                        design = NAME_MEM_Surveyor_Support
+                    }
+                }
+                while = {
+                    count = 3
+                    create_ship = {
+                        name = ""
+                        design = NAME_MEM_Surveyor_Escort
+                    }
+                }
             }
         }
     }
