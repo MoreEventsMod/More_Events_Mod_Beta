@@ -1615,7 +1615,7 @@ fleet_event = {
                     set_planet_flag = mem_surveyor_next_target_planet
                 }
             }
-            clear_fleet_actions = yes
+            clear_fleet_actions = this
             queue_actions = {
                 find_random_planet = { #Find a planet to attack
                     trigger = {
@@ -1669,6 +1669,13 @@ fleet_event = {
                 }
                 log = "[This.GetName] is the next target."
                 set_star_flag = mem_surveyor_next_target
+                every_playable_country = {
+                    remove_country_flag = mem_surveyor_terrorize_this_country
+                }
+                space_owner = {
+                    set_country_flag = mem_surveyor_terrorize_this_country
+                    country_event = { id = mem_surveyor.204 }
+                }
             }
         }
         queue_actions = {
@@ -1757,22 +1764,10 @@ country_event = {
     }
 
     immediate = {
+        log = "[From.GetName] won"
         FROMFROM = {
-            set_owner = FROM
+            set_owner = event_target:mem_surveyor_country
             set_planet_flag = mem_surveyor_former_owner@root
-            every_owned_pop = { # Fist pass, eliminating all but one pop of each species
-                IF = {
-                    limit = {
-                        species = { has_species_flag = mem_surveyor_species_sampled }
-                    }
-                    kill_pop = yes
-                }
-                ELSE = {
-                    species = {
-                        set_species_flag = mem_surveyor_species_sampled
-                    }
-                }
-            }
             every_owned_pop = { # Second pass, clear all the flags, edit the species
                 species = { remove_species_flag = mem_surveyor_species_sampled }
                 IF = {
@@ -1785,10 +1780,11 @@ country_event = {
                     kill_pop = yes
                 }
                 ELSE = {                    
-                    change_species = event_target:mem_surveyor_country
+                    random_list = {
+                        change_species = event_target:mem_surveyor_country
                     prev = {
                         while = {
-                            count = 3
+                            count = 1
                             create_army = {
                                 name = "Robotomite Garrison"
                                 owner = FROM
@@ -1796,6 +1792,7 @@ country_event = {
                                 type = mem_surveyor_robotomites
                             }
                         }
+                    }
                     }
                 }
             }
@@ -1840,10 +1837,11 @@ country_event = {
     location = FROMFROM
 
     trigger = {
-        FROM = { is_country_type = mem_surveyor_country_red }
+        FROM.owner = { is_country_type = mem_surveyor_country_red }
     }
 
     immediate = {
+        log = "[From.GetName] lost"
         FROMFROM = { set_owner = ROOT }
     }
 
