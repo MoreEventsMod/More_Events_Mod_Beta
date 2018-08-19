@@ -1459,7 +1459,24 @@ country_event = {
             }
             country_event = { id = mem_surveyor.202 } #Players get notified
         }
+        create_ship_design = { design = "NAME_MEM_Surveyor_Outpost" }
+        add_ship_design = last_created_design
         random_owned_fleet = {
+            set_name = "Berserker Probe"
+            while = {
+                count = 9
+                create_ship = {
+                    name = ""
+                    design = NAME_MEM_Surveyor_Support
+                }
+            }
+            while = {
+                count = 3
+                create_ship = {
+                    name = ""
+                    design = NAME_MEM_Surveyor_Escort
+                }
+            }
             fleet_event = { id = mem_surveyor.210 }
         }
     }
@@ -1711,7 +1728,7 @@ planet_event = {
         set_timed_planet_flag = { flag = mem_surveyor_is_being_attacked days = 360 }
         from = {
             random_owned_ship = {
-                limit = { always = yes } #Is ship class
+                limit = { is_ship_size = mem_surveyor_primary } #Is ship class
                 add_modifier = { modifier = mem_surveyor_attrition days = -1 }
             }
             owner = {
@@ -1781,18 +1798,23 @@ country_event = {
                 }
                 ELSE = {                    
                     random_list = {
-                        change_species = event_target:mem_surveyor_country
-                    prev = {
-                        while = {
-                            count = 1
-                            create_army = {
-                                name = "Robotomite Garrison"
-                                owner = FROM
-                                species = this
-                                type = mem_surveyor_robotomites
+                        33 = {
+                            change_species = event_target:mem_surveyor_country
+                            prev = {
+                                while = {
+                                    count = 1
+                                    create_army = {
+                                        name = "Robotomite Garrison"
+                                        owner = FROM
+                                        species = this
+                                        type = mem_surveyor_robotomites
+                                    }
+                                }
                             }
                         }
-                    }
+                        66 = {
+                            kill_pop = yes
+                        }
                     }
                 }
             }
@@ -1850,6 +1872,105 @@ country_event = {
     }
 }
 
+# Surveyor construct outpost if they own a planet, but nobody else does
+event = {
+    id = mem_surveyor.215
+    hide_window = yes
+    is_triggered_only = yes
 
+    trigger = {
+        exists = event_target:mem_surveyor_country
+        event_target:mem_surveyor_country = {
+            is_country_type = mem_surveyor_country_red
+            any_owned_planet = {
+                NOT = { exists = starbase }
+            }
+        }
+    }
 
+    immediate = {
+        event_target:mem_surveyor_country = {
+            every_owned_planet = {
+                solar_system = {
+                    IF = {
+                        limit = {
+                            NOR = {
+                                any_ship_in_system = {
+                                    exists = owner
+                                    owner = { NOT = { is_country_type = mem_surveyor_country_red } }
+                                }
+                                any_planet = {
+                                    exists = owner
+                                    owner = { NOT = { is_country_type = mem_surveyor_country_red } }
+                                }
+                            }
+                        }
+                        create_starbase = {
+                            size = mem_surveyor_outpost
+                            owner = event_target:mem_surveyor_country
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
+# Reinforcement
+fleet_event = {
+    id = mem_surveyor.216
+    hide_window = yes
+
+    mean_time_to_happen = {
+        months = 6
+    }
+
+    trigger = {
+        has_fleet_flag = mem_surveyor_fleet
+        is_in_combat = no
+        any_owned_ship = {
+            is_ship_size = mem_surveyor_primary
+        }
+        fleet_size < 31
+        owner = {
+            OR = {
+                is_country_type = mem_surveyor_country_red
+                is_country_type = mem_surveyor_country_yellow
+            }
+            check_variable = {
+                which = mem_surveyor_attriction_counter
+                value < 90
+            }
+        }
+    }
+
+    immediate = {
+        IF = {
+            limit = {
+                count_fleet_ships = {
+                    limit = { is_ship_size = mem_surveyor_support }
+                    count < 7
+                }
+            }
+            while = {
+                count = 3
+                create_ship = {
+                    name = ""
+                    design = NAME_MEM_Surveyor_Support
+                }
+            }
+        }
+        IF = {
+            limit = {
+                count_fleet_ships = {
+                    limit = { is_ship_size = mem_surveyor_escort }
+                    count < 7
+                }
+            }
+            create_ship = {
+                name = ""
+                design = NAME_MEM_Surveyor_Escort
+            }
+        }
+    }
+}
