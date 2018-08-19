@@ -1419,7 +1419,6 @@ event = {
 # Probe decides to flip
 country_event = {
     id = mem_surveyor.201
-    is_triggered_only = yes
     hide_window = yes
 
     trigger = {
@@ -1576,14 +1575,15 @@ fleet_event = {
     }
 
     immediate = {
+        log = ".210 loop"
         solar_system = {
             remove_star_flag = mem_surveyor_next_target
         }
+        # IF = {
+        #     limit = { is_in_combat = yes }
+        #     fleet_event = { id = mem_surveyor.210 days = 30 }
+        # }
         IF = {
-            limit = { is_in_combat = yes }
-            fleet_event = { id = mem_surveyor.210 days = 30 }
-        }
-        ELSE_IF = {
             limit = { # Attack nearest planet if any in the system
                 solar_system = {
                     any_planet = {
@@ -1598,11 +1598,11 @@ fleet_event = {
                     }
                 }
             }
-            clear_fleet_actions = yes
-            queue_actions = {
-                find_closest_planet = { #Find a planet to attack
-                    trigger = {
-                        id = mem_surveyor.berserker.trigger.1.1
+            log = "Targeting things!!!"
+            solar_system = {
+                random_system_planet = {
+                    limit = {
+                        NOT = { has_planet_flag = mem_surveyor_is_being_attacked }
                         exists = owner
                         owner = {
                             OR = {
@@ -1611,32 +1611,27 @@ fleet_event = {
                             }
                         }
                     }
+                    log = "[This.GetName] targeted"
+                    set_planet_flag = mem_surveyor_next_target_planet
+                }
+            }
+            clear_fleet_actions = yes
+            queue_actions = {
+                find_random_planet = { #Find a planet to attack
+                    trigger = {
+                        id = mem_surveyor.berserker.trigger.1.1
+                        log = ".210 loop's planet"
+                        has_planet_flag = mem_surveyor_next_target_planet
+                    }
                     found_planet = {
-                        move_to = this
+                        effect = {
+                            id = mem_surveyor.1.logging
+                            log = "[This.GetName] is the planet"
+                        }
                         orbit_planet = this
                         effect = { # Begin the invasion
                             id = mem_surveyor.berserker.trigger.1.2
-                            set_timed_planet_flag = { flag = mem_surveyor_is_being_attacked days = 360 }
-                            root = {
-                                random_owned_ship = {
-                                    limit = { } #Is ship class
-                                    add_modifier = { modifier = mem_surveyor_attriation days = -1 }
-                                }
-                                owner = {
-                                    change_variable = {
-                                        which = mem_surveyor_attriction_counter
-                                        value = 1
-                                    }
-                                }
-                            }
-                            while = {
-                                count = 5
-                                create_army = {
-                                    name = "Berserkoid Invasion Force"
-                                    owner = root.owner
-                                    type = mem_surveyor_invaders
-                                }
-                            }
+                            remove_planet_flag = mem_surveyor_next_target_planet
                             planet_event = { id = mem_surveyor.211 } #Notification that war has began
                         }
                         wait = { duration = 20 }
@@ -1652,25 +1647,27 @@ fleet_event = {
         }
 
         ELSE = { # Go find another system
-            IF = {
-                limit = {
-                    NOT = {  
-                        any_country = { has_country_flag = mem_surveyor_terrorize_this_country }
-                    }
-                }
-                random_country = {
-                    limit = {
-                        is_country_type = default
-                    }
-                    country_event = { id = mem_surveyor.204 } #Contacting the player
-                    set_timed_country_flag = { flag = mem_surveyor_terrorize_this_country days = 1800 }
-                }
-            }
+            # This selector picks viable targets
+            # IF = {
+            #     limit = {
+            #         NOT = {  
+            #             any_country = { has_country_flag = mem_surveyor_terrorize_this_country }
+            #         }
+            #     }
+            #     random_country = {
+            #         limit = {
+            #             is_country_type = default
+            #         }
+            #         country_event = { id = mem_surveyor.204 } #Contacting the player
+            #         set_timed_country_flag = { flag = mem_surveyor_terrorize_this_country days = 1800 }
+            #     }
+            # }
             closest_system = {
                 limit = {
                     exists = space_owner
-                    space_owner = { has_country_flag = mem_surveyor_terrorize_this_country }
+                    space_owner = { is_country_type = default }
                 }
+                log = "[This.GetName] is the next target."
                 set_star_flag = mem_surveyor_next_target
             }
         }
@@ -1684,7 +1681,7 @@ fleet_event = {
                     move_to = this
                     effect = {
                         id = mem_surveyor.berserker.trigger.2.2
-                        fleet_event = { id = mem_surveyor.210 }
+                        root = { fleet_event = { id = mem_surveyor.210 } }
                     }
                 }
             }
@@ -1702,6 +1699,31 @@ planet_event = {
 
     picture = GFX_evt_mem_ancient_robots_attack_01
     location = ROOT
+
+    immediate = {
+        set_timed_planet_flag = { flag = mem_surveyor_is_being_attacked days = 360 }
+        from = {
+            random_owned_ship = {
+                limit = { always = yes } #Is ship class
+                add_modifier = { modifier = mem_surveyor_attrition days = -1 }
+            }
+            owner = {
+                change_variable = {
+                    which = mem_surveyor_attriction_counter
+                    value = 1
+                }
+            }
+        }
+        
+        while = {
+            count = 5
+            create_army = {
+                name = "Berserkoid Invasion Force"
+                owner = from.owner
+                type = mem_surveyor_invaders
+            }
+        }
+    }
 
     option = {
         name = mem_surveyor.211.a
@@ -1762,57 +1784,13 @@ country_event = {
                     }
                     kill_pop = yes
                 }
-                ELSE_IF = {
-                    limit = { has_trait = trait_hive_mind }
-                    create_species = {
-                        name = this.species
-                        class = this.species
-                        portrait = this.species
-                        name_list = this.species
-                        traits = {
-                            trait = trait_cybernetic
-                        }
-                        traits = this.species
-                        homeworld = this.home_planet
-                    }
-                    modify_species = {
-                        species = last_created_species
-                        remove_trait = trait_hive_mind
-                    }
-                    change_species = last_created_species
+                ELSE = {                    
+                    change_species = event_target:mem_surveyor_country
                     prev = {
                         while = {
                             count = 3
                             create_army = {
-                                type = "Robotomite Garrison"
-                                owner = FROM
-                                species = this
-                                type = mem_surveyor_robotomites
-                            }
-                        }
-                    }
-                }
-                ELSE_IF = {
-                    limit = {
-                        NOT = { has_trait = trait_cybernetic }
-                    }
-                    create_species = {
-                        name = this.species
-                        class = this.species
-                        portrait = this.species
-                        name_list = this.species
-                        traits = {
-                            trait = trait_cybernetic
-                        }
-                        traits = this.species
-                        homeworld = this.home_planet
-                    }
-                    change_species = last_created_species
-                    prev = {
-                        while = {
-                            count = 3
-                            create_army = {
-                                type = "Robotomite Garrison"
+                                name = "Robotomite Garrison"
                                 owner = FROM
                                 species = this
                                 type = mem_surveyor_robotomites
@@ -1822,6 +1800,10 @@ country_event = {
                 }
             }
         }
+    }
+
+    option = {
+        name = mem_surveyor.212.a
     }
 }
 
