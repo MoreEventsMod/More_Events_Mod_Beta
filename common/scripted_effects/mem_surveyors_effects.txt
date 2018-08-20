@@ -43,5 +43,210 @@ mem_surveyor_try_to_communicate = {
 
 # Breaks probe territories into one or more peices
 mem_syurveyor_create_robotomite_countries = {
-    
+    every_owned_planet = {
+        limit = {
+            exists = space_owner
+            space_owner = {
+                NOT = { is_same_value = root }
+            }
+        }
+        set_owner = space_owner 
+    }
+    create_species = {
+        name = Freebotomite
+        adjective = Freebotomite
+        plural = Freebotomites
+        class = FUN
+        portrait = fun13
+        homeworld = event_target:mem_surveyor_robotomite_species.home_planet
+        # pops_can_be_colonizers = no #Regular robotomites should not do this, but still maintain functional
+        # pops_can_reproduce = no
+        # pops_can_migrate = no
+        traits = {
+            trait = trait_cybernetic
+            trait = trait_venerable
+            trait = trait_repugnant
+            trait = trait_slow_learners
+        }
+        effect = {
+            save_global_event_target_as = mem_surveyor_freebotomite_species
+        }
+    }
+    random_owned_planet = {
+        IF = {
+            limit = { exists = starbase }
+            starbase.fleet = { destroy_fleet = this }
+        }
+        create_country = {
+            type = default
+            species = event_target:mem_surveyor_freebotomite_species
+            ethos = {
+                ethic = ethic_fanatic_materialist
+                ethic = ethic_xenophobe
+            }
+            authority = random
+            civics = random
+            effect = {
+                set_country_flag = mem_surveyor_freebotomite_country
+            }
+        }
+        every_owned_pop = { change_species = event_target:mem_surveyor_freebotomite_species }
+        set_owner = last_created_country
+        solar_system = {
+            create_starbase = {
+				size = starbase_starfortress
+				owner = last_created_country
+				module = shipyard
+				building = crew_quarters
+				effect = {
+					set_starbase_module = {
+						slot = 1
+						module = anchorage
+					}
+					set_starbase_module = {
+						slot = 2
+						module = anchorage
+					}
+					set_starbase_module = {
+						slot = 3
+						module = trading_hub
+					}
+					set_starbase_module = {
+						slot = 4
+						module = trading_hub
+					}
+					set_starbase_module = {
+						slot = 5
+						module = trading_hub
+					}
+					set_starbase_building = {
+						slot = 1
+						building = hydroponics_bay
+					}
+				}
+            }
+            every_system_planet = {
+                limit = {
+                    exists = owner
+                    owner = { is_same_value = root }
+                }
+                every_owned_pop = { change_species = event_target:mem_surveyor_freebotomite_species }
+                set_owner = last_created_country
+            }
+            every_fleet_in_system = {
+                limit = {  has_fleet_flag = mem_surveyor_garrison_fleet }
+                set_owner = last_created_country
+            }
+        }
+    }
+    every_system_within_border = {
+        IF = {
+            limit = { exists = starbase }
+            starbase.fleet = { destroy_fleet = this }
+        }
+        random_list = {
+            90 = {
+                closest_system = {
+                    limit = {
+                        exists = space_owner 
+                        space_owner = { has_country_flag = mem_surveyor_freebotomite_country }
+                    }
+                    space_owner = { save_event_target_as = claimant }
+                }
+                create_starbase = {
+					size = starbase_outpost
+					owner = event_target:claimant
+                }
+                every_system_planet = {
+                    limit = {
+                        exists = owner
+                        owner = { is_same_value = root }
+                    }
+                    every_owned_pop = { change_species = event_target:mem_surveyor_freebotomite_species }
+                    set_owner = event_target:claimant
+                }
+                every_fleet_in_system = {
+                    limit = {  has_fleet_flag = mem_surveyor_garrison_fleet }
+                    set_owner = event_target:claimant
+                }
+            }
+            10 = {
+                random_system_planet = {
+                    limit = {
+                        exists = owner
+                        owner = { is_same_value = root }
+                    }
+                    create_country = {
+                        type = default
+                        species = event_target:mem_surveyor_freebotomite_species
+                        ethos = {
+                            ethic = ethic_fanatic_materialist
+                            ethic = ethic_xenophobe
+                        }
+                        authority = random
+                        civics = random
+                        effect = {
+                            set_country_flag = mem_surveyor_freebotomite_country
+                        }
+                    }
+                    every_owned_pop = { change_species = event_target:mem_surveyor_freebotomite_species }
+                    set_owner = last_created_country
+                }
+                create_starbase = {
+                    size = starbase_starfortress
+                    owner = last_created_country
+                    module = shipyard
+                    building = crew_quarters
+                    effect = {
+                        set_starbase_module = {
+                            slot = 1
+                            module = anchorage
+                        }
+                        set_starbase_module = {
+                            slot = 2
+                            module = anchorage
+                        }
+                        set_starbase_module = {
+                            slot = 3
+                            module = trading_hub
+                        }
+                        set_starbase_module = {
+                            slot = 4
+                            module = trading_hub
+                        }
+                        set_starbase_module = {
+                            slot = 5
+                            module = trading_hub
+                        }
+                        set_starbase_building = {
+                            slot = 1
+                            building = hydroponics_bay
+                        }
+                    }
+                }
+                every_system_planet = {
+                    limit = {
+                        exists = owner
+                        owner = { is_same_value = root }
+                    }
+                    every_owned_pop = { change_species = event_target:mem_surveyor_freebotomite_species }
+                    set_owner = last_created_country
+                }
+                every_fleet_in_system = {
+                    limit = {  has_fleet_flag = mem_surveyor_garrison_fleet }
+                    set_owner = last_created_country
+                }
+
+                modifier = {
+                    factor = 0
+                    NOT = {
+                        any_planet = {
+                            exists = owner
+                            owner = { is_same_value = root }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
