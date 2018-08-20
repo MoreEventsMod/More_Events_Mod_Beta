@@ -1488,6 +1488,7 @@ country_event = {
                     design = NAME_MEM_Surveyor_Escort
                 }
             }
+            clear_fleet_actions = this # Otherwise it risks getting stuck
             fleet_event = { id = mem_surveyor.210 }
         }
     }
@@ -1611,6 +1612,9 @@ fleet_event = {
             remove_star_flag = mem_surveyor_next_target
             IF = {
                 limit = {
+                    prev = {
+                        NOT = { has_fleet_flag = mem_surveyor_order_from_planet } # Ship should not construct an outpost unless it just tourched the star
+                    }
                     NOR = {
                         any_ship_in_system = {
                             exists = owner
@@ -1720,6 +1724,7 @@ fleet_event = {
                         effect = { # Reset the loop
                             id = mem_surveyor.berserker.trigger.1.3
                             root = {
+                                set_timed_fleet_flag = { flag = mem_surveyor_order_from_planet days = 1 }
                                 fleet_event = { id = mem_surveyor.210 }
                             }
                         }
@@ -2117,6 +2122,7 @@ planet_event = {
                 set_location = root
                 set_owner = root.owner
                 set_fleet_flag = mem_surveyor_garrison_fleet
+                set_fleet_flag = mem_surveyor_fleet_of@root # Setting relations, would help on transition, maybe
                 while = {
                     count = 9
                     create_ship = {
