@@ -60,7 +60,8 @@ namespace = mem_vazurans
 # mem_vazurans.270 |Marking player with damper field bypass as retaliation target
 # mem_vazurans.280 |Reaching Vazuran Homesystem
 # mem_vazurans.281 |Defeated Vazuran Homefleet
-# mem_vazurans.282 |Investigated Vazuran HQ
+# mem_vazurans.282 |Winning Invasion of Vazuran base and get reward and opinion modifier
+# mem_vazurans.283 |Adding opinion modifier when establishing communications with new empire
 
 # Setup Event at Game Start for randomly disabling the Crisis
 event = {
@@ -146,8 +147,9 @@ event = {
 	
 	trigger = {
 		has_global_flag = mem_vazurans_enabled
-		NOT = {
+		NOR = {
 			has_global_flag = mem_vazurans_disabled
+			has_global_flag = mem_vazurans_finished
 		}
 		years_passed >= 19
 	}
@@ -1034,6 +1036,7 @@ country_event = {
 	}
 }
 
+#Stabilization tech researched and project to stabilize rift set
 country_event = {
 	id = mem_vazurans.51
 	title = mem_vazurans.51.name
@@ -1042,6 +1045,10 @@ country_event = {
 	picture = GFX_evt_mem_rift
 	
 	trigger = {
+		NOR = {
+			has_global_flag = mem_vazurans_disabled
+			has_global_flag = mem_vazurans_finished
+		}
 		has_technology = tech_mem_vazuran_rift_stabilization
 		Not = {
 			has_country_flag = mem_vazurans_rift_stabilization_started
@@ -2991,6 +2998,10 @@ country_event = {
 	id = mem_vazurans.250
 	hide_window = yes
 	trigger = {
+		NOR = {
+			has_global_flag = mem_vazurans_disabled
+			has_global_flag = mem_vazurans_finished
+		}
 		years_passed >= 50
 		has_country_flag = mem_vazurans_met
 		NOT = {
@@ -3231,6 +3242,10 @@ country_event = {
 	hide_window = yes
 	fire_only_once = yes
 	trigger =  {
+		NOR = {
+			has_global_flag = mem_vazurans_disabled
+			has_global_flag = mem_vazurans_finished
+		}
 		has_technology = tech_mem_vazuran_damper_field_bypass
 		is_country_type = default
 		NOT = {
@@ -3249,9 +3264,190 @@ country_event = {
 	}
 }
 
-# mem_vazurans.280 |Reaching Vazuran Homesystem
-# mem_vazurans.281 |Defeated Vazuran Homefleet
-# mem_vazurans.282 |Investigated Vazuran HQ
+# Reaching Vazuran Homesystem
+# Triggers event when ship enters a system
+# Scope = Ship
+# From = System
+# FromFrom = Country
+ship_event = {
+	id = mem_vazurans.280
+	title = mem_vazurans.280.name
+	desc = mem_vazurans.280.desc
+	picture = GFX_evt_mem_vazuran_system
+	show_sound = event_scanner
+
+	is_triggered_only = yes
+
+	trigger = {
+		From = {
+			has_star_flag = mem_vazuran_homesystem
+		}
+		NOR = {
+			has_global_flag = mem_vazurans_finished
+			owner = {
+				has_country_flag = mem_vazurans_home_system_visited
+			}
+		}
+	}
+
+	immediate = {
+		owner = {
+			set_country_flag = mem_vazurans_home_system_visited
+		}
+	}
+
+	option = {
+		name = mem_vazurans.280.a
+	}
+}
+
+# Defeated Vazuran Homefleet
+# This = owner of fleet 1 (combatant)
+# From = owner of fleet 2 (destroyed)
+# FromFrom = fleet 1
+# FromFromFrom = fleet 2
+country_event = {
+	id = mem_vazurans.281
+	title = mem_vazurans.281.name
+	desc = mem_vazurans.281.desc
+	picture = GFX_evt_mem_space_battle
+	show_sound = event_space_battle
+	location = FromFrom
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		FROMFROMFROM = {
+			has_fleet_flag = mem_vazurans_home_fleet
+		}
+	}
+
+	option = {
+		name = mem_vazurans.281
+	}
+}
+
+# Investigated Vazuran HQ
+# Triggers country_event for the attacker upon victory
+# (Before controller is switched)
+# This = country, leader attacker
+# From = country, planet owner
+# FromFrom = planet
+country_event = {
+	id = mem_vazurans.282
+	title = mem_vazurans.282.name
+	desc = mem_vazurans.282.desc
+	picture = GFX_evt_mem_victory
+	show_sound = event_ground_battle
+
+	is_triggered_only = yes
+
+	trigger = {
+		From = {
+			is_same_value = event_target:mem_vazurans_country
+		}
+	}
+
+	immediate = {
+		set_global_flag = mem_vazurans_finished
+		FromFrom = {
+			every_tile = {
+				set_ruined = yes
+			}
+			owner = {
+				every_owned_pop = {
+					kill_pop = yes
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_vazurans.282.a
+		add_research_option = tech_mem_vazuran_xentronium_armor
+		add_tech_progress = {
+			tech = tech_mem_vazuran_xentronium_armor
+			progress = 0.1
+		}
+		hidden_effect = {
+			set_country_flag = mem_ended_vazuran_menace
+			every_country = {
+				limit = {
+					OR = {
+						is_country_type = default
+						is_country_type = fallen_empire
+						is_country_type = awakened_fallen_empire
+					}
+					NOT = { #should do the same as the above mentioned thing but does not exclude other human players
+						is_same_value = ROOT
+					}
+					has_communications = ROOT
+				}
+				add_opinion_modifier = {
+					who = ROOT
+					modifier = mem_ended_vazuran_menace
+				}
+			}
+		}
+	}
+}
+
+# Happens if an empire with the which defeated the vazurans establishes communications with a new empire
+# Executed right before a country has established communications with another country
+# This = Country which established the communications
+# From = Country which communications were established with
+country_event = {
+	id = mem_vazurans.283
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		OR = {
+			has_country_flag = mem_ended_vazuran_menace
+			FROM = {
+				has_country_flag = mem_ended_vazuran_menace
+			}
+		}
+	}
+	
+	immediate = {
+		IF = {
+			limit = {
+				has_country_flag = mem_ended_vazuran_menace
+				FROM = {
+					OR = {
+						is_country_type = default
+						is_country_type = fallen_empire
+						is_country_type = awakened_fallen_empire
+					}
+				}
+			}
+			FROM = {
+				add_opinion_modifier = {
+					who = ROOT
+					modifier = mem_ended_vazuran_menace
+				}
+			}
+		}
+		IF = {
+			limit = {
+				FROM = {
+					has_country_flag = mem_ended_vazuran_menace
+				}
+				OR = {
+					is_country_type = default
+					is_country_type = fallen_empire
+					is_country_type = awakened_fallen_empire
+				}
+			}
+			add_opinion_modifier = {
+				who = FROM
+				modifier = mem_ended_vazuran_menace
+			}
+		}
+	}
+}
 
 # spawn testsystem
 country_event = {
