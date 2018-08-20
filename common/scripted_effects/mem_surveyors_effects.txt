@@ -75,7 +75,9 @@ mem_syurveyor_create_robotomite_countries = {
     random_owned_planet = {
         IF = {
             limit = { exists = starbase }
-            starbase.fleet = { destroy_fleet = this }
+            starbase = {
+                fleet = { destroy_fleet = this }
+            }
         }
         create_country = {
             type = default
@@ -87,12 +89,14 @@ mem_syurveyor_create_robotomite_countries = {
             authority = random
             civics = random
             effect = {
+                log = "First country created: [This.GetName]"
                 set_country_flag = mem_surveyor_freebotomite_country
             }
         }
         every_owned_pop = { change_species = event_target:mem_surveyor_freebotomite_species }
         set_owner = last_created_country
         solar_system = {
+            set_star_flag = mem_surveyor_robotomite_capital
             create_starbase = {
 				size = starbase_starfortress
 				owner = last_created_country
@@ -139,19 +143,29 @@ mem_syurveyor_create_robotomite_countries = {
             }
         }
     }
-    every_system_within_border = {
+    every_system = {
+        limit = {
+            exists = space_owner
+            space_owner = { is_same_value = root }
+        }
+        log = "[This.GetName] Is being processed"
         IF = {
             limit = { exists = starbase }
-            starbase.fleet = { destroy_fleet = this }
+            starbase = {
+                fleet = { destroy_fleet = this }
+            }
         }
         random_list = {
             90 = {
                 closest_system = {
                     limit = {
-                        exists = space_owner 
-                        space_owner = { has_country_flag = mem_surveyor_freebotomite_country }
+                        has_star_flag = mem_surveyor_robotomite_capital
                     }
-                    space_owner = { save_event_target_as = claimant }
+                    log = "[This.GetName] is used a relevant capital"
+                    starbase = {
+                        log = "[owner.GetName] is set as a claimant"
+                        owner = { save_event_target_as = claimant }
+                    }
                 }
                 create_starbase = {
 					size = starbase_outpost
@@ -186,12 +200,14 @@ mem_syurveyor_create_robotomite_countries = {
                         authority = random
                         civics = random
                         effect = {
+                            log = "Extra country created: [This.GetName]"
                             set_country_flag = mem_surveyor_freebotomite_country
                         }
                     }
                     every_owned_pop = { change_species = event_target:mem_surveyor_freebotomite_species }
                     set_owner = last_created_country
                 }
+                set_star_flag = mem_surveyor_robotomite_capital
                 create_starbase = {
                     size = starbase_starfortress
                     owner = last_created_country
