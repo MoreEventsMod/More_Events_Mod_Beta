@@ -2153,6 +2153,16 @@ country_event = {
     trigger = {
         is_country_type = mem_surveyor_country_red
         exists = event_target:mem_surveyor_fleet.solar_system
+        event_target:mem_surveyor_fleet.solar_system = {
+            any_planet = {
+                uninhabitable_regular_planet = yes
+                has_anomaly = no
+                OR = {
+                    has_deposit_for = shipclass_research_station
+                    orbital_deposit_tile = { has_deposit = no }
+                }
+            }
+        }
         check_variable = {
             which = mem_surveyor_attriction_counter
             value > 100
@@ -2171,9 +2181,37 @@ country_event = {
             }
             country_event = { id = mem_surveyor.220 }
         }
+        event_target:mem_surveyor_fleet = {
+            clear_fleet_actions = this
+            queue_actions = {
+                find_random_planet = {
+                    trigger = {
+                        id = mem_surveyor.berserker.trigger.3.1
+                        uninhabitable_regular_planet = yes
+                        has_anomaly = no
+                        OR = {
+                            has_deposit_for = shipclass_research_station
+                            orbital_deposit_tile = { has_deposit = no }
+                        }
+                    }
+                    found_planet = {
+                        orbit_planet = this
+                        effect = {
+                            id = mem_surveyor.berserker.trigger.3.1
+                            prevent_anomaly = yes
+                            set_planet_flag = mem_surveyor_resting_place
+                        }
+                    }
+                }
+            }
+        }
+        country_event = {
+            id = mem_surveyor.221 days = 720 random = 360
+        }
     }
 }
 
+# Player is notified
 country_event = {
     id = mem_surveyor.220
     title = mem_surveyor.220.name
@@ -2186,5 +2224,31 @@ country_event = {
 
     option = {
         name = mem_surveyor.220.a
+    }
+}
+
+# Turn fleet grey
+country_event = {
+    id = mem_surveyor.221
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        any_owned_ship = {
+            has_ship_flag = mem_surveyoer_probe_ship
+        }
+    }
+
+    immediate = {
+        every_owned_planet = {
+            limit = {
+                exists = space_owner
+                space_owner = {
+                    NOT = { is_same_value = root }
+                }
+            }
+            set_owner = space_owner
+        }
+        mem_syurveyor_create_robotomite_countries = yes
     }
 }
