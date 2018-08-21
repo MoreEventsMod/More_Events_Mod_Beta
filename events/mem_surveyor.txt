@@ -424,6 +424,87 @@ country_event = {
     }
 }
 
+# Surveyor probe is dead
+country_event = {
+    id = mem_surveyor.8
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        is_country_type = mem_surveyor_country_green
+        FROMFROM = {
+            has_ship_flag = mem_surveyoer_probe_ship
+        }
+    }
+
+    immediate = {
+        FROM = { 
+            save_event_target_as = probe_killers 
+            country_event = { id = mem_surveyor.10 }
+        }
+        every_playable_country = {
+            limit = {
+                is_ai = no
+                has_established_contact = root
+                NOT = { is_same_value = FROM }
+            }
+            country_event = { id = mem_surveyor.9 }
+        }
+    }
+}
+
+# Player is notified someone killed the probe
+country_event = {
+    id = mem_surveyor.9
+    title = mem_surveyor.9.name
+    desc = mem_surveyor.9.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_debris
+
+    option = {
+        name = mem_surveyor.9.a
+    }
+}
+
+country_event = {
+    id = mem_surveyor.10
+    title = mem_surveyor.10.name
+    desc = mem_surveyor.10.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_debris
+    
+    after = {
+        IF = {
+            limit = { 
+                is_country_type = default 
+                NOR = {
+                    has_valid_civic = civic_fanatic_purifiers
+                    has_valid_civic = civic_hive_devouring_swarm
+                    has_valid_civic = civic_machine_terminator
+                    has_valid_civic = civic_machine_assimilator
+                }
+            }
+            custom_tooltip = mem_surveyor.10.tooltip.opinion_increase
+            every_playable_country = {
+                limit = {
+                    has_established_contact = FROM
+                    has_established_contact = ROOT
+                }
+                # TODO: Add opinion modifier
+            }
+        }
+        mem_surveyor_killing_reward = yes
+    }
+
+    option = {
+        name = mem_surveyor.10.a
+    }
+}
+
 #####################################
 ### Diplomacy with friendly probe ###
 #####################################
@@ -2139,9 +2220,7 @@ planet_event = {
             name = "[Root.GetName] Robotomite Flotilla"
             settings = { 
                 can_upgrade = no 
-                can_disband = no
                 can_change_composition = no
-                uses_naval_capacity = no
             }
             effect = {
                 set_location = root
@@ -2326,7 +2405,10 @@ country_event = {
     }
 
     immediate = {
-        FROM = { save_event_target_as = probe_killers }
+        FROM = { 
+            save_event_target_as = probe_killers 
+            country_event = { id = mem_surveyor.233 }
+        }
         IF = {
             limit = {
                 NOT = { has_country_flag = mem_surveyor_already_attritioned }
@@ -2407,6 +2489,9 @@ country_event = {
             any_country = {
                 has_country_flag = mem_surveyor_freebotomite_country
             }
+            NOT = {
+                FROM = { has_global_flag = mem_surveyor_already_attritioned }
+            }
         }
     }
     desc = mem_surveyor.233.desc.no_freebs
@@ -2414,6 +2499,15 @@ country_event = {
         text = mem_surveyor.233.desc.no_planet_taken_ever
         exclusive_trigger = {
             NOT = { has_global_flag = mem_surveyor_probe_took_a_planet }
+            NOT = {
+                FROM = { has_global_flag = mem_surveyor_already_attritioned }
+            }
+        }
+    }
+    desc = {
+        text = mem_surveyoer.233.desc.already_attritioned
+        exclusive_trigger = {
+            FROM = { has_global_flag = mem_surveyor_already_attritioned }
         }
     }
 
@@ -2422,14 +2516,14 @@ country_event = {
     picture = GFX_evt_debris
     location = FROMFROMFROM.Solar_System
 
-    trigger = {
-        FROM = {
-            is_country_type = mem_surveyor_country_red
-        }
-        FROMFROMFROM = {
-            has_ship_flag = mem_surveyoer_probe_ship
-        }
-    }
+    # trigger = {
+    #     FROM = {
+    #         is_country_type = mem_surveyor_country_red
+    #     }
+    #     FROMFROMFROM = {
+    #         has_ship_flag = mem_surveyoer_probe_ship
+    #     }
+    # }
 
     after = {
         IF = {
