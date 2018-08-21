@@ -1853,6 +1853,7 @@ country_event = {
 
     immediate = {
         log = "[From.GetName] won"
+        set_global_flag = mem_surveyor_probe_took_a_planet
         FROMFROM = {
             set_planet_flag = mem_surveyor_former_owner@root
             remove_modifier = land_appropriation
@@ -2117,15 +2118,19 @@ planet_event = {
         owner = {
             is_country_type = mem_surveyor_country_red
         }
-        NAND = {
-            exists = space_owner
-            space_owner = {
-                NOT = { is_same_value = root.owner }
-            }
-        }
+        # NAND = {
+        #     exists = space_owner
+        #     space_owner = {
+        #         NOT = { is_same_value = root.owner }
+        #     }
+        #     exists = starbase
+        #     starbase = { is_disabled = no }
+        # }
         NOT = {
             has_planet_flag = mem_surveyor_spawned_garrison
         }
+        has_ground_combat = no
+        is_occupied_flag = no
     }
 
     immediate = {
@@ -2252,7 +2257,7 @@ country_event = {
     }
 }
 
-# Turn fleet grey
+# Probe completely loses control
 country_event = {
     id = mem_surveyor.221
     hide_window = yes
@@ -2267,5 +2272,189 @@ country_event = {
     immediate = {
         set_country_flag = mem_surveyor_already_attritioned
         mem_syurveyor_create_robotomite_countries = yes
+        every_playable_country = {
+            limit = {
+                is_ai = no
+                has_established_contact = root
+            }
+            country_event = { id = mem_surveyor.222 }
+        }
+    }
+}
+
+# Player is notified of Freebotomites being born
+country_event = {
+    id = mem_surveyor.222
+    title = mem_surveyor.222.name
+    desc = {
+        text = mem_surveyor.222.desc
+        exclusive_trigger = {
+            any_country = {
+                has_country_flag = mem_surveyor_freebotomite_country
+            }
+        }
+    }
+    desc = mem_surveyor.222.desc.no_freebs
+    desc = {
+        text = mem_surveyor.222.desc.no_planet_taken_ever
+        exclusive_trigger = {
+            NOT = { has_global_flag = mem_surveyor_probe_took_a_planet }
+        }
+    }
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mining_station
+    location = event_target:mem_surveyor_fleet
+
+    option = {
+        name = mem_surveyor.222.a
+    }
+}
+
+# Berserker probe is killed
+country_event = {
+    id = mem_surveyor.230
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        is_country_type = mem_surveyor_country_red
+        FROMFROM = {
+            has_ship_flag = mem_surveyoer_probe_ship
+        }
+    }
+
+    immediate = {
+        FROM = { save_event_target_as = probe_killers }
+        IF = {
+            limit = {
+                NOT = { has_country_flag = mem_surveyor_already_attritioned }
+            }
+            mem_syurveyor_create_robotomite_countries = yes
+            every_playable_country = {
+                limit = {
+                    NOT = { is_same_value = FROM }
+                    has_established_contact = ROOT
+                }
+                country_event = { id = mem_surveyor.231 } # Tell everyone what happened
+            }
+        }
+        ELSE = {
+            every_playable_country = {
+                limit = {
+                    NOT = { is_same_value = FROM }
+                    has_established_contact = ROOT
+                }
+                country_event = { id = mem_surveyor.232 } # Tell everyone probe is dead, but no mention of attrition
+            }
+        }
+    }
+}
+
+# Inform player of probe being destroyed + robotomites
+country_event = {
+    id = mem_surveyor.231
+    title = mem_surveyor.231.name
+    desc = {
+        text = mem_surveyor.231.desc
+        exclusive_trigger = {
+            any_country = {
+                has_country_flag = mem_surveyor_freebotomite_country
+            }
+        }
+    }
+    desc = mem_surveyor.231.desc.no_freebs
+    desc = {
+        text = mem_surveyor.231.desc.no_planet_taken_ever
+        exclusive_trigger = {
+            NOT = { has_global_flag = mem_surveyor_probe_took_a_planet }
+        }
+    }
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_debris
+
+    option = {
+        name = mem_surveyor.231.a
+    }
+}
+
+# Inform player of probe being destroyed
+
+country_event = {
+    id = mem_surveyor.232
+    title = mem_surveyor.232.name
+    desc = mem_surveyor.232.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_debris
+
+    option = {
+        name = mem_surveyor.232.a
+    }
+}
+
+# You have killed berserker probe
+country_event = {
+    id = mem_surveyor.233
+    title = mem_surveyor.233.name
+    desc = {
+        text = mem_surveyor.233.desc
+        exclusive_trigger = {
+            any_country = {
+                has_country_flag = mem_surveyor_freebotomite_country
+            }
+        }
+    }
+    desc = mem_surveyor.233.desc.no_freebs
+    desc = {
+        text = mem_surveyor.233.desc.no_planet_taken_ever
+        exclusive_trigger = {
+            NOT = { has_global_flag = mem_surveyor_probe_took_a_planet }
+        }
+    }
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_debris
+    location = FROMFROMFROM.Solar_System
+
+    trigger = {
+        FROM = {
+            is_country_type = mem_surveyor_country_red
+        }
+        FROMFROMFROM = {
+            has_ship_flag = mem_surveyoer_probe_ship
+        }
+    }
+
+    after = {
+        IF = {
+            limit = { 
+                is_country_type = default 
+                NOR = {
+                    has_valid_civic = civic_fanatic_purifiers
+                    has_valid_civic = civic_hive_devouring_swarm
+                    has_valid_civic = civic_machine_terminator
+                    has_valid_civic = civic_machine_assimilator
+                }
+            }
+            custom_tooltip = mem_surveyor.233.tooltip.opinion_increase
+            every_playable_country = {
+                limit = {
+                    has_established_contact = FROM
+                    has_established_contact = ROOT
+                }
+                # TODO: Add opinion modifier
+            }
+        }
+        mem_surveyor_killing_reward = yes
+    }
+
+    option = {
+        name = mem_surveyor.233.a
     }
 }
