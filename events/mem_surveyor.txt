@@ -2463,7 +2463,7 @@ country_event = {
                 }
             }
         }
-        country_event = { id = mem_surveyoer.223 days = 360 }
+        country_event = { id = mem_surveyor.223 days = 360 }
     }
 }
 
@@ -2641,21 +2641,185 @@ country_event = {
 
     trigger = {
         is_country_type = dormant_marauders
-        NOT = { has_global_flag = mem_surveyor_surviror_spawned }
+        NOT = { has_global_flag = mem_surveyor_survivor_spawned }
+        any_system = {
+            exists = space_owner
+            space_owner = { is_same_value = root }
+        }
     }
 
     immediate = {
         log = "Spawning hunters"
+        random_system = {
+            limit = {
+                exists = space_owner
+                space_owner = { is_same_value = root }
+            }
+            log = "[This.GetName] is the starting system."
+            save_event_target_as = starting_system
+        }
         set_global_flag = mem_surveyor_survivor_spawned
         create_country = {
             name = "Probe Hunters"
+            name_list = "PRT1"
             type = mem_surveyor_avengers
             species = event_target:escapee_species
+            flag = {
+                icon = {
+                    category = ornate
+                    file = flag_ornate_21.dds
+                }
+                background = {
+                    category = backgrounds
+                    file = triangle_split.dds
+                }
+                colors = {
+                    "red"
+                    "black"
+                    "null"
+                    "null"
+                }
+            }
             effect = {
+                set_graphical_culture = pirate_01
                 set_country_flag = mem_surveyor_avengers_country
                 create_leader = {
                     type = admiral
+                    traits = {
+                        trait = leader_trait_mem_surveyor_avenger
+                    }
+                    effect = {
+                        save_event_target_as = avengers_leader
+                    }
                 }
+                save_event_target_as = avengers_country
+                IF = {
+                    limit = {
+                        root = { has_country_flag = marauder_1 }
+                    }
+                    set_country_flag = mem_surveyor_avenger_1
+                }
+                ELSE_IF = {
+                    limit = {
+                        root = { has_country_flag = marauder_2 }
+                    }
+                    set_country_flag = mem_surveyor_avenger_2
+                }
+                ELSE = {
+                    set_country_flag = mem_surveyor_avenger_3
+                }
+            }
+        }
+        create_fleet = {
+            name = "Probe Hunters"
+            effect = {
+                set_owner = event_target:avengers_country
+                set_leader = event_target:avengers_leader
+                while = {
+                    count = 18
+                    create_ship = {
+                        name = random
+                        design = "NAME_Outrider"
+                        prefix = no
+                        graphical_culture = "pirate_01"
+                    }
+                }
+                while = {
+                    count = 12
+                    create_ship = {
+                        name = random
+                        design = "NAME_Lancer"
+                        prefix = no
+                        graphical_culture = "pirate_01"
+                    }
+                }
+                while = {
+                    count = 6
+                    create_ship = {
+                        name = random
+                        design = "NAME_Void_Champion"
+                        prefix = no
+                        graphical_culture = "pirate_01"
+                    }
+                }
+                set_location = event_target:staring_system
+                auto_follow_fleet = { 
+					target = event_target:mem_surveyor_fleet
+					attack_fleet = yes 
+				}
+            }
+        }
+        every_playable_country = {
+            limit = { has_established_contact = root }
+            country_event = { id = mem_surveyor.341 }
+        }
+    }
+}
+
+# Establishing contact with the avengers
+country_event = {
+    id = mem_surveyor.341
+    title = mem_surveyor.341.name
+    desc = mem_surveyor.341.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_pirate_armada
+
+    immediate = {
+        estabish_communications_no_message = event_target:avengers_country
+    }
+
+    option = {
+        name = ONSCREEN
+        hidden_effect = {
+            country_event = { id = mem_surveyor.342 }
+        }
+    }
+}
+
+# Diplomatic event from the avengers
+country_event = {
+    id = mem_surveyor.342
+    title = TRANSMISSION
+    desc = { # Warriors
+        text = mem_surveyor.342.desc.1
+        trigger = {
+            event_target:avengers_country = { has_country_flag = mem_surveyor_avenger_1 }
+        }
+    }
+    desc = { # Dwamaks
+        text = mem_surveyor.342.desc.2
+        trigger = {
+            event_target:avengers_country = { has_country_flag = mem_surveyor_avenger_2 }
+        }
+    }
+    desc = { # She of the Void
+        text = mem_surveyor.342.desc.3
+        trigger = {
+            event_target:avengers_country = { has_country_flag = mem_surveyor_avenger_3 }
+        }
+    }
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		portrait = event_target:avengers_leader
+		room = ethic_spaceship_room
+    }
+    
+    option = {
+        name = mem_surveyor.341.a
+    }
+
+    option = {
+        name = mem_surveyor.341.purifier
+        exclusive_trigger = {
+            OR = {
+                has_valid_civic = civic_fanatic_purifiers
+                has_valid_civic = civic_devouring_swarm
+                has_valid_civic = civic_machine_terminator
             }
         }
     }
