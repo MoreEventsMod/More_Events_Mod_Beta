@@ -491,12 +491,17 @@ country_event = {
                 }
             }
             custom_tooltip = mem_surveyor.10.tooltip.opinion_decrease
-            every_playable_country = {
-                limit = {
-                    has_established_contact = FROM
-                    has_established_contact = ROOT
+            hidden_effect = {
+                every_playable_country = {
+                    limit = {
+                        has_established_contact = FROM
+                        has_established_contact = ROOT
+                    }
+                    add_opinion_modifier = {
+                        who = root
+                        modifier = mem_surveyor_destroyed_probe
+                    }
                 }
-                # TODO: Add opinion modifier
             }
         }
         mem_surveyor_killing_reward = yes
@@ -1521,7 +1526,7 @@ country_event = {
     }
 
     mean_time_to_happen = {
-        years = 1 #Change to something sensible!
+        years = 50 #Change to something sensible!
     }
 
     immediate = {
@@ -1574,6 +1579,7 @@ country_event = {
             clear_fleet_actions = this # Otherwise it risks getting stuck
             fleet_event = { id = mem_surveyor.210 }
         }
+        country_event = { id = mem_surveyor.223 }
     }
 }
 
@@ -2108,7 +2114,7 @@ fleet_event = {
         any_owned_ship = {
             is_ship_size = mem_surveyor_primary
         }
-        fleet_size < 31
+        fleet_size < 47
         owner = {
             OR = {
                 is_country_type = mem_surveyor_country_red
@@ -2116,7 +2122,7 @@ fleet_event = {
             }
             check_variable = {
                 which = mem_surveyor_attriction_counter
-                value < 101
+                value < 151
             }
         }
     }
@@ -2126,7 +2132,7 @@ fleet_event = {
             limit = {
                 count_fleet_ships = {
                     limit = { is_ship_size = mem_surveyor_support }
-                    count < 7
+                    count < 17
                 }
             }
             while = {
@@ -2141,7 +2147,7 @@ fleet_event = {
             limit = {
                 count_fleet_ships = {
                     limit = { is_ship_size = mem_surveyor_escort }
-                    count < 3
+                    count < 9
                 }
             }
             create_ship = {
@@ -2223,6 +2229,7 @@ planet_event = {
             settings = { 
                 can_upgrade = no 
                 can_change_composition = no
+                can_disband = no
             }
             effect = {
                 set_location = root
@@ -2230,14 +2237,14 @@ planet_event = {
                 set_fleet_flag = mem_surveyor_garrison_fleet
                 set_fleet_flag = mem_surveyor_fleet_of@root # Setting relations, would help on transition, maybe
                 while = {
-                    count = 9
+                    count = 15
                     create_ship = {
                         name = ""
                         design = NAME_MEM_Surveyor_Support
                     }
                 }
                 while = {
-                    count = 3
+                    count = 5
                     create_ship = {
                         name = ""
                         design = NAME_MEM_Surveyor_Escort
@@ -2272,7 +2279,7 @@ country_event = {
         }
         check_variable = {
             which = mem_surveyor_attriction_counter
-            value > 100
+            value > 150
         }
         any_owned_ship = {
             has_ship_flag = mem_surveyoer_probe_ship
@@ -2398,6 +2405,36 @@ country_event = {
 
     option = {
         name = mem_surveyor.222.a
+    }
+}
+
+# Increase probe attrition yearly
+@attrition_yearly_increase = 5
+country_event = {
+    id = mem_surveyor.223
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        is_country_type = mem_surveyor_country_red
+        check_variable = {
+            which = mem_surveyor_attriction_counter
+            value < 150
+        }
+    }
+
+    immediate = {
+        change_variable = {
+            which = mem_surveyor_attriction_counter
+            value = @attrition_yearly_increase
+        }
+        while = {
+            count = @attrition_yearly_increase
+            add_modifier = {
+                modifier = mem_surveyor_attrition
+                days = -1
+            }
+        }
     }
 }
 
@@ -2553,7 +2590,10 @@ country_event = {
                     has_established_contact = FROM
                     has_established_contact = ROOT
                 }
-                # TODO: Add opinion modifier
+                add_opinion_modifier = {
+                    who = root
+                    modifier = mem_surveyor_destroyed_probe_red
+                }
             }
         }
         mem_surveyor_killing_reward = yes
