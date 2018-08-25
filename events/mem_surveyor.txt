@@ -2702,7 +2702,7 @@ country_event = {
                     }
                     skill = 3
                     effect = {
-                        save_event_target_as = avengers_leader
+                        save_global_event_target_as = mem_surveyor_avengers_leader
                     }
                 }
                 save_event_target_as = avengers_country
@@ -2733,7 +2733,16 @@ country_event = {
             name = "Probe Hunters"
             effect = {
                 set_owner = event_target:avengers_country
-                set_leader = event_target:avengers_leader
+                set_leader = event_target:mem_surveyor_avengers_leader
+                while = {
+                    count = 1
+                    create_ship = {
+                        name = random
+                        design = "NAME_Ancestral_Glory"
+                        prefix = no
+                        graphical_culture = "pirate_01"
+                    }
+                }
                 while = {
                     count = 18
                     create_ship = {
@@ -2824,7 +2833,7 @@ country_event = {
     diplomatic = yes
 
     picture_event_data = {
-		portrait = event_target:avengers_leader
+		portrait = event_target:mem_surveyor_avengers_leader
 		room = ethic_spaceship_room
     }
     
@@ -2834,6 +2843,226 @@ country_event = {
 
     option = {
         name = mem_surveyor.242.purifier
+        exclusive_trigger = {
+            OR = {
+                has_valid_civic = civic_fanatic_purifiers
+                has_valid_civic = civic_hive_devouring_swarm
+                has_valid_civic = civic_machine_terminator
+            }
+        }
+    }
+}
+
+# Custom diplomacy with the avengers
+country_event = {
+    id = mem_surveyor.243
+    title = TRANSMISSION
+    # Status update on the probe: It's moving to system
+    desc = { # Warriors
+        text = mem_surveyor.243.desc.1.1
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_1 }
+            NOT = { has_country_flag = mem_surveyor_terrorize_this_country }
+            exists = event_target:next_target
+        }
+    }
+    desc = { # Dwamaks
+        text = mem_surveyor.243.desc.1.2
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_2 }
+            NOT = { has_country_flag = mem_surveyor_terrorize_this_country }
+            exists = event_target:next_target
+        }
+    }
+    desc = { # She of the Void
+        text = mem_surveyor.243.desc.1.3
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_3 }
+            NOT = { has_country_flag = mem_surveyor_terrorize_this_country }
+            exists = event_target:next_target
+        }
+    }
+    # Status update on probe: It's targeting a planet
+    desc = { # Warriors
+        text = mem_surveyor.243.desc.2.1
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_1 }
+            NOT = { has_country_flag = mem_surveyor_terrorize_this_country }
+            exists = event_target:next_target_planet
+        }
+    }
+    desc = { # Dwamaks
+        text = mem_surveyor.243.desc.2.2
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_2 }
+            NOT = { has_country_flag = mem_surveyor_terrorize_this_country }
+            exists = event_target:next_target_planet
+        }
+    }
+    desc = { # She of the Void
+        text = mem_surveyor.243.desc.2.3
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_3 }
+            NOT = { has_country_flag = mem_surveyor_terrorize_this_country }
+            exists = event_target:next_target_planet
+        }
+    }
+    # Player is being targeted
+    desc = { # Warriors
+        text = mem_surveyor.243.desc.3.1
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_1 }
+            NOT = { has_country_flag = mem_surveyor_terrorize_this_country }
+            exists = event_target:next_target
+        }
+    }
+    desc = { # Dwamaks
+        text = mem_surveyor.243.desc.3.2
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_2 }
+            NOT = { has_country_flag = mem_surveyor_terrorize_this_country }
+            exists = event_target:next_target
+        }
+    }
+    desc = { # She of the Void
+        text = mem_surveyor.243.desc.3.3
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_3 }
+            NOT = { has_country_flag = mem_surveyor_terrorize_this_country }
+            exists = event_target:next_target
+        }
+    }
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		portrait = event_target:mem_surveyor_avengers_leader
+		room = ethic_spaceship_room
+    }
+
+    trigger = {
+        FROM = { is_country_type = mem_surveyor_avengers_country }
+        any_country = { is_country_type = mem_surveyor_destroyed_probe_red }
+        NOT = { has_country_flag = mem_surveyoer_avengers_diplomacy }
+        exists = event_target:mem_surveyor_avengers_leader
+    }
+
+    immediate = {
+        set_country_flag = mem_surveyoer_avengers_diplomacy
+        random_system = {
+            limit = { has_star_flag = mem_surveyor_next_target }
+            save_event_target_as = next_target
+        }
+        random_planet = {
+            limit = { has_planet_flag = mem_surveyor_next_target_planet }
+            save_event_target_as = next_target_planet
+        }
+    }
+
+    # Talking about duty
+    option = {
+        name = mem_surveyor.243.1.a
+        is_dialog_only = yes
+        response_text = mem_surveyor.243.1.a.response
+
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_1 }
+            NAND = {
+                event_target:mem_surveyor_avengers_leader = { is_same_species = root }
+                is_militarist = yes
+            }
+        }
+    }
+
+    # Militarists accuse him of desertion
+    option = {
+        name = mem_surveyor.243.1.b
+        is_dialog_only = yes
+        response_text = mem_surveyor.243.1.b.response
+
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_1 }
+            event_target:mem_surveyor_avengers_leader = { is_same_species = root }
+            OR = {
+                has_ethic = ethic_fanatic_militarist
+                has_ethic = ethic_militarist
+            }
+        }
+    }
+
+    # Telling him to stop screeching
+    option = {
+        name = mem_surveyor.243.2.a
+        is_dialog_only = yes
+        response_text = mem_surveyor.243.2.a.response
+
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_2 }
+            # event_target:mem_surveyor_avengers_leader = { is_same_species = root }
+        }
+    }
+
+    # Generic disapproval of Void worshippers
+    option = {
+        name = mem_surveyor.243.3.a
+        is_dialog_only = yes
+        response_text = mem_surveyor.243.3.a.response
+
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_3 }
+            OR = {
+                NOT = { event_target:mem_surveyor_avengers_leader = { is_same_species = root } }
+                NOR = {
+                    is_materialist = yes
+                    is_spiritualist = yes
+                }
+            }
+        }
+    }
+
+    # Materialists question his conversion
+    option = {
+        name = mem_surveyor.243.3.b
+        is_dialog_only = yes
+        response_text = mem_surveyor.243.3.b.response
+
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_3 }
+            event_target:mem_surveyor_avengers_leader = { is_same_species = root } 
+            OR = {
+                has_ethic = ethic_fanatic_materialist
+                has_ethic = ethic_materialist
+            }
+        }
+    }
+
+    # Spiritualist accuse him of heresy
+    option = {
+        name = mem_surveyor.243.3.c
+        is_dialog_only = yes
+        response_text = mem_surveyor.243.3.c.response
+
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_3 }
+            event_target:mem_surveyor_avengers_leader = { is_same_species = root } 
+            OR = {
+                has_ethic = ethic_fanatic_spiritualist
+                has_ethic = ethic_spiritualist
+            }
+        }
+    }
+
+    option = {
+        name = MEM_SURVEYOR_EXIT
+        default_hide_option = yes
+        remove_country_flag = mem_surveyoer_avengers_diplomacy
+    }
+
+    option = {
+        name = mem_surveyor.242.purifier
+        default_hide_option = yes
+        remove_country_flag = mem_surveyoer_avengers_diplomacy
         exclusive_trigger = {
             OR = {
                 has_valid_civic = civic_fanatic_purifiers
