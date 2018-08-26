@@ -433,7 +433,7 @@ country_event = {
     trigger = {
         is_country_type = mem_surveyor_country_green
         FROMFROM = {
-            has_ship_flag = mem_surveyoer_probe_ship
+            has_ship_flag = mem_surveyor_probe_ship
         }
     }
 
@@ -2314,7 +2314,7 @@ country_event = {
             value > 150
         }
         any_owned_ship = {
-            has_ship_flag = mem_surveyoer_probe_ship
+            has_ship_flag = mem_surveyor_probe_ship
         }
     }
 
@@ -2386,7 +2386,7 @@ country_event = {
 
     trigger = {
         any_owned_ship = {
-            has_ship_flag = mem_surveyoer_probe_ship
+            has_ship_flag = mem_surveyor_probe_ship
         }
         has_global_flag = mem_surveyor_probe_took_a_planet
     }
@@ -2462,7 +2462,7 @@ country_event = {
         }
         random_owned_ship = {
             limit = {
-                has_ship_flag = mem_surveyoer_probe_ship
+                has_ship_flag = mem_surveyor_probe_ship
             }
             while = {
                 count = @attrition_yearly_increase
@@ -2485,7 +2485,7 @@ country_event = {
     trigger = {
         is_country_type = mem_surveyor_country_red
         FROMFROM = {
-            has_ship_flag = mem_surveyoer_probe_ship
+            has_ship_flag = mem_surveyor_probe_ship
         }
     }
 
@@ -2616,7 +2616,7 @@ country_event = {
     #         is_country_type = mem_surveyor_country_red
     #     }
     #     FROMFROMFROM = {
-    #         has_ship_flag = mem_surveyoer_probe_ship
+    #         has_ship_flag = mem_surveyor_probe_ship
     #     }
     # }
 
@@ -2993,13 +2993,13 @@ country_event = {
                 is_ship_size = mem_surveyor_primary
             }
         }
-        NOT = { has_country_flag = mem_surveyoer_avengers_diplomacy }
+        NOT = { has_country_flag = mem_surveyor_avengers_diplomacy }
         exists = event_target:mem_surveyor_avengers_leader
-        NOT = { has_country_flag = mem_surveyoer_attacked_avengers }
+        NOT = { has_country_flag = mem_surveyor_attacked_avengers }
     }
 
     immediate = {
-        set_country_flag = mem_surveyoer_avengers_diplomacy
+        set_country_flag = mem_surveyor_avengers_diplomacy
         random_system = {
             limit = { has_star_flag = mem_surveyor_next_target }
             save_event_target_as = next_target
@@ -3106,13 +3106,13 @@ country_event = {
     option = {
         name = MEM_SURVEYOR_EXIT
         default_hide_option = yes
-        remove_country_flag = mem_surveyoer_avengers_diplomacy
+        remove_country_flag = mem_surveyor_avengers_diplomacy
     }
 
     option = {
         name = mem_surveyor.242.purifier
         default_hide_option = yes
-        remove_country_flag = mem_surveyoer_avengers_diplomacy
+        remove_country_flag = mem_surveyor_avengers_diplomacy
         exclusive_trigger = {
             OR = {
                 has_valid_civic = civic_fanatic_purifiers
@@ -3330,7 +3330,7 @@ country_event = {
     }
 
     immediate = {
-        set_country_flag = mem_surveyoer_attacked_avengers
+        set_country_flag = mem_surveyor_attacked_avengers
     }
 }
 
@@ -3341,6 +3341,7 @@ country_event = {
     desc = mem_surveyor.252.desc
 
     is_triggered_only = yes
+    picture = GFX_evt_unknown_ships
 
     trigger = {
         FROM = { is_country_type = mem_surveyor_avengers }
@@ -3352,9 +3353,9 @@ country_event = {
                 }
             }
             exists = event_target:mem_surveyor_avengers_leader
-            NOT = { has_country_flag = mem_surveyoer_attacked_avengers }
+            NOT = { has_country_flag = mem_surveyor_attacked_avengers }
         }
-        NOT = { has_country_flag = mem_surveyoer_avengers_diplomacy }
+        NOT = { has_country_flag = mem_surveyor_avengers_diplomacy }
     }
 
     option = {
@@ -3476,5 +3477,88 @@ country_event = {
         hidden_effect = {
             country_event = { id = mem_surveyor.242 }
         }
+    }
+}
+
+# Curators pop up offering data
+country_event = {
+    id = mem_surveyor.260
+    title = TRANSMISSION
+    desc = mem_surveyor.260.desc
+
+	diplomatic = yes
+	custom_gui = "enclave_curator_window"
+
+	picture_event_data = {
+		portrait = event_target:curators
+		room = enclave_curator_room
+	}
+
+    trigger = {
+        NOT = { has_country_flag = mem_surveyor_curator_offer }
+        any_country = {
+            is_country_type = mem_surveyor_country_red
+            NOT = { has_country_flag = mem_surveyor_already_attritioned }
+        }
+        any_country = {
+            is_country_type = enclave
+            has_country_flag = curator_enclave_country
+            has_established_contact = root
+        }
+        NOR = {
+            has_country_flag = attacked_curators 
+            has_valid_civic = civic_fanatic_purifiers
+            has_valid_civic = civic_hive_devouring_swarm
+            has_valid_civic = civic_machine_assimilator
+        }
+        energy >= 3500 # Will offer only if you can spare
+    }
+
+    mean_time_to_happen = {
+        years = 5
+    }
+
+    immediate = {
+        # set_country_flag = curator_enclave_diplomacy_engaged # Don't think it's needed, although if it pops up during another conversation - might be weird
+        set_country_flag = mem_surveyor_curator_offer
+        random_country = {
+            limit = {
+                is_country_type = enclave
+			    has_country_flag = curator_enclave_country
+                has_established_contact = root
+            }
+            save_event_target_as = curators
+        }
+	}
+
+    option = {
+        name = mem_surveyor.260.a
+        custom_gui = "enclave_curator_option"
+
+        allow = {
+            energy >= 2500
+        }
+
+        ai_chance = {
+            factor = 3
+        }
+
+        add_modifier = {
+            modifier = mem_surveyor_how_to_kill
+            days = -1
+        }
+    }
+
+    option = {
+        name = mem_surveyor.260.b
+        custom_gui = "enclave_curator_option"
+        is_dialog_only = yes
+        response_text = mem_surveyor.260.b.response
+    }
+
+    option = {
+        name = mem_surveyor.260.c
+        custom_gui = "enclave_curator_option"
+        default_hide_option = yes
     }
 }
