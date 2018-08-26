@@ -2495,6 +2495,9 @@ country_event = {
             save_event_target_as = probe_killers 
             country_event = { id = mem_surveyor.233 }
         }
+        FROMFROM.fleet = {
+            clear_fleet_actions = this
+        }
         IF = {
             limit = {
                 NOT = { has_country_flag = mem_surveyor_already_attritioned }
@@ -2516,6 +2519,12 @@ country_event = {
                 }
                 country_event = { id = mem_surveyor.232 } # Tell everyone probe is dead, but no mention of attrition
             }
+        }
+        random_country = {
+            limit = {
+                is_country_type = mem_surveyor_avengers
+            }
+            country_event = { id = mem_surveyor.248 days = 7 }
         }
     }
 }
@@ -2704,6 +2713,8 @@ country_event = {
                     skill = 3
                     effect = {
                         save_global_event_target_as = mem_surveyor_avengers_leader
+                        set_age = 21
+                        set_leader_flag = mem_surveyor_avengers_leader
                     }
                 }
                 save_event_target_as = avengers_country
@@ -2975,9 +2986,15 @@ country_event = {
 
     trigger = {
         FROM = { is_country_type = mem_surveyor_avengers }
-        any_country = { is_country_type = mem_surveyor_country_red }
+        any_country = { 
+            is_country_type = mem_surveyor_country_red 
+            any_owned_ship = {
+                is_ship_size = mem_surveyor_primary
+            }
+        }
         NOT = { has_country_flag = mem_surveyoer_avengers_diplomacy }
         exists = event_target:mem_surveyor_avengers_leader
+        NOT = { has_country_flag = mem_surveyoer_attacked_avengers }
     }
 
     immediate = {
@@ -3105,3 +3122,286 @@ country_event = {
         }
     }
 }
+
+# The avengers fleet is defeated
+country_event = {
+    id = mem_surveyor.244
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        is_country_type = mem_surveyor_avengers
+    }
+
+    immediate = {
+        log = "[From.GetName] killed avengers."
+        IF = {
+            limit = {
+                FROM = { NOT = { is_country_type = mem_surveyor_country_red } }
+            }
+            every_playable_country = {
+                limit = {
+                    is_ai = no
+                    has_established_contact = root
+                    NOT = { is_same_value = FROM }
+                }
+                country_event = { id = mem_surveyor.245 }
+            }
+        }
+        ELSE_IF = {
+            limit = {
+                FROMFROMFROM = {
+                    NOT = { has_fleet_flag = mem_surveyor_fleet }
+                }
+            }
+            every_playable_country = {
+                limit = {
+                    is_ai = no
+                    has_established_contact = root
+                }
+                country_event = { id = mem_surveyor.246 }
+            }
+        }
+        ELSE_IF = {
+            limit = {
+                FROMFROMFROM = {
+                    any_owned_ship = {
+                        is_ship_size = mem_surveyor_primary
+                    }
+                }
+            }
+            while = {
+                count = 30
+                limit = {
+                    FROM = {
+                        check_variable = {
+                            which = mem_surveyor_attriction_counter
+                            value < 149
+                        }
+                    }
+                }
+                FROMFROM = {
+                    random_owned_ship = {
+                        limit = { is_ship_size = mem_surveyor_primary } #Is ship class
+                        add_modifier = { modifier = mem_surveyor_attrition days = -1 }
+                    }
+                }
+                FROM = {
+                    change_variable = {
+                        which = mem_surveyor_attriction_counter
+                        value = 1
+                    }
+                }
+            }
+            every_playable_country = {
+                limit = {
+                    is_ai = no
+                    has_established_contact = root
+                }
+                country_event = { id = mem_surveyor.247 }
+            }
+        }
+    }
+}
+
+# Inform player that avengers are killed by 3rd party
+country_event = {
+    id = mem_surveyor.245
+    title = mem_surveyor.245.name
+    desc = mem_surveyor.245.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_space_battle
+
+    option = {
+        name = mem_surveyor.245.a
+    }
+}
+
+# Inform player that avengers are killed by the Aux Probe Fleet
+country_event = {
+    id = mem_surveyor.246
+    title = mem_surveyor.246.name
+    desc = mem_surveyor.246.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_space_battle
+
+    option = {
+        name = mem_surveyor.246.a
+    }
+}
+
+# Inform player that avengers are killed by the probe itself
+country_event = {
+    id = mem_surveyor.247
+    title = mem_surveyor.247.name
+    desc = mem_surveyor.247.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_space_battle
+
+    option = {
+        name = mem_surveyor.247.a
+    }
+}
+
+# Disband avengers
+country_event = {
+    id = mem_surveyor.248
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        every_playable_country = {
+            limit = {
+                is_ai = no
+                has_established_contact = root
+            }
+            country_event = { id = mem_surveyor.249 }
+        }
+        destroy_country = yes
+    }
+}
+
+# Inform player that avengers disbanded
+country_event = {
+    id = mem_surveyor.249
+    title = mem_surveyor.249.name
+    desc = mem_surveyor.249.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_pirate_armada
+
+    option = {
+        name = OK
+    }
+}
+
+# Player destroyed avengers
+country_event = {
+    id = mem_surveyor.250
+    title = mem_surveyor.250.name
+    desc = mem_surveyor.250.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_space_battle
+
+    option = {
+        name = mem_surveyor.250.a
+
+        add_monthly_resource_mult = {
+			resource = minerals
+			value = @tier3materialreward
+			min = @tier3materialmin
+			max = @tier3materialmax
+        }
+        add_monthly_resource_mult = {
+			resource = energy
+			value = @tier3materialreward
+			min = @tier3materialmin
+			max = @tier3materialmax
+		}
+    }
+}
+
+# Player enters combat with the avengers
+country_event = {
+    id = mem_surveyor.251
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        FROM = {
+            is_country_type = mem_surveyor_avengers
+        }
+    }
+
+    immediate = {
+        set_country_flag = mem_surveyoer_attacked_avengers
+    }
+}
+
+# Unable to contact avengers
+country_event = {
+    id = mem_surveyor.252
+    title = mem_surveyor.252.name
+    desc = mem_surveyor.252.desc
+
+    is_triggered_only = yes
+
+    trigger = {
+        FROM = { is_country_type = mem_surveyor_avengers }
+        NAND = {
+            any_country = { 
+                is_country_type = mem_surveyor_country_red 
+                any_owned_ship = {
+                    is_ship_size = mem_surveyor_primary
+                }
+            }
+            exists = event_target:mem_surveyor_avengers_leader
+            NOT = { has_country_flag = mem_surveyoer_attacked_avengers }
+        }
+        NOT = { has_country_flag = mem_surveyoer_avengers_diplomacy }
+    }
+
+    option = {
+        name = OK
+    }
+}
+
+# Somehow, leader dies
+country_event = {
+    id = mem_surveyor.253
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        FROM = {
+            has_leader_flag = mem_surveyor_avengers_leader
+        }
+    }
+
+    immediate = {
+        country_event = { id = mem_surveyor.254 days = 5 }
+    }
+}
+
+# Disband fleet when leader dies
+country_event = {
+    id = mem_surveyor.254
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        every_playable_country = {
+            limit = {
+                is_ai = no
+                has_established_contact = root
+            }
+            country_event = { id = mem_surveyor.255 }
+        }
+        destroy_country = yes
+    }
+}
+
+# Inform player that avengers disbanded after leader's death
+country_event = {
+    id = mem_surveyor.255
+    title = mem_surveyor.255.name
+    desc = mem_surveyor.255.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_space_funeral
+
+    option = {
+        name = OK
+    }
+}
+
