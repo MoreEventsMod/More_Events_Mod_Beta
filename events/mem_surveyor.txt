@@ -3665,7 +3665,7 @@ country_event = {
                 50 = {}
                 5000 = { # Change weights for something better
                     log = "Triggered Titanic Effort for [This.GetName]"
-                    country_event = { id = mem_surveyor.262 }
+                    country_event = { id = mem_surveyor.262 days = 360 }
                 }
             }
         }
@@ -3680,93 +3680,143 @@ country_event = {
 
     trigger = {
         NOT = { has_global_flag = mem_surveyor_titanic_effort }
+        any_country = {
+            is_country_type = mem_surveyor_country_red
+            NOT = { has_country_flag = mem_surveyor_out_of_comission }
+        }
     }
 
     immediate = {
         set_global_flag = mem_surveyor_titanic_effort
+        random_owned_ship = {
+            save_event_target_as = spawn_site
+        }
+        random_country = {
+            limit = {
+                OR = {
+                    is_country_type = default
+                    is_country_type = fallen_empire
+                    is_country_type = enclave
+                    is_country_type = dormant_marauders
+                }
+                NOT = {
+                    has_ethic = ethic_gestalt_consciousness
+                }
+            }
+            save_event_target_as = captain_origin
+        }
+        create_country = {
+            name = "Titanic Effort"
+            species = event_target:captain_origin
+            type = mem_surveyor_titanic_effort
+            flag = {
+                icon = {
+                    category = ornate
+                    file = flag_ornate_21.dds
+                }
+                background = {
+                    category = backgrounds
+                    file = triangle_split.dds
+                }
+                colors = {
+                    "blue"
+                    "orange"
+                    "null"
+                    "null"
+                }
+            }
+            effect = {
+                save_event_target_as = titanic_country
+                randomize_flag_symbol = "ornate"
+                give_technology = { tech = tech_mass_drivers_5 }
+                give_technology = { tech = tech_lasers_5 }
+                give_technology = { tech = tech_titans }
+                give_technology = { tech = tech_shields_4 }
+                give_technology = { tech = tech_ship_armor_4 }
+                give_technology = { tech = tech_regenerative_hull_tissue }
+                give_technology = { tech = tech_zero_point_power }
+                give_technology = { tech = tech_thrusters_4 }
+                give_technology = { tech = tech_sensors_3 }
+                give_technology = { tech = tech_combat_computers_3 }
+                give_technology = { tech = tech_hyper_drive_3 }
+
+                
+
+                create_leader = {
+                    type = admiral
+                    skill = 5
+                    effect = {
+                        add_trait = leader_trait_mem_surveyor_mercenary
+                        set_leader_flag = mem_surveyor_mercenary_leader
+                        save_global_event_target_as = mem_surveyor_mercenary_leader
+                    }
+                }
+            }
+        }
+        create_fleet = {
+            name = "Titan Fleet"
+            settings = {
+                spawn_debris = no
+            }
+            effect = {
+                set_owner = event_target:titanic_country
+                set_location = event_target:spawn_site
+                create_ship = {
+                    name = ""
+                    prefix = no
+                    random_existing_design = titan
+                    effect = {
+                        IF = {
+                            limit = {
+                                root = { has_country_flag = trader_enclave_country_1 }
+                            }
+                            set_name = "XCS Princess Xuri"
+                        }
+                        ELSE_IF = {
+                            limit = {
+                                root = { has_country_flag = trader_enclave_country_2 }
+                            }
+                            set_name = "RCES Spice Marine"
+                        }
+                        ELSE = {
+                            set_name = "MMS Crystal Clear"
+                        }
+                        save_event_target_as = the_ship
+                    }
+                }
+                set_leader = event_target:mem_surveyor_mercenary_leader
+                set_name = event_target:the_ship
+                auto_follow_fleet = { 
+					target = event_target:mem_surveyor_fleet
+					attack_fleet = yes 
+				}
+            }
+        }
+        event_target:titanic_country = {
+            set_name = event_target:the_ship
+        }
+        every_playable_country = {
+            limit = {
+                is_ai = no
+                has_communications = root
+            }
+            country_event = { id = mem_surveyor.263 }
+        }
     }
 }
 
-# # Checks if berserker is stuck - if so, it will jump at the cost of attrition
-# country_event = {
-#     id = mem_surveyor.270
-#     hide_window = yes
+# Player is notified about titanic effort
+country_event = {
+    id = mem_surveyor.263
+    title = mem_surveyor.263.name
+    desc = mem_surveyor.263.desc
 
-#     mean_time_to_happen = {
-#         months = 3
-#     }
+    is_triggered_only = yes
 
-#     trigger = {
-#         is_country_type = mem_surveyor_country_red
-#         NOT = { has_country_flag = mem_surveyor_out_of_comission }
-#         any_owned_fleet = {
-#             has_fleet_flag = mem_surveyor_fleet
-#             is_fleet_idle = yes
-#             any_owned_ship = {
-#                 is_ship_size = mem_surveyor_primary
-#             }
-#         }
-#     }
+    picture = GFX_evt_automated_dreadnought
+    location = event_target:the_ship
 
-#     immediate = {
-#         every_system = {
-#             remove_star_flag = mem_surveyor_next_target
-#         }
-#         random_system = {
-#             limit = {
-#                 NAND = {
-#                     exists = owner
-#                     owner = { is_country_type = mem_surveyor_country_red }
-#                 }
-#             }
-#             save_event_target_as = next_target
-#         }
-#         while = {
-#             count = 10
-#             limit = {
-#                 check_variable = {
-#                     which = mem_surveyor_attriction_counter
-#                     value < 149
-#                 }
-#             }
-#             change_variable = {
-#                 which = mem_surveyor_attriction_counter
-#                 value = 1
-#             }
-#             random_owned_ship = {
-#                 limit = { is_ship_size = mem_surveyor_primary } #Is ship class
-#                 add_modifier = { modifier = mem_surveyor_attrition days = -1 }
-#             }
-#         }
-#         random_owned_fleet = {
-#             limit = {
-#                 has_fleet_flag = mem_surveyor_fleet
-#             }
-#             set_location = event_target:next_target.star
-#             clear_fleet_actions = this
-#             fleet_event = { id = mem_surveyor.210 }
-#         }
-#         event_target:next_target = {
-#             IF = {
-#                 limit = { exists = space_owner }
-#                 space_owner = { country_event = { id = mem_surveyor.271 } }
-#             }
-#         }
-#     }
-# }
-
-# # Player is notified that a probe jumped into his system
-# country_event = {
-#     id = mem_surveyor.271
-#     title = mem_surveyor.271.name
-#     desc = mem_surveyor.271.desc
-
-#     is_triggered_only = yes
-
-#     picture = GFX_evt_unknown_ships
-#     location = event_target:next_target
-
-#     option = {
-#         name = mem_surveyor.271.a
-#     }
-# }
+    option = {
+        name = mem_surveyor.263
+    }
+}
