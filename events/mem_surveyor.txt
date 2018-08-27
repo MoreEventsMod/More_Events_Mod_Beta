@@ -3634,3 +3634,87 @@ country_event = {
         default_hide_option = yes
     }
 }
+
+# Checks if berserker is stuck - if so, it will jump at the cost of attrition
+country_event = {
+    id = mem_surveyor.270
+    hide_window = yes
+
+    mean_time_to_happen = {
+        months = 3
+    }
+
+    trigger = {
+        is_country_type = mem_surveyor_country_red
+        NOT = { has_country_flag = mem_surveyor_out_of_comission }
+        any_owned_fleet = {
+            has_fleet_flag = mem_surveyor_fleet
+            is_fleet_idle = yes
+            any_owned_ship = {
+                is_ship_size = mem_surveyor_primary
+            }
+        }
+    }
+
+    immediate = {
+        every_system = {
+            remove_star_flag = mem_surveyor_next_target
+        }
+        random_system = {
+            limit = {
+                NAND = {
+                    exists = owner
+                    owner = { is_country_type = mem_surveyor_country_red }
+                }
+            }
+            save_event_target_as = next_target
+        }
+        while = {
+            count = 10
+            limit = {
+                check_variable = {
+                    which = mem_surveyor_attriction_counter
+                    value < 149
+                }
+            }
+            change_variable = {
+                which = mem_surveyor_attriction_counter
+                value = 1
+            }
+            random_owned_ship = {
+                limit = { is_ship_size = mem_surveyor_primary } #Is ship class
+                add_modifier = { modifier = mem_surveyor_attrition days = -1 }
+            }
+        }
+        random_owned_fleet = {
+            limit = {
+                has_fleet_flag = mem_surveyor_fleet
+            }
+            set_location = event_target:next_target.star
+            clear_fleet_actions = this
+            fleet_event = { id = mem_surveyor.210 }
+        }
+        event_target:next_target = {
+            IF = {
+                limit = { exists = space_owner }
+                space_owner = { country_event = { id = mem_surveyor.271 } }
+            }
+        }
+    }
+}
+
+# Player is notified that a probe jumped into his system
+country_event = {
+    id = mem_surveyor.271
+    title = mem_surveyor.271.name
+    desc = mem_surveyor.271.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_unknown_ships
+    location = event_target:next_target
+
+    option = {
+        name = mem_surveyor.271.a
+    }
+}
