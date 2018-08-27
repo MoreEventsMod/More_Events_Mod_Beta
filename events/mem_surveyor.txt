@@ -2561,6 +2561,12 @@ country_event = {
             }
             country_event = { id = mem_surveyor.248 days = 7 }
         }
+        random_country = {
+            limit = {
+                is_country_type = mem_surveyor_titanic_effort
+            }
+            country_event = { id = mem_surveyor.269 days = 7 }
+        }
     }
 }
 
@@ -3846,7 +3852,7 @@ country_event = {
         }
     }
     desc = {
-        text = mem_surveyor.264.desc.3
+        text = mem_surveyor.264.desc.4
         trigger = {
             NOT = { has_country_flag = mem_surveyor_terrorize_this_country }
             NOR = {
@@ -3895,5 +3901,274 @@ country_event = {
             }
             NOT = { event_target:mem_surveyor_avengers_leader = { is_same_species = root } }
         }
+    }
+}
+
+# Mercs are killed
+country_event = {
+    id = mem_surveyor.265
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        is_country_type = mem_surveyor_titanic_effort
+    }
+
+    immediate = {
+        log = "[From.GetName] killed mercs."
+        FROM = {
+            save_event_target_as = mercs_killers
+        }
+        FROMFROM.solar_system = {
+            save_event_target_as = battle_system
+        }
+        IF = {
+            limit = {
+                FROM = { NOT = { is_country_type = mem_surveyor_country_red } }
+            }
+            every_playable_country = {
+                limit = {
+                    is_ai = no
+                    has_communications = root
+                    NOT = { is_same_value = FROM }
+                }
+                country_event = { id = mem_surveyor.266 }
+            }
+        }
+        ELSE_IF = {
+            limit = {
+                FROMFROMFROM = {
+                    NOT = { has_fleet_flag = mem_surveyor_fleet }
+                }
+            }
+            every_playable_country = {
+                limit = {
+                    is_ai = no
+                    has_communications = root
+                }
+                country_event = { id = mem_surveyor.267 }
+            }
+        }
+        ELSE_IF = {
+            limit = {
+                FROMFROMFROM = {
+                    any_owned_ship = {
+                        is_ship_size = mem_surveyor_primary
+                    }
+                }
+            }
+            while = {
+                count = 30
+                limit = {
+                    FROM = {
+                        check_variable = {
+                            which = mem_surveyor_attriction_counter
+                            value < 149
+                        }
+                    }
+                }
+                FROMFROM = {
+                    random_owned_ship = {
+                        limit = { is_ship_size = mem_surveyor_primary } #Is ship class
+                        add_modifier = { modifier = mem_surveyor_attrition days = -1 }
+                    }
+                }
+                FROM = {
+                    change_variable = {
+                        which = mem_surveyor_attriction_counter
+                        value = 1
+                    }
+                }
+            }
+            every_playable_country = {
+                limit = {
+                    is_ai = no
+                    has_communications = root
+                }
+                country_event = { id = mem_surveyor.268 }
+            }
+        }
+    }
+}
+
+# Inform player that mercs are killed by 3rd party
+country_event = {
+    id = mem_surveyor.266
+    title = mem_surveyor.266.name
+    desc = mem_surveyor.266.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_space_battle
+
+    option = {
+        name = mem_surveyor.266.a
+    }
+}
+
+# Inform player that mercs are killed by the Aux Probe Fleet
+country_event = {
+    id = mem_surveyor.267
+    title = mem_surveyor.267.name
+    desc = mem_surveyor.267.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_space_battle
+
+    option = {
+        name = mem_surveyor.267.a
+    }
+}
+
+# Inform player that mercs are killed by the probe itself
+country_event = {
+    id = mem_surveyor.268
+    title = mem_surveyor.268.name
+    desc = mem_surveyor.268.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_space_battle
+
+    option = {
+        name = mem_surveyor.268.a
+    }
+}
+
+# Disband titan
+country_event = {
+    id = mem_surveyor.269
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        every_playable_country = {
+            limit = {
+                is_ai = no
+                has_communications = root
+            }
+            country_event = { id = mem_surveyor.270 }
+        }
+    }
+}
+
+# Player is notified titan was disbanded
+country_event = {
+    id = mem_surveyor.270
+    title = mem_surveyor.270.name
+    desc = mem_surveyor.270.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_automated_dreadnought
+
+    option = {
+        name = mem_surveyor.270.a
+    }
+}
+
+# Player destroyed mercs
+country_event = {
+    id = mem_surveyor.271
+    title = mem_surveyor.271.name
+    desc = mem_surveyor.271.desc
+
+    is_triggered_only = yes
+
+    trigger = {
+        FROM = {
+            is_country_type = mem_surveyor_titanic_effort
+        }
+    }
+
+    picture = GFX_evt_mem_space_battle
+
+    option = {
+        name = mem_surveyor.271.a
+
+        add_monthly_resource_mult = {
+			resource = minerals
+			value = @tier3materialreward
+			min = @tier3materialmin
+			max = @tier3materialmax
+        }
+        add_monthly_resource_mult = {
+			resource = energy
+			value = @tier3materialreward
+			min = @tier3materialmin
+			max = @tier3materialmax
+		}
+    }
+}
+
+# Quietly replace titan's captain if he dies
+country_event = {
+    id = mem_surveyor.272
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        FROM = {
+            has_leader_flag = mem_surveyor_mercenary_leader
+        }
+    }
+
+    immediate = {
+        random_country = {
+            limit = {
+                OR = {
+                    is_country_type = default
+                    is_country_type = fallen_empire
+                    is_country_type = enclave
+                    is_country_type = dormant_marauders
+                    is_country_type = mem_surveyor_titanic_effort
+                }
+                NOT = {
+                    has_ethic = ethic_gestalt_consciousness
+                }
+            }
+            save_event_target_as = captain_origin
+        }
+        create_leader = {
+            type = admiral
+            species = event_target:captain_origin
+            skill = 5
+            effect = {
+                add_trait = leader_trait_mem_surveyor_mercenary
+                set_leader_flag = mem_surveyor_mercenary_leader
+                save_global_event_target_as = mem_surveyor_mercenary_leader
+            }
+        }
+        random_owned_fleet = {
+            set_leader = last_created_leader
+        }
+    }
+}
+
+# Can't communicate with them
+
+country_event = {
+    id = mem_surveyor.273
+    title = mem_surveyor.273.name
+    desc = mem_surveyor.273.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_automated_dreadnought
+
+    trigger = {
+        NOT = { has_country_flag = mem_surveyor_mercenary_diplomacy }
+        FROM = { is_country_type = mem_surveyor_titanic_effort }
+        NAND = {
+            exists = event_target:mem_surveyor_mercenary_leader
+            any_country = {
+                is_country_type = mem_surveyor_country_red
+            }
+        }
+    }
+
+    option = {
+        name = OK
     }
 }
