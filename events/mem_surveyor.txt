@@ -3268,7 +3268,7 @@ country_event = {
                         }
                     }
                 }
-                FROMFROM = {
+                FROMFROMFROM = {
                     random_owned_ship = {
                         limit = { is_ship_size = mem_surveyor_primary } #Is ship class
                         add_modifier = { modifier = mem_surveyor_attrition days = -1 }
@@ -3694,6 +3694,22 @@ country_event = {
 
     immediate = {
         set_global_flag = mem_surveyor_titanic_effort
+        switch = {
+            trigger = has_country_flag
+            trader_enclave_country_1 = {
+                log = "Xura Sponsored Titan"
+                set_global_flag = mem_surveyor_xura_sponsored_titan
+            }
+            trader_enclave_country_2 = {
+                log = "Rigga Sponsored Titan"
+                set_global_flag = mem_surveyor_riggan_sponsored_titan
+            }
+            trader_enclave_country_3 = {
+                log = "Muutra Sponsored Titan"
+                set_global_flag = mem_surveyor_muutra_sponsored_titan
+            }
+
+        }
         random_owned_ship = {
             save_event_target_as = spawn_site
         }
@@ -3778,13 +3794,13 @@ country_event = {
                         }
                         IF = {
                             limit = {
-                                root = { has_country_flag = trader_enclave_country_1 }
+                                has_global_flag = mem_surveyor_xura_sponsored_titan
                             }
                             set_name = "XCS Princess Xuri"
                         }
                         ELSE_IF = {
                             limit = {
-                                root = { has_country_flag = trader_enclave_country_2 }
+                                has_global_flag = mem_surveyor_riggan_sponsored_titan
                             }
                             set_name = "RCES Spice Marine"
                         }
@@ -3807,7 +3823,6 @@ country_event = {
         }
         every_playable_country = {
             limit = {
-                is_ai = no
                 has_communications = root
             }
             country_event = { id = mem_surveyor.263 }
@@ -3825,6 +3840,10 @@ country_event = {
 
     picture = GFX_evt_automated_dreadnought
     location = event_target:the_ship
+
+    immediate = {
+        establish_communications_no_message = event_target:titanic_country
+    }
 
     option = {
         name = mem_surveyor.263
@@ -3885,18 +3904,26 @@ country_event = {
 
     immediate = {
         set_country_flag = mem_surveyor_mercenary_diplomacy
+        random_system = {
+            limit = { has_star_flag = mem_surveyor_next_target }
+            save_event_target_as = next_target
+        }
+        random_planet = {
+            limit = { has_planet_flag = mem_surveyor_next_target_planet }
+            save_event_target_as = next_target_planet
+        }
     }
 
     option = {
         name = MEM_SURVEYOR_EXIT
         default_hide_option = yes
-        remove_country_flag = mem_surveyor_avengers_diplomacy
+        remove_country_flag = mem_surveyor_mercenary_diplomacy
     }
 
     option = {
         name = mem_surveyor.242.purifier
         default_hide_option = yes
-        remove_country_flag = mem_surveyor_avengers_diplomacy
+        remove_country_flag = mem_surveyor_mercenary_diplomacy
         exclusive_trigger = {
             OR = {
                 has_valid_civic = civic_fanatic_purifiers
@@ -3971,7 +3998,7 @@ country_event = {
                         }
                     }
                 }
-                FROMFROM = {
+                FROMFROMFROM = {
                     random_owned_ship = {
                         limit = { is_ship_size = mem_surveyor_primary } #Is ship class
                         add_modifier = { modifier = mem_surveyor_attrition days = -1 }
