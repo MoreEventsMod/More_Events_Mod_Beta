@@ -1720,6 +1720,10 @@ fleet_event = {
 
     immediate = {
         log = ".210 loop"
+        IF = {
+            limit = { has_fleet_flag = mem_surveyor_day_of_the_order }
+            log = "Recent order flag is still present"
+        }
         solar_system = {
             remove_star_flag = mem_surveyor_next_target
             IF = {
@@ -3637,6 +3641,49 @@ country_event = {
         name = mem_surveyor.260.c
         custom_gui = "enclave_curator_option"
         default_hide_option = yes
+    }
+}
+
+# When enclave is destroyed by the probe, trigger Titanic Effort
+country_event = {
+    id = mem_surveyor.261
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        is_country_type = enclave
+        FROM = { is_country_type = mem_surveyor_country_red }
+    }
+
+    immediate = {
+        random_country = {
+            limit = {
+                has_country_flag = trader_enclave_country
+                NOT = { is_same_value = root }
+            }
+            random_list = {
+                50 = {}
+                5000 = { # Change weights for something better
+                    log = "Triggered Titanic Effort for [This.GetName]"
+                    country_event = { id = mem_surveyor.262 }
+                }
+            }
+        }
+    }
+}
+
+# Titanic Effort
+country_event = {
+    id = mem_surveyor.262
+    is_triggered_only = yes
+    hide_window = yes
+
+    trigger = {
+        NOT = { has_global_flag = mem_surveyor_titanic_effort }
+    }
+
+    immediate = {
+        set_global_flag = mem_surveyor_titanic_effort
     }
 }
 
