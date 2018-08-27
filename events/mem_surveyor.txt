@@ -1772,6 +1772,7 @@ fleet_event = {
                                     which = mem_surveyor_attriction_counter
                                     value = 1
                                 }
+                                log = "Attrition: [This.mem_surveyor_attriction_counter]"
                             }
                         }                        
                         create_starbase = {
@@ -1888,6 +1889,24 @@ fleet_event = {
         }
         set_timed_fleet_flag = { flag = mem_surveyor_day_of_the_order days = 2 } # If fleet receives events in rapid succession, it probably can't path. Make it so it can.
         queue_actions = {
+            repeat = { # Probe shouldn't leave system if there's unconqered planet - I don't fully trust this code, but it should keep it standing.
+                while = {
+                    id = mem_surveyor.berserker.trigger.2.0
+                    root = {
+                        exists = solar_system
+                        solar_system = {
+                            any_planet = {
+                                exists = owner
+                                owner = {
+                                    NOT = { is_country_type = mem_surveyor_country_red }
+                                }
+                                has_ground_combat = yes
+                            }
+                        }
+                    }
+                }
+                wait = { duration = 10 }
+            }
             find_closest_system = {
                 trigger = {
                     id = mem_surveyor.berserker.trigger.2.1
@@ -1928,6 +1947,7 @@ planet_event = {
                     which = mem_surveyor_attriction_counter
                     value = 1
                 }
+                log = "Attrition: [This.mem_surveyor_attriction_counter]"
             }
         }
         
@@ -2495,6 +2515,7 @@ country_event = {
             which = mem_surveyor_attriction_counter
             value = @attrition_yearly_increase
         }
+        log = "Attrition: [This.mem_surveyor_attriction_counter]"
         random_owned_ship = {
             limit = {
                 has_ship_flag = mem_surveyor_probe_ship
@@ -3279,6 +3300,7 @@ country_event = {
                         which = mem_surveyor_attriction_counter
                         value = 1
                     }
+                    log = "Attrition: [This.mem_surveyor_attriction_counter]"
                 }
             }
             every_playable_country = {
@@ -4009,6 +4031,7 @@ country_event = {
                         which = mem_surveyor_attriction_counter
                         value = 1
                     }
+                    log = "Attrition: [This.mem_surveyor_attriction_counter]"
                 }
             }
             every_playable_country = {
