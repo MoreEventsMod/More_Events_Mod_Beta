@@ -6,6 +6,10 @@
 
 namespace = mem_lost_emperor
 
+#How much % of the empire ascends
+@mem_lost_emperor_ascension_percentage = 0.25
+
+
 ship_event = {
 	id = mem_lost_emperor.1
 	title = mem_lost_emperor.1.name
@@ -199,7 +203,7 @@ ship_event = {
 	immediate = {
 		solar_system.star = {
 			create_country = {
-				type = faction
+				type = mem_azran
 				name = "Azran"
 				effect = {
 					set_country_flag = mem_azran
@@ -622,74 +626,85 @@ country_event = {
 
 
 
-for the lost emperor:
+#Portion of empire ascends
 
-@mem_lost_emperor_ascension_percentage = 0.25
+country_event = {
+	id = mem_lost_emperor.999
 
-while = {
-	limit = {
-		any_owned_planet = {
-			num_pops > 7
-			NOT = {
-				has_planet_flag = mem_lost_emperor_planet_counted
+	is_triggered_only = yes
+
+	trigger = {
+		num_owned_planets > 1
+	}
+
+	immediate = {
+				
+		while = {
+			limit = {
+				any_owned_planet = {
+					num_pops > 7
+					NOT = {
+						has_planet_flag = mem_lost_emperor_planet_counted
+					}
+				}
+			}
+			random_owned_planet = {
+				limit = {
+					num_pops > 7
+					NOT = {
+						has_planet_flag = mem_lost_emperor_planet_counted
+					}
+				}
+				set_timed_planet_flag = {
+					flag = mem_lost_emperor_planet_counted
+					days = 3600
+				}
+			}
+			change_variable = {
+				which = mem_lost_emperor_planets_count
+				value = @mem_lost_emperor_ascension_percentage
 			}
 		}
-	}
-	random_owned_planet = {
-		limit = {
-			num_pops > 7
-			NOT = {
-				has_planet_flag = mem_lost_emperor_planet_counted
+		if = {
+			limit = {
+				check_variable = {
+					which = mem_lost_emperor_planets_count
+					value < 1
+				}
+			}
+			set_variable = {
+				which = mem_lost_emperor_planets_count
+				value = 1
 			}
 		}
-		set_timed_planet_flag = {
-			flag = mem_lost_emperor_planet_counted
-			days = 3600
+
+		capital_scope = {
+			effects = yes
 		}
-	}
-	change_variable = {
-		which = mem_lost_emperor_planets_count
-		value = @mem_lost_emperor_ascension_percentage
-	}
-}
-if = {
-	limit = {
-		check_variable = {
+		change_variable = {
 			which = mem_lost_emperor_planets_count
-			value < 1
+			value = -1
 		}
-	}
-	set_variable = {
-		which = mem_lost_emperor_planets_count
-		value = 1
-	}
-}
-
-capital_scope = {
-	effects = yes
-}
-change_variable = {
-	which = mem_lost_emperor_planets_count
-	value = -1
-}
-while = {
-	limit = {
-		check_variable = {
-			which = mem_lost_emperor_planets_count
-			value > 0.99
-		}
-	}
-	random_owned_planet = {
-		limit = {
-			num_pops > 7
-			NOT = {
-				has_planet_flag = mem_lost_emperor_planet_counted
+		while = {
+			limit = {
+				check_variable = {
+					which = mem_lost_emperor_planets_count
+					value > 0.99
+				}
+			}
+			random_owned_planet = {
+				limit = {
+					num_pops > 7
+					NOT = {
+						has_planet_flag = mem_lost_emperor_planet_counted
+					}
+				}
+				effects = yes
+			}
+			change_variable = {
+				which = mem_lost_emperor_planets_count
+				value = -1
 			}
 		}
-		effects = yes
-	}
-	change_variable = {
-		which = mem_lost_emperor_planets_count
-		value = -1
 	}
 }
