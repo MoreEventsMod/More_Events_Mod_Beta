@@ -79,7 +79,7 @@ fleet_event = {
                         space_owner = {
                             OR = {
                                 is_country_type = fallen_empire
-                                is_country_type = awakened_empire
+                                is_country_type = awakened_fallen_empire
                                 is_country_type = dormant_marauders
                                 is_country_type = awakened_marauders
                                 has_country_flag = mem_surveyor_attacked_surveyor
@@ -151,7 +151,7 @@ fleet_event = {
                                 space_owner = {
                                     OR = {
                                         is_country_type = fallen_empire
-                                        is_country_type = awakened_empire
+                                        is_country_type = awakened_fallen_empire
                                         is_country_type = dormant_marauders
                                         is_country_type = awakened_marauders
                                         has_country_flag = mem_surveyor_attacked_surveyor
@@ -235,6 +235,9 @@ country_event = {
 
     option = {
         name = INTERESTING
+        hidden_effect = {
+            country_event = { id = story.7 days = 2 }
+        }
     }
 }
 
@@ -257,6 +260,7 @@ country_event = {
     immediate = {
         set_country_flag = mem_surveyor_opened_comms
         establish_communications_no_message = FROM.owner
+        country_event = { id = mem_surveyor.303 days = 120 random = 180 }
     }
 
     option = {
@@ -464,6 +468,7 @@ country_event = {
         log = "Probe killed by [From.GetName]"
         FROM = { 
             save_event_target_as = probe_killers 
+            set_country_flag = mem_surveyor_probe_killers
             country_event = { id = mem_surveyor.10 }
         }
         every_playable_country = {
@@ -1559,6 +1564,7 @@ country_event = {
             remove_star_flag = mem_surveyor_next_target
         }
         set_country_type = mem_surveyor_country_red
+        set_global_flag = mem_surveyor_went_berserk
         set_name = "Berserker Probe"
         change_country_flag = {
             icon = {
@@ -2575,6 +2581,7 @@ country_event = {
         log = "Berserker Probe is killed by [From.GetName]"
         FROM = { 
             save_event_target_as = probe_killers 
+            set_country_flag = mem_surveyor_probe_killers
             country_event = { id = mem_surveyor.233 }
         }
         FROMFROM.fleet = {
@@ -4308,5 +4315,208 @@ country_event = {
 
     option = {
         name = OK
+    }
+}
+
+########################
+### ALKREE HOMEWORLD ###
+########################
+
+# Anomaly resolution
+ship_event = {
+    id = mem_surveyor.300
+    title = mem_surveyor.300.name
+    desc = mem_surveyor.300.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_archaeological_dig
+    location = FROM
+
+    immediate = {
+        FROM = {
+            add_modifier = {
+                modifier = mem_surveyor_alkree_homeworld
+                days = -1
+            }
+            orbital_deposit_tile = {
+                set_deposit = d_enormous1_society_deposit
+                add_deposit = d_immense_physics_deposit
+                add_deposit = d_immense_engineering_deposit
+            }
+        }
+    }
+
+    option = {
+        name = FASCINATING
+        custom_tooltip = mem_surveyor.300.tooltip
+        leader = {
+            add_experience = 200
+            IF = {
+                limit = {
+                    NOT = { has_trait = leader_trait_meticulous }
+                }
+                add_trait = leader_trait_meticulous
+            }
+        }
+    }
+}
+
+# Bounce off planet to give player valuable info
+planet_event = {
+    id = mem_surveyor.301
+    hide_window = yes
+    
+    mean_time_to_happen = {
+        years = 10
+    }
+
+    trigger = {
+        exists = solar_system.space_owner
+        has_research_station = yes
+        has_modifier = mem_surveyor_alkree_homeworld
+        solar_system.space_owner = {
+            NOT = { has_country_flag = mem_surveyor_studied_ruins }
+        }
+    }
+
+    immediate = {
+        solar_system.space_owner = {
+            set_country_flag = mem_surveyor_studied_ruins
+            country_event = { id = mem_surveyor.302 }
+        }
+    }
+}
+
+# Receive country event telling story
+country_event = {
+    id = mem_surveyor.302
+    title = mem_surveyor.302.name
+    desc = mem_surveyor.302.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_dead_city
+    location = FROM
+
+    option = {
+        name = FASCINATING
+        add_monthly_resource_mult = {
+            resource = society_research
+            value = @tier2researchreward
+            min = @tier2researchmin
+            max = @tier2researchmax
+        }
+    }
+
+    after = {
+        hidden_effect = {
+            country_event = { id = mem_surveyor.303 days = 120 random = 180 }
+        }
+    }
+}
+
+# Country cross-references surveyor with the ruins
+country_event = {
+    id = mem_surveyor.303
+    title = mem_surveyor.303.name
+    desc = mem_surveyor.303.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_dead_city
+    location = event_target:the_planet
+
+    trigger = {
+        has_country_flag = mem_surveyor_opened_comms
+        has_country_flag = mem_surveyor_studied_ruins
+        NOT = { has_country_flag = mem_surveyor_found_alkree_homeworld }
+        any_system = {
+            has_star_flag = mem_surveyor_home_system
+            any_planet = {
+                has_planet_flag = mem_surveyor_alkree_homeworld
+            }
+        }
+    }
+
+    immediate = {
+        set_country_flag = mem_surveyor_found_alkree_homeworld
+        random_planet = {
+            limit = {
+                has_planet_flag = mem_surveyor_alkree_homeworld
+            }
+            save_event_target_as = the_planet
+        }
+    }
+
+    after = {
+        add_monthly_resource_mult = {
+            resource = unity
+            value = @tier3unityreward
+            min = @tier3unitymin
+            max = @tier3unitymax
+        }
+        add_monthly_resource_mult = {
+            resource = society_research
+            value = @tier3researchreward
+            min = @tier3researchmin
+            max = @tier3researchmax
+        }
+    }
+
+    option = {
+        name = mem_surveyor.303.a
+        custom_tooltip = mem_surveyor.303.a.tooltip
+        trigger = {
+            NOT = { has_global_flag = mem_surveyor_went_berserk }
+            any_country = { is_country_type = mem_surveyor_country_green }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.303.b
+        trigger = {
+            NOR = { 
+                has_global_flag = mem_surveyor_went_berserk 
+                any_country = { is_country_type = mem_surveyor_country_green }
+                has_country_flag = mem_surveyor_probe_killers
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.303.c
+        trigger = {
+            NOT = { has_global_flag = mem_surveyor_went_berserk }
+            has_country_flag = mem_surveyor_probe_killers
+        }
+    }
+
+    option = {
+        name = mem_surveyor.303.d
+        custom_tooltip = mem_surveyor.303.d.tooltip
+        trigger = {
+            has_global_flag = mem_surveyor_went_berserk
+            any_country = { is_country_type = mem_surveyor_country_red }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.303.e
+        trigger = {
+            has_global_flag = mem_surveyor_went_berserk
+            NOR = {
+                any_country = { is_country_type = mem_surveyor_country_red }
+                has_country_flag = mem_surveyor_probe_killers
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.303.f
+        trigger = {
+            has_global_flag = mem_surveyor_went_berserk
+            has_country_flag = mem_surveyor_probe_killers
+        }
     }
 }
