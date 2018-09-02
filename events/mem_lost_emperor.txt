@@ -355,15 +355,18 @@ country_event = {
 			type = ruler
 			species = last_created
 			
+			skill = 10
+			
 			traits = {
 				trait = leader_trait_ruler_chosen
-				trait = leader_trait_ruler_psionic
+				trait = mem_leader_trait_ruler_ancient_cyborg
 				trait = leader_trait_ruler_erudite
 				trait = mem_leader_trait_ruler_knowledge_of_another_age
 				trait = mem_leader_trait_ruler_lunatic_neoch
 			}
 
 			effect = {
+				set_leader_flag = mem_neochadanus
 				save_event_target_as = mem_neochadanus
 			}
 		}
@@ -541,15 +544,34 @@ country_event = {
 		custom_tooltip = mem_lost_emperor.20.accept.tooltip
 
 		hidden_effect = {
-			effects = yes
+			set_leader = Neochadanus
+
+			set_country_flag = mem_emperor_is_neochadanus
+			set_timed_country_flag = {
+				flag = mem_emperor_is_neochadanus_fifty
+				years = 50
+			}
 		}
+		
 		if = {
 			limit = {
 				NOT = {
 					has_authority = auth_imperial
 				}
 			}
-			effects = yes
+			if = {
+				limit = {
+					NOR = {
+						has_ethic = ethic_authoritarian
+						has_ethic = ethic_fanatic_authoritarian
+					}
+				}
+				shift_ethic = ethic_authoritarian
+			}
+
+			change_government = {
+				authority = auth_imperial
+			}
 		}
 
 		custom_tooltip = mem_lost_emperor.20.accept.tooltip2
@@ -576,7 +598,24 @@ country_event = {
 		custom_tooltip = mem_lost_emperor.20.imprison.tooltip
 
 		hidden_effect = {
-			effects = yes
+			event_target:mem_azran_vanquisher_fleet = {
+				set_fleet_flag = mem_neochadanus_carrying_fleet
+
+				set_event_locked = yes
+
+				queue_actions = {
+					move_to = root.capital_scope
+
+					effect = {
+						id = mem_lost_emperor.action.1
+						remove_fleet_flag = mem_neochadanus_carrying_fleet
+						set_event_locked = no
+						root = {
+							country_event = { id = mem_lost_emperor.25 }
+						}
+					}
+				}
+			}
 		}
 		
 		response_text = mem_lost_emperor.20.imprison.response
@@ -585,10 +624,21 @@ country_event = {
 	option = {
 		name = mem_lost_emperor.20.dissemble
 
-		hidden_effect = {
-			effects = yes
+		random_list = {
+			2 = {
+				custom_tooltip = mem_lost_emperor.20.dissemble.tooltip.success
+				hidden_effect = {
+					country_event = { id = mem_lost_emperor.21 days = 1 }
+				}
+			}
+			1 = {
+				custom_tooltip = mem_lost_emperor.20.dissemble.tooltip.fail
+				hidden_effect = {
+					country_event = { id = mem_lost_emperor.22 days = 1 }
+				}
+			}
 		}
-		
+
 		response_text = mem_lost_emperor.20.dissemble.response
 	}
 	
@@ -615,16 +665,129 @@ country_event = {
 
 
 
+#Made it home
+country_event = {
+	id = mem_lost_emperor.25
+	title = mem_lost_emperor.25.name
+	desc = mem_lost_emperor.25.desc
+	picture = TODO
+
+	is_triggered_only = yes
+
+	option = {
+		name = EXCELLENT
+		add_modifier = {
+			modifier = mem_lost_emperor_fount_of_knowledge_modifier
+			days = -1
+		}
+	}
+}
+
+
+# A fleet has entered a system
+# Scope = Fleet
+# From = System
+fleet_event = {
+	id = mem_lost_emperor.30
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_fleet_flag = mem_neochadanus_carrying_fleet
+	}
+
+	immediate = {
+		random_list = {
+			35 = {
+				effects = yes
+			}
+			965 = { }
+		}
+	}
+}
 
 
 
 
+#50 years at least after you get Neochadanus
+country_event = {
+	id = mem_lost_emperor.900
+	title = mem_lost_emperor.900.name
+	desc = mem_lost_emperor.900.desc
+	
+	diplomatic = yes
 
+	picture_event_data = {
+		room = root.ruler
+		portrait = root		
+		planet_background = root
+		graphical_culture = root
+		city_level = root
+	}
 
+	mean_time_to_happen = {
+		years = 10
+	}
 
+	trigger = {
+		has_country_flag = mem_emperor_is_neochadanus
+		ruler = {
+			has_leader_flag = mem_neochadanus
+		}
+		NOT = {
+			has_country_flag = mem_emperor_is_neochadanus_fifty
+			any_country = {
+				OR = {
+					is_crisis_faction = yes
+					
+					AND = {
+						OR = {
+							is_country_type = default
+							is_country_type = fallen_empire
+							is_country_type = awakened_fallen_empire
+						}
+						relative_power = {
+							who = root
+							value = overwhelming
+						}
+					}
+				}
+			}
+		}
+		num_owned_planets > 1
+	}
 
+	immediate = {
+		effects = yes #actually options needed
+	}
 
+	option = {
+		name = mem_lost_emperor.900.A
 
+		add_modifier = {
+			modifier = mem_lost_emperor_paying_for_ascension
+			days = 3600
+		}
+
+		custom_tooltip = mem_lost_emperor.900.A.tooltip
+
+		hidden_effect = {
+			country_event = { id =  mem_lost_emperor.901 days = 3600 }
+		}
+
+		response_text = mem_lost_emperor.900.A.response
+	}
+	
+	option = {
+		name = mem_lost_emperor.900.B
+
+		hidden_effect = {
+			country_event = { id =  mem_lost_emperor.902 days = 1800 }
+		}
+
+		response_text = mem_lost_emperor.900.B.response
+	}
+}
 
 #Portion of empire ascends
 
