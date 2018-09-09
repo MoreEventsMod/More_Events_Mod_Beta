@@ -1753,6 +1753,18 @@ fleet_event = {
         solar_system = {
             remove_star_flag = mem_surveyor_next_target
             IF = {
+                limit = { # If probe touched the star, starbase is likely disabled by third party. Remove it.
+                    exists = starbase
+                    starbase = {
+                        owner = { NOT = { is_same_value = root.owner } }
+                    }
+                    prev = {
+                        NOT = { has_fleet_flag = mem_surveyor_order_from_planet }
+                    }
+                }
+                starbase.fleet = { delete_fleet = this }
+            }
+            IF = {
                 limit = {
                     prev = {
                         NOT = { has_fleet_flag = mem_surveyor_order_from_planet } # Ship should not construct an outpost unless it just tourched the star
