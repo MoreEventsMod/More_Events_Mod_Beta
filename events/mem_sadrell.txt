@@ -15,6 +15,23 @@ event = {
 
     immediate = {
         # Spawning the for essentials; if any are missing.
+        random_list = { # Determining the future
+            60 = {
+                random_list = {
+                    70 = { set_global_flag = mem_sadrell_will_return }
+                    0 = {
+                        set_global_flag = mem_sadrell_will_return_ass
+                        modifier = {
+                            factor = 0
+                            NOT = { host_has_dlc = "Synthetic Dawn Story Pack" }
+                        }
+                    }
+                }
+            }
+            0 = { set_global_flag = mem_sadrell_will_desert }
+            0 = { set_global_flag = mem_sadrell_will_send_message }
+            0 = { set_global_flag = mem_sadrell_nothing_will_happen }
+        }
         every_system = { # It did its job
             limit = {
                 has_star_flag = mem_sadrell_home_cluster
@@ -95,13 +112,17 @@ ship_event = {
     show_sound = event_scanner
 
     trigger = {
-        FROM = { has_star_flag = mem_sadrell_gate_system }
+        FROM = { 
+            has_star_flag = mem_sadrell_gate_system 
+            has_megastructure = mem_sadrell_gateway_inactive
+        }
         owner = {
             NOT = { has_country_flag = mem_sadrell_encountered_gate }
         }
     }
 
     immediate = {
+        set_global_flag = mem_sadrell_someone_encountered_the_gate
         owner = {
             set_country_flag = mem_sadrell_encountered_gate
         }
@@ -135,85 +156,187 @@ event = {
                 }
             }            
         }
-        set_spawn_system_batch = begin
-        no_scope = {
-            spawn_system = {
-                min_distance >= 700
-                max_distance <= 720
-                min_orientation_angle = 244
-                max_orientation_angle = 246
-                initializer = mem_sadrell_1_0
-            }
-            event_target:system_0 = {
-                spawn_system = {
-                    min_distance >= 15
-                    max_distance <= 25
-                    min_orientation_angle = 70
-                    max_orientation_angle = 75
-                    initializer = mem_sadrell_1_1
-                }
-                spawn_system = {
-                    min_distance >= 15
-                    max_distance <= 25
-                    min_orientation_angle = 142
-                    max_orientation_angle = 147
-                    initializer = mem_sadrell_1_2
-                }
-                spawn_system = {
-                    min_distance >= 15
-                    max_distance <= 25
-                    min_orientation_angle = 214
-                    max_orientation_angle = 217
-                    initializer = mem_sadrell_1_3
-                }
-                spawn_system = {
-                    min_distance >= 15
-                    max_distance <= 25
-                    min_orientation_angle = 286
-                    max_orientation_angle = 289
-                    initializer = mem_sadrell_1_4
-                }
-                spawn_system = {
-                    min_distance >= 15
-                    max_distance <= 25
-                    min_orientation_angle = 350
-                    max_orientation_angle = 355
-                    initializer = mem_sadrell_1_5
-                }
+        mem_sadrell_generate_cluster = yes
+    }
+}
+
+# Event to open the gate - deciding who goes there
+event = {
+    id = mem_sadrell.4
+    hide_window = yes
+
+    mean_time_to_happen = {
+        years = 10
+    }
+
+    trigger = {
+        has_global_flag = mem_sadrell_cluster_spawned
+        has_global_flag = mem_sadrell_someone_encountered_the_gate
+        NOR = {
+            has_global_flag = mem_sadrell_delay_flag
+            has_global_flag = mem_sadrell_situation_resolved
+        }
+        any_system = {
+            has_star_flag = mem_sadrell_gate_system
+            has_megastructure = mem_sadrell_gateway_inactive
+        }
+    }
+
+    immediate = {
+        random_system = {
+            limit = { has_star_flag = mem_sadrell_gate_system }
+            save_event_target_as = gate_system
+        }
+        IF = {
+            limit = { has_global_flag = mem_sadrell_will_return }
+            event_target:gate_system.star = {
+                planet_event = { id = mem_sadrell.100 } # Trigger return of the sadrell
             }
         }
-        every_system = {
-            limit = { has_star_flag = mem_sadrell_extant_cluster }
-            isolate_system = yes
+    }
+}
+
+# Check who, if anyone at all, owns the cluster
+planet_event = {
+    id = mem_sadrell.100
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        NOT = {
+            any_system = {
+                has_star_flag = mem_sadrell_home_cluster
+                exists = space_owner
+                space_owner = {
+                    NOR = {
+                        is_country_type = default
+                        is_country_type = fallen_empire
+                        is_country_type = dormant_marauders
+                    }
+                }
+            }
         }
-        add_hyperlane = {
-            from = event_target:system_1
-            to = event_target:system_2
+    }
+
+    immediate = {
+        set_global_flag = mem_sadrell_situation_resolved
+        IF = {
+            limit = { # Gate is owned by someone
+                event_target:gate_system = { 
+                    exists = space_owner 
+                    space_owner = { is_country_type = default } 
+                } 
+            }
+            event_target:gate_system.space_owner = {
+                set_country_flag = mem_sadrell_message_receiver
+                country_event = { id = mem_sadrell.110 }
+            }
+            every_country = {
+                limit = {
+                    intel_level = {
+                        level > none
+                        system = event_target:gate_system
+                    }
+                    NOT = { has_country_flag = mem_sadrell_message_receiver }
+                }
+                country_event = { id = mem_sadrell.112 }
+            }
         }
-        add_hyperlane = {
-            from = event_target:system_2
-            to = event_target:system_3
+        ELSE_IF = {
+            limit = {
+                any_system = {
+                    has_star_flag = mem_sadrell_home_cluster
+                    exists = space_owner
+                    space_owner = { is_country_type = default }
+                }
+            }
+            event_target:gate_system = {
+                closest_system = {
+                    limit = { 
+                        has_star_flag = mem_sadrell_home_cluster
+                        exists = space_owner 
+                    }
+                    space_owner = {
+                        save_event_target_as = mem_sadrell_message_receiver
+                        country_event = { id = mem_sadrell.111 }
+                    }
+                }
+            }
+            every_country = {
+                limit = {
+                    intel_level = {
+                        level > none
+                        system = event_target:gate_system
+                    }
+                    NOT = { has_country_flag = mem_sadrell_message_receiver }
+                }
+                country_event = { id = mem_sadrell.112 }
+            }
         }
-        add_hyperlane = {
-            from = event_target:system_3
-            to = event_target:system_4
+        ELSE = {
+            random_megastructure = {
+                limit = { is_megastructure_type = mem_sadrell_gateway_inactive }
+                remove_megastructure = this
+                solar_system = {
+                    spawn_megastructure = {
+                        type = mem_sadrell_gateway_active
+                        orbit_angle = 0
+                        orbit_distance = 60
+                        location = solar_system
+                    }
+                    random_system_megastructure = {
+                        limit = { is_megastructure_type = mem_sadrell_gateway_active }
+                        activate_gateway = this
+                    }
+                }            
+            }
+            mem_sadrell_generate_cluster = yes
+            event_target:desert_colony = {
+                create_country = {
+                    type = mem_sadrell_country
+                    species = event_target:mem_sadrell_species
+                    ethos = {
+                        ethic = ethic_fanatic_materialist
+                        ethic = ethic_egalitarian
+                    }
+                    authority = auth_democratic
+                    civics = random
+                    flag = {
+                        icon = {
+                            category = "blocky"
+                            file = "flag_blocky_17.dds"
+                        }
+                        background={
+                            category = "backgrounds"
+                            file = "new_dawn.dds"
+                        }
+                        colors = {
+                            "yellow"
+                            "black"
+                            "null"
+                            "null"
+                        }
+                    }
+
+                    effect = {
+                        save_event_target_as = newcomer_country
+                    }
+                }
+            }
+            event_target:newcomer_country = {
+                set_country_type = default
+            }
+            mem_sadrell_create_sadrell_colonies = yes
+            every_country = {
+                limit = {
+                    intel_level = {
+                        level > none
+                        system = event_target:gate_system
+                    }
+                    NOT = { has_country_flag = mem_sadrell_message_receiver }
+                }
+                country_event = { id = mem_sadrell.113 }
+            }
         }
-        add_hyperlane = {
-            from = event_target:system_4
-            to = event_target:system_5
-        }
-        add_hyperlane = {
-            from = event_target:system_5
-            to = event_target:system_1
-        }
-        add_hyperlane = {
-            from = event_target:system_0
-            to = event_target:system_1
-        }
-        add_hyperlane = {
-            from = event_target:system_0
-            to = event_target:system_3
-        }
-        set_spawn_system_batch = end
     }
 }

@@ -1,0 +1,256 @@
+mem_sadrell_generate_cluster = {
+    set_spawn_system_batch = begin
+    no_scope = {
+        spawn_system = {
+            min_distance >= 700
+            max_distance <= 720
+            min_orientation_angle = 244
+            max_orientation_angle = 246
+            initializer = mem_sadrell_1_0
+        }
+        event_target:system_0 = {
+            spawn_system = {
+                min_distance >= 15
+                max_distance <= 25
+                min_orientation_angle = 70
+                max_orientation_angle = 75
+                initializer = mem_sadrell_1_1
+            }
+            spawn_system = {
+                min_distance >= 15
+                max_distance <= 25
+                min_orientation_angle = 142
+                max_orientation_angle = 147
+                initializer = mem_sadrell_1_2
+            }
+            spawn_system = {
+                min_distance >= 15
+                max_distance <= 25
+                min_orientation_angle = 214
+                max_orientation_angle = 217
+                initializer = mem_sadrell_1_3
+            }
+            spawn_system = {
+                min_distance >= 15
+                max_distance <= 25
+                min_orientation_angle = 286
+                max_orientation_angle = 289
+                initializer = mem_sadrell_1_4
+            }
+            spawn_system = {
+                min_distance >= 15
+                max_distance <= 25
+                min_orientation_angle = 350
+                max_orientation_angle = 355
+                initializer = mem_sadrell_1_5
+            }
+        }
+    }
+    every_system = {
+        limit = { has_star_flag = mem_sadrell_extant_cluster }
+        isolate_system = yes
+    }
+    add_hyperlane = {
+        from = event_target:system_1
+        to = event_target:system_2
+    }
+    add_hyperlane = {
+        from = event_target:system_2
+        to = event_target:system_3
+    }
+    add_hyperlane = {
+        from = event_target:system_3
+        to = event_target:system_4
+    }
+    add_hyperlane = {
+        from = event_target:system_4
+        to = event_target:system_5
+    }
+    add_hyperlane = {
+        from = event_target:system_5
+        to = event_target:system_1
+    }
+    add_hyperlane = {
+        from = event_target:system_0
+        to = event_target:system_1
+    }
+    add_hyperlane = {
+        from = event_target:system_0
+        to = event_target:system_3
+    }
+    set_spawn_system_batch = end
+}
+
+# Creating Sadrell country, execute after spawning cluster
+mem_sadrell_create_sadrell_colonies = {
+    event_target:desert_colony = {
+        create_colony = {
+            owner = event_target:newcomer_country
+            species = event_target:mem_sadrell_species
+        }
+        mem_sadrell_set_buildings = yes
+    }
+    event_target:tundra_colony = {
+        create_colony = {
+            owner = event_target:newcomer_country
+            species = event_target:mem_sadrell_species
+        }
+        mem_sadrell_set_buildings = yes
+    }
+}
+
+# Fill planet with buildings
+mem_sadrell_set_buildings = {
+    every_tile = {
+        limit = { has_building = yes }
+        remove_building = yes
+    }
+    random_tile = {
+        limit = {
+            num_adjacent_tiles > 3
+        }
+        set_building = building_capital_2
+        set_deposit = d_rich_energy_deposit
+        create_pop = {
+            species = event_target:mem_sadrell_species
+        }
+    }
+    random_tile = {
+        limit = {
+            has_building = no
+            any_neighboring_tile = {
+                has_building = building_capital_2
+            }
+        }
+        set_building = building_mining_network_3
+        set_deposit = d_mineral_deposit
+        build_pop = {
+            name = buildable_robot_pop_2
+            grown = yes
+        }
+    }
+    random_tile = {
+        limit = {
+            has_building = no
+            any_neighboring_tile = {
+                has_building = building_capital_2
+            }
+        }
+        set_building = building_hydroponics_farm_3
+        set_deposit = d_farmland_deposit
+        build_pop = {
+            name = buildable_robot_pop_2
+            grown = yes
+        }
+    }
+    while = {
+        count = 2
+        random_tile = {
+            limit = {
+                has_building = no
+                any_neighboring_tile = {
+                    has_building = building_capital_2
+                }
+            }
+            set_building = building_power_plant_3
+            set_deposit = d_farmland_deposit
+            create_pop = {
+                species = event_target:mem_sadrell_species
+            }
+        }
+    }
+    random_tile = {
+        limit = { has_building = no }
+        set_building = building_heritage_site
+        clear_deposits = yes
+        create_pop = {
+            species = event_target:mem_sadrell_species
+        }
+    }
+    random_tile = {
+        limit = {
+            has_building = no
+        }
+        set_building = building_power_hub_1
+        set_deposit = d_rich_energy_deposit
+        create_pop = {
+            species = event_target:mem_sadrell_species
+        }
+    }
+    while = {
+        limit = {
+            any_tile = { has_building = no }
+        }
+        random_tile = {
+            limit = {
+                has_building = no
+            }
+            set_building = building_mining_network_3
+            set_deposit = d_mineral_deposit
+            build_pop = {
+                name = buildable_robot_pop_2
+                grown = yes
+            }
+        }
+        random_tile = {
+            limit = {
+                has_building = no
+            }
+            set_building = building_hydroponics_farm_3
+            set_deposit = d_farmland_deposit
+            build_pop = {
+                name = buildable_robot_pop_2
+                grown = yes
+            }
+        }
+        random_tile = {
+            limit = {
+                has_building = no
+            }
+            set_building = building_power_plant_3
+            set_deposit = d_farmland_deposit
+            create_pop = {
+                species = event_target:mem_sadrell_species
+            }
+        }
+        random_tile = {
+            limit = {
+                has_building = no
+            }
+            IF = {
+                limit = { prev = { has_planet_flag = mem_sadrell_desert_colony } }
+                set_building = building_xeno_zoo
+                set_deposit = d_alien_pets_deposit
+                create_pop = {
+                    species = event_target:mem_sadrell_species
+                }
+            }
+            ELSE_IF = {
+                limit = { prev = { has_planet_flag = mem_sadrell_tundra_colony } }
+                set_building = betharian_power_plant
+                set_deposit = d_betharian_deposit
+                create_pop = {
+                    species = event_target:mem_sadrell_species
+                }
+            }
+        }
+        random_tile = {
+            limit = {
+                has_building = no
+            }
+            random_list = {
+                33 = { set_building = building_engineering_facility_1 }
+                33 = { set_building = building_physics_lab_1 }
+                33 = { set_building = building_biolab_1 }
+            }
+            random_list = {
+                33 = { set_deposit = d_engineering_deposit }
+                33 = { set_deposit = d_physics_deposit }
+                33 = { set_deposit = d_society_deposit }
+            }
+            create_pop = {
+                species = event_target:mem_sadrell_species
+            }
+        }
+    }
+}
