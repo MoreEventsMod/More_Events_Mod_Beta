@@ -1112,7 +1112,18 @@ country_event = {
 country_event = {
     id = mem_sadrell.115
     title = TRANSMISSION
-    desc = mem_sadrell.115.desc
+    desc = {
+        text = mem_sadrell.115.desc
+        trigger = {
+            NOT = { has_global_flag = mem_sadrell_federation_breakdown }
+        }
+    }
+    desc = {
+        text = mem_sadrell.115.desc.breakdown
+        trigger = {
+            has_global_flag = mem_sadrell_federation_breakdown
+        }
+    }
 
     diplomatic = yes
     is_triggered_only = yes
@@ -1231,7 +1242,7 @@ country_event = {
         event_target:newcomer_country = {
             clear_ethos = yes
             country_add_ethic = ethic_materialist
-            country_add_ethic = ethic_egalitarian
+            country_add_ethic = ethic_xenophobe
             country_add_ethic = ethic_militarist
             set_country_type = default
             change_government = {
@@ -1347,11 +1358,33 @@ country_event = {
                 }
             }
         }
+
+        ai_chance = {
+            factor = 100
+            modifier = {
+                add = 25
+                is_xenophile = yes
+            }
+            modifier = {
+                add = 25
+                is_pacifist = yes
+            }
+            modifier = {
+                add = 25
+                OR = {
+                    is_materialist = yes
+                    has_authority = auth_machine_intelligence
+                }
+            }
+        }
     }
 
-    option = { Abstain
+    option = { # Abstain
         name = mem_sadrell.121.b
         set_country_flag = mem_sadrell_vote_abstain
+        ai_chance = {
+            factor = 125
+        }
     }
 
     option = { # Nay.
@@ -1364,6 +1397,26 @@ country_event = {
                     which = mem_sadrell_vote_balance
                     value = -1
                 }
+            }
+        }
+
+        ai_chance = {
+            factor = 75
+            modifier = {
+                add = 25
+                is_xenophobe = yes
+            }
+            modifier = {
+                add = 25
+                is_militarist = yes
+            }
+            modifier = {
+                add = 25
+                is_authoritarian = yes
+            }
+            modifier = {
+                add = 25
+                is_spiritualist = yes
             }
         }
     }
@@ -1442,6 +1495,147 @@ country_event = {
                 limit = { has_country_flag = mem_sadrell_vote_no }
                 custom_tooltip = mem_sadrell_vote_no
             }
+        }
+    }
+}
+
+# Sadrell join the federation
+country_event = {
+    id = mem_sadrell.123
+    title = TRANSMISSION
+    desc = mem_sadrell.123.desc
+
+    diplomatic = yes
+    is_triggered_only = yes
+    location = event_target:gate_system
+
+    picture_event_data = {
+		portrait = event_target:landed_country
+		room = mem_server_room
+    }
+
+    immediate = {
+        set_global_flag = mem_sadrell_joined_federation
+        mem_sadrell_generate_cluster = yes
+        event_target:newcomer_country = {
+            clear_ethos = yes
+            country_add_ethic = ethic_materialist
+            country_add_ethic = ethic_xenophile
+            country_add_ethic = ethic_egalitarian
+            set_country_type = default
+            change_government = {
+                civics = random
+            }
+            join_alliance = {
+                who = root
+                override_requirements = yes
+            }
+        }
+        mem_sadrell_create_sadrell_colonies = yes
+        every_system = {
+            limit = { 
+                has_star_flag = mem_sadrell_home_cluster
+                NOT = { exists = space_owner } 
+                NOT = {
+                    any_ship_in_system = {
+                        owner = {
+                            NOT = { is_country_type = default }
+                        }
+                    }
+                }
+            }
+            create_starbase = {
+                size = starbase_outpost
+                owner = event_target:newcomer_country
+            }
+        }
+        every_system_within_border = {
+            limit = { has_star_flag = mem_sadrell_home_cluster }
+            set_star_flag = mem_sadrell_system_flip
+            IF = {
+                limit = { exists = starbase }
+                starbase = {
+                    set_owner = event_target:newcomer_country
+                }
+            }
+            ELSE = {
+                create_starbase = {
+                    size = starbase_outpost
+                    owner = event_target:newcomer_country
+                }
+            }
+            every_system_planet = {
+                limit = {
+                    exists = owner
+                    owner = { is_same_value = root }
+                }
+                set_owner = event_target:newcomer_country
+                set_planet_flag = mem_sadrell_moved_in
+                while = {
+                    count = 4
+                    IF = {
+                        limit = {
+                            any_tile = { has_pop = no has_blocker = no }
+                        }
+                        best_tile_for_pop = {
+                            create_pop = {
+                                species = event_target:mem_sadrell_species
+                            }
+                        }
+                    }
+                    ELSE = {
+                        random_tile = {
+                            limit = { has_pop = yes }
+                            kill_pop = yes
+                            create_pop = {
+                                species = event_target:mem_sadrell_species
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+# Sadrell respond to failed vote
+country_event = {
+    id = mem_sadrell.124
+    title = TRANSMISSION
+    desc = mem_sadrell.124.desc
+
+    diplomatic = yes
+    is_triggered_only = yes
+    location = event_target:gate_system
+
+    picture_event_data = {
+		portrait = event_target:landed_country
+		room = mem_server_room
+    }
+
+    option = {
+        name = mem_sadrell.124.a
+
+        hidden_effect = {
+            set_global_flag = mem_sadrell_federation_breakdown
+            leave_alliance = { override_requirements = yes }
+            country_event = { id = mem_sadrell.115 }
+        }
+    }
+
+    option = {
+        name = mem_sadrell.124.b
+        set_global_flag = mem_sadrell_land_ceded
+        hidden_effect = {
+            country_event = { id = mem_sadrell.111 }
+        }
+    }
+
+    option = {
+        name = mem_sadrell.124.c
+        default_hide_option = yes
+        hidden_effect = {
+            country_event = { id = mem_sadrell.112 }
         }
     }
 }
