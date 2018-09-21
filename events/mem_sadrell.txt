@@ -32,6 +32,20 @@ event = {
             0 = { set_global_flag = mem_sadrell_will_send_message }
             0 = { set_global_flag = mem_sadrell_nothing_will_happen }
         }
+        random_list = {
+            25 = {
+                set_timed_global_flag = { flag = mem_sadrell_delay_flag days = 7200 }
+            }
+            25 = {
+                set_timed_global_flag = { flag = mem_sadrell_delay_flag days = 10800 }
+            }
+            25 = {
+                set_timed_global_flag = { flag = mem_sadrell_delay_flag days = 14400 }
+            }
+            25 = {
+                set_timed_global_flag = { flag = mem_sadrell_delay_flag days = 18000 }
+            }
+        }
         every_system = { # It did its job
             limit = {
                 has_star_flag = mem_sadrell_home_cluster
@@ -194,7 +208,7 @@ event = {
 }
 
 # Event to open the gate - deciding who goes there
-event = {
+country_event = {
     id = mem_sadrell.4
     hide_window = yes
 
@@ -203,6 +217,8 @@ event = {
     }
 
     trigger = {
+        log = "Trying to trigger .4"
+        is_country_type = global_event
         has_global_flag = mem_sadrell_cluster_spawned
         has_global_flag = mem_sadrell_someone_encountered_the_gate
         NOR = {
@@ -216,6 +232,7 @@ event = {
     }
 
     immediate = {
+        log = ".4 triggered"
         random_system = {
             limit = { has_star_flag = mem_sadrell_gate_system }
             save_event_target_as = gate_system
@@ -1046,6 +1063,7 @@ country_event = {
     }
 
     immediate = {
+        set_global_flag = mem_sadrell_vassalized
         mem_sadrell_generate_cluster = yes
         event_target:newcomer_country = {
             clear_ethos = yes
@@ -1664,5 +1682,138 @@ country_event = {
         hidden_effect = {
             country_event = { id = mem_sadrell.112 }
         }
+    }
+}
+
+# Diplo event if they move into systems unowned
+country_event = {
+    id = mem_sadrell.130
+    title = TRANSMISSION
+    desc = mem_sadrell.130.desc
+
+    diplomatic = yes
+    is_triggered_only = yes
+    location = event_target:gate_system
+
+    picture_event_data = {
+		portrait = event_target:newcomer_country
+		room = mem_server_room
+    }
+
+    option = {
+        name = mem_sadrell.130.a
+        trigger = {
+            is_xenophobe = no
+            is_xenophile = no
+        }
+    }
+
+    option = {
+        name = mem_sadrell.130.phobe
+        trigger = {
+            has_ethic = ethic_fanatic_xenophobe
+            has_ethic = ethic_xenophobe
+        }
+    }
+
+    option = {
+        name = mem_sadrell.130.phile
+        trigger = {
+            has_ethic = ethic_fanatic_xenophile
+            has_ethic = ethic_xenophile
+        }
+    }
+
+    option = { # Ask for a bit of backstory
+        name = mem_sadrell.110.f
+        is_dialog_only = yes
+        response_text = mem_sadrell.110.f.response
+    }
+
+    option = { # Ask about cluster
+        name = mem_sadrell.110.g
+        is_dialog_only = yes
+        response_text = mem_sadrell.110.g.response
+    }
+
+    option = {
+        name = mem_sadrell.110.purifier
+
+        exclusive_trigger = {
+            has_valid_civic = civic_fanatic_purifiers            
+        }
+    }
+
+    option = {
+        name = mem_sadrell.110.swarm
+
+        exclusive_trigger = {
+            has_valid_civic = civic_hive_devouring_swarm
+        }
+    }
+
+    option = {
+        name = mem_sadrell.110.terminator
+
+        exclusive_trigger = {
+            has_valid_civic = civic_machine_terminator
+        }
+    }
+}
+
+# Pop-up to notify other factions
+country_event = {
+    id = mem_sadrell.131
+    title = mem_sadrell.131.name
+    desc = {
+        text = mem_sadrell.131.ceded
+        trigger = {
+            has_global_flag = mem_sadrell_land_ceded
+        }
+    }
+    desc = {
+        text = mem_sadrell.131.war
+        trigger = {
+            has_global_flag = mem_sadrell_war
+        }
+    }
+    desc = {
+        text = mem_sadrell.131.total_war
+        trigger = {
+            has_global_flag = mem_sadrell_total_war
+        }
+    }
+    desc = {
+        text = mem_sadrell.131.vassalized
+        trigger = {
+            has_global_flag = mem_sadrell_vassalized
+        }
+    }
+    desc = {
+        text = mem_sadrell.131.formed_federation
+        trigger = {
+            has_global_flag = mem_sadrell_federation
+        }
+    }
+    desc = {
+        text = mem_sadrell.131.federation_breakdown
+        trigger = {
+            has_global_flag = mem_sadrell_federation_breakdown
+        }
+    }
+    desc = {
+        text = mem_sadrell.131.joined_federation
+        trigger = {
+            has_global_flag = mem_sadrell_joined_federation
+        }
+    }
+
+    is_triggered_only = yes
+
+    location = event_target:gate_system
+    picture = GFX_evt_drifting_gateway
+
+    option = {
+        name = OK
     }
 }
