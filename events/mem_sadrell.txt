@@ -18,7 +18,7 @@ event = {
         random_list = { # Determining the future
             60 = {
                 random_list = {
-                    0 = { set_global_flag = mem_sadrell_will_return }
+                    70 = { set_global_flag = mem_sadrell_will_return }
                     30 = {
                         set_global_flag = mem_sadrell_will_return_ass
                         modifier = {
@@ -28,8 +28,8 @@ event = {
                     }
                 }
             }
-            0 = { set_global_flag = mem_sadrell_will_desert }
-            0 = { set_global_flag = mem_sadrell_will_send_message }
+            # 0 = { set_global_flag = mem_sadrell_will_desert } # Likely will not be implemented due to similarity with message
+            20 = { set_global_flag = mem_sadrell_will_send_message }
             0 = { set_global_flag = mem_sadrell_nothing_will_happen }
         }
         random_list = {
@@ -249,6 +249,12 @@ country_event = {
                 planet_event = { id = mem_sadrell.200 } # Trigger return of the assimilated Sadrell
             }
         }
+        ELSE_IF = {
+            limit = { has_global_flag = mem_sadrell_will_send_message }
+            event_target:gate_system.star = {
+                planet_event = { id = mem_sadrell.300 } # Trigger return of the assimilated Sadrell
+            }
+        }
     }
 }
 
@@ -322,7 +328,7 @@ planet_event = {
                 save_event_target_as = message_receiver
                 country_event = { id = mem_sadrell.101 }
             }
-            every_playble_country = {
+            every_playable_country = {
                 limit = {
                     any_system = {
                         has_star_flag = mem_sadrell_gate_system
@@ -1378,7 +1384,7 @@ country_event = {
 
     immediate = {
         mem_sadrell_generate_cluster = yes
-        every_playble_country = {
+        every_playable_country = {
             limit = {
                 OR = {
                     any_system = {
@@ -1673,7 +1679,7 @@ country_event = {
     immediate = {
         set_global_flag = mem_sadrell_joined_federation
         mem_sadrell_generate_cluster = yes
-        every_plyable_country = {
+        every_playable_country = {
             limit = {
                 OR = {
                     any_system = {
@@ -2070,11 +2076,7 @@ planet_event = {
             }
         }
         log = "[gate_system.GetName]"
-        every_country = {
-            limit = {
-                log = "[This.GetName] checking"
-            }
-            log = "[This.GetName]"
+        every_playable_country = {
             establish_communications_no_message = event_target:newcomer_country
             country_event = { id = mem_sadrell.201 }
         }
@@ -2214,5 +2216,217 @@ country_event = {
         name = mem_sadrell.202.c
         is_dialog_only = yes
         response_text = mem_sadrell.202.c.response
+    }
+}
+
+###################################
+### MESSAGE IN A BOTTLE OUTCOME ###
+###################################
+
+# Initial setup
+planet_event = {
+    id = mem_sadrell.300
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        event_target:gate_system = {
+            exists = space_owner
+            space_owner = { is_country_type = default }
+        }
+    }
+
+    immediate = {
+        set_global_flag = mem_sadrell_situation_resolved
+        mem_sadrell_generate_cluster = yes
+        event_target:gate_system = {
+            random_system_megastructure = {
+                limit = { is_megastructure_type = mem_sadrell_gateway_active }
+                save_event_target_as = terminus
+            }
+        }
+        create_ambient_object = {
+            type = mem_sadrell_probe
+            location = root
+        }
+        last_created_ambient_object = {
+            save_event_target_as = sadrell_probe
+            set_location = {
+                target = event_target:terminus
+                distance = 30
+                angle = random
+            }
+        }
+        event_target:gate_system = {
+            space_owner = { country_event = { id = mem_sadrell.301 } }
+            every_playable_country = {
+                limit = {
+                    intel_level = {
+                        level > none
+                        system = prev
+                    }
+                    NOT = { is_same_value = prev.space_owner }
+                }
+                country_event = { id = mem_sadrell.302 }
+            }
+        }
+    }
+}
+
+# System owner is notified of gate opening
+country_event = {
+    id = mem_sadrell.301
+    title = mem_sadrell.301.name
+    desc = mem_sadrell.301.desc
+
+    is_triggered_only = yes
+
+    location = evwent_target:gate_system
+    picture = GFX_evt_drifting_gateway
+
+    option = {
+        name = mem_sadrell.301.a
+
+        enable_special_project = {
+            name = MEM_SADRELL_PROBE_PROJECT
+            location = event_target:sadrell_probe
+            owner = root
+        }
+    }
+
+    option = {
+        name = mem_sadrell.301.b
+
+        add_influence = 50
+    }
+}
+
+# Everyone else is notified too
+country_event = {
+    id = mem_sadrell.302
+    title = mem_sadrell.302.name
+    desc = mem_sadrell.302.desc
+
+    is_triggered_only = yes
+
+    location = evwent_target:gate_system
+    picture = GFX_evt_drifting_gateway
+
+    option = {
+        name = INTERESTING
+    }
+}
+
+# Ship event on project completion
+ship_event = {
+    id = mem_sadrell.303
+    title = mem_sadrell.303.name
+    desc = mem_sadrell.303.desc
+
+    is_triggered_only = yes
+
+    location = evwent_target:gate_system
+    picture = GFX_evt_satellite_in_orbit
+
+    option = {
+        name = ONSCREEN
+
+        owner = {
+            add_monthly_resource_mult = {
+				resource = unity
+				value = @tier3unityreward
+				min = @tier3unitymin
+				max = @tier3unitymax
+            }
+            add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+            }
+            hidden_effect = {
+                country_event = { id = mem_sadrell.304 }
+            }
+        }
+    }
+}
+
+# Diplomatic event to read the probe
+country_event = {
+    id = mem_sadrell.304
+    title = mem_sadrell.304.name
+    desc = mem_sadrell.304.desc
+
+    is_triggered_only = yes
+
+    diplomatic = yes
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+    
+    option = {
+        name = mem_sadrell.304.a
+        default_hide_option = yes
+    }
+
+    option = {
+        name = mem_sadrell.304.b
+        is_dialog_only = yes
+        response_text = mem_sadrell.304.b.response
+    }
+
+    option = {
+        name = mem_sadrell.304.c
+        is_dialog_only = yes
+        response_text = mem_sadrell.304.c.response
+    }
+
+    option = {
+        name = mem_sadrell.304.d
+        is_dialog_only = yes
+        response_text = mem_sadrell.304.d.response
+    }
+
+    option = {
+        name = mem_sadrell.304.e
+        is_dialog_only = yes
+        response_text = mem_sadrell.304.e.response
+    }
+    option = {
+        name = mem_sadrell.304.f
+        is_dialog_only = yes
+        response_text = mem_sadrell.304.f.response
+    }
+}
+
+# Entering cluster
+ship_event = {
+    id = mem_sadrell.305
+    title = mem_sadrell.305.name
+    desc = mem_sadrell.305.desc
+
+    is_triggered_only = yes
+
+    trigger = {
+        has_global_flag = mem_sadrell_will_send_message
+        FROM = {
+            has_star_flag = mem_sadrell_extant_cluster
+        }
+        owner = {
+            NOT = { has_country_flag = mem_sadrell_visited_cluster }
+        }
+    }
+
+    immediate = {
+        owner = {
+            set_country_flag = mem_sadrell_visited_cluster
+        }
+    }
+
+    picture = GFX_evt_ruined_system
+    location = FROM
+
+    option = {
+        name = INTERESTING
     }
 }
