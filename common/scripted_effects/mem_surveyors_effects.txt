@@ -1,0 +1,376 @@
+# Establishing comms when probe stops in your system
+mem_surveyor_try_to_communicate = {
+    space_owner = {
+        IF = { #50% chance probe would contact you, assuming it already spotted you
+            limit = {
+                has_country_flag = mem_surveyor_spotted_probe
+                NOT = { has_country_flag = mem_surveyor_opened_comms }
+            }
+            random_list = {
+                50 = {  }
+                50 = {
+                    country_event = { id = mem_surveyor.4 }
+                }
+            }
+        }
+        ELSE_IF = { #If it made its cycle after you completed the quest, dispense the reward
+            limit = {
+                has_country_flag = mem_surveyor_finished_quest
+                NOT = { has_country_flag = mem_surveyor_reward_wait }
+                NOT = { has_country_flag = mem_surveyor_attacked_surveyor }
+            }
+            country_event = { id = mem_surveyor.110 }
+        }
+        ELSE_IF = { #Offer a quest
+            limit = { 
+                is_country_type = default 
+                NOR = { 
+                    has_country_flag = mem_surveyor_attacked_surveyor  
+                    has_country_flag = mem_surveyor_offered_quest
+                    has_country_flag = mem_surveyor_finished_quest
+                    has_country_flag = mem_surveyor_received_reward
+                    has_country_flag = mem_surveyor_busy_with_project
+                    has_country_flag = mem_surveyor_collected_reward
+                }
+            }
+            random_list = {
+                97 = { } #Fix this number when test is done!!!
+                3 = { country_event = { id = mem_surveyor.102 } }
+            }
+        }
+    }
+}
+
+# Breaks probe territories into one or more peices
+mem_syurveyor_create_robotomite_countries = {
+    every_owned_planet = {
+        limit = {
+            exists = space_owner
+            space_owner = {
+                NOT = { is_same_value = root }
+            }
+        }
+        set_owner = space_owner 
+    }
+    every_owned_planet = {
+        limit = {
+            NOT = { exists = starbase }
+        }
+        every_owned_pop = {
+            kill_pop = yes
+        }
+    }
+    create_species = {
+        name = Freebotomite
+        adjective = Freebotomite
+        plural = Freebotomites
+        class = FUN
+        portrait = fun13
+        homeworld = event_target:mem_surveyor_robotomite_species.home_planet
+        # pops_can_be_colonizers = no #Regular robotomites should not do this, but still maintain functional
+        # pops_can_reproduce = no
+        # pops_can_migrate = no
+        traits = {
+            trait = trait_cybernetic
+            trait = trait_mem_surveyor_freebotomites
+            trait = trait_venerable
+            trait = trait_repugnant
+            trait = trait_slow_learners
+        }
+        effect = {
+            save_global_event_target_as = mem_surveyor_freebotomite_species
+        }
+    }
+    every_system = {
+        limit = {
+            exists = space_owner
+            space_owner = { is_same_value = root }
+        }
+        set_star_flag = mem_surveyor_former_probe
+    }
+    while = {
+        limit = { num_owned_planets > 0 }
+        random_owned_planet = {
+            save_global_event_target_as = new_capital
+            create_country = {
+                type = mem_broken_clock_country
+                species = event_target:mem_surveyor_freebotomite_species
+                ethos = {
+                    ethic = ethic_materialist
+                }
+                authority = random
+                civics = random
+                effect = {
+                    set_country_flag = mem_surveyor_freebotomite_country
+                    set_global_flag = mem_surveyor_freebotomite_country_spawned
+                    save_event_target_as = new_country
+                    add_minerals = 30000
+                    add_food = 200
+                    add_energy = 30000
+                    add_influence = 500
+                    add_100_unity_per_year_passed = yes
+                    copy_techs_from = {
+                        target = root
+                        except = {
+                            # Horizon Signal
+                            tech_akx_worm_1
+                            tech_akx_worm_2
+                            tech_akx_worm_3
+                        }
+                    }
+                }
+            }
+            every_owned_pop = {
+                change_species = event_target:mem_surveyor_freebotomite_species
+            }
+            set_owner = event_target:new_country
+            solar_system = {
+                set_star_flag = mem_surveyor_next_to_transfer
+            }
+        }
+        while = {
+            limit = {
+                log = "trying to find neigbour system"
+                any_system = {
+                    has_star_flag = mem_surveyor_former_probe
+                    NOT = { has_star_flag = mem_surveyor_next_to_transfer }
+                    any_neighbor_system = {
+                        has_star_flag = mem_surveyor_former_probe
+                        has_star_flag = mem_surveyor_next_to_transfer
+                    }
+                }
+            }
+            random_system = {
+                limit = {
+                    has_star_flag = mem_surveyor_former_probe
+                    NOT = { has_star_flag = mem_surveyor_next_to_transfer }
+                    any_neighbor_system = {
+                        has_star_flag = mem_surveyor_former_probe
+                        has_star_flag = mem_surveyor_next_to_transfer
+                    }
+                }
+                log = "[This.GetName] is neigbouring system"
+                set_star_flag = mem_surveyor_next_to_transfer
+            }
+        }
+        every_system = {
+            limit = {
+                has_star_flag = mem_surveyor_next_to_transfer
+            }
+            remove_star_flag = mem_surveyor_former_probe
+            remove_star_flag = mem_surveyor_next_to_transfer
+            IF = {
+                limit = { exists = starbase }
+                starbase = { fleet = { destroy_fleet = this } }
+            }
+            create_starbase = {
+                size = starbase_outpost
+                owner = event_target:new_country
+            }
+            every_fleet_in_system = {
+                limit = { has_fleet_flag = mem_surveyor_garrison_fleet }
+                set_owner = event_target:new_country
+            }
+            every_system_planet = {
+                limit = {
+                    exists = owner
+                    owner = { is_same_value = root }
+                }
+                every_owned_pop = {
+                    change_species = event_target:mem_surveyor_freebotomite_species
+                }
+                set_owner = event_target:new_country
+            }
+        }
+    }
+    every_country = {
+        limit = {
+            has_country_flag = mem_surveyor_freebotomite_country
+        }
+        while = {
+            count = 5
+            limit = {
+                any_owned_planet = {
+                    starbase = {
+                        has_starbase_size = starbase_outpost
+                    }
+                }
+            }
+            random_owned_planet = {
+                limit = {
+                    starbase = { has_starbase_size = starbase_outpost }
+                }
+                starbase = {
+                    set_starbase_size = starbase_starport
+                    set_starbase_module = {
+                        slot = 0
+                        module = shipyard
+                    }
+                    set_starbase_module = {
+						slot = 1
+						module = anchorage
+					}
+                }
+            }
+        }
+    }
+    every_country = {
+        limit = {
+            has_country_flag = mem_surveyor_freebotomite_country
+        }
+        every_country = {
+            limit = {
+                OR = {
+                    has_country_flag = mem_surveyor_freebotomite_country
+                    has_communications = root
+                }
+            }
+            establish_communications_no_message = prev
+        }
+        random_list = {
+            30 = {
+                random_list = {
+                    1 = { country_add_ethic = ethic_fanatic_xenophobe }
+                    1 = { country_add_ethic = ethic_fanatic_xenophile }
+                    1 = { country_add_ethic = ethic_fanatic_authoritarian }
+                    1 = { country_add_ethic = ethic_fanatic_egalitarian }
+                    1 = { country_add_ethic = ethic_fanatic_militarist }
+                    1 = { country_add_ethic = ethic_fanatic_pacifist }
+                }
+            }
+            70 = {
+                random_list = {
+                    1 = { country_add_ethic = ethic_xenophobe }
+                    1 = { country_add_ethic = ethic_xenophile }
+                    1 = { country_add_ethic = ethic_authoritarian }
+                    1 = { country_add_ethic = ethic_egalitarian }
+                    1 = { country_add_ethic = ethic_militarist }
+                    1 = { country_add_ethic = ethic_pacifist }
+                }
+                random_list = {
+					1 = { country_add_ethic = ethic_militarist 		modifier = { factor = 0 OR = { has_ethic = ethic_militarist    has_ethic = ethic_pacifist } } }
+					1 = { country_add_ethic = ethic_pacifist 		modifier = { factor = 0 OR = { has_ethic = ethic_pacifist      has_ethic = ethic_militarist } } }
+					1 = { country_add_ethic = ethic_xenophile 		modifier = { factor = 0 OR = { has_ethic = ethic_xenophile     has_ethic = ethic_xenophobe } } }
+					1 = { country_add_ethic = ethic_xenophobe 		modifier = { factor = 0 OR = { has_ethic = ethic_xenophobe     has_ethic = ethic_xenophile } } }
+					1 = { country_add_ethic = ethic_egalitarian 	modifier = { factor = 0 OR = { has_ethic = ethic_egalitarian   has_ethic = ethic_authoritarian } } }
+					1 = { country_add_ethic = ethic_authoritarian 	modifier = { factor = 0 OR = { has_ethic = ethic_authoritarian has_ethic = ethic_egalitarian } } }
+                }
+            }
+        }
+        change_government = {
+			authority = random
+			civics = random
+        }
+        set_name = random
+        set_country_type = default
+        create_leader = {
+            type = governor
+        }
+        create_leader = {
+            type = admiral
+        }
+        while = {
+            count = 3
+            create_leader = {
+                type = scientist
+            }
+        }
+        every_planet_within_border = {
+			limit = { 
+				has_deposit_for = shipclass_mining_station 
+				has_mining_station = no
+			}
+			create_mining_station = {
+				owner = event_target:new_country
+			}
+		}
+		every_planet_within_border = {
+			limit = { 
+				has_deposit_for = shipclass_research_station 
+				has_research_station = no
+			}
+			create_research_station = {
+				owner = event_target:new_country
+			}
+		}
+        country_event = { id = game_start.9 }
+    }
+}
+
+# Here goes effect to reward the country
+mem_surveyor_killing_reward = {
+    add_research_option = mem_surveyor_alkree_secrets
+    generate_lcluster_clue = yes # I hope it works
+}
+
+# Knock off of the vanilla effect "refugee_pop_effect", to use as a substitute
+mem_surveyor_refugee_pop_effect = {
+	remove_modifier = "pop_recently_conquered"
+	remove_culture_shock = yes
+	planet = { 	
+		save_event_target_as = RefugeeEscapedPlanet 		
+	}
+	owner = {
+		save_event_target_as = RefugeeEscapedFrom
+		random_relation = {
+			limit = {
+				is_country_type = default
+				NOT = { has_policy_flag = refugees_not_allowed } 
+				root = {
+					OR = { 
+						has_citizenship_type = { type = citizenship_full country = prev }
+						has_citizenship_type = { type = citizenship_caste_system country = prev }
+						AND = {
+							has_citizenship_type = { type = citizenship_limited country = prev }
+							has_citizenship_type = { type = citizenship_caste_system_limited country = prev }
+							prev = { has_policy_flag = refugees_allowed }
+						}	
+					}		
+				}	
+				any_owned_planet = {
+					habitability = { who = root value > 0.2 }
+					is_under_colonization = no
+					is_controlled_by = owner
+					has_orbital_bombardment = no
+					any_tile = {
+						has_blocker = no
+						has_pop = no
+					}									
+				}
+			}
+			random_owned_planet = {
+				limit = {
+					habitability = { who = root value > 0.2 }
+					is_under_colonization = no
+					is_controlled_by = owner
+					has_orbital_bombardment = no
+					any_tile = {
+						has_blocker = no
+						has_pop = no
+					}					
+				}
+				resettle_pop = {
+					pop = root
+					planet = this
+				}
+				root = { add_modifier = { modifier = recent_refugee days = 3600 } }
+				if = {
+					limit = {
+						NOT = {
+							owner = {
+								any_owned_planet = {
+									any_owned_pop = {
+										NOT = { is_same_value = root }
+										is_same_species = root
+									}
+								}
+							}
+						}				
+					}		
+					root = { pop_event = { id = mem_surveyor.235 } }
+				}	
+				add_organic_sanctuaries = yes
+			}
+		}		
+	}		
+}
