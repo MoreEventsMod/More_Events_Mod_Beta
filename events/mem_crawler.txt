@@ -531,7 +531,7 @@ country_event = {
         event_target:request_sender = {
             add_opinion_modifier = {
                 who = root
-                modifier = mem_crawler_harboring
+                modifier = mem_crawler_killed
             }
         }
 
@@ -667,6 +667,104 @@ country_event = {
                     add_ruler_trait = trait_mem_crawler_pet_owner_ruler
                 }
             }
+        }
+    }
+}
+
+# The same thing but for fallen empire
+country_event = {
+    id = mem_crawler.12
+    title = TRANSMISSION
+    desc = mem_crawler.12.desc
+
+    diplomatic = yes
+    
+    picture_event_data = {
+		portrait = event_target:request_sender
+		planet_background = event_target:request_sender
+		graphical_culture = event_target:request_sender
+		city_level = event_target:request_sender
+		room = event_target:request_sender.ruler
+    }
+    
+    mean_time_to_happen = {
+        years = 25
+    }
+
+    trigger = {
+        has_country_flag = mem_crawler_pet_owner
+        has_country_flag = mem_crawler_first_update
+        NOT = { has_country_flag = mem_crawler_request_happening }
+        any_owned_leader = {
+            OR = {
+                has_trait = trait_mem_crawler_pet_owner
+                has_trait = trait_mem_crawler_pet_owner_ruler
+            }
+        }
+        any_relation = {
+            is_country_type = fallen_empire
+            has_ethic = ethic_fanatic_xenophile
+            is_ai = yes
+            NOR = {
+                is_same_value = root
+                is_at_war_with = root
+            }
+        }
+    }
+
+    immediate = {
+        set_country_flag = mem_crawler_request_happening
+        random_relation = {
+            limit = {
+                is_country_type = fallen_empire
+                has_ethic = ethic_fanatic_xenophile
+                is_ai = yes
+                NOR = {
+                    is_same_value = root
+                    is_at_war_with = root
+                }
+            }
+            save_event_target_as = request_sender
+        }
+        random_owned_leader = {
+            limit = {
+                OR = {
+                    has_trait = trait_mem_crawler_pet_owner
+                    has_trait = trait_mem_crawler_pet_owner_ruler
+                }
+            }
+            save_event_target_as = crawler_owner
+        }
+    }
+
+    option = {
+        name = mem_crawler.12.a
+
+        event_target:request_sender = {
+            add_opinion_modifier = { who = root modifier = opinion_refused_fallen_empire_request }
+        }
+    }
+
+    option = {
+        name = mem_crawler.12.b
+        custom_tooltip = mem_crawler.12.b.tooltip
+
+        event_target:request_sender = {
+            add_opinion_modifier = { who = root modifier = opinion_accepted_fallen_empire_request }
+        }
+
+        hidden_effect = {
+            random_owned_leader = {
+                limit = {
+                    OR = {
+                        has_trait = trait_mem_crawler_pet_owner
+                        has_trait = trait_mem_crawler_pet_owner_ruler
+                    }
+                }
+                remove_trait = trait_mem_crawler_pet_owner
+                remove_ruler_trait = trait_mem_crawler_pet_owner_ruler
+            }
+            remove_country_flag = mem_crawler_pet_owner
         }
     }
 }
