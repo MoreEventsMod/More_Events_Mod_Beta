@@ -24,6 +24,7 @@ namespace = mem_vazurans
 # mem_vazurans.51  |Stabilization tech researched and project to stabilize rift set
 # mem_vazurans.52  |Vazuran system spawned
 # mem_vazurans.53  |Player being informed about established connection
+# mem_vazurans.90  |Decade pulse event to start damper field quest and extermination event
 # mem_vazurans.98  |Test Event for the Rift
 # mem_vazurans.99  |Test Event to show Targets
 ########################################################
@@ -49,7 +50,7 @@ namespace = mem_vazurans
 ########################################################
 # Story Events
 ########################################################
-# mem_vazurans.250 |Starting damper field bypass events
+# mem_vazurans.250 |Starting damper field bypass events starts by decade pulse check
 # mem_vazurans.251 |Crashed vazuran ship on planet excavated
 # mem_vazurans.252 |Anomaly done, project spawn
 # mem_vazurans.253 |Crashed vazuran ship on asteroid excavated
@@ -65,7 +66,7 @@ namespace = mem_vazurans
 ########################################################
 # Extermination Events
 ########################################################
-# mem_vazurans.300 |Extermination of an AI empire starts by MTTH
+# mem_vazurans.300 |Extermination of an AI empire starts by decade pulse check
 # mem_vazurans.301 |Rift opens and extermination fleet spawns
 # mem_vazurans.302 |tells the raiding or extermination fleet to move to the target planet to start bombarding
 # mem_vazurans.303 |Planet has been bombarded and now colony gets destroyed
@@ -1151,6 +1152,136 @@ country_event = {
 	}
 }
 
+# Decade pulse event
+event = {
+	id = mem_vazurans.90
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	limit = {
+		has_global_flag = mem_vazurans_enabled
+		NOR = {
+			has_global_flag = mem_vazurans_disabled
+			has_global_flag = mem_vazurans_finished
+		}
+	}
+
+	immediate = {
+		If = {
+			limit = {
+				years_passed >= 100
+				years_passed < 150
+				NOT = {
+					has_global_flag = mem_vazurans_extermination
+				}
+				any_country = {
+					is_ai = yes
+					is_country_type = default
+				}
+			}
+			random_list = {
+				90 = {}
+				10 = {
+					event = { id = mem_vazurans.300 days = 1750 random = 1700 }
+				}
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				years_passed >= 150
+				NOT = {
+					has_global_flag = mem_vazurans_extermination
+				}
+				any_country = {
+					is_ai = yes
+					is_country_type = default
+				}
+			}
+			random_list = {
+				80 = {}
+				20 = {
+					event = { id = mem_vazurans.300 days = 1750 random = 1700 }
+				}
+			}
+		}
+		IF = {
+			limit = {
+				NOR = {
+					has_global_flag = mem_vazurans_disabled
+					has_global_flag = mem_vazurans_finished
+				}
+				has_global_flag = mem_vazurans_enabled
+				years_passed >= 50
+				years_passed < 100
+			}
+			every_country = {
+				limit = {
+					has_country_flag = mem_vazurans_met
+					NOT = {
+						has_country_flag = mem_vazurans_damper_field_quest
+					}
+				}
+				random_list = {
+					90 = {}
+					10 = {
+						country_event = { id = mem_vazurans.250 days = 1750 random = 1700 }
+					}
+				}
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				NOR = {
+					has_global_flag = mem_vazurans_disabled
+					has_global_flag = mem_vazurans_finished
+				}
+				has_global_flag = mem_vazurans_enabled
+				years_passed >= 100
+				years_passed < 150
+			}
+			every_country = {
+				limit = {
+					has_country_flag = mem_vazurans_met
+					NOT = {
+						has_country_flag = mem_vazurans_damper_field_quest
+					}
+				}
+				random_list = {
+					80 = {}
+					20 = {
+						country_event = { id = mem_vazurans.250 days = 1750 random = 1700 }
+					}
+				}
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				NOR = {
+					has_global_flag = mem_vazurans_disabled
+					has_global_flag = mem_vazurans_finished
+				}
+				has_global_flag = mem_vazurans_enabled
+				years_passed >= 150
+			}
+			every_country = {
+				limit = {
+					has_country_flag = mem_vazurans_met
+					NOT = {
+						has_country_flag = mem_vazurans_damper_field_quest
+					}
+				}
+				random_list = {
+					70 = {}
+					30 = {
+						country_event = { id = mem_vazurans.250 days = 1750 random = 1700 }
+					}
+				}
+			}
+		}
+	}
+}
+
 # Retaliation Fleet spawn
 country_event = {
 	id = mem_vazurans.100
@@ -2208,6 +2339,11 @@ planet_event = {
 			limit = {
 				years_passed >= 100
 				habitable_planet = yes
+				NOR = {
+					has_building = building_mem_planetary_shield_generator
+					has_building = building_mem_planetary_shield_generator_heavy
+					has_building = building_mem_planetary_shield_generator_orila
+				}
 			}
 			random_list = {
 				5 = {
@@ -2230,6 +2366,11 @@ planet_event = {
 		ELSE_IF = {
 			limit = {
 				years_passed >= 100
+				NOR = {
+					has_building = building_mem_planetary_shield_generator
+					has_building = building_mem_planetary_shield_generator_heavy
+					has_building = building_mem_planetary_shield_generator_orila
+				}
 			}
 			random_list = {
 				5 = {
@@ -2737,6 +2878,7 @@ ship_event = {
 country_event = {
 	id = mem_vazurans.250
 	hide_window = yes
+	is_triggered_only = yes
 	trigger = {
 		NOR = {
 			has_global_flag = mem_vazurans_disabled
@@ -2747,9 +2889,6 @@ country_event = {
 		NOT = {
 			has_country_flag = mem_vazurans_damper_field_quest
 		}
-	}
-	mean_time_to_happen = {
-		months = 720
 	}
 	immediate = {
 		set_country_flag = mem_vazurans_damper_field_quest
@@ -3222,11 +3361,12 @@ country_event = {
 	}
 }
 
-# Extermination of an AI empire starts by MTTH
+# Extermination of an AI empire starts by decade pulse check
 event = {
 	id = mem_vazurans.300
 	hide_window = yes
 	fire_only_once = yes
+	is_triggered_only = yes
 
 	trigger = {
 		years_passed >= 100
@@ -3241,10 +3381,7 @@ event = {
 			is_country_type = default
 		}
 	}
-
-	mean_time_to_happen = {
-		months = 300
-	}
+	
 
 	immediate = {
 		set_global_flag = mem_vazurans_extermination
