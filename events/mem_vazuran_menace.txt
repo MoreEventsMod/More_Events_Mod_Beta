@@ -19,6 +19,8 @@ namespace = mem_vazurans
 # mem_vazurans.10  |Establishing communications with every country that does not already know them (is started at fleet spawn 100 and 101)
 # mem_vazurans.20  |Information event about a known empire being attacked
 # mem_vazurans.21  |Information event about an unknown empire being attacked
+# mem_vazurans.30  |Information event about Vazuran Homefleet defeated
+# mem_vazurans.31  |Information event about Vazuran Homeworld taken
 # mem_vazurans.40  |Finishing investigation of first Rift
 # mem_vazurans.50  |Retaliation Fleet has been destroyed by target empire ready to progress quest
 # mem_vazurans.51  |Stabilization tech researched and project to stabilize rift set
@@ -988,6 +990,54 @@ country_event = {
 	
 	option = {
 		name = "WORRYING"
+	}
+}
+
+# Information event about Vazuran Homefleet defeated
+country_event = {
+	id = mem_vazurans.30
+	title = mem_vazurans.30.name
+	desc = mem_vazurans.30a.desc
+
+	picture = GFX_evt_smugglers_in_bar
+	
+	is_triggered_only = yes
+
+	immediate = {
+		random_country = {
+			limit = {
+				has_country_flag = mem_vazuran_victor
+			}
+			save_event_target_as = mem_vazuran_victor
+		}
+	}
+	
+	option = {
+		name = "EXCELLENT"
+	}
+}
+
+# Information event about Vazuran Homeworld taken
+country_event = {
+	id = mem_vazurans.31
+	title = mem_vazurans.31.name
+	desc = mem_vazurans.31a.desc
+
+	picture = GFX_evt_smugglers_in_bar
+	
+	is_triggered_only = yes
+
+	immediate = {
+		random_country = {
+			limit = {
+				has_country_flag = mem_vazuran_invader
+			}
+			save_event_target_as = mem_vazuran_invader
+		}
+	}
+	
+	option = {
+		name = mem_vazurans_31.a
 	}
 }
 
@@ -3181,6 +3231,8 @@ country_event = {
 	}
 
 	immediate = {
+		set_country_flag = mem_vazuran_victor
+		set_global_flag = mem_vazurans_finished
 		random_system = {
 			limit = {
 				has_star_flag = mem_vazuran_homesystem
@@ -3188,6 +3240,15 @@ country_event = {
 			starbase = {
 				set_owner = root
 			}
+		}
+		every_country = {
+			limit = {
+				is_ai = no
+				NOT = {
+					has_country_flag = mem_vazuran_victor
+				}
+			}
+			country_event = { id = mem_vazurans.30 days = 20 random = 10 }
 		}
 	}
 
@@ -3218,7 +3279,7 @@ country_event = {
 	}
 
 	immediate = {
-		set_global_flag = mem_vazurans_finished
+		set_country_flag = mem_vazuran_invader
 		FromFrom = {
 			every_tile = {
 				set_ruined = yes
@@ -3228,6 +3289,15 @@ country_event = {
 					kill_pop = yes
 				}
 			}
+		}
+		every_country = {
+			limit = {
+				is_ai = no
+				NOT = {
+					has_country_flag = mem_vazuran_invader
+				}
+			}
+			country_event = { id = mem_vazurans.31 days = 20 random = 10 }
 		}
 	}
 
@@ -3262,7 +3332,7 @@ country_event = {
 	}
 }
 
-# Happens if an empire with the which defeated the vazurans establishes communications with a new empire
+# Happens if an empire which defeated the vazurans establishes communications with a new empire
 # Executed right before a country has established communications with another country
 # This = Country which established the communications
 # From = Country which communications were established with
