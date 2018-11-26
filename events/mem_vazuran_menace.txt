@@ -19,11 +19,14 @@ namespace = mem_vazurans
 # mem_vazurans.10  |Establishing communications with every country that does not already know them (is started at fleet spawn 100 and 101)
 # mem_vazurans.20  |Information event about a known empire being attacked
 # mem_vazurans.21  |Information event about an unknown empire being attacked
+# mem_vazurans.30  |Information event about Vazuran Homefleet defeated
+# mem_vazurans.31  |Information event about Vazuran Homeworld taken
 # mem_vazurans.40  |Finishing investigation of first Rift
 # mem_vazurans.50  |Retaliation Fleet has been destroyed by target empire ready to progress quest
 # mem_vazurans.51  |Stabilization tech researched and project to stabilize rift set
 # mem_vazurans.52  |Vazuran system spawned
 # mem_vazurans.53  |Player being informed about established connection
+# mem_vazurans.90  |Decade pulse event to start damper field quest and extermination event
 # mem_vazurans.98  |Test Event for the Rift
 # mem_vazurans.99  |Test Event to show Targets
 ########################################################
@@ -49,7 +52,7 @@ namespace = mem_vazurans
 ########################################################
 # Story Events
 ########################################################
-# mem_vazurans.250 |Starting damper field bypass events
+# mem_vazurans.250 |Starting damper field bypass events starts by decade pulse check
 # mem_vazurans.251 |Crashed vazuran ship on planet excavated
 # mem_vazurans.252 |Anomaly done, project spawn
 # mem_vazurans.253 |Crashed vazuran ship on asteroid excavated
@@ -65,7 +68,7 @@ namespace = mem_vazurans
 ########################################################
 # Extermination Events
 ########################################################
-# mem_vazurans.300 |Extermination of an AI empire starts by MTTH
+# mem_vazurans.300 |Extermination of an AI empire starts by decade pulse check
 # mem_vazurans.301 |Rift opens and extermination fleet spawns
 # mem_vazurans.302 |tells the raiding or extermination fleet to move to the target planet to start bombarding
 # mem_vazurans.303 |Planet has been bombarded and now colony gets destroyed
@@ -990,6 +993,54 @@ country_event = {
 	}
 }
 
+# Information event about Vazuran Homefleet defeated
+country_event = {
+	id = mem_vazurans.30
+	title = mem_vazurans.30.name
+	desc = mem_vazurans.30a.desc
+
+	picture = GFX_evt_smugglers_in_bar
+	
+	is_triggered_only = yes
+
+	immediate = {
+		random_country = {
+			limit = {
+				has_country_flag = mem_vazuran_victor
+			}
+			save_event_target_as = mem_vazuran_victor
+		}
+	}
+	
+	option = {
+		name = "EXCELLENT"
+	}
+}
+
+# Information event about Vazuran Homeworld taken
+country_event = {
+	id = mem_vazurans.31
+	title = mem_vazurans.31.name
+	desc = mem_vazurans.31a.desc
+
+	picture = GFX_evt_smugglers_in_bar
+	
+	is_triggered_only = yes
+
+	immediate = {
+		random_country = {
+			limit = {
+				has_country_flag = mem_vazuran_invader
+			}
+			save_event_target_as = mem_vazuran_invader
+		}
+	}
+	
+	option = {
+		name = mem_vazurans_31.a
+	}
+}
+
 # Finishing first Rift investigation
 country_event = {
 	id = mem_vazurans.40
@@ -1148,6 +1199,119 @@ country_event = {
 	
 	option = {
 		name = "GOOD"
+	}
+}
+
+# Decade pulse event
+event = {
+	id = mem_vazurans.90
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	limit = {
+		has_global_flag = mem_vazurans_enabled
+		NOR = {
+			has_global_flag = mem_vazurans_disabled
+			has_global_flag = mem_vazurans_finished
+		}
+	}
+
+	immediate = {
+		If = {
+			limit = {
+				years_passed >= 100
+				years_passed < 150
+				NOT = {
+					has_global_flag = mem_vazurans_extermination
+				}
+				any_country = {
+					is_ai = yes
+					is_country_type = default
+				}
+			}
+			random_list = {
+				90 = {}
+				10 = {
+					event = { id = mem_vazurans.300 days = 1750 random = 1700 }
+				}
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				years_passed >= 150
+				NOT = {
+					has_global_flag = mem_vazurans_extermination
+				}
+				any_country = {
+					is_ai = yes
+					is_country_type = default
+				}
+			}
+			random_list = {
+				80 = {}
+				20 = {
+					event = { id = mem_vazurans.300 days = 1750 random = 1700 }
+				}
+			}
+		}
+		every_country = {
+			limit = {
+				has_country_flag = mem_vazurans_met
+				NOT = {
+					has_country_flag = mem_vazurans_damper_field_quest
+				}
+			}
+			country_event = { id = mem_vazurans.91 }
+		}
+	}
+}
+
+#bridge event to damper field quest
+country_event = {
+	id = mem_vazurans.91
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		IF = {
+			limit = {
+				years_passed >= 50
+				years_passed < 100
+			}
+			random_list = {
+				90 = {}
+				10 = {
+					country_event = { id = mem_vazurans.250 days = 1750 random = 1700 }
+					set_country_flag = mem_vazurans_damper_field_quest
+				}
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				years_passed >= 100
+				years_passed < 150
+			}
+			random_list = {
+				80 = {}
+				20 = {
+					country_event = { id = mem_vazurans.250 days = 1750 random = 1700 }
+					set_country_flag = mem_vazurans_damper_field_quest
+				}
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				years_passed >= 150
+			}
+			random_list = {
+				70 = {}
+				30 = {
+					country_event = { id = mem_vazurans.250 days = 1750 random = 1700 }
+					set_country_flag = mem_vazurans_damper_field_quest
+				}
+			}
+		}
 	}
 }
 
@@ -2208,6 +2372,11 @@ planet_event = {
 			limit = {
 				years_passed >= 100
 				habitable_planet = yes
+				NOR = {
+					has_building = building_mem_planetary_shield_generator
+					has_building = building_mem_planetary_shield_generator_heavy
+					has_building = building_mem_planetary_shield_generator_orila
+				}
 			}
 			random_list = {
 				5 = {
@@ -2230,6 +2399,11 @@ planet_event = {
 		ELSE_IF = {
 			limit = {
 				years_passed >= 100
+				NOR = {
+					has_building = building_mem_planetary_shield_generator
+					has_building = building_mem_planetary_shield_generator_heavy
+					has_building = building_mem_planetary_shield_generator_orila
+				}
 			}
 			random_list = {
 				5 = {
@@ -2737,22 +2911,14 @@ ship_event = {
 country_event = {
 	id = mem_vazurans.250
 	hide_window = yes
+	is_triggered_only = yes
 	trigger = {
 		NOR = {
 			has_global_flag = mem_vazurans_disabled
 			has_global_flag = mem_vazurans_finished
 		}
-		years_passed >= 50
-		has_country_flag = mem_vazurans_met
-		NOT = {
-			has_country_flag = mem_vazurans_damper_field_quest
-		}
-	}
-	mean_time_to_happen = {
-		months = 720
 	}
 	immediate = {
-		set_country_flag = mem_vazurans_damper_field_quest
 		random_list = {
 			1 = {
 				random_planet_within_border = {
@@ -3065,6 +3231,8 @@ country_event = {
 	}
 
 	immediate = {
+		set_country_flag = mem_vazuran_victor
+		set_global_flag = mem_vazurans_finished
 		random_system = {
 			limit = {
 				has_star_flag = mem_vazuran_homesystem
@@ -3072,6 +3240,15 @@ country_event = {
 			starbase = {
 				set_owner = root
 			}
+		}
+		every_country = {
+			limit = {
+				is_ai = no
+				NOT = {
+					has_country_flag = mem_vazuran_victor
+				}
+			}
+			country_event = { id = mem_vazurans.30 days = 20 random = 10 }
 		}
 	}
 
@@ -3102,7 +3279,7 @@ country_event = {
 	}
 
 	immediate = {
-		set_global_flag = mem_vazurans_finished
+		set_country_flag = mem_vazuran_invader
 		FromFrom = {
 			every_tile = {
 				set_ruined = yes
@@ -3112,6 +3289,15 @@ country_event = {
 					kill_pop = yes
 				}
 			}
+		}
+		every_country = {
+			limit = {
+				is_ai = no
+				NOT = {
+					has_country_flag = mem_vazuran_invader
+				}
+			}
+			country_event = { id = mem_vazurans.31 days = 20 random = 10 }
 		}
 	}
 
@@ -3146,7 +3332,7 @@ country_event = {
 	}
 }
 
-# Happens if an empire with the which defeated the vazurans establishes communications with a new empire
+# Happens if an empire which defeated the vazurans establishes communications with a new empire
 # Executed right before a country has established communications with another country
 # This = Country which established the communications
 # From = Country which communications were established with
@@ -3222,11 +3408,12 @@ country_event = {
 	}
 }
 
-# Extermination of an AI empire starts by MTTH
+# Extermination of an AI empire starts by decade pulse check
 event = {
 	id = mem_vazurans.300
 	hide_window = yes
 	fire_only_once = yes
+	is_triggered_only = yes
 
 	trigger = {
 		years_passed >= 100
@@ -3241,10 +3428,7 @@ event = {
 			is_country_type = default
 		}
 	}
-
-	mean_time_to_happen = {
-		months = 300
-	}
+	
 
 	immediate = {
 		set_global_flag = mem_vazurans_extermination
