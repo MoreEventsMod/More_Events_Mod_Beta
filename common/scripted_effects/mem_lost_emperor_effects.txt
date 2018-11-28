@@ -1,7 +1,6 @@
 #I'm basically using these so I don't lose them
 
-
-give_neochadanus_resources = { #placeholder until 2.2
+give_neochadanus_resources = {
 	minerals = 20000
 	energy = 20000
 	food = 4000
@@ -43,6 +42,121 @@ mem_create_neochadanus = {
 		effect = {
 			set_leader_flag = mem_neochadanus
 			save_event_target_as = mem_neochadanus
+		}
+	}
+}
+
+
+#I use this twice in different events so figured this was the best way to do it.
+mem_neochadanus_seizes_ship_and_flees = {
+	if = {
+		limit = {
+			any_ship = {
+				is_ship_size = battleship
+			}
+		}
+		random_owned_ship = {
+			limit = {
+				is_ship_size = battleship
+			}
+			save_event_target_as = mem_neochadanus_ship
+		}
+	}
+	else_if = {
+		limit = {
+			any_ship = {
+				is_ship_size = cruiser
+			}
+		}
+		random_owned_ship = {
+			limit = {
+				is_ship_size = cruiser
+			}
+			save_event_target_as = mem_neochadanus_ship
+		}
+	}
+	else = {
+		random_owned_ship = {
+			save_event_target_as = mem_neochadanus_ship
+		}
+	}
+	event_target:mem_neochadanus_ship = {
+		delete_ship = this
+	}
+	
+	root.owner = {
+		save_event_target_as = mem_neochadanus_victim_country
+	}
+	
+	if = {
+		limit = {
+			root.owner = {
+				any_owned_planet = {
+					is_ecumenopolis = yes
+					is_capital = no
+					solar_system = {
+						NOT = {
+							is_same_value = root.owner.capital_scope.solar_system
+						}
+					}
+				}
+			}
+			closest_system = {
+				limit = {
+					exists = owner
+					owner = {
+						is_same_value = root.owner
+					}
+					any_planet = {
+						has_owner = yes
+						is_colony = yes
+						is_ecumenopolis = yes
+						is_capital = no
+					}
+					NOT = {
+						any_planet = {
+							is_capital = yes
+						}
+					}
+				}
+				random_planet = {
+					limit = {
+						has_owner = yes
+						is_colony = yes
+						is_ecumenopolis = yes
+						is_capital = no
+					}
+					planet_event = { id = mem_lost_emperor.30 days = 180 }
+				}
+			}
+		}
+		else = {
+			closest_system = {
+				limit = {
+					exists = owner
+					owner = {
+						is_same_value = root.owner
+					}
+					any_planet = {
+						has_owner = yes
+						is_colony = yes
+						is_capital = no
+					}
+					NOT = {
+						any_planet = {
+							is_capital = yes
+						}
+					}
+				}
+				random_planet = {
+					limit = {
+						has_owner = yes
+						is_colony = yes
+						is_capital = no
+					}
+					planet_event = { id = mem_lost_emperor.30 days = 180 }
+				}
+			}
 		}
 	}
 }
