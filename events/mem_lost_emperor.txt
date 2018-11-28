@@ -337,39 +337,7 @@ country_event = {
 	}
 
 	immediate = {
-		create_species = {
-			name = "Neochadanus"
-			class = random_non_machine
-			
-			traits = {
-				trait = trait_psionic
-				trait = trait_cybernetic
-				trait = trait_erudite
-				trait = trait_very_strong
-				trait = trait_venerable
-			}
-		}
-		create_saved_leader = {
-			key = Neochadanus
-			name = "Neochadanus"
-			type = ruler
-			species = last_created
-			
-			skill = 10
-			
-			traits = {
-				trait = leader_trait_ruler_chosen
-				trait = mem_leader_trait_ruler_ancient_cyborg
-				trait = leader_trait_ruler_erudite
-				trait = mem_leader_trait_ruler_knowledge_of_another_age
-				trait = mem_leader_trait_ruler_lunatic_neoch
-			}
-
-			effect = {
-				set_leader_flag = mem_neochadanus
-				save_event_target_as = mem_neochadanus
-			}
-		}
+		mem_create_neochadanus = yes
 	}
 
 	option = {
@@ -598,6 +566,7 @@ country_event = {
 		custom_tooltip = mem_lost_emperor.20.imprison.tooltip
 
 		hidden_effect = {
+			country_event = { id = mem_lost_emperor.21 }
 			event_target:mem_azran_vanquisher_fleet = {
 				set_fleet_flag = mem_neochadanus_carrying_fleet
 
@@ -628,13 +597,15 @@ country_event = {
 			2 = {
 				custom_tooltip = mem_lost_emperor.20.dissemble.tooltip.success
 				hidden_effect = {
-					country_event = { id = mem_lost_emperor.21 days = 1 }
+					country_event = { id = mem_lost_emperor.21 }
 				}
 			}
 			1 = {
 				custom_tooltip = mem_lost_emperor.20.dissemble.tooltip.fail
 				hidden_effect = {
-					country_event = { id = mem_lost_emperor.22 days = 1 }
+					event_target:mem_azran_vanquisher_fleet = {
+						fleet_event = { id = mem_lost_emperor.29 }
+					}
 				}
 			}
 		}
@@ -657,9 +628,76 @@ country_event = {
 
 
 
+######Imprison subchain
+
+#Simple notification
+country_event = {
+	id = mem_lost_emperor.21
+	title = mem_lost_emperor.21.name
+	desc = mem_lost_emperor.21.desc
+	picture = TODO
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = OK
+	}
+}
 
 
+#Escapes
 
+# A fleet has entered a system
+# Scope = Fleet
+# From = System
+fleet_event = {
+	id = mem_lost_emperor.22
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_fleet_flag = mem_neochadanus_carrying_fleet
+		
+		owner = {
+			num_owned_planets > 1
+			any_owned_planet = {
+				solar_system = {
+					NOT = {
+						is_same_value = prevprev.solar_system
+					}
+				}
+			}
+		}
+	}
+
+	immediate = {
+		random_list = {
+			35 = {
+				fleet_event = { id = mem_lost_emperor.23 }
+			}
+			965 = { }
+		}
+	}
+}
+
+#FromFrom = system
+fleet_event = {
+	id = mem_lost_emperor.23
+	title = mem_lost_emperor.23.name
+	desc = mem_lost_emperor.23.desc
+	picture = TODO
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		mem_neochadanus_seizes_ship_and_flees = yes
+	}
+	
+	option = {
+		name = WORRYING
+		custom_tooltip = mem_lost_emperor.23.tooltip
+	}
+}
 
 
 
@@ -684,25 +722,288 @@ country_event = {
 }
 
 
-# A fleet has entered a system
-# Scope = Fleet
-# From = System
-fleet_event = {
-	id = mem_lost_emperor.30
-	hide_window = yes
-	is_triggered_only = yes
 
+
+
+
+
+
+
+
+#Negative follow-up to .20.dissemble
+fleet_event = {
+	id = mem_lost_emperor.29
+	title = mem_lost_emperor.29.name
+	desc = mem_lost_emperor.29.desc
+	picture = TODO
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		mem_neochadanus_seizes_ship_and_flees = yes
+	}
+	
+	option = {
+		name = WORRYING
+		custom_tooltip = mem_lost_emperor.29.tooltip
+	}
+}
+
+
+##### Neochadanus Escaped, seized a planet 
+
+planet_event = {
+	id = mem_lost_emperor.30
+	title = mem_lost_emperor.30.name
+	desc = mem_lost_emperor.30.desc
+	picture = TODO
+	
+	is_triggered_only = yes
+	
 	trigger = {
-		has_fleet_flag = mem_neochadanus_carrying_fleet
+		has_owner = yes
+		exists = owner
+		owner = {
+			is_same_value = event_target:mem_neochadanus_victim_country
+		}
+	}
+	
+	immediate = {
+		create_country = {
+			#Neochadanus stuff!
+			type = mem_neochadanus_ascendant
+			
+			authority = auth_imperial
+			ethic = ethic_authoritarian
+			ethic = ethic_spiritualist
+			ethic = ethic_xenophile
+			
+			civic = mem_neochadanus_civic_1
+			civic = mem_neochadanus_civic_2
+			civic = mem_neochadanus_civic_3
+			
+			species = "Immortals"
+			
+			effect = {
+				save_event_target_as = mem_neochadanus_ascendant
+				
+				#does this work?
+				set_leader = Neochadanus
+				
+				add_modifier = { #ethics pull and unrest annihilated
+					modifer = mem_neochadanus_setup_boost
+					days = 4800
+				}
+				
+				root = {					
+					if = {
+						limit = {
+							NOT = {
+								is_ecumenopolis = yes
+							}
+						}
+						change_planet_size = 4
+						
+						add_modifier = { #these are too dangerous to not limit to one planet
+							modifer = mem_neochadanus_setup_boost_planet
+							days = 4800
+						}
+					}
+				
+					set_owner = prev
+					
+					solar_system.starbase = {
+						set_owner = prevprev
+						set_starbase_size = starbase_citadel
+						
+						set_starbase_module = {
+							slot = 1
+							module = shipyard
+						}
+						set_starbase_module = {
+							slot = 2
+							module = shipyard
+						}
+						set_starbase_module = {
+							slot = 3
+							module = crew_quarters
+						}
+						set_starbase_module = {
+							slot = 4
+							module = something
+						}
+						set_starbase_module = {
+							slot = 5
+							module = something
+						}
+						set_starbase_module = {
+							slot = 6
+							module = something
+						}
+						
+						set_starbase_building = {
+							slot = 1
+							building = something
+						}
+						set_starbase_building = {
+							slot = 2
+							building = something
+						}
+						set_starbase_building = {
+							slot = 3
+							building = something
+						}
+						set_starbase_building = {
+							slot = 4
+							building = something
+						}
+						
+						#is that all slots covered?
+					}
+				}
+				if = {
+					limit = {
+						any_country = {
+							OR = {
+								is_country_type = fallen_empire
+								is_country_type = awakened_fallen_empire
+							}
+						}
+						random_country = {
+							limit = {
+								OR = {
+									is_country_type = fallen_empire
+									is_country_type = awakened_fallen_empire
+								}
+							}
+							prev = {
+								copy_techs_from = {
+									who = prev
+								}
+							}
+						}
+					}
+				}
+				else = {
+					copy_techs_from = {
+						who = event_target:mem_neochadanus_victim_country
+					}
+					add_more_techs = {
+						experimental_hyperlane
+						all_ships
+						tie
+						all_mechanics
+						all_biology
+						with_dlcs:all_extras
+					}
+				}
+				
+				event_target:mem_neochadanus_victim_country = {
+					every_relation = {
+						establish_communications_no_message = prevprev
+						country_event = { id = mem_lost_emperor.30 } #tell them about it
+					}
+					establish_communications_no_message = prev
+				}
+				
+				give_neochadanus_resources = yes
+				
+				set_timed_country_flag = {
+					flag = mem_neochadanus_ascendant_timer
+					years = 50
+				}
+				
+				add_opinion_modifier = {
+					who = event_target:mem_neochadanus_victim_country
+					modifier = mem_neochadanus_scorned
+				}
+				
+				while = {
+					count = 4
+					
+					closest_system = {
+						limit = {
+							owner = event_target:mem_neochadanus_victim_country
+							has_owner = no
+						}
+						max_steps = 1
+						starbase = {
+							set_owner = event_target:mem_neochadanus_ascendant
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	option = { #we must recover this lost territory!
+		name = mem_lost_emperor.30.A
+		
+		event_target:mem_neochadanus_victim_country = {
+			hidden_effect = {
+				add_claim = root.solar_system
+			}
+			declare_war = {
+				who = event_target:mem_neochadanus_ascendant
+				war_goal = wg_conquest
+			}
+		}
+	}
+	
+	option = { #let's see how this develops
+		name = mem_lost_emperor.30.B
+	}
+}
+
+
+
+country_event = {
+	id = mem_lost_emperor.38
+
+	hide_window = yes
+	
+	mean_time_to_happen = {
+		years = 10
 	}
 
+	trigger = {
+		is_country_type = mem_neochadanus
+		is_subject = no
+		is_at_war = no
+	}
+	
 	immediate = {
-		random_list = {
-			35 = {
-				effects = yes
-			}
-			965 = { }
+		effects = yes #all planets ascend, the empire disappears
+		
+		every_relation = {
+			country_event = { id = mem_lost_emperor.39
 		}
+	}
+}
+
+
+#Fallback in case dies for some reason
+country_event = {
+	id = mem_lost_emperor.800
+	title = mem_lost_emperor.800.name
+	desc = mem_lost_emperor.800.desc
+	picture = GFX_evt_space_funeral
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		has_country_flag = mem_emperor_is_neochadanus
+		from = {
+			has_leader_flag = mem_neochadanus
+		}
+	}
+	
+	immediate = {
+		remove_country_flag = mem_emperor_is_neochadanus
+	}
+	
+	option = {
+		name = mem_lost_emperor.800.option
 	}
 }
 
