@@ -13,6 +13,62 @@ namespace = mem_lost_emperor
 @MEM_minor_neoch_reward = 6
 
 
+#On_game_start
+event = {
+	id = mem_lost_emperor.1000
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		#disable in multiplayers and for gestalts
+		any_country = {
+			is_ai = no
+			NOR = {
+				has_ethic = ethic_gestalt_consciousness
+				any_country = {
+					NOT = {
+						is_same_value = prev
+					}
+					is_ai = no
+				}
+			}
+		}
+	}
+	
+	immediate = {
+		random_list = {
+			3 = { } #too bad
+			1 = {
+				every_country = {
+					limit = { is_ai = no }
+
+					closest_system = {
+						limit = {
+							NOT = {
+								exists = owner
+							}
+							is_planet_class = pc_neutron_star
+							NOT = {
+								OR = {
+									any_planet = {
+										OR = {
+											is_colonizable = yes
+											is_colony = yes
+										}
+									}
+									has_star_flag = enclave
+								}
+							}
+						}
+						add_anomaly = mem_lost_emperor_category
+					}
+				}
+			}
+		}
+	}
+}
+
+
 ship_event = {
 	id = mem_lost_emperor.1
 	title = mem_lost_emperor.1.name
@@ -510,6 +566,30 @@ country_event = {
 		portrait = event_target:mem_neochadanus
 	}
 
+	#For the crazy option
+	immediate = {
+		event_target:mem_azran_vanquisher_fleet = {
+			if = {
+				limit = {
+					any_owned_ship = {
+						is_ship_size = corvette
+					}
+				}
+				random_owned_ship = {
+					limit = {
+						is_ship_size = corvette
+					}
+					save_event_target_as = mem_neochadanus_ship
+				}
+			}
+			else = {
+				random_owned_ship = {
+					save_event_target_as = mem_neochadanus_ship
+				}
+			}
+		}
+	}
+
 	option = {
 		name = mem_lost_emperor.20.accept
 		custom_tooltip = mem_lost_emperor.20.accept.tooltip
@@ -635,6 +715,21 @@ country_event = {
 		
 		response_text = mem_lost_emperor.20.destroy.response
 	}
+	
+	option = {
+		name = mem_lost_emperor.20.release
+		hidden_effect = {
+			mem_neochadanus_seizes_ship_and_flees = yes
+
+			set_timed_country_flag = {
+				flag = mem_neochadanus_not_scorned
+				days = 360
+			}
+		}
+
+		custom_tooltip = mem_lost_emperor.20.release.1
+		custom_tooltip = mem_lost_emperor.20.release.2
+	}
 }
 
 
@@ -647,7 +742,7 @@ country_event = {
 	id = mem_lost_emperor.21
 	title = mem_lost_emperor.21.name
 	desc = mem_lost_emperor.21.desc
-	picture = TODO
+	picture = GFX_evt_ship_in_orbit
 	
 	is_triggered_only = yes
 	
@@ -697,7 +792,7 @@ fleet_event = {
 	id = mem_lost_emperor.23
 	title = mem_lost_emperor.23.name
 	desc = mem_lost_emperor.23.desc
-	picture = TODO
+	picture = GFX_evt_federation_fleet
 	
 	is_triggered_only = yes
 	
@@ -747,7 +842,7 @@ fleet_event = {
 	id = mem_lost_emperor.29
 	title = mem_lost_emperor.29.name
 	desc = mem_lost_emperor.29.desc
-	picture = TODO
+	picture = GFX_evt_federation_fleet
 	
 	is_triggered_only = yes
 	
@@ -784,11 +879,15 @@ planet_event = {
 		create_country = {
 			#Neochadanus stuff!
 			type = mem_neochadanus_ascendant
+
+			name = mem_neochadanus_country_name
 			
 			authority = auth_imperial
-			ethic = ethic_authoritarian
-			ethic = ethic_spiritualist
-			ethic = ethic_xenophile
+			ethics = {
+				ethic = ethic_authoritarian
+				ethic = ethic_spiritualist
+				ethic = ethic_militarist
+			}
 			
 			civic = mem_neochadanus_civic_1
 			civic = mem_neochadanus_civic_2
@@ -838,82 +937,46 @@ planet_event = {
 						}
 						set_starbase_module = {
 							slot = 3
-							module = crew_quarters
+							module = shipyard
 						}
 						set_starbase_module = {
 							slot = 4
-							module = something
+							module = anchorage
 						}
 						set_starbase_module = {
 							slot = 5
-							module = something
+							module = trading_hub
 						}
 						set_starbase_module = {
 							slot = 6
-							module = something
+							module = trading_hub
 						}
 						
 						set_starbase_building = {
 							slot = 1
-							building = something
+							building = crew_quarters
 						}
 						set_starbase_building = {
 							slot = 2
-							building = something
+							building = hydroponics_bay
 						}
 						set_starbase_building = {
 							slot = 3
-							building = something
+							building = fleet_academy
 						}
 						set_starbase_building = {
 							slot = 4
-							building = something
+							building = target_uplink_computer
 						}
 						
 						#is that all slots covered?
-					}
-				}
-				if = {
-					limit = {
-						any_country = {
-							OR = {
-								is_country_type = fallen_empire
-								is_country_type = awakened_fallen_empire
-							}
-						}
-						random_country = {
-							limit = {
-								OR = {
-									is_country_type = fallen_empire
-									is_country_type = awakened_fallen_empire
-								}
-							}
-							prev = {
-								copy_techs_from = {
-									who = prev
-								}
-							}
-						}
-					}
-				}
-				else = {
-					copy_techs_from = {
-						who = event_target:mem_neochadanus_victim_country
-					}
-					add_more_techs = {
-						experimental_hyperlane
-						all_ships
-						tie
-						all_mechanics
-						all_biology
-						with_dlcs:all_extras
 					}
 				}
 				
 				event_target:mem_neochadanus_victim_country = {
 					every_relation = {
 						establish_communications_no_message = prevprev
-						country_event = { id = mem_lost_emperor.30 } #tell them about it
+						country_event = { id = mem_lost_emperor.31 } #tell them about it
 					}
 					establish_communications_no_message = prev
 				}
@@ -925,9 +988,16 @@ planet_event = {
 					years = 50
 				}
 				
-				add_opinion_modifier = {
-					who = event_target:mem_neochadanus_victim_country
-					modifier = mem_neochadanus_scorned
+				if = {
+					limit = {
+						NOT = {
+							has_country_flag = mem_neochadanus_not_scorned
+						}
+					}
+					add_opinion_modifier = {
+						who = event_target:mem_neochadanus_victim_country
+						modifier = mem_neochadanus_scorned
+					}
 				}
 				
 				while = {
@@ -935,7 +1005,7 @@ planet_event = {
 					
 					closest_system = {
 						limit = {
-							owner = event_target:mem_neochadanus_victim_country
+							is_owned_by = event_target:mem_neochadanus_victim_country
 							has_owner = no
 						}
 						max_steps = 1
@@ -951,13 +1021,18 @@ planet_event = {
 	option = { #we must recover this lost territory!
 		name = mem_lost_emperor.30.A
 		
-		event_target:mem_neochadanus_victim_country = {
-			hidden_effect = {
-				add_claim = root.solar_system
+		hidden_effect = {
+			solar_system = {
+				add_claims = {
+					who = event_target:mem_neochadanus_victim_country
+				}
 			}
+		}
+		event_target:mem_neochadanus_victim_country = {
 			declare_war = {
-				who = event_target:mem_neochadanus_ascendant
-				war_goal = wg_conquest
+				target = event_target:mem_neochadanus_ascendant
+				attacker_war_goal = wg_conquest
+				
 			}
 		}
 	}
@@ -979,7 +1054,7 @@ country_event = {
 	}
 
 	trigger = {
-		is_country_type = mem_neochadanus
+		is_country_type = mem_neochadanus_ascendant
 		is_subject = no
 		is_at_war = no
 	}
@@ -988,7 +1063,7 @@ country_event = {
 		effects = yes #all planets ascend, the empire disappears
 		
 		every_relation = {
-			country_event = { id = mem_lost_emperor.39
+			country_event = { id = mem_lost_emperor.39 }
 		}
 	}
 }

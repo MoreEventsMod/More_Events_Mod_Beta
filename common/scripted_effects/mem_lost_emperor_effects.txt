@@ -6,7 +6,7 @@ give_neochadanus_resources = {
 	food = 4000
 	influence = 1000
 	unity = 1000000
-	create_fleet_from_naval_capacity = 0.25
+	create_fleet_from_naval_cap = 0.25
 }
 
 
@@ -51,35 +51,43 @@ mem_create_neochadanus = {
 mem_neochadanus_seizes_ship_and_flees = {
 	if = {
 		limit = {
-			any_ship = {
-				is_ship_size = battleship
+			NOT = {
+				exists = event_target:mem_neochadanus_ship
 			}
 		}
-		random_owned_ship = {
+		if = {
 			limit = {
-				is_ship_size = battleship
+				any_ship = {
+					is_ship_size = battleship
+				}
 			}
-			save_event_target_as = mem_neochadanus_ship
-		}
-	}
-	else_if = {
-		limit = {
-			any_ship = {
-				is_ship_size = cruiser
+			random_owned_ship = {
+				limit = {
+					is_ship_size = battleship
+				}
+				save_event_target_as = mem_neochadanus_ship
 			}
 		}
-		random_owned_ship = {
+		else_if = {
 			limit = {
-				is_ship_size = cruiser
+				any_ship = {
+					is_ship_size = cruiser
+				}
 			}
-			save_event_target_as = mem_neochadanus_ship
+			random_owned_ship = {
+				limit = {
+					is_ship_size = cruiser
+				}
+				save_event_target_as = mem_neochadanus_ship
+			}
+		}
+		else = {
+			random_owned_ship = {
+				save_event_target_as = mem_neochadanus_ship
+			}
 		}
 	}
-	else = {
-		random_owned_ship = {
-			save_event_target_as = mem_neochadanus_ship
-		}
-	}
+
 	event_target:mem_neochadanus_ship = {
 		delete_ship = this
 	}
@@ -101,33 +109,33 @@ mem_neochadanus_seizes_ship_and_flees = {
 					}
 				}
 			}
-			closest_system = {
-				limit = {
-					exists = owner
-					owner = {
-						is_same_value = root.owner
-					}
+		}
+		closest_system = {
+			limit = {
+				exists = owner
+				owner = {
+					is_same_value = root.owner
+				}
+				any_planet = {
+					has_owner = yes
+					is_colony = yes
+					is_ecumenopolis = yes
+					is_capital = no
+				}
+				NOT = {
 					any_planet = {
-						has_owner = yes
-						is_colony = yes
-						is_ecumenopolis = yes
-						is_capital = no
-					}
-					NOT = {
-						any_planet = {
-							is_capital = yes
-						}
+						is_capital = yes
 					}
 				}
-				random_planet = {
-					limit = {
-						has_owner = yes
-						is_colony = yes
-						is_ecumenopolis = yes
-						is_capital = no
-					}
-					planet_event = { id = mem_lost_emperor.30 days = 180 }
+			}
+			random_planet = {
+				limit = {
+					has_owner = yes
+					is_colony = yes
+					is_ecumenopolis = yes
+					is_capital = no
 				}
+				planet_event = { id = mem_lost_emperor.30 days = 180 }
 			}
 		}
 		else = {
