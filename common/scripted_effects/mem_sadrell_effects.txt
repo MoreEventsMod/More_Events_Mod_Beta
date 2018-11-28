@@ -1,0 +1,604 @@
+mem_sadrell_generate_cluster = {
+    random_megastructure = {
+        limit = { is_megastructure_type = mem_sadrell_gateway_inactive }
+        remove_megastructure = this
+        solar_system = {
+            spawn_megastructure = {
+                type = mem_sadrell_gateway_active
+                orbit_angle = 0
+                orbit_distance = 60
+                location = solar_system
+            }
+            random_system_megastructure = {
+                limit = { is_megastructure_type = mem_sadrell_gateway_active }
+                activate_gateway = this
+            }
+        }            
+    }
+    set_spawn_system_batch = begin
+    no_scope = {
+        spawn_system = {
+            min_distance >= 700
+            max_distance <= 720
+            min_orientation_angle = 244
+            max_orientation_angle = 246
+            initializer = mem_sadrell_1_0
+        }
+        event_target:system_0 = {
+            spawn_system = {
+                min_distance >= 15
+                max_distance <= 25
+                min_orientation_angle = 70
+                max_orientation_angle = 75
+                initializer = mem_sadrell_1_1
+            }
+            spawn_system = {
+                min_distance >= 15
+                max_distance <= 25
+                min_orientation_angle = 142
+                max_orientation_angle = 147
+                initializer = mem_sadrell_1_2
+            }
+            spawn_system = {
+                min_distance >= 15
+                max_distance <= 25
+                min_orientation_angle = 214
+                max_orientation_angle = 217
+                initializer = mem_sadrell_1_3
+            }
+            spawn_system = {
+                min_distance >= 15
+                max_distance <= 25
+                min_orientation_angle = 286
+                max_orientation_angle = 289
+                initializer = mem_sadrell_1_4
+            }
+            spawn_system = {
+                min_distance >= 15
+                max_distance <= 25
+                min_orientation_angle = 350
+                max_orientation_angle = 355
+                initializer = mem_sadrell_1_5
+            }
+        }
+    }
+    every_system = {
+        limit = { has_star_flag = mem_sadrell_extant_cluster }
+        isolate_system = yes
+        while = {
+            count = 3
+            random_system_planet = {
+                limit = {
+                    NOT = { has_planet_flag = mem_sadrell_extant_deposit }
+                    is_star = no
+                }
+                set_planet_flag = mem_sadrell_extant_deposit
+                orbital_deposit_tile = {
+                    random_list = {
+                        35 = { set_deposit = d_rich_mineral_deposit }
+                        20 = { set_deposit = d_rich_energy_deposit }
+                        10 = { set_deposit = d_immense_mineral_deposit }
+                        5 = { set_deposit = d_immense_energy_deposit }
+                    }
+                    random_list = {
+                        20 = { add_deposit = d_rich_mineral_deposit }
+                        20 = { add_deposit = d_rich_energy_deposit }
+                        5 = { add_deposit = d_immense_mineral_deposit }
+                        5 = { add_deposit = d_immense_energy_deposit }
+                        50 = {  }
+                    }
+                }
+            }
+        }
+    }
+    add_hyperlane = {
+        from = event_target:system_1
+        to = event_target:system_2
+    }
+    add_hyperlane = {
+        from = event_target:system_2
+        to = event_target:system_3
+    }
+    add_hyperlane = {
+        from = event_target:system_3
+        to = event_target:system_4
+    }
+    add_hyperlane = {
+        from = event_target:system_4
+        to = event_target:system_5
+    }
+    add_hyperlane = {
+        from = event_target:system_5
+        to = event_target:system_1
+    }
+    add_hyperlane = {
+        from = event_target:system_0
+        to = event_target:system_1
+    }
+    add_hyperlane = {
+        from = event_target:system_0
+        to = event_target:system_3
+    }
+    set_spawn_system_batch = end
+}
+
+# Creating Sadrell country, execute after spawning cluster and setting up country itself
+mem_sadrell_create_sadrell_colonies = {
+    event_target:desert_colony = {
+        create_colony = {
+            owner = event_target:newcomer_country
+            species = event_target:mem_sadrell_species
+        }
+        mem_sadrell_set_buildings = yes
+    }
+    event_target:tundra_colony = {
+        create_colony = {
+            owner = event_target:newcomer_country
+            species = event_target:mem_sadrell_species
+        }
+        mem_sadrell_set_buildings = yes
+    }
+    event_target:system_0 = {
+        create_starbase = {
+            size = starbase_starfortress
+            owner = event_target:newcomer_country
+
+            module = "shipyard"
+            module = "shipyard"
+            module = "anchorage"
+            module = "anchorage"
+            module = "hangar_bay"
+            module = "gun_battery"
+            
+            building = "crew_quarters"
+            building = "black_hole_observatory"
+            building = "naval_logistics_office"
+
+            effect = {
+                while = {
+                    count = 5
+                    create_ship = {
+                        name = random
+                        random_existing_design = military_station_small
+                    }
+                }
+            }
+            
+        }
+    }
+    event_target:system_1 = {
+        create_starbase = {
+            size = starbase_starport
+            owner = event_target:newcomer_country
+
+            module = "shipyard"
+            module = "anchorage"
+
+            building = "naval_logistics_office"
+        }
+    }
+
+    event_target:system_2 = {
+        create_starbase = {
+            size = starbase_outpost
+            owner = event_target:newcomer_country
+        }
+    }
+
+    event_target:system_3 = {
+        create_starbase = {
+            size = starbase_starport
+            owner = event_target:newcomer_country
+
+            module = "shipyard"
+            module = "anchorage"
+
+            building = "naval_logistics_office"
+        }
+    }
+
+    event_target:system_4 = {
+        create_starbase = {
+            size = starbase_starhold
+            owner = event_target:newcomer_country
+
+            module = "gun_battery"
+            module = "trading_hub"
+            module = "trading_hub"
+            module = "trading_hub"
+
+            building = "offworld_trading_company"
+            building = "hydroponics_bay"
+
+            effect = {
+                while = {
+                    count = 3
+                    create_ship = {
+                        name = random
+                        random_existing_design = military_station_small
+                    }
+                }
+            }
+        }
+    }
+
+    event_target:system_5 = {
+        create_starbase = {
+            size = starbase_starhold
+            owner = event_target:newcomer_country
+
+            module = "gun_battery"
+            module = "trading_hub"
+            module = "trading_hub"
+            module = "trading_hub"
+
+            building = "offworld_trading_company"
+            building = "hydroponics_bay"
+
+            effect = {
+                while = {
+                    count = 3
+                    create_ship = {
+                        name = random
+                        random_existing_design = military_station_small
+                    }
+                }
+            }
+        }
+    }
+
+    while = {
+        count = 2
+        event_target:newcomer_country = {
+            create_fleet_from_naval_cap = 0.15
+        }
+        last_created_fleet = {
+            set_location = event_target:system_0.star
+        }
+    }
+
+    every_system = {
+        limit = { has_star_flag = mem_sadrell_extant_cluster }
+        every_system_planet = {
+            limit = { 
+				has_deposit_for = shipclass_mining_station 
+				has_mining_station = no
+			}
+			create_mining_station = {
+				owner = event_target:newcomer_country
+			}
+        }
+        every_system_planet = {
+            limit = { 
+				has_deposit_for = shipclass_research_station 
+				has_research_station = no
+			}
+			create_research_station = {
+				owner = event_target:newcomer_country
+			}
+        }
+    }
+
+    event_target:newcomer_country = {
+        add_minerals = 5000
+        add_energy = 5000
+        add_influence = 1000
+        add_100_unity_per_year_passed = yes
+        while = {
+            count = 2
+            create_leader = {
+                type = admiral
+            }
+        }
+        create_leader = {
+            type = governor
+        }
+        while = {
+            count = 3
+            create_leader = {
+                type = scientist
+            }
+        }
+        create_leader = {
+            type = general
+        }
+        country_event = { id = game_start.9 }
+    }
+
+    every_system = {
+        limit = { has_star_flag = mem_sadrell_home_cluster }
+        every_system_planet = {
+            surveyed = {
+                set_surveyed = yes
+                surveyor = event_target:newcomer_country
+            }
+        }
+    }
+}
+
+# Fill planet with buildings
+mem_sadrell_set_buildings = {
+    every_tile = {
+        limit = { has_building = yes }
+        remove_building = yes
+        kill_pop = yes
+    }
+    random_tile = {
+        limit = {
+            num_adjacent_tiles > 3
+        }
+        set_building = building_capital_2
+        set_deposit = d_rich_energy_deposit
+        create_pop = {
+            species = event_target:mem_sadrell_species
+        }
+    }
+    random_tile = {
+        limit = {
+            has_building = no
+            any_neighboring_tile = {
+                has_building = building_capital_2
+            }
+        }
+        set_building = building_mining_network_3
+        set_deposit = d_mineral_deposit
+        build_pop = {
+            name = buildable_robot_pop_2
+            grown = yes
+        }
+    }
+    random_tile = {
+        limit = {
+            has_building = no
+            any_neighboring_tile = {
+                has_building = building_capital_2
+            }
+        }
+        set_building = building_hydroponics_farm_3
+        set_deposit = d_farmland_deposit
+        build_pop = {
+            name = buildable_robot_pop_2
+            grown = yes
+        }
+    }
+    while = {
+        count = 2
+        random_tile = {
+            limit = {
+                has_building = no
+                any_neighboring_tile = {
+                    has_building = building_capital_2
+                }
+            }
+            set_building = building_power_plant_3
+            set_deposit = d_farmland_deposit
+            create_pop = {
+                species = event_target:mem_sadrell_species
+            }
+        }
+    }
+    random_tile = {
+        limit = { has_building = no }
+        IF = {
+            limit = {
+                event_target:newcomer_country = { has_authority = auth_machine_intelligence }
+            }
+            set_building = building_network_junction
+        }
+        ELSE = {
+            set_building = building_heritage_site
+        }
+        clear_deposits = yes
+        create_pop = {
+            species = event_target:mem_sadrell_species
+        }
+    }
+    random_tile = {
+        limit = {
+            has_building = no
+        }
+        set_building = building_power_hub_1
+        set_deposit = d_rich_energy_deposit
+        create_pop = {
+            species = event_target:mem_sadrell_species
+        }
+    }
+    while = {
+        limit = {
+            any_tile = { has_building = no }
+        }
+        random_tile = {
+            limit = {
+                has_building = no
+            }
+            set_building = building_mining_network_3
+            set_deposit = d_mineral_deposit
+            build_pop = {
+                name = buildable_robot_pop_2
+                grown = yes
+            }
+        }
+        random_tile = {
+            limit = {
+                has_building = no
+            }
+            set_building = building_hydroponics_farm_3
+            set_deposit = d_farmland_deposit
+            build_pop = {
+                name = buildable_robot_pop_2
+                grown = yes
+            }
+        }
+        random_tile = {
+            limit = {
+                has_building = no
+            }
+            set_building = building_power_plant_3
+            set_deposit = d_farmland_deposit
+            create_pop = {
+                species = event_target:mem_sadrell_species
+            }
+        }
+        random_tile = {
+            limit = {
+                has_building = no
+            }
+            IF = {
+                limit = { prev = { has_planet_flag = mem_sadrell_desert_colony } }
+                IF = {
+                    limit = { event_target:newcomer_country = { has_authority = auth_machine_intelligence } }
+                    set_building = building_animal_evaluation_laboratory
+                }
+                ELSE = {
+                    set_building = building_xeno_zoo
+                }
+                set_deposit = d_alien_pets_deposit
+                create_pop = {
+                    species = event_target:mem_sadrell_species
+                }
+            }
+            ELSE_IF = {
+                limit = { prev = { has_planet_flag = mem_sadrell_tundra_colony } }
+                set_building = betharian_power_plant
+                set_deposit = d_betharian_deposit
+                create_pop = {
+                    species = event_target:mem_sadrell_species
+                }
+            }
+        }
+        random_tile = {
+            limit = {
+                has_building = no
+            }
+            random_list = {
+                33 = { set_building = building_engineering_facility_1 }
+                33 = { set_building = building_physics_lab_1 }
+                33 = { set_building = building_biolab_1 }
+            }
+            random_list = {
+                33 = { set_deposit = d_engineering_deposit }
+                33 = { set_deposit = d_physics_deposit }
+                33 = { set_deposit = d_society_deposit }
+            }
+            create_pop = {
+                species = event_target:mem_sadrell_species
+            }
+        }
+    }
+}
+
+mem_sadrell_place_stations = {
+    every_system = {
+        limit = { has_star_flag = mem_sadrell_extant_cluster }
+        while = {
+            count = 6
+            random_system_planet = {
+                limit = {
+                    is_moon = no
+                    is_star = no
+                    NOT = { has_planet_flag = mem_sadrell_voidhome_host }
+                }
+                set_planet_flag = mem_sadrell_voidhome_host
+                create_fleet = {
+                    name = ""
+                    effect = {
+                        set_owner = event_target:newcomer_country
+                        create_ship = {
+                            name = Voidhome
+                            design = "Sadrell Voidhome"
+                            prefix = no
+                        }
+                        set_location = {
+                            target = PREV
+                            distance = 15
+                            angle = random
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+mem_sadrell_create_ruined_voidhomes = {
+    every_system = {
+        limit = { has_star_flag = mem_sadrell_extant_cluster }
+        while = {
+            count = 6
+            random_system_planet = {
+                limit = {
+                    is_moon = no
+                    is_star = no
+                    NOT = { has_planet_flag = mem_sadrell_voidhome_host }
+                }
+                set_planet_flag = mem_sadrell_voidhome_host
+                create_ambient_object = {
+                    type = mem_sadrell_destroyed_voidhome
+                    location = prev
+                }
+                last_created_ambient_object = {
+                    set_location = {
+                        target = PREV
+                        distance = 15
+                        angle = random
+                    }
+                }
+            }
+        }
+    }
+}
+
+mem_sadrell_create_mixed_voidhomes = {
+    every_system = {
+        limit = { has_star_flag = mem_sadrell_extant_cluster }
+        while = {
+            count = 3
+            random_system_planet = {
+                limit = {
+                    is_moon = no
+                    is_star = no
+                    NOT = { has_planet_flag = mem_sadrell_voidhome_host }
+                }
+                set_planet_flag = mem_sadrell_voidhome_host
+                create_fleet = {
+                    name = ""
+                    effect = {
+                        set_owner = event_target:newcomer_country
+                        create_ship = {
+                            name = Voidhome
+                            design = "Sadrell Voidhome"
+                            prefix = no
+                        }
+                        set_location = {
+                            target = PREV
+                            distance = 15
+                            angle = random
+                        }
+                    }
+                }
+            }
+        }
+        while = {
+            count = 3
+            random_system_planet = {
+                limit = {
+                    is_moon = no
+                    is_star = no
+                    NOT = { has_planet_flag = mem_sadrell_voidhome_host }
+                }
+                set_planet_flag = mem_sadrell_voidhome_host
+                create_ambient_object = {
+                    type = mem_sadrell_destroyed_voidhome
+                    location = prev
+                }
+                last_created_ambient_object = {
+                    set_location = {
+                        target = PREV
+                        distance = 15
+                        angle = random
+                    }
+                }
+            }
+        }
+    }
+}

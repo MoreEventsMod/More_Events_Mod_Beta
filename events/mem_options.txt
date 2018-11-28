@@ -84,12 +84,9 @@ country_event = {
 	
 	is_triggered_only = yes
 	
-	# LEX Submenu
+	# Crisis Submenu
 	option = {
 		name = mem_options.4.a
-		trigger = { #TODO get a real flag from Space Core to connect to
-			has_global_flag = lex_flag
-		}
 		hidden_effect = {
 			country_event = { id = mem_options.5 }
 		}
@@ -167,6 +164,22 @@ country_event = {
 			country_event = { id = mem_options.11 }
 		}
 	}
+
+	# Broken Clock
+	option = {
+		name = mem_options.4.g
+		hidden_effect = {
+			country_event = { id = mem_options.12 }
+		}
+	}
+
+	# Surveyor Probe
+	option = {
+		name = mem_options.4.h
+		hidden_effect = {
+			country_event = { id = mem_options.13 }
+		}
+	}
 	
 	# Exit EVENT
 	option = {
@@ -177,76 +190,51 @@ country_event = {
 # mem_ring_seed, mem_grave_seed, mem_garden_seed, mem_prison_seed, mem_gate_seed
 # mem_ring_system, mem_grave_system, mem_garden_system, mem_prison_system, mem_gate_system
 
-# LEX Submenu
+# Crisis Submenu
 country_event = {
 	id = mem_options.5
 	title = mem_options.5.name
 	desc = mem_options.5.desc
-	picture = GFX_evt_mem_lex_options
+	picture = GFX_evt_mem_vazuran_system
 	
 	is_triggered_only = yes
 	
-#	#disable LEX
-	# option = {
-		# name = mem_options.5.a
-		# trigger = {
-			# NOT = {
-				# any_system = {
-					# OR = {
-						# has_star_flag = mem_ring_system
-						# has_star_flag = mem_grave_system
-						# has_star_flag = mem_garden_system
-						# has_star_flag = mem_prison_system
-						# has_star_flag = mem_gate_system
-					# }
-				# }
-			# }
-		# }
-		# set_global_flag = mem_ring_seed
-		# set_global_flag = mem_grave_seed
-		# set_global_flag = mem_garden_seed
-		# set_global_flag = mem_prison_seed
-		# set_global_flag = mem_gate_seed
-	# }
+	# disable Vazuran Menace
+	option = {
+		name = mem_options.5.a
+		custom_tooltip = mem_options.5.a.tooltip
+		trigger = {
+			has_global_flag = mem_vazurans_enabled
+		}
+		remove_global_flag = mem_vazurans_enabled
+		hidden_effect = {
+			country_event = { id = mem_options.5 }
+		}
+	}
 	
-#	#LEX is already disabled
-	# option = {
-		# name = mem_options.5.b
-		# trigger = {
-			# NOT = {
-				# any_system = {
-					# OR = {
-						# has_star_flag = mem_ring_system
-						# has_star_flag = mem_grave_system
-						# has_star_flag = mem_garden_system
-						# has_star_flag = mem_prison_system
-						# has_star_flag = mem_gate_system
-					# }
-				# }
-			# }
-			# has_global_flag = mem_ring_seed
-			# has_global_flag = mem_grave_seed
-			# has_global_flag = mem_garden_seed
-			# has_global_flag = mem_prison_seed
-			# has_global_flag = mem_gate_seed
-		# }
-	# }
-	
-#	#LEX is already active
-	# option = {
-		# name = mem_options.5.b
-		# trigger = {
-			# any_system = {
-				# OR = {
-					# has_star_flag = mem_ring_system
-					# has_star_flag = mem_grave_system
-					# has_star_flag = mem_garden_system
-					# has_star_flag = mem_prison_system
-					# has_star_flag = mem_gate_system
-				# }
-			# }
-		# }
-	# }
+	# enable Vazuran Menace
+	option = {
+		name = mem_options.5.b
+		custom_tooltip = mem_options.5.b.tooltip
+		trigger = {
+			NOT = {
+				has_global_flag = mem_vazurans_enabled
+			}
+		}
+		set_global_flag = mem_vazurans_enabled
+		hidden_effect = {
+			country_event = { id = mem_options.5 }
+		}
+	}
+
+	# fix bugged starbase
+	option = {
+		name = mem_options.5.c
+		custom_tooltip = mem_options.5.c.tooltip
+		hidden_effect = {
+			country_event = { id = mem_vazurans.284 }
+		}
+	}
 	
 	# Back to previous Menu
 	option = {
@@ -256,7 +244,7 @@ country_event = {
 		}
 	}
 	
-	#Exit
+	# Exit
 	option = {
 		name = mem_options.exit
 	}
@@ -536,14 +524,12 @@ country_event = {
 			capital_scope = {
 				closest_system = {
 					limit = {
-						NOT = {
-							any_planet = {
-								is_capital = yes
-							}
-						}
 						any_planet = {
 							is_planet_class = pc_barren
 							has_anomaly = no
+						}
+						NOT = {
+							has_star_flag = empire_home_system
 						}
 					}
 					random_system_planet = {
@@ -567,6 +553,9 @@ country_event = {
 						any_planet = {
 							is_planet_class = pc_molten
 							has_anomaly = no
+						}
+						NOT = {
+							has_star_flag = empire_home_system
 						}
 					}
 					random_system_planet = {
@@ -595,6 +584,9 @@ country_event = {
 						any_planet = {
 							is_planet_class = pc_nuked
 							has_anomaly = no
+						}
+						NOT = {
+							has_star_flag = empire_home_system
 						}
 					}
 					random_system_planet = {
@@ -708,6 +700,122 @@ country_event = {
 		}
 	}
 	
+	# Exit EVENT
+	option = {
+		name = mem_options.exit
+	}
+}
+
+#Broken Clock options
+country_event = {
+	id = mem_options.12
+	title = mem_options.12.name
+	desc = mem_options.12.desc
+	picture = GFX_evt_mem_options
+	
+	is_triggered_only = yes
+
+	#Disable the crisis
+	option = {
+		name = mem_options.12.a
+
+		trigger = {
+			NOR = {
+				has_global_flag = mem_broken_clock_prevent_triggering
+				mid_game_years_passed > 0
+			}
+		}
+
+		set_global_flag = mem_broken_clock_prevent_triggering
+	}
+
+	#Re-enable the crisis
+	option = {
+		name = mem_options.12.b
+
+		trigger = {
+			has_global_flag = mem_broken_clock_prevent_triggering
+			NOT = {
+				mid_game_years_passed > 0
+			}
+		}
+
+		remove_global_flag = mem_broken_clock_prevent_triggering
+	}
+
+	#Trigger instant death for unwelcome guests
+	option = {
+		name = mem_options.12.c
+
+		trigger = {
+			any_country = {
+				has_country_flag = mem_broken_clock_newcomers
+			}
+		}
+
+		random_country = {
+			limit = { has_country_flag = mem_broken_clock_newcomers }
+			set_global_flag = mem_broken_clock_kill_now
+			country_event = { id = mem_broken_clock.3000 }
+		}
+	}
+
+	# Exit EVENT
+	option = {
+		name = mem_options.exit
+	}
+}
+
+# Surveyor options.
+country_event = {
+	id = mem_options.13
+	title = mem_options.13.name
+	desc = mem_surveyor.13.desc
+	picture = GFX_evt_mem_options
+	
+	is_triggered_only = yes
+
+	option = {
+		name = mem_surveyor.13.a
+
+		allow = {
+			custom_tooltip = {
+				fail_text = mem_surveyor.13.a.tooltip
+				NOT = { mid_game_years_passed > 0 }
+			}
+		}
+
+		hidden_effect = {
+			random_country = {
+				limit = {
+					is_country_type = mem_surveyor_country_green
+				}
+				destroy_country = yes
+			}
+		}
+	}
+
+	option = {
+		name = mem_surveyor.13.b
+
+		allow = {
+			custom_tooltip = {
+				fail_text = mem_surveyor.13.b.tooltip
+				is_multiplayer = no
+			}
+		}
+
+		hidden_effect = {
+			random_country = {
+				limit = {
+					is_country_type = mem_surveyor_country_green
+				}
+				set_country_flag = mem_surveyor_will_go_berserk
+				country_event = { id = mem_surveyor.201 }
+			}
+		}
+	}
+
 	# Exit EVENT
 	option = {
 		name = mem_options.exit
