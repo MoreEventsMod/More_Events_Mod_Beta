@@ -7,7 +7,7 @@
 namespace = mem_lost_emperor
 
 #How much % of the empire ascends
-@mem_lost_emperor_ascension_percentage = 0.25
+@mem_lost_emperor_ascension_percentage = 0.20
 
 @MEM_major_neoch_reward = 24
 @MEM_minor_neoch_reward = 6
@@ -1060,7 +1060,9 @@ country_event = {
 	}
 	
 	immediate = {
-		effects = yes #all planets ascend, the empire disappears
+		every_owned_planet = {
+			remove_planet = yes
+		}
 		
 		every_relation = {
 			country_event = { id = mem_lost_emperor.39 }
@@ -1184,11 +1186,7 @@ country_event = {
 		}
 		num_owned_planets > 1
 	}
-
-	immediate = {
-		effects = yes #actually options needed
-	}
-
+	
 	option = {
 		name = mem_lost_emperor.900.A
 
@@ -1229,7 +1227,6 @@ country_event = {
 	}
 
 	immediate = {
-				
 		while = {
 			limit = {
 				any_owned_planet = {
@@ -1269,13 +1266,6 @@ country_event = {
 			}
 		}
 
-		capital_scope = {
-			effects = yes
-		}
-		change_variable = {
-			which = mem_lost_emperor_planets_count
-			value = -1
-		}
 		while = {
 			limit = {
 				check_variable = {
@@ -1285,18 +1275,27 @@ country_event = {
 			}
 			random_owned_planet = {
 				limit = {
-					num_pops > 7
-					NOT = {
-						has_planet_flag = mem_lost_emperor_planet_counted
+					is_capital = no
+					NOT = { #that would just look weird (and getting rid of all 4 would be a bit harsh)
+						is_pc = pc_ring_world
 					}
+					num_pops > 7
 				}
-				effects = yes
+				avoid_ringworlds = yes
+				remove_planet = yes
 			}
 			change_variable = {
 				which = mem_lost_emperor_planets_count
 				value = -1
 			}
 		}
+	}
+	
+	option = { #horrifying
+		name = mem_lost_emperor.999.option
+		custom_tooltip = mem_lost_emperor.999.tooltip
+		
+		
 	}
 }
 
