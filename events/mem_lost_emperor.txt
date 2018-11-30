@@ -1008,13 +1008,134 @@ planet_event = {
 							slot = 4
 							building = target_uplink_computer
 						}
-						
-						#is that all slots covered?
+					}
+
+					give_root_enough_pops_and_infrastructure = yes
+
+					#Give them some habitats, because why not
+					solar_system = {
+						while = {
+							limit = {
+								any_planet = {
+									NOT = { has_anomaly = yes }
+									NOR = {
+										has_planet_flag = megastructure
+										has_planet_flag = has_megastructure
+										solar_system = {
+											has_star_flag = ring_world_built
+										}
+										is_planet_class = pc_ringworld_habitable
+										is_planet_class = pc_ringworld_habitable_damaged
+										is_planet_class = pc_ringworld_tech
+										is_planet_class = pc_ringworld_tech_damaged
+										is_planet_class = pc_ringworld_seam
+										is_planet_class = pc_ringworld_seam_damaged
+										is_planet_class = pc_habitat
+									}
+									has_orbital_station = no
+									is_asteroid = yes
+									is_moon = yes
+									is_star = no
+								}
+							}
+							count = 4
+							
+							random_planet = {
+								limit = {
+									NOT = { has_anomaly = yes }
+									NOR = {
+										has_planet_flag = megastructure
+										has_planet_flag = has_megastructure
+										solar_system = {
+											has_star_flag = ring_world_built
+										}
+										is_planet_class = pc_ringworld_habitable
+										is_planet_class = pc_ringworld_habitable_damaged
+										is_planet_class = pc_ringworld_tech
+										is_planet_class = pc_ringworld_tech_damaged
+										is_planet_class = pc_ringworld_seam
+										is_planet_class = pc_ringworld_seam_damaged
+										is_planet_class = pc_habitat
+									}
+									has_orbital_station = no
+									is_asteroid = yes
+									is_moon = yes
+									is_star = no
+								}
+
+								save_event_target_as = mem_planet
+								
+								spawn_planet = {
+									class = "pc_habitat"
+									location = event_target:mem_planet
+									orbit_location = yes
+									orbit_angle_offset = 45
+									orbit_distance_offset = 9.899
+									size = 15
+									has_ring = no
+									
+									init_effect = {
+										set_name = "HABITAT_PLANET_NAME"
+										set_planet_entity = {
+											entity = "orbital_habitat_entity"
+											graphical_culture = event_target:mem_neochadanus_ascendant
+										}
+										surveyed = {
+											set_surveyed = yes
+											surveyor = event_target:mem_neochadanus_ascendant
+										}
+										set_all_comms_surveyed = yes
+										while = {
+											limit = {
+												any_tile = { has_blocker = yes }
+											}
+											random_tile = {
+												limit = { has_blocker = yes }
+												remove_blocker = yes
+											}
+										}
+										if = {
+											limit = {
+												event_target:mem_planet = {
+													colonizeable_planet = no
+												}
+											}
+											copy_orbital_tile = event_target:mem_planet
+										}
+										set_planet_flag = megastructure
+										set_planet_flag = habitat
+										remove_orbital_deposit = yes
+
+										create_colony = {
+											owner = event_target:mem_neochadanus_ascendant
+										}
+										create_pop = {
+											species = buildable_robot_pop_3
+										}
+										random_owned_pop = {
+											limit = {
+												is_species = "Immortals"
+											}
+											kill_pop = yes
+										}
+									}
+								}
+								event_target:mem_planet = {
+									set_planet_flag = has_megastructure
+								}
+								#remove_megastructure = fromfrom
+							}
+						}
 					}
 				}
 				
 				event_target:mem_neochadanus_victim_country = {
 					every_relation = {
+						limit = {
+							NOT = {
+								is_same_value = prevprev
+							}
+						}
 						establish_communications_no_message = prevprev
 						country_event = { id = mem_lost_emperor.31 } #tell them about it
 					}
@@ -1072,7 +1193,6 @@ planet_event = {
 			declare_war = {
 				target = event_target:mem_neochadanus_ascendant
 				attacker_war_goal = wg_conquest
-				
 			}
 		}
 	}
@@ -1082,7 +1202,46 @@ planet_event = {
 	}
 }
 
+#Tell all the other countries (actually this is unnecessary as no non-AI country can exist so hid it)
+country_event = {
+	id = mem_lost_emperor.31
+#	title = mem_lost_emperor.31.name
+#	desc = {
+#		text = mem_lost_emperor.31.desc
+#		trigger = {
+#			NOR = {
+#				has_authority = auth_machine_intelligence
+#				is_synthetic_empire = yes
+#			}
+#		}
+#	}
+#	desc = {
+#		text = mem_lost_emperor.31.desc.machine
+#		trigger = {
+#			OR = {
+#				has_authority = auth_machine_intelligence
+#				is_synthetic_empire = yes
+#			}
+#		}
+#	}
+#
+#	diplomatic = yes
+#
+#	picture_event_data = {
+#		portrait = event_target:mem_neochadanus_ascendant
+#		planet_background = event_target:mem_neochadanus_ascendant
+#		graphical_culture = event_target:mem_neochadanus_ascendant
+#		city_level = event_target:mem_neochadanus_ascendant
+#		room = event_target:mem_neochadanus_ascendant.ruler
+#	}
 
+	hide_window = yes
+	is_triggered_only = yes
+
+#	option = {
+#		name = mem_lost_emperor.31.option
+#	}
+}
 
 country_event = {
 	id = mem_lost_emperor.38
@@ -1112,17 +1271,52 @@ country_event = {
 	}
 	
 	immediate = {
-		every_owned_planet = {
-			remove_planet = yes
-		}
-		
 		every_relation = {
 			country_event = { id = mem_lost_emperor.39 }
+		}
+	}
+	after = {
+		every_owned_planet = {
+			remove_planet = yes
 		}
 	}
 }
 
 
+country_event = {
+	id = mem_lost_emperor.39
+	title = mem_lost_emperor.39.name
+	desc = mem_lost_emperor.39.desc
+
+	diplomatic = yes
+
+	picture_event_data = {
+		portrait = from
+		planet_background = from
+		graphical_culture = from
+		city_level = from
+		room = from.ruler
+	}
+
+	is_triggered_only = yes
+
+	option = {
+		name = mem_lost_emperor.39.option
+
+		trigger = {
+			NOR = {
+				has_civic = civic_fanatic_purifiers
+			}
+		}
+	}
+	option = {
+		name = mem_lost_emperor.39.option.purifiers
+		
+		trigger = {
+			has_civic = civic_fanatic_purifiers
+		}
+	}
+}
 
 
 #Disassemble Positive Outcome
@@ -1152,8 +1346,67 @@ country_event = {
 		
 		switch = {
 			trigger = has_technology
-			
-			stuff = yes #(the levels of robotics + default)
+			tech_synthetic_workers = {
+				add_modifier = {
+					modifier = mem_last_emperor_synth_boost_2
+					days = -1
+				}
+			}
+			tech_sapient_ai = {
+				add_research_option = tech_synthetic_workers
+				add_tech_progress = {
+					tech = tech_synthetic_workers
+					progress = 0.33
+				}
+				add_modifier = {
+					modifier = mem_last_emperor_synth_boost
+					days = -1
+				}
+			}
+			tech_droid_workers = {
+				add_research_option = tech_sapient_ai
+				add_tech_progress = {
+					tech = tech_sapient_ai
+					progress = 0.33
+				}
+				add_modifier = {
+					modifier = mem_last_emperor_synth_boost
+					days = -1
+				}
+			}
+			tech_robotic_workers = {
+				add_research_option = tech_droid_workers
+				add_tech_progress = {
+					tech = tech_droid_workers
+					progress = 0.33
+				}
+				add_modifier = {
+					modifier = mem_last_emperor_synth_boost
+					days = -1
+				}
+			}
+			tech_powered_exoskeletons = {
+				add_research_option = tech_robotic_workers
+				add_tech_progress = {
+					tech = tech_robotic_workers
+					progress = 0.33
+				}
+				add_modifier = {
+					modifier = mem_last_emperor_synth_boost
+					days = -1
+				}
+			}
+			default = {
+				add_research_option = tech_powered_exoskeletons
+				add_tech_progress = {
+					tech = tech_powered_exoskeletons
+					progress = 0.33
+				}
+				add_modifier = {
+					modifier = mem_last_emperor_synth_boost
+					days = -1
+				}
+			}
 		}
 	}
 }
@@ -1222,8 +1475,6 @@ country_event = {
 	immediate = {
 		remove_country_flag = mem_emperor_is_neochadanus
 
-
-		
 		country_event = { id = mem_lost_emperor.910 days = 180 random = 360 }
 	}
 	
@@ -1299,6 +1550,7 @@ country_event = {
 			}
 			kill_leader = {
 				type = ruler
+				show_notification = no
 			}
 		}
 		create_leader = {
@@ -1400,11 +1652,76 @@ country_event = {
 	option = {
 		name = mem_lost_emperor.900.B
 
+		custom_tooltip = mem_lost_emperor.900.B.tooltip
+
 		hidden_effect = {
-			country_event = { id =  mem_lost_emperor.902 days = 1800 }
+			country_event = { id =  mem_lost_emperor.903 days = 1800 }
 		}
 
 		response_text = mem_lost_emperor.900.B.response
+	}
+}
+
+#Successful ascension
+country_event = {
+	id = mem_lost_emperor.901
+	title = mem_lost_emperor.901.name
+	desc = mem_lost_emperor.901.desc
+
+	diplomatic = yes
+
+	picture_event_data = {
+		room = root.ruler
+		portrait = root		
+		planet_background = root
+		graphical_culture = root
+		city_level = root
+	}
+
+	is_triggered_only = yes
+	
+	trigger = {
+		has_country_flag = mem_emperor_is_neochadanus
+		ruler = {
+			has_leader_flag = mem_neochadanus
+		}
+	}
+	
+	immediate = {
+		kill_leader = {
+			type = ruler
+			show_notification = no
+		}
+		create_leader = {
+			type = ruler
+
+			effect = {
+				save_event_target_as = mem_new_ruler
+				exile_leader_as = mem_new_ruler
+			}
+		}
+		set_leader = mem_new_ruler
+	}
+
+	option = {
+		name = mem_lost_emperor.901.option
+
+		hidden_effect = {
+			country_event = { id = mem_lost_emperor.902 }
+		}
+	}
+}
+
+country_event = {
+	id = mem_lost_emperor.902
+	title = mem_lost_emperor.902.name
+	desc = mem_lost_emperor.902.desc
+	picture = GFX_evt_psionics
+
+	is_triggered_only = yes
+
+	option = {
+		name = mem_lost_emperor.902.option
 	}
 }
 
