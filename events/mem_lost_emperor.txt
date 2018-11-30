@@ -1183,6 +1183,8 @@ country_event = {
 	title = mem_lost_emperor.801.name
 	desc = mem_lost_emperor.801.desc
 	
+	diplomatic = yes
+
 	picture_event_data = {
 		portrait = root
 		planet_background = root
@@ -1207,6 +1209,8 @@ country_event = {
 	
 	immediate = {
 		remove_country_flag = mem_emperor_is_neochadanus
+
+
 		
 		country_event = { id = mem_lost_emperor.910 days = 180 random = 360 }
 	}
@@ -1216,6 +1220,105 @@ country_event = {
 	}
 }
 
+
+#Fallback in case is Neochadanus' Ascendancy and dies for some reason
+country_event = {
+	id = mem_lost_emperor.802
+	hide_window = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		is_country_type = mem_neochadanus_ascendant
+	}
+	
+	immediate = {
+		set_country_type = default
+		change_government = {
+			civics = random
+		}
+		if = {
+			limit = {
+				any_owned_pop_species = {
+					pops_have_happiness = yes
+					root = {
+						pop_percentage = {
+							percentage > 0.33
+							limit = {
+								is_same_value = prev
+							}
+						}
+					}
+				}
+			}
+		}
+		random_owned_pop_species = {
+			limit = {
+				pops_have_happiness = yes
+				root = {
+					pop_percentage = {
+						percentage > 0.33
+						limit = {
+							is_same_value = prev
+						}
+					}
+				}
+			}
+			root = {
+				change_dominant_species = {
+					species = prev
+				}
+			}
+		}
+		else = {
+			random_owned_pop_species = {
+				limit = {
+					pops_have_happiness = yes
+				}
+				root = {
+					change_dominant_species = {
+						species = prev
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				exists = ruler
+			}
+			kill_leader = {
+				type = ruler
+			}
+		}
+		create_leader = {
+			type = ruler
+
+			effect = {
+				save_event_target_as = mem_new_ruler
+				exile_leader_as = mem_new_ruler
+			}
+		}
+		set_leader = mem_new_ruler
+
+		set_name = "Mourners of Neochadanus"
+
+		every_relation = {
+			country_event = { id = mem_lost_emperor.803 }
+		}
+	}
+}
+
+country_event = {
+	id = mem_lost_emperor.803
+	title = mem_lost_emperor.803.name
+	desc = mem_lost_emperor.803.desc
+	picture = GFX_evt_space_funeral
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_lost_emperor.803.option
+	}
+}
 
 #50 years at least after you get Neochadanus
 country_event = {
@@ -1297,6 +1400,8 @@ country_event = {
 
 country_event = {
 	id = mem_lost_emperor.999
+	title = mem_lost_emperor.999.name
+	desc = mem_lost_emperor.999.desc
 
 	is_triggered_only = yes
 
@@ -1377,5 +1482,3 @@ country_event = {
 }
 
 
-#try this:
-#remove_planet = yes
