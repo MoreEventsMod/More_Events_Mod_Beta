@@ -39,29 +39,66 @@ event = {
 		random_list = {
 			2 = { } #too bad
 			1 = {
-				every_country = {
-					limit = { is_ai = no }
-
-					closest_system = {
-						limit = {
-							NOT = {
-								exists = owner
+				random_country = {
+					limit = {
+						is_ai = no
+					}
+					save_event_target_as = mem_player
+				}
+				random_system = {
+					limit = {
+						NOT = {
+							exists = owner
+						}
+						is_planet_class = pc_neutron_star
+						NOT = {
+							OR = {
+								any_planet = {
+									OR = {
+										is_colonizable = yes
+										is_colony = yes
+									}
+								}
+								has_star_flag = enclave
 							}
-							is_planet_class = pc_neutron_star
-							NOT = {
-								OR = {
-									any_planet = {
-										OR = {
-											is_colonizable = yes
-											is_colony = yes
+						}
+					}
+					weights = {
+						base = 1
+						modifier = {
+							mult = 2
+							distance = {
+								source = event_target:mem_player.capital_scope
+								max_distance <= 400
+							}
+						}
+						modifier = {
+							mult = 4
+							event_target:mem_player = {
+								closest_system = {
+									limit = {
+										NOT = {
+											exists = owner
+										}
+										is_planet_class = pc_neutron_star
+										NOT = {
+											OR = {
+												any_planet = {
+													OR = {
+														is_colonizable = yes
+														is_colony = yes
+													}
+												}
+												has_star_flag = enclave
+											}
 										}
 									}
-									has_star_flag = enclave
+									is_same_value = prevprev
 								}
 							}
 						}
-						add_anomaly = mem_lost_emperor_category
 					}
+					add_anomaly = mem_lost_emperor_category
 				}
 			}
 		}
@@ -815,7 +852,7 @@ country_event = {
 	id = mem_lost_emperor.25
 	title = mem_lost_emperor.25.name
 	desc = mem_lost_emperor.25.desc
-	picture = TODO
+	picture = GFX_evt_space_station
 
 	is_triggered_only = yes
 
@@ -863,7 +900,7 @@ planet_event = {
 	id = mem_lost_emperor.30
 	title = mem_lost_emperor.30.name
 	desc = mem_lost_emperor.30.desc
-	picture = TODO
+	picture = GFX_evt_space_station
 	
 	is_triggered_only = yes
 	
@@ -883,16 +920,19 @@ planet_event = {
 			name = mem_neochadanus_country_name
 			
 			authority = auth_imperial
-			ethics = {
+			
+			ethos = {
 				ethic = ethic_authoritarian
 				ethic = ethic_spiritualist
 				ethic = ethic_militarist
 			}
 			
-			civic = mem_neochadanus_civic_1
-			civic = mem_neochadanus_civic_2
-			civic = mem_neochadanus_civic_3
-			
+			civics = {
+				civic = mem_neochadanus_civic_1
+				civic = mem_neochadanus_civic_2
+				civic = mem_neochadanus_civic_3
+			}
+
 			species = "Immortals"
 			
 			effect = {
@@ -902,7 +942,7 @@ planet_event = {
 				set_leader = Neochadanus
 				
 				add_modifier = { #ethics pull and unrest annihilated
-					modifer = mem_neochadanus_setup_boost
+					modifier = mem_neochadanus_setup_boost
 					days = 4800
 				}
 				
@@ -916,7 +956,7 @@ planet_event = {
 						change_planet_size = 4
 						
 						add_modifier = { #these are too dangerous to not limit to one planet
-							modifer = mem_neochadanus_setup_boost_planet
+							modifier = mem_neochadanus_setup_boost_planet
 							days = 4800
 						}
 					}
@@ -1078,7 +1118,7 @@ country_event = {
 	id = mem_lost_emperor.40
 	title = mem_lost_emperor.40.name
 	desc = mem_lost_emperor.40.desc
-	picture = TODO	
+	picture = GFX_evt_mem_ancient_robots_project	
 	
 	is_triggered_only = yes
 
@@ -1143,7 +1183,7 @@ country_event = {
 	title = mem_lost_emperor.801.name
 	desc = mem_lost_emperor.801.desc
 	
-	picture_data = {
+	picture_event_data = {
 		portrait = root
 		planet_background = root
 		graphical_culture = root
@@ -1315,11 +1355,10 @@ country_event = {
 				limit = {
 					is_capital = no
 					NOT = { #that would just look weird (and getting rid of all 4 would be a bit harsh)
-						is_pc = pc_ring_world
+						is_planet_class = pc_ringworld_habitable
 					}
 					num_pops > 7
 				}
-				avoid_ringworlds = yes
 				remove_planet = yes
 			}
 			change_variable = {
