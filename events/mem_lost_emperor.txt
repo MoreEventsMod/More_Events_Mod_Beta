@@ -1094,7 +1094,7 @@ planet_event = {
 							count = 4
 							
 							random_planet = {
-								limit = {
+								limit = { #this is the conditions for building a habitat in the habitat file
 									NOT = { has_anomaly = yes }
 									NOR = {
 										has_planet_flag = megastructure
@@ -1529,6 +1529,17 @@ country_event = {
 		remove_country_flag = mem_emperor_is_neochadanus
 
 		exile_leader_as = mem_angry_neochadanus
+
+		create_leader = {
+			type = ruler
+
+			effect = {
+				save_event_target_as = mem_new_ruler
+				exile_leader_as = mem_new_ruler
+			}
+		}
+		set_leader = mem_new_ruler
+
 		country_event = { id = mem_lost_emperor.910 days = 180 random = 360 }
 	}
 	
@@ -1786,9 +1797,73 @@ country_event = {
 
 #Angry Neochadanus subchain
 
+#Neochadanus disappears
+country_event = {
+	id = mem_lost_emperor.903
+	title = mem_lost_emperor.903.name
+	desc = mem_lost_emperor.903.desc
+	picture = GFX_evt_throne_room
+
+	is_triggered_only = yes
+
+	immediate = {
+		exile_leader_as = mem_angry_neochadanus
+		
+		create_leader = {
+			type = ruler
+
+			effect = {
+				save_event_target_as = mem_new_ruler
+				exile_leader_as = mem_new_ruler
+			}
+		}
+		set_leader = mem_new_ruler
+
+		country_event = { id = mem_lost_emperor.910 days = 180 random = 360 }
+	}
+
+	option = {
+		name = mem_lost_emperor.903.option
+		custom_tooltip = mem_lost_emperor.903.tooltip		
+	}
+}
+
 #910 will let you reverse it incl. turn back to imperial authority. He is exiled as mem_angry_neochadanus
 
+country_event = {
+	id = mem_lost_emperor.910
+	title = mem_lost_emperor.910.name
+	desc = mem_lost_emperor.910.desc
+	picture = GFX_evt_news_room
 
+	is_triggered_only = yes
+
+	option = {
+		name = mem_lost_emperor.910.A
+
+		custom_tooltip = mem_lost_emperor.910.A.tooltip
+
+		add_modifier = {
+			modifier = mem_lost_emperor_paying_for_ascension
+			days = 3600
+		}
+
+		hidden_effect = {
+			set_leader = mem_angry_neochadanus
+	
+			set_country_flag = mem_emperor_is_neochadanus
+			country_event = { id = mem_lost_emperor.901 days = 3600 }
+		}
+	}
+
+	option = {
+		name = mem_lost_emperor.910.B
+
+		hidden_effect = {
+			country_event = { id = mem_lost_emperor.999 days = 90 random = 90 }
+		}
+	}
+}
 
 
 #Portion of empire ascends
@@ -1796,7 +1871,24 @@ country_event = {
 country_event = {
 	id = mem_lost_emperor.999
 	title = mem_lost_emperor.999.name
-	desc = mem_lost_emperor.999.desc
+	desc = {
+		text = mem_lost_emperor.999.desc.1planet
+		trigger = {
+			has_variable = {
+				which = mem_lost_emperor_planets_count_2
+				value = 1
+			}
+		}
+	}
+	desc = {
+		text = mem_lost_emperor.999.desc.else
+		trigger = {
+			has_variable = {
+				which = mem_lost_emperor_planets_count_2
+				value > 1
+			}
+		}
+	}
 
 	is_triggered_only = yes
 
@@ -1859,20 +1951,44 @@ country_event = {
 					}
 					num_pops > 7
 				}
+				if = {
+					limit = {
+						root = {
+							has_variable = {
+								which = mem_lost_emperor_planets_count_2
+								value = 0
+							}
+						}
+					}
+					save_event_target_as = mem_disappeared_planet
+				}
 				remove_planet = yes
 			}
 			change_variable = {
 				which = mem_lost_emperor_planets_count
 				value = -1
 			}
+			change_variable = {
+				which = mem_lost_emperor_planets_count_2
+				value = 1
+			}
 		}
 	}
 	
 	option = { #horrifying
 		name = mem_lost_emperor.999.option
-		custom_tooltip = mem_lost_emperor.999.tooltip
-		
-		
+		if = {
+			limit = {
+				has_variable = {
+					which = mem_lost_emperor_planets_count_2
+					value = 1
+				}
+			}
+			custom_tooltip = mem_lost_emperor.999.tooltip.1planet
+		}
+		else = {
+			custom_tooltip = mem_lost_emperor.999.tooltip.else
+		}
 	}
 }
 
