@@ -489,6 +489,18 @@ country_event = {
 	}
 
 	immediate = {
+		create_species = {
+			name = "Immortals"
+			class = random_non_machine
+			
+			traits = {
+				trait = trait_psionic
+				trait = trait_cybernetic
+				trait = trait_erudite
+				trait = trait_very_strong
+				trait = trait_venerable
+			}
+		}
 		mem_create_neochadanus = yes
 	}
 
@@ -680,30 +692,6 @@ country_event = {
 		portrait = event_target:mem_neochadanus
 	}
 
-	#For the crazy option
-	immediate = {
-		event_target:mem_azran_vanquisher_fleet = {
-			if = {
-				limit = {
-					any_owned_ship = {
-						is_ship_size = corvette
-					}
-				}
-				random_owned_ship = {
-					limit = {
-						is_ship_size = corvette
-					}
-					save_event_target_as = mem_neochadanus_ship
-				}
-			}
-			else = {
-				random_owned_ship = {
-					save_event_target_as = mem_neochadanus_ship
-				}
-			}
-		}
-	}
-
 	option = {
 		name = mem_lost_emperor.20.accept
 		custom_tooltip = mem_lost_emperor.20.accept.tooltip
@@ -838,7 +826,81 @@ country_event = {
 		}
 
 		hidden_effect = {
-			mem_neochadanus_seizes_ship_and_flees = yes
+			save_event_target_as = mem_neochadanus_victim_country
+			
+			if = {
+				limit = {
+					any_owned_planet = {
+						is_ecumenopolis = yes
+						is_capital = no
+						solar_system = {
+							NOT = {
+								is_same_value = capital_scope.solar_system
+							}
+						}
+					}
+				}
+				closest_system = {
+					limit = {
+						exists = owner
+						owner = {
+							is_same_value = root
+						}
+						any_planet = {
+							has_owner = yes
+							is_colony = yes
+							is_ecumenopolis = yes
+							is_capital = no
+						}
+						NOT = {
+							any_planet = {
+								is_capital = yes
+							}
+						}
+					}
+					random_system_planet = {
+						limit = {
+							has_owner = yes
+							is_colony = yes
+							is_ecumenopolis = yes
+							is_capital = no
+						}
+						planet_event = { id = mem_lost_emperor.30 days = 180 }
+					}
+				}
+			}
+			else = {
+				closest_system = {
+					limit = {
+						exists = owner
+						owner = {
+							is_same_value = root
+						}
+						any_planet = {
+							has_owner = yes
+							is_colony = yes
+							is_capital = no
+						}
+						NOT = {
+							any_planet = {
+								is_capital = yes
+							}
+						}
+					}
+					random_system_planet = {
+						limit = {
+							has_owner = yes
+							is_colony = yes
+							is_capital = no
+						}
+						set_timed_planet_flag = {
+							flag = mem_lost_emperor_crazy
+							days = 200
+						}
+						planet_event = { id = mem_lost_emperor.30 days = 180 }
+					}
+				}
+			}
 
 			set_timed_country_flag = {
 				flag = mem_neochadanus_not_scorned
@@ -983,6 +1045,7 @@ planet_event = {
 	title = mem_lost_emperor.30.name
 	desc = mem_lost_emperor.30.desc
 	picture = GFX_evt_space_station
+	location = root
 	
 	is_triggered_only = yes
 	
@@ -995,6 +1058,22 @@ planet_event = {
 	}
 	
 	immediate = {
+		mem_create_neochadanus = yes
+
+		if = {
+			limit = {
+				has_planet_flag = mem_lost_emperor_crazy
+			}
+			from.species = {
+				save_event_target_as = mem_neoch_releaser_species
+			}
+		}
+		else = {
+			from.owner.species = {
+				save_event_target_as = mem_neoch_releaser_species
+			}
+		}
+
 		create_country = {
 			#Neochadanus stuff!
 			type = mem_neochadanus_ascendant
@@ -1015,7 +1094,7 @@ planet_event = {
 				civic = mem_neochadanus_civic_3
 			}
 
-			species = "Immortals"
+			species = event_target:mem_neoch_releaser_species
 			
 			effect = {
 				save_event_target_as = mem_neochadanus_ascendant
@@ -1050,6 +1129,10 @@ planet_event = {
 						set_starbase_size = starbase_citadel
 						
 						set_starbase_module = {
+							slot = 0
+							module = shipyard
+						}
+						set_starbase_module = {
 							slot = 1
 							module = shipyard
 						}
@@ -1059,35 +1142,31 @@ planet_event = {
 						}
 						set_starbase_module = {
 							slot = 3
-							module = shipyard
+							module = anchorage
 						}
 						set_starbase_module = {
 							slot = 4
-							module = anchorage
+							module = trading_hub
 						}
 						set_starbase_module = {
 							slot = 5
 							module = trading_hub
 						}
-						set_starbase_module = {
-							slot = 6
-							module = trading_hub
-						}
 						
 						set_starbase_building = {
-							slot = 1
+							slot = 0
 							building = crew_quarters
 						}
 						set_starbase_building = {
-							slot = 2
+							slot = 1
 							building = hydroponics_bay
 						}
 						set_starbase_building = {
-							slot = 3
+							slot = 2
 							building = fleet_academy
 						}
 						set_starbase_building = {
-							slot = 4
+							slot = 3
 							building = target_uplink_computer
 						}
 					}
@@ -1120,9 +1199,9 @@ planet_event = {
 									is_star = no
 								}
 							}
-							count = 4
+							count = 3
 							
-							random_planet = {
+							random_system_planet = {
 								limit = { #this is the conditions for building a habitat in the habitat file
 									NOT = { has_anomaly = yes }
 									NOR = {
