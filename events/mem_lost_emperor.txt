@@ -492,6 +492,7 @@ country_event = {
 		create_species = {
 			name = "Immortals"
 			class = random_non_machine
+			immortal = yes
 			
 			traits = {
 				trait = trait_psionic
@@ -501,6 +502,14 @@ country_event = {
 				trait = trait_venerable
 			}
 		}
+#		create_country = {
+#			type = global_event
+#			species = last_created_species
+#
+#			effect = {
+#				save_event_target_as = mem_neoch_global_event
+#			}
+#		}
 		mem_create_neochadanus = yes
 	}
 
@@ -697,7 +706,34 @@ country_event = {
 		custom_tooltip = mem_lost_emperor.20.accept.tooltip
 
 		hidden_effect = {
-			set_leader = Neochadanus
+			create_fleet = {
+				name = "NAME_Other_Science_Ship"
+				effect = {
+					set_owner = root
+					create_ship_design = {
+						design = "NAME_Prototype"
+					}
+					create_ship = {
+						name = "NAME_From_Beyond"
+						design = last_created_design
+						graphical_culture = "extra_dimensional_01"
+						prefix = no
+						upgradable = no
+					}
+					set_location = root.capital_scope
+					save_event_target_as = deleted_ship
+				}
+			}
+			event_target:deleted_ship = {
+				set_leader = mem_neochadanus
+				leader = {
+					save_event_target_as = mem_neochadanus
+					root = {
+						assign_leader = event_target:mem_neochadanus
+					}
+				}
+				delete_fleet = this
+			}
 
 			set_country_flag = mem_emperor_is_neochadanus
 			set_timed_country_flag = {
@@ -1097,10 +1133,40 @@ planet_event = {
 			effect = {
 				save_event_target_as = mem_neochadanus_ascendant
 
-				mem_create_neochadanus = yes
+#				mem_create_neochadanus = yes
 				
 				#does this work?
-				set_leader = mem_neochadanus
+				create_fleet = {
+					name = "NAME_Other_Science_Ship"
+					effect = {
+						set_owner = event_target:mem_neochadanus_ascendant
+						create_ship_design = {
+							design = "NAME_Prototype"
+						}
+						create_ship = {
+							name = "NAME_From_Beyond"
+							design = last_created_design
+							graphical_culture = "extra_dimensional_01"
+							prefix = no
+							upgradable = no
+						}
+						set_location = root
+						save_event_target_as = deleted_ship
+					}
+				}
+				event_target:deleted_ship = {
+					set_leader = mem_neochadanus
+					leader = {
+						save_event_target_as = mem_neochadanus
+
+						event_target:mem_neochadanus_ascendant = {
+							assign_leader = event_target:mem_neochadanus
+						}
+					}
+					delete_fleet = this
+				}
+
+
 				
 				add_modifier = { #ethics pull and unrest annihilated
 					modifier = mem_neochadanus_setup_boost
@@ -1193,8 +1259,10 @@ planet_event = {
 										is_planet_class = pc_habitat
 									}
 									has_orbital_station = no
-									is_asteroid = yes
-									is_moon = yes
+									NOR = {
+										is_asteroid = yes
+										is_moon = yes
+									}
 									is_star = no
 								}
 							}
@@ -1218,13 +1286,15 @@ planet_event = {
 										is_planet_class = pc_habitat
 									}
 									has_orbital_station = no
-									is_asteroid = yes
-									is_moon = yes
+									NOR = {
+										is_asteroid = yes
+										is_moon = yes
+									}
 									is_star = no
 								}
 
 								save_event_target_as = mem_planet
-								log = "[this.GetName]"
+#								log = "[this.GetName]"
 								
 								solar_system = {
 									spawn_planet = {
@@ -1294,7 +1364,7 @@ planet_event = {
 					establish_communications_no_message = prev
 				}
 				
-				give_neochadanus_resources = yes
+				mem_give_neochadanus_resources = yes
 				
 				set_timed_country_flag = {
 					flag = mem_neochadanus_ascendant_timer
@@ -1304,7 +1374,9 @@ planet_event = {
 				if = {
 					limit = {
 						NOT = {
-							has_country_flag = mem_neochadanus_not_scorned
+							event_target:mem_neochadanus_victim_country = {
+								has_country_flag = mem_neochadanus_not_scorned
+							}
 						}
 					}
 					add_opinion_modifier = {
