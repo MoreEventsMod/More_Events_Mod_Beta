@@ -460,7 +460,26 @@ country_event = {
 
 	immediate = {
 		fromfrom = {
-			save_event_target_as = mem_azran_vanquisher_fleet
+			if = {
+				limit = {
+					NOT = {
+						is_ship_class = shipclass_starbase
+					}
+				}
+				save_event_target_as = mem_azran_vanquisher_fleet
+			}
+			else = {
+				solar_system = {
+					random_fleet_in_system = {
+						limit = {
+							NOT = {
+								is_ship_class = shipclass_starbase
+							}
+						}
+						save_event_target_as = mem_azran_vanquisher_fleet
+					}
+				}
+			}
 		}
 	}
 
@@ -792,25 +811,14 @@ country_event = {
 		custom_tooltip = mem_lost_emperor.20.imprison.tooltip
 
 		hidden_effect = {
-			country_event = { id = mem_lost_emperor.21 }
+			country_event = { id = mem_lost_emperor.21 days = 1 }
 			event_target:mem_azran_vanquisher_fleet = {
 				set_fleet_flag = mem_neochadanus_carrying_fleet
-
-				set_event_locked = yes
-
-				queue_actions = {
-					move_to = root.capital_scope
-
-					effect = {
-						id = mem_lost_emperor.action.1
-						remove_fleet_flag = mem_neochadanus_carrying_fleet
-						set_event_locked = no
-						root = {
-							country_event = { id = mem_lost_emperor.25 }
-						}
-					}
-				}
 			}
+		}
+
+		trigger = {
+			exists = event_target:mem_azran_vanquisher_fleet
 		}
 		
 		response_text = mem_lost_emperor.20.imprison.response
@@ -1021,10 +1029,10 @@ fleet_event = {
 
 	immediate = {
 		random_list = {
-			35 = {
+			5 = {
 				fleet_event = { id = mem_lost_emperor.23 }
 			}
-			965 = { }
+			95 = { }
 		}
 	}
 }
@@ -1040,6 +1048,7 @@ fleet_event = {
 	
 	immediate = {
 		mem_neochadanus_seizes_ship_and_flees = yes
+		remove_fleet_flag = mem_neochadanus_carrying_fleet
 	}
 	
 	option = {
@@ -1050,16 +1059,51 @@ fleet_event = {
 
 
 
-
-
-#Made it home
-country_event = {
+#Made it home. (Not quite the most ideal solution but should work)
+# A fleet has entered a system
+# Scope = Fleet
+# From = System
+fleet_event = {
 	id = mem_lost_emperor.25
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_fleet_flag = mem_neochadanus_carrying_fleet
+		solar_system = {
+			is_same_value = root.owner.capital_scope.solar_system
+		}
+	}
+	
+	immediate = {
+		owner = {
+			country_event = { id = mem_lost_emperor.251 days = 30 }
+		}
+	}
+}
+
+country_event = {
+	id = mem_lost_emperor.251
 	title = mem_lost_emperor.25.name
 	desc = mem_lost_emperor.25.desc
 	picture = GFX_evt_space_station
 
 	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			solar_system = {
+				is_same_value = root.capital_scope.solar_system
+			}
+			has_fleet_flag = mem_neochadanus_carrying_fleet
+		}
+	}
+
+	immediate = {
+		from = {
+			remove_fleet_flag = mem_neochadanus_carrying_fleet
+		}
+	}
 
 	option = {
 		name = EXCELLENT
@@ -1069,7 +1113,6 @@ country_event = {
 		}
 	}
 }
-
 
 
 
