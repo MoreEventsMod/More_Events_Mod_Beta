@@ -493,6 +493,7 @@ country_event = {
 			name = "Immortals"
 			class = random_non_machine
 			immortal = yes
+			pops_can_reproduce = no
 			
 			traits = {
 				trait = trait_psionic
@@ -1908,8 +1909,7 @@ country_event = {
 	}
 
 	mean_time_to_happen = {
-#		years = 10
-days = 10
+		years = 10
 	}
 
 	trigger = {
@@ -1919,7 +1919,7 @@ days = 10
 		}
 		NOR = {
 			has_modifier = mem_lost_emperor_paying_for_ascension
-#			has_country_flag = mem_emperor_is_neochadanus_fifty
+			has_country_flag = mem_emperor_is_neochadanus_fifty
 			has_country_flag = mem_neoch_decision
 			any_country = {
 				OR = {
@@ -1976,7 +1976,7 @@ days = 10
 
 		hidden_effect = {
 			remove_country_flag = mem_emperor_is_neochadanus
-			country_event = { id =  mem_lost_emperor.903 days = 1800 }
+			country_event = { id =  mem_lost_emperor.903 days = 180 random = 30 }
 		}
 
 		response_text = mem_lost_emperor.900.B.response
@@ -2122,7 +2122,7 @@ country_event = {
 			authority = auth_imperial
 		}
 
-		country_event = { id = mem_lost_emperor.910 days = 180 random = 360 }
+		country_event = { id = mem_lost_emperor.910 days = 135 random = 90 }
 	}
 
 	option = {
@@ -2212,7 +2212,7 @@ country_event = {
 		while = {
 			limit = {
 				any_owned_planet = {
-					num_pops > 7
+					num_pops > 5
 					NOT = {
 						has_planet_flag = mem_lost_emperor_planet_counted
 					}
@@ -2220,7 +2220,7 @@ country_event = {
 			}
 			random_owned_planet = {
 				limit = {
-					num_pops > 7
+					num_pops > 5
 					NOT = {
 						has_planet_flag = mem_lost_emperor_planet_counted
 					}
@@ -2254,6 +2254,16 @@ country_event = {
 					which = mem_lost_emperor_planets_count
 					value > 0.99
 				}
+				any_owned_planet = {
+					is_capital = no
+					NOT = { #that would just look weird (and getting rid of all 4 would be a bit harsh)
+						is_planet_class = pc_ringworld_habitable
+					}
+					num_pops > 5
+					NOT = {
+						has_planet_flag = mem_lost_emperor_planet_to_disappear
+					}
+				}
 			}
 			random_owned_planet = {
 				limit = {
@@ -2261,7 +2271,10 @@ country_event = {
 					NOT = { #that would just look weird (and getting rid of all 4 would be a bit harsh)
 						is_planet_class = pc_ringworld_habitable
 					}
-					num_pops > 7
+					num_pops > 5
+					NOT = {
+						has_planet_flag = mem_lost_emperor_planet_to_disappear
+					}
 				}
 				if = {
 					limit = {
@@ -2274,7 +2287,118 @@ country_event = {
 					}
 					save_event_target_as = mem_disappeared_planet
 				}
-				remove_planet = yes
+				if = {
+					limit = {
+						root = {
+							check_variable = {
+								which = mem_lost_emperor_planets_count_2
+								value = 9
+							}
+						}
+					}
+					save_event_target_as = mem_disappeared_planet_10
+				}
+				else_if = {
+					limit = {
+						root = {
+							check_variable = {
+								which = mem_lost_emperor_planets_count_2
+								value = 8
+							}
+						}
+					}
+					save_event_target_as = mem_disappeared_planet_9
+				}
+				else_if = {
+					limit = {
+						root = {
+							check_variable = {
+								which = mem_lost_emperor_planets_count_2
+								value = 7
+							}
+						}
+					}
+					save_event_target_as = mem_disappeared_planet_8
+				}
+				else_if = {
+					limit = {
+						root = {
+							check_variable = {
+								which = mem_lost_emperor_planets_count_2
+								value = 6
+							}
+						}
+					}
+					save_event_target_as = mem_disappeared_planet_7
+				}
+				else_if = {
+					limit = {
+						root = {
+							check_variable = {
+								which = mem_lost_emperor_planets_count_2
+								value = 5
+							}
+						}
+					}
+					save_event_target_as = mem_disappeared_planet_6
+				}
+				else_if = {
+					limit = {
+						root = {
+							check_variable = {
+								which = mem_lost_emperor_planets_count_2
+								value = 4
+							}
+						}
+					}
+					save_event_target_as = mem_disappeared_planet_5
+				}
+				else_if = {
+					limit = {
+						root = {
+							check_variable = {
+								which = mem_lost_emperor_planets_count_2
+								value = 3
+							}
+						}
+					}
+					save_event_target_as = mem_disappeared_planet_4
+				}
+				else_if = {
+					limit = {
+						root = {
+							check_variable = {
+								which = mem_lost_emperor_planets_count_2
+								value = 2
+							}
+						}
+					}
+					save_event_target_as = mem_disappeared_planet_3
+				}
+				else_if = {
+					limit = {
+						root = {
+							check_variable = {
+								which = mem_lost_emperor_planets_count_2
+								value = 1
+							}
+						}
+					}
+					save_event_target_as = mem_disappeared_planet_2
+				}
+				else_if = {
+					limit = {
+						root = {
+							check_variable = {
+								which = mem_lost_emperor_planets_count_2
+								value < 1
+							}
+						}
+					}
+					save_event_target_as = mem_disappeared_planet_1
+				}
+				set_planet_flag = mem_lost_emperor_planet_to_disappear
+#				remove_planet = yes
 			}
 			change_variable = {
 				which = mem_lost_emperor_planets_count
@@ -2300,6 +2424,16 @@ country_event = {
 		}
 		else = {
 			custom_tooltip = mem_lost_emperor.999.tooltip.else
+		}
+
+		hidden_effect = {
+			every_owned_planet = {
+				limit = {
+					has_planet_flag = mem_lost_emperor_planet_to_disappear
+				}
+				destroy_colony = yes
+				remove_planet = yes
+			}
 		}
 	}
 }
