@@ -758,7 +758,13 @@ country_event = {
 				shift_ethic = ethic_authoritarian
 			}
 			custom_tooltip = mem_lost_emperor.20.accept.tooltip3
-			hidden_effect = { country_event = { id = mem_lost_emperor.2001 } }
+			hidden_effect = {
+				set_timed_country_flag = {
+					flag = mem_just_set_neoch
+					days = 30
+				}
+				country_event = { id = mem_lost_emperor.2001 days = 2 }
+			}
 		}
 
 		custom_tooltip = mem_lost_emperor.20.accept.tooltip2
@@ -973,6 +979,15 @@ country_event = {
 	immediate = {
 		change_government = {
 			authority = auth_imperial
+			civics = random
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_authority = auth_imperial
+				}
+			}
+			country_event = { id = mem_lost_emperor.2001 days = 1 }
 		}
 	}
 }
@@ -1189,7 +1204,7 @@ planet_event = {
 								is_ecumenopolis = yes
 							}
 						}
-						change_planet_size = 4
+						change_planet_size = 3
 					}
 					add_modifier = { #these are too dangerous to not limit to one planet
 						modifier = mem_neochadanus_setup_boost_planet
@@ -1703,8 +1718,9 @@ country_event = {
 		ruler = {
 			has_leader_flag = mem_neochadanus
 		}
-		NOT = {
+		NOR = {
 			has_authority = auth_imperial
+			has_country_flag = mem_just_set_neoch
 		}
 	}
 	
@@ -1725,6 +1741,20 @@ country_event = {
 			}
 		}
 		set_leader = mem_new_ruler
+
+		if = {
+			limit = {
+				exists = heir
+				heir = {
+					is_same_species = event_target:mem_angry_neochadanus.species
+				}
+			}
+			kill_leader = {
+				type = ruler
+				heir = yes
+				show_notification = no
+			}
+		}
 
 		country_event = { id = mem_lost_emperor.910 days = 180 random = 360 }
 	}
@@ -1817,6 +1847,28 @@ country_event = {
 			}
 		}
 		set_leader = mem_new_ruler
+		
+		if = {
+			limit = {
+				exists = heir
+				heir = {
+					is_same_species = from.species
+				}
+			}
+			kill_leader = {
+				type = ruler
+				heir = yes
+				show_notification = no
+			}
+		}
+
+		#refresh the govt
+		change_government = {
+			authority = auth_dictatorial
+		}
+		change_government = {
+			authority = auth_imperial
+		}
 
 		set_name = "Mourners of Neochadanus"
 
@@ -1849,14 +1901,15 @@ country_event = {
 
 	picture_event_data = {
 		room = root.ruler
-		portrait = root		
+		portrait = event_target:mem_neochadanus
 		planet_background = root
 		graphical_culture = root
 		city_level = root
 	}
 
 	mean_time_to_happen = {
-		years = 10
+#		years = 10
+days = 10
 	}
 
 	trigger = {
@@ -1866,7 +1919,8 @@ country_event = {
 		}
 		NOR = {
 			has_modifier = mem_lost_emperor_paying_for_ascension
-			has_country_flag = mem_emperor_is_neochadanus_fifty
+#			has_country_flag = mem_emperor_is_neochadanus_fifty
+			has_country_flag = mem_neoch_decision
 			any_country = {
 				OR = {
 					is_crisis_faction = yes
@@ -1874,9 +1928,9 @@ country_event = {
 					AND = {
 						OR = {
 							is_country_type = default
-							is_country_type = fallen_empire
 							is_country_type = awakened_fallen_empire
 						}
+						has_communications = root
 						relative_power = {
 							who = root
 							value = overwhelming
@@ -1886,6 +1940,16 @@ country_event = {
 			}
 		}
 		num_owned_planets > 1
+	}
+
+	immediate = {
+		set_timed_country_flag = {
+			flag = mem_neoch_decision
+			days = 360
+		}
+		ruler = {
+			save_event_target_as = mem_neochadanus
+		}
 	}
 	
 	option = {
@@ -1929,7 +1993,7 @@ country_event = {
 
 	picture_event_data = {
 		room = root.ruler
-		portrait = root		
+		portrait = event_target:mem_neochadanus
 		planet_background = root
 		graphical_culture = root
 		city_level = root
@@ -1946,6 +2010,9 @@ country_event = {
 	
 	immediate = {
 		remove_country_flag = mem_emperor_is_neochadanus
+		ruler = {
+			save_event_target_as = mem_neochadanus
+		}
 		kill_leader = {
 			type = ruler
 			show_notification = no
@@ -1959,6 +2026,28 @@ country_event = {
 			}
 		}
 		set_leader = mem_new_ruler
+
+		if = {
+			limit = {
+				exists = heir
+				heir = {
+					is_same_species = event_target:mem_neochadanus.species
+				}
+			}
+			kill_leader = {
+				type = ruler
+				heir = yes
+				show_notification = no
+			}
+		}
+
+		#refresh the govt
+		change_government = {
+			authority = auth_dictatorial
+		}
+		change_government = {
+			authority = auth_imperial
+		}
 	}
 
 	option = {
@@ -1996,6 +2085,9 @@ country_event = {
 	is_triggered_only = yes
 
 	immediate = {
+		ruler = {
+			save_event_target_as = mem_angry_neochadanus
+		}
 		exile_leader_as = mem_angry_neochadanus
 		
 		create_leader = {
@@ -2007,6 +2099,28 @@ country_event = {
 			}
 		}
 		set_leader = mem_new_ruler
+
+		if = {
+			limit = {
+				exists = heir
+				heir = {
+					is_same_species = event_target:mem_angry_neochadanus.species
+				}
+			}
+			kill_leader = {
+				type = ruler
+				heir = yes
+				show_notification = no
+			}
+		}
+
+		#refresh the govt
+		change_government = {
+			authority = auth_dictatorial
+		}
+		change_government = {
+			authority = auth_imperial
+		}
 
 		country_event = { id = mem_lost_emperor.910 days = 180 random = 360 }
 	}
@@ -2039,8 +2153,16 @@ country_event = {
 
 		hidden_effect = {
 			set_leader = mem_angry_neochadanus
-	
 			set_country_flag = mem_emperor_is_neochadanus
+
+			#refresh the govt
+			change_government = {
+				authority = auth_dictatorial
+			}
+			change_government = {
+				authority = auth_imperial
+			}
+
 			country_event = { id = mem_lost_emperor.901 days = 3600 }
 		}
 	}
