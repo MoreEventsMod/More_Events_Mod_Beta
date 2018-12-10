@@ -3,87 +3,32 @@
 
 # Increases the time it takes to bombard the planet
 building_planetary_shield_generator = {
-	icon = "building_shield_generator"
-	base_buildtime = 360
-	is_listed = no
-	planet_unique = yes
-	immune_to_bombardment = yes
+	base_buildtime = 600	
+	base_cap_amount = 1
+	add_to_first_building_slot = yes
+	can_build = no
+
+	category = army
 	
-	cost = {
-		minerals = 500
-	}
-	
-	required_resources = {
-		energy = 5
+	allow = {
+		has_upgraded_capital = yes
 	}
 	
 	planet_modifier = {
-		planet_orbital_bombardment_damage = -0.75
+		planet_orbital_bombardment_damage = -0.5
 	}
 
-	produced_resources = {
-		engineering_research = 3
-		physics_research = 3
-	}	
-	
-	potential = {
-		planet = {
-			NOT = { is_planet_class = pc_habitat }
-		}
-	}
-	
-	allow = {
-		if = {
-			limit = {
-				owner = {
-					NOT = { has_authority = auth_machine_intelligence }
-				}
-			}
-			custom_tooltip = {
-				text = "requires_building_capital_1"
-				planet = {
-					OR = {
-						has_building = "building_capital_1"
-						has_building = "building_capital_2"
-						has_building = "building_capital_3"
-					}
-				}
-			}
-		}
-		if = {
-			limit = {
-				owner = { has_authority = auth_machine_intelligence }
-			}
-			custom_tooltip = {
-				text = "requires_building_machine_capital_1"
-				planet = {
-					OR = {
-						has_building = "building_machine_capital_1"
-						has_building = "building_machine_capital_2"
-						has_building = "building_machine_capital_3"
-					}
-				}
-			}
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = 500
+		}			
+		upkeep = {
+			energy = 5
 		}
 	}
 	
 	prerequisites = {
-	}
-
-	ai_allow = {
-		NOR = {
-			has_resource = {
-				type = sr_betharian
-				amount > 0
-			}	
-			has_resource = {
-				type = sr_alien_pets
-				amount > 0
-			}				
-		}
-		fromfrom = {
-			has_technology = tech_planetary_shield_generator
-		}
 	}
 	
 	ai_weight = {
@@ -93,28 +38,63 @@ building_planetary_shield_generator = {
 
 # mem shield generator
 building_mem_planetary_shield_generator = {
-	icon = "building_shield_generator"
-	base_buildtime = 360	
-	planet_unique = yes
-	defense_armies = 1
-	
-	cost = {
-		minerals = 500
-	}
-	
+	icon = "building_planetary_shield_generator"
+	base_buildtime = 600	
+	base_cap_amount = 1
+	add_to_first_building_slot = yes
+
+	category = army
+		
 	planet_modifier = {
-		planet_orbital_bombardment_damage = -0.75
-	}	
-	
-	required_resources = {
-		energy = 5
+		planet_orbital_bombardment_damage = -0.5
 	}
-	
-	produced_resources = {
-		engineering_research = 3
-		physics_research = 3
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = 500
+		}			
+		upkeep = {
+			energy = 5
+		}
 	}
-	
+
+	upgrades = {
+		building_mem_planetary_shield_generator_heavy
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			owner = { is_gestalt = no }
+		}
+		modifier = {
+			job_soldier_add = 1
+		}
+	}
+	triggered_planet_modifier = {
+		potential = {
+			owner = { is_gestalt = yes }
+		}
+		modifier = {
+			job_warrior_drone_add = 1
+		}
+	}
+
+	triggered_desc = {
+		trigger = {
+			exists = owner
+			owner = { is_gestalt = yes }
+		}
+		text = job_warrior_drone_effect_desc
+	}
+	triggered_desc = {
+		trigger = {
+			exists = owner
+			owner = { is_gestalt = no }
+		}
+		text = job_soldier_effect_desc
+	}
+		
 	potential = {
 		planet = {
 			NOR = { 
@@ -129,167 +109,153 @@ building_mem_planetary_shield_generator = {
 	}
 	
 	allow = {
-		if = {
-			limit = {
-				owner = {
-					NOT = { has_authority = auth_machine_intelligence }
-				}
-			}
-			custom_tooltip = {
-				text = "requires_building_capital_1"
-				planet = {
-					OR = {
-						has_building = "building_capital_1"
-						has_building = "building_capital_2"
-						has_building = "building_capital_3"
-					}
-				}
-			}
-		}
-		if = {
-			limit = {
-				owner = { has_authority = auth_machine_intelligence }
-			}
-			custom_tooltip = {
-				text = "requires_building_machine_capital_1"
-				planet = {
-					OR = {
-						has_building = "building_machine_capital_1"
-						has_building = "building_machine_capital_2"
-						has_building = "building_machine_capital_3"
-					}
-				}
-			}
-		}
+		has_upgraded_capital = yes
 	}
 	
 	prerequisites = {
 		"tech_planetary_shield_generator"
 	}
-	
-	ai_allow = {
-		NOR = {
-			has_resource = {
-				type = sr_betharian
-				amount > 0
-			}	
-			has_resource = {
-				type = sr_alien_pets
-				amount > 0
-			}				
-		}
-#		has_resource = {
-#			type = energy
-#			amount > 0
-#		}
-	}
-	
+
 	ai_weight = {
-		weight = 10000
+		weight = 10
+		modifier = {
+			factor = 0
+			num_pops <= 29
+		}
+		modifier = {
+			factor = 10
+			num_pops >= 60
+		}
+		modifier = {
+			factor = 10
+			num_buildings = {
+				type = building_fortress
+				value > 0
+			}
+		}
 	}
-	
-	upgrades = {
-		building_mem_planetary_shield_generator_heavy
-	}
-	
-	ai_replace = no
 }
 
 #Heavy Shield Generator
 building_mem_planetary_shield_generator_heavy = {
 	icon = "building_mem_heavy_shield_generator"
-	base_buildtime = 360
-	is_listed = no
-	planet_unique = yes
-	defense_armies = 1
-	
-	cost = {
-		minerals = 650
+	base_buildtime = 600
+	can_build = no
+	add_to_first_building_slot = yes
+
+	category = army
+
+	allow = {
+		has_upgraded_capital = yes
 	}
 	
 	planet_modifier = {
-		planet_orbital_bombardment_damage = -0.85
-	}	
-	
-	required_resources = {
-		energy = 6
+		planet_orbital_bombardment_damage = -0.6
 	}
-	
-	produced_resources = {
-		engineering_research = 4
-		physics_research = 4
-	}
-	
-	potential = {
-		planet = {
-			NOR = { 
-				is_planet_class = pc_habitat
-				is_planet_class = pc_asteroid
-			}	
+
+	triggered_planet_modifier = {
+		potential = {
+			owner = { is_gestalt = no }
+		}
+		modifier = {
+			job_soldier_add = 1
 		}
 	}
-	
-	allow = {
-		if = {
-			limit = {
-				owner = {
-					NOT = { has_authority = auth_machine_intelligence }
-				}
-			}
-			custom_tooltip = {
-				text = "requires_building_capital_2"
-				planet = {
-					OR = {
-						has_building = "building_capital_2"
-						has_building = "building_capital_3"
-					}
-				}
-			}
+	triggered_planet_modifier = {
+		potential = {
+			owner = { is_gestalt = yes }
 		}
-		if = {
-			limit = {
-				owner = { has_authority = auth_machine_intelligence }
-			}
-			custom_tooltip = {
-				text = "requires_building_machine_capital_2"
-				planet = {
-					OR = {
-						has_building = "building_machine_capital_2"
-						has_building = "building_machine_capital_3"
-					}
-				}
-			}
+		modifier = {
+			job_warrior_drone_add = 1
 		}
 	}
-	
+
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = 800
+			rare_crystals = 50
+		}	
+		upkeep = {
+			energy = 6
+			rare_crystals = 1				
+		}
+	}
+
 	prerequisites = {
 		"mem_tech_planetary_shield_generator_heavy"
 	}
-	
-	ai_replace = no
+
+	triggered_desc = {
+		trigger = {
+			exists = owner
+			owner = { is_gestalt = yes }
+		}
+		text = job_warrior_drone_effect_desc
+	}
+	triggered_desc = {
+		trigger = {
+			exists = owner
+			owner = { is_gestalt = no }
+		}
+		text = job_soldier_effect_desc
+	}
 
 	ai_weight = {
 		weight = 10000
+		modifier = {
+			factor = 0
+			owner = { 
+				has_monthly_income = {
+					resource = rare_crystals
+					value < 3
+				}
+			}
+		}
 	}
 }
 
 building_mem_planetary_shield_generator_orila = {
 	icon = "building_mem_orila_shield_generator"
-	is_listed = no
-	defense_armies = 1
-	
-	planet_modifier = {
-		planet_orbital_bombardment_damage = -0.95
-	}	
-	
-	produced_resources = {
-		engineering_research = 5
-		physics_research = 5
+	can_build = no
+	can_demolish = yes
+	add_to_first_building_slot = yes
+
+	category = army
+
+	triggered_planet_modifier = {
+		potential = {
+			owner = { is_gestalt = no }
+		}
+		modifier = {
+			job_soldier_add = 1
+		}
+	}
+	triggered_planet_modifier = {
+		potential = {
+			owner = { is_gestalt = yes }
+		}
+		modifier = {
+			job_warrior_drone_add = 1
+		}
+	}
+
+	triggered_desc = {
+		trigger = {
+			exists = owner
+			owner = { is_gestalt = yes }
+		}
+		text = job_warrior_drone_effect_desc
+	}
+	triggered_desc = {
+		trigger = {
+			exists = owner
+			owner = { is_gestalt = no }
+		}
+		text = job_soldier_effect_desc
 	}
 	
-	ai_replace = no
-	
-	ai_weight = {
-		weight = 10000
+	planet_modifier = {
+		planet_orbital_bombardment_damage = -0.7
 	}
 }
