@@ -22,7 +22,7 @@ country_event = {
 		num_owned_planets > 9
 		any_owned_planet = { 
 			is_capital = no
-			num_pops > 4
+			num_pops > 15
 			NOT = { 
 				has_planet_flag = colony_event
 			}
@@ -39,13 +39,13 @@ country_event = {
 				random_owned_planet = { 
 					limit = {
 						is_capital = no
-						num_pops > 4
+						num_pops > 15
 						NOT = { 
 							has_planet_flag = colony_event
 						}
 					}
-					planet_event = { id = mem_viral_engine.10 days = 1 }
 					save_event_target_as = mem_viral_engine_planet #TODO: Necessary?
+					planet_event = { id = mem_viral_engine.10 days = 1 }
 					set_planet_flag = colony_event
 				}
 			}
@@ -325,35 +325,7 @@ planet_event = {
 	option = {
 		name = mem_viral_engine.22.a
 		custom_tooltip = mem_viral_engine.22.a.tooltip
-		hidden_effect = { 
-			if = {
-				limit = {
-					any_tile = { 
-						has_building = no
-						has_blocker = no
-					}
-				}
-				random_tile = {
-					limit = { 
-						has_building = no
-						has_blocker = no
-					}
-					set_building = building_mem_viral_engine
-				}
-			}
-			ELSE_IF = {
-				limit = {
-					any_tile = { has_blocker = no }
-				}
-				random_tile = {
-					limit = { has_blocker = no }
-					set_building = building_mem_viral_engine
-				}
-			}
-			ELSE = { 
-				random_tile = { set_building = building_mem_viral_engine }
-			}
-		}
+		add_deposit = d_mem_viral_engine
 	}
 }
 
@@ -372,7 +344,10 @@ planet_event = {
 			modifier = "mem_viral_insurgency"
 			days = 21600
 		}
-		random_pop = { kill_pop = yes }
+		while = {
+			count = 3
+			random_pop = { kill_pop = yes }
+		}
 	}
 	
 	option = {
@@ -391,22 +366,11 @@ planet_event = {
 	is_triggered_only = yes
 	
 	immediate = {
-		IF = {
-			limit = { 
-				any_tile = { has_blocker = no }
-			}
-			random_tile = {
-				limit = { has_blocker = no }
-				set_blocker = tb_mem_viral_transmitter
-			}
-		}
-		ELSE = {
-			random_tile = { set_blocker = tb_mem_viral_transmitter }
-		}
 	}
 	
 	option = {
 		name = mem_viral_engine.20.a
+		add_deposit = d_mem_viral_transmitter
 	}
 }
 
@@ -421,24 +385,29 @@ planet_event = {
 	is_triggered_only = yes
 	
 	immediate = {
-		random_pop = { kill_pop = yes }
-		random_list = { 
-			1 = {}
-			8 = { random_pop = { kill_pop = yes } }
+		set_variable = {
+			which = mem_pops_to_kill
+			value = 1
 		}
-		random_list = {
-			1 = {}
-			6 = { random_pop = { kill_pop = yes } }
+		every_pop = {
+			root = {
+				change_variable = {
+					which = mem_pops_to_kill
+					value = 0.2
+				}
+			}
 		}
-		random_list = {
-			1 = {}
-			4 = { random_pop = { kill_pop = yes } }
-		}
-		every_tile = {
-			limit = { has_building = yes }
-			random_list = {
-				3 = {}
-				2 = { set_ruined = yes }
+		while = {
+			limit = {
+				check_variable = {
+					which = mem_pops_to_kill
+					value > 0.9
+				}
+			}
+			random_pop = { kill_pop = yes }
+			change_variable = {
+				which = mem_pops_killed
+				value = 1
 			}
 		}
 		add_modifier = {
@@ -449,5 +418,19 @@ planet_event = {
 	
 	option = {
 		name = TERRIBLE
+		custom_tooltip = mem_viral_engine.21.tooltip
+		add_planet_devastation = 20
+	}
+	after = {
+		hidden_effect = {
+			set_variable = {
+				which = mem_pops_to_kill
+				value = 0
+			}
+			set_variable = {
+				which = mem_pops_killed
+				value = 0
+			}
+		}
 	}
 }

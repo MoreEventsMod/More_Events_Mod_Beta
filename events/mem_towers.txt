@@ -28,9 +28,7 @@ ship_event = {
         name = mem_towers.100.a
 
         FROM = {
-            orbital_deposit_tile = {
-                set_deposit = d_enormous1_society_deposit
-            }
+            set_deposit = d_society_6
         }
     }
 
@@ -39,96 +37,80 @@ ship_event = {
         custom_tooltip = mem_towers.100.b.tooltip
 
         owner = {
-            random_owned_planet = {
-                limit = {
-                    num_pops > 0
-                    NOR = {
-                        is_planet_class = pc_ringworld_habitable
-                        is_planet_class = pc_habitat
-                        is_planet_class = pc_gaia
-                        is_planet_class = pc_nuked
-                        is_planet_class = pc_machine
-                        #is_capital = yes
-                    }
-                }
-                save_event_target_as = sulfur_planet
-            }
-            hidden_effect = {
-                country_event = { id = mem_towers.101 days = 30 }
-            }
+            set_country_flag = mem_towers_forest_edict_unlocked
         }
     }
 }
 
 #Checking if planet even exist, executing possible scope
-country_event = {
-    id = mem_towers.101
-    hide_window = yes
-    is_triggered_only = yes
+# country_event = {
+#     id = mem_towers.101
+#     hide_window = yes
+#     is_triggered_only = yes
 
-    immediate = {
-        random_list = {
-            22 = {
-                country_event = { id = mem_towers.103 } #Fail
-            }
-            78 = {
-                country_event = { id = mem_towers.102 } #Success
-                modifier = {
-                    factor = 0
-                    NOT = { 
-                        exists = event_target:sulfur_planet 
-                    }
-                }
-            }
-        }
-    }
-}
+#     immediate = {
+#         random_list = {
+#             22 = {
+#                 country_event = { id = mem_towers.103 } #Fail
+#             }
+#             78 = {
+#                 country_event = { id = mem_towers.102 } #Success
+#                 modifier = {
+#                     factor = 0
+#                     NOT = { 
+#                         exists = event_target:sulfur_planet 
+#                     }
+#                 }
+#             }
+#         }
+#     }
+# }
 
-#Transplant candidate found
-country_event = {
-    id = mem_towers.102
-    title = mem_towers.102.name
-    desc = mem_towers.102.desc
+# #Transplant candidate found
+# country_event = {
+#     id = mem_towers.102
+#     title = mem_towers.102.name
+#     desc = mem_towers.102.desc
 
-    picture = GFX_evt_toxic
-    location = event_target:sulfur_planet
+#     picture = GFX_evt_toxic
+#     location = event_target:sulfur_planet
 
-    is_triggered_only = yes
+#     is_triggered_only = yes
 
-    option = {
-        name = mem_towers.102.a
+#     option = {
+#         name = mem_towers.102.a
 
-        event_target:sulfur_planet = {
-            add_modifier = {
-                modifier = mem_towers_forest_power
-                days = -1
-            }
-        }
-    }
+#         event_target:sulfur_planet = {
+#             add_modifier = {
+#                 modifier = mem_towers_forest_power
+#                 days = -1
+#             }
+#         }
+#     }
 
-    option = {
-        name = mem_towers.102.b
-    }
+#     option = {
+#         name = mem_towers.102.b
+#     }
 
-    after = {
-        hidden_effect = { owner = { country_event = { id = story.3 days = 30 } } }
-    }
-}
+#     after = {
+#         hidden_effect = { owner = { country_event = { id = story.3 days = 30 } } }
+#     }
+# }
 
 #Transplant candidate not found
-country_event = {
-    id = mem_towers.103
-    title = mem_towers.103.name
-    desc = mem_towers.103.desc
+# country_event = {
+#     id = mem_towers.103
+#     title = mem_towers.103.name
+#     desc = mem_towers.103.desc
 
-    picture = GFX_evt_toxic
+#     picture = GFX_evt_toxic
 
-    is_triggered_only = yes
+#     is_triggered_only = yes
 
-    option = {
-        name = mem_towers.103.a
-    }
-}
+#     option = {
+#         name = mem_towers.103.a
+#     }
+# }
 
 #Trash of the titans
 ship_event = {
@@ -175,10 +157,11 @@ ship_event = {
         name = mem_tower.200.c
 
         FROM = {
-            orbital_deposit_tile = {
-                set_deposit = d_immense_engineering_deposit
-                add_deposit = d_immense_society_deposit
+            hidden_effect = {
+                clear_deposits = yes
             }
+            add_deposit = d_engineering_3
+            add_deposit = d_society_3
         }
     }
 
@@ -212,7 +195,7 @@ ship_event = {
                 key = mem_towers_brigadier
                 name = "Brigadier"
                 species = last_created_species
-                type = governor
+                class = governor
                 traits = {
                     trait = mem_leader_trait_towers_brigadier
                 }
@@ -258,17 +241,18 @@ country_event = {
 			add_to_owned = yes
 			key = mem_towers_brigadier
         }
-        
-        allow = {
-            free_leader_slots > 0 
-        }
     }
 
     option = {
         name = mem_towers.211.b
         default_hide_option = yes
 
-        add_influence = 50
+        add_monthly_resource_mult = {
+			resource = influence
+			value = @tier1influencereward
+			min = @tier1influencemin
+			max = @tier1influencemax
+		}
     }
 
     option = {
@@ -317,7 +301,7 @@ ship_event = {
                 20 = {
                     if = {
                         limit = {
-                            has_technology = tech_mining_network_3
+                            has_technology = tech_mining_2
                         }
                         add_monthly_resource_mult = {
                             resource = engineering_research
@@ -328,18 +312,18 @@ ship_event = {
                     }
                     else_if = {
                         limit = {
-                            has_technology = tech_mining_network_2
+                            has_technology = tech_mining_1
                         }
-                        add_research_option = tech_mining_network_3
+                        add_research_option = tech_mining_2
                         add_tech_progress = {
-                            tech = tech_mining_network_3
+                            tech = tech_mining_3
                             progress = 0.20
                         }
                     }
                     else = {
-                        add_research_option = tech_mining_network_2
+                        add_research_option = tech_mining_1
                         add_tech_progress = {
-                            tech = tech_mining_network_2
+                            tech = tech_mining_1
                             progress = 0.20
                         }
                     }

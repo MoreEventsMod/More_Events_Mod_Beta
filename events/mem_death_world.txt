@@ -93,7 +93,7 @@ planet_event = {
 		NOR = {
 			has_global_flag = mem_death_world_started
 			# has_planet_flag = colony_event
-			has_planet_flag = was_terraformed
+			# has_planet_flag = was_terraformed # Deprecated?
 		}
 		# owner = {
 			# is_ai = no
@@ -109,10 +109,6 @@ planet_event = {
 		add_modifier = {
 			modifier = mem_death_world_1
 			days = -1
-		}
-		IF = {
-			limit = { has_modifier = mem_paradise_world }
-			remove_modifier = mem_paradise_world
 		}
 		planet_event = { id = mem_death_world.100 days = 150 random = 110 }
 	}
@@ -448,7 +444,7 @@ planet_event = {
 				has_authority = auth_hive_mind
 			}
 		}
-		any_owned_pop = { species = { pops_have_happiness = yes } }
+		any_owned_pop = { mem_has_happiness = yes }
 	}
 	
 	immediate = {
@@ -459,7 +455,7 @@ planet_event = {
 		set_planet_flag = mem_death_world_militia
 		#Please be another way. Please!
 		every_owned_pop = {
-			limit = { species = { pops_have_happiness = yes } }
+			limit = { mem_has_happiness = yes }
 			pop_change_ethic = "ethic_militarist"
 		}
 		
@@ -470,7 +466,11 @@ planet_event = {
 		
 		trigger = {
 			owner = {
-				minerals > 249
+				resource_stockpile_compare = {
+					resource = minerals
+					value >= 250
+					
+				}
 			}
 		}
 		
@@ -611,13 +611,7 @@ planet_event = {
 			flag = mem_death_world_happening
 			days = 240
 		}
-		random_tile = {
-			limit = {
-				has_building = yes
-				is_ruined = no
-			}
-			set_ruined = yes
-		}
+		add_planet_devastation = 10
 		
 		IF = {
 			limit = {
@@ -720,12 +714,12 @@ planet_event = {
 				has_authority = auth_hive_mind
 			}
 		}
-		any_owned_pop = { species = { pops_have_happiness = yes } }
+		any_owned_pop = { mem_has_happiness = yes }
 	}
 	
 	immediate = {
 		every_owned_pop = {
-			limit = { species = { pops_have_happiness = yes } }
+			limit = { mem_has_happiness = yes }
 			pop_change_ethic = "ethic_xenophobe"
 		}
 		set_planet_flag = mem_death_world_purity
@@ -973,7 +967,12 @@ planet_event = {
 		name = mem_death_world.13a
 		
 		owner = {
-			add_society_research = 1000
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier4researchreward
+				min = @tier4researchmin
+				max = @tier4researchmax
+			}
 		}
 		add_modifier = {
 			modifier = mem_death_world_wasteland
@@ -1100,8 +1099,12 @@ country_event = {
 	option = {
 		name = mem_death_world.15a
 		
-		
-		add_society_research = 500
+		add_monthly_resource_mult = {
+			resource = society_research
+			value = @tier3researchreward
+			min = @tier3researchmin
+			max = @tier3researchmax
+		}
 		
 		FROMFROM = {
 			add_modifier = {
@@ -1176,19 +1179,16 @@ country_event = {
 			remove_modifier = mem_death_world_militia
 			remove_modifier = mem_death_world_militia_supported
 			set_planet_flag = mem_death_world_finished
-			every_tile = { 
-				kill_pop = yes 
-				remove_building = yes
+			every_owned_pop = { 
+				kill_pop = yes
 			}
 			change_pc = pc_toxic
 			add_modifier = {
 				modifier = mem_death_world_toxic
 				days = -1
 			}
-			orbital_deposit_tile = {
-				clear_deposits = yes
-				add_deposit = d_enormous2_society_deposit
-			}
+			clear_deposits = yes
+			add_deposit = d_society_5
 		}
 		
 	}
@@ -1316,13 +1316,9 @@ planet_event = {
 					NOT = { has_trait = trait_mem_pc_death_preference }
 				}
 				species = { save_event_target_as = species_being_modified }
-				create_species = {
-					name = this
-					plural = this
-					class = this
-					portrait = this
-					traits = this
-					homeworld = root
+				modify_species = {
+					species = this
+					ideal_planet_class = root
 				}
 			}
 			last_created_species = { set_species_identity = event_target:species_being_modified }
@@ -1403,7 +1399,7 @@ planet_event = {
 	}
 }
 
-#Walled Garden
+#Walled Garden - this event is likely discontinued now
 planet_event = {
 	id = mem_death_world.20
 	title = mem_death_world.20.name
@@ -1451,31 +1447,64 @@ planet_event = {
 	
 	is_triggered_only = yes
 	
-	trigger = {
-		from = {
-			has_building = mem_deterrence_hub
-		}
-	}
+	# trigger = {
+	# 	from = {
+	# 		has_building = mem_deterrence_hub
+	# 	}
+	# }
 	
 	immediate = {
-		random_tile = {
-			limit = {
-				NOT = { has_building = mem_deterrence_hub }
-				has_blocker = no
+		while = {
+			count = 2
+			limit = { free_district_slots < 2 }
+			random_list = {
+				1 = {
+					remove_district = district_city
+					modifier = {
+						factor = 0
+						num_districts = { type = district_city value < 1 }
+					}
+				}
+				1 = {
+					remove_district = district_hive
+					modifier = {
+						factor = 0
+						num_districts = { type = district_hive value < 1 }
+					}
+				}
+				1 = {
+					remove_district = district_nexus
+					modifier = {
+						factor = 0
+						num_districts = { type = district_nexus value < 1 }
+					}
+				}
+				1 = {
+					remove_district = district_generator
+					modifier = {
+						factor = 0
+						num_districts = { type = district_generator value < 1 }
+					}
+				}
+				1 = {
+					remove_district = district_mining
+					modifier = {
+						factor = 0
+						num_districts = { type = district_mining value < 1 }
+					}
+				}
+				1 = {
+					remove_district = district_farming
+					modifier = {
+						factor = 0
+						num_districts = { type = district_farming value < 1 }
+					}
+				}
 			}
-			kill_pop = yes
-			remove_building = yes
-			set_blocker = "tb_mem_death_world"
 		}
-		random_tile = {
-			limit = {
-				NOT = { has_building = mem_deterrence_hub }
-				has_blocker = no
-			}
-			kill_pop = yes
-			remove_building = yes
-			set_blocker = "tb_mem_death_world"
-		}
+		add_deposit = d_mem_death_world_blocker
+		add_deposit = d_mem_death_world_blocker
+		add_deposit = d_mem_death_world_deterrence_hub
 		set_planet_flag = mem_death_world_deterrence_hub
 		set_planet_flag = mem_death_world_finished
 	}
@@ -1495,49 +1524,46 @@ planet_event = {
 }
 
 #Walled garden: Deterrence hub removed (You're a moron!)
-planet_event = {
-	id = mem_death_world.22
-	title = mem_death_world.22.name
-	desc = mem_death_world.22.desc
-	picture = GFX_evt_alien_ruins
-	show_sound = event_alien_nature
-	location = ROOT
+# planet_event = {
+# 	id = mem_death_world.22
+# 	title = mem_death_world.22.name
+# 	desc = mem_death_world.22.desc
+# 	picture = GFX_evt_alien_ruins
+# 	show_sound = event_alien_nature
+# 	location = ROOT
 	
-	is_triggered_only = yes
+# 	is_triggered_only = yes
 	
-	trigger = {
-		from = {
-			has_prev_building = mem_deterrence_hub
-		}
-		has_planet_flag = mem_death_world_deterrence_hub
-	}
+# 	trigger = {
+# 		from = {
+# 			has_prev_building = mem_deterrence_hub
+# 		}
+# 		has_planet_flag = mem_death_world_deterrence_hub
+# 	}
 	
-	immediate = {
-		remove_modifier = mem_death_world_2
-		remove_modifier = mem_death_world_3
-		remove_modifier = mem_death_world_militia
-		remove_modifier = mem_death_world_militia_supported
-		remove_modifier = mem_paradise_world
-		set_planet_flag = mem_death_world_finished
-		every_tile = { 
-			kill_pop = yes 
-			remove_building = yes
-		}
-		change_pc = pc_toxic
-		add_modifier = {
-			modifier = mem_death_world_toxic
-			days = -1
-		}
-		orbital_deposit_tile = {
-			clear_deposits = yes
-			add_deposit = d_enormous2_society_deposit
-		}
-	}
+# 	immediate = {
+# 		remove_modifier = mem_death_world_2
+# 		remove_modifier = mem_death_world_3
+# 		remove_modifier = mem_death_world_militia
+# 		remove_modifier = mem_death_world_militia_supported
+# 		set_planet_flag = mem_death_world_finished
+# 		every_tile = { 
+# 			kill_pop = yes 
+# 			remove_building = yes
+# 		}
+# 		change_pc = pc_toxic
+# 		add_modifier = {
+# 			modifier = mem_death_world_toxic
+# 			days = -1
+# 		}
+# 		clear_deposits = yes
+# 		add_deposit = d_society_5
+# 	}
 	
-	option = {
-		name = mem_death_world_LOST
-	}
-}
+# 	option = {
+# 		name = mem_death_world_LOST
+# 	}
+# }
 
 #Psionic entry point
 planet_event = {
@@ -1629,19 +1655,16 @@ planet_event = {
 		remove_modifier = mem_death_world_militia
 		remove_modifier = mem_death_world_militia_supported
 		set_planet_flag = mem_death_world_finished
-		every_tile = { 
+		every_owned_pop = { 
 			kill_pop = yes 
-			remove_building = yes
 		}
 		change_pc = pc_toxic
 		add_modifier = {
 			modifier = mem_death_world_toxic
 			days = -1
 		}
-		orbital_deposit_tile = {
-			clear_deposits = yes
-			add_deposit = d_enormous2_society_deposit
-		}
+		clear_deposits = yes
+		add_deposit = d_society_5
 	}
 	
 	option = {
@@ -1739,12 +1762,12 @@ planet_event = {
 		name = mem_death_world.27a
 		custom_tooltip = mem_death_world.27a.tooltip
 		
-		trigger = {
-			any_tile = {
-				has_pop = no
-				has_blocker = no
-			}
-		}
+		# trigger = {
+		# 	any_tile = {
+		# 		has_pop = no
+		# 		has_blocker = no
+		# 	}
+		# }
 		
 		hidden_effect = {
 			create_species = {
@@ -1763,29 +1786,8 @@ planet_event = {
 			last_created_species = {
 				save_event_target_as = planetmind
 			}
-			random_tile = {
-				limit = {
-					has_pop = no
-					has_blocker = no
-				}
-				create_pop = {
-					species = event_target:planetmind
-				}
-			}
-			random_tile = {
-				limit = {
-					has_pop = no
-					has_blocker = no
-				}
-				create_pop = {
-					species = event_target:planetmind
-				}
-			}
-			random_tile = {
-				limit = {
-					has_pop = no
-					has_blocker = no
-				}
+			while = {
+				count = 5
 				create_pop = {
 					species = event_target:planetmind
 				}
@@ -1835,19 +1837,16 @@ planet_event = {
 		remove_modifier = mem_death_world_militia
 		remove_modifier = mem_death_world_militia_supported
 		set_planet_flag = mem_death_world_finished
-		every_tile = { 
+		every_owned_pop = { 
 			kill_pop = yes 
-			remove_building = yes
 		}
 		change_pc = pc_toxic
 		add_modifier = {
 			modifier = mem_death_world_toxic
 			days = -1
 		}
-		orbital_deposit_tile = {
-			clear_deposits = yes
-			add_deposit = d_enormous2_society_deposit
-		}
+		clear_deposits = yes
+		add_deposit = d_society_5
 	}
 	
 	option = {
@@ -1893,19 +1892,16 @@ planet_event = {
 		owner = {
 			end_event_chain = "mem_death_world_chain"
 		}
-		every_tile = { 
+		every_owned_pop = { 
 			kill_pop = yes 
-			remove_building = yes
 		}
 		change_pc = pc_toxic
 		add_modifier = {
 			modifier = mem_death_world_toxic
 			days = -1
 		}
-		orbital_deposit_tile = {
-			clear_deposits = yes
-			add_deposit = d_enormous2_society_deposit
-		}
+		clear_deposits = yes
+		add_deposit = d_society_5
 	}
 	
 	option = {

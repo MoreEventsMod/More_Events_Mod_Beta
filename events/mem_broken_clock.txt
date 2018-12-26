@@ -212,6 +212,9 @@ planet_event = {
                                 trait = trait_fleeting
                             }
                             homeworld = this
+                            effect = {
+                                save_event_target_as = newcomer_species
+                            }
                         }
                         create_country = {
                             type = mem_broken_clock_country
@@ -249,7 +252,7 @@ planet_event = {
                                 save_event_target_as = unwelcome_guests
                                 set_country_flag = mem_broken_clock_newcomers
                                 set_timed_country_flag = { flag = day_0 days = 7 }
-                                mem_broken_clock_give_tech = yes
+                                # mem_broken_clock_give_tech = yes
                                 add_modifier = {
                                     modifier = mem_broken_clock_ai_cheat
                                     days = -1
@@ -276,7 +279,7 @@ planet_event = {
                             }
                             homeworld = this
                             effect = {
-                                apply_robotic_pop_growth_behavior = yes
+                                save_event_target_as = newcomer_species
                             }
                         }
                         create_country = {
@@ -314,7 +317,7 @@ planet_event = {
                                 save_event_target_as = unwelcome_guests
                                 set_country_flag = mem_broken_clock_newcomers
                                 set_timed_country_flag = { flag = day_0 days = 7 }
-                                mem_broken_clock_give_tech = yes
+                                # mem_broken_clock_give_tech = yes
                                 set_graphical_culture = reptilian_01
                                 add_modifier = {
                                     modifier = mem_broken_clock_ai_cheat
@@ -347,6 +350,9 @@ planet_event = {
                                 trait = trait_repugnant
                             }
                             homeworld = this
+                            effect = {
+                                save_event_target_as = newcomer_species
+                            }
                         }
                         create_country = {
                             type = mem_broken_clock_country
@@ -383,7 +389,7 @@ planet_event = {
                                 save_event_target_as = unwelcome_guests
                                 set_country_flag = mem_broken_clock_newcomers
                                 set_timed_country_flag = { flag = day_0 days = 7 }
-                                mem_broken_clock_give_tech = yes
+                                # mem_broken_clock_give_tech = yes
                                 add_modifier = {
                                     modifier = mem_broken_clock_ai_cheat
                                     days = -1
@@ -436,12 +442,7 @@ planet_event = {
                         limit = {
                             exists = owner
                         }
-                        every_tile = {
-                            limit = {
-                                has_pop = yes
-                            }
-                            kill_pop = yes
-                        }
+                        destroy_colony = yes
                     }
                     create_starbase = {
                         owner = event_target:unwelcome_guests
@@ -467,84 +468,85 @@ planet_event = {
                         }
                     }
                 }
-                set_owner = event_target:unwelcome_guests
-                every_tile = {
-                    create_pop = {
-                        species = event_target:unwelcome_guests
-                    }
+                create_colony = {
+                    owner = event_target:unwelcome_guests
+                    species = event_target:newcomer_species
                 }
-                random_tile = {
-                    limit = {
-                        num_adjacent_tiles > 3
-                        has_building = no
-                        NOR = {
-                            any_neighboring_tile = { is_orbital_tile = yes }
-                            is_orbital_tile = yes
+                # Setting deposits on capitol
+                clear_deposits = yes
+                add_deposit = d_mem_broken_clock_fissure
+                while = {
+                    count = 8
+                    owner = {
+                        switch = {
+                            trigger = has_authority
+                            auth_machine_intelligence = { prev = { add_district = district_nexus } }
+                            auth_machine_intelligence = { prev = { add_district = district_hive } }
+                            auth_imperial = { prev = { add_district = district_city } }
                         }
                     }
+                }
+                while = {
+                    count = 12
+                    add_district = district_mining
+                }
+                while = {
+                    count = 5
                     IF = {
-                        limit = { event_target:unwelcome_guests = { has_authority = auth_machine_intelligence } }
-                        set_building = building_machine_capital_3
+                        limit = {
+                            owner = { has_authority = auth_machine_intelligence }
+                        }
+                        add_district = district_generator
                     }
                     ELSE = {
-                        set_building = building_capital_3
+                        add_district = district_farming
                     }
-                    set_deposit = d_rich_energy_deposit
                 }
-                random_tile = {
-                    limit = {
-                        has_building = no
-                        is_orbital_tile = no
+                while = {
+                    count = 50
+                    create_pop = {
+                        species = event_target:newcomer_species
                     }
-                    set_building = building_power_hub_1
-                    set_deposit = d_energy_deposit
                 }
-                orbital_deposit_tile = {
-                    set_building = building_stronghold
-                }
-                random_tile = {
+                remove_all_buildings = yes
+                IF = {
                     limit = {
-                        has_building = no
-                        is_orbital_tile = no
-                        NOT = {
-                            any_neighboring_tile = {
-                                OR = {
-                                    has_building = "building_capital_1"
-                                    has_building = "building_capital_2"
-                                    has_building = "building_capital_3"
-                                }
+                        owner = { has_authority = auth_hive_mind }
+                    }
+                    add_building = building_hive_major_capital
+                }
+                ELSE_IF = {
+                    limit = {
+                        owner = { has_authority = auth_machine_intelligence }
+                    }
+                    add_building = building_machine_major_capital
+                }
+                ELSE = {
+                    add_building = building_major_capital
+                }
+                while = {
+                    count = 3
+                    add_building = building_fortress
+                }
+                add_building = building_hall_judgment
+                add_building = building_mineral_purification_hub
+                add_building = building_dimensional_fabricator
+                add_building = building_class_4_singularity
+                while = {
+                    count = 2
+                    random_list = {
+                        1 = {
+                            add_building = building_hydroponics_farm
+                            modifier = {
+                                factor = 0
+                                owner = { is_gestalt = yes }
                             }
                         }
-                    }
-                    set_building = building_hypercomms_forum
-                }
-                random_tile = {
-                    limit = {
-                        has_building = no
-                        any_neighboring_tile = {
-                            OR = {
-                                has_building = "building_capital_1"
-                                has_building = "building_capital_2"
-                                has_building = "building_capital_3"
-                            }
+                        1 = {
+                            add_building = building_energy_grid
                         }
                     }
-                    set_building = building_dark_matter_power_plant
                 }
-                random_tile = {
-                    limit = {
-                        has_building = no
-                        any_neighboring_tile = {
-                            OR = {
-                                has_building = "building_capital_1"
-                                has_building = "building_capital_2"
-                                has_building = "building_capital_3"
-                            }
-                        }
-                    }
-                    set_building = building_ancient_factory
-                }
-                mem_broken_clock_set_buildings = yes
             }
 
             every_system_planet = {
@@ -552,12 +554,9 @@ planet_event = {
                     has_planet_flag = mem_broken_clock_mining_moon
                 }
                 change_pc = pc_barren
-                orbital_deposit_tile = {
-                    set_deposit = d_immense_energy_deposit
-                    add_deposit = d_immense_mineral_deposit
-                    add_deposit = d_energy_deposit
-                    add_deposit = d_mineral_deposit
-                }
+                set_deposit = d_minerals_10
+                add_deposit = d_minerals_10
+                add_deposit = d_alloys_5
                 create_mining_station = {
                     owner = event_target:unwelcome_guests
                 }
@@ -567,9 +566,7 @@ planet_event = {
                     has_planet_flag = mem_broken_clock_toxic_moon
                 }
                 change_pc = pc_molten
-                orbital_deposit_tile = {
-                    set_deposit = d_enormous2_energy_deposit
-                }
+                set_deposit = d_energy_10
                 create_mining_station = {
                     owner = event_target:unwelcome_guests
                 }
@@ -579,9 +576,10 @@ planet_event = {
                     has_planet_flag = mem_broken_clock_frozen_moon
                 }
                 change_pc = pc_frozen
-                orbital_deposit_tile = {
-                    set_deposit = d_enormous2_mineral_deposit
-                }
+                set_deposit = d_alloys_5
+                add_deposit = d_exotic_gases_5
+                add_deposit = d_rare_crystals_5
+                add_deposit = d_volatile_motes_5
                 create_mining_station = {
                     owner = event_target:unwelcome_guests
                 }
@@ -592,58 +590,71 @@ planet_event = {
                     is_planet_class = pc_ringworld_habitable_damaged
                 }
                 change_pc = pc_ringworld_habitable
-                set_owner = event_target:unwelcome_guests
-                every_tile = {
-                    create_pop = {
-                        species = event_target:unwelcome_guests
-                    }
+                create_colony = {
+                    owner = event_target:unwelcome_guests
+                    species = event_target:newcomer_species
                 }
-                random_tile = {
-                    limit = {
-                        num_adjacent_tiles > 3
-                        has_building = no
-                        NOR = {
-                            is_orbital_tile = yes
-                            any_neighboring_tile = { is_orbital_tile = yes }
+                while = {
+                    count = 25
+                    owner = {
+                        switch = {
+                            trigger = has_authority
+                            auth_machine_intelligence = { prev = { add_district = district_nexus } }
+                            auth_machine_intelligence = { prev = { add_district = district_hive } }
+                            auth_imperial = { prev = { add_district = district_city } }
                         }
                     }
+                }
+                while = {
+                    count = 13
+                    add_district = district_generator_uncapped
+                }
+                while = {
+                    count = 12
                     IF = {
-                        limit = { event_target:unwelcome_guests = { has_authority = auth_machine_intelligence } }
-                        set_building = building_machine_capital_2
+                        limit = {
+                            owner = { has_authority = auth_machine_intelligence }
+                        }
+                        add_district = district_generator_uncapped
                     }
                     ELSE = {
-                        set_building = building_capital_2
+                        add_district = district_farming_uncapped
                     }
-                    set_deposit = d_rich_energy_deposit
                 }
-                random_tile = {
+                while = {
+                    count = 75
+                    create_pop = {
+                        species = event_target:newcomer_species
+                    }
+                }
+                IF = {
                     limit = {
-                        has_building = no
-                        is_orbital_tile = no
+                        owner = { has_authority = auth_hive_mind }
                     }
-                    set_building = building_power_hub_1
-                    set_deposit = d_energy_deposit
+                    add_building = building_hive_major_capital
                 }
-                orbital_deposit_tile = {
-                    set_building = building_stronghold
-                }
-                random_tile = {
+                ELSE_IF = {
                     limit = {
-                        has_building = no
-                        is_orbital_tile = no
-                        NOT = {
-                            any_neighboring_tile = {
-                                OR = {
-                                    has_building = "building_capital_1"
-                                    has_building = "building_capital_2"
-                                    has_building = "building_capital_3"
-                                }
-                            }
-                        }
+                        owner = { has_authority = auth_machine_intelligence }
                     }
-                    set_building = building_hypercomms_forum
+                    add_building = building_machine_major_capital
                 }
-                mem_broken_clock_set_buildings = yes
+                ELSE = {
+                    add_building = building_major_capital
+                }
+                while = {
+                    count = 3
+                    add_building = building_fortress
+                }
+                add_building = building_hall_judgment
+                while = {
+                    count = 5
+                    add_building = building_research_lab_1
+                }
+                while = {
+                    count = 5
+                    add_building = building_foundry_1
+                }
             }
             every_system_planet = {
                 limit = {
@@ -683,10 +694,12 @@ planet_event = {
                 ELSE = {
                     set_name = "Dool'Rakkan Reborn"
                 }
-                add_influence = 1000
-                add_minerals = 5000
-                add_energy = 5000
-                add_food = 200
+                add_resource = {
+					influence = 1000
+					minerals = 5000
+					food = 200
+					energy = 5000
+				}
                 add_100_unity_per_year_passed = yes
                 while = {
                     count = 5
@@ -727,7 +740,7 @@ planet_event = {
                 while = {
                     count = 4
                     create_leader = {
-                        type = scientist
+                        class = scientist
                         effect = {
                             add_trait = mem_broken_clock_scientist_trait
                         }
@@ -745,7 +758,7 @@ planet_event = {
                 while = {
                     count = 2
                     create_leader = {
-                        type = admiral
+                        class = admiral
                         effect = {
                             add_trait = mem_broken_clock_admiral_trait
                         }
@@ -759,7 +772,7 @@ planet_event = {
                     }
                 }
                 create_leader = {
-                    type = general
+                    class = general
                     effect = {
                         add_trait = mem_broken_clock_general_trait
                     }
@@ -769,7 +782,7 @@ planet_event = {
                     set_leader = last_created_leader
                 }
                 create_leader = {
-                    type = governor
+                    class = governor
                     effect = {
                         add_trait = mem_broken_clock_governor_trait
                     }
@@ -847,26 +860,26 @@ country_event = {
 }
 
 #Newcomer empire breaks radiosilence - no longer triggered
-country_event = {
-    id = mem_broken_clock.2000
-    hide_window = yes
-    is_triggered_only = yes
+# country_event = {
+#     id = mem_broken_clock.2000
+#     hide_window = yes
+#     is_triggered_only = yes
 
-    immediate = {
-        every_country = {
-            limit = {
-                has_country_flag = mem_broken_clock_encountered_newcomers
-            }
-            establish_communications_no_message = root
-            IF = {
-                limit = {
-                    is_ai = no
-                }
-                country_event = { id = mem_broken_clock.1002 }
-            }
-        }
-    }
-}
+#     immediate = {
+#         every_country = {
+#             limit = {
+#                 has_country_flag = mem_broken_clock_encountered_newcomers
+#             }
+#             establish_communications_no_message = root
+#             IF = {
+#                 limit = {
+#                     is_ai = no
+#                 }
+#                 country_event = { id = mem_broken_clock.1002 }
+#             }
+#         }
+#     }
+# }
 
 #Quicky hailing - likely deprecated
 country_event = {
@@ -1244,9 +1257,7 @@ country_event = {
                             has_planet_flag = mem_broken_clock_mining_moon
                         }
                         change_pc = pc_shrouded
-                        orbital_deposit_tile = {
-                            clear_deposits = yes
-                        }
+                        clear_deposits = yes
                         random_mining_station = {
                             dismantle = yes
                         }
@@ -1256,9 +1267,7 @@ country_event = {
                             has_planet_flag = mem_broken_clock_toxic_moon
                         }
                         change_pc = pc_shrouded
-                        orbital_deposit_tile = {
-                            clear_deposits = yes
-                        }
+                        clear_deposits = yes
                         random_mining_station = {
                             dismantle = yes
                         }
@@ -1268,31 +1277,31 @@ country_event = {
                             has_planet_flag = mem_broken_clock_frozen_moon
                         }
                         change_pc = pc_shrouded
-                        orbital_deposit_tile = {
-                            clear_deposits = yes
-                        }
+                        clear_deposits = yes
                         random_mining_station = {
                             dismantle = yes
                         }
                     }
                     every_system_planet = {
                         limit = { is_planet_class = pc_ringworld_habitable }
-                        every_tile = { kill_pop = yes }
+                        destroy_colony = yes
                         change_pc = pc_ringworld_habitable_damaged
                     }
                     every_system_planet = {
                         limit = { is_planet_class = pc_ringworld_tech }
-                        every_tile = { kill_pop = yes }
+                        destroy_colony = yes
                         change_pc = pc_ringworld_tech_damaged
+						reroll_planet = yes
                     }
                     every_system_planet = {
                         limit = { is_planet_class = pc_ringworld_seam }
-                        every_tile = { kill_pop = yes }
+                        destroy_colony = yes
                         change_pc = pc_ringworld_seam_damaged
+						reroll_planet = yes
                     }
                     every_system_planet = {
                         limit = { has_planet_flag = mem_broken_clock_homeworld }
-                        every_tile = { kill_pop = yes }
+                        destroy_colony = yes
                         change_pc = pc_shrouded
                     }
                 }
