@@ -91,9 +91,11 @@ mem_syurveyor_create_robotomite_countries = {
     while = {
         limit = { num_owned_planets > 0 }
         random_owned_planet = {
-            save_global_event_target_as = new_capital
+			save_global_event_target_as = new_capital
+			log = "[This.GetName] ([Solar_System.GetName]) is the point of origin"
             create_country = {
-                type = mem_broken_clock_country
+				name = "Freebotomite Placeholder"
+                # type = mem_broken_clock_country
                 species = event_target:mem_surveyor_freebotomite_species
                 ethos = {
                     ethic = ethic_materialist
@@ -151,24 +153,29 @@ mem_syurveyor_create_robotomite_countries = {
                         has_star_flag = mem_surveyor_next_to_transfer
                     }
                 }
-                # log = "[This.GetName] is neigbouring system"
+                log = "[This.GetName] is neigbouring system"
                 set_star_flag = mem_surveyor_next_to_transfer
             }
         }
         every_system = {
             limit = {
                 has_star_flag = mem_surveyor_next_to_transfer
-            }
+			}
+			log = "Executing transfer on [This.GetName]"
             remove_star_flag = mem_surveyor_former_probe
             remove_star_flag = mem_surveyor_next_to_transfer
             IF = {
                 limit = { exists = starbase }
-                starbase = { fleet = { destroy_fleet = this } }
+				# starbase = { fleet = { destroy_fleet = this } }
+				starbase = {
+					set_owner = event_target:new_country
+					set_starbase_size = starbase_outpost
+				}
             }
-            create_starbase = {
-                size = starbase_outpost
-                owner = event_target:new_country
-            }
+            # create_starbase = {
+            #     size = starbase_outpost
+            #     owner = event_target:new_country
+            # }
             every_fleet_in_system = {
                 limit = { has_fleet_flag = mem_surveyor_garrison_fleet }
                 set_owner = event_target:new_country
@@ -177,18 +184,35 @@ mem_syurveyor_create_robotomite_countries = {
                 limit = {
                     exists = owner
                     owner = { is_same_value = root }
-                }
+				}
+				log = "Executing planet transfer on [This.GetName]"
                 every_owned_pop = {
                     change_species = event_target:mem_surveyor_freebotomite_species
                 }
                 set_owner = event_target:new_country
             }
         }
-    }
+	}
+	log = "Out of the system transfer"
     every_country = {
         limit = {
             has_country_flag = mem_surveyor_freebotomite_country
-        }
+		}
+		# set_name = random
+		log = "Setting starbases for [This.GetName]"
+		capital_scope = {
+			starbase = {
+				set_starbase_size = starbase_starport
+				set_starbase_module = {
+					slot = 0
+					module = shipyard
+				}
+				set_starbase_module = {
+					slot = 1
+					module = trading_hub
+				}
+			}
+		}
         while = {
             count = 5
             limit = {
@@ -201,7 +225,8 @@ mem_syurveyor_create_robotomite_countries = {
             random_owned_planet = {
                 limit = {
                     starbase = { has_starbase_size = starbase_outpost }
-                }
+				}
+				log = "Setting starbase around [This.GetName]"
                 starbase = {
                     set_starbase_size = starbase_starport
                     set_starbase_module = {
@@ -219,7 +244,8 @@ mem_syurveyor_create_robotomite_countries = {
     every_country = {
         limit = {
             has_country_flag = mem_surveyor_freebotomite_country
-        }
+		}
+		log = "Finalizing country transformation"
         every_country = {
             limit = {
                 OR = {
@@ -264,7 +290,7 @@ mem_syurveyor_create_robotomite_countries = {
 			civics = random
         }
         set_name = random
-        set_country_type = default
+        # set_country_type = default
         create_leader = {
             class = governor
         }
@@ -296,7 +322,8 @@ mem_syurveyor_create_robotomite_countries = {
 			}
 		}
         country_event = { id = game_start.9 }
-    }
+	}
+	log = "Done adding countries"
 }
 
 # Here goes effect to reward the country
