@@ -55,11 +55,10 @@ planet_event = {
             }
             observation_outpost = {
                 dismantle = yes
-            }
-            every_tile = {
-                kill_pop = yes
-                remove_building = yes
-            }
+			}
+			every_owned_pop = { kill_pop = yes }
+			remove_all_buildings = yes
+			remove_all_districts = yes
             change_pc = pc_shrouded
         }
         ELSE_IF = { #Checking if someone took over
@@ -106,9 +105,6 @@ planet_event = {
                 value = 1
             }
             reroll_planet = yes
-            orbital_deposit_tile = {
-                clear_deposits = yes
-            }
             event_target:mem_crucible_country = {
                 set_country_type = primitive
                 clear_ethos = yes
@@ -134,22 +130,23 @@ planet_event = {
                 set_graphical_culture = preindustrial_01
             }
             set_owner = event_target:mem_crucible_country
-            set_name = Volch
-            while = {
-                count = 5
-                random_tile = {
-                    limit = { has_pop = no is_orbital_tile = no }
-                    remove_blocker = yes
-                    create_pop = { species = owner }
-                    set_deposit = d_farmland_deposit
-                }
-            }
-            create_army = {
-                name = "NAME_Primitive_Army"
-                owner = event_target:mem_crucible_country
-                species = event_target:mem_crucible_country
-                type = "primitive_army"
-            }
+			set_name = Volch
+			
+			while = {
+				count = 2
+				add_district = district_city
+				add_district = district_farming
+				add_district = district_mining
+				add_district = district_generator
+			}
+			while = {
+				count = 4
+				create_pop = {
+					species = last_created
+				}					
+			}
+			add_building = building_crude_huts
+
             set_variable = {
                 which = mem_crucible_timer
                 value = 0
@@ -381,10 +378,9 @@ planet_event = {
         owner = {
             set_country_flag = mem_crucible_took_hostile_action
         }
-        every_tile = {
-            kill_pop = yes
-            remove_building = yes
-        }
+		every_owned_pop = { kill_pop = yes }
+		remove_all_buildings = yes
+		remove_all_districts = yes
         change_pc = pc_shrouded
     }
 
@@ -472,10 +468,9 @@ planet_event = {
         owner = {
             set_country_type = mem_crucible_dummy_country
         }
-        every_tile = {
-            kill_pop = yes
-            remove_building = yes
-        }
+		every_owned_pop = { kill_pop = yes }
+		remove_all_buildings = yes
+		remove_all_districts = yes
         change_pc = pc_shrouded
         FROM = {
             set_country_flag = mem_crucible_took_hostile_action
@@ -635,8 +630,8 @@ country_event = {
     is_triggered_only = yes
 
     location = event_target:mem_crucible_controller_planet.solar_system
-    picture = GFX_evt_space_monster
-    location = event_mystic_reveal
+	picture = GFX_evt_space_monster
+	show_sound = event_mystic_reveal
 
     trigger = {
         has_country_flag = mem_crucible_examined_homeworld
@@ -652,8 +647,9 @@ country_event = {
 
     option = {
         name = mem_crucible.200.a
-
-        add_influence = 100
+        add_resource = {
+			influence = 100
+		}
         enable_special_project = {
             name = MEM_CRUCIBLE_CONTACT_THE_CONTROLLER
             location = event_target:mem_crucible_controller_planet
@@ -664,8 +660,9 @@ country_event = {
     option = {
         name = mem_crucible.200.b
         custom_tooltip = mem_crucible.100.b.tooltip
-
-        add_influence = 200
+        add_resource = {
+			influence = 100
+		}
         set_country_flag = mem_crucible_ignore_events
         remove_global_flag = mem_crucible_someone_was_offered_quest
         end_event_chain = mem_crucible_chain
@@ -682,7 +679,7 @@ country_event = {
 
     location = event_target:mem_crucible_controller_planet
     picture = GFX_evt_space_monster
-    location = event_mystic_reveal
+    show_sound = event_mystic_reveal
 
     option = { #Disable the controller
         name = mem_crucible.201.a
@@ -690,10 +687,9 @@ country_event = {
 
         hidden_effect = {
             event_target:mem_crucible_planet = {
-                every_tile = {
-                    kill_pop = yes
-                    remove_building = yes
-                }
+				every_owned_pop = { kill_pop = yes }
+				remove_all_buildings = yes
+				remove_all_districts = yes
                 set_planet_flag = mem_crucible_stop_the_loop
                 change_pc = pc_shrouded
                 planet_event = { id = mem_crucible.300 days = 60 }
@@ -735,7 +731,7 @@ country_event = {
             OR = {
                 has_authority = auth_machine_intelligence
                 has_trait = trait_cybernetic
-                has_trait = trait_robotic_3
+                is_synthetic_empire = yes
             }
             always = no #Maybe add it later, be prepared
         }
@@ -743,8 +739,9 @@ country_event = {
 
     option = { #Screw you guys
         name = mem_crucible.201.e
-
-        add_influence = 300
+        add_resource = {
+			influence = 300
+		}
         set_country_flag = mem_crucible_ignore_events
         remove_global_flag = mem_crucible_someone_was_offered_quest
         end_event_chain = mem_crucible_chain
@@ -808,9 +805,6 @@ planet_event = {
         }
         change_pc = pc_gaia
         reroll_planet = yes
-        orbital_deposit_tile = {
-            clear_deposits = yes
-        }
         IF = {
             limit = { exists = space_owner }
             space_owner = {
@@ -999,23 +993,16 @@ country_event = {
         event_target:mem_crucible_controller_planet = {
             change_pc = pc_nuked
             reroll_planet = yes
-            every_tile = {
-                limit = { has_blocker = yes }
-                remove_blocker = yes
-            }
-            orbital_deposit_tile = {
-                clear_deposits = yes
-                set_building = mem_building_crucible_controller
-            }
+			clear_blockers = yes
+            add_deposit = d_mem_crucible_controller
             set_planet_flag = primtives_nuked_themselves
             set_planet_flag = colony_event
             set_planet_flag = mem_crucible_stop_the_loop
         }
         event_target:mem_crucible_planet = {
-            every_tile = {
-                kill_pop = yes
-                remove_building = yes
-            }
+			every_owned_pop = { kill_pop = yes }
+			remove_all_buildings = yes
+			remove_all_districts = yes
             change_pc = pc_shrouded
             set_planet_flag = mem_crucible_stop_the_loop
         }
@@ -1043,14 +1030,8 @@ country_event = {
         event_target:mem_crucible_controller_planet = {
             change_pc = pc_nuked
             reroll_planet = yes
-            every_tile = {
-                limit = { has_blocker = yes }
-                remove_blocker = yes
-            }
-            orbital_deposit_tile = {
-                clear_deposits = yes
-                set_building = mem_building_crucible_controller
-            }
+            clear_blockers = yes
+            add_deposit = d_mem_crucible_controller
             set_planet_flag = primtives_nuked_themselves
             set_planet_flag = colony_event
         }
@@ -1089,21 +1070,21 @@ country_event = {
                 }
                 set_owner = event_target:mem_crucible_country
                 set_name = Volch
-                while = {
-                    count = 5
-                    random_tile = {
-                        limit = { has_pop = no is_orbital_tile = no }
-                        remove_blocker = yes
-                        create_pop = { species = owner }
-                        set_deposit = d_farmland_deposit
-                    }
-                }
-                create_army = {
-                    name = "NAME_Primitive_Army"
-                    owner = event_target:mem_crucible_country
-                    species = event_target:mem_crucible_country
-                    type = "primitive_army"
-                }
+				while = {
+					count = 2
+					add_district = district_city
+					add_district = district_farming
+					add_district = district_mining
+					add_district = district_generator
+				}
+				while = {
+					count = 4
+					create_pop = {
+						species = last_created
+					}					
+				}
+				add_building = building_crude_huts
+	
             }
             ELSE = {
                 set_owner = event_target:mem_crucible_country
@@ -1120,11 +1101,6 @@ country_event = {
                         limit = { has_country_flag = mem_crucible_insanity_age }
                         set_country_flag = industrial_age
                         set_primitive_age = industrial_age
-                        prev = {
-                            every_tile = {
-                                set_ruined = no
-                            }
-                        }
                     }
                 }
             }

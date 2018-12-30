@@ -815,16 +815,23 @@ country_event = {
 
     option = {
         name = mem_surveyor.mission.accept
-
-        add_minerals = -500
-        add_energy = -500
+        add_resource = {
+            minerals = -500
+            energy = -500
+        }
         
         set_country_flag = mem_surveyor_finished_quest
         set_country_flag = mem_surveyor_reward_wait
 
         allow = {
-            energy > 499
-            minerals > 499
+            resource_stockpile_compare = {
+                resource = energy
+                value >= 500
+            }
+            resource_stockpile_compare = {
+                resource = minerals
+                value >= 500
+            }
         }
     }
 
@@ -1140,10 +1147,10 @@ country_event = {
                 country_event = { id = mem_surveyor.114 }
                 modifier = {
                     factor = 0
-                    has_technology = tech_biolab_1
-                    has_technology = tech_engineering_lab_1
+                    has_technology = tech_society_1
+                    has_technology = tech_engineering_1
                     has_technology = tech_lasers_2
-                    has_technology = tech_physics_lab_1
+                    has_technology = tech_physics_1
                     has_technology = tech_sensors_2
                     has_technology = tech_wormhole_stabilization
                 }
@@ -1173,9 +1180,7 @@ country_event = {
                                 is_planet_class = pc_gas_giant
                             }
                             is_colonizable = no
-                            orbital_deposit_tile = {
-                                has_deposit = no
-                            }
+                            has_deposit = no
                         }
                     }
                 }
@@ -1283,7 +1288,7 @@ country_event = {
         text = mem_surveyor.112.desc.fallen
         trigger = {
             event_target:contact_country = {
-                is_country_type = fallen
+                is_country_type = fallen_empire
             }
         }
     }
@@ -1402,24 +1407,24 @@ country_event = {
                 }
             }
             4 = {
-                give_technology = { tech = tech_physics_lab_1 }
+                give_technology = { tech = tech_physics_1 }
                 modifier = {
                     factor = 0
-                    has_technology = tech_physics_lab_1
+                    has_technology = tech_physics_1
                 }
             }
             4 = {
-                give_technology = { tech = tech_biolab_1 }
+                give_technology = { tech = tech_society_1 }
                 modifier = {
                     factor = 0
-                    has_technology = tech_biolab_1
+                    has_technology = tech_society_1
                 }
             }
             4 = {
-                give_technology = { tech = tech_engineering_lab_1 }
+                give_technology = { tech = tech_engineering_1 }
                 modifier = {
                     factor = 0
-                    has_technology = tech_physics_lab_1
+                    has_technology = tech_engineering_1
                 }
             }
             4 = {
@@ -1487,9 +1492,7 @@ country_event = {
                     is_planet_class = pc_gas_giant
                 }
                 is_colonizable = no
-                orbital_deposit_tile = {
-                    has_deposit = no
-                }
+                has_deposit = no
             }
             save_event_target_as = target_planet
         }
@@ -1501,14 +1504,12 @@ country_event = {
 
         hidden_effect = {
             event_target:target_planet = {
-                orbital_deposit_tile = {
-                    random_list = {
-                        1 = { add_deposit = d_immense_energy_deposit }
-                        1 = { add_deposit = d_immense_mineral_deposit }
-                        1 = { add_deposit = d_immense_society_deposit }
-                        1 = { add_deposit = d_immense_physics_deposit }
-                        1 = { add_deposit = d_immense_engineering_deposit }
-                    }
+                random_list = {
+                    1 = { add_deposit = d_energy_3 }
+                    1 = { add_deposit = d_minerals_3 }
+                    1 = { add_deposit = d_society_3 }
+                    1 = { add_deposit = d_physics_3 }
+                    1 = { add_deposit = d_engineering_3 }
                 }
             }
         }
@@ -2052,7 +2053,7 @@ country_event = {
             set_planet_flag = mem_surveyor_former_owner@root
             remove_modifier = land_appropriation
             every_owned_pop = { # Second pass, clear all the flags, edit the species
-                species = { remove_species_flag = mem_surveyor_species_sampled }
+                # species = { remove_species_flag = mem_surveyor_species_sampled }
                 IF = {
                     limit = { 
                         OR = {
@@ -2420,7 +2421,7 @@ country_event = {
                 has_anomaly = no
                 OR = {
                     has_deposit_for = shipclass_research_station
-                    orbital_deposit_tile = { has_deposit = no }
+                    has_deposit = no
                 }
             }
         }
@@ -2457,7 +2458,7 @@ country_event = {
                             has_anomaly = no
                             OR = {
                                 has_deposit_for = shipclass_research_station
-                                orbital_deposit_tile = { has_deposit = no }
+                                has_deposit = no
                             }
                         }
                     }
@@ -2470,7 +2471,7 @@ country_event = {
                                 has_anomaly = no
                                 OR = {
                                     has_deposit_for = shipclass_research_station
-                                    orbital_deposit_tile = { has_deposit = no }
+                                    has_deposit = no
                                 }
                             }
                             found_planet = {
@@ -2479,10 +2480,8 @@ country_event = {
                                     id = mem_surveyor.berserker.trigger.3.1
                                     prevent_anomaly = yes
                                     set_planet_flag = mem_surveyor_resting_place
-                                    orbital_deposit_tile = {
-                                        add_deposit = d_immense_physics_deposit
-                                        add_deposit = d_immense_engineering_deposit
-                                    }
+                                    add_deposit = d_physics_4
+                                    add_deposit = d_engineering_4
                                     add_modifier = {
                                         modifier = mem_surveyor_resting_place
                                         days = -1
@@ -2697,7 +2696,7 @@ country_event = {
     desc = {
         text = mem_surveyor.231.desc.no_freebs
         exclusive_trigger = {
-            NOT = { has_global_flag = mem_surveyor.231.desc.no_freebs }
+            NOT = { has_global_flag = mem_surveyor_freebotomite_country_spawned }
         }
     }
     desc = {
@@ -2779,7 +2778,7 @@ country_event = {
                 has_country_flag = mem_surveyor_freebotomite_country
             }
             NOT = {
-                FROM = { has_global_flag = mem_surveyor_already_attritioned }
+                FROM = { has_country_flag = mem_surveyor_already_attritioned }
             }
         }
     }
@@ -2789,14 +2788,14 @@ country_event = {
         exclusive_trigger = {
             NOT = { has_global_flag = mem_surveyor_probe_took_a_planet }
             NOT = {
-                FROM = { has_global_flag = mem_surveyor_already_attritioned }
+                FROM = { has_country_flag = mem_surveyor_already_attritioned }
             }
         }
     }
     desc = {
         text = mem_surveyor.233.desc.already_attritioned
         exclusive_trigger = {
-            FROM = { has_global_flag = mem_surveyor_already_attritioned }
+            FROM = { has_country_flag = mem_surveyor_already_attritioned }
         }
     }
 
@@ -2943,7 +2942,7 @@ country_event = {
                 set_country_flag = mem_surveyor_avengers_country
                 randomize_flag_symbol = "domination"
                 create_leader = {
-                    type = admiral
+                    class = admiral
                     traits = {
                         trait = leader_trait_mem_surveyor_avenger
                         trait = leader_trait_arrested_development
@@ -3781,7 +3780,10 @@ country_event = {
             has_valid_civic = civic_hive_devouring_swarm
             has_valid_civic = civic_machine_assimilator
         }
-        energy >= 3500 # Will offer only if you can spare
+        resource_stockpile_compare = {
+        resource = energy
+            value >= 3500
+        }
     }
 
     mean_time_to_happen = {
@@ -3806,7 +3808,10 @@ country_event = {
         custom_gui = "enclave_curator_option"
 
         allow = {
-            energy >= 2500
+            resource_stockpile_compare = {
+                resource = energy
+                    value >= 2500
+                }
         }
 
         ai_chance = {
@@ -3817,7 +3822,9 @@ country_event = {
             modifier = mem_surveyor_how_to_kill
             days = -1
         }
-        add_energy = -2500
+        add_resource = {
+            energy = -2500
+        }
     }
 
     option = {
@@ -3949,7 +3956,7 @@ country_event = {
                 
 
                 create_leader = {
-                    type = admiral
+                    class = admiral
                     skill = 5
                     effect = {
                         add_trait = leader_trait_mem_surveyor_mercenary
@@ -4358,7 +4365,7 @@ country_event = {
             save_event_target_as = captain_origin
         }
         create_leader = {
-            type = admiral
+            class = admiral
             species = event_target:captain_origin
             skill = 5
             effect = {
@@ -4422,11 +4429,9 @@ ship_event = {
                 modifier = mem_surveyor_alkree_homeworld
                 days = -1
             }
-            orbital_deposit_tile = {
-                set_deposit = d_enormous1_society_deposit
-                add_deposit = d_immense_physics_deposit
-                add_deposit = d_immense_engineering_deposit
-            }
+            set_deposit = d_society_5
+            add_deposit = d_physics_4
+            add_deposit = d_engineering_4
         }
     }
 
