@@ -108,7 +108,7 @@ country_event = {
 				}
 			}
 			25 = {
-				set_global_flag = mem_colony_ship_is_humans
+				set_global_flag = mem_humans_taken
 				create_species = {
 					name = Human
 					plural = Humans
@@ -124,7 +124,6 @@ country_event = {
 				}
 				modifier = { #If humans or sol already exist, must not happen
 					factor = 0
-					always = yes #Let's not do it for now, name lists are glitchy
 					OR = {
 						any_country = {
 							any_owned_pop_species = { species_portrait = human } 
@@ -132,6 +131,7 @@ country_event = {
 						any_system = {
 							has_star_flag = sol
 						}
+						has_global_flag = mem_humans_taken
 					}
 				}
 			}
@@ -410,17 +410,17 @@ planet_event = {
 			}
 			establish_communications_no_message = event_target:landed_country
 		}
-		create_colony = {
-			owner = event_target:landed_country
-			species = event_target:landed_country
-			ethos = owner
-		}
+		set_owner = event_target:landed_country
+		set_capital = yes
 		while = {
-			count = 4
+			count = 5
 			create_pop = {
 				species = event_target:landed_country
 			}	
 		}
+		add_building = building_mem_colony_ship_shelter
+		remove_building = building_colony_shelter
+		check_planet_employment = yes
 		solar_system.space_owner = { country_event = { id = mem_colony_ship.8 } }
 		create_army = {
 			name = "Colonial Militia"
@@ -490,45 +490,55 @@ planet_event = {
 	
 	immediate = {
 		while = {
-			count = 4
+			count = 2
 			create_pop = {
 				species = event_target:landed_country
 			}
 		}
 		IF = {
 			limit = {
-				NOT = { has_building = building_primitive_capital }
+				has_building = building_mem_colony_ship_shelter
 			}
-			add_building = building_primitive_capital
-			add_building = building_urban_dwellings
+			remove_building = building_mem_colony_ship_shelter
+			add_building = building_mem_colony_ship_protocity
+			while = {
+				count = 7
+				create_pop = {
+					species = event_target:landed_country
+				}
+			}
 		}
 		random_list = {
 			1 = {
-				add_building = building_primitive_farm
+				add_building = building_mem_colony_ship_farming_outpost
 				modifier = {
 					factor = 0
-					has_building = building_primitive_farm
+					has_building = building_mem_colony_ship_farming_outpost
 				}
 			}
 			1 = {
-				add_building = building_primitive_factory
+				add_building = building_mem_colony_ship_industrial_outpost
 				modifier = {
 					factor = 0
-					has_building = building_primitive_factory
+					OR = {
+						has_building = building_mem_colony_ship_industrial_outpost
+						NOT = { has_building = building_mem_colony_ship_power_outpost } 
+						NOT = { has_building = building_mem_colony_ship_mining_outpost } 
+					}
 				}
 			}
 			1 = {
-				add_building = building_primitive_mine
+				add_building = building_mem_colony_ship_power_outpost
 				modifier = {
 					factor = 0
-					has_building = building_primitive_mine
+					has_building = building_mem_colony_ship_power_outpost
 				}
 			}
 			1 = {
-				add_building = building_primitive_power_plant
+				add_building = building_mem_colony_ship_mining_outpost
 				modifier = {
 					factor = 0
-					has_building = building_primitive_power_plant
+					has_building = building_mem_colony_ship_mining_outpost
 				}
 			}
 		}
@@ -538,6 +548,7 @@ planet_event = {
 			species = root.owner
 			type = "industrial_army"
 		}
+		every_owned_pop = { clear_pop_category = yes } # To avoid faulty demotion
 	}
 }
 
@@ -732,7 +743,7 @@ planet_event = {
 	
 	immediate = {
 		while = {
-			count = 4
+			count = 8
 			create_pop = { species = owner }
 		}
 		create_primitive_blockers = yes
@@ -742,6 +753,13 @@ planet_event = {
 			set_primitive_age = early_space_age
 		}
 		remove_all_armies = yes
+		remove_all_buildings = yes
+		add_building = building_primitive_farm
+		add_building = building_primitive_factory
+		add_building = building_primitive_mine
+		add_building = building_primitive_power_plant
+		add_building = building_primitive_capital
+		add_building = building_urban_dwellings
 		while = {
 			count = 4
 			create_army = {
