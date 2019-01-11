@@ -21,13 +21,13 @@ ship_event = {
 	immediate = {
 		FROM = { save_event_target_as = mem_demon_ship_position }
 		create_fleet = {
-			name = ""
+			name = "Lost Prototype"
 			effect = {
 				set_owner = root.owner
 
 				create_ship = {
 					name = "Far Horizon"
-					random_existing_design = science
+					design = NAME_MEM_FTL_Prototype
 				}
 
 				set_fleet_stance = passive				
@@ -222,7 +222,8 @@ ship_event = {
 	option = {
 		name = "mem_demon_ship.7.a"
 		leader = { 
-			add_experience = 200
+			add_experience = 200			
+			add_trait = leader_trait_expertise_psionics
 		}
 		owner = {
 			add_monthly_resource_mult = {
@@ -285,8 +286,13 @@ ship_event = {
 			delete_fleet = THIS
 		}
 		fleet = { set_event_locked = no }
-		kill_leader = { type = scientist show_notification = no }
+		leader = {
+			exile_leader_as = mem_demon_ship_scientist
+		}
 		fleet = { delete_fleet = THIS }
+		owner = {
+			country_event = { id = mem_demon_ship.20 days = 10 random = 5 } # days = 18000 random = 7200
+		}
 	}
 
 	option = {
@@ -298,6 +304,110 @@ ship_event = {
 				value = 4
 				min = 40
 				max = 100
+			}
+		}
+	}
+}
+
+country_event = {
+	id = mem_demon_ship.20
+	title = mem_demon_ship.20.name
+	desc = mem_demon_ship.20.desc
+	picture = GFX_evt_ship_in_orbit
+	show_sound = event_ship_bridge
+	location = event_target:mem_demon_ship_position
+	is_triggered_only = yes
+
+	immediate = {
+		IF = {
+			limit = {
+				any_system_within_border = {
+					has_planet_class = pc_gas_giant
+				}
+			}
+			random_system_within_border = {
+				limit = {
+					has_planet_class = pc_gas_giant
+				}
+				random_system_planet = {
+					limit = {
+						is_planet_class = pc_gas_giant
+					}
+					save_event_target_as = mem_demon_ship_position
+				}
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				any_system_within_border = {
+					OR = {
+						has_planet_class = pc_barren
+						has_planet_class = pc_barren_cold
+						has_planet_class = pc_frozen
+						has_planet_class = pc_molten
+					}
+				}
+			}
+			random_system_within_border = {
+				limit = {
+					OR = {
+						has_planet_class = pc_barren
+						has_planet_class = pc_barren_cold
+						has_planet_class = pc_frozen
+						has_planet_class = pc_molten
+					}
+				}
+				random_system_planet = {
+					limit = {
+						OR = {
+							is_planet_class = pc_barren
+							is_planet_class = pc_barren_cold
+							is_planet_class = pc_frozen
+							is_planet_class = pc_molten
+						}
+					}
+					save_event_target_as = mem_demon_ship_position
+				}
+			}
+		}
+		ELSE = {
+			random_owned_planet = {
+				save_event_target_as = mem_demon_ship_position
+			}
+		}
+		create_fleet = {
+			name = "Lost Prototype"
+			effect = {
+				set_owner = root.owner
+
+				create_ship = {
+					name = "Far Horizon"
+					design = NAME_MEM_FTL_Prototype
+				}
+
+				set_fleet_stance = passive				
+				set_location = {
+					target = event_target:mem_demon_ship_position
+					distance = 5
+					angle = random
+				}
+				set_event_locked = yes
+			}
+		}
+		last_created_fleet = {
+			THIS = {
+				save_event_target_as = mem_demon_ship
+			}
+		}
+	}
+
+	option = {
+		name = mem_demon_ship.20.a
+		event_target:mem_demon_ship = {
+			enable_special_project = {
+				name = "MEM_DEMON_SHIP_PROJECT_2"
+				owner = ROOT
+				location = THIS
 			}
 		}
 	}
