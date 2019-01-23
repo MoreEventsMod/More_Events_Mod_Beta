@@ -152,7 +152,7 @@ event = {
 					}
 				}
 				random_planet = {
-					planet_event = { id = mem_vazurans.401 days = 7200 random = 1000 }
+					planet_event = { id = mem_vazurans.401 days = 7200 random = 1000 } # TODO change to 30 years later
 					planet_event = { id = mem_vazurans.402 days = 7200 random = 1000 }
 					planet_event = { id = mem_vazurans.403 days = 7200 random = 1000 }
 					planet_event = { id = mem_vazurans.404 days = 7200 random = 1000 }
@@ -1095,23 +1095,38 @@ country_event = {
 					}
 				}
 			}
-			random_owned_planet = {
+			IF = {
 				limit = {
-					is_colony = yes
-					is_under_colonization = no
-					is_capital = no
-					NOT = {
-						has_planet_flag = mem_vazurans_raided_planet
+					years_passed < 60
+					any_system_within_border = {
+						NOT = {
+							any_system_planet = {
+								OR = {
+									is_colony = yes
+									is_capital = yes
+								}
+							}
+						}
 					}
 				}
-				set_timed_planet_flag = {
-					flag = mem_vazurans_raiding_target
-					days = 600
-				}
-				solar_system = {
+				random_system_within_border = {
+					limit = {
+						NOT = {
+							any_system_planet = {
+								OR = {
+									is_colony = yes
+									is_capital = yes
+								}
+							}
+						}
+					}
 					random_system_planet = {
 						limit = {
 							is_star = yes
+						}
+						set_timed_planet_flag = {
+							flag = mem_vazurans_raiding_target
+							days = 600
 						}
 						THIS = {
 							save_event_target_as = mem_vazurans_target_sun
@@ -1132,42 +1147,177 @@ country_event = {
 					}
 				}
 			}
+			ELSE_IF = {
+				limit = {
+					years_passed <= 120
+					any_system_within_border = {
+						NOT = {
+							any_system_planet = {
+								OR = {
+									is_colony = yes
+									is_capital = yes
+								}
+							}
+						}
+					}
+				}
+				random_list = {
+					1 = {
+						random_system_within_border = {
+							limit = {
+								NOT = {
+									any_system_planet = {
+										OR = {
+											is_colony = yes
+											is_capital = yes
+										}
+									}
+								}
+							}
+							random_system_planet = {
+								limit = {
+									is_star = yes
+								}
+								set_timed_planet_flag = {
+									flag = mem_vazurans_raiding_target
+									days = 600
+								}
+								THIS = {
+									save_event_target_as = mem_vazurans_target_sun
+								}
+							}
+							create_ambient_object = { # TODO exchange that later with a custom made one by frog
+								type = "mem_vazuran_wormhole_small_object"
+							}
+							random_system_ambient_object = {
+								limit = { is_same_value = last_created_ambient_object }
+								set_location = {
+									target = event_target:mem_vazurans_target_sun
+									distance = 150
+									angle = random
+								}
+								set_ambient_object_flag = mem_vazurans_rift
+								save_event_target_as = mem_vazurans_rift
+							}
+						}
+					}
+					1 = {
+						random_owned_planet = {
+							limit = {
+								is_colony = yes
+								is_under_colonization = no
+								is_capital = no
+								NOT = {
+									has_planet_flag = mem_vazurans_raided_planet
+								}
+							}
+							set_timed_planet_flag = {
+								flag = mem_vazurans_raiding_target
+								days = 600
+							}
+							solar_system = {
+								random_system_planet = {
+									limit = {
+										is_star = yes
+									}
+									THIS = {
+										save_event_target_as = mem_vazurans_target_sun
+									}
+								}
+								create_ambient_object = { # TODO exchange that later with a custom made one by frog
+									type = "mem_vazuran_wormhole_small_object"
+								}
+								random_system_ambient_object = {
+									limit = { is_same_value = last_created_ambient_object }
+									set_location = {
+										target = event_target:mem_vazurans_target_sun
+										distance = 150
+										angle = random
+									}
+									set_ambient_object_flag = mem_vazurans_rift
+									save_event_target_as = mem_vazurans_rift
+								}
+							}
+						}
+					}
+				}
+			}
+			ELSE = {
+				random_owned_planet = {
+					limit = {
+						is_colony = yes
+						is_under_colonization = no
+						is_capital = no
+						NOT = {
+							has_planet_flag = mem_vazurans_raided_planet
+						}
+					}
+					set_timed_planet_flag = {
+						flag = mem_vazurans_raiding_target
+						days = 600
+					}
+					solar_system = {
+						random_system_planet = {
+							limit = {
+								is_star = yes
+							}
+							THIS = {
+								save_event_target_as = mem_vazurans_target_sun
+							}
+						}
+						create_ambient_object = { # TODO exchange that later with a custom made one by frog
+							type = "mem_vazuran_wormhole_small_object"
+						}
+						random_system_ambient_object = {
+							limit = { is_same_value = last_created_ambient_object }
+							set_location = {
+								target = event_target:mem_vazurans_target_sun
+								distance = 150
+								angle = random
+							}
+							set_ambient_object_flag = mem_vazurans_rift
+							save_event_target_as = mem_vazurans_rift
+						}
+					}
+				}
+			}
 			# start next event to notify the player
 			country_event = { id = mem_vazurans.4 days = 5 }
 			# start overnext event to open the rift and spawn enemy fleet
 			country_event = { id = mem_vazurans.5 days = 30 }
 		}
 		ELSE = { # failsafe target - if not even the capital is left there is nothing happening anyway
-			random_owned_planet = {
-				limit = {
-					is_colony = yes
-					is_under_colonization = no
-				}
-				set_timed_planet_flag = {
-					flag = mem_vazurans_raiding_target
-					days = 600
-				}
-				solar_system = {
-					random_system_planet = {
-						limit = {
-							is_star = yes
-						}
-						THIS = {
-							save_event_target_as = mem_vazurans_target_sun
-						}
+			random_system_within_border = {	
+				random_system_planet = {
+					limit = {
+						is_star = yes
 					}
-					create_ambient_object = { # TODO exchange that later with a custom made one by frog
-						type = "mem_vazuran_wormhole_small_object"
+					set_timed_planet_flag = {
+						flag = mem_vazurans_raiding_target
+						days = 600
 					}
-					random_system_ambient_object = {
-						limit = { is_same_value = last_created_ambient_object }
-						set_location = {
-							target = event_target:mem_vazurans_target_sun
-							distance = 150
-							angle = random
+					solar_system = {
+						random_system_planet = {
+							limit = {
+								is_star = yes
+							}
+							THIS = {
+								save_event_target_as = mem_vazurans_target_sun
+							}
 						}
-						set_ambient_object_flag = mem_vazurans_rift
-						save_event_target_as = mem_vazurans_rift
+						create_ambient_object = { # TODO exchange that later with a custom made one by frog
+							type = "mem_vazuran_wormhole_small_object"
+						}
+						random_system_ambient_object = {
+							limit = { is_same_value = last_created_ambient_object }
+							set_location = {
+								target = event_target:mem_vazurans_target_sun
+								distance = 150
+								angle = random
+							}
+							set_ambient_object_flag = mem_vazurans_rift
+							save_event_target_as = mem_vazurans_rift
+						}
 					}
 				}
 			}
@@ -2137,137 +2287,65 @@ country_event = {
 				limit = {
 					has_ambient_object_flag = mem_vazurans_rift
 				}
-				IF = { # weakest raiding fleet if not having researched destroyers yet
-					limit = {
-						ROOT = {
-							NOT = {
-								has_technology = tech_destroyers
-							}
-						}
-					}
-					create_mem_vazuran_corvette_stage_fleet = yes
+				mem_vazuran_raiding_fleet_spawn = yes
+				
+			}
+		}
+		last_created_fleet = { # fleet flag for bombarding event
+			set_fleet_flag = mem_vazurans_fleet
+			set_fleet_stance = aggressive
+			set_aggro_range_measure_from = self
+			set_aggro_range = 150
+			fleet_event = { id = mem_vazurans.110 days = 1 }
+		}
+		IF = { # check which attack number the empire has (1 to 5) for destruction check to know which empire will be the target of a retaliation strike
+			limit = {
+				ROOT = {
+					has_country_flag = mem_vazurans_target_1
 				}
-				IF = { # raiding fleet if not having researched cruisers yet
-					limit = {
-						ROOT = {
-							has_technology = tech_destroyers
-							NOT = {
-								has_technology = tech_cruisers
-							}
-						}
-					}
-					create_mem_vazuran_destroyer_stage_fleet = yes
+			}
+			last_created_fleet = {
+				set_fleet_flag = mem_vazurans_fleet_1
+			}
+		}
+		IF = { # check which attack number the empire has (1 to 5) for destruction check to know which empire will be the target of a retaliation strike
+			limit = {
+				ROOT = {
+					has_country_flag = mem_vazurans_target_2
 				}
-				IF = { # raiding fleet if not having researched battleships yet
-					limit = {
-						ROOT = {
-							has_technology = tech_cruisers
-							NOT = {
-								has_technology = tech_battleships
-							}
-						}
-					}
-					create_mem_vazuran_cruiser_stage_fleet = yes
+			}
+			last_created_fleet = {
+				set_fleet_flag = mem_vazurans_fleet_2
+			}
+		}
+		IF = { # check which attack number the empire has (1 to 5) for destruction check to know which empire will be the target of a retaliation strike
+			limit = {
+				ROOT = {
+					has_country_flag = mem_vazurans_target_3
 				}
-				IF = { # raiding fleet if not having researched any xl t1 weapon yet
-					limit = {
-						ROOT = {
-							has_technology = tech_battleships
-							NOR = {
-								has_technology = tech_energy_lance_1
-								has_technology = tech_mass_accelerator_1
-								has_technology = tech_arc_emitter_1
-							}
-						}
-					}
-					create_mem_vazuran_battleship_stage_fleet = yes
+			}
+			last_created_fleet = {
+				set_fleet_flag = mem_vazurans_fleet_3
+			}
+		}
+		IF = { # check which attack number the empire has (1 to 5) for destruction check to know which empire will be the target of a retaliation strike
+			limit = {
+				ROOT = {
+					has_country_flag = mem_vazurans_target_4
 				}
-				IF = { # raiding fleet if not having researched any xl t2 weapon yet
-					limit = {
-						ROOT = {
-							OR = {
-								has_technology = tech_energy_lance_1
-								has_technology = tech_mass_accelerator_1
-								has_technology = tech_arc_emitter_1
-							}
-							NOR = {
-								has_technology = tech_energy_lance_2
-								has_technology = tech_mass_accelerator_2
-								has_technology = tech_arc_emitter_2
-							}
-						}
-					}
-					create_mem_vazuran_xl_01_stage_fleet = yes
+			}
+			last_created_fleet = {
+				set_fleet_flag = mem_vazurans_fleet_4
+			}
+		}
+		IF = { # check which attack number the empire has (1 to 5) for destruction check to know which empire will be the target of a retaliation strike
+			limit = {
+				ROOT = {
+					has_country_flag = mem_vazurans_target_5
 				}
-				IF = { # raiding fleet if having researched any xl t2 weapon
-					limit = {
-						ROOT = {
-							OR = {
-								has_technology = tech_energy_lance_2
-								has_technology = tech_mass_accelerator_2
-								has_technology = tech_arc_emitter_2
-							}
-						}
-					}
-					create_mem_vazuran_xl_02_stage_fleet = yes
-				}
-				last_created_fleet = { # fleet flag for bombarding event
-					set_fleet_flag = mem_vazurans_fleet
-					set_fleet_stance = aggressive
-					set_aggro_range_measure_from = self
-					set_aggro_range = 150
-					fleet_event = { id = mem_vazurans.110 days = 1 }
-				}
-				IF = { # check which attack number the empire has (1 to 5) for destruction check to know which empire will be the target of a retaliation strike
-					limit = {
-						ROOT = {
-							has_country_flag = mem_vazurans_target_1
-						}
-					}
-					last_created_fleet = {
-						set_fleet_flag = mem_vazurans_fleet_1
-					}
-				}
-				IF = { # check which attack number the empire has (1 to 5) for destruction check to know which empire will be the target of a retaliation strike
-					limit = {
-						ROOT = {
-							has_country_flag = mem_vazurans_target_2
-						}
-					}
-					last_created_fleet = {
-						set_fleet_flag = mem_vazurans_fleet_2
-					}
-				}
-				IF = { # check which attack number the empire has (1 to 5) for destruction check to know which empire will be the target of a retaliation strike
-					limit = {
-						ROOT = {
-							has_country_flag = mem_vazurans_target_3
-						}
-					}
-					last_created_fleet = {
-						set_fleet_flag = mem_vazurans_fleet_3
-					}
-				}
-				IF = { # check which attack number the empire has (1 to 5) for destruction check to know which empire will be the target of a retaliation strike
-					limit = {
-						ROOT = {
-							has_country_flag = mem_vazurans_target_4
-						}
-					}
-					last_created_fleet = {
-						set_fleet_flag = mem_vazurans_fleet_4
-					}
-				}
-				IF = { # check which attack number the empire has (1 to 5) for destruction check to know which empire will be the target of a retaliation strike
-					limit = {
-						ROOT = {
-							has_country_flag = mem_vazurans_target_5
-						}
-					}
-					last_created_fleet = {
-						set_fleet_flag = mem_vazurans_fleet_5
-					}
-				}
+			}
+			last_created_fleet = {
+				set_fleet_flag = mem_vazurans_fleet_5
 			}
 		}
 	}
@@ -3119,6 +3197,7 @@ planet_event = {
 		}
 		ELSE_IF = {
 			limit = {
+				is_colony = yes
 				years_passed >= 100
 				habitable_planet = yes
 				NOR = {
@@ -3147,6 +3226,7 @@ planet_event = {
 		}
 		ELSE_IF = {
 			limit = {
+				is_colony = yes
 				years_passed >= 100
 				NOR = {
 					has_building = building_mem_planetary_shield_generator
@@ -3166,7 +3246,10 @@ planet_event = {
 				}
 			}
 		}
-		ELSE = {
+		ELSE_IF = {
+			limit = {
+				is_colony = yes
+			}
 			mem_vazurans_planet_raiding_effect_1 = yes
 		}
 		solar_system = {

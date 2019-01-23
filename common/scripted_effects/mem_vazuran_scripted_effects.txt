@@ -999,45 +999,149 @@ mem_vazurans_planet_raiding_effect_1 = {
 #		modifier = mem_vazurans_raided
 #		days = 3600
 #	}
-	set_timed_planet_flag = {
-		flag = mem_vazurans_raided_planet
-		days = 27000 # 75 years
-	}
-	add_deposit = d_mem_vazuran_bomb_crater
-	add_planet_devastation = 100
+	IF = {
+		limit = {
+			is_star = no
+		}
+		set_timed_planet_flag = {
+			flag = mem_vazurans_raided_planet
+			days = 27000 # 75 years
+		}
+		add_deposit = d_mem_vazuran_bomb_crater
+		IF = {
+			limit = {
+				OR = {
+					has_building = building_mem_planetary_shield_generator
+					has_building = building_mem_planetary_shield_generator_heavy
+					has_building = building_mem_planetary_shield_generator_orila
+				}
+			}
+			add_planet_devastation = 25
+		}
+		ELSE = {
+			add_planet_devastation = 50
+		}
+	}	
 }
 
 # Raiding effect 2 colony destruction (planet scope)
 mem_vazurans_planet_raiding_effect_2 = {
-	add_deposit = d_mem_vazuran_bomb_crater
-	add_deposit = d_mem_vazuran_bomb_crater
-	add_deposit = d_city_ruins
-	add_deposit = d_city_ruins
-	add_planet_devastation = 100
-	every_pop = {
+	IF = {
 		limit = {
-			planet = {
-				is_same_value = root
-			}
+			is_star = no
 		}
-		kill_pop = yes
+		add_deposit = d_mem_vazuran_bomb_crater
+		add_deposit = d_mem_vazuran_bomb_crater
+		add_deposit = d_city_ruins
+		add_deposit = d_city_ruins
+		add_planet_devastation = 100
+		every_pop = {
+			limit = {
+				planet = {
+					is_same_value = root
+				}
+			}
+			kill_pop = yes
+		}
 	}
 }
 
 # Raiding effect 3 colony destruction nuked (planet scope)
 mem_vazurans_planet_raiding_effect_3 = {
-	add_deposit = d_mem_vazuran_bomb_crater
-	add_deposit = d_mem_vazuran_bomb_crater
-	add_deposit = d_city_ruins
-	add_deposit = d_city_ruins
-	add_planet_devastation = 100
-	every_pop = {
+	IF = {
 		limit = {
-			planet = {
-				is_same_value = root
+			is_star = no
+		}
+		add_deposit = d_mem_vazuran_bomb_crater
+		add_deposit = d_mem_vazuran_bomb_crater
+		add_deposit = d_city_ruins
+		add_deposit = d_city_ruins
+		add_planet_devastation = 100
+		every_pop = {
+			limit = {
+				planet = {
+					is_same_value = root
+				}
+			}
+			kill_pop = yes
+		}
+		change_pc = pc_nuked
+	}
+}
+
+mem_vazuran_raiding_fleet_spawn = {
+	IF = { # weakest raiding fleet if not having researched destroyers yet
+		limit = {
+			ROOT = {
+				NOT = {
+					has_technology = tech_destroyers
+				}
 			}
 		}
-		kill_pop = yes
+		create_mem_vazuran_corvette_stage_fleet = yes
 	}
-	change_pc = pc_nuked
+	IF = { # raiding fleet if not having researched cruisers yet
+		limit = {
+			ROOT = {
+				has_technology = tech_destroyers
+				NOT = {
+					has_technology = tech_cruisers
+				}
+			}
+		}
+		create_mem_vazuran_destroyer_stage_fleet = yes
+	}
+	IF = { # raiding fleet if not having researched battleships yet
+		limit = {
+			ROOT = {
+				has_technology = tech_cruisers
+				NOT = {
+					has_technology = tech_battleships
+				}
+			}
+		}
+		create_mem_vazuran_cruiser_stage_fleet = yes
+	}
+	IF = { # raiding fleet if not having researched any xl t1 weapon yet
+		limit = {
+			ROOT = {
+				has_technology = tech_battleships
+				NOR = {
+					has_technology = tech_energy_lance_1
+					has_technology = tech_mass_accelerator_1
+					has_technology = tech_arc_emitter_1
+				}
+			}
+		}
+		create_mem_vazuran_battleship_stage_fleet = yes
+	}
+	IF = { # raiding fleet if not having researched any xl t2 weapon yet
+		limit = {
+			ROOT = {
+				OR = {
+					has_technology = tech_energy_lance_1
+					has_technology = tech_mass_accelerator_1
+					has_technology = tech_arc_emitter_1
+				}
+				NOR = {
+					has_technology = tech_energy_lance_2
+					has_technology = tech_mass_accelerator_2
+					has_technology = tech_arc_emitter_2
+				}
+			}
+		}
+		create_mem_vazuran_xl_01_stage_fleet = yes
+	}
+	IF = { # raiding fleet if having researched any xl t2 weapon
+		limit = {
+			ROOT = {
+				OR = {
+					has_technology = tech_energy_lance_2
+					has_technology = tech_mass_accelerator_2
+					has_technology = tech_arc_emitter_2
+				}
+			}
+		}
+		create_mem_vazuran_xl_02_stage_fleet = yes
+	}
 }
