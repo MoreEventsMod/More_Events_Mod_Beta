@@ -15,7 +15,7 @@ planet_event = {
 		NOT = {
 			has_global_flag = mem_space_monster_attacks_crystal
 		}
-		NOT = { is_planet_class = pc_habitat }
+		habitable_structure = no
 		has_owner = yes
 		owner = {
 			is_ai = no
@@ -203,6 +203,12 @@ country_event = {
 			min = @tier3materialmin
 			max = @tier3materialmax
 		}
+		add_monthly_resource_mult = {
+			resource = rare_crystals
+			value = @tier2materialreward
+			min = @tier2materialmin
+			max = @tier2materialmax
+		}
 		enable_special_project = {
 			name = MEM_SPACE_MONSTER_ATTACKS_CRYSTAL_STUDY
 			location = event_target:pc_home
@@ -244,6 +250,12 @@ country_event = {
 			min = @tier3materialmin
 			max = @tier3materialmax
 		}
+		add_monthly_resource_mult = {
+			resource = rare_crystals
+			value = @tier2materialreward
+			min = @tier2materialmin
+			max = @tier2materialmax
+		}
 		enable_special_project = {
 			name = MEM_SPACE_MONSTER_ATTACKS_CRYSTAL_STUDY
 			location = event_target:pc_home
@@ -276,17 +288,17 @@ country_event = {
 			}
 			add_monthly_resource_mult = {
 				resource = society_research
-				value = 50
-				min = 1500
-				max = 2500
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
 			}
 		}
 		ELSE = {
 			add_monthly_resource_mult = {
 				resource = society_research
-				value = 50
-				min = 2500
-				max = 4000
+				value = @tier4researchreward
+				min = @tier4researchmin
+				max = @tier4researchmax
 			}
 		}
 	}
@@ -305,10 +317,10 @@ planet_event = {
 	option = {
 		name = mem_space_monster_attacks.6.a
 		custom_tooltip = mem_space_monster_attacks.6.a.tooltip
-		add_modifier = {
-			modifier = mem_crystal_harvest
-			days = -1
-		}
+#		add_modifier = {
+#			modifier = mem_crystal_harvest
+#			days = -1
+#		}
 		hidden_effect = {
 			IF = {
 				limit = {
@@ -318,15 +330,39 @@ planet_event = {
 				}
 				planet_event = { id = mem_space_monster_attacks.7 days = 1800 random = 360 }
 			}
+			IF = {
+				limit = { 
+					num_free_districts = {
+						type = district_farming
+						value < 2
+					}
+					num_free_districts = {
+						type = district_farming
+						value > 0
+					}
+				}
+				remove_district = district_farming
+			}
+			ELSE_IF = {
+				limit = {
+					num_free_districts = {
+						type = district_farming
+						value < 1
+					}
+				}
+				remove_district = district_farming
+				remove_district = district_farming
+			}
 		}
+		add_deposit = d_mem_crystals_mining
 	}
 	option = {
 		name = mem_space_monster_attacks.6.b
 		custom_tooltip = mem_space_monster_attacks.6.b.tooltip
-		add_modifier = {
-			modifier = mem_crystal_study
-			days = -1
-		}
+#		add_modifier = {
+#			modifier = mem_crystal_study
+#			days = -1
+#		}
 		hidden_effect = {
 			IF = {
 				limit = {
@@ -336,7 +372,29 @@ planet_event = {
 				}
 				planet_event = { id = mem_space_monster_attacks.7 days = 1800 random = 360 }
 			}
+			IF = {
+				limit = { 
+					num_free_districts = {
+						type = district_mining
+						value = 0
+					}
+				}
+				remove_district = district_mining
+			}
+			while = {
+				count = 2
+				IF = {
+					limit = { 
+						num_free_districts = {
+							type = district_farming
+							value < 2
+						}
+					}
+					remove_district = district_farming
+				}
+			}
 		}
+		add_deposit = d_mem_crystals_science
 	}
 	option = {
 		name = mem_space_monster_attacks.6.c
@@ -363,6 +421,20 @@ planet_event = {
 	
 	option = {
 		name = mem_space_monster_attacks.7.a
+		hidden_effect = {
+			while = {
+				count = 2
+				IF = {
+					limit = { 
+						num_free_districts = {
+							type = district_farming
+							value < 2
+						}
+					}
+					remove_district = district_farming
+				}
+			}
+		}
 		add_modifier = {
 			modifier = bleak_planet
 			days = -1
@@ -370,6 +442,20 @@ planet_event = {
 		IF = {
 			limit = {
 				has_modifier = lush_planet
+			}
+			hidden_effect = {
+				while = {
+					count = 4
+					IF = {
+						limit = { 
+							num_free_districts = {
+								type = district_farming
+								value < 4
+							}
+						}
+						remove_district = district_farming
+					}
+				}
 			}
 			remove_modifier = lush_planet
 		}
@@ -391,9 +477,15 @@ planet_event = {
 		owner = {
 			add_monthly_resource_mult = {
 				resource = minerals
-				value = 50
-				min = 1000
-				max = 1600
+				value = @tier4materialreward
+				min = @tier4materialmin
+				max = @tier4materialmax
+			}
+			add_monthly_resource_mult = {
+				resource = rare_crystals
+				value = @tier3materialreward
+				min = @tier3materialmin
+				max = @tier3materialmax
 			}
 		}
 	}
