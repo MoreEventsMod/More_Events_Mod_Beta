@@ -90,6 +90,11 @@ country_event = {
             limit = { has_star_flag = mem_rebel_yell_signal_system }
             save_event_target_as = the_system
             random_system_planet = {
+                limit = {
+                    is_star = no
+                    NOT = { has_planet_flag = mem_rebel_yell_broken_city }
+                    NOT = { is_planet_class = pc_gas_giant }
+                }
                 save_event_target_as = the_planet
             }
         }
@@ -204,4 +209,51 @@ country_event = {
     #         location = event_target:the_system                    
     #     }
     # }
+}
+
+# Entering boss system for the first time
+ship_event = {
+    id = mem_rebel_yell.5
+    title = mem_rebel_yell.5.name
+    desc = mem_rebel_yell.5.desc
+
+    is_triggered_only = yes
+
+    location = ROOT
+    show_sound = event_default
+    picture = GFX_evt_fleet_good
+
+    trigger = {
+        from = { 
+            has_star_flag = mem_rebel_yell_boss_system
+            any_ship_in_system = {
+                exists = owner
+                owner = { has_country_flag = mem_rebel_yell_resistance_country }
+                is_disabled = no
+            }
+        }
+        owner = {
+            NOT = { has_country_flag = mem_rebel_yell_met_boss }
+        }
+
+    }
+
+    immediate = {
+        random_country = {
+            limit = { has_country_flag = mem_rebel_yell_resistance_country }
+            save_event_target_as = the_other_guys
+        }        
+        owner = { 
+            set_country_flag = mem_rebel_yell_met_boss 
+            establish_communications_no_message = event_target:the_other_guys
+            establish_contact = {
+                who = event_target:the_other_guys
+                location = FROM
+            }
+        }
+    }
+
+    option = {
+        name = OK
+    }
 }
