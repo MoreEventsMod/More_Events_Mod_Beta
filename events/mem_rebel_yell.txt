@@ -258,6 +258,113 @@ ship_event = {
     }
 }
 
+# Ship disabled
+ship_event = {
+    id = mem_rebel_yell.6
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        has_ship_flag = mem_rebel_yell_prize_ship
+        owner = {
+            has_country_flag = mem_rebel_yell_resistance_country
+        }
+    }
+
+    immediate = {
+        save_event_target_as = prize_ship
+        kill_leader = { type = admiral show_notification = no }
+        owner = {
+            every_owned_ship = {
+                limit = {
+                    NOT = { is_same_value = root }
+                }
+                destroy_ship = this
+            }
+        }
+        FROM.owner = {
+            IF = {
+                limit = { is_country_type = default }
+                country_event = { id = mem_rebel_yell.7 }
+            }
+            ELSE = {
+                destroy_ship = root
+            }
+        }
+    }
+}
+
+# Princess contacts us
+country_event = {
+    id = mem_rebel_yell.7
+    title = TRANSMISSION
+    desc = mem_rebel_yell.7.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+        room = ethic_spaceship_room
+        portrait = event_target:princess
+    }
+
+    immediate = {
+        IF = {
+            limit = { NOT = { is_species_class = HUM } }
+            create_species = {
+                name = Caith
+                class = HUM
+                portrait = humanoid_05
+                traits = {
+                    trait = trait_charismatic
+                    trait = trait_quick_learners
+                    trait = trait_talented
+                    trait = trait_psionic
+                }
+                effect = {
+                    save_event_target_as = princess_species
+                }
+            }
+        }
+        ELSE = {
+            create_species = {
+                name = Caith
+                class = MAM
+                portrait = mam3
+                traits = {
+                    trait = trait_charismatic
+                    trait = trait_quick_learners
+                    trait = trait_talented
+                    trait = trait_psionic
+                }
+                effect = {
+                    save_event_target_as = princess_species
+                }
+            }
+        }
+
+        create_saved_leader = {
+            key = mem_rebel_yell_princess
+            class = admiral
+            species = last_created_species
+            skill = 2
+            gender = female
+            
+            effect = {
+                save_event_target_as = princess
+                set_age = 25
+            }
+        }
+    }
+
+    option = {
+        name = mem_rebel_yell.7.a
+        hidden_effect = {
+            country_event = { id = mem_rebel_yell.8 }
+        }
+    }
+}
+
 # Test event
 country_event = {
     id = mem_rebel_yell.999
