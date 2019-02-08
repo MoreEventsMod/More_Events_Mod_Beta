@@ -162,6 +162,8 @@ mem_rebel_yell_system_2 = {
         size = 25
         orbit_distance = 30
 
+        flags = { mem_rebel_yell_boss_origin_planet }
+
         moon = {
             class = random_non_colonizable
             size = 12
@@ -169,6 +171,7 @@ mem_rebel_yell_system_2 = {
         }
 
         init_effect = {
+            save_event_target_as = patrol_starting_planet
             create_country = {
                 name = "Resistance"
                 type = faction
@@ -302,6 +305,54 @@ mem_rebel_yell_system_2 = {
                     set_owner = last_created_country
                     set_location = prev
                     set_leader = event_target:recon_bot
+
+                    queue_actions = {
+                        repeat = {
+                            find_closest_system = {
+                                trigger = {
+                                    id = mem_rebel_yell.patrol_trigger.1
+                                    has_star_flag = mem_rebel_yell_signal_system
+                                }
+                                found_system = {
+                                    move_to = this
+                                    effect = {
+                                        id = mem_rebel_yell.patrol_trigger.2
+                                        prev = { set_fleet_stance = aggressive }
+                                        random_system_ambient_object = {
+                                            save_event_target_as = debris_of_interest
+                                        }
+                                    }
+                                    move_to = event_target:debris_of_interest
+                                }
+                            }
+                            find_closest_system = {
+                                trigger = {
+                                    id = mem_rebel_yell.patrol_trigger.3
+                                    has_star_flag = mem_rebel_yell_boss_system
+                                }
+                                found_system = {
+                                    move_to = THIS
+                                    effect = { 
+                                        id = mem_rebel_yell.patrol_trigger.4 
+                                        set_fleet_stance = passive
+                                    }
+                                    find_closest_planet = {
+                                        trigger = {
+                                            id = mem_rebel_yell.patrol_trigger.5
+                                            has_planet_flag = mem_rebel_yell_boss_origin_planet
+                                        }
+                                        found_planet = {
+                                            move_to = this
+                                        }
+                                    }
+                                }
+                                
+                            }
+                            wait = {
+                                duration = 3600
+                            }
+                        }
+                    }
                 }
             }
         }
