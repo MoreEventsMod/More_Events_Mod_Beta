@@ -17,7 +17,16 @@ ship_event = {
     show_sound = event_default
 
     immediate = {
-        FROM = { save_event_target_as = the_planet }
+        FROM = { 
+            save_event_target_as = the_planet
+            solar_system = {
+                random_system_planet = {
+                    limit = { is_planet_class = pc_gas_giant }
+                    save_event_target_as = the_gas_giant
+                }
+                set_star_flag = mem_convict_anomaly_system
+            }
+        }
     }
 
     option = {
@@ -43,10 +52,7 @@ ship_event = {
         name = mem_convict.1.c
         exclusive_trigger = {
             owner = {
-                OR = {
-                    has_valid_civic = civic_fanatic_purifiers
-                    has_valid_civic = civic_machine_terminator
-                }
+                has_valid_civic = civic_fanatic_purifiers
             }
         }
         owner = {
@@ -56,22 +62,6 @@ ship_event = {
                 min = @tier2unitymin
                 max = @tier2unitymax
             }
-        }
-    }
-    option = {
-        name = mem_convict.1.d
-        exclusive_trigger = {
-            owner = {
-                has_valid_civic = civic_hive_devouring_swarm
-            }
-        }
-        owner = {
-            add_resource = {
-                food = 1
-            }
-        }
-        leader = {
-            add_experience = 100
         }
     }
 }
@@ -455,6 +445,11 @@ country_event = {
         any_owned_leader = {
             has_leader_flag = mem_convict_retheri_rhin
         }
+        exists = event_target:the_gas_giant
+        event_target:the_gas_giant = { is_planet_class = pc_gas_giant }
+        any_system_within_border = {
+            NOT = { has_star_flag = mem_convict_anomaly_system }
+        }
     }
 
     immediate = {
@@ -463,13 +458,13 @@ country_event = {
                 is_under_colonization = no
             }
             weights = {
-                base = 1
+                base = 10
                 modifier = {
-                    mult = 10
+                    mult = 0.1
                     is_capital = yes
                 }
                 modifier = {
-                    mult = 1000
+                    mult = 100
                     sector = {
                         exists = leader
                         leader = {
@@ -477,18 +472,79 @@ country_event = {
                         }
                     }
                 }
+                modifier = {
+                    mult = 0
+                    solar_system = { is_same_value = event_target:the_gas_giant }
+                }
             }
             save_event_target_as = target_planet
+            set_planet_flag = mem_convict_target_planet
         }
-        random_planet = {
-            limit = {
-                is_planet_class = pc_gas_giant
-                NAND = {
-                    exists = space_owner
-                    space_owner = {
-                        is_same_value = root
+        event_target:the_gas_giant = {
+            create_country = {
+                name = "Grim Portent"
+                type = mem_neutral_station_smasher
+                ethos = {
+                    ethic = ethic_fanatic_xenophobe
+                    ethic = ethic_militarist
+                }
+                civics = {
+                    civic = civic_fanatic_purifiers
+                }
+                effect = {
+                    save_event_target_as = enforcer_country
+                    set_country_flag = mem_convict_enforcer_country
+                }
+            }
+            create_fleet = {
+                name = "Grim Portent"
+                effect = {
+                    create_ship = {
+                        name = "Grim Portent"
+                        design = "Grim Portent"
+                    }
+                    set_owner = event_target:enforcer_country
+                    set_location = event_target:the_gas_giant
+                    set_fleet_flag = mem_convict_enforcer_fleet
+                    set_fleet_bombardment_stance = armageddon
+                    auto_move_to_planet = {
+                        target = event_target:target_planet
+                        clear_auto_move_on_arrival = yes
                     }
                 }
+            }
+        }
+    }
+}
+
+# On portent fleet entering the system
+fleet_event = {
+    id = mem_convict.6
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        has_fleet_flag = mem_convict_enforcer_fleet
+        FROM = {
+            any_system_planet = {
+                has_planet_flag = mem_convict_target_planet
+            }
+        }
+    }
+
+    immediate = {
+        clear_fleet_actions = this
+        solar_system = {
+            IF = {
+                limit = {
+                    exists = space_owner
+                }
+                space_owner = {
+                    country_event = { id = mem_convict.7 }
+                }
+            }
+            ELSE = {
+                destroy_fleet = ROOT
             }
         }
     }
