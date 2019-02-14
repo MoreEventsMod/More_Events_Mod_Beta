@@ -21,7 +21,10 @@ ship_event = {
             save_event_target_as = the_planet
             solar_system = {
                 random_system_planet = {
-                    limit = { is_planet_class = pc_gas_giant }
+                    limit = { 
+                        is_planet_class = pc_gas_giant
+                        any_moon = { is_same_value = FROM }
+                    }
                     save_event_target_as = the_gas_giant
                 }
                 set_star_flag = mem_convict_anomaly_system
@@ -64,6 +67,10 @@ ship_event = {
                 max = @tier2unitymax
             }
         }
+    }
+
+    after = {
+        owner = { country_event = { id = story.5 days = 30 } }
     }
 }
 
@@ -165,13 +172,10 @@ country_event = {
             class = governor
             gender = male
             skill = 4
-            traits = {
-                # Make a new trait later
-                trait = leader_trait_governor_erudite
-            }
 
             effect = {
                 set_leader_flag = mem_convict_retheri_rhin
+                add_trait = leader_trait_governor_erudite
                 add_ruler_trait = leader_trait_ruler_erudite
                 save_event_target_as = retheri_rhin
             }
@@ -404,6 +408,11 @@ country_event = {
             event_target:retheri_rhin = {
                 add_trait = leader_trait_corrupt
             }
+            add_resource = {
+                influence = -50
+                energy = -200
+                consumer_goods = -200
+            }
         }
         ELSE = {
             event_target:retheri_rhin = {
@@ -420,6 +429,11 @@ country_event = {
         tooltip = {
             event_target:retheri_rhin = {
                 add_trait = leader_trait_corrupt
+            }
+            add_resource = {
+                influence = -50
+                energy = -200
+                consumer_goods = -200
             }
         }
     }
@@ -541,11 +555,39 @@ fleet_event = {
                     exists = space_owner
                 }
                 space_owner = {
-                    country_event = { id = mem_convict.7 }
+                    country_event = { id = mem_convict.61 }
                 }
             }
             ELSE = {
                 destroy_fleet = ROOT
+            }
+        }
+    }
+}
+
+country_event = {
+    id = mem_convict.61
+    title = mem_convict.61.name
+    desc = mem_convict.61.desc
+
+    location = from
+    picture = GFX_evt_fleet_evil
+    show_sound = event_default
+
+    is_triggered_only = yes
+
+    immediate = {
+        random_system = {
+            limit = { has_star_flag = mem_convict_anomaly_system }
+            save_event_target_as = origin_system
+        }
+    }
+
+    option = {
+        name = ONSCREEN
+        hidden_effect = {
+            country_event = {
+                id = mem_convict.7
             }
         }
     }
@@ -559,7 +601,7 @@ country_event = {
 
     is_triggered_only = yes
     diplomatic = yes
-    location = FROM
+    location = FROMFROM
 
     picture_event_data = {
         room = no_video_feed_room
@@ -570,6 +612,7 @@ country_event = {
             limit = { has_planet_flag = mem_convict_target_planet }
             save_event_target_as = target_planet
         }
+        establish_communication_no_message = from.owner
     }
 
     option = {
@@ -601,7 +644,7 @@ country_event = {
         default_hide_option = yes
 
         hidden_effect = {
-            FROM = {
+            FROMFROM = {
                 owner = {
                     set_faction_hostility = {
                         target = root
@@ -644,7 +687,7 @@ country_event = {
         }
 
         hidden_effect = {
-            destroy_fleet = FROM
+            destroy_fleet = FROMFROM
         }
     }
     option = {
@@ -663,7 +706,100 @@ country_event = {
         }
 
         hidden_effect = {
-            destroy_fleet = FROM
+            destroy_fleet = FROMFROM
+        }
+    }
+}
+
+# Planet bombed badly. Enforcers calls it quit
+planet_event = {
+    id = mem_convict.8
+    title = TRANSMISSION
+    desc = mem_convict.8.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+        room = no_video_feed_room
+    }
+
+    trigger = {
+        planet_devastation >= 35
+        FROM = {
+            has_country_flag = mem_convict_enforcer_country
+        }
+    }
+
+    immediate = {
+        add_planet_devastation = 35
+        FROM = {
+            random_owned_fleet = {
+                solar_system = {
+                    random_neighbor_system = {
+                        save_event_target_as = target_system
+                    }
+                }
+                auto_move_to_planet = {
+                    target = event_target:target_system.star
+                    clear_auto_move_on_arrival = yes                    
+                }
+            }
+            country_event = {
+                id = mem_convict.9
+                days = 2
+            }
+        }
+    }
+
+    option = {
+        name = mem_convict.8.a
+    }
+}
+
+# Ticker to have ship disappear while in FTL
+country_event = {
+    id = mem_convict.9
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        IF = {
+            limit = {
+                any_owned_ship = {
+                    NOT = { exists = solar_system }
+                }
+            }
+            destroy_country = yes
+        }
+        ELSE_IF = {
+            limit = {
+                any_owned_fleet = {
+                    is_fleet_idle = yes
+                    is_in_combat = no
+                }
+            }
+            random_owned_fleet = {
+                solar_system = {
+                    random_neighbor_system = {
+                        save_event_target_as = target_system
+                    }
+                }
+                auto_move_to_planet = {
+                    target = event_target:target_system.star
+                    clear_auto_move_on_arrival = yes                    
+                }
+            }
+            country_event = {
+                id = mem_convict.9
+                days = 2
+            }
+        }
+        ELSE = {
+            country_event = {
+                id = mem_convict.9
+                days = 2
+            }
         }
     }
 }
