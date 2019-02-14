@@ -70,7 +70,9 @@ ship_event = {
     }
 
     after = {
-        owner = { country_event = { id = story.5 days = 30 } }
+        hidden_effect = {
+            owner = { country_event = { id = story.5 days = 30 } }
+        }
     }
 }
 
@@ -173,9 +175,14 @@ country_event = {
             gender = male
             skill = 4
 
+            traits = {
+                trait = leader_trait_intellectual
+                trait = leader_trait_architectural_interest
+                trait = leader_trait_governor_erudite
+            }
+
             effect = {
                 set_leader_flag = mem_convict_retheri_rhin
-                add_trait = leader_trait_governor_erudite
                 add_ruler_trait = leader_trait_ruler_erudite
                 save_event_target_as = retheri_rhin
             }
@@ -509,6 +516,11 @@ country_event = {
                 effect = {
                     save_event_target_as = enforcer_country
                     set_country_flag = mem_convict_enforcer_country
+                    set_policy = {
+                        policy = orbital_bombardment
+                        option = orbital_bombardment_armageddon
+                        cooldown = no
+                    }
                 }
             }
             create_fleet = {
@@ -549,6 +561,8 @@ fleet_event = {
 
     immediate = {
         clear_fleet_actions = this
+        save_event_target_as = portent_fleet
+        owner = { save_event_target_as = portent_country }
         solar_system = {
             IF = {
                 limit = {
@@ -612,7 +626,7 @@ country_event = {
             limit = { has_planet_flag = mem_convict_target_planet }
             save_event_target_as = target_planet
         }
-        establish_communication_no_message = fromfrom.owner
+        establish_communications_no_message = fromfrom.owner
     }
 
     option = {
@@ -676,12 +690,6 @@ country_event = {
                 has_leader_flag = mem_convict_retheri_rhin
             }
         }
-
-        hidden_effect = {
-            fromfrom.owner = {
-                country_event = { id = mem_convict.9 }
-            }
-        }
     }
 
     option = {
@@ -698,8 +706,11 @@ country_event = {
         }
 
         hidden_effect = {
-            fromfrom.owner = {
-                country_event = { id = mem_convict.9 }
+            event_target:portent_country = {
+                country_event = {
+                    id = mem_convict.9
+                    days = 2
+                }
             }
         }
     }
@@ -719,7 +730,12 @@ country_event = {
         }
 
         hidden_effect = {
-            destroy_fleet = FROMFROM
+            event_target:portent_country = {
+                country_event = {
+                    id = mem_convict.9
+                    days = 2
+                }
+            }
         }
     }
 }
@@ -746,18 +762,12 @@ planet_event = {
 
     immediate = {
         add_planet_devastation = 35
+        while = {
+            count = 5
+            limit = { num_pops > 10 }
+            random_owned_pop = { kill_pop = yes }
+        }
         FROM = {
-            random_owned_fleet = {
-                solar_system = {
-                    random_neighbor_system = {
-                        save_event_target_as = target_system
-                    }
-                }
-                auto_move_to_planet = {
-                    target = event_target:target_system.star
-                    clear_auto_move_on_arrival = yes                    
-                }
-            }
             country_event = {
                 id = mem_convict.9
                 days = 2
@@ -777,6 +787,7 @@ country_event = {
     is_triggered_only = yes
 
     immediate = {
+        log = ".9 loop for [Root.GetName]"
         IF = {
             limit = {
                 any_owned_ship = {
@@ -811,8 +822,39 @@ country_event = {
         ELSE = {
             country_event = {
                 id = mem_convict.9
-                days = 2
+                days = 1
             }
+        }
+    }
+}
+
+# Anomaly failure - wouldn't be cool to get the same chain on repeat
+ship_event = {
+    id = mem_convict.10
+    title = mem_convict.10.name
+    desc = mem_convict.10.desc
+
+    is_triggered_only = yes
+
+    location = FROM
+    picture = GFX_evt_mem_crashed_ship
+    show_sound = event_default
+
+    option = {
+        name = INTERESTING
+        owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier5researchreward
+				min = @tier5researchmin
+				max = @tier5researchmax
+			}
+		}
+    }
+
+    after = {
+        hidden_effect = {
+            owner = { country_event = { id = story.5 days = 30 } }
         }
     }
 }
