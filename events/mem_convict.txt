@@ -26,6 +26,7 @@ ship_event = {
                         any_moon = { is_same_value = FROM }
                     }
                     save_event_target_as = the_gas_giant
+                    set_planet_flag = mem_convict_gas_giant
                 }
                 set_star_flag = mem_convict_anomaly_system
             }
@@ -516,11 +517,6 @@ country_event = {
                 effect = {
                     save_event_target_as = enforcer_country
                     set_country_flag = mem_convict_enforcer_country
-                    set_policy = {
-                        policy = orbital_bombardment
-                        option = orbital_bombardment_armageddon
-                        cooldown = no
-                    }
                 }
             }
             create_fleet = {
@@ -533,7 +529,7 @@ country_event = {
                     set_owner = event_target:enforcer_country
                     set_location = event_target:the_gas_giant
                     set_fleet_flag = mem_convict_enforcer_fleet
-                    set_fleet_bombardment_stance = armageddon
+                    set_fleet_bombardment_stance = mem_armageddon
                     auto_move_to_planet = {
                         target = event_target:target_planet
                         clear_auto_move_on_arrival = yes
@@ -645,8 +641,8 @@ country_event = {
             }
         }
         hidden_effect = {
-            fromfrom.owner = {
-                country_event = { id = mem_convict.9 }
+            fromfrom = {
+                mem_convict_move_away_and_leave = yes
             }
         }
     }
@@ -706,11 +702,8 @@ country_event = {
         }
 
         hidden_effect = {
-            event_target:portent_country = {
-                country_event = {
-                    id = mem_convict.9
-                    days = 2
-                }
+            fromfrom = {
+                mem_convict_move_away_and_leave = yes
             }
         }
     }
@@ -730,11 +723,8 @@ country_event = {
         }
 
         hidden_effect = {
-            event_target:portent_country = {
-                country_event = {
-                    id = mem_convict.9
-                    days = 2
-                }
+            fromfrom = {
+                mem_convict_move_away_and_leave = yes
             }
         }
     }
@@ -771,10 +761,7 @@ planet_event = {
             random_owned_pop = { kill_pop = yes }
         }
         FROM = {
-            country_event = {
-                id = mem_convict.9
-                days = 2
-            }
+            mem_convict_move_away_and_leave = yes
         }
     }
 
@@ -783,51 +770,14 @@ planet_event = {
     }
 }
 
-# Ticker to have ship disappear while in FTL
+# Fleet deleted
 country_event = {
     id = mem_convict.9
     hide_window = yes
     is_triggered_only = yes
 
     immediate = {
-        log = ".9 loop for [Root.GetName]"
-        IF = {
-            limit = {
-                any_owned_ship = {
-                    NOT = { exists = solar_system }
-                }
-            }
-            destroy_country = yes
-        }
-        ELSE_IF = {
-            limit = {
-                any_owned_fleet = {
-                    is_fleet_idle = yes
-                    is_in_combat = no
-                }
-            }
-            random_owned_fleet = {
-                solar_system = {
-                    random_neighbor_system = {
-                        save_event_target_as = target_system
-                    }
-                }
-                auto_move_to_planet = {
-                    target = event_target:target_system.star
-                    clear_auto_move_on_arrival = yes                    
-                }
-            }
-            country_event = {
-                id = mem_convict.9
-                days = 2
-            }
-        }
-        ELSE = {
-            country_event = {
-                id = mem_convict.9
-                days = 1
-            }
-        }
+        destroy_country = yes
     }
 }
 
