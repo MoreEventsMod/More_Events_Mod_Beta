@@ -1,0 +1,815 @@
+# Convict
+# Code and Text by ViolentBeetle
+# Idea by Solarius Scorch
+
+namespace = mem_convict
+
+# Anomaly solution
+ship_event = {
+    id = mem_convict.1
+    title = mem_convict.1.name
+    desc = mem_convict.1.desc
+
+    is_triggered_only = yes
+
+    location = FROM
+    picture = GFX_evt_mem_crashed_ship
+    show_sound = event_default
+
+    immediate = {
+        FROM = { 
+            save_event_target_as = the_planet
+            solar_system = {
+                random_system_planet = {
+                    limit = { 
+                        is_planet_class = pc_gas_giant
+                        any_moon = { is_same_value = FROM }
+                    }
+                    save_event_target_as = the_gas_giant
+                    set_planet_flag = mem_convict_gas_giant
+                }
+                set_star_flag = mem_convict_anomaly_system
+            }
+        }
+        owner = { set_country_flag = mem_convict_anomaly_country }
+    }
+
+    option = {
+        name = mem_convict.1.a
+
+        owner.capital_scope = {
+            enable_special_project = {
+                name = MEM_CONVICT_STUDY_POD
+                location = THIS
+                owner = root.owner
+            }
+        }
+    }
+    option = {
+        name = mem_convict.1.b
+        owner = {
+            add_resource = {
+                influence = 25
+            }
+        }
+    }
+    option = {
+        name = mem_convict.1.c
+        exclusive_trigger = {
+            owner = {
+                has_valid_civic = civic_fanatic_purifiers
+            }
+        }
+        owner = {
+            add_monthly_resource_mult = {
+                resource = unity
+                value = @tier2unityreward
+                min = @tier2unitymin
+                max = @tier2unitymax
+            }
+        }
+    }
+
+    after = {
+        hidden_effect = {
+            owner = { country_event = { id = story.5 days = 30 } }
+        }
+    }
+}
+
+# Project resolution
+country_event = {
+    id = mem_convict.2
+    title = mem_convict.2.name
+    desc = mem_convict.2.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_society_research
+    show_sound = event_default
+
+    immediate = {
+        random_list = {
+            50 = { set_country_flag = mem_convict_will_go_bad }
+            50 = { set_country_flag = mem_convict_will_go_good }
+        }
+        random_list = {
+            50 = { set_country_flag = mem_convict_portent_arrives }
+            50 = {  }
+        }
+    }
+
+    option = {
+        name = mem_convict.2.a
+
+        trigger = {
+            NOT = { has_ethic = ethic_fanatic_xenophobe }
+        }
+
+        hidden_effect = {
+            country_event = {
+                id = mem_convict.3
+                days  = 15
+            }
+        }
+    }
+
+    option = {
+        name = mem_convict.2.b
+
+        add_monthly_resource_mult = {
+            resource = unity
+            value = @tier2unityreward
+            min = @tier2unitymin
+            max = @tier2unitymax
+        }
+    }
+}
+
+# Reedan Rhyn woke up
+country_event = {
+    id = mem_convict.3
+    title = mem_convict.3.name
+    desc = mem_convict.3.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_throne_room
+    show_sound = event_default
+
+    immediate = {
+        IF = {
+            limit = { 
+                NOT = { species_portrait = art17 } 
+            }
+            create_species = {
+                name = "Rendan"
+                adjective = "Rendan"
+                plural = "Rendans"
+                class = ART
+                portrait = art19
+                traits = {
+                    trait = trait_erudite
+                    trait = trait_enduring
+                }
+            }
+        }
+        ELSE = {
+            create_species = {
+                name = "Rendan"
+                adjective = "Rendan"
+                plural = "Rendans"
+                class = ART
+                portrait = art20
+                traits = {
+                    trait = trait_erudite
+                    trait = trait_enduring
+                }
+            }
+        }
+        last_created_species = { save_event_target_as = rendan_species }
+        create_saved_leader = {
+            key = mem_convict_retheri_rhin
+            name = "Retheri Rhin"
+            species = last_created_species
+            class = governor
+            gender = male
+            skill = 4
+
+            traits = {
+                # trait = leader_trait_intellectual
+                trait = leader_trait_architectural_interest
+                trait = leader_trait_governor_erudite
+            }
+
+            effect = {
+                set_leader_flag = mem_convict_retheri_rhin
+                add_ruler_trait = leader_trait_ruler_erudite
+                save_event_target_as = retheri_rhin
+            }
+        }
+    }
+
+    # Array of flavourful options for different ethics to accept leader.
+    option = {
+        name = mem_convict.3.a
+        custom_tooltip = mem_convict.3.a.tooltip
+
+        trigger = {
+            NOR = {
+                has_ethic = ethic_fanatic_authoritarian
+                has_ethic = ethic_fanatic_egalitarian
+                has_ethic = ethic_fanatic_materialist
+                # has_ethic = ethic_fanatic_spiritualist
+                # has_ethic = ethic_fanatic_militarist
+                # has_ethic = ethic_fanatic_pacifist
+                has_ethic = ethic_fanatic_xenophile
+                # has_ethic = ethic_fanatic_xenophobe
+                has_ethic = ethic_gestalt_consciousness
+            }
+        }
+
+        hidden_effect = {
+            activate_saved_leader = {
+                key = mem_convict_retheri_rhin
+            }
+            country_event = {
+                id = mem_convict.4
+                days = 36
+                random = 72
+            }
+            country_event = {
+                id = mem_convict.5
+                days = 36
+                random = 36
+            }
+        }
+    }
+
+    option = {
+        name = mem_convict.3.a.auth
+        custom_tooltip = mem_convict.3.a.tooltip
+
+        trigger = {
+            has_ethic = ethic_fanatic_authoritarian
+        }
+
+        hidden_effect = {
+            activate_saved_leader = {
+                key = mem_convict_retheri_rhin
+            }
+            country_event = {
+                id = mem_convict.4
+                days = 36
+                random = 72
+            }
+            country_event = {
+                id = mem_convict.5
+                days = 36
+                random = 36
+            }
+        }
+    }
+    option = {
+        name = mem_convict.3.a.ega
+        custom_tooltip = mem_convict.3.a.tooltip
+
+        trigger = {
+            has_ethic = ethic_fanatic_egalitarian
+        }
+
+        hidden_effect = {
+            activate_saved_leader = {
+                key = mem_convict_retheri_rhin
+            }
+            country_event = {
+                id = mem_convict.4
+                days = 36
+                random = 72
+            }
+            country_event = {
+                id = mem_convict.5
+                days = 36
+                random = 36
+            }
+        }
+    }
+    option = {
+        name = mem_convict.3.a.mat
+        custom_tooltip = mem_convict.3.a.tooltip
+
+        trigger = {
+            has_ethic = ethic_fanatic_materialist
+        }
+
+        hidden_effect = {
+            activate_saved_leader = {
+                key = mem_convict_retheri_rhin
+            }
+            country_event = {
+                id = mem_convict.4
+                days = 36
+                random = 72
+            }
+            country_event = {
+                id = mem_convict.5
+                days = 36
+                random = 36
+            }
+        }
+    }
+    option = {
+        name = mem_convict.3.a.phile
+        custom_tooltip = mem_convict.3.a.tooltip
+
+        trigger = {
+            has_ethic = ethic_fanatic_xenophile
+        }
+
+        hidden_effect = {
+            activate_saved_leader = {
+                key = mem_convict_retheri_rhin
+            }
+            country_event = {
+                id = mem_convict.4
+                days = 36
+                random = 72
+            }
+            country_event = {
+                id = mem_convict.5
+                days = 36
+                random = 36
+            }
+        }
+    }
+
+    # Array of options to decline
+    option = {
+        name = mem_convict.3.b
+        custom_tooltip = mem_convict.3.b.tooltip
+
+        trigger = {
+            NOR = {
+                has_ethic = ethic_fanatic_authoritarian
+                has_ethic = ethic_fanatic_egalitarian
+                # has_ethic = ethic_fanatic_materialist
+                # has_ethic = ethic_fanatic_spiritualist
+                # has_ethic = ethic_fanatic_militarist
+                # has_ethic = ethic_fanatic_pacifist
+                # has_ethic = ethic_fanatic_xenophile
+                # has_ethic = ethic_fanatic_xenophobe
+                # has_ethic = ethic_gestalt_consciousness
+            }
+        }
+
+        add_monthly_resource_mult = {
+            resource = unity
+            value = @tier2unityreward
+            min = @tier2unitymin
+            max = @tier2unitymax
+        }
+    }
+
+    option = {
+        name = mem_convict.3.b.auth
+        custom_tooltip = mem_convict.3.b.tooltip
+
+        trigger = {
+            has_ethic = ethic_fanatic_authoritarian
+        }
+
+        add_monthly_resource_mult = {
+            resource = unity
+            value = @tier2unityreward
+            min = @tier2unitymin
+            max = @tier2unitymax
+        }
+    }
+    option = {
+        name = mem_convict.3.b.ega
+        custom_tooltip = mem_convict.3.b.tooltip
+
+        trigger = {
+            has_ethic = ethic_fanatic_egalitarian
+        }
+
+        add_monthly_resource_mult = {
+            resource = unity
+            value = @tier2unityreward
+            min = @tier2unitymin
+            max = @tier2unitymax
+        }
+    }
+}
+
+# Result is decided based on flag - consider adding extra rewards/penalties
+country_event = {
+    id = mem_convict.4
+    title = mem_convict.4.name
+    desc = {
+        text = mem_convict.4.desc.corrupt
+        trigger = {
+            has_country_flag = mem_convict_will_go_bad
+        }
+    }
+    desc = {
+        text = mem_convict.4.desc.honest
+        trigger = {
+            has_country_flag = mem_convict_will_go_good
+        }
+    }
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_throne_room
+    show_sound = event_factions
+
+    trigger = {
+        any_owned_leader = {
+            has_leader_flag = mem_convict_retheri_rhin
+        }
+    }
+
+    immediate = {
+        IF = {
+            limit = { has_country_flag = mem_convict_will_go_bad }
+            event_target:retheri_rhin = {
+                add_trait = leader_trait_corrupt
+            }
+            add_resource = {
+                influence = -50
+                energy = -200
+                consumer_goods = -200
+            }
+        }
+        ELSE = {
+            event_target:retheri_rhin = {
+                add_trait = leader_trait_righteous
+            }
+        }
+    }
+
+    option = {
+        name = mem_convict.4.a
+        trigger = {
+            has_country_flag = mem_convict_will_go_bad
+        }
+        tooltip = {
+            event_target:retheri_rhin = {
+                add_trait = leader_trait_corrupt
+            }
+            add_resource = {
+                influence = -50
+                energy = -200
+                consumer_goods = -200
+            }
+        }
+    }
+    option = {
+        name = mem_convict.4.b
+        trigger = {
+            has_country_flag = mem_convict_will_go_good
+        }
+        tooltip = {
+            event_target:retheri_rhin = {
+                add_trait = leader_trait_righteous
+            }
+        }
+    }
+}
+
+# An evil ship emerging from random gas giant
+country_event = {
+    id = mem_convict.5
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        any_owned_leader = {
+            has_leader_flag = mem_convict_retheri_rhin
+        }
+        exists = event_target:the_gas_giant
+        event_target:the_gas_giant = { is_planet_class = pc_gas_giant }
+        any_system_within_border = {
+            NOT = { has_star_flag = mem_convict_anomaly_system }
+        }
+    }
+
+    immediate = {
+        random_owned_planet = { # Ship will prefer to bully planet ruled by your governor, if possible. His second best guess would be your capital
+            limit = {
+                is_under_colonization = no
+            }
+            weights = {
+                base = 10
+                modifier = {
+                    mult = 0.1
+                    is_capital = yes
+                }
+                modifier = {
+                    mult = 100
+                    sector = {
+                        exists = leader
+                        leader = {
+                            has_leader_flag = mem_convict_retheri_rhin
+                        }
+                    }
+                }
+                modifier = {
+                    mult = 0
+                    solar_system = { is_same_value = event_target:the_gas_giant }
+                }
+            }
+            save_event_target_as = target_planet
+            set_planet_flag = mem_convict_target_planet
+        }
+        event_target:the_gas_giant = {
+            create_country = {
+                name = "Grim Portent"
+                type = mem_neutral_station_smasher
+                ethos = {
+                    ethic = ethic_fanatic_xenophobe
+                    ethic = ethic_militarist
+                }
+                civics = {
+                    civic = civic_fanatic_purifiers
+                }
+                effect = {
+                    save_event_target_as = enforcer_country
+                    set_country_flag = mem_convict_enforcer_country
+                }
+            }
+            create_fleet = {
+                name = "Grim Portent"
+                effect = {
+                    create_ship = {
+                        name = "Grim Portent"
+                        design = "Grim Portent"
+                    }
+                    set_owner = event_target:enforcer_country
+                    set_location = event_target:the_gas_giant
+                    set_fleet_flag = mem_convict_enforcer_fleet
+                    set_fleet_bombardment_stance = mem_armageddon
+                    auto_move_to_planet = {
+                        target = event_target:target_planet
+                        clear_auto_move_on_arrival = yes
+                    }
+                }
+            }
+        }
+    }
+}
+
+# On portent fleet entering the system
+fleet_event = {
+    id = mem_convict.6
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        has_fleet_flag = mem_convict_enforcer_fleet
+        FROM = {
+            any_system_planet = {
+                has_planet_flag = mem_convict_target_planet
+            }
+        }
+    }
+
+    immediate = {
+        clear_fleet_actions = this
+        save_event_target_as = portent_fleet
+        owner = { save_event_target_as = portent_country }
+        solar_system = {
+            IF = {
+                limit = {
+                    exists = space_owner
+                }
+                space_owner = {
+                    country_event = { id = mem_convict.61 }
+                }
+            }
+            ELSE = {
+                destroy_fleet = ROOT
+            }
+        }
+    }
+}
+
+country_event = {
+    id = mem_convict.61
+    title = mem_convict.61.name
+    desc = mem_convict.61.desc
+
+    location = from
+    picture = GFX_evt_fleet_evil
+    show_sound = event_default
+
+    is_triggered_only = yes
+
+    immediate = {
+        random_system = {
+            limit = { has_star_flag = mem_convict_anomaly_system }
+            save_event_target_as = origin_system
+        }
+    }
+
+    option = {
+        name = ONSCREEN
+        hidden_effect = {
+            country_event = {
+                id = mem_convict.7
+            }
+        }
+    }
+}
+
+# Diplomatic chat with the Portent
+country_event = {
+    id = mem_convict.7
+    title = TRANSMISSION
+    desc = mem_convict.7.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+    location = FROMFROM
+
+    picture_event_data = {
+        room = no_video_feed_room
+    }
+
+    immediate = {
+        random_planet = {
+            limit = { has_planet_flag = mem_convict_target_planet }
+            save_event_target_as = target_planet
+        }
+        establish_communications_no_message = fromfrom.owner
+    }
+
+    option = {
+        name = mem_convict.7.a
+
+        trigger = {
+            any_owned_leader = {
+                has_leader_flag = mem_convict_retheri_rhin
+            }
+        }
+
+        random_owned_leader = {
+            limit = { has_leader_flag = mem_convict_retheri_rhin }
+            kill_leader = {
+                show_notification = no
+            }
+        }
+        hidden_effect = {
+            fromfrom = {
+                mem_convict_move_away_and_leave = yes
+            }
+        }
+    }
+
+    option = {
+        name = mem_convict.7.b
+
+        trigger = {
+            any_owned_leader = {
+                has_leader_flag = mem_convict_retheri_rhin
+            }
+        }
+
+        default_hide_option = yes
+
+        hidden_effect = {
+            FROMFROM = {
+                owner = {
+                    set_faction_hostility = {
+                        target = root
+                        set_hostile = yes
+                        set_neutral = no
+                        set_friendly = no
+                    }
+                }
+                auto_move_to_planet = {
+                    target = event_target:target_planet
+                    clear_auto_move_on_arrival = yes                
+                }
+            }
+        }
+    }
+
+    option = {
+        name = mem_convict.7.c
+        is_dialog_only = yes
+        response_text = mem_convict.7.c.responce
+
+        trigger = {
+            any_owned_leader = {
+                has_leader_flag = mem_convict_retheri_rhin
+            }
+        }
+    }
+
+    option = {
+        name = mem_convict.7.d
+        response_text = mem_convict.7.d.response
+
+        trigger = {
+            NOT = {
+                any_owned_leader = {
+                    has_leader_flag = mem_convict_retheri_rhin
+                }
+            }
+            has_country_flag = mem_convict_anomaly_country
+        }
+
+        hidden_effect = {
+            fromfrom = {
+                mem_convict_move_away_and_leave = yes
+            }
+        }
+    }
+    option = {
+        name = mem_convict.7.e
+        response_text = mem_convict.7.e.response
+
+        trigger = {
+            NOT = {
+                any_owned_leader = {
+                    has_leader_flag = mem_convict_retheri_rhin
+                }
+            }
+            NOT = {
+                has_country_flag = mem_convict_anomaly_country
+            }
+        }
+
+        hidden_effect = {
+            fromfrom = {
+                mem_convict_move_away_and_leave = yes
+            }
+        }
+    }
+}
+
+# Planet bombed badly. Enforcers calls it quit
+planet_event = {
+    id = mem_convict.8
+    title = TRANSMISSION
+    desc = mem_convict.8.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+        room = no_video_feed_room
+    }
+
+    trigger = {
+        OR = {
+            planet_devastation >= 25
+            has_army = no
+        }
+        FROM = {
+            has_country_flag = mem_convict_enforcer_country
+        }
+    }
+
+    immediate = {
+        add_planet_devastation = 35
+        while = {
+            count = 5
+            limit = { num_pops > 10 }
+            random_owned_pop = { kill_pop = yes }
+        }
+        FROM = {
+            random_owned_fleet = {
+                mem_convict_move_away_and_leave = yes
+            }
+        }
+    }
+
+    option = {
+        name = mem_convict.8.a
+    }
+}
+
+# Fleet deleted
+country_event = {
+    id = mem_convict.9
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        destroy_country = yes
+    }
+}
+
+# Anomaly failure - wouldn't be cool to get the same chain on repeat
+ship_event = {
+    id = mem_convict.10
+    title = mem_convict.10.name
+    desc = mem_convict.10.desc
+
+    is_triggered_only = yes
+
+    location = FROM
+    picture = GFX_evt_mem_crashed_ship
+    show_sound = event_default
+
+    option = {
+        name = INTERESTING
+        owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier5researchreward
+				min = @tier5researchmin
+				max = @tier5researchmax
+			}
+		}
+    }
+
+    after = {
+        hidden_effect = {
+            owner = { country_event = { id = story.5 days = 30 } }
+        }
+    }
+}
