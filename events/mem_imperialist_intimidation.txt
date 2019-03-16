@@ -1,224 +1,216 @@
+# Imperialist Intimidation
+# Writing and original code by uncredited people
 
 namespace = mem_imperialist_intimidation
 
+# Country event to gatekeep properly
 country_event = {
-	id = mem_imperialist_intimidation.7
-	title = "mem_imperialist_intimidation.7.name"
-	desc = {
-		trigger = { 
-			switch = { 
-				trigger = has_country_flag 
-				hegimpcrusader = { text = mem_imperialist_intimidation.7.desc_01 } 
-				hegimpmilitarist = { text = mem_imperialist_intimidation.7.desc_02 }
-				hegimpspiritualist = { text = mem_imperialist_intimidation.7.desc_04 }
-				hegimpcollectivist = { text = mem_imperialist_intimidation.7.desc_03 } 
-				hegimpdefault = { text = mem_imperialist_intimidation.7.desc_05 } 
-			} 
-		}
-	}
-	picture = GFX_evt_fleet_evil
-	show_sound = event_ship_thrusters
-	
+	id = mem_imperialist_intimidation.1
+	hide_window = yes
+
 	mean_time_to_happen = {
 		months = 360
 	}
-	
+
 	trigger = {
+		is_country_type = default
 		is_ai = no
 		NOR = {
 			has_ethic = ethic_gestalt_consciousness
 			has_country_flag = mem_recent_imp_intimidation
 		}
 		any_neighbor_country = {
-			is_ai = yes
-			has_ai_personality_behaviour = conqueror
-			NOR = { 
-				has_country_flag = hegemonic_imperialists_met_player
-				is_overlord_to = root
-				ROOT = {
-					is_overlord_to = prev
-				}
-			}
-			OR = {
-				is_rival = root
-				is_hostile_to = root
-				is_domineering_to = root
-				root = {
-					is_rival = prev
-				}
-			}
+			mem_imperialist_intimidation_valid_bully = yes
 		}
 	}
-	
+
 	immediate = {
-		set_timed_country_flag = {
-			flag = mem_recent_imp_intimidation
-			years = 50
-		}
-		random_neighbor_country = {
+		# Selecting a valid planet. I imagine adding trigger for validation is pointless, if it can't target, it can't trigger
+		random_owned_planet = {
 			limit = {
-				is_ai = yes
-				has_ai_personality_behaviour = conqueror
-				NOR = { 
-					has_country_flag = hegemonic_imperialists_met_player
-					is_overlord_to = root
-					ROOT = {
-						is_overlord_to = prev
-					}
-				}
-				OR = {
-					is_rival = root
-					is_hostile_to = root
-					is_domineering_to = root
-					root = {
-						is_rival = prev
+				num_pops > 10
+				NOT = { has_planet_flag = mem_imperialist_intimidation_planet }
+				solar_system = {
+					any_neighbor_system = {
+						exists = space_owner
+						space_owner = {
+							mem_imperialist_intimidation_valid_bully = yes
+						}
 					}
 				}
 			}
-			set_country_flag = hegemonic_imperialists_met_player
-			save_event_target_as = hegimp
-			closest_system = { 
-				limit = { 
-					is_owned_by = ROOT 
-					any_planet = { 
-						is_owned_by = ROOT 
-					} 
-				} 
-				random_system_planet = { 
-					limit = { 
-						is_owned_by = ROOT 
-					} 
-					save_event_target_as = intimplanet
-				} 
-			}
-		}
-		IF = {
-			limit = {
-				OR = {
-					has_ethic = ethic_spiritualist
-					has_ethic = ethic_fanatic_spiritualist
+			random_country = {
+				limit = {
+					mem_imperialist_intimidation_valid_bully = yes
+					prev.solar_system = { has_hyperlane_to = prev }
 				}
-				OR = {
-					has_ethic = ethic_militarist
-					has_ethic = ethic_fanatic_militarist
-				}
+				save_event_target_as = hegimp
+				set_country_flag = mem_imperialist_intimidation_actor@root
 			}
-			set_country_flag = hegimpcrusader
-		}
-		ELSE_IF = {
-			limit = {
-				OR = {
-					has_ethic = ethic_militarist
-					has_ethic = ethic_fanatic_militarist
-					has_ethic = ethic_xenophobe
-					has_ethic = ethic_fanatic_xenophobe
-				}
+			planet_event = {
+				id = mem_imperialist_intimidation.2
 			}
-			set_country_flag = hegimpmilitarist
-		}
-		ELSE_IF = {
-			limit = {
-				OR = {
-					has_ethic = ethic_spiritualist
-					has_ethic = ethic_fanatic_spiritualist
-				}
-			}
-			set_country_flag = hegimpspiritualist
-		}
-		ELSE_IF = {
-			limit = {
-				OR = {
-					has_ethic = ethic_authoritarian
-					has_ethic = ethic_fanatic_authoritarian
-				}
-			}
-			set_country_flag = hegimpcollectivist
-		}
-		ELSE = {
-			set_country_flag = hegimpdefault
 		}
 	}
-	option = {
-		name = mem_imperialist_intimidation.7.holyorder
-			trigger = {
-					has_country_flag = hegimpcrusader
+}
+
+planet_event = {
+	id = mem_imperialist_intimidation.2
+	title = mem_imperialist_intimidation.2.name
+	desc = {
+		trigger = { 
+			switch = { 
+				trigger = has_planet_flag 
+				mem_hegimpcrusader = { text = mem_imperialist_intimidation.2.desc_01 } 
+				mem_hegimpmilitarist = { text = mem_imperialist_intimidation.2.desc_02 }
+				mem_hegimpspiritualist = { text = mem_imperialist_intimidation.2.desc_04 }
+				mem_hegimpcollectivist = { text = mem_imperialist_intimidation.2.desc_03 } 
+				mem_hegimpdefault = { text = mem_imperialist_intimidation.2.desc_05 } 
+			} 
+		}
+	}
+
+	is_triggered_only = yes
+
+	location = ROOT
+	picture = GFX_evt_fleet_evil
+	show_sound = event_air_raid_siren
+
+	immediate = {
+		owner = {
+			set_timed_country_flag = {
+				flag = mem_recent_imp_intimidation
+				years = 50
+			}
+		}
+		set_planet_flag = mem_imperialist_intimidation_planet
+		random_list = {
+			10 = {
+				set_planet_flag = mem_hegimpcrusader
+				modifier = {
+					factor = 0
+					owner = {
+						NAND = {
+							is_spiritualist = yes
+							is_militarist = yes
+						}
 					}
-		event_target:intimplanet = {
-			add_modifier = {	
-				modifier = mem_holy_order_established
-				days = 1800
 				}
 			}
-		remove_country_flag = hegimpcrusader
-	}
-	option = {
-		name = mem_imperialist_intimidation.7.letthemcome
-			trigger = {
-					has_country_flag = hegimpmilitarist
-				}
-		event_target:intimplanet = {
-			add_modifier = {	
-				modifier = mem_volunteer_surge
-				days = 1800
+			10 = {
+				set_planet_flag = mem_hegimpmilitarist
+				modifier = {
+					factor = 0
+					owner = {
+						NOR = {
+							is_xenophobe = yes
+							is_militarist = yes
+						}
+					}
 				}
 			}
-		remove_country_flag = hegimpmilitarist
-	}
-	option = {
-		name = mem_imperialist_intimidation.7.unitedfront
-			trigger = {
-					has_country_flag = hegimpcollectivist
+			5 = {
+				set_planet_flag = mem_hegimpspiritualist
+				modifier = {
+					factor = 0
+					owner = {
+						is_spiritualist = no
+					}
 				}
-			add_modifier = {
-				modifier = mem_united_front
-				days = 360
 			}
-		remove_country_flag = hegimpcollectivist
+			5 = {
+				set_planet_flag = mem_hegimpcollectivist
+				modifier = {
+					factor = 0
+					owner = {
+						is_authoritarian = no
+					}
+				}
+			}
+			2 = {
+				set_planet_flag = mem_hegimpdefault
+			}			
+		}
+	}
+
+	
+	option = {
+		name = mem_imperialist_intimidation.2.holyorder
+		trigger = {
+			has_planet_flag = mem_hegimpcrusader
+		}
+		add_modifier = {	
+			modifier = mem_holy_order_established
+			days = 1800
+		}
+		remove_planet_flag = mem_hegimpcrusader
 	}
 	option = {
-		name = mem_imperialist_intimidation.7.default
-			trigger = {
-					has_country_flag = hegimpdefault
-				}
+		name = mem_imperialist_intimidation.2.letthemcome
+		trigger = {
+			has_planet_flag = mem_hegimpmilitarist
+		}
+		add_modifier = {	
+			modifier = mem_volunteer_surge
+			days = 1800
+		}			
+		remove_planet_flag = mem_hegimpmilitarist
+	}
+	option = {
+		name = mem_imperialist_intimidation.2.unitedfront
+		trigger = {
+			has_planet_flag = mem_hegimpcollectivist
+		}
+		add_modifier = {
+			modifier = mem_united_front
+			days = 360
+		}
+		remove_planet_flag = mem_hegimpcollectivist
+	}
+	option = {
+		name = mem_imperialist_intimidation.2.default
+		trigger = {
+			has_planet_flag = mem_hegimpdefault
+		}
+		owner = {
 			random_list = {
 				33 = {
 					add_monthly_resource_mult = {
 						resource = physics_research
-						value = 2
-						min = 20
-						max = 75
+						value = @tier2researchreward
+						min = @tier2researchmin
+						max = @tier2researchmax
 					}
 				}
 				34 = {
 					add_monthly_resource_mult = {
 						resource = society_research
-						value = 2
-						min = 20
-						max = 75
+						value = @tier2researchreward
+						min = @tier2researchmin
+						max = @tier2researchmax
 					}
 				}
 				33 = {
 					add_monthly_resource_mult = {
 						resource = engineering_research
-						value = 2
-						min = 20
-						max = 75
+						value = @tier2researchreward
+						min = @tier2researchmin
+						max = @tier2researchmax
 					}
 				}
 			}
-		remove_country_flag = hegimpdefault
+		}
+		remove_planet_flag = mem_hegimpdefault
 	}
 	option = {
-		name = mem_imperialist_intimidation.7.prayer
+		name = mem_imperialist_intimidation.2.prayer
 		trigger = {
-			has_country_flag = hegimpspiritualist
+			has_planet_flag = mem_hegimpspiritualist
 		}
-		event_target:intimplanet = {
-			add_modifier = {	
-				modifier = mem_united_in_prayer
-				days = 1800
-			}
+		add_modifier = {	
+			modifier = mem_united_in_prayer
+			days = 1800
 		}
-		remove_country_flag = hegimpspiritualist
+		remove_planet_flag = mem_hegimpspiritualist
 	}
 }
