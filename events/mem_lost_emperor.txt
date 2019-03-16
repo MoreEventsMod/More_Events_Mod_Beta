@@ -142,11 +142,16 @@ country_event = {
 			}
 			save_event_target_as = mem_lost_emperor_system
 			remove_star_flag = mem_lost_emperor_anomaly
+			set_star_flag = mem_lost_emperor_azran
 		}
 	}
 
 	option = {
 		name = mem_lost_emperor.1001.option
+
+		begin_event_chain = {
+			event_chain = mem_lost_emperor_azran_chain
+		}
 
 		enable_special_project = {
 			name = mem_lost_emperor_science_investigate
@@ -161,7 +166,7 @@ ship_event = {
 	desc = mem_lost_emperor.1.desc
 	picture = GFX_evt_enigmatic_cache
 
-	location = event_target:mem_lost_emperor_system
+	location = root
 
 	is_triggered_only = yes
 
@@ -175,6 +180,7 @@ ship_event = {
 				}
 				remove_star_flag = mem_lost_emperor_anomaly
 			}
+			set_star_flag = mem_lost_emperor_azran
 		}
 	}
 
@@ -184,6 +190,12 @@ ship_event = {
 	
 	option = { #Check it out
 		name = mem_lost_emperor.1.B
+
+		owner = {
+			begin_event_chain = {
+				event_chain = mem_lost_emperor_azran_chain
+			}
+		}
 
 		hidden_effect = {
 			ship_event = { id = mem_lost_emperor.2 }
@@ -206,12 +218,13 @@ ship_event = {
 	desc = mem_lost_emperor.2.desc
 	picture = GFX_evt_enigmatic_cache
 	
-	location = event_target:mem_lost_emperor_system
+	location = root
 
 	is_triggered_only = yes
 
 	option = { #Leave be
 		name = mem_lost_emperor.2.A
+		owner = { end_event_chain = mem_lost_emperor_azran_chain }
 	}
 	
 	option = { #Check it out
@@ -237,7 +250,7 @@ ship_event = {
 	desc = mem_lost_emperor.3.desc
 	picture = GFX_evt_exploding_ship
 	
-	location = event_target:mem_lost_emperor_system
+	location = root
 
 	is_triggered_only = yes
 
@@ -247,6 +260,7 @@ ship_event = {
 
 	option = { #Leave be
 		name = mem_lost_emperor.3.A
+		owner = { end_event_chain = mem_lost_emperor_azran_chain }
 	}
 	
 	option = { #Send military next time
@@ -265,7 +279,7 @@ ship_event = {
 	title = mem_lost_emperor.4.name
 	desc = mem_lost_emperor.4.desc
 	
-	location = event_target:mem_lost_emperor_system
+	location = root
 
 	is_triggered_only = yes
 	diplomatic = yes
@@ -320,6 +334,7 @@ ship_event = {
 	option = { #Leave be
 		name = mem_lost_emperor.4.G.action
 
+		owner = { end_event_chain = mem_lost_emperor_azran_chain }
 	}
 	
 	option = { #Return with military
@@ -359,7 +374,7 @@ ship_event = {
 	}
 	picture = GFX_evt_unknown_ships
 	
-	location = solar_system
+	location = root
 
 	is_triggered_only = yes
 
@@ -445,11 +460,69 @@ country_event = {
 			name = mem_lost_emperor_military_investigate_1
 			location = event_target:mem_lost_emperor_system.star
 		}
+
+		hidden_effect = {
+			if = {
+				limit = { NOT = { has_country_flag = mem_azran_special_project } }
+				country_event = { id = mem_lost_emperor.605 days = 10 }
+			}
+		}
 	}
 	option = { #that's enough of this
 		name = mem_lost_emperor.6.B
+		end_event_chain = mem_lost_emperor_azran_chain
 	}
 }
+
+#Enable special project to find out more about Azran
+country_event = {
+	id = mem_lost_emperor.605
+	title = mem_lost_emperor.605.name
+	desc = mem_lost_emperor.605.desc
+	picture = GFX_evt_unidentified_monster
+
+	is_triggered_only = yes
+
+	option = {
+		name = mem_lost_emperor.605.option
+		
+		enable_special_project = {
+			name = mem_lost_emperor_find_out_about_azran
+			location = capital_scope
+		}
+	}
+}
+
+country_event = {
+	id = mem_lost_emperor.606
+	title = mem_lost_emperor.606.name
+	desc = mem_lost_emperor.606.desc
+	picture = GFX_evt_unidentified_monster
+
+	is_triggered_only = yes
+
+	option = {
+		name = mem_lost_emperor.606.option
+		add_monthly_resource_mult = {
+			resource = physics_research
+			value = 6			
+		}
+		hidden_effect = {
+			random_system = {
+				limit = { has_star_flag = mem_lost_emperor_azran }
+				save_event_target_as = mem_lost_emperor_system
+			}
+			create_point_of_interest = {
+				id = mem_lost_emperor.poi.606
+				name = mem_azran
+				desc = "mem_lost_emperor.606.desc"
+				event_chain = mem_lost_emperor_azran_chain
+				location = event_target:mem_lost_emperor_system
+			}
+		}
+	}
+}
+
 
 #You defeated Azran
 # This = owner of fleet 1 (combatant)
@@ -473,6 +546,7 @@ country_event = {
 	}
 
 	immediate = {
+		set_country_flag = mem_lost_emperor_vanquisher_of_azran
 		fromfrom = {
 			solar_system = {
 				save_event_target_as = mem_lost_emperor_system
@@ -507,6 +581,7 @@ country_event = {
 
 	option = { #Let's see what they have to say.
 		name = mem_lost_emperor.7.option
+		end_event_chain = mem_lost_emperor_azran_chain
 		
 		hidden_effect = {
 			country_event = { id = mem_lost_emperor.8 }
