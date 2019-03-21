@@ -40,8 +40,8 @@ ship_event = {
     }
 }
 
-@notification_time = 1
-@notification_random = 7199 #Total: up to 20 years since midgame
+@notification_time = 10800
+@notification_random = 7200 #Up to 50 years from the start
 
 @arrival_time = 360 #Change to some actual numbers
 @arrival_random = 3240
@@ -59,6 +59,7 @@ event = {
     }
 
     immediate = {
+        log = "Broken Clock Midgame Pulse"
         random_system = {
             limit = { has_star_flag = mem_broken_clock_system }
             star = {
@@ -416,7 +417,85 @@ planet_event = {
                                 establish_contact = { who = event_target:unwelcome_guests location = root.solar_system }
                                 country_event = { id = mem_broken_clock.1001 }
                              }
-                            fleet = { delete_fleet = this }
+                            set_owner = event_target:unwelcome_guests
+                            set_starbase_size = starbase_starfortress
+                            set_starbase_module = {
+                                slot = 1
+                                module = shipyard
+                            }
+                            set_starbase_module = {
+                                slot = 2
+                                module = shipyard
+                            }
+                            set_starbase_module = {
+                                slot = 3
+                                module = anchorage
+                            }
+                            set_starbase_module = {
+                                slot = 4
+                                module = anchorage
+                            }
+                            set_starbase_module = {
+                                slot = 5
+                                module = gun_battery
+                            }
+                            set_starbase_module = {
+                                slot = 6
+                                module = missile_battery
+                            }
+                            set_starbase_building = {
+                                slot = 1
+                                building = disruption_field                                
+                            }
+                            set_starbase_building = {
+                                slot = 2
+                                building = target_uplink_computer                                
+                            }
+                            set_starbase_building = {
+                                slot = 3
+                                building = defense_grid                                
+                            }
+                            while = {
+                                count = 20
+                                create_ship = {
+                                    name = random
+                                    random_existing_design = military_station_small
+                                }
+                            }
+                        }
+                    }
+                    ELSE = {
+                        create_starbase = {
+                            owner = event_target:unwelcome_guests
+                            size = starbase_starfortress
+                            module = shipyard
+                            module = shipyard
+                            module = anchorage
+                            module = anchorage
+                            module = gun_battery
+                            module = missile_battery
+    
+                            building = disruption_field
+                            building = target_uplink_computer
+                            building = defense_grid
+                            effect = {
+                                while = {
+                                    count = 20
+                                    create_ship = {
+                                        name = random
+                                        random_existing_design = military_station_small
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    starbase = {
+                        IF = {
+                            limit = { owner = { is_gestalt = no } }
+                            set_starbase_module = {
+                                slot = 4
+                                module = trading_hub
+                            }
                         }
                     }
                     every_system_planet = {
@@ -443,29 +522,6 @@ planet_event = {
                             exists = owner
                         }
                         destroy_colony = yes
-                    }
-                    create_starbase = {
-                        owner = event_target:unwelcome_guests
-                        size = starbase_starfortress
-                        module = shipyard
-                        module = shipyard
-                        module = anchorage
-                        module = anchorage
-                        module = gun_battery
-                        module = missile_battery
-
-                        building = disruption_field
-                        building = target_uplink_computer
-                        building = defense_grid
-                        effect = {
-                            while = {
-                                count = 20
-                                create_ship = {
-                                    name = random
-                                    random_existing_design = military_station_small
-                                }
-                            }
-                        }
                     }
                 }
                 create_colony = {
@@ -791,7 +847,7 @@ planet_event = {
                     # set_leader = last_created_leader
                 }
                 # country_event = { id = mem_broken_clock.2000 days = 7 } #Empire will make contact - after all the event targets are set
-                country_event = { id = mem_broken_clock.3000 days = 9000 random = 360 } #25 years, approximately
+                country_event = { id = mem_broken_clock.3000 days = 5400 random = 360 } #15 years, approximately
             }
         }
     }
@@ -1213,7 +1269,7 @@ country_event = {
 
     immediate = {
         random_list = {
-            190 = { #5% default currently
+            175 = { #5% default currently
                 country_event = { id = mem_broken_clock.3000 days = 360 }
                 modifier = { #Unlikely to happen if lost control of BC system
                     factor = 5
@@ -1228,7 +1284,7 @@ country_event = {
                     has_global_flag = mem_broken_clock_kill_now
                 }
             }
-            10 = {
+            25 = {
                 every_system_within_border = {
                     set_star_flag = mem_broken_clock_unwelcome_guests_purged
                 }
