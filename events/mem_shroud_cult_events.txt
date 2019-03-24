@@ -1,0 +1,233 @@
+# Shroud Cult
+# By ViolentBeetle
+
+namespace = mem_shroud_cult
+
+# Running into Shroud Cult home system and get triggered
+ship_event = {
+    id = mem_shroud_cult.1
+    title = mem_shroud_cult.1.name
+    desc = {
+        text = mem_shroud_cult.1.desc
+        trigger = {
+            owner = {
+                is_gestalt = no
+            }
+        }
+    }
+    desc = {
+        text = mem_shroud_cult.1.machine
+        trigger = {
+            owner = {
+                has_authority = auth_machine_intelligence
+            }
+        }
+    }
+    desc = {
+        text = mem_shroud_cult.1.hive
+        trigger = {
+            owner = {
+                has_authority = auth_hive_mind
+            }
+        }
+    }
+
+    trigger = {
+        exists = event_target:mem_shroud_cult_country
+        event_target:mem_shroud_cult_country = {
+            is_country_type = mem_shroud_cult_country
+        }
+        FROM = {
+            has_star_flag = mem_shroud_cult_system
+            any_ship_in_system = {
+                is_owned_by = event_target:mem_shroud_cult_country
+            }
+        }
+        owner = {
+            is_country_type = default
+            NOT = {
+                has_communications = event_target:mem_shroud_cult_country
+            }
+        }
+    }
+
+    diplomatic = yes
+    is_triggered_only = yes
+    custom_gui = "enclave_caravaneer_window"
+
+    picture_event_data = {
+		portrait = event_target:mem_shroud_cult_country
+		room = mem_shroud_cult_01_room
+    }
+
+    immediate = {
+        owner = {
+            establish_communications_no_message = event_target:mem_shroud_cult_country
+        }
+    }
+
+    option = {
+		name = SCUM
+		exclusive_trigger = {
+			owner = {
+                has_valid_civic = civic_fanatic_purifiers
+            }
+		}
+		custom_gui = "enclave_caravaneer_option"
+	}
+	
+	option = {
+		name = TASTY
+		trigger = {
+			owner = {
+                has_valid_civic = civic_hive_devouring_swarm
+            }
+		}
+		custom_gui = "enclave_caravaneer_option"
+	}
+
+	option = {
+		name = EXTERMINATE
+		trigger = {
+			owner = {
+                has_valid_civic = civic_machine_terminator
+            }
+		}
+		custom_gui = "enclave_caravaneer_option"
+	}
+
+	option = {
+		name = leviathans.502.a
+		custom_gui = "enclave_caravaneer_option"
+	}
+}
+
+# Engaging custom diplomacy
+country_event = {
+    id = mem_shroud_cult.2
+    title = mem_shroud_cult.2.name
+    desc = {
+        text = mem_should_cult.2.desc.0
+        trigger = {
+            FROM = {
+                trust = {
+                    who = root
+                    value = 0
+                }
+            }
+        }
+    }
+    desc = {
+        text = mem_should_cult.2.desc.1.1
+        trigger = {
+            FROM = {
+                trust = {
+                    who = root
+                    value > 0
+                }
+            }
+        }
+    }
+    desc = {
+        text = mem_should_cult.2.desc.1.2
+        trigger = {
+            FROM = {
+                trust = {
+                    who = root
+                    value > 0
+                }
+            }
+        }
+    }
+    # Multiple descs, some coditional
+
+    trigger = {
+        is_gestalt = no
+        FROM = {
+            is_country_type = mem_shroud_cult_country
+        }
+        NOR = {
+            has_country_flag = mem_shroud_cult_diplomacy_engaged
+            has_country_flag = mem_shroud_cult_attacked_them
+        }
+    }
+
+    diplomatic = yes
+    is_triggered_only = yes
+    custom_gui = "enclave_caravaneer_window"
+
+    picture_event_data = {
+		portrait = FROM
+		room = mem_shroud_cult_01_room
+    }
+
+    immediate = {
+        set_country_flag = mem_shroud_cult_diplomacy_engaged
+    }
+
+    option = {
+        name = mem_shroud_cult.2.a
+        custom_gui = "enclave_caravaneer_option"
+        custom_tooltip = mem_shroud_cult.2.a.tooltip
+
+        trigger = {
+            NOT = { has_country_flag = mem_shroud_cult_opened_borders }
+            FROM = {
+                trust = {
+                    who = root
+                    value = 0
+                }
+            }
+        }
+
+        allow = {
+            resource_stockpile_compare = { resource = influence value > 250 }
+        }
+
+        add_resource = {
+            influence = -250
+        }
+        custom_tooltip = opinion10
+        hidden_effect = {
+            FROM = {
+                add_trust = {
+                    who = root
+                    amount = 10
+                }
+            }
+        }
+        add_country_flag = mem_shroud_cult_opened_borders
+        remove_country_flag = mem_shroud_cult_diplomacy_engaged
+    }
+
+    # farewell
+    option = {
+        name = mem_shroud_cult.2.farewell
+        custom_gui = "enclave_caravaneer_option"
+        remove_country_flag = mem_shroud_cult_diplomacy_engaged
+    }
+
+    # Why is your station on fire
+    option = {
+        name = mem_shroud_cult.2.hams
+        custom_gui = "enclave_caravaneer_option"
+        is_dialog_only = yes
+        response_text = mem_shroud_cult.2.hams.response
+
+        trigger = {
+            NOT = { has_country_flag = mem_shroud_cult_asked_about_smoke }
+        }
+        set_country_flag = mem_shroud_cult_asked_about_smoke
+    }
+
+    # Purifier lockdown
+    option = {
+		name = SCUM
+		exclusive_trigger = {
+			owner = {
+                has_valid_civic = civic_fanatic_purifiers
+            }
+		}
+		custom_gui = "enclave_caravaneer_option"
+	}
+}
