@@ -233,43 +233,7 @@ country_event = {
             }
         }        
         remove_modifier = mem_shroud_cult_relations
-        IF = {
-            limit = { has_modifier = mem_shroud_cult_mercy_corps }
-            remove_modifier = mem_shroud_cult_mercy_corps
-        }
-        IF = {
-            limit = {
-                any_owned_leader = {
-                    has_leader_flag = mem_shroud_cult_scholar
-                }
-            }
-            custom_tooltip = mem_shroud_cult.3.b.fire_scholar
-            hidden_effect = {
-                every_owned_leader = {
-                    limit = { has_leader_flag = mem_shroud_cult_scholar }
-                    kill_leader = { show_notification = no }
-                }
-            }
-        }
-        IF = {
-            limit = {
-                has_country_flag = mem_shroud_cult_bought_a_sermon
-            }
-            custom_tooltip = mem_shrould_cult.3.b.lose_sermon
-            hidden_effect = {
-                remove_country_flag = mem_shroud_cult_sermon_of_life
-                remove_country_flag = mem_shroud_cult_sermon_of_joy
-                remove_country_flag = mem_shroud_cult_sermon_of_fortitude
-                remove_country_flag = mem_shroud_cult_sermon_of_knowledge
-                remove_country_flag = mem_shroud_cult_sermon_of_labour
-                remove_country_flag = mem_shroud_cult_sermon_of_ingenuity
-                remove_country_flag = mem_shroud_cult_sermon_of_prosperity
-                every_owned_planet = {
-                    limit = { mem_shroud_cult_has_sermon = yes }
-                    mem_shroud_cult_clear_sermons = yes
-                }
-            }
-        }
+        mem_shroud_cult_clear_all_benefits = yes
         remove_country_flag = mem_shroud_cult_opened_borders
         remove_country_flag = mem_shroud_cult_diplomacy_engaged
     }
@@ -1240,7 +1204,7 @@ country_event = {
     }
 }
 
-# Gain opinion and subversion mana
+# Gain opinion and subversion mana. Run AI purchase loop
 event = {
     id = mem_shroud_cult.11
     hide_window = yes
@@ -1278,6 +1242,16 @@ event = {
                 which = mem_shroud_cult_subversion_mana
                 value = 1                
             }
+            save_event_target_as = the_cult_guys
+            every_relation = {
+                limit = {
+                    is_ai = yes
+                    is_country_type = default
+                }
+                country_event = {
+                    id = mem_shroud_cult.3
+                }
+            }
         }
     }
 }
@@ -1296,3 +1270,192 @@ planet_event = {
         mem_shroud_cult_clear_sermons = yes
     }
 }
+
+# AI decision-making loop - will re-instate if necessary
+# country_event = {
+#     id = mem_shroud_cult.13
+#     hide_window = yes
+#     is_triggered_only = yes
+
+#     # AI will not consider a deal if its ethics are not compatible
+#     trigger = {
+#         is_xenophobe = no
+#         is_materialist = no
+#         is_gestalt = no
+#     }
+
+#     immediate = {
+#         log = "[Root.GetName] considers what do do."
+#         if = {
+#             limit = {
+#                 NOT = { has_country_flag = mem_shroud_cult_opened_borders }
+#             }
+#             log = "[Root.GetName] considers if it wants to open borders"
+#             if = {
+#                 limit = {
+#                     resource_stockpile_compare = {
+#                         resource = influence
+#                         value > 300
+#                     }
+#                     resource_income_compare = {
+#                         resource = influence
+#                         value > 1.5
+#                     }
+#                 }
+#                 random_list = {
+#                     1 = {
+#                         add_modifier = { modifier = mem_shroud_cult_relations days = -1 }
+#                         set_country_flag = mem_shroud_cult_opened_borders
+#                         add_resource = { influence = -200 } # AI is a cheater and gets a discount I guess
+#                         log = "[Root.GetName] opened borders."
+#                     }
+#                     3 = {
+#                         log = "[Root.GetName] did not open borders."
+#                         modifier = {
+#                             factor = 3
+#                             is_spiritualist = no
+#                             is_xenophile = no
+#                         }
+#                     }
+#                 }
+#             }
+#         }
+#         else_if = {
+#             limit = {
+#                 resource_income_compare = {
+#                     resource = influence
+#                     value < 0.25
+#                 }
+#             }
+#             log = "[Root.GetName] cancelled access."
+#             remove_modifier = mem_shroud_cult_relations
+#             mem_shroud_cult_clear_all_benefits = yes
+#             remove_country_flag = mem_shroud_cult_opened_borders
+#         }
+#         else_if = {
+#             limit = {
+#                 has_modifier = mem_shroud_cult_mercy_corps
+#                 resource_stockpile_compare = {
+#                     resource = energy
+#                     value > 6000
+#                 }
+#                 event_target:mem_shroud_cult_country = {
+#                     trust = {
+#                         who = root
+#                         value > 49
+#                     }
+#                 }
+#             }
+#             random_list = {
+#                 3 = {
+#                     add_resource = {
+#                         energy = -5000
+#                     }
+#                     event_target:mem_shroud_cult_country = {
+#                         add_trust = {
+#                             who = root
+#                             amount = 20
+#                         }
+#                     }
+#                     change_variable = {
+#                         which = mem_shroud_cult_subversion_mana
+#                         value = 200
+#                     }
+#                     create_leader = {
+#                         class = scientist
+#                         sub_type = society
+#                         species = event_target:mem_shroud_cult_country.species
+#                         event_leader = yes
+#                         skill = 2
+#                         effect = {
+#                             add_trait = leader_trait_expertise_psionics
+#                             set_leader_flag = mem_shroud_cult_scholar
+#                         }
+#                     }
+#                     modifier = {
+#                         factor = 0
+#                         any_owned_leader = {
+#                             OR = {
+#                                 has_leader_flag = mem_shroud_cult_scholar
+#                                 has_trait = leader_trait_expertise_psionics
+#                             }
+#                         }
+#                     }
+
+#                     log = "[Root.GetName] bought a scholar"
+#                 }
+#                 3 = {
+#                     change_variable = {
+#                         which = mem_shroud_cult_subversion_mana
+#                         value = 500
+#                     }
+#                     set_country_flag = mem_shroud_cult_bought_a_sermon
+#                     random_list = {
+#                         1 = { set_country_flag = mem_shroud_cult_sermon_of_life }
+#                         1 = { set_country_flag = mem_shroud_cult_sermon_of_joy }
+#                         1 = { set_country_flag = mem_shroud_cult_sermon_of_fortitude }
+#                         1 = { set_country_flag = mem_shroud_cult_sermon_of_knowledge }
+#                         1 = { set_country_flag = mem_shroud_cult_sermon_of_labour }
+#                         1 = { set_country_flag = mem_shroud_cult_sermon_of_ingenuity }
+#                         1 = { set_country_flag = mem_shroud_cult_sermon_of_prosperity }
+#                     }
+#                     event_target:mem_shroud_cult_country = {
+#                         add_trust = {
+#                             who = root
+#                             amount = 20
+#                         }
+#                     }
+
+#                     modifier = {
+#                         factor = 0
+#                         has_country_flag = mem_shroud_cult_bought_a_sermon   
+#                     }
+
+#                     modifier = {
+#                         factor = 0
+#                         event_target:mem_shroud_cult_country = {
+#                             trust = {
+#                                 who = root
+#                                 value < 100
+#                             }
+#                         }
+#                     }
+#                     log = "[Root.GetName] bought Sermon"
+#                 }
+#                 4 = { log = "[Root.GetName] bought nothing" }
+#             }
+#         }
+#         else_if = {
+#             limit = {
+#                 resource_stockpile_compare = {
+#                     resource = energy
+#                     value > 3000
+#                 }
+#             }
+#             random_list = {
+#                 1 = { log = "[Root.GetName] didn't buy Mercy Coprs" }
+#                 1 = {
+#                     add_modifier = {
+#                         modifier = mem_shroud_cult_mercy_corps
+#                         days = @mercy_modifier_length
+#                     }
+#                     change_variable = {
+#                         which = mem_shroud_cult_subversion_mana
+#                         value = @mercy_subversion_mana
+#                     }
+#                     set_country_flag = mem_shroud_cult_hired_corps
+#                     event_target:mem_shroud_cult_country = {
+#                         add_trust = {
+#                             who = root
+#                             amount = 20
+#                         }
+#                     }
+#                     add_resource = {
+#                         energy = -1000
+#                     }
+#                     log = "[Root.GetName] bought Mercy Corps"
+#                 }
+#             }
+#         }
+#     }
+# }
