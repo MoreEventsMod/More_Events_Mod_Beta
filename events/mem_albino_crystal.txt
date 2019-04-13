@@ -1,0 +1,147 @@
+# The Albino Crystal
+# By ViolentBeetle
+
+namespace = mem_albino_crystal
+
+# On Survey
+ship_event = {
+    id = mem_albino_crystal.1
+    title = mem_albino_crystal.1.name
+    desc = mem_albino_crystal.1.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_hive
+    location = FROM
+    show_sound = event_default
+
+    trigger = {
+        FROM = { has_planet_flag = mem_albino_crystal_asteroid }
+        NOT = { has_global_flag = mem_albino_crystal_papa_spawned }
+    }
+
+    option = {
+        name = INTERESTING
+    }
+}
+
+# Trigger the spawnage
+country_event = {
+    id = mem_albino_crystal.2
+    title = mem_albino_crystal.2.name
+    desc = mem_albino_crystal.2.desc
+
+    picture = GFX_evt_mem_giant_crystal
+    location = event_target:crystal_asteroid
+    show_sound = event_yellow_alert
+
+    mean_time_to_happen = {
+        years = 10
+    }
+
+    trigger = {
+        NOT = { has_global_flag = mem_albino_crystal_papa_spawned }
+        is_country_type = default
+        any_planet_within_border = {
+            has_planet_flag = mem_albino_crystal_asteroid
+            has_mining_station = yes
+        }
+    }
+
+    immediate = {
+        set_global_flag = mem_albino_crystal_papa_spawned
+        random_planet_within_border = {
+            limit = { has_planet_flag = mem_albino_crystal_asteroid }
+            save_event_target_as = crystal_asteroid
+            solar_system.star = { save_event_target_as = asteroids_star }
+        }
+        create_country = {
+            name = "Albino Crystal"
+            type = mem_neutral_everything_smasher
+            flag = {
+                icon = {
+                    category = zoological
+                    file = emblem_zoological_8.dds
+                }
+                background = {
+                    category = backgrounds
+                    file = 00_solid
+                }
+                colors = {
+                    "grey"
+                    "grey"
+                    "null"
+                    "null"
+                }
+            }
+            ignore_initial_colony_error = yes
+            effect = {
+                set_country_flag = mem_albino_crystal_country
+                save_event_target_as = papa_crystal_country
+                establish_communications_no_message = root
+            }
+        }
+        create_fleet = {
+            name = "Albino Crystal Entity"
+            effect = {
+                create_ship = {
+                    name = "Albino Crystal Entity"
+                    design = NAME_MEM_Albino_Crystal_Adult
+                }
+                set_location = {
+                    target = event_target:asteroids_star
+                    distance = 250
+                    angle = random
+                }
+                save_event_target_as = papa_crystal_fleet
+                set_fleet_stance = aggressive
+            }
+        }
+    }
+
+    option = {
+        name = ONSCREEN
+
+        trigger = {
+            is_ai = no
+        }
+
+        hidden_effect = {
+            id = mem_albino_crystal.3
+        }
+    }
+
+    option = {
+        name = mem_albino_crystal.2.ai
+
+        trigger = {
+            is_ai = yes
+        }
+        event_target:papa_crystal_country = {
+            set_country_type = mem_everything_smasher
+        }
+    }
+}
+
+# Diplomatic window
+country_event = {
+    id = mem_albino_crystal.3
+    title = TRANSMISSION
+    desc = mem_albino_crystal.3.desc
+
+    diplomatic = yes
+    is_triggered_only = yes
+    location = event_target:papa_crystal_fleet
+
+    picture_event_data = {
+        room = no_video_feed_room
+    }
+
+    option = {
+        name = mem_albino_crystal.3.a
+
+        hidden_effect = {
+            country_event = { id = mem_albino_crystal.4 }
+        }
+    }
+}
