@@ -42,9 +42,12 @@ country_event = {
     trigger = {
         NOT = { has_global_flag = mem_albino_crystal_papa_spawned }
         is_country_type = default
-        any_planet_within_border = {
-            has_planet_flag = mem_albino_crystal_asteroid
-            has_mining_station = yes
+        any_system_within_border = {
+            has_star_flag = mem_albino_crystal_asteroid_system
+            any_system_planet = {
+                has_planet_flag = mem_albino_crystal_asteroid
+                has_mining_station = yes
+            }
         }
     }
 
@@ -53,7 +56,10 @@ country_event = {
         random_planet_within_border = {
             limit = { has_planet_flag = mem_albino_crystal_asteroid }
             save_event_target_as = crystal_asteroid
-            solar_system.star = { save_event_target_as = asteroids_star }
+            solar_system = { 
+                save_event_target_as = asteroids_star_system
+                star = { save_event_target_as = asteroids_star }
+            }
         }
         create_country = {
             name = "Albino Crystal"
@@ -107,7 +113,9 @@ country_event = {
         }
 
         hidden_effect = {
-            id = mem_albino_crystal.3
+            country_event = {
+                id = mem_albino_crystal.3
+            }
         }
     }
 
@@ -117,9 +125,7 @@ country_event = {
         trigger = {
             is_ai = yes
         }
-        event_target:papa_crystal_country = {
-            set_country_type = mem_everything_smasher
-        }
+        mem_albino_crystal_make_papa_angry = yes
     }
 }
 
@@ -142,6 +148,74 @@ country_event = {
 
         hidden_effect = {
             country_event = { id = mem_albino_crystal.4 }
+        }
+    }
+
+    option = {
+        name = mem_albino_crystal.3.purifier
+
+        exclusive_trigger = {
+            has_valid_civic = civic_fanatic_purifiers
+        }
+        mem_albino_crystal_make_papa_angry = yes
+    }
+}
+
+# Sending request
+country_event = {
+    id = mem_albino_crystal.4
+    title = TRANSMISSION
+    desc = mem_albino_crystal.4.desc
+
+    diplomatic = yes
+    is_triggered_only = yes
+    location = event_target:papa_crystal_fleet
+
+    picture_event_data = {
+        room = no_video_feed_room
+    }
+
+    option = {
+        name = mem_albino_crystal.4.a
+        response_text = mem_albino_crystal.4.a.response
+
+        event_target:crystal_asteroid = {
+            random_mining_station = {
+                dismantle = yes
+            }
+        }
+        hidden_effect = {
+            event_target:papa_crystal_fleet = {
+                auto_move_to_planet = {
+                    target = event_target:crystal_asteroid
+                    clear_auto_move_on_arrival = no                    
+                }
+            }
+        }
+    }
+
+    option = {
+        name = mem_albino_crystal.4.b
+        response_text = mem_albino_crystal.4.b.response
+        default_hide_option = yes
+        mem_albino_crystal_make_papa_angry = yes
+
+        trigger = {
+            is_xenophobe = no
+        }
+    }
+
+    option = {
+        name = mem_albino_crystal.4.b.phobe
+        response_text = mem_albino_crystal.4.b.response
+        default_hide_option = yes
+        mem_albino_crystal_make_papa_angry = yes
+
+        trigger = {
+            OR = {
+                has_ethic = ethic_fanatic_xenophobe
+                has_ethic = ethic_xenophobe
+            }
         }
     }
 }
