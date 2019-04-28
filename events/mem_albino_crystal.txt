@@ -25,6 +25,9 @@ ship_event = {
     }
 }
 
+@hatching_min = 1
+@hatching_max = 29
+
 # Trigger the spawnage
 country_event = {
     id = mem_albino_crystal.2
@@ -67,11 +70,11 @@ country_event = {
             flag = {
                 icon = {
                     category = zoological
-                    file = emblem_zoological_8.dds
+                    file = flag_zoological_8.dds
                 }
                 background = {
                     category = backgrounds
-                    file = 00_solid
+                    file = 00_solid.dds
                 }
                 colors = {
                     "grey"
@@ -91,7 +94,7 @@ country_event = {
             name = "Albino Crystal Entity"
             effect = {
                 create_ship = {
-                    name = "Albino Crystal Entity"
+                    name = "Patriarch"
                     design = NAME_MEM_Albino_Crystal_Adult
                 }
                 set_location = {
@@ -99,9 +102,20 @@ country_event = {
                     distance = 250
                     angle = random
                 }
+                set_owner = event_target:papa_crystal_country
                 save_event_target_as = papa_crystal_fleet
                 set_fleet_stance = aggressive
+                create_ambient_object = {
+                    type = mem_dummy_object
+                    location = this
+                }
+                last_created_ambient_object = {
+                    set_ambient_object_flag = mem_albino_crystal_departure_marker
+                }
             }
+        }
+        event_target:crystal_asteroid = {
+            planet_event = { id = mem_albino_crystal.6 days = @hatching_min random = @hatching_max }
         }
     }
 
@@ -178,7 +192,8 @@ country_event = {
     option = {
         name = mem_albino_crystal.4.a
         response_text = mem_albino_crystal.4.a.response
-
+        set_country_flag = mem_albiono_crystal_the_ones_contacted
+        set_global_flag = mme_albino_crystal_station_dismantled
         event_target:crystal_asteroid = {
             random_mining_station = {
                 dismantle = yes
@@ -217,5 +232,188 @@ country_event = {
                 has_ethic = ethic_xenophobe
             }
         }
+    }
+}
+
+# Papa is mad that you mined his asteroid
+country_event = {
+    id = meme_albino_crystal.5
+    title = TRANSMISSION
+    desc = meme_albino_crystal.5.desc
+
+    diplomatic = yes
+    location = event_target:papa_crystal_fleet
+
+    picture_event_data = {
+        room = no_video_feed_room
+    }
+
+    mean_time_to_happen = {
+        years = 1
+    }
+
+    trigger = {
+        has_global_flag = mme_albino_crystal_station_dismantled
+        is_country_type = default
+        any_country = {
+            has_country_flag = mem_albino_crystal_country
+        }
+        any_system_within_border = {
+            has_star_flag = mem_albino_crystal_asteroid_system
+            any_system_planet = {
+                has_planet_flag = mem_albino_crystal_asteroid
+                has_mining_station = yes
+            }
+        }
+    }
+
+    immediate = {
+        random_planet_within_border = {
+            limit = { has_planet_flag = mem_albino_crystal_asteroid }
+            save_event_target_as = crystal_asteroid
+        }
+        random_country = {
+            limit = { has_country_flag = mem_albino_crystal_country }
+            save_event_target_as = papa_crystal_country
+            random_owned_fleet = {
+                save_event_target_as = papa_crystal_fleet
+            }
+        }
+    }
+
+    option = {
+        name = meme_albino_crystal.5.a
+        trigger = {
+            has_country_flag = mem_albiono_crystal_the_ones_contacted
+        }
+    }
+
+    option = {
+        name = meme_albino_crystal.5.b
+        trigger = {
+            NOT = { has_country_flag = mem_albiono_crystal_the_ones_contacted }
+        }
+    }
+
+    after = {
+        custom_tooltip = mem_albino_crystal_will_become_hostile
+    }
+}
+
+# Planet event on asteroid to execute hatching
+planet_event = {
+    id = mem_albino_crystal.6
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        is_planet_class = pc_rare_crystal_asteroid
+    }
+
+    immediate = {
+        solar_system = {
+            random_system_ambient_object = {
+                limit = { has_ambient_object_flag = mem_albino_crystal_departure_marker }
+            }
+            save_event_target_as = departure_marker
+        }
+
+        # If Papa is present - departure in pair
+        IF = {
+            limit = {
+                exists = event_target:papa_crystal_country
+                # NOT = { has_global_flag = mem_albino_crystal_papa_is_pissed }
+            }
+            create_fleet = {
+                name = "Albino Crystal Jr."
+                effect = {
+                    create_ship = {
+                        name = "Albino Crystal Jr."
+                        design = NAME_MEM_Albino_Crystal_Child
+                    }
+                    set_owner = event_target:papa_crystal_country
+                    set_location = root
+                }
+            }
+            mem_albino_crystal_send_child_away = yes
+            mem_albino_crystal_send_papa_away = yes
+            every_country = {
+                limit = {
+                    is_ai = no
+                    intel_level = {
+                        level = high
+                        system = root.solar_system
+                    }
+                }
+                country_event = {
+                    id = mem_albino_crystal.7
+                }
+            }
+        }
+        # If papa is gone and asteroid is mined
+        ELSE_IF = {
+            limit = { 
+                exists = solar_system.space_owner
+                has_mining_station = yes
+            }
+            solar_system.space_owner = {
+                country_event = { id = mem_albino-crystal.8 }
+            }
+        }
+        # If system is abandoned, or asteroid simply is not mined, infant departs
+        ELSE = {
+            create_country = {
+                name = name = "Albino Crystal Jr."
+                type = mem_neutral_everything_smasher
+                flag = {
+                    icon = {
+                        category = zoological
+                        file = flag_zoological_8.dds
+                    }
+                    background = {
+                        category = backgrounds
+                        file = 00_solid.dds
+                    }
+                    colors = {
+                        "grey"
+                        "grey"
+                        "null"
+                        "null"
+                    }
+                }
+                ignore_initial_colony_error = yes
+            }
+            create_fleet = {
+                name = "Albino Crystal Jr."
+                effect = {
+                    create_ship = {
+                        name = "Albino Crystal Jr."
+                        design = NAME_MEM_Albino_Crystal_Child
+                    }
+                    set_owner = last_created_country
+                    set_location = root
+                }
+            }
+            mem_albino_crystal_send_child_away = yes
+            every_country = {
+                limit = {
+                    is_ai = no
+                    intel_level = {
+                        level = high
+                        system = root.solar_system
+                    }
+                }
+                country_event = {
+                    id = mem_albino_crystal.10
+                }
+            }
+        }
+
+        change_pc = pc_asteroid
+        clear_deposits = yes
+        random_mining_station = {
+            dismantle = yes
+        }
+        add_deposit = d_society_10
     }
 }
