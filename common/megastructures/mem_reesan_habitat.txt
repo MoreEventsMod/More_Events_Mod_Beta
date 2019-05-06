@@ -1,0 +1,103 @@
+@entity_x = 0
+@entity_y = -20
+
+# Food constructor reward habitat. Can be used in other chains, if I get around expanding Reesan lore
+mem_reesan_habitat_ruined = {
+    entity = mem_reesan_habitat_full_stack_damaged_entity
+    portrait = "GFX_megastructure_construction_background"
+
+    place_entity_on_planet_plane = no
+    entity_offset = { x = -7 y = -7 }
+    
+    potential = {
+		always = no
+	}
+}
+
+mem_reesan_habitat_restored = {
+    entity = mem_reesan_habitat_full_stack_entity
+    construction_entity = mem_reesan_habitat_full_stack_construction_entity
+
+    portrait = "GFX_megastructure_construction_background"
+
+    place_entity_on_planet_plane = no
+    entity_offset = { x = -7 y = -7 }
+
+    upgrade_from = {
+		mem_reesan_habitat_ruined
+	}
+
+    build_time = 900
+    resources = {
+        category = megastructures
+        cost = {
+            alloys = 3000
+        }
+    }
+
+    possible = {
+        custom_tooltip = {
+            fail_text = "mem_requires_starbase_4_tech"
+            from = {
+                OR = {
+                    has_technology = tech_starbase_4
+                    has_technology = tech_mega_engineering
+                    has_utopia = yes
+                }
+            }
+        }
+        custom_tooltip = {
+            fail_text = mem_requires_voidborn_ap
+            from = {
+                OR = {
+                    has_ascension_perk = ap_voidborn
+                    has_technology = tech_mega_engineering
+                    has_utopia = no
+                }
+            }
+        }
+    }
+
+    on_build_complete = {
+        spawn_planet = {
+            class = pc_habitat
+            location = fromfrom.planet
+            orbit_location = yes
+			orbit_angle_offset = 45
+			orbit_distance_offset = 9.899
+			size = 12
+			has_ring = no
+
+            init_effect = {
+				set_name = "Reesan Station"
+				set_planet_entity = {
+					entity = "mem_reesan_habitat_full_stack_entity"
+				}
+				surveyed = {
+					set_surveyed = yes
+					surveyor = FROM
+				}
+				set_all_comms_surveyed = yes
+				clear_blockers = yes
+				if = {
+					limit = {
+						from = { has_ascension_perk = ap_master_builders }
+						NOT = { has_modifier = master_builders_habitats }
+					}
+					add_modifier = {
+						modifier = master_builders_habitats
+						days = -1
+					}
+				}
+				set_planet_flag = megastructure
+				set_planet_flag = habitat
+                add_deposit = d_mem_reesan_core
+                add_deposit = d_mem_reesan_ring
+			}
+        }
+        fromfrom.planet = {
+			set_planet_flag = has_megastructure
+        }
+        remove_megastructure = fromfrom
+    }
+}

@@ -210,7 +210,7 @@ country_event = {
     hide_window = yes
 
     mean_time_to_happen = {
-        years = 25
+        years = 5
     }
 
     trigger = {
@@ -218,7 +218,8 @@ country_event = {
         is_country_type = global_event
         has_global_flag = mem_sadrell_cluster_spawned
         has_global_flag = mem_sadrell_someone_encountered_the_gate
-        mid_game_years_passed = 25
+        NOT = { has_global_flag = mem_sadrell_nothing_will_happen }
+        mid_game_years_passed = 50
         NOR = {
             # has_global_flag = mem_sadrell_delay_flag
             has_global_flag = mem_sadrell_situation_resolved
@@ -310,7 +311,7 @@ planet_event = {
                 set_country_flag = mem_sadrell_country_regular
                 add_modifier = {
                     modifier = mem_sadrell_starting_boon
-                    days = 5400
+                    days = 1800
                 }
             }
         }
@@ -2092,11 +2093,58 @@ country_event = {
                     species = event_target:mem_sadrell_species
                 }
                 while = {
-                    count = 6
+                    count = 4
                     create_pop = { species = event_target:mem_sadrell_species }
                 }
+                set_planet_flag = mem_sadrell_voidhome_applied
             }
         }   
+    }
+}
+
+# Sadrell move pops to planets from a voidhome
+planet_event = {
+    id = mem_sadrell.141
+    hide_window = yes
+
+    mean_time_to_happen = {
+        years = 5
+    }
+
+    trigger = {
+        exists = owner
+        NOT = { has_planet_flag = mem_sadrell_voidhome_applied }
+        owner = {
+            OR = {
+                has_country_flag = mem_sadrell_country_regular
+                has_country_flag = mem_sadrell_assimilator_country
+                any_owned_ship = {
+                    is_ship_size = mem_sadrell_void_home
+                }
+            }
+        }
+        num_pops > 0
+    }
+
+    immediate = {
+        owner = {
+            random_owned_ship = {
+                limit = {
+                    is_ship_size = mem_sadrell_void_home
+                }
+                delete_ship = this
+            }
+            add_resource = {
+                minerals = 500
+                energy = 500
+                food = 500
+            }
+        }
+        while = {
+            count = 4
+            create_pop = { species = event_target:mem_sadrell_species }
+        }
+        set_planet_flag = mem_sadrell_voidhome_applied
     }
 }
 
@@ -2180,7 +2228,7 @@ planet_event = {
                 set_country_flag = mem_sadrell_assimilator_country
                 add_modifier = {
                     modifier = mem_sadrell_starting_boon
-                    days = 5400
+                    days = 1800
                 }
             }
         }
