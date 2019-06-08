@@ -1,0 +1,496 @@
+######################################
+# Lost Robot
+# Code by:          Tuttu
+# Writing by:       Tuttu
+######################################
+
+namespace = mem_lost_robot
+
+# TODO ? : change text for robots
+# has_authority = auth_machine_intelligence
+
+# Initial event. 
+planet_event = {
+	id = mem_lost_robot.1
+	title = "mem_lost_robot.1.name"
+	desc = "mem_lost_robot.1.desc"
+	picture = GFX_evt_space_station
+	show_sound = event_administrative_work
+	location = ROOT
+
+	#is_triggered_only = yes
+
+	mean_time_to_happen = {
+		months = 10
+	}
+
+	trigger = {
+		NOT = { has_planet_flag = colony_event }
+		is_colony = yes
+		is_moon = no
+		has_moon = yes
+		any_moon = {
+			habitable_planet = no
+			has_resource = { type = minerals amount > 0 }
+			has_mining_station = yes
+		}
+
+		Root.Owner = {
+			is_country_type = default
+			has_technology = tech_robotic_workers
+			NOR = {
+				has_country_flag = mem_lost_robot_done
+				has_authority = auth_hive_mind
+			}
+		}
+	}
+
+	# Used for easier localization and planet selection
+	immediate = {
+		save_event_target_as = mem_lost_robot_planet
+		Root.Owner = { set_country_flag = mem_lost_robot_done }
+		set_planet_flag = colony_event
+
+		random_moon = {
+			limit = {
+				habitable_planet = no
+				has_resource = { type = minerals amount > 0 }
+				has_mining_station = yes
+			}
+			save_event_target_as = mem_lost_robot_moon
+		}
+	}
+
+	# Retrieve the robot
+	option = {
+		name = "mem_lost_robot.1.accept"
+		hidden_effect = {
+			planet_event = { id = mem_lost_robot.2 days = 5 }
+		}
+	}
+
+	# We don't care
+	option = {
+		name = "mem_lost_robot.1.deny"
+	}
+
+	after = {
+		# Triggers the final event
+		hidden_effect = {
+			planet_event = { id = mem_lost_robot.100 days = 100 }
+		}
+	}
+}
+
+# Retrieve the robot
+planet_event = {
+	id = mem_lost_robot.2
+	title = "mem_lost_robot.2.name"
+	desc = "mem_lost_robot.2.desc"
+	picture = GFX_evt_space_station
+	show_sound = event_administrative_work
+	location = ROOT
+
+	is_triggered_only = yes
+
+	# Check the cargo
+	option = {
+		name = "mem_lost_robot.2.cargo"
+
+		hidden_effect = {
+			random_list = {
+				65 = { # Delayed search
+					Root.Owner = { set_country_flag = "mem_lost_robot_cargo_first" }
+					planet_event = { id = mem_lost_robot.10 days = @mem_lost_robot_cargo_long } 
+				}
+				15 = { # Nothing in cargo
+					Root.Owner = { set_country_flag = "mem_lost_robot_cargo_first" }
+					planet_event = { id = mem_lost_robot.11 days = @mem_lost_robot_cargo } 
+				}
+				20 = { # Robot found
+					Root.Owner = { set_country_flag = "mem_lost_robot_found_cargo" }
+					planet_event = { id = mem_lost_robot.30 days = @mem_lost_robot_cargo }
+				}
+			}
+		}
+	}
+
+	# Check the factory
+	option = {
+		name = "mem_lost_robot.2.factory"
+
+		hidden_effect = {
+			random_list = {
+				90 = { # Nothing in factory
+					Root.Owner = { set_country_flag = "mem_lost_robot_factory_first" }
+					planet_event = { id = mem_lost_robot.20 days = @mem_lost_robot_factory } 
+				}
+				10 = { # Robot found
+					Root.Owner = { set_country_flag = "mem_lost_robot_found_factory" }
+					planet_event = { id = mem_lost_robot.30 days = @mem_lost_robot_factory }
+				}
+			}
+		}
+	}
+}
+
+# Retrieve the robot - Delayed cargo
+planet_event = {
+	id = mem_lost_robot.10
+	title = "mem_lost_robot.10.name"
+	desc =  mem_lost_robot.10.desc
+	picture = GFX_evt_hangar_bay
+	show_sound = event_ship_bridge
+	location = ROOT
+
+	is_triggered_only = yes
+
+	# Check the factory
+	option = {		
+		name = "mem_lost_robot.10.factory"
+		hidden_effect = {
+			random_list = {
+				80 = { # Nothing in factory
+					planet_event = { id = mem_lost_robot.20 days = @mem_lost_robot_factory } 
+				}
+				20 = { # Robot found in factory
+					Root.Owner = { set_country_flag = "mem_lost_robot_found_factory" }
+					planet_event = { id = mem_lost_robot.30 days = @mem_lost_robot_factory }
+				}
+			}
+		}
+	}
+
+	# Abandon
+	option = {
+		name = "mem_lost_robot.10.abandon"
+		Root.Owner = { 
+			add_resource = {
+				influence = 30
+			}
+		}
+	}
+}
+
+# Retrieve the robot - Cargo
+planet_event = {
+	id = mem_lost_robot.11
+	title = "mem_lost_robot.11.name"
+
+	# If cargo first
+	desc = {
+		text = mem_lost_robot.11.desc.first
+		trigger = {
+			Root.Owner = { has_country_flag = "mem_lost_robot_cargo_first" }
+		}
+	}
+	# If cargo second
+	desc = {
+		text = mem_lost_robot.11.desc.second
+		trigger = {
+			Root.Owner = { has_country_flag = "mem_lost_robot_factory_first" }
+		}
+	}
+	picture = GFX_evt_hangar_bay
+	show_sound = event_ship_bridge
+	location = ROOT
+
+	is_triggered_only = yes
+
+	# Check the factory
+	option = {		
+		trigger = {
+			Root.Owner = { has_country_flag = "mem_lost_robot_cargo_first" }
+		}
+		name = "mem_lost_robot.11.factory"
+		hidden_effect = {
+			random_list = {
+				80 = { # Nothing in factory
+					planet_event = { id = mem_lost_robot.20 days = @mem_lost_robot_factory } 
+				}
+				20 = { # Robot found in factory
+					Root.Owner = { set_country_flag = "mem_lost_robot_found_factory" }
+					planet_event = { id = mem_lost_robot.30 days = @mem_lost_robot_factory }
+				}
+			}
+		}
+	}
+
+	# Check the planet
+	option = {
+		trigger = {
+			Root.Owner = { has_country_flag = "mem_lost_robot_factory_first" }
+		}
+		name = "mem_lost_robot.11.planet"
+		hidden_effect = {
+			random_list = {
+				70 = { } # Too late
+				20 = { # Robot found on planet
+					Root.Owner = { set_country_flag = "mem_lost_robot_found_planet" }
+					planet_event = { id = mem_lost_robot.102 days = @mem_lost_robot_planet }
+				}
+				10 = { # Robot found with working Disinto
+					Root.Owner = { set_country_flag = "mem_lost_robot_found_planet_disinto" }
+					planet_event = { id = mem_lost_robot.103 days = @mem_lost_robot_planet }
+				}
+			}
+		}
+	}
+
+	# Abandon
+	option = {
+		name = "mem_lost_robot.11.abandon"
+		Root.Owner = { 
+			add_resource = {
+				influence = 30
+			}
+		}
+	}
+}
+
+# Retrieve the robot - Factory
+planet_event = {
+	id = mem_lost_robot.20
+	title = "mem_lost_robot.20.name"
+
+	# If factory first
+	desc = {
+		text = mem_lost_robot.20.desc.first
+		trigger = {
+			Root.Owner = { has_country_flag = "mem_lost_robot_factory_first" }
+		}
+	}
+	# If factory second
+	desc = {
+		text = mem_lost_robot.20.desc.second
+		trigger = {
+			Root.Owner = { has_country_flag = "mem_lost_robot_cargo_first" }
+		}
+	}
+	picture = GFX_evt_mem_interior
+	show_sound = event_ship_bridge
+	location = ROOT
+
+	is_triggered_only = yes
+
+	# Check the cargo - Normal
+	option = {		
+		trigger = {
+			Root.Owner = { has_country_flag = "mem_lost_robot_factory_first" }
+		}
+		name = "mem_lost_robot.20.cargo"
+		hidden_effect = {
+			random_list = {
+				80 = { # Nothing in cargo
+					planet_event = { id = mem_lost_robot.11 days = 7 random = 2 } 
+				}
+				20 = { # Robot found in cargo
+					Root.Owner = { set_country_flag = "mem_lost_robot_found_cargo" }
+					planet_event = { id = mem_lost_robot.30 days = 7 random = 2 }
+				}
+			}
+		}
+	}
+
+	# Check the planet
+	option = {
+		trigger = {
+			Root.Owner = { has_country_flag = "mem_lost_robot_cargo_first" }
+		}
+		name = "mem_lost_robot.20.planet"
+		hidden_effect = {
+			random_list = {
+				70 = { } # Too late
+				20 = { # Robot found on planet
+					Root.Owner = { set_country_flag = "mem_lost_robot_found_planet" }
+					planet_event = { id = mem_lost_robot.102 days = @mem_lost_robot_planet }
+				}
+				10 = { # Robot found with working Disinto
+					Root.Owner = { set_country_flag = "mem_lost_robot_found_planet_disinto" }
+					planet_event = { id = mem_lost_robot.103 days = @mem_lost_robot_planet }
+				}
+			}
+		}
+	}
+
+	# Abandon
+	option = {
+		name = "mem_lost_robot.20.abandon"
+		Root.Owner = { 
+			add_resource = {
+				influence = 30
+			}
+		}
+	}
+}
+
+# Robot found before timer
+planet_event = {
+	id = mem_lost_robot.30
+	title = "mem_lost_robot.30.name"
+	desc = {
+		text = "mem_lost_robot.30.desc.cargo"
+		trigger = {
+			Root.Owner = {
+				has_country_flag = "mem_lost_robot_found_cargo"
+			}
+		}
+	}
+	desc = {
+		text = "mem_lost_robot.30.desc.factory"
+		trigger = {
+			Root.Owner = {
+				has_country_flag = "mem_lost_robot_found_factory"
+			}
+		}
+	}
+
+	picture = GFX_evt_throne_room
+	show_sound = event_scanner
+	location = ROOT
+
+	is_triggered_only = yes
+
+	option = {
+		name = "EXCELLENT"
+		Root.Owner = { 
+			add_resource = {
+				influence = 50
+			}
+		}
+	}
+}
+
+# Final event - Randomly chosing one of the possible outcome
+planet_event = {
+	id = mem_lost_robot.100
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		If = {
+			limit = {
+				Root.Owner = {
+					NOR = {
+						has_country_flag = mem_lost_robot_found_cargo
+						has_country_flag = mem_lost_robot_found_factory
+						has_country_flag = mem_lost_robot_found_planet
+						has_country_flag = mem_lost_robot_found_planet_disinto
+					}
+				}
+			}
+			random_list = {
+				50 = { planet_event = { id = mem_lost_robot.101 } } # Disinto triggered
+				09 = { # Robot finally found with broken Disinto
+					Root.Owner = { set_country_flag = "mem_lost_robot_found_planet_luck" }
+					planet_event = { id = mem_lost_robot.102 }
+				}				
+				01 = { # Robot finally found with working Disinto
+					Root.Owner = { set_country_flag = "mem_lost_robot_found_planet_disinto_luck" }
+					planet_event = { id = mem_lost_robot.103 }
+				}
+				40 = { } # Nothing happens
+			}
+		}
+	}
+}
+
+# Disinto triggered
+planet_event = {
+	id = mem_lost_robot.101
+	title = "mem_lost_robot.101.name"
+	desc = "mem_lost_robot.101.desc"	
+
+	picture = GFX_evt_burning_settlement
+	show_sound = event_ship_explosion
+	location = ROOT
+
+	is_triggered_only = yes
+
+	# KABOUM
+	option = {
+		name = "mem_lost_robot.101.a"
+
+		hidden_effect = {
+			random_pop = {
+				kill_pop = yes
+			}
+			add_deposit = d_mem_lost_robot_crater
+		}
+		custom_tooltip = mem_lost_robot_101.tooltip
+	}
+}
+
+# Robot finally found with broken Disinto
+planet_event = {
+	id = mem_lost_robot.102
+	title = "mem_lost_robot.102.name"
+	desc = {
+		text = "mem_lost_robot.102.desc.luck"
+		trigger = {
+			Root.Owner = {
+				has_country_flag = "mem_lost_robot_found_planet_luck"
+			}
+		}
+	}
+	desc = {
+		text = "mem_lost_robot.102.desc"
+		trigger = {
+			Root.Owner = {
+				has_country_flag = "mem_lost_robot_found_planet"
+			}
+		}
+	}	
+	picture = GFX_evt_landing_ship
+	show_sound = event_scanner
+	location = ROOT
+
+	is_triggered_only = yes
+
+	option = {
+		name = "mem_lost_robot.102.a"
+		Root.Owner = {
+			add_monthly_resource_mult = {
+				resource = minerals
+				value = @tier1materialreward
+				min = @tier1materialmin
+				max = @tier1materialmax
+			}
+		}
+	}
+}
+
+# Robot finally found with working Disinto
+planet_event = {
+	id = mem_lost_robot.103
+	title = "mem_lost_robot.103.name"
+	desc = {
+		text = "mem_lost_robot.103.desc.luck"
+		trigger = {
+			Root.Owner = {
+				has_country_flag = "mem_lost_robot_found_planet_disinto_luck"
+			}
+		}
+	}
+	desc = {
+		text = "mem_lost_robot.103.desc"
+		trigger = {
+			Root.Owner = {
+				has_country_flag = "mem_lost_robot_found_planet_disinto"
+			}
+		}
+	}	
+	picture = GFX_evt_landing_ship
+	show_sound = event_scanner
+	location = ROOT
+
+	is_triggered_only = yes
+
+	option = {
+		name = "mem_lost_robot.103.a"
+		Root.Owner = {
+			add_modifier = { modifier = mem_lost_robot_enhanced_mining days = -1 }
+		}
+	}
+}

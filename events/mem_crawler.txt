@@ -1,0 +1,782 @@
+# Crawler
+# By ViolentBeetle
+# Additional ideas by Beautiful Duwang
+
+namespace = mem_crawler
+
+# Anomaly resolution
+ship_event = {
+    id = mem_crawler.1
+    title = mem_crawler.1.name
+    desc = mem_crawler.1.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_society_research
+    location = FROM
+    show_sound = event_laboratory_sound
+
+    immediate = {
+        owner = { country_event = { id = story.5 days = 30 } }
+    }
+
+    # Adopt the slug
+    option = {
+        name = mem_crawler.1.a
+
+        trigger = {
+            owner = {
+                NOT = { has_ethic = ethic_gestalt_consciousness }
+                is_xenophobe = no
+                is_xenophile = no
+            }
+        }
+
+        owner = {
+            set_country_flag = mem_crawler_pet_owner
+            set_timed_country_flag = { flag = mem_crawler_timeout days = 60 }
+        }
+
+        leader = {
+            add_trait = trait_mem_crawler_pet_owner
+            hidden_effect = {
+                add_ruler_trait = trait_mem_crawler_pet_owner_ruler
+            }
+        }
+    }
+
+    option = {
+        name = mem_crawler.1.xenophile
+
+        trigger = {
+            owner = {
+                OR = {
+                    has_ethic = ethic_xenophile
+                    has_ethic = ethic_fanatic_xenophile
+                }
+            }
+        }
+
+        owner = {
+            set_country_flag = mem_crawler_pet_owner
+            set_timed_country_flag = { flag = mem_crawler_timeout days = 60 }
+        }
+
+        leader = {
+            add_trait = trait_mem_crawler_pet_owner
+            hidden_effect = {
+                add_ruler_trait = trait_mem_crawler_pet_owner_ruler
+            }
+        }
+    }
+
+    # Dissect it
+    option = {
+        name = mem_crawler.1.b
+
+        trigger = {
+            owner = {
+                OR = {
+                    NOT = { has_ethic = ethic_fanatic_xenophile }
+                    has_authority = auth_machine_intelligence
+                    has_authority = auth_hive_mind
+                }
+            }
+        }
+
+        owner = {
+            add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+        }
+    }
+
+    # Kill it with fire!
+    option = {
+        name = mem_crawler.1.c
+
+        trigger = {
+            owner = {
+                OR = {
+                    has_ethic = ethic_xenophobe
+                    has_ethic = ethic_fanatic_xenophobe
+                }
+            }
+        }
+
+        owner = {
+            add_monthly_resource_mult = {
+                resource = unity
+                value = @tier1unityreward
+                min = @tier1unitymin
+                max = @tier1unitymax
+            }
+        }
+    }
+
+    # Eat it
+    option = {
+        name = mem_crawler.1.swarm
+
+        exclusive_trigger = {
+            owner = {
+                has_valid_civic = civic_hive_devouring_swarm
+            }
+        }
+
+        leader = {
+            add_experience = 200
+        }
+    }
+
+    # Kill it with fire - forced purifier version
+    option = {
+        name = mem_crawler.1.c
+
+        exclusive_trigger = {
+            owner = {
+                has_valid_civic = civic_fanatic_purifiers
+            }
+        }
+
+        owner = {
+            add_monthly_resource_mult = {
+                resource = unity
+                value = @tier2unityreward
+                min = @tier2unitymin
+                max = @tier2unitymax
+            }
+        }
+    }
+}
+
+# On leader's death, transfer pet to a random leader = {
+country_event = {
+    id = mem_crawler.2
+    title = mem_crawler.2.name
+    desc = mem_crawler.2.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_space_funeral
+    show_sound = event_default
+
+    trigger = {
+        has_country_flag = mem_crawler_pet_owner
+        FROM = {
+            OR = {
+                has_trait = trait_mem_crawler_pet_owner
+                has_trait = trait_mem_crawler_pet_owner_ruler
+            }
+        }
+        any_owned_leader = {
+            OR = {
+                leader_class = ruler
+                leader_class = scientist
+                leader_class = governor
+                leader_class = general
+                leader_class = admiral
+            }
+            NOR = {
+                has_trait = trait_mem_crawler_pet_owner
+                has_trait = trait_mem_crawler_pet_owner_ruler
+            }
+        }
+    }
+
+    immediate = {
+        random_owned_leader = {
+            limit = {
+                OR = {
+                    leader_class = ruler
+                    leader_class = scientist
+                    leader_class = governor
+                    leader_class = general
+                    leader_class = admiral
+                }
+                NOR = {
+                    has_trait = trait_mem_crawler_pet_owner
+                    has_trait = trait_mem_crawler_pet_owner_ruler
+                }
+            }
+            save_event_target_as = new_owner
+            IF = {
+                limit = { leader_class = ruler }
+                add_trait = trait_mem_crawler_pet_owner_ruler
+            }
+            ELSE = {
+                add_trait = trait_mem_crawler_pet_owner
+                add_ruler_trait = trait_mem_crawler_pet_owner_ruler
+            }
+        }
+    }
+
+    option = {
+        name = OK
+        custom_tooltip = mem_crawler.2.tooltip
+    }
+}
+
+# Hidden event to re-add trait to resigning ruler
+country_event = {
+    id = mem_crawler.3
+    is_triggered_only = yes
+    hide_window = yes
+
+    trigger = {
+        FROM = {
+            has_ruler_trait = trait_mem_crawler_pet_owner_ruler
+            NOT = { has_trait = trait_mem_crawler_pet_owner }
+        }
+    }
+
+    immediate = {
+        FROM = {
+            add_trait = trait_mem_crawler_pet_owner
+        }
+    }
+}
+
+# If fleet is killed and so is leader
+country_event = {
+    id = mem_crawler.4
+    title = mem_crawler.4.name
+    desc = mem_crawler.4.desc
+
+    is_triggered_only = yes
+
+    location = FROM
+    picture = GFX_evt_debris
+    show_sound = event_ship_explosion
+
+    trigger = {
+        FROM = {
+            exists = leader
+            leader = {
+                has_trait = trait_mem_crawler_pet_owner
+            }
+        }
+    }
+
+    immediate = {
+        remove_country_flag = mem_crawler_pet_owner
+    }
+
+    option = {
+        name = mem_crawler.4.a
+    }
+}
+
+# Update on the Crawler
+country_event = {
+    id = mem_crawler.5
+    title = mem_crawler.5.name
+    desc = mem_crawler.5.desc
+
+    mean_time_to_happen = {
+        days = 300
+    }
+
+    picture = GFX_evt_society_research
+    show_sound = event_default
+
+    trigger = {
+        has_country_flag = mem_crawler_pet_owner
+        NOR = {
+            has_country_flag = mem_crawler_timeout
+            has_country_flag = mem_crawler_first_update
+        }
+        any_owned_leader = {
+            OR = {
+                has_trait = trait_mem_crawler_pet_owner
+                has_trait = trait_mem_crawler_pet_owner_ruler
+            }
+        }
+    }
+
+    immediate = {
+        set_country_flag = mem_crawler_first_update
+        set_timed_country_flag = { flag = mem_crawler_timeout days = 3600 }
+        random_owned_leader = {
+            limit = {
+                OR = {
+                    has_trait = trait_mem_crawler_pet_owner
+                    has_trait = trait_mem_crawler_pet_owner_ruler
+                }
+            }
+            save_event_target_as = crawler_owner
+        }
+    }
+
+    option = {
+        name = INTERESTING
+    }
+}
+
+# Crawler dies of old age
+country_event = {
+    id = mem_crawler.6
+    title = mem_crawler.6.name
+    desc = mem_crawler.6.desc
+
+    mean_time_to_happen = {
+        years = 100
+    }
+
+    picture = GFX_evt_society_research
+    show_sound = event_default
+
+    trigger = {
+        has_country_flag = mem_crawler_pet_owner
+        has_country_flag = mem_crawler_first_update
+        NOT = { has_country_flag = mem_crawler_timeout }
+        any_owned_leader = {
+            OR = {
+                has_trait = trait_mem_crawler_pet_owner
+                has_trait = trait_mem_crawler_pet_owner_ruler
+            }
+        }
+    }
+
+    immediate = {
+        random_owned_leader = {
+            limit = {
+                OR = {
+                    has_trait = trait_mem_crawler_pet_owner
+                    has_trait = trait_mem_crawler_pet_owner_ruler
+                }
+            }
+            save_event_target_as = crawler_owner
+            remove_trait = trait_mem_crawler_pet_owner
+            remove_ruler_trait = trait_mem_crawler_pet_owner_ruler
+        }
+        remove_country_flag = mem_crawler_pet_owner
+    }
+
+    option = {
+        name = mem_crawler.6.a
+    }
+
+    option = {
+        name = mem_crawler.6.b
+
+        exclusive_trigger = {
+            OR = {
+                has_ethic = ethic_xenophile
+                has_ethic = ethic_fanatic_xenophile
+            }
+        }
+
+        add_monthly_resource_mult = {
+            resource = unity
+            value = @tier3unityreward
+            min = @tier3unitymin
+            max = @tier3unitymax
+        }
+    }
+
+    option = {
+        name = mem_crawler.6.c
+
+        exclusive_trigger = {
+            OR = {
+                has_ethic = ethic_materialist
+                has_ethic = ethic_fanatic_materialist
+            }
+        }
+
+        add_monthly_resource_mult = {
+            resource = society_research
+            value = @tier3researchreward
+            min = @tier3researchmin
+            max = @tier3researchmax
+        }
+    }
+}
+
+# Spiritualist empire asking to kill it
+country_event = {
+    id = mem_crawler.10
+    title = TRANSMISSION
+    desc = mem_crawler.10.desc
+
+    diplomatic = yes
+    
+    picture_event_data = {
+		portrait = event_target:request_sender
+		planet_background = event_target:request_sender
+		graphical_culture = event_target:request_sender
+		city_level = event_target:request_sender
+		room = event_target:request_sender.ruler
+    }
+    
+    mean_time_to_happen = {
+        years = 25
+    }
+
+    trigger = {
+        has_country_flag = mem_crawler_pet_owner
+        has_country_flag = mem_crawler_first_update
+        NOT = { has_country_flag = mem_crawler_request_happening }
+        any_owned_leader = {
+            OR = {
+                has_trait = trait_mem_crawler_pet_owner
+                has_trait = trait_mem_crawler_pet_owner_ruler
+            }
+        }
+        any_relation = {
+            is_country_type = default
+            is_spiritualist = yes
+            is_ai = yes
+            NOR = {
+                is_same_value = root
+                is_at_war_with = root
+            }
+            opinion = {
+                who = root
+                value > 0
+            }
+        }
+    }
+
+    immediate = {
+        set_country_flag = mem_crawler_request_happening
+        random_relation = {
+            limit = {
+                is_country_type = default
+                is_spiritualist = yes
+                is_ai = yes
+                NOR = {
+                    is_same_value = root
+                    is_at_war_with = root
+                }
+                opinion = {
+                    who = root
+                    value > 0
+                }
+            }
+            save_event_target_as = request_sender
+        }
+        random_owned_leader = {
+            limit = {
+                OR = {
+                    has_trait = trait_mem_crawler_pet_owner
+                    has_trait = trait_mem_crawler_pet_owner_ruler
+                }
+            }
+            save_event_target_as = crawler_owner
+        }
+    }
+
+    # Deny
+    option = {
+        name = mem_crawler.10.a
+
+        trigger = {
+            is_materialist = no
+            is_spiritualist = no
+        }
+
+        event_target:request_sender = {
+            add_opinion_modifier = {
+                who = root
+                modifier = mem_crawler_harboring
+            }
+        }
+    }
+
+    option = {
+        name = mem_crawler.10.a.mat
+
+        trigger = {
+            OR = {
+                has_ethic = ethic_fanatic_materialist
+                has_ethic = ethic_materialist
+            }
+        }
+
+        event_target:request_sender = {
+            add_opinion_modifier = {
+                who = root
+                modifier = mem_crawler_harboring
+            }
+        }
+    }
+
+    option = {
+        name = mem_crawler.10.a.spi
+
+        trigger = {
+            OR = {
+                has_ethic = ethic_fanatic_spiritualist
+                has_ethic = ethic_spiritualist
+            }
+        }
+
+        event_target:request_sender = {
+            add_opinion_modifier = {
+                who = root
+                modifier = mem_crawler_harboring
+            }
+        }
+    }
+
+    option = {
+        name = mem_crawler.10.b
+        custom_tooltip = mem_crawler.10.b.tooltip
+
+        event_target:request_sender = {
+            add_opinion_modifier = {
+                who = root
+                modifier = mem_crawler_killed
+            }
+        }
+
+        hidden_effect = {
+            random_owned_leader = {
+                limit = {
+                    OR = {
+                        has_trait = trait_mem_crawler_pet_owner
+                        has_trait = trait_mem_crawler_pet_owner_ruler
+                    }
+                }
+                remove_trait = trait_mem_crawler_pet_owner
+                remove_ruler_trait = trait_mem_crawler_pet_owner_ruler
+            }
+            remove_country_flag = mem_crawler_pet_owner
+        }
+    }
+}
+
+# Neigbouring empire would like to buy it
+country_event = {
+    id = mem_crawler.11
+    title = TRANSMISSION
+    desc = mem_crawler.11.desc
+
+    diplomatic = yes
+    
+    picture_event_data = {
+		portrait = event_target:request_sender
+		planet_background = event_target:request_sender
+		graphical_culture = event_target:request_sender
+		city_level = event_target:request_sender
+		room = event_target:request_sender.ruler
+    }
+    
+    mean_time_to_happen = {
+        years = 25
+    }
+
+    trigger = {
+        has_country_flag = mem_crawler_pet_owner
+        has_country_flag = mem_crawler_first_update
+        NOT = { has_country_flag = mem_crawler_request_happening }
+        any_owned_leader = {
+            OR = {
+                has_trait = trait_mem_crawler_pet_owner
+                has_trait = trait_mem_crawler_pet_owner_ruler
+            }
+        }
+        any_relation = {
+            is_country_type = default
+            is_xenophobe = no
+            NOT = { has_ethic = ethic_gestalt_consciousness }
+            is_ai = yes
+            NOR = {
+                is_same_value = root
+                is_at_war_with = root
+            }
+            opinion = {
+                who = root
+                value > 0
+            }
+            resource_stockpile_compare = {
+                resource = energy
+                value >= 2000
+                
+            }
+            exists = ruler
+        }
+    }
+
+    immediate = {
+        set_country_flag = mem_crawler_request_happening
+        random_relation = {
+            limit = {
+                is_country_type = default
+                is_xenophobe = no
+                NOT = { has_ethic = ethic_gestalt_consciousness }
+                is_ai = yes
+                NOR = {
+                    is_same_value = root
+                    is_at_war_with = root
+                }
+                opinion = {
+                    who = root
+                    value > 0
+                }
+                resource_stockpile_compare = {
+                    resource = energy
+                    value >= 2000
+                    
+                }
+                exists = ruler
+            }
+            save_event_target_as = request_sender
+        }
+        random_owned_leader = {
+            limit = {
+                OR = {
+                    has_trait = trait_mem_crawler_pet_owner
+                    has_trait = trait_mem_crawler_pet_owner_ruler
+                }
+            }
+            save_event_target_as = crawler_owner
+        }
+        
+    }
+
+    option = {
+        name = mem_crawler.11.a
+
+        event_target:request_sender = {
+            add_opinion_modifier = {
+                who = root
+                modifier = mem_crawler_denied_request
+            }
+        }
+    }
+
+    option = {
+        name = mem_crawler.11.b
+        add_resource = {
+            energy = 1000
+        }
+        custom_tooltip = mem_crawler.11.b.tooltip
+
+        hidden_effect = {
+            random_owned_leader = {
+                limit = {
+                    OR = {
+                        has_trait = trait_mem_crawler_pet_owner
+                        has_trait = trait_mem_crawler_pet_owner_ruler
+                    }
+                }
+                remove_trait = trait_mem_crawler_pet_owner
+                remove_ruler_trait = trait_mem_crawler_pet_owner_ruler
+            }
+            remove_country_flag = mem_crawler_pet_owner
+            event_target:request_sender = {
+                add_resource = {
+                    energy = -1000
+                }
+                set_country_flag = mem_crawler_pet_owner
+                ruler = {
+                    add_ruler_trait = trait_mem_crawler_pet_owner_ruler
+                }
+            }
+        }
+    }
+}
+
+# The same thing but for fallen empire
+country_event = {
+    id = mem_crawler.12
+    title = TRANSMISSION
+    desc = mem_crawler.12.desc
+
+    diplomatic = yes
+    
+    picture_event_data = {
+		portrait = event_target:request_sender
+		planet_background = event_target:request_sender
+		graphical_culture = event_target:request_sender
+		city_level = event_target:request_sender
+		room = event_target:request_sender.ruler
+    }
+    
+    mean_time_to_happen = {
+        years = 25
+    }
+
+    trigger = {
+        has_country_flag = mem_crawler_pet_owner
+        has_country_flag = mem_crawler_first_update
+        NOT = { has_country_flag = mem_crawler_request_happening }
+        any_owned_leader = {
+            OR = {
+                has_trait = trait_mem_crawler_pet_owner
+                has_trait = trait_mem_crawler_pet_owner_ruler
+            }
+        }
+        any_relation = {
+            is_country_type = fallen_empire
+            has_ethic = ethic_fanatic_xenophile
+            is_ai = yes
+            NOR = {
+                is_same_value = root
+                is_at_war_with = root
+            }
+        }
+    }
+
+    immediate = {
+        set_country_flag = mem_crawler_request_happening
+        random_relation = {
+            limit = {
+                is_country_type = fallen_empire
+                has_ethic = ethic_fanatic_xenophile
+                is_ai = yes
+                NOR = {
+                    is_same_value = root
+                    is_at_war_with = root
+                }
+            }
+            save_event_target_as = request_sender
+        }
+        random_owned_leader = {
+            limit = {
+                OR = {
+                    has_trait = trait_mem_crawler_pet_owner
+                    has_trait = trait_mem_crawler_pet_owner_ruler
+                }
+            }
+            save_event_target_as = crawler_owner
+        }
+    }
+
+    option = {
+        name = mem_crawler.12.a
+
+        event_target:request_sender = {
+            add_opinion_modifier = { who = root modifier = opinion_refused_fallen_empire_request }
+        }
+    }
+
+    option = {
+        name = mem_crawler.12.b
+        custom_tooltip = mem_crawler.12.b.tooltip
+
+        event_target:request_sender = {
+            add_opinion_modifier = { who = root modifier = opinion_accepted_fallen_empire_request }
+        }
+
+        hidden_effect = {
+            random_owned_leader = {
+                limit = {
+                    OR = {
+                        has_trait = trait_mem_crawler_pet_owner
+                        has_trait = trait_mem_crawler_pet_owner_ruler
+                    }
+                }
+                remove_trait = trait_mem_crawler_pet_owner
+                remove_ruler_trait = trait_mem_crawler_pet_owner_ruler
+            }
+            remove_country_flag = mem_crawler_pet_owner
+        }
+    }
+}

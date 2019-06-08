@@ -1,0 +1,4630 @@
+##########################
+#        Surveyor        #
+#   By ViolentBeetle     #
+##########################
+
+namespace = mem_surveyor
+
+###################
+### Base events ###
+###################
+
+#Initial issuing of orders. Don't feel safe enough to put it into initializer
+event = {
+    id = mem_surveyor.1
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        has_global_flag = mem_surveyor_is_present
+        # exists = event_target:mem_surveyor_fleet
+    }
+    
+    immediate = {
+        random_country = {
+            limit = { has_country_flag = mem_surveyor_country }
+            random_owned_fleet = {
+                fleet_event = { id = mem_surveyor.2 }
+            }
+        }
+        # log = "Initialized"
+    }
+}
+
+#Fleet arrives in a system and consider what to do next
+fleet_event = {
+    id = mem_surveyor.2
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        owner = {
+            is_country_type = mem_surveyor_country_green
+        }
+    }
+
+    immediate = {
+        solar_system = {
+            save_event_target_as = surveyor_system
+            set_star_flag = mem_surveyor_visited
+            remove_star_flag = mem_surveyor_next_target
+            # log = "[This.GetName] visited"
+            closest_system = { # Find the most appealing system
+                limit = {
+                    NOR = {
+                        has_star_flag = mem_surveyor_visited
+                        has_star_flag = hostile_system
+                        has_star_flag = sealed_system
+                        has_star_flag = lcluster
+                        has_star_flag = scavenger_bot_system
+                        has_star_flag = elderly_tiyanki_system
+                        any_ship_in_system = {
+                            exists = owner
+                            owner = {
+                                OR = {
+                                    is_country_type = faction
+                                    is_country_type = amoeba
+                                    is_country_type = crystal
+                                    is_country_type = drone
+                                    is_country_type = cloud
+                                    is_guardian_country = yes
+                                    is_country_type = guardian_scavenger_bot
+                                    is_country_type = guardian_elderly_tiyanki
+                                    is_country_type = guardian_hatchling
+                                }
+                            }
+                        }
+                    }
+                    NAND = {
+                        exists = space_owner
+                        space_owner = {
+                            OR = {
+                                is_country_type = fallen_empire
+                                is_country_type = awakened_fallen_empire
+                                is_country_type = dormant_marauders
+                                is_country_type = awakened_marauders
+                                has_country_flag = mem_surveyor_attacked_surveyor
+                            }
+                        }
+                    }
+                }
+                min_steps = 1
+                max_steps = 1
+                set_star_flag = mem_surveyor_next_target
+            }
+            #Various effects go here
+            IF = {
+                limit = { 
+                    exists = space_owner 
+                    space_owner = { is_country_type = default }
+                }
+                mem_surveyor_try_to_communicate = yes
+            }
+        }
+        clear_fleet_actions = this
+        queue_actions = {
+            find_closest_system = { #Try to move to targeted system
+                trigger = {
+                    id = mem_surveyor.vanilla.1
+                    has_star_flag = mem_surveyor_next_target
+                }
+                found_system = {
+                    move_to = this
+                    wait = 1
+                    effect = {
+                        id = mem_surveyor.vanilla.2
+                        root = {
+                            fleet_event = { id = mem_surveyor.2 }
+                        }
+                    }
+                }
+                failed = { #If no system is flagged, no system is valid
+                    wait = { duration = 10 }
+
+                    find_random_system = { #Go somewhere
+                        trigger = {
+                            id = mem_surveyor.vanilla.3
+                            NOR = {
+                                has_star_flag = mem_surveyor_visited
+                                has_star_flag = hostile_system
+                                has_star_flag = sealed_system
+                                has_star_flag = lcluster
+                                has_star_flag = scavenger_bot_system
+                                has_star_flag = elderly_tiyanki_system
+                                any_ship_in_system = {
+                                    exists = owner
+                                    owner = {
+                                        OR = {
+                                            is_country_type = faction
+                                            is_country_type = amoeba
+                                            is_country_type = crystal
+                                            is_country_type = drone
+                                            is_country_type = cloud
+                                            is_guardian_country = yes
+                                            is_country_type = guardian_scavenger_bot
+                                            is_country_type = guardian_elderly_tiyanki
+                                            is_country_type = guardian_hatchling
+                                        }
+                                    }
+                                }
+                            }
+                            NAND = {
+                                exists = space_owner
+                                space_owner = {
+                                    OR = {
+                                        is_country_type = fallen_empire
+                                        is_country_type = awakened_fallen_empire
+                                        is_country_type = dormant_marauders
+                                        is_country_type = awakened_marauders
+                                        has_country_flag = mem_surveyor_attacked_surveyor
+                                    }
+                                }
+                            }
+                        }
+                        found_system = {
+                            effect = {
+                                id = mem_surveyor.vanilla.4
+                                # log = "Setting location to [This.GetName]"
+                                root = {
+                                    solar_system = {
+                                        IF = {
+                                            limit = { exists = space_owner }
+                                            space_owner = {
+                                                random_list = {
+                                                    7 = { country_event = { id = mem_surveyor.7 } }
+                                                    93 = {}
+                                                }
+                                            }
+                                        }
+                                    }
+                                    set_location = prev.star
+                                    fleet_event = { id = mem_surveyor.2 }
+                                }
+                            }
+                        }
+                        failed = {
+                            effect = {
+                                id = mem_surveyor.vanilla.5
+                                # log = "Found nothing"
+                                every_system = {
+                                    limit = { has_star_flag = mem_surveyor_visited }
+                                    remove_star_flag = mem_surveyor_visited
+                                }
+                                every_playable_country = {
+                                    remove_country_flag = mem_surveyor_reward_wait
+                                    remove_country_flag = mem_surveyor_offered_quest
+                                }
+                                owner = {
+                                    change_variable = {
+                                        which = mem_surveyor_iteration_count
+                                        value = 1
+                                    }
+                                }
+                                # log = "Rebooting the cycle: [This.mem_surveyor_iteration_count]" 
+                                fleet_event = { id = mem_surveyor.2 }
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+}
+
+#Country event: Enigmatic spacefarers
+country_event = {
+    id = mem_surveyor.3
+    title = mem_surveyor.3.name
+    desc = mem_surveyor.3.desc
+
+    is_triggered_only = yes
+
+    trigger = {
+        # # log = "Trying to initiate first contact. [From.GetName]"
+        FROM = { is_country_type = mem_surveyor_country_green }
+        NOT = { has_country_flag = mem_surveyor_spotted_probe }
+    }
+
+    picture = GFX_evt_unknown_ships
+    show_sound = event_radio_chatter
+    location = FROMFROMFROM
+    
+    immediate = {
+        set_country_flag = mem_surveyor_spotted_probe
+        FROMFROMFROM = { save_event_target_as = surveyor_system }
+    }
+
+    option = {
+        name = INTERESTING
+        hidden_effect = {
+            country_event = { id = story.7 days = 2 }
+        }
+    }
+}
+
+#Probe makes contact
+country_event = {
+    id = mem_surveyor.4
+    title = mem_surveyor.4.name
+    desc = mem_surveyor.4.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_unknown_ships
+    show_sound = event_radio_chatter
+    location = FROM
+
+    trigger = {
+        NOT = { has_country_flag = mem_surveyor_attacked_surveyor }
+    }
+    
+    immediate = {
+        set_country_flag = mem_surveyor_opened_comms
+        establish_communications_no_message = FROM.owner
+        country_event = { id = mem_surveyor.303 days = 120 random = 180 }
+    }
+
+    option = {
+        name = ONSCREEN
+        hidden_effect = {
+            country_event = { id = mem_surveyor.5 }
+        }
+    }
+}
+
+#Probe greetings
+country_event = {
+    id = mem_surveyor.5
+    title = MEM_SURVEYOR_PROBE_HEADER
+    desc = mem_surveyor.5.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+    location = FROMFROM
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+    
+    option = {
+        name = mem_surveyor.5.default
+    }
+
+    option = {
+        name = mem_surveyor.5.ega
+        trigger = {
+            OR = {
+                has_ethic = ethic_egalitarian
+                has_ethic = ethic_fanatic_egalitarian
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.5.aut
+        trigger = {
+            OR = {
+                has_ethic = ethic_authoritarian
+                has_ethic = ethic_fanatic_authoritarian
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.5.mat
+        trigger = {
+            OR = {
+                has_ethic = ethic_materialist
+                has_ethic = ethic_fanatic_materialist
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.5.spi
+        trigger = {
+            OR = {
+                has_ethic = ethic_spiritualist
+                has_ethic = ethic_fanatic_spiritualist
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.5.pac
+        trigger = {
+            OR = {
+                has_ethic = ethic_pacifist
+                has_ethic = ethic_fanatic_pacifist
+            }
+        }
+    }
+    
+    option = {
+        name = mem_surveyor.5.mil
+        trigger = {
+            OR = {
+                has_ethic = ethic_militarist
+                has_ethic = ethic_fanatic_militarist
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.5.phile
+        trigger = {
+            OR = {
+                has_ethic = ethic_xenophile
+                has_ethic = ethic_fanatic_xenophile
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.5.phobe
+        trigger = {
+            OR = {
+                has_ethic = ethic_xenophobe
+                has_ethic = ethic_fanatic_xenophobe
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.5.hive
+        trigger = {
+            has_authority = auth_hive_mind
+        }
+    }
+
+    option = {
+        name = mem_surveyor.5.machine
+        trigger = {
+            has_authority = auth_machine_intelligence
+        }
+    }
+
+    option = {
+        name = mem_surveyor.5.purifier
+        exclusive_trigger = {
+            has_valid_civic = civic_fanatic_purifiers
+        }
+    }
+
+    option = {
+        name = mem_surveyor.5.terminator
+        exclusive_trigger = {
+            has_valid_civic = civic_machine_terminator
+        }
+    }
+
+    option = {
+        name = mem_surveyor.5.swarm
+        exclusive_trigger = {
+            has_valid_civic = civic_hive_devouring_swarm
+        }
+    }
+}
+
+#Flag about attacking probe
+country_event = {
+    id = mem_surveyor.6
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        FROM = {
+            OR = {
+                is_country_type = mem_surveyor_country_green
+                is_country_type = mem_surveyor_country_yellow
+            }
+        }
+        NOT = { has_country_flag = mem_surveyor_attacked_surveyor }
+    }
+
+    immediate = {
+        set_country_flag = mem_surveyor_attacked_surveyor
+    }
+}
+
+#Country witnesses probe jumping away
+country_event = {
+    id = mem_surveyor.7
+    title = mem_surveyor.7.name
+    desc = mem_surveyor.7.desc
+
+    picture = GFX_evt_wormhole
+    show_sound = event_alien_signal
+
+    is_triggered_only = yes
+
+    trigger = {
+        is_country_type = default
+        has_communications = event_target:mem_surveyor_country
+        NOR = {
+            has_technology = tech_experimental_subspace_navigation
+            has_tech_option = tech_experimental_subspace_navigation
+        }
+    }
+
+    option = {
+        name = mem_surveyor.7.a
+        add_research_option = tech_experimental_subspace_navigation
+    }
+}
+
+# Surveyor probe is dead
+country_event = {
+    id = mem_surveyor.8
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        is_country_type = mem_surveyor_country_green
+        FROMFROM = {
+            has_ship_flag = mem_surveyor_probe_ship
+        }
+    }
+
+    immediate = {
+        # log = "Probe killed by [From.GetName]"
+        FROM = { 
+            save_event_target_as = probe_killers 
+            set_country_flag = mem_surveyor_probe_killers
+            country_event = { id = mem_surveyor.10 }
+        }
+        every_playable_country = {
+            limit = {
+                is_ai = no
+                has_communications = root
+                NOT = { is_same_value = FROM }
+            }
+            country_event = { id = mem_surveyor.9 }
+        }
+    }
+}
+
+# Player is notified someone killed the probe
+country_event = {
+    id = mem_surveyor.9
+    title = mem_surveyor.9.name
+    desc = mem_surveyor.9.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_debris
+    show_sound = event_ship_explosion
+
+    option = {
+        name = mem_surveyor.9.a
+    }
+}
+
+# Player killed the probe
+country_event = {
+    id = mem_surveyor.10
+    title = mem_surveyor.10.name
+    desc = mem_surveyor.10.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_debris
+    
+    after = {
+        IF = {
+            limit = { 
+                is_country_type = default 
+                NOR = {
+                    has_valid_civic = civic_fanatic_purifiers
+                    has_valid_civic = civic_hive_devouring_swarm
+                    has_valid_civic = civic_machine_terminator
+                    has_valid_civic = civic_machine_assimilator
+                }
+            }
+            custom_tooltip = mem_surveyor.10.tooltip.opinion_decrease
+            hidden_effect = {
+                every_playable_country = {
+                    limit = {
+                        has_communications = FROM
+                        has_communications = ROOT
+                    }
+                    add_opinion_modifier = {
+                        who = root
+                        modifier = mem_surveyor_destroyed_probe
+                    }
+                }
+            }
+        }
+        mem_surveyor_killing_reward = yes
+    }
+
+    option = {
+        name = mem_surveyor.10.a
+    }
+}
+
+#####################################
+### Diplomacy with friendly probe ###
+#####################################
+
+# Custom diplomacy with surveyor probe
+
+country_event = {
+    id = mem_surveyor.100
+    title = MEM_SURVEYOR_PROBE_HEADER
+    
+    #Generic greets
+    desc = {
+        text = mem_surveyor.100.desc.1
+        trigger = { has_country_flag = mem_surveyor_generic_responses }
+    }
+    desc = {
+        text = mem_surveyor.100.desc.2
+        trigger = { has_country_flag = mem_surveyor_generic_responses }
+    }
+    desc = {
+        text = mem_surveyor.100.desc.3
+        trigger = { has_country_flag = mem_surveyor_generic_responses }
+    }
+    desc = {
+        text = mem_surveyor.100.desc.4
+        trigger = { has_country_flag = mem_surveyor_generic_responses }
+    }
+    desc = {
+        text = mem_surveyor.100.desc.5
+        trigger = { has_country_flag = mem_surveyor_generic_responses }
+    }
+    desc = {
+        text = mem_surveyor.100.desc.6
+        trigger = { has_country_flag = mem_surveyor_generic_responses }
+    }
+    desc = {
+        text = mem_surveyor.100.desc.7
+        trigger = { has_country_flag = mem_surveyor_generic_responses }
+    }
+    desc = {
+        text = mem_surveyor.100.desc.8
+        trigger = { has_country_flag = mem_surveyor_generic_responses }
+    }
+    desc = {
+        text = mem_surveyor.100.desc.9
+        trigger = { has_country_flag = mem_surveyor_generic_responses }
+    }
+
+    #Greets when away from the player space
+    desc = {
+        text = mem_surveyor.100.away.1
+        trigger = {
+            exists = event_target:mem_surveyor_fleet.solar_system
+            mem_surveyor_in_owned_space = no
+        }
+    }
+
+    #Greets when in player's space
+    desc = {
+        text = mem_surveyor.100.here.1
+        trigger = {
+            exists = event_target:mem_surveyor_fleet.solar_system
+            mem_surveyor_in_owned_space = yes
+        }
+    }
+    desc = {
+        text = mem_surveyor.100.here.2
+        trigger = {
+            exists = event_target:mem_surveyor_fleet.solar_system
+            mem_surveyor_in_owned_space = yes
+        }
+    }
+
+    #Greets based on ethics, governments etc
+    desc = {
+        text = mem_surveyor.100.mat
+        trigger = {
+            is_materialist = yes
+        }
+    }
+    desc = {
+        text = mem_surveyor.100.spi
+        trigger = {
+            is_spiritualist = yes
+        }
+    }
+    desc = {
+        text = mem_surveyor.100.machine
+        trigger = {
+            has_authority = auth_machine_intelligence
+        }
+    }
+
+    #Probe relates to its journeys
+    desc = {
+        text = mem_surveyor.100.journey.1
+        trigger = {
+            exists = event_target:next_target
+        }
+    }
+    desc = {
+        text = mem_surveyor.100.journey.2
+        trigger = {
+            exists = event_target:visited_system
+        }
+    }
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    trigger = {
+        FROM = { is_country_type = mem_surveyor_country_green }
+        NOT = { has_country_flag = mem_surveyor_diplomacy_engaged }
+        NOT = { has_country_flag = mem_surveyor_attacked_surveyor }
+    }
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+
+    immediate = {
+        set_country_flag = mem_surveyor_diplomacy_engaged
+        random_list = {
+            50 = { }
+            50 = { set_country_flag = mem_surveyor_generic_responses }
+        }
+        random_system = {
+            limit = { has_star_flag = mem_surveyor_next_target }
+            save_event_target_as = next_target
+        }
+        random_system = {
+            limit = { has_star_flag = mem_surveyor_visited }
+            save_event_target_as = visited_system
+        }
+    }
+
+    option = { #Tell us about the mission
+        name = mem_surveyor.100.a
+        is_dialog_only = yes
+        response_text = mem_surveyor.100.a.answer
+    }
+
+    option = { #Tell us about the Alkree
+        name = mem_surveyor.100.b        
+        is_dialog_only = yes
+        response_text = mem_surveyor.100.b.answer
+    }
+
+    option = { #All Alkree are dead
+        name = mem_surveyor.100.c
+        is_dialog_only = yes
+        response_text = mem_surveyor.100.c.answer
+
+        trigger = {
+            has_country_flag = mem_surveyor_found_alkree_homeworld
+        }
+    }
+
+    option = {
+        name = MEM_SURVEYOR_EXIT
+        default_hide_option = yes
+        remove_country_flag = mem_surveyor_generic_responses
+        remove_country_flag = mem_surveyor_diplomacy_engaged
+    }
+}
+
+#Attempting diplo after attacking peaceful probe
+country_event = {
+    id = mem_surveyor.101
+    title = MEM_SURVEYOR_PROBE_HEADER
+    desc = mem_surveyor.101.desc.1
+    desc = mem_surveyor.101.desc.2
+    desc = mem_surveyor.101.desc.3
+    desc = mem_surveyor.101.desc.4
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    trigger = {
+        FROM = { is_country_type = mem_surveyor_country_green }
+        NOT = { has_country_flag = mem_surveyor_diplomacy_engaged }
+        has_country_flag = mem_surveyor_attacked_surveyor
+    }
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+
+    immediate = {
+        set_country_flag = mem_surveyor_diplomacy_engaged
+    }
+
+    option = {
+        name = MEM_SURVEYOR_EXIT
+        default_hide_option = yes
+        remove_country_flag = mem_surveyor_generic_responses
+        remove_country_flag = mem_surveyor_diplomacy_engaged
+    }
+}
+
+#Country event selecting viable mission
+country_event = {
+    id = mem_surveyor.102
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        set_country_flag = mem_surveyor_offered_quest
+        # log = "[This.GetName] Is offered quest"
+        random_list = { #Revise weights when all is done!!!
+            3 = { country_event = { id = mem_surveyor.103 } } #Ask to share computation
+            5 = { country_event = { id = mem_surveyor.104 } } #Ask for raw resources
+            2 = { country_event = { id = mem_surveyor.105 } } #Ask to use a planet as amplifier
+            4 = { country_event = { id = mem_surveyor.106 } } #Ask to use science ship to scan a unihabited planet
+            5 = { country_event = { id = mem_surveyor.107 } } #Ask to perform a special project on owned planet
+        }
+    }
+}
+
+#Sending request for computation
+country_event = {
+    id = mem_surveyor.103
+    title = MEM_SURVEYOR_PROBE_HEADER
+    desc = mem_surveyor.103.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+
+    option = {
+        name = mem_surveyor.mission.accept
+
+        add_modifier = {
+            modifier = mem_surveyor_science_drain
+            days = 360
+        }
+        set_country_flag = mem_surveyor_finished_quest
+        set_country_flag = mem_surveyor_reward_wait
+    }
+
+    option = {
+        name = mem_surveyor.mission.decline
+        default_hide_option = yes
+    }
+
+    option = {
+        name = mem_surveyor.mission.purifier
+
+        exclusive_trigger = {
+            has_valid_civic = civic_fanatic_purifiers
+            has_valid_civic = civic_hive_devouring_swarm
+        }
+    }
+}
+
+#Sending request for raw resources
+country_event = {
+    id = mem_surveyor.104
+    title = MEM_SURVEYOR_PROBE_HEADER
+    desc = mem_surveyor.104.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+
+    option = {
+        name = mem_surveyor.mission.accept
+        add_resource = {
+            minerals = -500
+            energy = -500
+        }
+        
+        set_country_flag = mem_surveyor_finished_quest
+        set_country_flag = mem_surveyor_reward_wait
+
+        allow = {
+            resource_stockpile_compare = {
+                resource = energy
+                value >= 500
+            }
+            resource_stockpile_compare = {
+                resource = minerals
+                value >= 500
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.mission.decline
+        default_hide_option = yes
+    }
+
+    option = {
+        name = mem_surveyor.mission.purifier
+
+        exclusive_trigger = {
+            has_valid_civic = civic_fanatic_purifiers
+            has_valid_civic = civic_hive_devouring_swarm
+        }
+    }
+}
+
+#Ask to use a planet as amplifier
+country_event = {
+    id = mem_surveyor.105
+    title = MEM_SURVEYOR_PROBE_HEADER
+    desc = mem_surveyor.105.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+
+    trigger = {
+        any_owned_planet = {
+            is_capital = no
+            NOR = {
+                is_planet_class = pc_ringworld_habitable
+                is_planet_class = pc_habitat
+            }
+        }
+    }
+
+    immediate = {
+        random_owned_planet = {
+            limit = {
+                is_capital = no
+                NOR = {
+                    is_planet_class = pc_ringworld_habitable
+                    is_planet_class = pc_habitat
+                }
+            }
+            save_event_target_as = amplifier_planet
+        }
+    }
+
+    option = {
+        name = mem_surveyor.mission.accept
+        set_country_flag = mem_surveyor_finished_quest
+        set_country_flag = mem_surveyor_reward_wait
+
+        event_target:amplifier_planet = {
+            add_modifier = {
+                modifier = mem_surveyor_amplified
+                days = 360
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.mission.decline
+        default_hide_option = yes
+    }
+
+    option = {
+        name = mem_surveyor.mission.purifier
+
+        exclusive_trigger = {
+            has_valid_civic = civic_fanatic_purifiers
+            has_valid_civic = civic_hive_devouring_swarm
+        }
+    }
+}
+
+#Ask to scan a planet
+country_event = {
+    id = mem_surveyor.106
+    title = MEM_SURVEYOR_PROBE_HEADER
+    desc = mem_surveyor.106.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    trigger = {
+        any_planet_within_border = {
+            OR = {
+                is_planet_class = pc_barren
+                is_planet_class = pc_barren_cold
+                is_planet_class = pc_toxic
+                is_planet_class = pc_frozen
+                is_planet_class = pc_molten
+                is_planet_class = pc_gas_giant
+            }
+        }
+    }
+
+    immediate = {
+        random_planet_within_border = {
+            limit = {
+                OR = {
+                    is_planet_class = pc_barren
+                    is_planet_class = pc_barren_cold
+                    is_planet_class = pc_toxic
+                    is_planet_class = pc_frozen
+                    is_planet_class = pc_molten
+                    is_planet_class = pc_gas_giant
+                }
+            }
+            save_event_target_as = scannable_planet
+        }
+    }
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+
+    option = {
+        name = mem_surveyor.mission.accept
+        set_country_flag = mem_surveyor_busy_with_project
+        enable_special_project = {
+            name = MEM_SURVEYOR_SCAN
+            owner = root
+            location = event_target:scannable_planet
+        }
+    }
+
+    option = {
+        name = mem_surveyor.mission.decline
+        default_hide_option = yes
+    }
+
+    option = {
+        name = mem_surveyor.mission.purifier
+
+        exclusive_trigger = {
+            has_valid_civic = civic_fanatic_purifiers
+            has_valid_civic = civic_hive_devouring_swarm
+        }
+    }
+}
+
+#Ask to perform a project on capital
+country_event = {
+    id = mem_surveyor.107
+    title = MEM_SURVEYOR_PROBE_HEADER
+    desc = mem_surveyor.107.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+
+    option = {
+        name = mem_surveyor.mission.accept
+        custom_tooltip = mem_surveyor.107.tooltip
+        set_country_flag = mem_surveyor_busy_with_project
+
+        hidden_effect = {
+            random_list = {
+                33 = {
+                    enable_special_project = {
+                        name = MEM_SURVEYOR_HELP_PHYSICS
+                        owner = root
+                        location = capital_scope
+                    }
+                }
+                33 = {
+                    enable_special_project = {
+                        name = MEM_SURVEYOR_HELP_SOCIETY
+                        owner = root
+                        location = capital_scope
+                    }
+                }
+                33 = {
+                    enable_special_project = {
+                        name = MEM_SURVEYOR_HELP_ENGINEERING
+                        owner = root
+                        location = capital_scope
+                    }
+                }
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.mission.decline
+        default_hide_option = yes
+    }
+
+    option = {
+        name = mem_surveyor.mission.purifier
+
+        exclusive_trigger = {
+            has_valid_civic = civic_fanatic_purifiers
+            has_valid_civic = civic_hive_devouring_swarm
+        }
+    }
+}
+
+#Scan is complete
+ship_event = {
+    id = mem_surveyor.108
+    title = mem_surveyor.108.name
+    desc = mem_surveyor.108.desc
+
+    is_triggered_only = yes
+
+    location = event_target:scannable_planet
+    show_sound = event_scanner
+    picture = GFX_evt_ship_in_orbit_2
+
+    immediate = {
+        owner = {
+            remove_country_flag = mem_surveyor_busy_with_project
+            set_country_flag = mem_surveyor_reward_wait
+            set_country_flag = mem_surveyor_finished_quest
+        }
+    }
+
+    option = {
+        name = EXCELLENT
+    }
+}
+
+#Calculation is complete
+planet_event = {
+    id = mem_surveyor.109
+    title = mem_surveyor.109.name
+    desc = mem_surveyor.109.desc
+
+    is_triggered_only = yes
+
+    location = ROOT
+    show_sound = event_scanner
+    picture = GFX_evt_physics_research
+
+    immediate = {
+        owner = {
+            remove_country_flag = mem_surveyor_busy_with_project
+            set_country_flag = mem_surveyor_reward_wait
+            set_country_flag = mem_surveyor_finished_quest
+        }
+    }
+
+    option = {
+        name = EXCELLENT
+    }
+}
+
+#Country event to determine which reward does the player get
+country_event = {
+    id = mem_surveyor.110
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        remove_country_flag = mem_surveyor_finished_quest
+        set_timed_country_flag = {
+            flag = mem_surveyor_collected_reward
+            days = 3600
+        }
+        # log = "[This.GetName] Collects Reward"
+        random_list = { #Choosing the reward
+            5 = { # Give survey data
+                country_event = { id = mem_surveyor.111 }
+                modifier = {
+                    factor = 0
+                    NOT = {
+                        any_system = {
+                            has_star_flag = mem_surveyor_visited
+                            any_system_planet = {
+                                is_surveyed = {
+                                    who = ROOT
+                                    status = no
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            5 = { # Give contacts
+                country_event = { id = mem_surveyor.112 }
+                modifier = {
+                    factor = 0
+                    NOT = {
+                        any_country = {
+                            NOT = { is_same_value = root }
+                            NOT = { has_communications = root }
+                            OR = {
+                                is_country_type = default
+                                is_country_type = fallen_empire
+                                is_country_type = enclave
+                                is_country_type = dormant_marauders
+                            }
+                        }
+                    }
+                }
+            }
+            10 = { # Give science
+                country_event = { id = mem_surveyor.113 }
+            }
+            3 = { # Give tech
+                country_event = { id = mem_surveyor.114 }
+                modifier = {
+                    factor = 0
+                    has_technology = tech_society_1
+                    has_technology = tech_engineering_1
+                    has_technology = tech_lasers_2
+                    has_technology = tech_physics_1
+                    has_technology = tech_sensors_2
+                    has_technology = tech_wormhole_stabilization
+                }
+                modifier = {
+                    factor = 0
+                    check_variable = {
+                        which = mem_surveyor_received_techs
+                        value > 1
+                    }
+                }
+            }
+            10 = { # Give navigation data, increase speed temporarility
+                country_event = { id = mem_surveyor.115 }
+            }
+            5 = { # Give deposit
+                country_event = { id = mem_surveyor.116 }
+                modifier = {
+                    factor = 0
+                    NOT = { #I don't know how could it possibly be so
+                        any_planet_within_border = {
+                            OR = {
+                                is_planet_class = pc_barren
+                                is_planet_class = pc_barren_cold
+                                is_planet_class = pc_frozen
+                                is_planet_class = pc_molten
+                                is_planet_class = pc_toxic
+                                is_planet_class = pc_gas_giant
+                            }
+                            is_colonizable = no
+                            has_deposit = no
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#Giving survey data
+country_event = {
+    id = mem_surveyor.111
+    title = MEM_SURVEYOR_PROBE_HEADER
+    desc = mem_surveyor.111.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+
+    immediate = {
+        random_system = {
+            limit = {
+                has_star_flag = mem_surveyor_visited
+                any_system_planet = {
+                    is_surveyed = {
+                        who = ROOT
+                        status = no
+                    }
+                }
+            }
+            every_system_planet = {
+                surveyed = {
+                    set_surveyed = yes
+                     surveyor = root
+                 }
+            }
+        }
+
+        random_list = {
+            25 = {  }
+            50 = {
+                random_system = {
+                    limit = {
+                        has_star_flag = mem_surveyor_visited
+                        any_system_planet = {
+                            is_surveyed = {
+                                who = ROOT
+                                status = no
+                            }
+                        }
+                    }
+                    every_system_planet = {
+                        surveyed = {
+                            set_surveyed = yes
+                             surveyor = root
+                         }
+                    }
+                }
+            }
+            25 = {
+                while = {
+                    count = 2
+                    random_system = {
+                        limit = {
+                            has_star_flag = mem_surveyor_visited
+                            any_system_planet = {
+                                is_surveyed = {
+                                    who = ROOT
+                                    status = no
+                                }
+                            }
+                        }
+                        every_system_planet = {
+                            surveyed = {
+                                set_surveyed = yes
+                                 surveyor = root
+                             }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.111.a
+    }
+}
+
+#Give contact
+country_event = {
+    id = mem_surveyor.112
+    title = MEM_SURVEYOR_PROBE_HEADER
+    desc = {
+        text = mem_surveyor.112.desc.default
+        trigger = {
+            event_target:contact_country = {
+                is_country_type = default
+            }
+        }
+    }
+    desc = {
+        text = mem_surveyor.112.desc.fallen
+        trigger = {
+            event_target:contact_country = {
+                is_country_type = fallen_empire
+            }
+        }
+    }
+    desc = {
+        text = mem_surveyor.112.desc.enclave
+        trigger = {
+            event_target:contact_country = {
+                is_country_type = enclave
+            }
+        }
+    }
+    desc = {
+        text = mem_surveyor.112.desc.mara
+        trigger = {
+            event_target:contact_country = {
+                is_country_type = dormant_marauders
+            }
+        }
+    }
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+
+    immediate = {
+        random_country = {
+            limit = {
+                NOT = { is_same_value = root }
+                NOT = { has_communications = root }
+                OR = {
+                    is_country_type = default
+                    is_country_type = fallen_empire
+                    is_country_type = enclave
+                    is_country_type = dormant_marauders
+                }
+            }
+            save_event_target_as = contact_country
+            establish_communications_no_message = root
+        }
+    }
+
+    option = {
+        name = mem_surveyor.112.a
+        custom_tooltip = mem_surveyor.112.a.tooltip
+    }
+}
+
+#Probe dispenses science
+country_event = {
+    id = mem_surveyor.113
+    title = MEM_SURVEYOR_PROBE_HEADER
+    desc = mem_surveyor.113.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+
+    option = {
+        name = mem_surveyor.113.a
+
+        add_monthly_resource_mult = {
+			resource = physics_research
+			value = @tier4researchreward
+			min = @tier4researchmin
+			max = @tier4researchmax
+		}
+        add_monthly_resource_mult = {
+			resource = society_research
+			value = @tier4researchreward
+			min = @tier4researchmin
+			max = @tier4researchmax
+		}
+        add_monthly_resource_mult = {
+			resource = engineering_research
+			value = @tier4researchreward
+			min = @tier4researchmin
+			max = @tier4researchmax
+		}
+    }
+}
+
+#Probe gives tech
+country_event = {
+    id = mem_surveyor.114
+    title = MEM_SURVEYOR_PROBE_HEADER
+    desc = mem_surveyor.114.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    immediate = {
+        change_variable = {
+            which = mem_surveyor_received_techs
+            value = 1
+        }
+    }
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+
+    option = {
+        name = mem_surveyor.114.a
+        random_list = {
+            4 = {
+                give_technology = { tech = tech_lasers_2 }
+                modifier = {
+                    factor = 0
+                    has_technology = tech_lasers_2
+                }
+            }
+            4 = {
+                give_technology = { tech = tech_physics_1 }
+                modifier = {
+                    factor = 0
+                    has_technology = tech_physics_1
+                }
+            }
+            4 = {
+                give_technology = { tech = tech_society_1 }
+                modifier = {
+                    factor = 0
+                    has_technology = tech_society_1
+                }
+            }
+            4 = {
+                give_technology = { tech = tech_engineering_1 }
+                modifier = {
+                    factor = 0
+                    has_technology = tech_engineering_1
+                }
+            }
+            4 = {
+                give_technology = { tech = tech_sensors_2 }
+                modifier = {
+                    factor = 0
+                    has_technology = tech_sensors_2
+                }
+            }
+            1 = {
+                give_technology = { tech = tech_wormhole_stabilization }
+                modifier = {
+                    factor = 0
+                    has_technology = tech_wormhole_stabilization
+                }
+            }
+        }
+    }
+}
+
+#Probe gives away modifier
+country_event = {
+    id = mem_surveyor.115
+    title = MEM_SURVEYOR_PROBE_HEADER
+    desc = mem_surveyor.115.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+
+    option = {
+        name = mem_surveyor.115.a
+        add_modifier = {
+            modifier = mem_surveyor_star_data
+            days = 1800
+        }
+    }
+}
+
+#Probe gives away depoosit
+country_event = {
+    id = mem_surveyor.116
+    title = MEM_SURVEYOR_PROBE_HEADER
+    desc = mem_surveyor.116.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+
+    immediate = {
+        random_planet_within_border = {
+            limit = {
+                OR = {
+                    is_planet_class = pc_barren
+                    is_planet_class = pc_barren_cold
+                    is_planet_class = pc_frozen
+                    is_planet_class = pc_molten
+                    is_planet_class = pc_toxic
+                    is_planet_class = pc_gas_giant
+                }
+                is_colonizable = no
+                has_deposit = no
+            }
+            save_event_target_as = target_planet
+        }
+    }
+
+    option = {
+        name = mem_surveyor.116.a
+        custom_tooltip = mem_surveyor.116.tooltip
+
+        hidden_effect = {
+            event_target:target_planet = {
+                random_list = {
+                    1 = { add_deposit = d_energy_3 }
+                    1 = { add_deposit = d_minerals_3 }
+                    1 = { add_deposit = d_society_3 }
+                    1 = { add_deposit = d_physics_3 }
+                    1 = { add_deposit = d_engineering_3 }
+                }
+            }
+        }
+    }
+}
+
+######################
+### BERSERKER MODE ###
+######################
+
+#Midgame start - decide if flippage should occur (Can also be rewritten to trigger event)
+
+event = {
+    id = mem_surveyor.200
+    is_triggered_only = yes
+    hide_window = yes
+
+    trigger = {
+        any_country = {
+            is_country_type = mem_surveyor_country_green
+        }
+    }
+
+    immediate = {
+        random_country = {
+            limit = {
+                is_country_type = mem_surveyor_country_green
+            }
+            random_list = { #Make sure to adjust weights!!!
+                30 = {}
+                50 = {
+                    set_country_flag = mem_surveyor_will_go_berserk
+                }
+            }
+        }
+    }
+}
+
+# Probe decides to flip
+country_event = {
+    id = mem_surveyor.201
+    hide_window = yes
+
+    trigger = {
+        is_country_type = mem_surveyor_country_green
+        has_country_flag = mem_surveyor_will_go_berserk
+        mid_game_years_passed = 25
+        any_owned_fleet = {
+            exists = solar_system
+            OR = {
+                NOT = { exists = space_owner }
+                space_owner = { is_ai = yes }
+            }
+        }
+    }
+
+    mean_time_to_happen = {
+        years = 25 #Change to something sensible!
+    }
+
+    immediate = {
+        every_system = {
+            remove_star_flag = mem_surveyor_next_target
+        }
+        set_country_type = mem_surveyor_country_red
+        set_global_flag = mem_surveyor_went_berserk
+        set_name = "Berserker Probe"
+        change_country_flag = {
+            icon = {
+                category = "mem"
+                file = "mem_radar_2.dds"
+            }
+            background= {
+                category = "backgrounds"
+                file = "circle.dds"
+            }
+            colors={
+                "red"
+                "red_orange"
+                "null"
+                "null"
+            }
+        }
+        set_variable = {
+            which = mem_surveyor_attriction_counter
+            value = 150
+        }
+        every_playable_country = {
+            limit = {
+                is_ai = no
+                has_communications = root
+            }
+            country_event = { id = mem_surveyor.202 } #Players get notified
+        }
+        create_ship_design = { design = "NAME_MEM_Surveyor_Outpost" }
+        add_ship_design = last_created_design
+        random_owned_fleet = {
+            set_name = "Berserker Probe"
+            queue_actions = {
+                wait = { duration = 10 }
+                effect = {
+                    id = mem_surveyor.berserker.trigger.init
+                    while = {
+                        count = 9
+                        create_ship = {
+                            name = ""
+                            design = NAME_MEM_Surveyor_Support
+                        }
+                    }
+                    while = {
+                        count = 3
+                        create_ship = {
+                            name = ""
+                            design = NAME_MEM_Surveyor_Escort
+                        }
+                    }
+                    every_system = {
+                        remove_star_flag = mem_surveyor_next_target
+                    }
+                    fleet_event = { id = mem_surveyor.210 }
+                }
+            }
+        }
+        country_event = { id = mem_surveyor.223 days = 360 }
+    }
+}
+
+# Diplomatic event to notify player 
+country_event = {
+    id = mem_surveyor.202
+    title = MEM_SURVEYOR_BERSERK_HEADER
+    desc = mem_surveyor.202.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+
+    option = {
+        name = MEM_SURVEYOR_EXIT
+    }
+}
+
+# Custom diplomacy with the berserker
+
+country_event = {
+    id = mem_surveyor.203
+    title = MEM_SURVEYOR_BERSERK_HEADER
+    desc = mem_surveyor.203.desc.1
+    desc = mem_surveyor.203.desc.2
+    desc = mem_surveyor.203.desc.3
+    desc = mem_surveyor.203.desc.4
+    desc = mem_surveyor.203.desc.5
+    desc = {
+        text = mem_surveyor.desc.agg.1
+        trigger = {
+            has_country_flag = mem_surveyor_terrorize_this_country
+        }
+    }
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    trigger = {
+        FROM = { 
+            is_country_type = mem_surveyor_country_red 
+            NOT = { has_country_flag = mem_surveyor_out_of_comission }
+        }
+        NOT = { has_country_flag = mem_surveyor_diplomacy_engaged }
+    }
+
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+
+    immediate = {
+        set_country_flag = mem_surveyor_diplomacy_engaged
+    }
+
+    option = { #All Alkree are dead
+        name = mem_surveyor.203.a
+        is_dialog_only = yes
+        response_text = mem_surveyor.203.a.answer
+
+        trigger = {
+            has_country_flag = mem_surveyor_found_alkree_homeworld
+        }
+    }
+
+    option = {
+        name = MEM_SURVEYOR_EXIT
+        default_hide_option = yes
+        remove_country_flag = mem_surveyor_generic_responses
+        remove_country_flag = mem_surveyor_diplomacy_engaged
+    }
+}
+
+country_event = {
+    id = mem_surveyor.204
+    title = mem_surveyor.204.name
+    desc = mem_surveyor.204.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_unknown_ships
+    show_sound = event_radio_chatter
+
+    trigger = {
+        NOT = { has_communications = event_target:mem_surveyor_country }
+    }
+
+    immediate = {
+        establish_communications_no_message = event_target:mem_surveyor_country
+    }
+
+    option = {
+        name = ONSCREEN
+
+        hidden_effect = {
+            country_event = { id = mem_surveyor.202 }
+        }
+    }
+}
+
+
+
+# Probe decision making - main cycle
+fleet_event = {
+    id = mem_surveyor.210
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        owner = {
+            is_country_type = mem_surveyor_country_red
+            NOT = {
+                has_country_flag = mem_surveyor_out_of_comission
+            }
+        }
+    }
+
+    immediate = {
+        # log = ".210 loop"
+        IF = {
+            limit = { has_fleet_flag = mem_surveyor_day_of_the_order }
+            # log = "Recent order flag is still present"
+        }
+        solar_system = {
+            remove_star_flag = mem_surveyor_next_target
+            IF = {
+                limit = { # If probe touched the star, starbase is likely disabled by third party. Remove it.
+                    exists = starbase
+                    starbase = {
+                        owner = { NOT = { is_same_value = root.owner } }
+                    }
+                    prev = {
+                        NOT = { has_fleet_flag = mem_surveyor_order_from_planet }
+                    }
+                }
+                starbase.fleet = { delete_fleet = this }
+            }
+            IF = {
+                limit = {
+                    prev = {
+                        NOT = { has_fleet_flag = mem_surveyor_order_from_planet } # Ship should not construct an outpost unless it just tourched the star
+                    }
+                    NOR = {
+                        any_ship_in_system = {
+                            exists = owner
+                            owner = { NOT = { is_country_type = mem_surveyor_country_red } }
+                        }
+                        any_system_planet = {
+                            exists = owner
+                            owner = { NOT = { is_country_type = mem_surveyor_country_red } }
+                        }
+                        exists = starbase
+                    }
+                    any_neighbor_system = {
+                        exists = space_owner
+                        space_owner = {
+                            is_same_value = root.owner
+                        }
+                    }
+                }
+                random_list = {
+                    50 = {
+                        modifier = {
+                            factor = 0
+                            any_neighbor_system = {
+                                any_system_planet = {
+                                    exists = owner
+                                    owner = { is_same_value = root.owner }
+                                }
+                            }
+                        }
+                    }
+                    50 = {
+                        root = {
+                            random_owned_ship = {
+                                limit = { is_ship_size = mem_surveyor_primary } #Is ship class
+                                add_modifier = { modifier = mem_surveyor_attrition days = -1 }
+                            }
+                            owner = {
+                                change_variable = {
+                                    which = mem_surveyor_attriction_counter
+                                    value = -1
+                                }
+                                # log = "Attrition: [This.mem_surveyor_attriction_counter]"
+                            }
+                        }                        
+                        create_starbase = {
+                            size = mem_surveyor_outpost
+                            owner = event_target:mem_surveyor_country
+                        }
+                    }
+                }
+            }
+        }
+        # IF = {
+        #     limit = { is_in_combat = yes }
+        #     fleet_event = { id = mem_surveyor.210 days = 30 }
+        # }
+        IF = {
+            limit = { # Attack nearest planet if any in the system
+                solar_system = {
+                    any_system_planet = {
+                        NOT = { has_planet_flag = mem_surveyor_is_being_attacked }
+                        exists = owner
+                        owner = {
+                            OR = {
+                                is_country_type = default
+                                is_country_type = primitive
+                                is_country_type = awakened_marauders
+                            }
+                        }
+                    }
+                }
+            }
+            # log = "Targeting things!!!"
+            solar_system = {
+                random_system_planet = {
+                    limit = {
+                        NOT = { has_planet_flag = mem_surveyor_is_being_attacked }
+                        exists = owner
+                        owner = {
+                            OR = {
+                                is_country_type = default
+                                is_country_type = primitive
+                                is_country_type = awakened_marauders
+                            }
+                        }
+                    }
+                    # log = "[This.GetName] targeted"
+                    set_planet_flag = mem_surveyor_next_target_planet
+                }
+            }
+            clear_fleet_actions = this
+            queue_actions = {
+                find_random_planet = { #Find a planet to attack
+                    trigger = {
+                        id = mem_surveyor.berserker.trigger.1.1
+                        has_planet_flag = mem_surveyor_next_target_planet
+                    }
+                    found_planet = {
+                        orbit_planet = this
+                        effect = { # Begin the invasion
+                            id = mem_surveyor.berserker.trigger.1.2
+                            remove_planet_flag = mem_surveyor_next_target_planet
+                            planet_event = { id = mem_surveyor.211 } #Notification that war has began
+                        }
+                        wait = { duration = 90 }
+                        effect = { # Reset the loop
+                            id = mem_surveyor.berserker.trigger.1.3
+                            root = {
+                                set_timed_fleet_flag = { flag = mem_surveyor_order_from_planet days = 1 }
+                                fleet_event = { id = mem_surveyor.210 }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        ELSE = { # Go find another system
+            # This selector picks viable targets
+            # IF = {
+            #     limit = {
+            #         NOT = {  
+            #             any_country = { has_country_flag = mem_surveyor_terrorize_this_country }
+            #         }
+            #     }
+            #     random_country = {
+            #         limit = {
+            #             is_country_type = default
+            #         }
+            #         country_event = { id = mem_surveyor.204 } #Contacting the player
+            #         set_timed_country_flag = { flag = mem_surveyor_terrorize_this_country days = 1800 }
+            #     }
+            # }
+            closest_system = {
+                limit = {
+                    OR = {
+                        AND = {
+                            exists = space_owner
+                            NOT = {
+                                space_owner = { is_same_value = root.owner } # Should not loop
+                            }
+                            OR = {
+                                space_owner = { is_country_type = default }
+                                space_owner = { is_country_type = awakened_marauders }
+                                ROOT = { has_fleet_flag = mem_surveyor_day_of_the_order }
+                            }
+                        }
+                        # This one targets primitives, not sure if I want it
+                        any_system_planet = {
+                            exists = owner
+                            owner = { is_country_type = primitive }
+                        }
+                    }
+                }
+                min_steps = 1 #Apparently, landing in the same system breaks the AI
+                # log = "[This.GetName] is the next target."
+                set_star_flag = mem_surveyor_next_target
+                every_playable_country = {
+                    remove_country_flag = mem_surveyor_terrorize_this_country
+                }
+                IF = {
+                    limit = { exists = space_owner }
+                    space_owner = {
+                        set_country_flag = mem_surveyor_terrorize_this_country
+                        country_event = { id = mem_surveyor.204 }
+                    }
+                }
+            }
+        }
+        set_timed_fleet_flag = { flag = mem_surveyor_day_of_the_order days = 2 } # If fleet receives events in rapid succession, it probably can't path. Make it so it can.
+        queue_actions = {
+            repeat = { # Probe shouldn't leave system if there's unconqered planet - I don't fully trust this code, but it should keep it standing.
+                while = {
+                    id = mem_surveyor.berserker.trigger.2.0
+                    root = {
+                        exists = solar_system
+                        solar_system = {
+                            any_system_planet = {
+                                exists = owner
+                                owner = {
+                                    NOT = { is_country_type = mem_surveyor_country_red }
+                                }
+                                has_ground_combat = yes
+                            }
+                        }
+                    }
+                }
+                wait = { duration = 1 } # This might conceivably cause lags, so increase number later if people complain
+            }
+            find_closest_system = {
+                trigger = {
+                    id = mem_surveyor.berserker.trigger.2.1
+                    has_star_flag = mem_surveyor_next_target
+                }
+                found_system = {
+                    move_to = this
+                    effect = {
+                        id = mem_surveyor.berserker.trigger.2.2
+                        root = { fleet_event = { id = mem_surveyor.210 } }
+                    }
+                }
+            }
+        }
+    }
+}
+
+# Player is informed about invasion
+planet_event = {
+    id = mem_surveyor.211
+    title = mem_surveyor.211.name
+    desc = mem_surveyor.211.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_ancient_robots_attack_01
+    location = ROOT
+    show_sound = event_air_raid_siren
+
+    immediate = {
+        set_timed_planet_flag = { flag = mem_surveyor_is_being_attacked days = 360 }
+        from = {
+            random_owned_ship = {
+                limit = { is_ship_size = mem_surveyor_primary } #Is ship class
+                add_modifier = { modifier = mem_surveyor_attrition days = -1 }
+            }
+            owner = {
+                change_variable = {
+                    which = mem_surveyor_attriction_counter
+                    value = -1
+                }
+                # log = "Attrition: [This.mem_surveyor_attriction_counter]"
+            }
+        }
+        
+        while = {
+            count = 5
+            create_army = {
+                name = "Berserkoid Invasion Force"
+                owner = from.owner
+                type = mem_surveyor_invaders
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.211.a
+    }
+}
+
+# Planet changes ownership to surveyor (On planet defenders lose)
+country_event = {
+    id = mem_surveyor.212
+    title = mem_surveyor.212.name
+    desc = {
+        text = mem_surveyor.212.desc.no_survivors
+        trigger = {
+            FROMFROM = { num_pops < 1 }
+        }
+    }
+    desc = {
+        text = mem_surveyor.212.desc.survivors
+        trigger = {
+            FROMFROM = { num_pops > 0 }
+        }
+    }
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_ancient_robots_attack_01
+    location = FROMFROM
+    show_sound = event_ground_battle
+
+    trigger = {
+        FROM = { is_country_type = mem_surveyor_country_red }
+    }
+
+    immediate = {
+        # log = "[From.GetName] won"
+        set_global_flag = mem_surveyor_probe_took_a_planet
+        FROMFROM = {
+            set_planet_flag = mem_surveyor_former_owner@root
+            remove_modifier = land_appropriation
+            every_owned_pop = { # Second pass, clear all the flags, edit the species
+                # species = { remove_species_flag = mem_surveyor_species_sampled }
+                IF = {
+                    limit = { 
+                        OR = {
+                            has_trait = trait_machine_unit 
+                            has_trait = trait_mechanical
+                        }
+                    }
+                    kill_pop = yes
+                }
+                ELSE = {                    
+                    random_list = {
+                        33 = {
+                            change_species = event_target:mem_surveyor_country
+                            clear_pop_category = yes
+                            prev = {
+                                while = {
+                                    count = 1
+                                    create_army = {
+                                        name = "Robotomite Garrison"
+                                        owner = FROM
+                                        species = this
+                                        type = mem_surveyor_robotomites
+                                    }
+                                }
+                            }
+                        }
+                        66 = {
+                            random_list = {
+                                1 = { # Rembered to change this!!!
+                                    species = {
+                                        save_event_target_as = escapee_species
+                                    }
+                                    FROMFROM = {
+                                        save_event_target_as = conquered_planet
+                                    }
+                                    random_country = {
+                                        limit = {
+                                            is_country_type = dormant_marauders
+                                            OR = {
+                                                has_country_flag = marauder_1
+                                                has_country_flag = marauder_2
+                                                has_country_flag = marauder_3
+                                            }
+                                        }
+                                        # log = "Avenger initiated"
+                                        country_event = { id = mem_surveyor.240 days = 180 random = 360 } # Change timer here
+                                    }
+                                    kill_pop = yes
+                                    modifier = {
+                                        factor = 0
+                                        has_trait = trait_hive_mind
+                                    }
+                                }
+                                15 = {
+                                    pop_event = { id = mem_surveyor.234 } # Trying to escape
+                                }
+                                84 = {
+                                    kill_pop = yes
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            IF = {
+                limit = { is_under_colonization = yes }
+                destroy_colony = yes
+            }
+            ELSE_IF = {
+                limit = { num_pops > 0 } # Apparently ownership is sometimes passed like this
+                set_owner = event_target:mem_surveyor_country
+            }
+            planet_event = { id = mem_surveyor.217 days = 5 } #Construct outpost after conquered
+            planet_event = { id = mem_surveyor.218 days = 60 } #Construct defense fleet
+        }
+        IF = {
+            limit = {
+                NOT = { has_authority = auth_machine_intelligence }
+            }
+            FROM = {
+                copy_techs_from = {
+                    target = root
+                    except = {
+                        # Horizon Signal
+                        tech_akx_worm_1
+                        tech_akx_worm_2
+                        tech_akx_worm_3
+                    }
+                }
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.212.a
+    }
+}
+
+# Invaders are beaten
+
+country_event = {
+    id = mem_surveyor.213
+    title = mem_surveyor.213.name
+    desc = mem_surveyor.213.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_victory
+    location = FROMFROM
+    show_sound = event_ground_battle
+
+    trigger = {
+        FROM = { is_country_type = mem_surveyor_country_red }
+    }
+
+    option = {
+        name = EXCELLENT
+    }
+}
+
+# Successfully retaking the planet
+country_event = {
+    id = mem_surveyor.214
+    title = mem_surveyor.214.name
+    desc = mem_surveyor.214.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_victory
+    location = FROMFROM
+    show_sound = event_ground_battle
+
+    trigger = {
+        FROM.owner = { is_country_type = mem_surveyor_country_red }
+    }
+
+    immediate = {
+        # log = "[From.GetName] lost"
+        FROMFROM = { 
+            set_owner = ROOT 
+            every_owned_pop = { clear_pop_category = yes }
+        }
+    }
+
+    option = {
+        name = EXCELLENT
+    }
+}
+
+# Surveyor construct outpost if they own a planet, but nobody else does
+event = {
+    id = mem_surveyor.215
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        exists = event_target:mem_surveyor_country
+        event_target:mem_surveyor_country = {
+            is_country_type = mem_surveyor_country_red
+            any_owned_planet = {
+                NOT = { exists = starbase }
+            }
+        }
+    }
+
+    immediate = {
+        event_target:mem_surveyor_country = {
+            every_owned_planet = {
+                solar_system = {
+                    IF = {
+                        limit = {
+                            NOR = {
+                                any_ship_in_system = {
+                                    exists = owner
+                                    owner = { NOT = { is_country_type = mem_surveyor_country_red } }
+                                }
+                                any_system_planet = {
+                                    exists = owner
+                                    owner = { NOT = { is_country_type = mem_surveyor_country_red } }
+                                }
+                            }
+                        }
+                        create_starbase = {
+                            size = mem_surveyor_outpost
+                            owner = event_target:mem_surveyor_country
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+# Reinforcement
+fleet_event = {
+    id = mem_surveyor.216
+    hide_window = yes
+
+    mean_time_to_happen = {
+        months = 6
+    }
+
+    trigger = {
+        has_fleet_flag = mem_surveyor_fleet
+        is_in_combat = no
+        any_owned_ship = {
+            is_ship_size = mem_surveyor_primary
+        }
+        fleet_size < 47
+        owner = {
+            OR = {
+                is_country_type = mem_surveyor_country_red
+                is_country_type = mem_surveyor_country_yellow
+            }
+            check_variable = {
+                which = mem_surveyor_attriction_counter
+                value > 0
+            }
+        }
+    }
+
+    immediate = {
+        IF = {
+            limit = {
+                count_fleet_ships = {
+                    limit = { is_ship_size = mem_surveyor_support }
+                    count < 17
+                }
+            }
+            while = {
+                count = 3
+                create_ship = {
+                    name = ""
+                    design = NAME_MEM_Surveyor_Support
+                }
+            }
+        }
+        IF = {
+            limit = {
+                count_fleet_ships = {
+                    limit = { is_ship_size = mem_surveyor_escort }
+                    count < 9
+                }
+            }
+            create_ship = {
+                name = ""
+                design = NAME_MEM_Surveyor_Escort
+            }
+        }
+    }
+}
+
+# Planet constructs outpost after conquest
+planet_event = {
+    id = mem_surveyor.217
+    is_triggered_only = yes
+    hide_window = yes
+
+    trigger = {
+        exists = owner
+        owner = {
+            is_country_type = mem_surveyor_country_red
+        }
+        NOT = {
+            exists = starbase
+        }
+        solar_system = {
+            NOR = {
+                any_ship_in_system = {
+                    exists = owner
+                    owner = { NOT = { is_country_type = mem_surveyor_country_red } }
+                }
+                any_system_planet = {
+                    exists = owner
+                    owner = { NOT = { is_country_type = mem_surveyor_country_red } }
+                }
+            }
+        }
+    }
+
+    immediate = {
+        solar_system = {
+            create_starbase = {
+                size = mem_surveyor_outpost
+                owner = event_target:mem_surveyor_country
+            }
+        }
+    }
+}
+
+# Planet constructs defensive fleets
+planet_event = {
+    id = mem_surveyor.218
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        exists = owner
+        owner = {
+            is_country_type = mem_surveyor_country_red
+        }
+        # NAND = {
+        #     exists = space_owner
+        #     space_owner = {
+        #         NOT = { is_same_value = root.owner }
+        #     }
+        #     exists = starbase
+        #     starbase = { is_disabled = no }
+        # }
+        NOT = {
+            has_planet_flag = mem_surveyor_spawned_garrison
+        }
+        has_ground_combat = no
+        is_occupied_flag = no
+    }
+
+    immediate = {
+        set_planet_flag = mem_surveyor_spawned_garrison
+        create_fleet = {
+            name = "[Root.GetName] Robotomite Flotilla"
+            settings = { 
+                can_upgrade = no 
+                can_change_composition = no
+                can_disband = no
+            }
+            effect = {
+                set_location = root
+                set_owner = root.owner
+                set_fleet_flag = mem_surveyor_garrison_fleet
+                set_fleet_flag = mem_surveyor_fleet_of@root # Setting relations, would help on transition, maybe
+                while = {
+                    count = 8
+                    create_ship = {
+                        name = ""
+                        design = NAME_MEM_Surveyor_Support
+                    }
+                }
+                while = {
+                    count = 3
+                    create_ship = {
+                        name = ""
+                        design = NAME_MEM_Surveyor_Escort
+                    }
+                }
+                set_fleet_stance = aggressive
+                set_aggro_range_measure_from = self
+                set_aggro_range = 500
+                add_modifier = {
+                    modifier = mem_surveyor_crappy_flunkies
+                    days = -1
+                }
+            }
+        }
+    }
+}
+
+# Probe siezes activity due to high attrition
+country_event = {
+    id = mem_surveyor.219
+    hide_window = yes
+
+    mean_time_to_happen = {
+        months = 3
+    }
+
+    trigger = {
+        is_country_type = mem_surveyor_country_red
+        NOT = { has_country_flag = mem_surveyor_out_of_comission }
+        exists = event_target:mem_surveyor_fleet.solar_system
+        event_target:mem_surveyor_fleet.solar_system = {
+            any_system_planet = {
+                uninhabitable_regular_planet = yes
+                has_anomaly = no
+                OR = {
+                    has_deposit_for = shipclass_research_station
+                    has_deposit = no
+                }
+            }
+        }
+        check_variable = {
+            which = mem_surveyor_attriction_counter
+            value < 1
+        }
+        any_owned_ship = {
+            has_ship_flag = mem_surveyor_probe_ship
+        }
+    }
+
+    immediate = {
+        set_country_flag = mem_surveyor_out_of_comission
+        every_playable_country = {
+            limit = { 
+                is_ai = no
+                has_communications = root
+            }
+            country_event = { id = mem_surveyor.220 }
+        }
+        every_owned_army = {
+            remove_army = yes
+        }
+        event_target:mem_surveyor_fleet = {
+            clear_fleet_actions = this
+            queue_actions = {
+                find_closest_system = {
+                    trigger = {
+                        id = mem_surveyor.berserker.trigger.3.0
+                        NOT = { exists = space_owner }
+                        any_system_planet = {
+                            uninhabitable_regular_planet = yes
+                            has_anomaly = no
+                            OR = {
+                                has_deposit_for = shipclass_research_station
+                                has_deposit = no
+                            }
+                        }
+                    }
+                    found_system = {
+                        move_to = this
+                        find_random_planet = {
+                            trigger = {
+                                id = mem_surveyor.berserker.trigger.3.1
+                                uninhabitable_regular_planet = yes
+                                has_anomaly = no
+                                OR = {
+                                    has_deposit_for = shipclass_research_station
+                                    has_deposit = no
+                                }
+                            }
+                            found_planet = {
+                                orbit_planet = this
+                                effect = {
+                                    id = mem_surveyor.berserker.trigger.3.1
+                                    prevent_anomaly = yes
+                                    set_planet_flag = mem_surveyor_resting_place
+                                    add_deposit = d_physics_4
+                                    add_deposit = d_engineering_4
+                                    add_modifier = {
+                                        modifier = mem_surveyor_resting_place
+                                        days = -1
+                                    }
+                                    root = {
+                                        country_event = {
+                                            id = mem_surveyor.221 days = 720 random = 360
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+# Player is notified
+country_event = {
+    id = mem_surveyor.220
+    title = mem_surveyor.220.name
+    desc = mem_surveyor.220.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_unknown_ships
+    location = event_target:mem_surveyor_fleet
+    show_sound = event_airlock
+
+    option = {
+        name = mem_surveyor.220.a
+    }
+}
+
+# Probe completely loses control
+country_event = {
+    id = mem_surveyor.221
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        any_owned_ship = {
+            has_ship_flag = mem_surveyor_probe_ship
+        }
+        has_global_flag = mem_surveyor_probe_took_a_planet
+        NOT = { has_country_flag = mem_surveyor_already_attritioned }
+    }
+
+    immediate = {
+        set_country_flag = mem_surveyor_already_attritioned
+        mem_syurveyor_create_robotomite_countries = yes
+        every_owned_fleet = {
+            limit = {
+                NOT = { has_fleet_flag = mem_surveyor_fleet }
+            }
+            destroy_fleet = this
+        }
+        every_playable_country = {
+            limit = {
+                is_ai = no
+                has_communications = root
+            }
+            country_event = { id = mem_surveyor.222 }
+        }
+    }
+}
+
+# Player is notified of Freebotomites being born
+country_event = {
+    id = mem_surveyor.222
+    title = mem_surveyor.222.name
+    desc = {
+        text = mem_surveyor.222.desc
+        exclusive_trigger = {
+            any_country = {
+                has_country_flag = mem_surveyor_freebotomite_country
+            }
+        }
+    }
+    desc = mem_surveyor.222.desc.no_freebs
+    # desc = {
+    #     text = mem_surveyor.222.desc.no_planet_taken_ever
+    #     exclusive_trigger = {
+    #         NOT = { has_global_flag = mem_surveyor_probe_took_a_planet }
+    #     }
+    # }
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mining_station
+    location = event_target:mem_surveyor_fleet
+    show_sound = event_airlock
+
+    option = {
+        name = mem_surveyor.222.a
+    }
+}
+
+# Increase probe attrition yearly
+@attrition_yearly_increase = 5
+country_event = {
+    id = mem_surveyor.223
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        is_country_type = mem_surveyor_country_red
+        check_variable = {
+            which = mem_surveyor_attriction_counter
+            value > 0
+        }
+    }
+
+    immediate = {
+        subtract_variable = {
+            which = mem_surveyor_attriction_counter
+            value = @attrition_yearly_increase
+        }
+        # log = "Attrition: [This.mem_surveyor_attriction_counter]"
+        random_owned_ship = {
+            limit = {
+                has_ship_flag = mem_surveyor_probe_ship
+            }
+            while = {
+                count = @attrition_yearly_increase
+                add_modifier = {
+                    modifier = mem_surveyor_attrition
+                    days = -1
+                }
+            }
+        }
+        country_event = { id = mem_surveyor.223 days = 360 }
+    }
+}
+
+# Berserker probe is killed
+country_event = {
+    id = mem_surveyor.230
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        is_country_type = mem_surveyor_country_red
+        FROMFROM = {
+            has_ship_flag = mem_surveyor_probe_ship
+        }
+    }
+
+    immediate = {
+        # log = "Berserker Probe is killed by [From.GetName]"
+        FROM = { 
+            save_event_target_as = probe_killers 
+            set_country_flag = mem_surveyor_probe_killers
+            country_event = { id = mem_surveyor.233 }
+        }
+        FROMFROM.fleet = {
+            clear_fleet_actions = this
+        }
+        every_owned_army = {
+            remove_army = yes
+        }
+        IF = {
+            limit = {
+                NOT = { has_country_flag = mem_surveyor_already_attritioned }
+            }
+            mem_syurveyor_create_robotomite_countries = yes
+            every_playable_country = {
+                limit = {
+                    NOT = { is_same_value = FROM }
+                    has_communications = ROOT
+                }
+                country_event = { id = mem_surveyor.231 } # Tell everyone what happened
+            }
+        }
+        ELSE = {
+            every_playable_country = {
+                limit = {
+                    NOT = { is_same_value = FROM }
+                    has_communications = ROOT
+                }
+                country_event = { id = mem_surveyor.232 } # Tell everyone probe is dead, but no mention of attrition
+            }
+        }
+        random_country = {
+            limit = {
+                is_country_type = mem_surveyor_avengers
+            }
+            country_event = { id = mem_surveyor.248 days = 7 }
+        }
+        random_country = {
+            limit = {
+                is_country_type = mem_surveyor_titanic_effort
+            }
+            country_event = { id = mem_surveyor.269 days = 7 }
+        }
+        destroy_country = yes
+    }
+}
+
+# Inform player of probe being destroyed + robotomites
+country_event = {
+    id = mem_surveyor.231
+    title = mem_surveyor.231.name
+    desc = {
+        text = mem_surveyor.231.desc
+        exclusive_trigger = {
+            has_global_flag = mem_surveyor_freebotomite_country_spawned
+        }
+    }
+    desc = {
+        text = mem_surveyor.231.desc.no_freebs
+        exclusive_trigger = {
+            NOT = { has_global_flag = mem_surveyor_freebotomite_country_spawned }
+        }
+    }
+    desc = {
+        text = mem_surveyor.231.desc.no_planet_taken_ever
+        exclusive_trigger = {
+            NOT = { has_global_flag = mem_surveyor_probe_took_a_planet }
+        }
+    }
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_debris
+    show_sound = event_space_battle
+
+    option = {
+        name = mem_surveyor.231.a
+    }
+
+    option = {
+        name = mem_surveyor.231.fallen_empire
+        exclusive_trigger = {
+            event_target:probe_killers = {
+                OR = {
+                    is_country_type = fallen_empire
+                    is_country_type = awakened_fallen_empire
+                    is_guardian_country = yes
+                    is_country_type = guardian_scavenger_bot
+                    is_country_type = guardian_elderly_tiyanki
+                    is_country_type = guardian_hatchling
+                }
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.231.probe_hunter
+        exclusive_trigger = {
+            event_target:probe_killers = {
+                is_country_type = mem_surveyor_avengers
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.231.titan
+        exclusive_trigger = {
+            event_target:probe_killers = {
+                is_country_type = mem_surveyor_titanic_effort
+            }
+        }
+    }
+}
+
+# Inform player of probe being destroyed
+
+country_event = {
+    id = mem_surveyor.232
+    title = mem_surveyor.232.name
+    desc = mem_surveyor.232.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_debris
+    show_sound = event_space_battle
+
+    option = {
+        name = mem_surveyor.232.a
+    }
+}
+
+# You have killed berserker probe
+country_event = {
+    id = mem_surveyor.233
+    title = mem_surveyor.233.name
+    desc = {
+        text = mem_surveyor.233.desc
+        exclusive_trigger = {
+            any_country = {
+                has_country_flag = mem_surveyor_freebotomite_country
+            }
+            NOT = {
+                FROM = { has_country_flag = mem_surveyor_already_attritioned }
+            }
+        }
+    }
+    desc = mem_surveyor.233.desc.no_freebs
+    desc = {
+        text = mem_surveyor.233.desc.no_planet_taken_ever
+        exclusive_trigger = {
+            NOT = { has_global_flag = mem_surveyor_probe_took_a_planet }
+            NOT = {
+                FROM = { has_country_flag = mem_surveyor_already_attritioned }
+            }
+        }
+    }
+    desc = {
+        text = mem_surveyor.233.desc.already_attritioned
+        exclusive_trigger = {
+            FROM = { has_country_flag = mem_surveyor_already_attritioned }
+        }
+    }
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_debris
+    location = FROMFROMFROM.Solar_System
+    show_sound = event_space_battle
+
+    # trigger = {
+    #     FROM = {
+    #         is_country_type = mem_surveyor_country_red
+    #     }
+    #     FROMFROMFROM = {
+    #         has_ship_flag = mem_surveyor_probe_ship
+    #     }
+    # }
+
+    after = {
+        IF = {
+            limit = { 
+                is_country_type = default 
+                NOR = {
+                    has_valid_civic = civic_fanatic_purifiers
+                    has_valid_civic = civic_hive_devouring_swarm
+                    has_valid_civic = civic_machine_terminator
+                    has_valid_civic = civic_machine_assimilator
+                }
+            }
+            custom_tooltip = mem_surveyor.233.tooltip.opinion_increase
+            hidden_effect = {
+                every_playable_country = {
+                    limit = {
+                        has_communications = FROM
+                        has_communications = ROOT
+                    }
+                    add_opinion_modifier = {
+                        who = root
+                        modifier = mem_surveyor_destroyed_probe_red
+                    }
+                }
+            }
+        }
+        mem_surveyor_killing_reward = yes
+    }
+
+    option = {
+        name = mem_surveyor.233.a
+    }
+}
+
+# Pop event to try and escape
+pop_event = {
+    id = mem_surveyor.234
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        # log = "Evaluation for refugees: [This.GetSpeciesName] on [Planet.GetName]"
+        IF = {
+            limit = { is_valid_refugee_pop = yes }
+            mem_surveyor_refugee_pop_effect = yes
+        }
+        ELSE = {
+            # log = "Refugee dead"
+            kill_pop = yes
+        }
+    }
+}
+
+
+# Refugees arrive
+pop_event = {
+    id = mem_surveyor.235
+    title = mem_surveyor.235.name
+    desc = mem_surveyor.235.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_unknown_ships
+    location = root.planet
+
+    immediate = {
+        # log = "[Planet.GetName] received refugees"
+    }
+
+    option = {
+        name = mem_surveyor.235.a
+    }
+}
+
+# Marauders receive event to spawn probe hunters
+country_event = {
+    id = mem_surveyor.240
+    is_triggered_only = yes
+    hide_window = yes
+
+    trigger = {
+        is_country_type = dormant_marauders
+        NOT = { has_global_flag = mem_surveyor_survivor_spawned }
+        any_system = {
+            exists = space_owner
+            space_owner = { is_same_value = root }
+        }
+        any_country = {
+            is_country_type = mem_surveyor_country_red
+        }
+    }
+
+    immediate = {
+        # log = "Spawning hunters"
+        random_system = {
+            limit = {
+                exists = space_owner
+                space_owner = { is_same_value = root }
+            }
+            # log = "[This.GetName] is the starting system."
+            save_event_target_as = starting_system
+        }
+        set_global_flag = mem_surveyor_survivor_spawned
+        create_country = {
+            name = "Probe Hunters"
+            name_list = "PRT1"
+            type = mem_surveyor_avengers
+            species = event_target:escapee_species
+            flag = {
+                icon = {
+                    category = ornate
+                    file = flag_ornate_21.dds
+                }
+                background = {
+                    category = backgrounds
+                    file = triangle_split.dds
+                }
+                colors = {
+                    "red"
+                    "black"
+                    "null"
+                    "null"
+                }
+            }
+            effect = {
+                set_graphical_culture = pirate_01
+                set_country_flag = mem_surveyor_avengers_country
+                randomize_flag_symbol = "domination"
+                create_leader = {
+                    class = admiral
+                    traits = {
+                        trait = leader_trait_mem_surveyor_avenger
+                        trait = leader_trait_arrested_development
+                    }
+                    skill = 3
+                    effect = {
+                        save_global_event_target_as = mem_surveyor_avengers_leader
+                        set_age = 21
+                        set_leader_flag = mem_surveyor_avengers_leader
+                    }
+                }
+                save_event_target_as = avengers_country
+                IF = {
+                    limit = {
+                        root = { has_country_flag = marauder_1 }
+                    }
+                    set_country_flag = mem_surveyor_avenger_1
+                }
+                ELSE_IF = {
+                    limit = {
+                        root = { has_country_flag = marauder_2 }
+                    }
+                    set_country_flag = mem_surveyor_avenger_2
+                }
+                ELSE = {
+                    set_country_flag = mem_surveyor_avenger_3
+                }
+            }
+        }
+        set_faction_hostility = {
+            target = event_target:avengers_country
+            set_hostile = no
+            set_neutral = yes
+            set_friendly = no
+        }
+        create_fleet = {
+            name = "Probe Hunters"
+            effect = {
+                set_owner = event_target:avengers_country
+                while = {
+                    count = 1
+                    create_ship = {
+                        name = "Vindicator"
+                        design = "NAME_Ancestral_Glory"
+                        prefix = no
+                        graphical_culture = "pirate_01"
+                    }
+                }
+                while = {
+                    count = 18
+                    create_ship = {
+                        name = random
+                        design = "NAME_Outrider"
+                        prefix = no
+                        graphical_culture = "pirate_01"
+                    }
+                }
+                while = {
+                    count = 12
+                    create_ship = {
+                        name = random
+                        design = "NAME_Lancer"
+                        prefix = no
+                        graphical_culture = "pirate_01"
+                    }
+                }
+                while = {
+                    count = 6
+                    create_ship = {
+                        name = random
+                        design = "NAME_Void_Champion"
+                        prefix = no
+                        graphical_culture = "pirate_01"
+                    }
+                }
+                set_location = event_target:starting_system.star                
+                set_leader = event_target:mem_surveyor_avengers_leader
+                auto_follow_fleet = { 
+					target = event_target:mem_surveyor_fleet
+					attack_fleet = yes 
+				}
+            }
+        }
+        every_playable_country = {
+            limit = { has_communications = root }
+            country_event = { id = mem_surveyor.241 }
+        }
+    }
+}
+
+# Establishing contact with the avengers
+country_event = {
+    id = mem_surveyor.241
+    title = mem_surveyor.241.name
+    desc = mem_surveyor.241.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_pirate_armada
+    show_sound = event_space_battle
+
+    immediate = {
+        establish_communications_no_message = event_target:avengers_country
+    }
+
+    option = {
+        name = ONSCREEN
+        hidden_effect = {
+            country_event = { id = mem_surveyor.242 }
+        }
+    }
+}
+
+# Diplomatic event from the avengers
+country_event = {
+    id = mem_surveyor.242
+    title = TRANSMISSION
+    desc = { # Warriors
+        text = mem_surveyor.242.desc.1
+        trigger = {
+            event_target:avengers_country = { has_country_flag = mem_surveyor_avenger_1 }
+        }
+    }
+    desc = { # Dwamaks
+        text = mem_surveyor.242.desc.2
+        trigger = {
+            event_target:avengers_country = { has_country_flag = mem_surveyor_avenger_2 }
+        }
+    }
+    desc = { # She of the Void
+        text = mem_surveyor.242.desc.3
+        trigger = {
+            event_target:avengers_country = { has_country_flag = mem_surveyor_avenger_3 }
+        }
+    }
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		portrait = event_target:mem_surveyor_avengers_leader
+		room = ethic_spaceship_room
+    }
+    
+    option = {
+        name = mem_surveyor.242.a
+    }
+
+    option = {
+        name = mem_surveyor.242.purifier
+        exclusive_trigger = {
+            OR = {
+                has_valid_civic = civic_fanatic_purifiers
+                has_valid_civic = civic_hive_devouring_swarm
+                has_valid_civic = civic_machine_terminator
+            }
+        }
+    }
+}
+
+# Custom diplomacy with the avengers
+country_event = {
+    id = mem_surveyor.243
+    title = TRANSMISSION
+    # Status update on the probe: It's moving to system
+    desc = { # Warriors
+        text = mem_surveyor.243.desc.1.1
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_1 }
+            NOT = { has_country_flag = mem_surveyor_terrorize_this_country }
+            exists = event_target:next_target
+        }
+    }
+    desc = { # Dwamaks
+        text = mem_surveyor.243.desc.1.2
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_2 }
+            NOT = { has_country_flag = mem_surveyor_terrorize_this_country }
+            exists = event_target:next_target
+        }
+    }
+    desc = { # She of the Void
+        text = mem_surveyor.243.desc.1.3
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_3 }
+            NOT = { has_country_flag = mem_surveyor_terrorize_this_country }
+            exists = event_target:next_target
+        }
+    }
+    # Status update on probe: It's targeting a planet
+    desc = { # Warriors
+        text = mem_surveyor.243.desc.2.1
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_1 }
+            NOT = { has_country_flag = mem_surveyor_terrorize_this_country }
+            exists = event_target:next_target_planet
+        }
+    }
+    desc = { # Dwamaks
+        text = mem_surveyor.243.desc.2.2
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_2 }
+            NOT = { has_country_flag = mem_surveyor_terrorize_this_country }
+            exists = event_target:next_target_planet
+        }
+    }
+    desc = { # She of the Void
+        text = mem_surveyor.243.desc.2.3
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_3 }
+            NOT = { has_country_flag = mem_surveyor_terrorize_this_country }
+            exists = event_target:next_target_planet
+        }
+    }
+    # Player is being targeted
+    desc = { # Warriors
+        text = mem_surveyor.243.desc.3.1
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_1 }
+            has_country_flag = mem_surveyor_terrorize_this_country 
+        }
+    }
+    desc = { # Dwamaks
+        text = mem_surveyor.243.desc.3.2
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_2 }
+            has_country_flag = mem_surveyor_terrorize_this_country 
+        }
+    }
+    desc = { # She of the Void
+        text = mem_surveyor.243.desc.3.3
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_3 }
+            has_country_flag = mem_surveyor_terrorize_this_country
+        }
+    }
+    # Probe is idling
+    desc = { # Warriors
+        text = mem_surveyor.243.desc.4.1
+        exclusive_trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_1 }
+            OR = {
+                NOR = { 
+                    has_country_flag = mem_surveyor_terrorize_this_country 
+                    exists = event_target:next_target
+                    exists = event_target:next_target_planet
+                }
+                event_target:mem_surveyor_fleet = {
+                    is_fleet_idle = yes
+                }
+            }
+        }
+    }
+    desc = { # Dwamaks
+        text = mem_surveyor.243.desc.4.2
+        exclusive_trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_2 }
+            OR = {
+                NOR = { 
+                    has_country_flag = mem_surveyor_terrorize_this_country 
+                    exists = event_target:next_target
+                    exists = event_target:next_target_planet
+                }
+                event_target:mem_surveyor_fleet = {
+                    is_fleet_idle = yes
+                }
+            }
+        }
+    }
+    desc = { # She of the Void
+        text = mem_surveyor.243.desc.4.3
+        exclusive_trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_3 }
+            OR = {
+                NOR = { 
+                    has_country_flag = mem_surveyor_terrorize_this_country 
+                    exists = event_target:next_target
+                    exists = event_target:next_target_planet
+                }
+                event_target:mem_surveyor_fleet = {
+                    is_fleet_idle = yes
+                }
+            }
+        }
+    }
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		portrait = event_target:mem_surveyor_avengers_leader
+		room = ethic_spaceship_room
+    }
+
+    trigger = {
+        FROM = { is_country_type = mem_surveyor_avengers }
+        any_country = { 
+            is_country_type = mem_surveyor_country_red 
+            any_owned_ship = {
+                is_ship_size = mem_surveyor_primary
+            }
+        }
+        NOT = { has_country_flag = mem_surveyor_avengers_diplomacy }
+        exists = event_target:mem_surveyor_avengers_leader
+        NOT = { has_country_flag = mem_surveyor_attacked_avengers }
+    }
+
+    immediate = {
+        set_country_flag = mem_surveyor_avengers_diplomacy
+        random_system = {
+            limit = { has_star_flag = mem_surveyor_next_target }
+            save_event_target_as = next_target
+        }
+        random_planet = {
+            limit = { has_planet_flag = mem_surveyor_next_target_planet }
+            save_event_target_as = next_target_planet
+        }
+    }
+
+    # Talking about duty
+    option = {
+        name = mem_surveyor.243.1.a
+        is_dialog_only = yes
+        response_text = mem_surveyor.243.1.a.response
+
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_1 }
+            NAND = {
+                event_target:mem_surveyor_avengers_leader = { is_same_species = root }
+                is_militarist = yes
+            }
+        }
+    }
+
+    # Militarists accuse him of desertion
+    option = {
+        name = mem_surveyor.243.1.b
+        is_dialog_only = yes
+        response_text = mem_surveyor.243.1.b.response
+
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_1 }
+            event_target:mem_surveyor_avengers_leader = { is_same_species = root }
+            OR = {
+                has_ethic = ethic_fanatic_militarist
+                has_ethic = ethic_militarist
+            }
+        }
+    }
+
+    # Telling him to stop screeching
+    option = {
+        name = mem_surveyor.243.2.a
+        is_dialog_only = yes
+        response_text = mem_surveyor.243.2.a.response
+
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_2 }
+            # event_target:mem_surveyor_avengers_leader = { is_same_species = root }
+        }
+    }
+
+    # Generic disapproval of Void worshippers
+    option = {
+        name = mem_surveyor.243.3.a
+        is_dialog_only = yes
+        response_text = mem_surveyor.243.3.a.response
+
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_3 }
+            OR = {
+                NOT = { event_target:mem_surveyor_avengers_leader = { is_same_species = root } }
+                NOR = {
+                    is_materialist = yes
+                    is_spiritualist = yes
+                }
+            }
+        }
+    }
+
+    # Materialists question his conversion
+    option = {
+        name = mem_surveyor.243.3.b
+        is_dialog_only = yes
+        response_text = mem_surveyor.243.3.b.response
+
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_3 }
+            event_target:mem_surveyor_avengers_leader = { is_same_species = root } 
+            OR = {
+                has_ethic = ethic_fanatic_materialist
+                has_ethic = ethic_materialist
+            }
+        }
+    }
+
+    # Spiritualist accuse him of heresy
+    option = {
+        name = mem_surveyor.243.3.c
+        is_dialog_only = yes
+        response_text = mem_surveyor.243.3.c.response
+
+        trigger = {
+            FROM = { has_country_flag = mem_surveyor_avenger_3 }
+            event_target:mem_surveyor_avengers_leader = { is_same_species = root } 
+            OR = {
+                has_ethic = ethic_fanatic_spiritualist
+                has_ethic = ethic_spiritualist
+            }
+        }
+    }
+
+    option = {
+        name = MEM_SURVEYOR_EXIT
+        default_hide_option = yes
+        remove_country_flag = mem_surveyor_avengers_diplomacy
+    }
+
+    option = {
+        name = mem_surveyor.242.purifier
+        default_hide_option = yes
+        remove_country_flag = mem_surveyor_avengers_diplomacy
+        exclusive_trigger = {
+            OR = {
+                has_valid_civic = civic_fanatic_purifiers
+                has_valid_civic = civic_hive_devouring_swarm
+                has_valid_civic = civic_machine_terminator
+            }
+            NOT = { event_target:mem_surveyor_avengers_leader = { is_same_species = root } }
+        }
+    }
+}
+
+# The avengers fleet is defeated
+country_event = {
+    id = mem_surveyor.244
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        is_country_type = mem_surveyor_avengers
+    }
+
+    immediate = {
+        # log = "[From.GetName] killed avengers."
+        FROM = {
+            save_event_target_as = avengers_killers
+        }
+        FROMFROM.solar_system = {
+            save_event_target_as = battle_system
+        }
+        IF = {
+            limit = {
+                FROM = { NOT = { is_country_type = mem_surveyor_country_red } }
+            }
+            every_playable_country = {
+                limit = {
+                    is_ai = no
+                    has_communications = root
+                    NOT = { is_same_value = FROM }
+                }
+                country_event = { id = mem_surveyor.245 }
+            }
+        }
+        ELSE_IF = {
+            limit = {
+                FROMFROMFROM = {
+                    NOT = { has_fleet_flag = mem_surveyor_fleet }
+                }
+            }
+            every_playable_country = {
+                limit = {
+                    is_ai = no
+                    has_communications = root
+                }
+                country_event = { id = mem_surveyor.246 }
+            }
+        }
+        ELSE_IF = {
+            limit = {
+                FROMFROMFROM = {
+                    any_owned_ship = {
+                        is_ship_size = mem_surveyor_primary
+                    }
+                }
+            }
+            while = {
+                count = 30
+                limit = {
+                    FROM = {
+                        check_variable = {
+                            which = mem_surveyor_attriction_counter
+                            value > 1
+                        }
+                    }
+                }
+                FROMFROMFROM = {
+                    random_owned_ship = {
+                        limit = { is_ship_size = mem_surveyor_primary } #Is ship class
+                        add_modifier = { modifier = mem_surveyor_attrition days = -1 }
+                    }
+                }
+                FROM = {
+                    change_variable = {
+                        which = mem_surveyor_attriction_counter
+                        value = -1
+                    }
+                    # log = "Attrition: [This.mem_surveyor_attriction_counter]"
+                }
+            }
+            every_playable_country = {
+                limit = {
+                    is_ai = no
+                    has_communications = root
+                }
+                country_event = { id = mem_surveyor.247 }
+            }
+        }
+    }
+}
+
+# Inform player that avengers are killed by 3rd party
+country_event = {
+    id = mem_surveyor.245
+    title = mem_surveyor.245.name
+    desc = mem_surveyor.245.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_space_battle
+    show_sound = event_space_battle
+
+    option = {
+        name = mem_surveyor.245.a
+    }
+}
+
+# Inform player that avengers are killed by the Aux Probe Fleet
+country_event = {
+    id = mem_surveyor.246
+    title = mem_surveyor.246.name
+    desc = mem_surveyor.246.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_space_battle
+    show_sound = event_space_battle
+
+    option = {
+        name = mem_surveyor.246.a
+    }
+}
+
+# Inform player that avengers are killed by the probe itself
+country_event = {
+    id = mem_surveyor.247
+    title = mem_surveyor.247.name
+    desc = mem_surveyor.247.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_space_battle
+    show_sound = event_space_battle
+
+    option = {
+        name = mem_surveyor.247.a
+    }
+}
+
+# Disband avengers
+country_event = {
+    id = mem_surveyor.248
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        every_playable_country = {
+            limit = {
+                is_ai = no
+                has_communications = root
+            }
+            country_event = { id = mem_surveyor.249 }
+        }
+        random_owned_fleet = {
+            delete_fleet = this
+        }
+    }
+}
+
+# Inform player that avengers disbanded
+country_event = {
+    id = mem_surveyor.249
+    title = mem_surveyor.249.name
+    desc = mem_surveyor.249.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_pirate_armada
+    show_sound = event_radio_chatter
+
+    option = {
+        name = OK
+    }
+}
+
+# Player destroyed avengers
+country_event = {
+    id = mem_surveyor.250
+    title = mem_surveyor.250.name
+    desc = mem_surveyor.250.desc
+
+    is_triggered_only = yes
+    show_sound = event_space_battle
+
+    trigger = {
+        FROM = {
+            is_country_type = mem_surveyor_avengers
+        }
+    }
+
+    picture = GFX_evt_mem_space_battle
+
+    option = {
+        name = mem_surveyor.250.a
+
+        add_monthly_resource_mult = {
+			resource = minerals
+			value = @tier3materialreward
+			min = @tier3materialmin
+			max = @tier3materialmax
+        }
+        add_monthly_resource_mult = {
+			resource = energy
+			value = @tier3materialreward
+			min = @tier3materialmin
+			max = @tier3materialmax
+		}
+    }
+}
+
+# Player enters combat with the avengers
+country_event = {
+    id = mem_surveyor.251
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        FROM = {
+            is_country_type = mem_surveyor_avengers
+        }
+    }
+
+    immediate = {
+        set_country_flag = mem_surveyor_attacked_avengers
+    }
+}
+
+# Unable to contact avengers
+country_event = {
+    id = mem_surveyor.252
+    title = mem_surveyor.252.name
+    desc = mem_surveyor.252.desc
+
+    is_triggered_only = yes
+    picture = GFX_evt_unknown_ships
+
+    trigger = {
+        FROM = { is_country_type = mem_surveyor_avengers }
+        NAND = {
+            any_country = { 
+                is_country_type = mem_surveyor_country_red 
+                any_owned_ship = {
+                    is_ship_size = mem_surveyor_primary
+                }
+            }
+            exists = event_target:mem_surveyor_avengers_leader
+            NOT = { has_country_flag = mem_surveyor_attacked_avengers }
+        }
+        NOT = { has_country_flag = mem_surveyor_avengers_diplomacy }
+    }
+
+    option = {
+        name = OK
+    }
+}
+
+# Somehow, leader dies
+country_event = {
+    id = mem_surveyor.253
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        FROM = {
+            has_leader_flag = mem_surveyor_avengers_leader
+        }
+    }
+
+    immediate = {
+        country_event = { id = mem_surveyor.254 days = 5 }
+    }
+}
+
+# Disband fleet when leader dies
+country_event = {
+    id = mem_surveyor.254
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        every_playable_country = {
+            limit = {
+                is_ai = no
+                has_communications = root
+            }
+            country_event = { id = mem_surveyor.255 }
+        }
+        destroy_country = yes
+    }
+}
+
+# Inform player that avengers disbanded after leader's death
+country_event = {
+    id = mem_surveyor.255
+    title = mem_surveyor.255.name
+    desc = mem_surveyor.255.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_space_funeral
+    show_sound = event_life_support_fail
+
+    option = {
+        name = OK
+    }
+}
+
+# Country spots avengers they know nothing about
+country_event = {
+    id = mem_surveyor.256
+    title = mem_surveyor.256.name
+    desc = mem_surveyor.256.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_unknown_ships
+    show_sound = event_radio_chatter
+
+    trigger = {
+        FROM = {
+            is_country_type = mem_surveyor_avengers
+        }
+    }
+
+    immediate = {
+        FROM = {
+            save_event_target_as = avengers_country
+            country_event = { id = mem_surveyor.257 days = 30 }
+        }
+    }
+
+    option = {
+        name = INTERESTING
+    }
+}
+
+# Avengers bounce back to player
+country_event = {
+    id = mem_surveyor.257
+    is_triggered_only = yes
+    hide_window = yes
+
+    trigger = {
+        exists = FROM
+    }
+
+    immediate = {
+        FROM = {
+            country_event = { id = mem_surveyor.258 }
+        }
+    }
+}
+
+# Contact with avengers
+country_event = {
+    id = mem_surveyor.258
+    title = mem_surveyor.258.name
+    desc = mem_surveyor.258.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_pirate_armada
+    show_sound = event_radio_chatter
+
+    immediate = {
+        establish_communications_no_message = event_target:avengers_country
+    }
+
+    option = {
+        name = ONSCREEN
+        hidden_effect = {
+            country_event = { id = mem_surveyor.242 }
+        }
+    }
+}
+
+# Curators pop up offering data
+country_event = {
+    id = mem_surveyor.260
+    title = TRANSMISSION
+    desc = mem_surveyor.260.desc
+
+	diplomatic = yes
+	custom_gui = "enclave_curator_window"
+
+	picture_event_data = {
+		portrait = event_target:curators
+		room = enclave_curator_room
+	}
+
+    trigger = {
+        NOT = { has_country_flag = mem_surveyor_curator_offer }
+        any_country = {
+            is_country_type = mem_surveyor_country_red
+            NOT = { has_country_flag = mem_surveyor_already_attritioned }
+        }
+        any_country = {
+            is_country_type = enclave
+            has_country_flag = curator_enclave_country
+            has_communications = root
+        }
+        NOR = {
+            has_country_flag = attacked_curators 
+            has_valid_civic = civic_fanatic_purifiers
+            has_valid_civic = civic_hive_devouring_swarm
+            has_valid_civic = civic_machine_assimilator
+        }
+        resource_stockpile_compare = {
+        resource = energy
+            value >= 3500
+        }
+    }
+
+    mean_time_to_happen = {
+        years = 15
+    }
+
+    immediate = {
+        # set_country_flag = curator_enclave_diplomacy_engaged # Don't think it's needed, although if it pops up during another conversation - might be weird
+        set_country_flag = mem_surveyor_curator_offer
+        random_country = {
+            limit = {
+                is_country_type = enclave
+			    has_country_flag = curator_enclave_country
+                has_communications = root
+            }
+            save_event_target_as = curators
+        }
+	}
+
+    option = {
+        name = mem_surveyor.260.a
+        custom_gui = "enclave_curator_option"
+
+        allow = {
+            resource_stockpile_compare = {
+                resource = energy
+                    value >= 2500
+                }
+        }
+
+        ai_chance = {
+            factor = 3
+        }
+
+        add_modifier = {
+            modifier = mem_surveyor_how_to_kill
+            days = -1
+        }
+        add_resource = {
+            energy = -2500
+        }
+    }
+
+    option = {
+        name = mem_surveyor.260.b
+        custom_gui = "enclave_curator_option"
+        is_dialog_only = yes
+        response_text = mem_surveyor.260.b.response
+    }
+
+    option = {
+        name = mem_surveyor.260.c
+        custom_gui = "enclave_curator_option"
+        default_hide_option = yes
+    }
+}
+
+# When enclave is destroyed by the probe, trigger Titanic Effort
+country_event = {
+    id = mem_surveyor.261
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        is_country_type = enclave
+        FROM = { is_country_type = mem_surveyor_country_red }
+    }
+
+    immediate = {
+        random_country = {
+            limit = {
+                has_country_flag = trader_enclave_country
+                NOT = { is_same_value = root }
+            }
+            random_list = {
+                66 = {}
+                33 = { # Change weights for something better
+                    # log = "Triggered Titanic Effort for [This.GetName]"
+                    country_event = { id = mem_surveyor.262 days = 360 }
+                }
+            }
+        }
+    }
+}
+
+# Titanic Effort
+country_event = {
+    id = mem_surveyor.262
+    is_triggered_only = yes
+    hide_window = yes
+
+    trigger = {
+        NOT = { has_global_flag = mem_surveyor_titanic_effort }
+        any_country = {
+            is_country_type = mem_surveyor_country_red
+            NOT = { has_country_flag = mem_surveyor_out_of_comission }
+        }
+    }
+
+    immediate = {
+        set_global_flag = mem_surveyor_titanic_effort
+        switch = {
+            trigger = has_country_flag
+            trader_enclave_country_1 = {
+                # log = "Xura Sponsored Titan"
+                set_global_flag = mem_surveyor_xura_sponsored_titan
+            }
+            trader_enclave_country_2 = {
+                # log = "Rigga Sponsored Titan"
+                set_global_flag = mem_surveyor_riggan_sponsored_titan
+            }
+            trader_enclave_country_3 = {
+                # log = "Muutra Sponsored Titan"
+                set_global_flag = mem_surveyor_muutra_sponsored_titan
+            }
+
+        }
+        random_owned_ship = {
+            save_event_target_as = spawn_site
+        }
+        random_country = {
+            limit = {
+                OR = {
+                    is_country_type = default
+                    is_country_type = fallen_empire
+                    is_country_type = enclave
+                    is_country_type = dormant_marauders
+                }
+                NOT = {
+                    has_ethic = ethic_gestalt_consciousness
+                }
+            }
+            save_event_target_as = captain_origin
+        }
+        create_country = {
+            name = "Titanic Effort"
+            species = event_target:captain_origin
+            type = mem_surveyor_titanic_effort
+            flag = {
+                icon = {
+                    category = ornate
+                    file = flag_ornate_21.dds
+                }
+                background = {
+                    category = backgrounds
+                    file = triangle_split.dds
+                }
+                colors = {
+                    "blue"
+                    "orange"
+                    "null"
+                    "null"
+                }
+            }
+            effect = {
+                save_event_target_as = titanic_country
+                randomize_flag_symbol = "ornate"
+                give_technology = { tech = tech_mass_drivers_5 }
+                give_technology = { tech = tech_lasers_5 }
+                give_technology = { tech = tech_titans }
+                give_technology = { tech = tech_shields_4 }
+                give_technology = { tech = tech_ship_armor_4 }
+                give_technology = { tech = tech_regenerative_hull_tissue }
+                give_technology = { tech = tech_zero_point_power }
+                give_technology = { tech = tech_thrusters_4 }
+                give_technology = { tech = tech_sensors_3 }
+                give_technology = { tech = tech_combat_computers_3 }
+                give_technology = { tech = tech_hyper_drive_3 }
+
+                
+
+                create_leader = {
+                    class = admiral
+                    skill = 5
+                    effect = {
+                        add_trait = leader_trait_mem_surveyor_mercenary
+                        set_leader_flag = mem_surveyor_mercenary_leader
+                        save_global_event_target_as = mem_surveyor_mercenary_leader
+                    }
+                }
+            }
+        }
+        create_fleet = {
+            name = "Titan Fleet"
+            settings = {
+                spawn_debris = no
+            }
+            effect = {
+                set_owner = event_target:titanic_country
+                set_location = event_target:spawn_site
+                create_ship = {
+                    name = ""
+                    prefix = no
+                    random_existing_design = titan
+                    effect = {
+                        add_modifier = {
+                            modifier = mem_surveyor_titanic_effort
+                            days = -1
+                        }
+                        IF = {
+                            limit = {
+                                has_global_flag = mem_surveyor_xura_sponsored_titan
+                            }
+                            set_name = "XCS Princess Xuri"
+                        }
+                        ELSE_IF = {
+                            limit = {
+                                has_global_flag = mem_surveyor_riggan_sponsored_titan
+                            }
+                            set_name = "RCES Spice Marine"
+                        }
+                        ELSE = {
+                            set_name = "MMS Crystal Clear"
+                        }
+                        save_event_target_as = the_ship
+                    }
+                }
+                set_leader = event_target:mem_surveyor_mercenary_leader
+                set_name = event_target:the_ship
+                auto_follow_fleet = { 
+					target = event_target:mem_surveyor_fleet
+					attack_fleet = yes 
+				}
+            }
+        }
+        event_target:titanic_country = {
+            set_name = event_target:the_ship
+        }
+        every_playable_country = {
+            limit = {
+                has_communications = root
+            }
+            country_event = { id = mem_surveyor.263 }
+        }
+    }
+}
+
+# Player is notified about titanic effort
+country_event = {
+    id = mem_surveyor.263
+    title = mem_surveyor.263.name
+    desc = mem_surveyor.263.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_automated_dreadnought
+    location = event_target:the_ship
+    show_sound = event_ship_thrusters
+
+    immediate = {
+        establish_communications_no_message = event_target:titanic_country
+    }
+
+    option = {
+        name = mem_surveyor.263
+    }
+}
+
+# Custom diplomacy with Titan
+country_event = {
+    id = mem_surveyor.264
+    title = TRANSMISSION
+    desc = {
+        text = mem_surveyor.264.desc.1
+        trigger = {
+            has_country_flag = mem_surveyor_terrorize_this_country
+        }
+    }
+    desc = {
+        text = mem_surveyor.264.desc.2
+        trigger = {
+            NOT = { has_country_flag = mem_surveyor_terrorize_this_country }
+            exists = event_target:next_target
+        }
+    }
+    desc = {
+        text = mem_surveyor.264.desc.3
+        trigger = {
+            NOT = { has_country_flag = mem_surveyor_terrorize_this_country }
+            exists = event_target:next_target_planet
+        }
+    }
+    desc = {
+        text = mem_surveyor.264.desc.4
+        exclusive_trigger = {
+            OR = {
+                NOR = { 
+                    has_country_flag = mem_surveyor_terrorize_this_country 
+                    exists = event_target:next_target
+                    exists = event_target:next_target_planet
+                }
+                event_target:mem_surveyor_fleet = {
+                    is_fleet_idle = yes
+                }
+            }
+        }
+    }
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		portrait = event_target:mem_surveyor_mercenary_leader
+		room = ethic_spaceship_room
+    }
+
+    trigger = {
+        NOT = { has_country_flag = mem_surveyor_mercenary_diplomacy }
+        FROM = { is_country_type = mem_surveyor_titanic_effort }
+        exists = event_target:mem_surveyor_mercenary_leader
+        any_country = {
+            is_country_type = mem_surveyor_country_red
+        }
+    }
+
+    immediate = {
+        set_country_flag = mem_surveyor_mercenary_diplomacy
+        random_system = {
+            limit = { has_star_flag = mem_surveyor_next_target }
+            save_event_target_as = next_target
+        }
+        random_planet = {
+            limit = { has_planet_flag = mem_surveyor_next_target_planet }
+            save_event_target_as = next_target_planet
+        }
+    }
+
+    option = {
+        name = MEM_SURVEYOR_EXIT
+        default_hide_option = yes
+        remove_country_flag = mem_surveyor_mercenary_diplomacy
+    }
+
+    option = {
+        name = mem_surveyor.242.purifier
+        default_hide_option = yes
+        remove_country_flag = mem_surveyor_mercenary_diplomacy
+        exclusive_trigger = {
+            OR = {
+                has_valid_civic = civic_fanatic_purifiers
+                has_valid_civic = civic_hive_devouring_swarm
+                has_valid_civic = civic_machine_terminator
+            }
+            NOT = { event_target:mem_surveyor_avengers_leader = { is_same_species = root } }
+        }
+    }
+}
+
+# Mercs are killed
+country_event = {
+    id = mem_surveyor.265
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        is_country_type = mem_surveyor_titanic_effort
+    }
+
+    immediate = {
+        # log = "[From.GetName] killed mercs."
+        FROM = {
+            save_event_target_as = mercs_killers
+        }
+        FROMFROM.solar_system = {
+            save_event_target_as = battle_system
+        }
+        IF = {
+            limit = {
+                FROM = { NOT = { is_country_type = mem_surveyor_country_red } }
+            }
+            every_playable_country = {
+                limit = {
+                    is_ai = no
+                    has_communications = root
+                    NOT = { is_same_value = FROM }
+                }
+                country_event = { id = mem_surveyor.266 }
+            }
+        }
+        ELSE_IF = {
+            limit = {
+                FROMFROMFROM = {
+                    NOT = { has_fleet_flag = mem_surveyor_fleet }
+                }
+            }
+            every_playable_country = {
+                limit = {
+                    is_ai = no
+                    has_communications = root
+                }
+                country_event = { id = mem_surveyor.267 }
+            }
+        }
+        ELSE_IF = {
+            limit = {
+                FROMFROMFROM = {
+                    any_owned_ship = {
+                        is_ship_size = mem_surveyor_primary
+                    }
+                }
+            }
+            while = {
+                count = 30
+                limit = {
+                    FROM = {
+                        check_variable = {
+                            which = mem_surveyor_attriction_counter
+                            value > 1
+                        }
+                    }
+                }
+                FROMFROMFROM = {
+                    random_owned_ship = {
+                        limit = { is_ship_size = mem_surveyor_primary } #Is ship class
+                        add_modifier = { modifier = mem_surveyor_attrition days = -1 }
+                    }
+                }
+                FROM = {
+                    change_variable = {
+                        which = mem_surveyor_attriction_counter
+                        value = -1
+                    }
+                    # log = "Attrition: [This.mem_surveyor_attriction_counter]"
+                }
+            }
+            every_playable_country = {
+                limit = {
+                    is_ai = no
+                    has_communications = root
+                }
+                country_event = { id = mem_surveyor.268 }
+            }
+        }
+    }
+}
+
+# Inform player that mercs are killed by 3rd party
+country_event = {
+    id = mem_surveyor.266
+    title = mem_surveyor.266.name
+    desc = mem_surveyor.266.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_space_battle
+    show_sound = event_space_battle
+
+    option = {
+        name = mem_surveyor.266.a
+    }
+}
+
+# Inform player that mercs are killed by the Aux Probe Fleet
+country_event = {
+    id = mem_surveyor.267
+    title = mem_surveyor.267.name
+    desc = mem_surveyor.267.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_space_battle
+    show_sound = event_space_battle
+
+    option = {
+        name = mem_surveyor.267.a
+    }
+}
+
+# Inform player that mercs are killed by the probe itself
+country_event = {
+    id = mem_surveyor.268
+    title = mem_surveyor.268.name
+    desc = mem_surveyor.268.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_space_battle
+    show_sound = event_space_battle
+
+    option = {
+        name = mem_surveyor.268.a
+    }
+}
+
+# Disband titan
+country_event = {
+    id = mem_surveyor.269
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        every_playable_country = {
+            limit = {
+                is_ai = no
+                has_communications = root
+            }
+            country_event = { id = mem_surveyor.270 }
+        }
+    }
+}
+
+# Player is notified titan was disbanded
+country_event = {
+    id = mem_surveyor.270
+    title = mem_surveyor.270.name
+    desc = mem_surveyor.270.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_automated_dreadnought
+    show_sound = event_radio_chatter
+
+    option = {
+        name = mem_surveyor.270.a
+    }
+}
+
+# Player destroyed mercs
+country_event = {
+    id = mem_surveyor.271
+    title = mem_surveyor.271.name
+    desc = mem_surveyor.271.desc
+
+    is_triggered_only = yes
+
+    trigger = {
+        FROM = {
+            is_country_type = mem_surveyor_titanic_effort
+        }
+    }
+
+    picture = GFX_evt_mem_space_battle
+    show_sound = event_space_battle
+
+    option = {
+        name = mem_surveyor.271.a
+
+        add_monthly_resource_mult = {
+			resource = minerals
+			value = @tier3materialreward
+			min = @tier3materialmin
+			max = @tier3materialmax
+        }
+        add_monthly_resource_mult = {
+			resource = energy
+			value = @tier3materialreward
+			min = @tier3materialmin
+			max = @tier3materialmax
+		}
+    }
+}
+
+# Quietly replace titan's captain if he dies
+country_event = {
+    id = mem_surveyor.272
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        FROM = {
+            has_leader_flag = mem_surveyor_mercenary_leader
+        }
+    }
+
+    immediate = {
+        random_country = {
+            limit = {
+                OR = {
+                    is_country_type = default
+                    is_country_type = fallen_empire
+                    is_country_type = enclave
+                    is_country_type = dormant_marauders
+                    is_country_type = mem_surveyor_titanic_effort
+                }
+                NOT = {
+                    has_ethic = ethic_gestalt_consciousness
+                }
+            }
+            save_event_target_as = captain_origin
+        }
+        create_leader = {
+            class = admiral
+            species = event_target:captain_origin
+            skill = 5
+            effect = {
+                add_trait = leader_trait_mem_surveyor_mercenary
+                set_leader_flag = mem_surveyor_mercenary_leader
+                save_global_event_target_as = mem_surveyor_mercenary_leader
+            }
+        }
+        random_owned_fleet = {
+            set_leader = last_created_leader
+        }
+    }
+}
+
+# Can't communicate with them
+
+country_event = {
+    id = mem_surveyor.273
+    title = mem_surveyor.273.name
+    desc = mem_surveyor.273.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_automated_dreadnought
+
+    trigger = {
+        NOT = { has_country_flag = mem_surveyor_mercenary_diplomacy }
+        FROM = { is_country_type = mem_surveyor_titanic_effort }
+        NAND = {
+            exists = event_target:mem_surveyor_mercenary_leader
+            any_country = {
+                is_country_type = mem_surveyor_country_red
+            }
+        }
+    }
+
+    option = {
+        name = OK
+    }
+}
+
+########################
+### ALKREE HOMEWORLD ###
+########################
+
+# Anomaly resolution
+ship_event = {
+    id = mem_surveyor.300
+    title = mem_surveyor.300.name
+    desc = mem_surveyor.300.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_archaeological_dig
+    location = FROM
+    show_sound = event_mystic_reveal
+
+    immediate = {
+        FROM = {
+            add_modifier = {
+                modifier = mem_surveyor_alkree_homeworld
+                days = -1
+            }
+            set_deposit = d_society_5
+            add_deposit = d_physics_4
+            add_deposit = d_engineering_4
+        }
+    }
+
+    option = {
+        name = FASCINATING
+        custom_tooltip = mem_surveyor.300.tooltip
+        leader = {
+            add_experience = 200
+            IF = {
+                limit = {
+                    NOT = { has_trait = leader_trait_meticulous }
+                }
+                add_trait = leader_trait_meticulous
+            }
+        }
+    }
+}
+
+# Bounce off planet to give player valuable info
+planet_event = {
+    id = mem_surveyor.301
+    hide_window = yes
+    
+    mean_time_to_happen = {
+        years = 10
+    }
+
+    trigger = {
+        exists = solar_system.space_owner
+        has_research_station = yes
+        has_modifier = mem_surveyor_alkree_homeworld
+        solar_system.space_owner = {
+            NOT = { has_country_flag = mem_surveyor_studied_ruins }
+        }
+    }
+
+    immediate = {
+        solar_system.space_owner = {
+            set_country_flag = mem_surveyor_studied_ruins
+            country_event = { id = mem_surveyor.302 }
+        }
+    }
+}
+
+# Receive country event telling story
+country_event = {
+    id = mem_surveyor.302
+    title = mem_surveyor.302.name
+    desc = mem_surveyor.302.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_dead_city
+    location = FROM
+    show_sound = event_mystic_reveal
+
+    option = {
+        name = FASCINATING
+        add_monthly_resource_mult = {
+            resource = society_research
+            value = @tier2researchreward
+            min = @tier2researchmin
+            max = @tier2researchmax
+        }
+    }
+
+    after = {
+        hidden_effect = {
+            country_event = { id = mem_surveyor.303 days = 120 random = 180 }
+        }
+    }
+}
+
+# Country cross-references surveyor with the ruins
+country_event = {
+    id = mem_surveyor.303
+    title = mem_surveyor.303.name
+    desc = mem_surveyor.303.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_dead_city
+    location = event_target:the_planet
+    show_sound = event_mystic_reveal
+
+    trigger = {
+        has_country_flag = mem_surveyor_opened_comms
+        has_country_flag = mem_surveyor_studied_ruins
+        NOT = { has_country_flag = mem_surveyor_found_alkree_homeworld }
+        any_system = {
+            has_star_flag = mem_surveyor_home_system
+            any_system_planet = {
+                has_planet_flag = mem_surveyor_alkree_homeworld
+            }
+        }
+    }
+
+    immediate = {
+        set_country_flag = mem_surveyor_found_alkree_homeworld
+        random_planet = {
+            limit = {
+                has_planet_flag = mem_surveyor_alkree_homeworld
+            }
+            save_event_target_as = the_planet
+        }
+    }
+
+    after = {
+        add_monthly_resource_mult = {
+            resource = unity
+            value = @tier3unityreward
+            min = @tier3unitymin
+            max = @tier3unitymax
+        }
+        add_monthly_resource_mult = {
+            resource = society_research
+            value = @tier3researchreward
+            min = @tier3researchmin
+            max = @tier3researchmax
+        }
+    }
+
+    option = {
+        name = mem_surveyor.303.a
+        custom_tooltip = mem_surveyor.303.a.tooltip
+        trigger = {
+            NOT = { has_global_flag = mem_surveyor_went_berserk }
+            any_country = { is_country_type = mem_surveyor_country_green }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.303.b
+        trigger = {
+            NOR = { 
+                has_global_flag = mem_surveyor_went_berserk 
+                any_country = { is_country_type = mem_surveyor_country_green }
+                has_country_flag = mem_surveyor_probe_killers
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.303.c
+        trigger = {
+            NOT = { has_global_flag = mem_surveyor_went_berserk }
+            has_country_flag = mem_surveyor_probe_killers
+        }
+    }
+
+    option = {
+        name = mem_surveyor.303.d
+        custom_tooltip = mem_surveyor.303.d.tooltip
+        trigger = {
+            has_global_flag = mem_surveyor_went_berserk
+            any_country = { is_country_type = mem_surveyor_country_red }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.303.e
+        trigger = {
+            has_global_flag = mem_surveyor_went_berserk
+            NOR = {
+                any_country = { is_country_type = mem_surveyor_country_red }
+                has_country_flag = mem_surveyor_probe_killers
+            }
+        }
+    }
+
+    option = {
+        name = mem_surveyor.303.f
+        trigger = {
+            has_global_flag = mem_surveyor_went_berserk
+            has_country_flag = mem_surveyor_probe_killers
+        }
+    }
+}

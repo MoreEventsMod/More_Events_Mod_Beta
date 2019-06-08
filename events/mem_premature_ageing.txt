@@ -38,7 +38,7 @@ ship_event = {
 			save_event_target_as = mem_premature_ageing_star
 		}
 	
-		if = { 
+		IF = { 
 			limit = {
 				ROOT.Owner = { has_ethic = ethic_materialist }			
 			}
@@ -46,22 +46,20 @@ ship_event = {
 				15 = { ROOT.Owner = { set_country_flag = mem_premature_ageing_alternate_ending } }
 				85 = { ROOT.Owner = { set_country_flag = mem_premature_ageing_normal_ending } }
 			}
-			else = {
-				if = { 
-					limit = {
-						ROOT.Owner = { has_ethic = ethic_fanatic_materialist }				
-					}
-					random_list = {
-						20 = { ROOT.Owner = { set_country_flag = mem_premature_ageing_alternate_ending } }
-						80 = { ROOT.Owner = { set_country_flag = mem_premature_ageing_normal_ending } }
-					}
-					else = {
-						random_list = {
-							05 = { ROOT.Owner = { set_country_flag = mem_premature_ageing_alternate_ending } }
-							95 = { ROOT.Owner = { set_country_flag = mem_premature_ageing_normal_ending } }
-						}
-					}
-				}
+		}
+		ELSE_IF = {
+			limit = {
+				ROOT.Owner = { has_ethic = ethic_fanatic_materialist }				
+			}
+			random_list = {
+				20 = { ROOT.Owner = { set_country_flag = mem_premature_ageing_alternate_ending } }
+				80 = { ROOT.Owner = { set_country_flag = mem_premature_ageing_normal_ending } }
+			}
+		}
+		ELSE = {
+			random_list = {
+				05 = { ROOT.Owner = { set_country_flag = mem_premature_ageing_alternate_ending } }
+				95 = { ROOT.Owner = { set_country_flag = mem_premature_ageing_normal_ending } }
 			}
 		}
 	}	
@@ -71,7 +69,14 @@ ship_event = {
 			ROOT.Owner = { has_country_flag = mem_premature_ageing_normal_ending }
 		}
 		name = mem_premature_ageing.2.normal
-		ROOT.owner = { add_physics_research = 500 }
+		ROOT.owner = { 
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+		}
 	}
 	
 	option = {
@@ -79,7 +84,14 @@ ship_event = {
 			ROOT.Owner = { has_country_flag = mem_premature_ageing_alternate_ending }
 		}
 		name = mem_premature_ageing.2.alternate
-		ROOT.owner = { add_physics_research = 500 }
+		ROOT.owner = { 
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+		}
 		FROM = {
 			enable_special_project = {
 				name = "MEM_PREMATURE_AGEING_WEAPON_TRACING_PROJECT"
@@ -115,10 +127,10 @@ ship_event = {
 					any_system = {
 						distance = {
 							source = event_target:mem_premature_ageing_star
-							max_distance = 200
-							min_distance = 100
+							max_distance <= 200
+							min_distance >= 100
 						}
-						any_planet = { is_asteroid = yes }
+						any_system_planet = { is_asteroid = yes }
 						has_presence = no
 					}
 				}
@@ -126,10 +138,10 @@ ship_event = {
 					limit = {
 						distance = {
 							source = event_target:mem_premature_ageing_star
-							max_distance = 200
-							min_distance = 100
+							max_distance <= 200
+							min_distance >= 100
 						}
-						any_planet = { is_asteroid = yes }
+						any_system_planet = { is_asteroid = yes }
 						has_presence = no
 					}
 					random_system_planet = {
@@ -139,19 +151,19 @@ ship_event = {
 					}
 					set_star_flag = mem_premature_ageing_weapon_system
 				}
-				ELSE = {
-					closest_system = {
-						limit = {
-							any_planet = { is_asteroid = yes }
-							has_presence = no
-						}
-						random_system_planet = {
-							limit = { is_asteroid = yes }
-							set_planet_flag = mem_premature_ageing_star_weapon_origin_planet
-							save_event_target_as = mem_premature_ageing_star_weapon_origin_planet
-						}
-						set_star_flag = mem_premature_ageing_weapon_system
+			}
+			ELSE = {
+				closest_system = {
+					limit = {
+						any_system_planet = { is_asteroid = yes }
+						has_presence = no
 					}
+					random_system_planet = {
+						limit = { is_asteroid = yes }
+						set_planet_flag = mem_premature_ageing_star_weapon_origin_planet
+						save_event_target_as = mem_premature_ageing_star_weapon_origin_planet
+					}
+					set_star_flag = mem_premature_ageing_weapon_system
 				}
 			}
 		}

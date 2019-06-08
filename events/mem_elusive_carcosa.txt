@@ -15,6 +15,10 @@ country_event = {
 	
 	trigger = {
 		is_ai = no
+		NOR = {
+			has_authority = auth_hive_mind
+			has_authority = auth_machine_intelligence
+		}
 		NOT = { has_global_flag = mem_elusive_carcosa }
 		num_owned_planets > 4
 		FROM = { 
@@ -41,6 +45,45 @@ country_event = {
 			random_list = {
 				25 = {}
 				75 = { 
+					if = {
+						limit = {
+							any_owned_planet = {
+								NOR = {
+									is_planet_class = pc_city
+									is_planet_class = pc_ringworld_habitable
+									is_planet_class = pc_habitat
+								}
+								is_capital = no
+							}
+						}
+						random_owned_planet = {
+							limit = {
+								NOR = {
+									is_planet_class = pc_city
+									is_planet_class = pc_ringworld_habitable
+									is_planet_class = pc_habitat
+								}
+								is_capital = no
+							}
+							save_global_event_target_as = mem_carcosa_colony
+						}
+					}
+					else = {
+						random_owned_planet = {
+							limit = {
+								is_capital = no
+							}
+							save_global_event_target_as = mem_carcosa_colony
+						}
+					}
+					country_event = { id = mem_elusive_carcosa.11 } 
+				}
+			}
+		}
+		ELSE = {
+			random_list = {
+				90 = {}
+				10 = { 
 					random_owned_planet = {
 						limit = {
 							is_colony = yes
@@ -48,23 +91,8 @@ country_event = {
 						}
 						save_global_event_target_as = mem_carcosa_colony
 					}
-					country_event = { id = mem_elusive_carcosa.11 } 
-				}
-			}
-			ELSE = {
-				random_list = {
-					90 = {}
-					10 = { 
-						random_owned_planet = {
-							limit = {
-								is_colony = yes
-								is_capital = no
-							}
-							save_global_event_target_as = mem_carcosa_colony
-						}
-						set_global_flag = mem_elusive_carcosa
-						country_event = { id = mem_elusive_carcosa.11 days = 20 } 
-					}
+					set_global_flag = mem_elusive_carcosa
+					country_event = { id = mem_elusive_carcosa.11 days = 20 } 
 				}
 			}
 		}
@@ -95,9 +123,54 @@ country_event = {
 		}
 
 		hidden_effect = {
-			random_owned_planet = {
-				limit = { is_colony = yes }
-				save_global_event_target_as = mem_carcosa_colony_capture	
+			if = {
+				limit = {
+					any_owned_planet = {
+						NOR = {
+							is_planet_class = pc_city
+							is_planet_class = pc_ringworld_habitable
+							is_planet_class = pc_habitat
+						}
+						num_pops < 25
+					}
+				}
+				random_owned_planet = {
+					limit = {
+						NOR = {
+							is_planet_class = pc_city
+							is_planet_class = pc_ringworld_habitable
+							is_planet_class = pc_habitat
+						}
+						num_pops < 25
+					}
+					save_global_event_target_as = mem_carcosa_colony_capture	
+				}
+			}
+			else_if = {
+				limit = {
+					any_owned_planet = {
+						NOR = {
+							is_planet_class = pc_city
+							is_planet_class = pc_ringworld_habitable
+							is_planet_class = pc_habitat
+						}
+					}
+				}
+				random_owned_planet = {
+					limit = {
+						NOR = {
+							is_planet_class = pc_city
+							is_planet_class = pc_ringworld_habitable
+							is_planet_class = pc_habitat
+						}
+					}
+					save_global_event_target_as = mem_carcosa_colony_capture	
+				}
+			}
+			else = {
+				random_owned_planet = {
+					save_global_event_target_as = mem_carcosa_colony_capture	
+				}
 			}
 		}
 	}
@@ -113,16 +186,47 @@ country_event = {
 	is_triggered_only = yes
 	hide_window = yes
 	
-	immediate = { hidden_effect = {
-		random_owned_planet = {
-			limit = {
-				is_colony = yes
-				NOT = { is_same_value = event_target:mem_carcosa_colony }
+	immediate = {
+		hidden_effect = {
+			if = {
+				limit = {
+					any_owned_planet = {
+						num_pops < 25
+						is_capital = no
+						NOR = {
+							is_planet_class = pc_city
+							is_planet_class = pc_ringworld_habitable
+							is_planet_class = pc_habitat
+						}
+						NOT = { is_same_value = event_target:mem_carcosa_colony }
+					}
+				}
+				random_owned_planet = {
+					limit = {
+						num_pops < 25
+						is_capital = no
+						NOR = {
+							is_planet_class = pc_city
+							is_planet_class = pc_ringworld_habitable
+							is_planet_class = pc_habitat
+						}
+						NOT = { is_same_value = event_target:mem_carcosa_colony }
+					}
+					save_global_event_target_as = mem_carcosa_colony_2
+				}
 			}
-			save_global_event_target_as = mem_carcosa_colony_2
+			else = {
+				random_owned_planet = {
+					limit = {
+						is_capital = no
+						NOT = { is_same_value = event_target:mem_carcosa_colony }
+					}
+					save_global_event_target_as = mem_carcosa_colony_2
+				}
+			}
+			country_event = { id = mem_elusive_carcosa.34 }
 		}
-		country_event = { id = mem_elusive_carcosa.34 }
-	} }
+	}
 }
 
 #setup event targets for full chain
@@ -131,20 +235,107 @@ country_event = {
 	is_triggered_only = yes
 	hide_window = yes
 	
-	immediate = { hidden_effect = {
-		random_owned_planet = {
-			limit = {
-				is_colony = yes
-				NOR = {
-					is_same_value = event_target:mem_carcosa_colony
-					is_same_value = event_target:mem_carcosa_colony_2
+	immediate = {
+		hidden_effect = {
+			if = {
+				limit = {
+					any_owned_planet = {
+						NOR = {
+							is_same_value = event_target:mem_carcosa_colony
+							is_same_value = event_target:mem_carcosa_colony_2
+						}
+						OR = {
+							is_planet_class = pc_continental
+							is_planet_class = pc_ocean
+							is_planet_class = pc_tropical
+						}
+					}
+				}
+				random_owned_planet = {
+					limit = {
+						NOR = {
+							is_same_value = event_target:mem_carcosa_colony
+							is_same_value = event_target:mem_carcosa_colony_2
+						}
+						OR = {
+							is_planet_class = pc_continental
+							is_planet_class = pc_ocean
+							is_planet_class = pc_tropical
+						}
+					}
+					save_global_event_target_as = mem_carcosa_colony_3
 				}
 			}
-			save_global_event_target_as = mem_carcosa_colony_3
+			else_if = {
+				limit = {
+					any_owned_planet = {
+						NOR = {
+							is_same_value = event_target:mem_carcosa_colony
+							is_same_value = event_target:mem_carcosa_colony_2
+						}
+						OR = {
+							is_planet_class = pc_tundra
+							is_planet_class = pc_savannah
+						}
+					}
+				}
+				random_owned_planet = {
+					limit = {
+						NOR = {
+							is_same_value = event_target:mem_carcosa_colony
+							is_same_value = event_target:mem_carcosa_colony_2
+						}
+						OR = {
+							is_planet_class = pc_tundra
+							is_planet_class = pc_savannah
+						}
+					}
+					save_global_event_target_as = mem_carcosa_colony_3
+				}
+			}
+			else_if = {
+				limit = {
+					any_owned_planet = {
+						NOR = {
+							is_same_value = event_target:mem_carcosa_colony
+							is_same_value = event_target:mem_carcosa_colony_2
+						}
+						NOR = {
+							is_planet_class = pc_city
+							is_planet_class = pc_ringworld_habitable
+							is_planet_class = pc_habitat
+						}
+					}
+				}
+				random_owned_planet = {
+					limit = {
+						NOR = {
+							is_same_value = event_target:mem_carcosa_colony
+							is_same_value = event_target:mem_carcosa_colony_2
+						}
+						NOR = {
+							is_planet_class = pc_city
+							is_planet_class = pc_ringworld_habitable
+							is_planet_class = pc_habitat
+						}
+					}
+					save_global_event_target_as = mem_carcosa_colony_3
+				}
+			}
+			else = {
+				random_owned_planet = {
+					limit = {
+						NOR = {
+							is_same_value = event_target:mem_carcosa_colony
+							is_same_value = event_target:mem_carcosa_colony_2
+						}
+					}
+					save_global_event_target_as = mem_carcosa_colony_3
+				}
+			}
+			country_event = { id = mem_elusive_carcosa.35 }
 		}
-
-		country_event = { id = mem_elusive_carcosa.35 }
-	} }
+	}
 }
 
 #setup event targets for full chain
@@ -153,21 +344,55 @@ country_event = {
 	is_triggered_only = yes
 	hide_window = yes
 	
-	immediate = { hidden_effect = {
-		random_owned_planet = {
-			limit = {
-				is_colony = yes
-				NOR = { 
-					is_same_value = event_target:mem_carcosa_colony
-					is_same_value = event_target:mem_carcosa_colony_2
-					is_same_value = event_target:mem_carcosa_colony_3 
+	immediate = {
+		hidden_effect = {
+			if = {
+				limit = {
+					any_owned_planet = {
+						NOR = {
+							is_planet_class = pc_city
+							is_planet_class = pc_ringworld_habitable
+							is_planet_class = pc_habitat
+						}
+						NOR = { 
+							is_same_value = event_target:mem_carcosa_colony
+							is_same_value = event_target:mem_carcosa_colony_2
+							is_same_value = event_target:mem_carcosa_colony_3 
+						}
+					}
+				}
+				random_owned_planet = {
+					limit = {
+						NOR = {
+							is_planet_class = pc_city
+							is_planet_class = pc_ringworld_habitable
+							is_planet_class = pc_habitat
+						}
+						NOR = { 
+							is_same_value = event_target:mem_carcosa_colony
+							is_same_value = event_target:mem_carcosa_colony_2
+							is_same_value = event_target:mem_carcosa_colony_3 
+						}
+					}
+					save_global_event_target_as = mem_carcosa_colony_4
 				}
 			}
-			save_global_event_target_as = mem_carcosa_colony_4
+			else = {
+				random_owned_planet = {
+					limit = {
+						NOR = { 
+							is_same_value = event_target:mem_carcosa_colony
+							is_same_value = event_target:mem_carcosa_colony_2
+							is_same_value = event_target:mem_carcosa_colony_3 
+						}
+					}
+					save_global_event_target_as = mem_carcosa_colony_4
+				}
+			}
+			
+			country_event = { id = mem_elusive_carcosa.36 }
 		}
-		
-		country_event = { id = mem_elusive_carcosa.36 }
-	} }
+	}
 }
 
 #setup event targets for full chain
@@ -176,18 +401,55 @@ country_event = {
 	is_triggered_only = yes
 	hide_window = yes
 	
-	immediate = { random_owned_planet = {
-		limit = {
-			is_colony = yes
-			NOR = { 
-				is_same_value = event_target:mem_carcosa_colony
-				is_same_value = event_target:mem_carcosa_colony_2
-				is_same_value = event_target:mem_carcosa_colony_3
-				is_same_value = event_target:mem_carcosa_colony_4
+	immediate = {
+		if = {
+			limit = {
+				any_owned_planet = {
+					NOR = {
+						is_planet_class = pc_city
+						is_planet_class = pc_ringworld_habitable
+						is_planet_class = pc_habitat
+					}
+					NOR = { 
+						is_same_value = event_target:mem_carcosa_colony
+						is_same_value = event_target:mem_carcosa_colony_2
+						is_same_value = event_target:mem_carcosa_colony_3
+						is_same_value = event_target:mem_carcosa_colony_4
+					}
+				}
+			}
+			random_owned_planet = {
+				limit = {
+					NOR = {
+						is_planet_class = pc_city
+						is_planet_class = pc_ringworld_habitable
+						is_planet_class = pc_habitat
+					}
+					NOR = { 
+						is_same_value = event_target:mem_carcosa_colony
+						is_same_value = event_target:mem_carcosa_colony_2
+						is_same_value = event_target:mem_carcosa_colony_3
+						is_same_value = event_target:mem_carcosa_colony_4
+					}
+				}
+				save_global_event_target_as = mem_carcosa_colony_5
 			}
 		}
-		save_global_event_target_as = mem_carcosa_colony_5
-	} }
+		else = {
+			random_owned_planet = {
+				limit = {
+					is_colony = yes
+					NOR = { 
+						is_same_value = event_target:mem_carcosa_colony
+						is_same_value = event_target:mem_carcosa_colony_2
+						is_same_value = event_target:mem_carcosa_colony_3
+						is_same_value = event_target:mem_carcosa_colony_4
+					}
+				}
+				save_global_event_target_as = mem_carcosa_colony_5
+			}
+		}
+	}
 }
 
 #finish of the initial special project
@@ -719,23 +981,21 @@ country_event = {
 					}
 					save_event_target_as = mem_carcosa_fallen_empire
 				}
-				country_event = { id = mem_elusive_carcosa.21 days = 5 random = 4 }
-				ELSE = {
-					IF = {
-						limit = {
-							any_country = {
-								is_country_type = fallen_empire
-							}
-						}
-						random_country = {
-							limit = {
-								is_country_type = fallen_empire
-							}
-							save_event_target_as = mem_carcosa_fallen_empire
-						}
-						country_event = { id = mem_elusive_carcosa.21 days = 5 random = 4 }
+				country_event = { id = mem_elusive_carcosa.21 days = 5 random = 4 }				
+			}
+			ELSE_IF = {
+				limit = {
+					any_country = {
+						is_country_type = fallen_empire
 					}
-				}				
+				}
+				random_country = {
+					limit = {
+						is_country_type = fallen_empire
+					}
+					save_event_target_as = mem_carcosa_fallen_empire
+				}
+				country_event = { id = mem_elusive_carcosa.21 days = 5 random = 4 }
 			}
 		}
 	}

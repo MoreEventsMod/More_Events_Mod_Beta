@@ -1,0 +1,980 @@
+# Gate system. Core of Sadrell cluster: this one also controls spawning chance for the entire classes - without it, there will be no systems
+mem_sadrell_0_0 = {
+    # name = "SADRELL 0-0"
+    class = sc_binary_1
+    usage = misc_system_init
+    flags = { mem_sadrell_gate_system mem_sadrell_home_cluster }
+    usage_odds = {
+        base = 50000
+        modifier = {
+	        factor = 0
+	        has_star_flag = empire_cluster
+        }
+        modifier = {
+			factor = 0
+			is_fe_cluster = yes
+		}
+    }
+    max_instances = 1
+    scaled_spawn_chance = 8
+    asteroid_belt = {
+        type = rocky_asteroid_belt
+        radius = 100
+    }
+
+    change_orbit = 25
+
+    planet = {
+        class = star
+        orbit_distance = 0
+        orbit_angle = { min = 250 max = 290 }
+        size = 25
+    }
+
+    planet = {
+        class = star
+        orbit_distance = 0
+        orbit_angle = 180
+        size = 16
+    }
+
+    planet = {
+        class = pc_broken
+        orbit_distance = 50
+    }
+
+    change_orbit = 25
+
+    planet = {
+        count = 4
+        class = pc_asteroid
+        orbit_distance = 0
+    }
+
+    change_orbit = 10
+
+    planet = {
+        count = 3
+        class = random_non_colonizable
+        orbit_distance = 25
+
+        moon = {
+            count = { min = 0 max = 1 }
+            class = random_non_colonizable
+            orbit_distance = 10
+        }
+    }
+
+    init_effect = {
+        set_global_flag = mem_sadrell_cluster_spawned
+        every_neighbor_system = {
+            limit = {
+                NOR = {
+                    has_star_flag = empire_cluster
+                    is_fe_cluster = yes
+                    has_star_flag = hostile_system
+                    has_star_flag = marauder_system
+                }
+            }
+            set_star_flag = mem_sadrell_home_cluster
+			every_neighbor_system = {
+                limit = {
+                    NOR = {
+                        has_star_flag = empire_cluster
+                        is_fe_cluster = yes
+                        has_star_flag = hostile_system
+                        has_star_flag = marauder_system
+                    }
+                }
+                set_star_flag = mem_sadrell_home_cluster
+			}
+        }
+        every_system = { # This should discourage leviathans and the like from spawning in this cluster
+            limit = { has_star_flag = mem_sadrell_home_cluster }
+            set_star_flag = empire_cluster
+        }
+        spawn_megastructure = {
+			type = mem_sadrell_gateway_inactive
+			orbit_angle = 0
+			orbit_distance = 60
+			location = solar_system
+        }
+    }
+}
+
+# Sadrell capital system
+mem_sadrell_0_1 = {
+    # name = "SADRELL 0-1"
+    class = "rl_trinary_stars"
+    flags = { mem_sadrell_homeworld_system mem_sadrell_home_cluster }
+    usage = misc_system_init
+    usage_odds = {
+        base = 50000
+        modifier = {
+            factor = 0
+            NOT = { has_star_flag = mem_sadrell_home_cluster }
+        }
+    }
+    max_instances = 1
+
+    change_orbit = 30
+
+    planet = {
+        class = star
+        orbit_distance = 0
+    }
+    planet = {
+        class = star
+        orbit_angle = 120
+        orbit_distance = 0
+    }
+    planet = {
+        class = star
+        orbit_angle = 120
+        orbit_distance = 0
+    }
+
+    change_orbit = 30
+
+    planet = {
+        count = 3
+        class = random_non_colonizable
+        orbit_distance = { min = 25 max = 30 }
+
+        moon = {
+            count = { min = 0 max = 1 }
+            class = random_non_colonizable
+            orbit_distance = 10
+        }
+    }
+
+    planet = {
+        class = pc_gas_giant
+        orbit_distance = 35
+        size = 25
+
+        moon = {
+            class = pc_broken
+            orbit_distance = 10
+        }
+
+        moon = {
+            class = pc_continental
+            orbit_distance = 5
+            size = 16
+
+            flags = { mem_sadrell_homeworld }
+
+            init_effect = {
+                IF = {
+                    limit = { host_has_dlc = "Humanoids Species Pack" }
+                    create_species = {
+                        name = Sadrell
+                        adjective = Sadrellan
+                        plural = Sadrells
+                        class = "HUM"
+                        portrait = "humanoid_hp_07"
+                        name_list = "HUM4"
+                        homeworld = this
+                        traits = {
+                            trait = trait_cybernetic
+                            trait = trait_thrifty
+                            trait = trait_natural_engineers
+                            trait = trait_quick_learners
+                            trait = trait_slow_breeders
+                            trait = trait_weak
+                        }
+
+                        effect = {
+                            save_global_event_target_as = mem_sadrell_species
+                        }
+                    }
+                }
+                ELSE = {
+                    create_species = {
+                        name = Sadrell
+                        adjective = Sadrellan
+                        plural = Sadrells
+                        class = "AVI"
+                        portrait = "avi15"
+                        homeworld = this
+                        traits = {
+                            trait = trait_cybernetic
+                            trait = trait_thrifty
+                            trait = trait_natural_engineers
+                            trait = trait_quick_learners
+                            trait = trait_slow_breeders
+                            trait = trait_weak
+                        }
+
+                        effect = {
+                            save_global_event_target_as = mem_sadrell_species
+                        }
+                    }
+                }
+                prevent_anomaly = yes
+                add_modifier = {
+                    modifier = mem_sadrell_former_capital
+                    days = -1
+                }
+                add_deposit = d_mem_sadrell_capital
+                while = {
+                    count = 4
+                    add_deposit = d_city_ruins
+                }
+            }
+        }
+
+        moon = {
+            count = 2
+            class = pc_barren
+            orbit_distance = 5
+        }
+    }
+
+    change_orbit = 15
+
+    planet = {
+        count = 3
+        class = random_non_colonizable
+        orbit_distance = { min = 25 max = 30 }
+
+        moon = {
+            count = { min = 0 max = 1 }
+            class = random_non_colonizable
+            orbit_distance = 10
+        }
+    }
+
+    init_effect = {
+        
+    }
+}
+
+# Industrial system
+mem_sadrell_0_2 = {
+    # name = "SADRELL 0-2"
+    class = rl_dwarf_stars
+    flags = { mem_sadrell_industrial_system mem_sadrell_home_cluster }
+    usage = misc_system_init
+    usage_odds = {
+        base = 50000
+        modifier = {
+            factor = 0
+            NOT = { has_star_flag = mem_sadrell_home_cluster }
+        }
+    }
+    max_instances = 1
+
+    asteroid_belt = {
+        type = rocky_asteroid_belt
+        radius = 100
+    }
+    asteroid_belt = {
+        type = icy_asteroid_belt
+        radius = 200
+    }
+    asteroid_belt = {
+        type = rocky_asteroid_belt
+        radius = 275
+    }
+
+    planet = {
+        class = star
+        orbit_distance = 0
+    }
+
+    change_orbit = 25
+
+    planet = {
+        count = 2
+        class = random_non_colonizable
+        orbit_distance = 25
+    }
+
+    change_orbit = 25
+
+    planet = {
+        count = { min = 2 max = 4 }
+        class = pc_asteroid
+        orbit_distance = 0
+    }
+
+    planet = {
+        class = pc_arid
+        size = { min = 14 max = 20 }
+        orbit_distance = 25
+        flags = { mem_sadrell_industrial }
+
+        init_effect = {
+            prevent_anomaly = yes
+            add_modifier = {
+                modifier = mem_sadrell_industrial_planet
+                days = -1
+            }
+            add_deposit = d_mem_sadrell_industrial_complex
+            while = {
+                count = 2
+                add_deposit = d_city_ruins
+            }
+        }
+    }
+
+    planet = {
+        count = 2
+        class = random_non_colonizable
+        orbit_distance = 25
+    }
+
+    change_orbit = 25
+
+    planet = {
+        count = { min = 2 max = 4 }
+        class = pc_ice_asteroid
+        orbit_distance = 0
+    }
+
+    planet = {
+        count = 2
+        class = random_non_colonizable
+        orbit_distance = 25
+    }
+
+    change_orbit = 25
+
+    planet = {
+        count = { min = 2 max = 4 }
+        class = pc_asteroid
+        orbit_distance = 0
+    }
+}
+
+# Agricultural system
+mem_sadrell_0_3 = {
+    # name = "SADRELL 0-3"
+    class = sc_a
+    flags = { mem_sadrell_agri_system mem_sadrell_home_cluster }
+    usage = misc_system_init
+    usage_odds = {
+        base = 50000
+        modifier = {
+            factor = 0
+            NOT = { has_star_flag = mem_sadrell_home_cluster }
+        }
+    }
+    max_instances = 1
+
+    asteroid_belt = {
+        type = icy_asteroid_belt
+        radius = 180
+    }
+
+    planet = {
+        class = star
+        orbit_distance = 0
+    }
+
+    change_orbit = 50
+
+    planet = {
+        class = random_non_colonizable
+        orbit_distance = 20
+    }
+
+    planet = {
+        class = pc_tropical
+        orbit_distance = 20
+        size = { min = 14 max = 20 }
+        flags = { mem_sadrell_agri_world }
+
+        init_effect = {
+            prevent_anomaly = yes
+            add_modifier = {
+                modifier = mem_sadrell_agri_planet
+                days = -1
+            }
+            add_deposit = d_mem_sadrell_runaway_gene_crop
+            while = {
+                count = 2
+                add_deposit = d_city_ruins
+            }
+        }
+
+        moon = {
+            class = random_non_colonizable
+            orbit_distance = 10
+        }
+    }
+
+    planet = {
+        count = 2
+        class = random_non_colonizable
+        orbit_distance = 30
+
+        moon = {
+            class = random_non_colonizable
+            orbit_distance = 10
+        }
+    }
+
+    change_orbit = 30
+
+    planet = {
+        count = { min = 2 max = 4 }
+        class = pc_ice_asteroid
+        orbit_distance = 0
+    }
+
+    planet = {
+        count = 3
+        class = random_non_colonizable
+        orbit_distance = 30
+
+        moon = {
+            class = random_non_colonizable
+            orbit_distance = 10
+        }
+    }
+}
+
+# Science colony
+mem_sadrell_0_4 = {
+    # name = "SADRELL 0-4"
+    class = sc_binary_10
+    flags = { mem_sadrell_science_system mem_sadrell_home_cluster }
+    usage = misc_system_init
+    usage_odds = {
+        base = 50000
+        modifier = {
+            factor = 0
+            NOT = { has_star_flag = mem_sadrell_home_cluster }
+        }
+    }
+    max_instances = 1
+
+    change_orbit = 20
+
+    planet = {
+        class = star
+        orbit_distance = 0
+    }
+
+    planet = {
+        class = star
+        orbit_distance = 0
+        orbit_angle = 180
+    }
+
+    change_orbit = 25
+
+    planet = {
+        count = 3
+        class = random_non_colonizable
+        orbit_distance = 25
+
+        moon = {
+            count = { min = 0 max = 1 }
+            class = random_non_colonizable
+            orbit_distance = 10
+        }
+    }
+
+    planet = {
+        class = pc_ocean
+        orbit_distance = 25
+        size = { min = 16 max = 24 }
+        flags = { mem_sadrell_science_system_1 }
+
+        init_effect = {
+            prevent_anomaly = yes
+            add_modifier = {
+                modifier = mem_sadrell_watery_planet
+                days = -1
+            }
+            add_deposit = d_mem_sadrell_tidal
+            while = {
+                count = 2
+                add_deposit = d_city_ruins
+            }
+        }
+    }
+
+    planet = {
+        class = pc_gas_giant
+        orbit_distance = 35
+        size = 25
+
+        moon = {
+            class = pc_alpine
+            orbit_distance = 10
+            size = { min = 12 max = 16 }
+            flags = { mem_sadrell_science_system_2 }
+
+            init_effect = {
+                prevent_anomaly = yes
+                add_modifier = {
+                    modifier = mem_sadrell_science_planet
+                    days = -1
+                }
+                add_deposit = d_mem_sadrell_research_lab
+                while = {
+                    count = 2
+                    add_deposit = d_city_ruins
+                }
+            }
+        }
+    }
+
+    planet = {
+        count = 3
+        class = random_non_colonizable
+        orbit_distance = 35
+
+        change_orbit = 5
+
+        moon = {
+            count = { min = 0 max = 2 }
+            class = random_non_colonizable
+            orbit_distance = 5
+        }
+    }
+}
+
+### OFF-GALAXY CLUSTER ###
+
+# Entry point
+mem_sadrell_1_0 = {
+    name = "Gorgons Eye"
+    class = sc_black_hole
+    flags = { mem_sadrell_extant_cluster mem_sadrell_1_0 }
+    
+    prevent_anomalies = yes
+
+    asteroid_belt = {
+        type = rocky_asteroid_belt
+        radius = 120
+    }
+
+    asteroid_belt = {
+        type = icy_asteroid_belt
+        radius = 240
+    }
+
+    planet = {
+        class = star
+        size = 30
+        orbit_distance = 0
+
+        flags = { mem_sadrell_extant_deposit }
+
+        init_effect = {
+            clear_deposits = yes
+            add_deposit = d_physics_4
+        }
+    }
+
+    change_orbit = 60
+
+    planet = {
+        count = 1
+        orbit_distance = 30
+        class = pc_broken
+
+        flags = { mem_sadrell_extant_deposit }
+
+        init_effect = {
+            clear_deposits = yes
+            add_deposit = d_minerals_8
+        }
+    }
+
+    change_orbit = 30
+
+    planet = {
+        count = 3
+        orbit_distance = 0
+        class = pc_asteroid
+    }
+
+    planet = {
+        class = pc_gas_giant
+        orbit_distance = 60
+        
+        change_orbit = 5
+
+        moon = {
+            count = 4
+            class = random_non_colonizable
+            orbit_distance = 5
+        }
+    }
+
+    change_orbit = 60
+
+    planet = {
+        count = 4
+        orbit_distance = 0
+        class = pc_ice_asteroid
+    }
+
+    planet = {
+        count = 2
+        orbit_distance = 25
+        class = random_non_colonizable
+
+        moon = {
+            orbit_distance = 10
+            class = random_non_colonizable
+        }
+    }
+
+    init_effect = {
+        save_event_target_as = system_0
+        spawn_megastructure = {
+			type = mem_sadrell_gateway_active
+			orbit_angle = 0
+			orbit_distance = 60
+            location = solar_system
+        }
+        random_system_megastructure = {
+            activate_gateway = this
+        }
+    }
+
+}
+
+# Gateway to the left
+mem_sadrell_1_1 = {
+    name = Caradon
+    class = rl_standard_stars
+    flags = { mem_sadrell_extant_cluster mem_sadrell_1_1 }
+    
+    prevent_anomalies = yes
+
+    planet = {
+        class = star
+        orbit_distance = 0
+
+        flags = { mem_sadrell_extant_deposit }
+
+        init_effect = {
+            clear_deposits = yes
+            add_deposit = d_energy_8
+        }
+    }
+
+    change_orbit = 35
+
+    planet = {
+        count = 8
+        class = random_non_colonizable
+        orbit_distance = { min = 35 max = 40 }
+
+        change_orbit = 5
+
+        moon = {
+            count = { min = 0 max = 2 }
+            class = random_non_colonizable
+            orbit_distance = 5
+        }
+    }
+
+    init_effect = {
+        save_event_target_as = system_1
+    }
+}
+
+# Neutron star on top
+mem_sadrell_1_2 = {
+    name = Dardello
+    class = sc_neutron_star
+    flags = { mem_sadrell_extant_cluster mem_sadrell_1_2 }
+    
+    prevent_anomalies = yes
+
+    asteroid_belt = {
+        type = rocky_asteroid_belt
+        radius = 135
+    }
+
+    planet = {
+        class = star
+        orbit_distance = 0
+
+        flags = { mem_sadrell_extant_deposit }
+
+        init_effect = {
+            clear_deposits = yes
+            add_deposit = d_engineering_6
+        }
+    }
+
+    change_orbit = 35
+
+    planet = {
+        count = 2
+        class = random_non_colonizable
+        orbit_distance = 35
+    }
+
+    change_orbit = 30
+
+    planet = {
+        count = 2
+        class = pc_asteroid
+        orbit_distance = 0
+    }
+
+    planet = {
+        count = 2
+        class = random_non_colonizable
+        orbit_distance = 35
+
+        change_orbit = 5
+
+        moon = {
+            count = { min = 1 max = 2 }
+            class = random_non_colonizable
+            orbit_distance = 5
+        }
+    }
+
+    init_effect = {
+        save_event_target_as = system_2
+    }
+}
+
+# Gateway to the right
+mem_sadrell_1_3 = {
+    name = Falx
+    class = rl_trinary_stars
+    flags = { mem_sadrell_extant_cluster mem_sadrell_1_3 }
+
+    prevent_anomalies = yes
+
+    asteroid_belt = {
+        type = rocky_asteroid_belt
+        radius = 100
+    }
+
+    asteroid_belt = {
+        type = rocky_asteroid_belt
+        radius = 200
+    }
+
+    asteroid_belt = {
+        type = rocky_asteroid_belt
+        radius = 300
+    }
+
+    change_orbit = 25
+
+    planet = {
+        class = star
+        orbit_distance = 0
+    }
+    planet = {
+        class = star
+        orbit_angle = 120
+        orbit_distance = 0
+    }
+    planet = {
+        class = star
+        orbit_angle = 120
+        orbit_distance = 0
+    }
+
+    change_orbit = 75
+
+    planet = {
+        count = { min = 1 max = 4 }
+        class = pc_asteroid
+        orbit_distance = 0
+    }
+
+    planet = {
+        class = pc_gas_giant
+        orbit_distance = 50
+
+        change_orbit = 5
+
+        moon = {
+            count = { min = 1 max = 5 }
+            class = random_non_colonizable
+            orbit_distance = 5
+        }
+    }
+
+    change_orbit = 50
+
+    planet = {
+        count = { min = 1 max = 4 }
+        class = pc_asteroid
+        orbit_distance = 0
+    }
+
+    planet = {
+        class = pc_gas_giant
+        orbit_distance = 50
+
+        change_orbit = 5
+
+        moon = {
+            count = { min = 1 max = 5 }
+            class = random_non_colonizable
+            orbit_distance = 5
+        }
+    }
+
+    change_orbit = 50
+
+    planet = {
+        count = { min = 1 max = 4 }
+        class = pc_asteroid
+        orbit_distance = 0
+    }
+
+    init_effect = {
+        save_event_target_as = system_3
+    }
+}
+
+# Bottom right - hot colony
+mem_sadrell_1_4 = {
+    name = Cholinpo
+    class = sc_binary_10
+    flags = { mem_sadrell_extant_cluster mem_sadrell_1_4 }
+    
+    prevent_anomalies = yes
+
+    change_orbit = 20
+
+    planet = {
+        class = star
+        orbit_distance = 0
+    }
+
+    planet = {
+        orbit_angle = 180
+        class = star
+        orbit_distance = 0
+    }
+
+    change_orbit = 20
+
+    planet = {
+        count = 2
+        class = random_non_colonizable
+        orbit_distance = 20
+    }
+
+    planet = {
+        count = 1
+        class = pc_desert
+        size = 20
+        orbit_distance = 20
+
+        flags = { mem_sadrell_desert_colony }
+
+        init_effect = {
+            prevent_anomaly = yes
+            save_event_target_as = desert_colony
+            clear_deposits = yes
+        }
+
+        moon = {
+            class = random_non_colonizable
+            orbit_distance = 10
+        }
+    }
+
+    planet = {
+        count = 2
+        class = random_non_colonizable
+        orbit_distance = 30
+
+        moon = {
+            class = random_non_colonizable
+            orbit_distance = 10
+        }
+    }
+    
+    init_effect = {
+        save_event_target_as = system_4
+    }
+}
+
+# Cold colony
+mem_sadrell_1_5 = {
+    name = Gechedeem
+    class = rl_standard_stars
+    flags = { mem_sadrell_extant_cluster mem_sadrell_1_5 }
+    
+    prevent_anomalies = yes
+
+    asteroid_belt = {
+        type = icy_asteroid_belt
+        radius = 180
+    }
+
+    planet = {
+        class = star
+        orbit_distance = 0
+    }
+
+    change_orbit = 35
+
+    planet = {
+        count = 3
+        class = random_non_colonizable
+        orbit_distance = 20
+    }
+
+    planet = {
+        class = pc_gas_giant
+        orbit_distance = 40
+
+        moon = {
+            class = pc_tundra
+            orbit_distance = 15
+            size = 16
+
+            flags = { mem_sadrell_tundra_colony }
+            init_effect = {
+                prevent_anomaly = yes
+                save_event_target_as = tundra_colony
+                clear_deposits = yes
+            }
+        }
+
+        moon = {
+            count = 3
+            class = random_non_colonizable
+            orbit_distance = 5
+        }
+    }
+
+    change_orbit = 45
+
+    planet = {
+        count = { min = 2 max = 4 }
+        class = pc_ice_asteroid
+        orbit_distance = 0
+    }
+
+    planet = {
+        count = 3
+        class = random_non_colonizable
+        orbit_distance = 25
+
+        moon = {
+            count = { min = 0 max = 1 }
+            class = random_non_colonizable
+            orbit_distance = 10
+        }
+    }
+
+    init_effect = {
+        save_event_target_as = system_5
+    }
+}

@@ -1,0 +1,232 @@
+########################
+# Primitive Civil War
+# Code by Malthus
+# Text by Malthus
+########################
+
+namespace = mem_primitive_civil_war
+
+################################################################################
+################################################################################
+################################################################################
+ 
+# Happens on planet with obervation post with either passive or active observation
+
+# Sleepers setup (HIDDEN)
+planet_event = {
+	id = mem_primitive_civil_war.1
+	hide_window = yes
+	
+	trigger = {
+		has_observation_outpost = yes
+		NOT = {
+			has_global_flag = mem_primitive_civil_war
+		}
+		observation_outpost = { 
+			OR = { 
+				has_mission = passive_observation
+				has_mission = specimen_collection
+			}
+		}
+		observation_outpost_owner = {
+			is_ai = no
+		}
+		owner = {
+			is_country_type = primitive
+			OR = {
+				has_country_flag = late_medieval_age
+			}
+			OR = {
+				has_ethic = ethic_fanatic_militarist
+				has_ethic = ethic_militarist
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		months = 5000
+		#months = 1
+	}
+	
+	immediate = {
+		save_global_event_target_as = mem_primitive_civil_war_planet
+		owner = {
+			save_global_event_target_as = mem_primitive_civil_war_planet_owner
+		}
+		observation_outpost_owner = {
+			limit = { 
+				is_ai = no
+			}
+			THIS = {
+				save_event_target_as = mem_primitive_civil_war_station_owner
+			}
+			country_event = { id = mem_primitive_civil_war.2 }
+		}
+		set_planet_flag = mem_primitive_civil_war_planet
+		set_global_flag = mem_primitive_civil_war
+	}
+}
+
+# initial notification about the ongoing civil war
+country_event = {
+	id = mem_primitive_civil_war.2
+	title = mem_primitive_civil_war.2.name
+	desc = mem_primitive_civil_war.2.desc
+	picture = GFX_evt_medieval_alien_civilization
+	show_sound = event_primitive_civilization
+	location = event_target:mem_primitive_civil_war_planet
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_primitive_civil_war.2.a
+		hidden_effect = {
+			country_event = { id = mem_primitive_civil_war.3 days = 600  random = 35 }
+		}
+	}
+}
+
+# status report on the civil war
+country_event = {
+	id = mem_primitive_civil_war.3
+	title = mem_primitive_civil_war.3.name
+	desc = mem_primitive_civil_war.3.desc
+	picture = GFX_evt_mem_ancient_tower
+	show_sound = event_primitive_civilization
+	location = event_target:mem_primitive_civil_war_planet
+	
+	is_triggered_only = yes
+
+	immediate = {
+	}
+
+	option = {
+		name = mem_primitive_civil_war.3.a
+		hidden_effect = {
+			country_event = { id = mem_primitive_civil_war.4 days = 90  random = 12 }
+		}
+	}
+
+	option = {
+		name = mem_primitive_civil_war.3.b
+		trigger = {
+			NOR = {
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_xenophobe
+			}
+			OR = {
+				has_policy_flag = interference_active
+				has_policy_flag = interference_full
+			}
+		}
+		enable_special_project = {
+			name = "MEM_PRIMITIVE_CIVIL_WAR_INTERVENTION"
+			location = event_target:mem_primitive_civil_war_planet
+			owner = ROOT
+		}
+	}
+}
+
+# end of civil war rebels defeated
+country_event = {
+	id = mem_primitive_civil_war.4
+	title = mem_primitive_civil_war.4.name
+	desc = mem_primitive_civil_war.4.desc
+	picture = GFX_evt_medieval_alien_civilization
+	show_sound = event_ground_battle
+	location = event_target:mem_primitive_civil_war_planet
+	
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:mem_primitive_civil_war_planet = {
+			owner = {
+				save_event_target_as = mem_primitive_civil_war_country
+				set_timed_country_flag = {
+					flag = recently_advanced
+					days = 2160 #60yrs
+				}
+				remove_country_flag = late_medieval_age
+				set_country_flag = steam_age
+				set_primitive_age = steam_age
+				change_country_flag = {
+					icon = {
+						category = "special"
+						file = "primitive.dds"
+					}
+					background= {
+						category = "backgrounds"
+						file = "new_dawn.dds"
+					}
+					colors={
+						"orange"
+						"red"
+						"null"
+						"null"
+					}
+				}
+				home_planet = {
+					remove_building = building_primitive_dwellings
+					add_building = building_primitive_factory
+					create_pop = { species = owner_main_species }
+					create_pop = { species = owner_main_species }
+					create_pop = { species = owner_main_species }
+					create_pop = { species = owner_main_species }
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_primitive_civil_war.4.a
+	}
+}
+
+# end of civil war rebels won
+ship_event = {
+	id = mem_primitive_civil_war.5
+	title = mem_primitive_civil_war.5.name
+	desc = mem_primitive_civil_war.5.desc
+	picture = GFX_evt_alien_propaganda
+	show_sound = event_planetary_riot
+	location = event_target:mem_primitive_civil_war_planet
+	
+	is_triggered_only = yes
+
+	immediate = {
+		event_target:mem_primitive_civil_war_planet = {
+			owner = {
+				set_timed_country_flag = {
+					flag = recently_advanced
+					days = 2160 #60yrs
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_primitive_civil_war.5.a
+		event_target:mem_primitive_civil_war_planet = {
+			random_pop = {
+				limit = {
+					NOR = {
+						has_ethic = "ethic_spiritualist"
+						is_robot_pop = yes
+						mem_has_happiness = no
+					}
+				}
+				pop_change_ethic = ethic_spiritualist
+			}
+			random_pop = {
+				limit = {
+					NOR = {
+						has_ethic = "ethic_spiritualist"
+						is_robot_pop = yes
+						mem_has_happiness = no
+					}
+				}
+				pop_change_ethic = ethic_spiritualist
+			}
+		}
+	}
+}

@@ -1,0 +1,424 @@
+#Towers in the Mist anomaly
+#By ViolentBeetle
+
+namespace = mem_towers
+
+#Sulfuric Forest
+ship_event = {
+    id = mem_towers.100
+    title = mem_towers.100.name
+    desc = mem_towers.100.desc
+
+    picture = GFX_evt_toxic
+    location = FROM
+
+    is_triggered_only = yes
+
+    immediate = {
+        FROM = {
+            add_modifier = {
+                modifier = mem_towers_forest
+                days = -1
+            }
+            save_event_target_as = the_planet
+        }
+    }
+
+    option = {
+        name = mem_towers.100.a
+
+        FROM = {
+            set_deposit = d_society_6
+        }
+    }
+
+    option = {
+        name = mem_towers.100.b
+        custom_tooltip = mem_towers.100.b.tooltip
+
+        owner = {
+            set_country_flag = mem_towers_forest_edict_unlocked
+        }
+    }
+}
+
+#Checking if planet even exist, executing possible scope
+# country_event = {
+#     id = mem_towers.101
+#     hide_window = yes
+#     is_triggered_only = yes
+
+#     immediate = {
+#         random_list = {
+#             22 = {
+#                 country_event = { id = mem_towers.103 } #Fail
+#             }
+#             78 = {
+#                 country_event = { id = mem_towers.102 } #Success
+#                 modifier = {
+#                     factor = 0
+#                     NOT = { 
+#                         exists = event_target:sulfur_planet 
+#                     }
+#                 }
+#             }
+#         }
+#     }
+# }
+
+# #Transplant candidate found
+# country_event = {
+#     id = mem_towers.102
+#     title = mem_towers.102.name
+#     desc = mem_towers.102.desc
+
+#     picture = GFX_evt_toxic
+#     location = event_target:sulfur_planet
+
+#     is_triggered_only = yes
+
+#     option = {
+#         name = mem_towers.102.a
+
+#         event_target:sulfur_planet = {
+#             add_modifier = {
+#                 modifier = mem_towers_forest_power
+#                 days = -1
+#             }
+#         }
+#     }
+
+#     option = {
+#         name = mem_towers.102.b
+#     }
+
+#     after = {
+#         hidden_effect = { owner = { country_event = { id = story.3 days = 30 } } }
+#     }
+# }
+
+#Transplant candidate not found
+# country_event = {
+#     id = mem_towers.103
+#     title = mem_towers.103.name
+#     desc = mem_towers.103.desc
+
+#     picture = GFX_evt_toxic
+
+#     is_triggered_only = yes
+
+#     option = {
+#         name = mem_towers.103.a
+#     }
+# }
+
+#Trash of the titans
+ship_event = {
+    id = mem_towers.200
+    title = mem_towers.200.name
+    desc = mem_towers.200.desc
+
+    picture = GFX_evt_junkheap
+    location = FROM
+
+    is_triggered_only = yes
+
+    immediate = {
+        FROM = {
+            add_modifier = {
+                modifier = mem_towers_trash
+                days = -1
+            }
+            save_event_target_as = the_planet
+        }
+    }
+
+    option = {
+        name = mem_towers.200.a
+
+        enable_special_project = {
+            name = MEM_TOWERS_CONTACT
+            location = FROM
+            owner = root.owner
+        }
+    }
+
+    option = {
+        name = mem_tower.200.b
+
+        enable_special_project = {
+            name = MEM_TOWERS_RUMMAGE
+            location = FROM
+            owner = root.owner
+        }
+    }
+
+    option = {
+        name = mem_tower.200.c
+
+        FROM = {
+            hidden_effect = {
+                clear_deposits = yes
+            }
+            add_deposit = d_engineering_3
+            add_deposit = d_society_3
+        }
+    }
+
+    after = {
+        hidden_effect = { owner = { country_event = { id = story.5 days = 30 } } }
+    }
+}
+
+#Trash of the titans - communicating with Brigadier
+ship_event = {
+    id = mem_towers.210
+    title = mem_towers.210.name
+    desc = mem_towers.210.desc
+
+    location = event_target:the_planet
+    picture = GFX_evt_junkheap
+
+    is_triggered_only = yes
+
+    immediate = {
+        owner = {
+            create_species = {
+                name = NAME_AI
+                class = ROBOT
+                namelist = "AI"
+                traits = {
+                    trait = trait_machine_unit
+                }
+            }
+            create_saved_leader = {
+                key = mem_towers_brigadier
+                name = "Brigadier"
+                species = last_created_species
+                class = governor
+                traits = {
+                    trait = mem_leader_trait_towers_brigadier
+                }
+                effect = {
+                    save_event_target_as = brigadier
+                    set_age = 5433
+                }
+            }
+        }
+    }
+
+    option = {
+        name = ONSCREEN
+
+        hidden_effect = {
+            owner = {
+                country_event = { id = mem_towers.211 }
+            }
+        }
+    }
+}
+
+#Diplomatic window
+country_event = {
+    id = mem_towers.211
+    title = TRANSMISSION
+    desc = mem_towers.211.desc
+
+    diplomatic = yes
+    is_triggered_only = yes
+    location = event_target:the_planet
+
+    picture_event_data = {
+		portrait = event_target:brigadier
+		planet_background = event_target:the_planet
+		room = machine_room
+    }
+    
+    option = {
+        name = mem_towers.211.a
+        custom_tooltip = mem_towers.211.a.tooltip
+        activate_saved_leader = {
+			add_to_owned = yes
+			key = mem_towers_brigadier
+        }
+    }
+
+    option = {
+        name = mem_towers.211.b
+        default_hide_option = yes
+
+        add_monthly_resource_mult = {
+			resource = influence
+			value = @tier1influencereward
+			min = @tier1influencemin
+			max = @tier1influencemax
+		}
+    }
+
+    option = {
+        name = mem_towers.211.c
+        response_text = mem_towers.211.c.response
+
+        trigger = {
+            OR = {
+                has_ethic = ethic_spiritualist
+                has_ethic = ethic_fanatic_spiritualist
+                has_valid_civic = civic_fanatic_purifiers
+            }
+        }
+
+        add_monthly_resource_mult = {
+            resource = unity
+            value = @tier2unityreward
+            min = @tier2unitymin
+            max = @tier2unitymax
+        }
+    }
+
+    option = {
+        name = mem_towers.211.d
+        response_text = mem_towers.211.d.response
+        is_dialog_only = yes
+    }
+}
+
+#Trash of the titans - successfully rummaging
+ship_event = {
+    id = mem_towers.220
+    title = mem_towers.220.name
+    desc = mem_towers.220.desc
+
+    picture = GFX_evt_junkheap
+    location = event_target:the_planet
+
+    is_triggered_only = yes
+
+    option = {
+        name = mem_towers.220.a
+
+        owner = {
+            random_list = {
+                20 = {
+                    if = {
+                        limit = {
+                            has_technology = tech_mining_2
+                        }
+                        add_monthly_resource_mult = {
+                            resource = engineering_research
+                            value = @tier2researchreward
+                            min = @tier2researchmin
+                            max = @tier2researchmax
+                        }
+                    }
+                    else_if = {
+                        limit = {
+                            has_technology = tech_mining_1
+                        }
+                        add_research_option = tech_mining_2
+                        add_tech_progress = {
+                            tech = tech_mining_3
+                            progress = 0.20
+                        }
+                    }
+                    else = {
+                        add_research_option = tech_mining_1
+                        add_tech_progress = {
+                            tech = tech_mining_1
+                            progress = 0.20
+                        }
+                    }
+                }
+                20 = {
+                    if = {
+                        limit = {
+                            has_technology = tech_gene_crops
+                        }
+                        add_monthly_resource_mult = {
+                            resource = society_research
+                            value = @tier2researchreward
+                            min = @tier2researchmin
+                            max = @tier2researchmax
+                        }
+                    }
+                    else_if = {
+                        limit = {
+                            has_technology = tech_hydroponics
+                        }
+                        add_research_option = tech_gene_crops
+                        add_tech_progress = {
+                            tech = tech_gene_crops
+                            progress = 0.20
+                        }
+                    }
+                    else = {
+                        add_research_option = tech_hydroponics
+                        add_tech_progress = {
+                            tech = tech_hydroponics
+                            progress = 0.20
+                        }
+                    }
+                }
+                20 = {
+                    if = {
+                        limit = {
+                            has_technology = tech_power_plant_3
+                        }
+                        add_monthly_resource_mult = {
+                            resource = physics_research
+                            value = @tier2researchreward
+                            min = @tier2researchmin
+                            max = @tier2researchmax
+                        }
+                    }
+                    else_if = {
+                        limit = {
+                            has_technology = tech_power_plant_2
+                        }
+                        add_research_option = tech_power_plant_3
+                        add_tech_progress = {
+                            tech = tech_power_plant_3
+                            progress = 0.20
+                        }
+                    }
+                    else = {
+                        add_research_option = tech_power_plant_2
+                        add_tech_progress = {
+                            tech = tech_power_plant_2
+                            progress = 0.20
+                        }
+                    }
+                }
+                20 = {
+                    modifier = {
+                        factor = 0
+                        OR = {
+                            has_technology = tech_robotic_workers
+                            has_ethic = ethic_gestalt_consciousness
+                        }
+                    }
+                    add_research_option = tech_robotic_workers
+                    add_tech_progress = {
+                        tech = tech_robotic_workers
+                        progress = 0.20
+                    }
+                }
+                20 = {
+                    modifier = {
+                        factor = 0
+                        OR = {
+                            has_technology = tech_artificial_moral_codes
+                            has_ethic = ethic_gestalt_consciousness
+                        }
+                    }
+                    add_research_option = tech_artificial_moral_codes
+                    add_tech_progress = {
+                        tech = tech_artificial_moral_codes
+                        progress = 0.20
+                    }
+                }
+            }
+        }
+    }
+}
+
+

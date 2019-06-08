@@ -1,0 +1,770 @@
+# Rebel Yell
+# By ViolentBeetle
+
+namespace = mem_rebel_yell
+
+# On entering system
+ship_event = {
+    id = mem_rebel_yell.1
+    title = mem_rebel_yell.1.name
+    desc = mem_rebel_yell.1.desc
+
+    is_triggered_only = yes
+
+    location = ROOT
+    show_sound = event_alien_signal
+    picture = GFX_evt_ruined_system
+
+    trigger = {
+        owner = {
+            is_ai = no
+            NOT = { has_country_flag = mem_rebel_yell_first_visit }
+        }
+        FROM = { has_star_flag = mem_rebel_yell_signal_system }
+        NOT = { has_global_flag = mem_rebel_yell_wormhole_opened }
+    }
+
+    immediate = {
+        owner = { set_country_flag = mem_rebel_yell_first_visit }
+    }
+
+    option = {
+        name = mem_rebel_yell.1.a
+        custom_tooltip = mem_rebel_yell.1.a.tooltip
+    }
+
+    option = {
+        name = mem_rebel_yell.1.b
+        custom_tooltip = mem_rebel_yell.1.b.tooltip
+        hidden_effect = {
+            FROM = { save_event_target_as = the_system }
+            owner = {
+                begin_event_chain = {
+                    event_chain = mem_rebel_yell_poi_chain
+                    target = this
+                }
+                create_point_of_interest = {
+                    id = mem_rebel_yell.poi.1
+                    name = mem_rebel_yell.poi.1.name
+                    desc = mem_rebel_yell.poi.1.desc
+                    event_chain = mem_rebel_yell_poi_chain
+                    location = FROM                    
+                }
+            }
+        }
+    }
+}
+
+# Popup for the signal system controller
+country_event = {
+    id = mem_rebel_yell.2
+    title = mem_rebel_yell.2.name
+    desc = mem_rebel_yell.2.desc
+
+    mean_time_to_happen = {
+        years = 10 # Make sure to change it
+    }
+
+    location = event_target:the_system
+    show_sound = event_radio_chatter
+    picture = GFX_evt_physics_research
+
+    trigger = {
+        NOR = { 
+            has_global_flag = mem_rebel_yell_wormhole_opened
+            has_country_flag = mem_rebel_yell_got_invitation
+        }
+        is_country_type = default
+        # has_technology = tech_wormhole_stabilization
+        years_passed > 25
+        any_system_within_border = {
+            has_star_flag = mem_rebel_yell_signal_system
+            exists = starbase
+            starbase = {
+                controller = { is_same_value = root }
+            }
+        }
+    }
+
+    immediate = {
+        set_country_flag = mem_rebel_yell_got_invitation
+        random_system = {
+            limit = { has_star_flag = mem_rebel_yell_signal_system }
+            save_event_target_as = the_system
+            random_system_planet = {
+                limit = {
+                    is_star = no
+                    NOT = { has_planet_flag = mem_rebel_yell_broken_city }
+                    NOT = { is_planet_class = pc_gas_giant }
+                }
+                save_event_target_as = the_planet
+            }
+        }
+    }
+
+    option = {
+        name = mem_rebel_yell.2.a
+
+        begin_event_chain = {
+            event_chain = mem_rebel_yell_investigation_chain
+            target = THIS
+        }
+        enable_special_project = {
+            name = MEM_REBEL_YELL_RESOLVE_SIGNAL
+            location = event_target:the_planet            
+        }
+
+        ai_chance = {
+            factor = 1000
+        }
+    }
+
+    option = {
+        name = mem_rebel_yell.2.b
+
+        add_resource = {
+            influence = 100
+        }
+
+        ai_chance = {
+            factor = 0
+        }
+    }
+
+    after = {
+        end_event_chain = mem_rebel_yell_poi_chain
+    }
+}
+
+# Project completion
+ship_event = {
+    id = mem_rebel_yell.3
+    title = mem_rebel_yell.3.name
+    desc = mem_rebel_yell.3.desc
+
+    is_triggered_only = yes
+
+    location = event_target:the_planet
+    show_sound = event_radio_chatter
+    picture = GFX_evt_ship_in_orbit
+
+    option = {
+        name = INTERESTING
+    }
+
+    after = {
+        owner = {
+            country_event = { id = mem_rebel_yell.4 days = 15}
+        }
+    }
+}
+
+# Wormhole opens in the system
+country_event = {
+    id = mem_rebel_yell.4
+    title = mem_rebel_yell.4.name
+    desc = mem_rebel_yell.4.desc
+
+    is_triggered_only = yes
+
+    location = event_target:the_system
+    show_sound = event_default
+    picture = GFX_evt_wormhole
+
+    immediate = {
+        set_global_flag = mem_rebel_yell_wormhole_opened
+        every_playable_country = {
+            limit = { has_event_chain = mem_rebel_yell_poi_chain }
+            end_event_chain = mem_rebel_yell_poi_chain
+        }
+        event_target:the_system = {
+            spawn_natural_wormhole = {
+                bypass_type = wormhole
+                random_pos = yes
+                orbit_angle = 360
+            }
+            spawn_system = {
+                initializer = mem_rebel_yell_system_2
+                min_distance = 12
+                max_distance = 16
+            }
+            event_target:boss_system = {
+                isolate_system = yes
+            }
+            link_wormholes = event_target:boss_system
+        }
+        log = "Rebel Yell Boss Spawn"
+    }
+
+    option = {
+        name = mem_rebel_yell.4.a
+        custom_tooltip = mem_rebel_yell.4.a.tooltip
+    }
+
+    # option = {
+    #     name = mem_rebel_yell.4.b
+    #     custom_tooltip = mem_rebel_yell.4.a.tooltip
+    #     create_point_of_interest = {
+    #         id = mem_rebel_yell.poi.2
+    #         name = mem_rebel_yell.poi.2.name
+    #         desc = mem_rebel_yell.poi.2.desc
+    #         event_chain = mem_rebel_yell_investigation_chain
+    #         location = event_target:the_system                    
+    #     }
+    # }
+}
+
+# Entering boss system for the first time
+ship_event = {
+    id = mem_rebel_yell.5
+    title = mem_rebel_yell.5.name
+    desc = mem_rebel_yell.5.desc
+
+    is_triggered_only = yes
+
+    location = ROOT
+    show_sound = event_default
+    picture = GFX_evt_fleet_good
+
+    trigger = {
+        from = { 
+            has_star_flag = mem_rebel_yell_boss_system
+            any_ship_in_system = {
+                exists = owner
+                owner = { has_country_flag = mem_rebel_yell_resistance_country }
+                is_disabled = no
+            }
+        }
+        owner = {
+            NOT = { has_country_flag = mem_rebel_yell_met_boss }
+        }
+
+    }
+
+    immediate = {
+        random_country = {
+            limit = { has_country_flag = mem_rebel_yell_resistance_country }
+            save_event_target_as = the_other_guys
+        }        
+        owner = { 
+            set_country_flag = mem_rebel_yell_met_boss 
+            establish_communications_no_message = event_target:the_other_guys
+            establish_contact = {
+                who = event_target:the_other_guys
+                location = FROM
+            }
+        }
+    }
+
+    option = {
+        name = OK
+    }
+}
+
+# Ship disabled
+ship_event = {
+    id = mem_rebel_yell.6
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        has_ship_flag = mem_rebel_yell_prize_ship
+        owner = {
+            has_country_flag = mem_rebel_yell_resistance_country
+        }
+    }
+
+    immediate = {
+        log = "[From.Owner.GetName] killed the Rebel Yell boss."
+        save_event_target_as = prize_ship
+        fleet = { save_event_target_as = prize_fleet }
+        kill_leader = { type = admiral show_notification = no }
+        owner = {
+            every_owned_ship = {
+                limit = {
+                    NOT = { is_same_value = root }
+                }
+                destroy_ship = this
+            }
+        }
+        FROM.owner = {
+            IF = {
+                limit = { is_country_type = default }
+                country_event = { id = mem_rebel_yell.7 }
+            }
+            ELSE = {
+                destroy_ship = root
+            }
+        }
+        every_playable_country = {
+            IF = {
+                limit = { has_event_chain = mem_rebel_yell_poi_chain }
+            }
+            end_event_chain = mem_rebel_yell_poi_chain
+            IF = {
+                limit = { has_event_chain = mem_rebel_yell_investigation_chain }
+            }
+            end_event_chain = mem_rebel_yell_investigation_chain
+        }
+    }
+}
+
+# Princess contacts us
+country_event = {
+    id = mem_rebel_yell.7
+    title = TRANSMISSION
+    desc = mem_rebel_yell.7.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+        room = ethic_spaceship_room
+        portrait = event_target:princess
+    }
+
+    immediate = {
+        IF = {
+            limit = { NOT = { is_species_class = HUM } }
+            create_species = {
+                name = Caith
+                class = HUM
+                portrait = humanoid_05
+                traits = {
+                    trait = trait_charismatic
+                    trait = trait_quick_learners
+                    trait = trait_talented
+                    trait = trait_psionic
+                }
+                effect = {
+                    save_event_target_as = princess_species
+                }
+            }
+        }
+        ELSE = {
+            create_species = {
+                name = Caith
+                class = MAM
+                portrait = mam3
+                traits = {
+                    trait = trait_charismatic
+                    trait = trait_quick_learners
+                    trait = trait_talented
+                    trait = trait_psionic
+                }
+                effect = {
+                    save_event_target_as = princess_species
+                }
+            }
+        }
+
+        create_saved_leader = {
+            key = mem_rebel_yell_princess
+            name = "Varnaya Tan-Kell"
+            class = admiral
+            species = last_created_species
+            skill = 2
+            gender = female
+            
+            effect = {
+                add_trait = leader_trait_admiral_psionic
+                add_ruler_trait = leader_trait_ruler_psionic
+                add_trait = mem_rebel_yell_princess_trait
+                save_event_target_as = princess
+                set_age = 25
+            }
+        }
+    }
+
+    option = {
+        name = mem_rebel_yell.7.a
+        hidden_effect = {
+            country_event = { id = mem_rebel_yell.8 }
+        }
+    }
+}
+
+country_event = {
+    id = mem_rebel_yell.8
+    title = TRANSMISSION
+    desc = mem_rebel_yell.8.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+        room = ethic_spaceship_room
+        portrait = event_target:princess
+    }
+
+    option = {
+        name = mem_rebel_yell.8.a
+        default_hide_option = yes
+
+        trigger = {
+            NOR = {
+                has_valid_civic = civic_fanatic_purifiers
+                has_valid_civic = civic_machine_terminator
+                has_valid_civic = civic_hive_devouring_swarm
+            }
+        }
+
+        hidden_effect = {
+            event_target:prize_fleet = {
+                set_owner = root
+                set_leader = event_target:princess
+            }
+            event_target:prize_ship = {
+                set_disabled = no
+                set_disable_at_health = -1 # Need testing if this lets the ship die
+            }
+        }
+
+        ai_chance = {
+            factor = 1000
+        }
+    }
+
+    option = {
+        name = mem_rebel_yell.8.b
+
+        trigger = {
+            NOR = {
+                has_valid_civic = civic_fanatic_purifiers
+                has_valid_civic = civic_machine_terminator
+                has_valid_civic = civic_hive_devouring_swarm
+            }
+        }
+
+        hidden_effect = {
+            activate_saved_leader = {
+                key = mem_rebel_yell_princess        
+            }
+            destroy_ship = event_target:prize_ship
+        }
+        add_resource = {
+            alloys = 750
+            volatile_motes = 75
+            rare_crystals = 75
+            exotic_gases = 75
+        }
+    }
+
+    option = {
+        name = mem_rebel_yell.8.c
+
+        trigger = {
+            OR = {
+                has_ethic = ethic_gestalt_consciousness
+                has_ethic = ethic_fanatic_xenophobe
+                has_ethic = ethic_xenophobe
+            }
+            NOT = { has_valid_civic = civic_machine_servitor }
+        }
+
+        add_monthly_resource_mult = {
+            resource = unity
+            value = @tier3unityreward
+            min = @tier3unitymin
+            max = @tier3unitymax
+        }
+
+        hidden_effect = {
+            event_target:prize_fleet = {
+                set_owner = root
+            }
+            event_target:prize_ship = {
+                set_disabled = no
+                set_disable_at_health = -1 # Need testing if this lets the ship die
+            }
+        }
+
+        ai_chance = {
+            factor = 500
+        }
+    }
+
+    option = {
+        name = mem_rebel_yell.8.d
+
+        trigger = {
+            OR = {
+                has_ethic = ethic_gestalt_consciousness
+                has_ethic = ethic_fanatic_xenophobe
+                has_ethic = ethic_xenophobe
+            }
+            NOT = { has_valid_civic = civic_machine_servitor }
+        }
+
+        add_monthly_resource_mult = {
+            resource = unity
+            value = @tier3unityreward
+            min = @tier3unitymin
+            max = @tier3unitymax
+        }
+        add_resource = {
+            alloys = 750
+            volatile_motes = 75
+            rare_crystals = 75
+            exotic_gases = 75
+        }
+
+        hidden_effect = {
+            destroy_ship = event_target:prize_ship
+        }
+    }
+
+    option = {
+        name = mem_rebel_yell.8.e
+        is_dialog_only = yes
+        response_text = mem_rebel_yell.8.e.response
+
+        trigger = {
+            has_country_flag = mem_vazurans_met
+            NOR = {
+                has_valid_civic = civic_fanatic_purifiers
+                has_valid_civic = civic_machine_terminator
+                has_valid_civic = civic_hive_devouring_swarm
+            }
+        }
+    }
+}
+
+# Anomaly event to get a ship
+ship_event = {
+    id = mem_rebel_yell.9
+    title = mem_rebel_yell.9.name
+    desc = mem_rebel_yell.9.desc
+
+    is_triggered_only = yes
+
+    location = FROM
+    show_sound = event_default
+    picture = GFX_evt_mem_crashed_ship_cold
+
+    option = {
+        name = mem_rebel_yell.9.a
+
+        FROM = {
+            save_event_target_as = the_asteroid
+            enable_special_project = {
+                name = MEM_REBEL_YELL_RECOVER_SHIP
+                location = THIS
+                owner = root.owner
+            }
+        }
+
+        ai_chance = {
+            factor = 100
+        }
+    }
+
+    option = {
+        name = NOTIME
+        
+        owner = {
+            add_resource = {
+                influence = 100
+            }
+        }
+    }
+}
+
+# Dig resolution
+ship_event = {
+    id = mem_rebel_yell.10
+    title = mem_rebel_yell.10.name
+    desc = mem_rebel_yell.10.desc
+
+    is_triggered_only = yes
+
+    location = event_target:the_asteroid
+    show_sound = event_default
+    picture = GFX_evt_mem_crashed_ship_cold
+
+    option = {
+        name = mem_rebel_yell.10.a
+        custom_tooltip = mem_rebel_yell.10.a.tooltip
+
+        hidden_effect = {
+            create_fleet = {
+                name = "Lost Knight"
+                effect = {
+                    create_ship = {
+                        name = Aldermendon
+                        # design = NAME_MEM_Rebel_Yell_Knight
+                        design = NAME_MEM_Rebel_Yell_Knight_Salvage
+                    }
+                    set_owner = root.owner
+                    set_location = event_target:the_asteroid
+                }
+            }
+        }
+
+        ai_chance = {
+            factor = 100
+        }
+    }
+
+    option = {
+        name = mem_rebel_yell.10.b
+
+        owner = {
+            add_resource = {
+                volatile_motes = 50
+                exotic_gases = 50
+                rare_crystals = 50
+            }
+        }
+    }
+
+    option = {
+        name = mem_rebel_yell.10.c
+
+        owner = {
+            add_monthly_resource_mult = {
+                resource = engineering_research
+                value = @tier3researchreward
+                min = @tier3researchmin
+                max = @tier3researchmax
+            }
+            add_monthly_resource_mult = {
+                resource = physics_research
+                value = @tier3researchreward
+                min = @tier3researchmin
+                max = @tier3researchmax
+            }
+        }
+    }
+}
+
+fleet_event = {
+    id = mem_rebel_yell.11
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        owner = { has_country_flag =  mem_rebel_yell_resistance_country }
+        from = {
+            has_star_flag = mem_rebel_yell_signal_system
+            exists = space_owner
+            space_owner = {
+                is_ai = no
+                NOT = { has_country_flag = mem_rebel_yell_saw_recon_fleet }
+            }
+        }
+    }
+
+    immediate = {
+        from = {
+            save_event_target_as = signal_system
+            space_owner = {
+                set_country_flag = mem_rebel_yell_saw_recon_fleet
+                country_event = {
+                    id = mem_rebel_yell.12
+                }
+            }
+        }
+    }
+}
+
+country_event = {
+    id = mem_rebel_yell.12
+    title = mem_rebel_yell.12.name
+    desc = mem_rebel_yell.12.desc
+
+    is_triggered_only = yes
+
+    location = FROM
+    picture = GFX_evt_fleet_good
+    show_sound = event_yellow_alert
+
+    option = {
+        name = mem_rebel_yell.12.a
+    }
+}
+
+# Test event
+country_event = {
+    id = mem_rebel_yell.999
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        create_fleet = {
+            name = "Test Ships"
+            effect = {
+                create_ship = {
+                    name = "Test Ship"
+                    design = NAME_MEM_Rebel_Yell_Paladin
+                }
+                set_owner = ROOT
+                set_location = root.capital_scope
+            }
+        }
+    }
+}
+
+# Test 2
+country_event = {
+    id = mem_rebel_yell.1000
+    title = TRANSMISSION
+    desc = mem_rebel_yell.7.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+        room = ethic_spaceship_room
+        portrait = event_target:princess
+    }
+
+    immediate = {
+        IF = {
+            limit = { NOT = { exists = event_target:princess_species } }
+            create_species = {
+                name = Caith
+                class = HUM
+                portrait = humanoid_05
+                traits = {
+                    trait = trait_charismatic
+                    trait = trait_quick_learners
+                    trait = trait_talented
+                    trait = trait_psionic
+                }
+                effect = {
+                    save_event_target_as = princess_species
+                }
+            }
+        }
+
+        create_saved_leader = {
+            key = mem_rebel_yell_princess
+            name = "Varnaya Tan-Kell"
+            class = admiral
+            species = event_target:princess_species
+            skill = 2
+            gender = female
+            
+            effect = {
+                add_trait = leader_trait_admiral_psionic
+                add_ruler_trait = leader_trait_ruler_psionic
+                save_event_target_as = princess
+                set_age = 25
+            }
+        }
+    }
+
+    option = {
+        name = OK
+    }
+
+    option = {
+        name = "Try Again"
+
+        country_event = {
+            id = mem_rebel_yell.1000            
+        }
+    }
+
+}

@@ -1,0 +1,187 @@
+#I'm basically using these so I don't lose them
+
+mem_give_neochadanus_resources = {
+	add_resource = {
+		minerals = 20000
+		alloys = 10000
+		consumer_goods = 10000
+		energy = 20000
+		food = 4000
+		influence = 1000
+		unity = 1000000
+	}
+	create_fleet_from_naval_cap = 0.25
+}
+
+
+mem_create_neochadanus = {
+	create_leader = {
+		name = "Neochadanus"
+		class = admiral
+		species = last_created
+		
+		skill = 10
+		
+		traits = {
+		}
+
+		effect = {
+			set_leader_flag = mem_neochadanus
+			save_event_target_as = mem_neochadanus
+			exile_leader_as = mem_neochadanus
+
+			add_ruler_trait = leader_trait_ruler_chosen
+			add_ruler_trait = mem_leader_trait_ruler_ancient_cyborg
+			add_ruler_trait = leader_trait_ruler_erudite
+			add_ruler_trait = mem_leader_trait_ruler_knowledge_of_another_age
+			add_ruler_trait = mem_leader_trait_ruler_lunatic_neoch
+		}
+	}
+}
+
+
+#I use this twice in different events so figured this was the best way to do it.
+mem_neochadanus_seizes_ship_and_flees = {
+	if = {
+		limit = {
+			NOT = {
+				exists = event_target:mem_neochadanus_ship
+			}
+		}
+		if = {
+			limit = {
+				any_ship = {
+					is_ship_size = battleship
+				}
+			}
+			random_owned_ship = {
+				limit = {
+					is_ship_size = battleship
+				}
+				save_event_target_as = mem_neochadanus_ship
+			}
+		}
+		else_if = {
+			limit = {
+				any_ship = {
+					is_ship_size = cruiser
+				}
+			}
+			random_owned_ship = {
+				limit = {
+					is_ship_size = cruiser
+				}
+				save_event_target_as = mem_neochadanus_ship
+			}
+		}
+		else = {
+			random_owned_ship = {
+				save_event_target_as = mem_neochadanus_ship
+			}
+		}
+	}
+
+	event_target:mem_neochadanus_ship = {
+		delete_ship = this
+	}
+	
+	root.owner = {
+		save_event_target_as = mem_neochadanus_victim_country
+	}
+	
+	if = {
+		limit = {
+			root.owner = {
+				any_owned_planet = {
+					is_planet_class = pc_city
+					is_capital = no
+					solar_system = {
+						NOT = {
+							is_same_value = root.owner.capital_scope.solar_system
+						}
+					}
+				}
+			}
+		}
+		closest_system = {
+			limit = {
+				exists = owner
+				owner = {
+					is_same_value = root.owner
+				}
+				any_system_planet = {
+					has_owner = yes
+					is_colony = yes
+					is_planet_class = pc_city
+					is_capital = no
+				}
+				NOT = {
+					any_system_planet = {
+						is_capital = yes
+					}
+				}
+			}
+			random_system_planet = {
+				limit = {
+					has_owner = yes
+					is_colony = yes
+					is_planet_class = pc_city
+					is_capital = no
+				}
+				planet_event = { id = mem_lost_emperor.30 days = 180 }
+			}
+		}
+	}
+	else = {
+		closest_system = {
+			limit = {
+				exists = owner
+				owner = {
+					is_same_value = root.owner
+				}
+				any_system_planet = {
+					has_owner = yes
+					is_colony = yes
+					is_capital = no
+				}
+				NOT = {
+					any_system_planet = {
+						is_capital = yes
+					}
+				}
+			}
+			random_system_planet = {
+				limit = {
+					has_owner = yes
+					is_colony = yes
+					is_capital = no
+				}
+				planet_event = { id = mem_lost_emperor.30 days = 180 }
+			}
+		}
+	}
+}
+
+mem_lost_emperor_give_root_planet_enough_pops_and_infrastructure = {
+	while = {
+		limit = {
+			num_pops < 25
+		}
+		create_pop = {
+			species = owner_main_species
+		}
+	}
+	remove_all_buildings = yes
+	
+	add_building = building_mem_lost_emperor_ancient_palace
+	add_building = building_fe_stronghold
+	add_building = building_fe_stronghold
+	add_building = building_affluence_center
+	add_building = building_nourishment_center
+	add_building = building_class_4_singularity
+	add_building = building_class_4_singularity
+	add_building = building_dimensional_fabricator
+	add_building = building_dimensional_fabricator
+	add_building = building_nano_forge
+	add_building = building_nano_forge
+}

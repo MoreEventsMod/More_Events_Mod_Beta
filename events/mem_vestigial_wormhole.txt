@@ -1,0 +1,889 @@
+# Vestigial Wormhole
+# By ViolentBeetle
+
+namespace = mem_vestigial_wormhole
+
+# Setting up vestigial wormhole on galaxy generation
+event = {
+    id = mem_vestigial_wormhole.1
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        random_list = {
+            25 = { } # TODO: Change odds
+            75 = {
+                random_system = {
+                    limit = {
+                        NOR = {
+                            any_ship_in_system = {
+                                always = yes
+                            }
+                            has_star_flag = hostile_system
+                            has_star_flag = empire_cluster
+                            is_fe_cluster = yes
+                        }
+                    }
+                    # set_name = "LOOK AT ME I'M WORMHOLE"
+                    set_star_flag = mem_vestigial_wormhole_system
+                    create_ambient_object = {
+                        type = mem_vestigial_wormhole_object
+                        location = this
+                    }
+                    last_created_ambient_object = {
+                        save_global_event_target_as = mem_vestigial_wormhole_ambient_object
+                    }
+                }
+            }
+        }
+    }
+}
+
+# Ship enters system and event pops up
+ship_event = {
+    id = mem_vestigial_wormhole.2
+    title = mem_vestigial_wormhole.2.name
+    desc = mem_vestigial_wormhole.2.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_wormhole
+    location = FROM
+    show_sound = event_default
+
+    trigger = {
+        owner = {
+            is_ai = no
+            NOT = { has_country_flag = mem_vestigial_wormhole_found_system }
+        }
+        FROM = {
+            has_star_flag = mem_vestigial_wormhole_system
+        }
+        NOT = { has_global_flag = mem_vestigial_wormhole_ship_emerged }
+    }
+
+    immediate = {
+        owner = { set_country_flag = mem_vestigial_wormhole_found_system }
+    }
+
+    option = {
+        name = INTERESTING
+    }
+}
+
+# Country event for the controller
+country_event = {
+    id = mem_vestigial_wormhole.3
+    title = mem_vestigial_wormhole.3.name
+    desc = mem_vestigial_wormhole.3.desc
+
+    picture = GFX_evt_wormhole
+    location = event_target:ship_object
+    show_sound = event_default
+
+    mean_time_to_happen = {
+        years = 50
+    }
+
+    trigger = {
+        NOT = { has_global_flag = mem_vestigial_wormhole_ship_emerged }
+        any_system_within_border = {
+            has_star_flag = mem_vestigial_wormhole_system
+        }
+        exists = event_target:mem_vestigial_wormhole_ambient_object
+    }
+
+    immediate = {
+        set_global_flag = mem_vestigial_wormhole_ship_emerged
+        random_system_within_border = {
+            limit = { has_star_flag = mem_vestigial_wormhole_system }
+            save_event_target_as = the_system
+        }
+        create_ambient_object = {
+            type = mem_vestigial_wormhole_ship_object
+            location = event_target:mem_vestigial_wormhole_ambient_object
+        }
+        destroy_ambient_object = event_target:mem_vestigial_wormhole_ambient_object
+        last_created_ambient_object = {
+            save_event_target_as = ship_object
+        }
+    }
+
+    option = {
+        name = mem_vestigial_wormhole.3.a
+
+        enable_special_project = {
+            name = MEM_VESTIGIAL_WORMHOLE_PROJECT
+            location = event_target:ship_object
+            owner = root
+        }
+
+        ai_chance = {
+            factor = 100
+        }
+    }
+
+    option = {
+        name = mem_vestigial_wormhole.3.b
+        add_monthly_resource_mult = {
+            resource = influence
+            value = @tier1influencereward
+            min = @tier1influencemin
+            max = @tier1influencemax
+        }
+
+        ai_chance = {
+            factor = 0
+        }
+    }
+}
+
+# Ship event: Found scientist
+ship_event = {
+    id = mem_vestigial_wormhole.4
+    title = mem_vestigial_wormhole.4.name
+    desc = mem_vestigial_wormhole.4.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_ship_in_orbit
+    location = event_target:ship_object
+    show_sound = event_default
+
+    immediate = {
+        IF = {
+            limit = {
+                NOR = {
+                    has_global_flag = mem_humans_taken
+                    any_system = { has_star_flag = sol }
+                    any_country = {
+                        any_owned_pop_species = { species_portrait = human }
+                    }
+                }
+            }
+            set_global_flag = mem_humans_taken
+            create_species = {
+                name = Human
+                plural = Humans
+                adjective = Human
+                class = "HUM"
+                portrait = "human"
+                traits = {
+                    trait = "trait_adaptive"
+                    trait = "trait_nomadic"	
+                    trait = "trait_wasteful"
+                }
+            }
+            owner = {
+                create_saved_leader = {
+                    creator = this
+                    key = mem_vestigial_wormhole_leader
+                    event_leader = no
+                    class = scientist
+                    species = last_created_species
+                    skill = 4
+                    traits = {
+                        trait = mem_vestigial_wormhole_wanderer_trait
+                    }
+                    # gender = male
+                    effect = {
+                        save_event_target_as = the_guy
+                        IF = {
+                            limit = { gender = male }
+                            set_name = "Elias Davenport"
+                        }
+                        ELSE = { set_name = "Temperance Wallcroft" }
+                    }
+                }
+            }
+        }
+        ELSE = {
+            create_species = {
+                name = Dommel
+                plural = Dommels
+                adjective = Dommel
+                class = "REP"
+                portrait = random
+                traits = {
+                    trait = "trait_adaptive"
+                    trait = "trait_nomadic"	
+                    trait = "trait_wasteful"
+                }
+            }
+            owner = {
+                create_saved_leader = {
+                    creator = this
+                    key = mem_vestigial_wormhole_leader
+                    event_leader = no
+                    class = scientist
+                    species = last_created_species
+                    # name = "Tinsar Hammelir"
+                    skill = 4
+                    traits = {
+                        trait = mem_vestigial_wormhole_wanderer_trait
+                    }
+                    # gender = male
+                    effect = {
+                        save_event_target_as = the_guy
+                        IF = {
+                            limit = { gender = male }
+                            set_name = "Tinsar Hammelir"
+                        }
+                        ELSE = { set_name = "Sura Dinkesh" }
+                    }
+                }
+            }
+        }
+    }
+
+    option = {
+        name = mem_vestigial_wormhole.4.a
+        custom_tooltip = mem_vestigial_wormhole.4.a.tooltip
+
+        owner = {
+            activate_saved_leader = {
+                add_to_owned = yes
+                key = mem_vestigial_wormhole_leader
+            }
+            set_country_flag = mem_vestigial_wormhole_hired_leader
+        }
+
+        ai_chance = {
+            factor = 100
+        }
+    }
+
+    option = {
+        name = mem_vestigial_wormhole.4.b
+
+        owner = {
+            add_monthly_resource_mult = {
+				resource = influence
+				value = @tier2influencereward
+				min = @tier2influencemin
+				max = @tier2influencemax
+			}
+        }
+    }
+
+    option = {
+        name = mem_vestigial_wormhole.4.c
+
+        trigger = {
+            owner = {
+                OR = {
+                    has_ethic = ethic_xenophobe
+                    has_ethic = ethic_fanatic_xenophobe
+                }
+            }
+        }
+
+        owner = {
+            add_monthly_resource_mult = {
+				resource = unity
+				value = @tier2unityreward
+				min = @tier2unitymin
+				max = @tier2unitymax
+			}
+        }
+    }
+
+    option = {
+        name = mem_vestigial_wormhole.4.d
+
+        trigger = {
+            owner = {
+                OR = {
+                    has_ethic = ethic_gestalt_consciousness
+                    has_ethic = ethic_xenophobe
+                    has_ethic = ethic_fanatic_xenophobe
+                    has_ethic = ethic_materialist
+                    has_ethic = ethic_fanatic_materialist
+                    has_ethic = ethic_authoritarian
+                    has_ethic = ethic_fanatic_authoritarian
+                }
+            }
+        }
+
+        owner = {
+            add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+            add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+        }
+    }
+
+    option = {
+        name = mem_vestigial_wormhole.4.inwards
+
+        exclusive_trigger = {
+            owner = {
+                has_valid_civic = civic_inwards_perfection
+            }
+        }
+
+        owner = {
+            add_monthly_resource_mult = {
+				resource = unity
+				value = @tier3unityreward
+				min = @tier3unitymin
+				max = @tier3unitymax
+			}
+        }
+    }
+
+    option = {
+        name = mem_vestigial_wormhole.4.servitor
+
+        exclusive_trigger = {
+            owner = {
+                has_valid_civic = civic_machine_servitor
+            }
+        }
+
+        owner = {
+            add_monthly_resource_mult = {
+				resource = unity
+				value = @tier3unityreward
+				min = @tier3unitymin
+				max = @tier3unitymax
+			}
+        }
+    }
+
+    option = {
+        name = mem_vestigial_wormhole.4.purifier
+
+        exclusive_trigger = {
+            owner = {
+                has_valid_civic = civic_fanatic_purifiers
+            }
+        }
+
+        owner = {
+            add_monthly_resource_mult = {
+				resource = unity
+				value = @tier3unityreward
+				min = @tier3unitymin
+				max = @tier3unitymax
+			}
+        }
+    }
+
+    option = {
+        name = mem_vestigial_wormhole.4.terminator
+
+        exclusive_trigger = {
+            owner = {
+                has_valid_civic = civic_machine_terminator
+            }
+        }
+
+        owner = {
+            add_monthly_resource_mult = {
+				resource = unity
+				value = @tier3unityreward
+				min = @tier3unitymin
+				max = @tier3unitymax
+			}
+        }
+    }
+
+    option = {
+        name = mem_vestigial_wormhole.4.swarm
+
+        exclusive_trigger = {
+            owner = {
+                has_valid_civic = civic_hive_devouring_swarm
+            }
+        }
+
+        leader = {
+            add_experience = 500
+        }
+    }
+
+    after = {
+        custom_tooltip = mem_vestigial_wormhole.4.tooltip
+        hidden_effect = {
+            create_fleet = {
+                name = ""
+                effect = {
+                    set_location = event_target:ship_object
+                    set_owner = root.owner
+                    create_ship = {
+                        name = "Emergent Wayfinder"
+                        design = "Emergent Wayfinder"
+                    }
+                    IF = {
+                        limit = {
+                            root.owner = { has_country_flag = mem_vestigial_wormhole_hired_leader }
+                        }
+                        set_leader = event_target:the_guy
+                    }
+                }
+            }
+            destroy_ambient_object = event_target:ship_object
+        }
+    }
+}
+
+# Ship event: Resolution checking for trats that would prevent spiders
+ship_event = {
+    id = mem_vestigial_wormhole.5
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        random_list = {
+            0 = {
+                modifier = {
+                    add = 50
+                    leader = {
+                        OR = {
+                            has_trait = leader_trait_scientist_cyborg
+                            has_trait = leader_trait_scientist_synthetic
+                            has_trait = leader_trait_scientist_psionic
+                            has_trait = leader_trait_scientist_chosen
+                            species = {
+                                OR = {
+                                    has_trait = trait_machine_unit
+                                    has_trait = trait_mechanical
+                                    has_trait = trait_robust
+                                }
+                            }
+                        }
+                    }
+                }
+                ship_event = { id = mem_vestigial_wormhole.6 }
+            }
+            50 = {
+                modifier = {
+                    factor = 0
+                    leader = {
+                        OR = {
+                            has_trait = leader_trait_scientist_synthetic
+                            has_trait = leader_trait_scientist_chosen
+                            species = {
+                                OR = {
+                                    has_trait = trait_machine_unit
+                                    has_trait = trait_mechanical
+                                }
+                            }
+                        }
+                    }
+                }
+                ship_event = { id = mem_vestigial_wormhole.7 }
+            }
+        }
+    }
+}
+
+# Ship event: spiders can't bite
+ship_event = {
+    id = mem_vestigial_wormhole.6
+    title = mem_vestigial_wormhole.6.name
+    desc = {
+        text = mem_vestigial_wormhole.6.desc.psi
+        trigger = {
+            leader = {
+                OR = {
+                    has_trait = leader_trait_scientist_psionic
+                    has_trait = leader_trait_scientist_chosen
+                }
+            }
+        }
+    }
+    desc = {
+        text = mem_vestigial_wormhole.6.desc.cyborg
+        trigger = {
+            leader = {
+                has_trait = leader_trait_scientist_cyborg
+            }
+        }
+    }
+    desc = {
+        text = mem_vestigial_wormhole.6.desc.robot
+        trigger = {
+            leader = {
+                OR = {
+                    has_trait = leader_trait_scientist_synthetic
+                    species = {
+                        OR = {
+                            has_trait = trait_machine_unit
+                            has_trait = trait_mechanical
+                        }
+                    }
+                }
+            }
+        }
+    }
+    desc = {
+        text = mem_vestigial_wormhole.desc.robust
+        trigger = {
+            leader = {
+                species = { has_trait = trait_robust }
+            }
+        }
+    }
+
+    immediate = {
+        leader = {
+            add_experience = 250
+        }
+    }
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_derelict_interior
+    location = event_target:ship_object
+    show_sound = event_default
+
+    option = {
+        name = WORRYING
+    }
+
+    option = {
+        name = mem_vestigial_wormhole.6.a.psi
+        trigger = {
+            leader = {
+                OR = {
+                    has_trait = leader_trait_scientist_psionic
+                    has_trait = leader_trait_scientist_chosen
+                }
+            }
+        }
+    }
+    option = {
+        name = mem_vestigial_wormhole.6.a.cyborg
+        trigger = {
+            leader = {
+                has_trait = leader_trait_scientist_cyborg
+            }
+        }
+    }
+    option = {
+        name = mem_vestigial_wormhole.6.a.robot
+        trigger = {
+            leader = {
+                OR = {
+                    has_trait = leader_trait_scientist_synthetic
+                    species = {
+                        OR = {
+                            has_trait = trait_machine_unit
+                            has_trait = trait_mechanical
+                        }
+                    }
+                }
+            }
+        }
+    }
+    option = {
+        name = mem_vestigial_wormhole.a.robust
+        trigger = {
+            leader = {
+                species = { has_trait = trait_robust }
+            }
+        }
+    }
+
+    after = {
+        owner = {
+            add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+        }
+        destroy_ambient_object = event_target:ship_object
+    }
+}
+
+# Project resolution, we got bitten by a spider
+ship_event = {
+    id = mem_vestigial_wormhole.7
+    title = mem_vestigial_wormhole.7.name
+    desc = mem_vestigial_wormhole.7.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_derelict_interior
+    location = event_target:ship_object
+    show_sound = event_default
+
+    immediate = {
+        leader = {
+            save_event_target_as = bitten_leader
+            exile_leader_as = mem_vestigial_wormhole_bitten_leader
+        }
+    }
+
+    option = {
+        name = mem_vestigial_wormhole.7.a
+        custom_tooltip = mem_vestigial_wormhole.7.a.tooltip
+
+        hidden_effect = {
+            owner = { country_event = { id = mem_vestigial_wormhole.8 days = 30 } }
+        }
+    }
+
+    after = {
+        destroy_ambient_object = event_target:ship_object
+    }
+}
+
+# Follow-up: The Eight-Legs
+country_event = {
+    id = mem_vestigial_wormhole.8
+    title = mem_vestigial_wormhole.8.name
+    desc = mem_vestigial_wormhole.8.desc
+    desc = {
+        text = mem_vestigial_wormhole.8.desc.hive
+        exclusive_trigger = {
+            has_authority = auth_hive_mind
+            event_target:bitten_leader = {
+                species = { has_trait = trait_hive_mind }
+            }
+        }
+    }
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_disease_outbreak
+    show_sound = event_default
+
+    immediate = {
+        event_target:bitten_leader = {
+            IF = {
+                limit = { has_trait = leader_trait_curator }
+                remove_trait = leader_trait_curator
+            }
+            add_trait = mem_vestigial_wormhole_scientist_spider
+            add_ruler_trait = mem_vestigial_wormhole_ruler_spider
+        }
+    }
+
+    option = {
+        name = mem_vestigial_wormhole.8.a
+
+        trigger = {
+            NOT = { has_ethic = ethic_fanatic_xenophobe }
+        }
+        add_resource = { 
+            influence = -50
+        }
+        custom_tooltip = mem_vestigial_wormhole.8.a.tooltip
+        hidden_effect = {
+            create_fleet = {
+                name = ""
+                effect = {
+                    set_owner = root
+                    create_ship = {
+                        random_existing_design = science
+                    }
+                    set_leader = event_target:bitten_leader
+                }
+            }
+            last_created_fleet = {
+                leader = {unassign_leader = this}
+                delete_fleet = this
+            }
+            event_target:bitten_leader = {
+                set_name = "Eight-Legs"
+            }
+        }
+
+        ai_chance = {
+            factor = 100
+        }
+    }
+
+    option = {
+        name = mem_vestigial_wormhole.8.b
+        custom_tooltip = mem_vestigial_wormhole.8.b.tooltip
+
+        add_monthly_resource_mult = {
+            resource = unity
+            value = @tier2unityreward
+            min = @tier2unitymin
+            max = @tier2unitymax
+        }
+    }
+
+    option = {
+        name = mem_vestigial_wormhole.8.c
+        custom_tooltip = mem_vestigial_wormhole.8.b.tooltip
+
+        trigger = {
+            OR = {
+                has_ethic = ethic_gestalt_consciousness
+                has_ethic = ethic_xenophobe
+                has_ethic = ethic_fanatic_xenophobe
+                has_ethic = ethic_materialist
+                has_ethic = ethic_fanatic_materialist
+                has_ethic = ethic_authoritarian
+                has_ethic = ethic_fanatic_authoritarian
+            }
+        }
+
+        add_monthly_resource_mult = {
+            resource = society_research
+            value = @tier4researchreward
+            min = @tier4researchmin
+            max = @tier4researchmax
+        }
+    }
+
+    option = {
+        name = mem_vestigial_wormhole.8.purifier
+        custom_tooltip = mem_vestigial_wormhole.8.b.tooltip
+
+        exclusive_trigger = {
+            has_valid_civic = civic_fanatic_purifiers
+        }
+
+        add_monthly_resource_mult = {
+            resource = unity
+            value = @tier2unityreward
+            min = @tier2unitymin
+            max = @tier2unitymax
+        }
+    }
+
+    option = {
+        name = mem_vestigial_wormhole.8.swarm
+        custom_tooltip = mem_vestigial_wormhole.8.swarm.tooltip
+
+        exclusive_trigger = {
+            has_valid_civic = civic_hive_devouring_swarm
+        }
+
+        add_monthly_resource_mult = {
+            resource = society_research
+            value = @tier3researchreward
+            min = @tier3researchmin
+            max = @tier3researchmax
+        }
+    }
+}
+
+# Thids outcome: Ghost ship
+ship_event = {
+    id = mem_vestigial_wormhole.9
+    title = mem_vestigial_wormhole.9.name
+    desc = mem_vestigial_wormhole.9.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_derelict_interior
+    location = event_target:ship_object
+    show_sound = event_default
+
+    option = {
+        name = mem_vestigial_wormhole.9.a
+        custom_tooltip = mem_vestigial_wormhole.9.a.tooltip
+
+        hidden_effect = {
+            create_fleet = {
+                name = ""
+                effect = {
+                    set_owner = root.owner
+                    create_ship = {
+                        name = "Emergent Wayfinder"
+                        design = "Emergent Wayfinder"
+                    }
+                    set_location = event_target:ship_object
+                }
+            }
+        }
+
+        ai_chance = {
+            factor = 100
+        }
+    }
+
+    option = {
+        name = mem_vestigial_wormhole.9.b
+
+        owner = {
+            add_monthly_resource_mult = {
+                resource = engineering_research
+                value = @tier3researchreward
+                min = @tier3researchmin
+                max = @tier3researchmax
+            }
+        }
+    }
+
+    option = {
+        name = mem_vestigial_wormhole.9.c
+
+        trigger = {
+            owner = {
+                OR = {
+                    has_ethic = ethic_xenophobe
+                    has_ethic = ethic_fanatic_xenophobe
+                    has_ethic = ethic_militarist
+                    has_ethic = ethic_fanatic_militarist
+                }
+            }
+        }
+
+        owner = {
+            add_monthly_resource_mult = {
+				resource = unity
+				value = @tier3unityreward
+				min = @tier3unitymin
+				max = @tier3unitymax
+			}
+        }
+    }
+
+    after = {
+        destroy_ambient_object = event_target:ship_object
+    }
+}
+
+# Ship has disappeared and stole our scientist
+ship_event = {
+    id = mem_vestigial_wormhole.10
+    title = mem_vestigial_wormhole.10.name
+    desc = mem_vestigial_wormhole.10.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_wormhole
+    location = root
+    show_sound = event_default
+
+    immediate = {
+        leader = { 
+            exile_leader_as = mem_vestigial_wormhole_stolen_leader 
+            save_event_target_as = stolen_leader
+        }
+        destroy_ambient_object = event_target:ship_object
+    }
+
+    option = {
+        name = mem_vestigial_wormhole.10.a
+        custom_tooltip = mem_vestigial_wormhole.10.a.tooltip
+
+        owner = {
+            add_monthly_resource_mult = {
+                resource = physics_research
+                value = @tier4researchreward
+                min = @tier4researchmin
+                max = @tier4researchmax
+            }
+        }
+    }
+}

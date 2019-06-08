@@ -1,0 +1,5331 @@
+####################################
+#
+# Vazuran Menace - Midgame Crisis
+#
+# Coding by Malthus
+#
+####################################
+
+namespace = mem_vazurans
+
+# mem_vazurans.1   |Setup Event at Game Start
+# mem_vazurans.2   |## WILL BE REMOVED ## Empire Targeting for Raids
+# mem_vazurans.3   |Rift Spawning for Raids
+# mem_vazurans.4   |Notification Event that a Rift is forming
+# mem_vazurans.5   |Rift opens and fleet spawn events get linked
+# mem_vazurans.6   |Vazuran Message for first raided
+# mem_vazurans.7   |Vazuran Message for retaliation
+# mem_vazurans.8   |Colony lost to Vazuran Terror attack
+# mem_vazurans.9   |Colony attacked by Vazuran Raid
+# mem_vazurans.10  |Establishing communications with every country that does not already know them (is started at fleet spawn 100 and 101)
+# mem_vazurans.20  |Information event about a known empire being attacked
+# mem_vazurans.21  |Information event about an unknown empire being attacked
+# mem_vazurans.30  |Information event about Vazuran Homefleet defeated
+# mem_vazurans.31  |Information event about Vazuran Homeworld taken
+# mem_vazurans.40  |Finishing investigation of first Rift
+# mem_vazurans.50  |Retaliation Fleet has been destroyed by target empire ready to progress quest
+# mem_vazurans.51  |Stabilization tech researched and project to stabilize rift set
+# mem_vazurans.52  |Vazuran system spawned
+# mem_vazurans.53  |Player being informed about established connection
+# mem_vazurans.90  |Decade pulse event to start damper field quest and extermination event
+# mem_vazurans.98  |Test Event for the Rift
+# mem_vazurans.99  |Test Event to show Targets
+########################################################
+# Fleet Spawning and Raiding Events
+########################################################
+# mem_vazurans.100 |Retaliation Fleet spawn event
+# mem_vazurans.101 |Raiding Fleet spawn event
+# mem_vazurans.105 |vazuran Raiding or Retaliation fleet has been destroyed
+# mem_vazurans.110 |Fleet event sending Raiding/Retaliation fleet to target planet
+# mem_vazurans.111 |Planet has been raided and owner flags are being changed
+# mem_vazurans.112 |Fleet event sending Raiding/Retaliation fleet home to the rift and let them vanish
+# mem_vazurans.113 |Delete Rift after fleet has left (on monthly pulse)
+########################################################
+# Introductionary Events
+########################################################
+# mem_vazurans.200 |Visiting a system with a broken/shattered planet (flagged in the first event)
+# mem_vazurans.201 |Finished Project on first broken world
+# mem_vazurans.202 |Finished Anomaly Version 1
+# mem_vazurans.203 |Finished Anomaly Version 2
+# mem_vazurans.204 |Finished Anomaly Version 3
+# mem_vazurans.205 |Finished Anomaly Version 4
+# mem_vazurans.206 |Finished Project of Anomaly 4
+########################################################
+# Story Events
+########################################################
+# mem_vazurans.240 |Finished Planet defense project
+# mem_vazurans.250 |Starting damper field bypass events starts by decade pulse check
+# mem_vazurans.251 |Crashed vazuran ship on planet excavated
+# mem_vazurans.252 |Anomaly done, project spawn
+# mem_vazurans.253 |Crashed vazuran ship on asteroid excavated
+# mem_vazurans.254 |Anomaly done, project spawn
+# mem_vazurans.255 |Drifting vazuran wreckage found in deep space
+# mem_vazurans.256 |Wreckage investigation finished
+# mem_vazurans.260 |Project finished, damper field research added
+# mem_vazurans.270 |Marking player with damper field bypass as retaliation target
+# mem_vazurans.271 |Setting flag for planetary shield tech aquired to prevent planetary defense quest on planet raid
+# mem_vazurans.280 |Reaching Vazuran Homesystem
+# mem_vazurans.281 |Defeated Vazuran Homefleet
+# mem_vazurans.282 |Winning Invasion of Vazuran base and get reward and opinion modifier
+# mem_vazurans.283 |Adding opinion modifier when establishing communications with new empire
+########################################################
+# Extermination Events
+########################################################
+# mem_vazurans.300 |Extermination of an AI empire starts by decade pulse check
+# mem_vazurans.301 |Rift opens and extermination fleet spawns
+# mem_vazurans.302 |tells the raiding or extermination fleet to move to the target planet to start bombarding
+# mem_vazurans.303 |Planet has been bombarded and now colony gets destroyed
+# mem_vazurans.304 |sending extermination fleet home to the rift and let them vanish
+# mem_vazurans.305 |next target system gets a Portal
+# mem_vazurans.306 |Player is informed of Vazurans commiting genocide
+########################################################
+# Raiding Setup Events
+########################################################
+# mem_vazurans.400 |Event only started via options menu to force start crisis
+# mem_vazurans.401 |Event cycle to start raiding/retaliation fleet 1
+# mem_vazurans.402 |Event cycle to start raiding/retaliation fleet 2
+# mem_vazurans.403 |Event cycle to start raiding/retaliation fleet 3
+# mem_vazurans.404 |Event cycle to start raiding/retaliation fleet 4
+# mem_vazurans.405 |Event cycle to start raiding/retaliation fleet 5
+
+# Setup Event at Game Start for randomly disabling the Crisis
+event = {
+	id = mem_vazurans.1
+	hide_window = yes
+
+	is_triggered_only = yes
+	
+	immediate = {
+		random_list = {
+			19 = {
+				set_global_flag = mem_vazurans_disabled
+			}
+			1 = {
+				set_global_flag = mem_vazurans_enabled
+				every_country = {
+					limit = {
+						is_country_type = default
+					}
+					random_list = {
+						1 = {
+							capital_scope = {
+								solar_system = {
+									random_neighbor_system = {
+										random_neighbor_system = {
+											limit = {
+												NOT = {
+													has_star_flag = empire_home_system
+												}
+												any_system_planet = {
+													OR = {
+														is_planet_class = pc_barren
+														is_planet_class = pc_barren_cold
+														is_planet_class = pc_toxic
+														is_planet_class = pc_frozen
+													}
+												}
+											}
+											set_star_flag = mem_vazuran_destroyed_planet_system
+											random_system_planet = {
+												limit = {
+													OR = {
+														is_planet_class = pc_barren
+														is_planet_class = pc_barren_cold
+														is_planet_class = pc_toxic
+														is_planet_class = pc_frozen
+													}
+												}
+												random_list = {
+													1 = {
+														change_pc = pc_shattered
+													}
+													1 = {
+														change_pc = pc_broken
+													}
+												}
+												set_planet_flag = mem_vazuran_destroyed_planet
+											}
+										}
+									}
+								}
+							}
+						}
+						1 = {
+						}
+					}
+				}
+				random_country = {
+					limit = {
+						is_country_type = global_event
+					}
+					country_event = { id = mem_vazurans.401 days = 7200 random = 1000 } # TODO change to 30 years later
+					country_event = { id = mem_vazurans.402 days = 7200 random = 1000 }
+					country_event = { id = mem_vazurans.403 days = 7200 random = 1000 }
+					country_event = { id = mem_vazurans.404 days = 7200 random = 1000 }
+					country_event = { id = mem_vazurans.405 days = 7200 random = 1000 }
+				}
+			}
+		}
+	}
+}
+
+# Event only started via options menu to force start crisis
+country_event = {
+	id = mem_vazurans.400
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		country_event = { id = mem_vazurans.401 days = 1080 random = 820 }
+		country_event = { id = mem_vazurans.402 days = 1080 random = 820 }
+		country_event = { id = mem_vazurans.403 days = 1080 random = 820 }
+		country_event = { id = mem_vazurans.404 days = 1080 random = 820 }
+		country_event = { id = mem_vazurans.405 days = 1080 random = 820 }
+	}
+}
+
+# Event cycle to start raiding/retaliation fleet 1
+country_event = {
+	id = mem_vazurans.401
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_global_flag = mem_vazurans_enabled
+		NOR = {
+			has_global_flag = mem_vazurans_disabled
+			has_global_flag = mem_vazurans_finished
+			has_global_flag = mem_vazurans_raid_1_event
+		}
+	}
+	
+	immediate = {
+		#restarting the event
+		country_event = { id = mem_vazurans.401 days = 2160 random = 400 }
+		set_timed_global_flag = {
+			flag = mem_vazurans_raid_1_event
+			days = 1750			
+		}
+		IF = { #if there is a retaliation target without target number (should not happen, but better safe than sorry)
+			limit = {
+				NOT = { #makes sure there is no country with that precise target number
+					any_country = {
+						has_country_flag = mem_vazurans_target_1
+					}
+				}
+				any_country = { #makes sure the retaliation target does not have another target number already (checking for same number as above is redundand but allows for faster copy paste)
+					is_country_type = default
+					has_country_flag = mem_vazurans_retaliation
+					NOR = {
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_4
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					is_country_type = default
+					has_country_flag = mem_vazurans_retaliation
+					NOR = {
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_4
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+				set_country_flag = mem_vazurans_target_1
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				NOT = {
+					any_country = {
+						has_country_flag = mem_vazurans_target_1
+					}
+				}
+				any_country = {			
+					is_country_type = default
+					NOR = {
+						has_country_flag = mem_vazurans_retaliation
+						has_country_flag = mem_vazurans_raided_empire
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_4
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					is_country_type = default
+					NOR = {
+						has_country_flag = mem_vazurans_retaliation
+						has_country_flag = mem_vazurans_raided_empire
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_4
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+				set_country_flag = mem_vazurans_target_1
+			}
+		}
+		IF = {
+			limit = {
+				any_country = {
+					has_country_flag = mem_vazurans_target_1
+					NOT = {
+						has_country_flag = mem_vazurans_raided_empire
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					has_country_flag = mem_vazurans_target_1
+				}
+				random_list = {
+					3 = {
+						set_timed_country_flag = {
+							flag = mem_vazurans_raided_empire
+							years = 16
+						}
+					}
+					2 = {
+						set_timed_country_flag = {
+							flag = mem_vazurans_raided_empire
+							years = 19
+						}
+					}
+					1 = {
+						set_timed_country_flag = {
+							flag = mem_vazurans_raided_empire
+							years = 22
+						}
+					}
+				}				
+			}
+		}
+		IF = {
+			limit = {
+				any_country = {
+					has_country_flag = mem_vazurans_target_1
+				}
+			}
+			random_country = {
+				limit = {
+					has_country_flag = mem_vazurans_target_1
+				}
+				country_event = { id = mem_vazurans.3 days = 180 random = 160 }
+			}
+		}
+	}
+}
+
+# Event cycle to start raiding/retaliation fleet 2
+country_event = {
+	id = mem_vazurans.402
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_global_flag = mem_vazurans_enabled
+		NOR = {
+			has_global_flag = mem_vazurans_disabled
+			has_global_flag = mem_vazurans_finished
+			has_global_flag = mem_vazurans_raid_2_event
+		}
+	}
+	
+	immediate = {
+		#restarting the event
+		country_event = { id = mem_vazurans.402 days = 2160 random = 400 }
+		set_timed_global_flag = {
+			flag = mem_vazurans_raid_2_event
+			days = 1750			
+		}
+		IF = { #if there is a retaliation target without target number (should not happen, but better safe than sorry)
+			limit = {
+				NOT = { #makes sure there is no country with that precise target number
+					any_country = {
+						has_country_flag = mem_vazurans_target_2
+					}
+				}
+				any_country = { #makes sure the retaliation target does not have another target number already (checking for same number as above is redundand but allows for faster copy paste)
+					is_country_type = default
+					has_country_flag = mem_vazurans_retaliation
+					NOR = {
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_4
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					is_country_type = default
+					has_country_flag = mem_vazurans_retaliation
+					NOR = {
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_4
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+				set_country_flag = mem_vazurans_target_2
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				NOT = {
+					any_country = {
+						has_country_flag = mem_vazurans_target_2
+					}
+				}
+				any_country = {
+					is_country_type = default
+					NOR = {
+						has_country_flag = mem_vazurans_retaliation
+						has_country_flag = mem_vazurans_raided_empire
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_4
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					is_country_type = default
+					NOR = {
+						has_country_flag = mem_vazurans_retaliation
+						has_country_flag = mem_vazurans_raided_empire
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_4
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+				set_country_flag = mem_vazurans_target_2
+			}
+		}
+		IF = {
+			limit = {
+				any_country = {
+					has_country_flag = mem_vazurans_target_2
+					NOT = {
+						has_country_flag = mem_vazurans_raided_empire
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					has_country_flag = mem_vazurans_target_2
+				}
+				random_list = {
+					3 = {
+						set_timed_country_flag = {
+							flag = mem_vazurans_raided_empire
+							years = 16
+						}
+					}
+					2 = {
+						set_timed_country_flag = {
+							flag = mem_vazurans_raided_empire
+							years = 19
+						}
+					}
+					1 = {
+						set_timed_country_flag = {
+							flag = mem_vazurans_raided_empire
+							years = 22
+						}
+					}
+				}
+			}
+		}		
+		IF = {
+			limit = {
+				any_country = {
+					has_country_flag = mem_vazurans_target_2
+				}
+			}
+			random_country = {
+				limit = {
+					has_country_flag = mem_vazurans_target_2
+				}
+				country_event = { id = mem_vazurans.3 days = 180 random = 160 }
+			}
+		}
+	}
+}
+
+# Event cycle to start raiding/retaliation fleet 3
+country_event = {
+	id = mem_vazurans.403
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_global_flag = mem_vazurans_enabled
+		NOR = {
+			has_global_flag = mem_vazurans_disabled
+			has_global_flag = mem_vazurans_finished
+			has_global_flag = mem_vazurans_raid_3_event
+		}
+	}
+	
+	immediate = {
+		#restarting the event
+		country_event = { id = mem_vazurans.403 days = 2160 random = 400 }
+		set_timed_global_flag = {
+			flag = mem_vazurans_raid_3_event
+			days = 1750			
+		}
+		IF = { #if there is a retaliation target without target number (should not happen, but better safe than sorry)
+			limit = {
+				NOT = { #makes sure there is no country with that precise target number
+					any_country = {
+						has_country_flag = mem_vazurans_target_3
+					}
+				}
+				any_country = { #makes sure the retaliation target does not have another target number already (checking for same number as above is redundand but allows for faster copy paste)
+					is_country_type = default
+					has_country_flag = mem_vazurans_retaliation
+					NOR = {
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_4
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					is_country_type = default
+					has_country_flag = mem_vazurans_retaliation
+					NOR = {
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_4
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+				set_country_flag = mem_vazurans_target_3
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				NOT = {
+					any_country = {
+						has_country_flag = mem_vazurans_target_3
+					}
+				}
+				any_country = {
+					is_country_type = default
+					NOR = {
+						has_country_flag = mem_vazurans_retaliation
+						has_country_flag = mem_vazurans_raided_empire
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_4
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					is_country_type = default
+					NOR = {
+						has_country_flag = mem_vazurans_retaliation
+						has_country_flag = mem_vazurans_raided_empire
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_4
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+				set_country_flag = mem_vazurans_target_3
+			}
+		}
+		IF = {
+			limit = {
+				any_country = {
+					has_country_flag = mem_vazurans_target_3
+					NOT = {
+						has_country_flag = mem_vazurans_raided_empire
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					has_country_flag = mem_vazurans_target_3
+				}
+				random_list = {
+					3 = {
+						set_timed_country_flag = {
+							flag = mem_vazurans_raided_empire
+							years = 16
+						}
+					}
+					2 = {
+						set_timed_country_flag = {
+							flag = mem_vazurans_raided_empire
+							years = 19
+						}
+					}
+					1 = {
+						set_timed_country_flag = {
+							flag = mem_vazurans_raided_empire
+							years = 22
+						}
+					}
+				}
+			}
+		}		
+		IF = {
+			limit = {
+				any_country = {
+					has_country_flag = mem_vazurans_target_3
+				}
+			}
+			random_country = {
+				limit = {
+					has_country_flag = mem_vazurans_target_3
+				}
+				country_event = { id = mem_vazurans.3 days = 180 random = 160 }
+			}
+		}
+	}
+}
+
+# Event cycle to start raiding/retaliation fleet 4
+country_event = {
+	id = mem_vazurans.404
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_global_flag = mem_vazurans_enabled
+		NOR = {
+			has_global_flag = mem_vazurans_disabled
+			has_global_flag = mem_vazurans_finished
+			has_global_flag = mem_vazurans_raid_4_event
+		}
+	}
+	
+	immediate = {
+		#restarting the event
+		country_event = { id = mem_vazurans.404 days = 2160 random = 400 }
+		set_timed_global_flag = {
+			flag = mem_vazurans_raid_4_event
+			days = 1750			
+		}
+		IF = { #if there is a retaliation target without target number (should not happen, but better safe than sorry)
+			limit = {
+				NOT = { #makes sure there is no country with that precise target number
+					any_country = {
+						has_country_flag = mem_vazurans_target_4
+					}
+				}
+				any_country = { #makes sure the retaliation target does not have another target number already (checking for same number as above is redundand but allows for faster copy paste)
+					is_country_type = default
+					has_country_flag = mem_vazurans_retaliation
+					NOR = {
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_4
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					is_country_type = default
+					has_country_flag = mem_vazurans_retaliation
+					NOR = {
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_4
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+				set_country_flag = mem_vazurans_target_4
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				NOT = {
+					any_country = {
+						has_country_flag = mem_vazurans_target_4
+					}
+				}
+				any_country = {
+					is_country_type = default
+					NOR = {
+						has_country_flag = mem_vazurans_retaliation
+						has_country_flag = mem_vazurans_raided_empire
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_4
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					is_country_type = default
+					NOR = {
+						has_country_flag = mem_vazurans_retaliation
+						has_country_flag = mem_vazurans_raided_empire
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_4
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+				set_country_flag = mem_vazurans_target_4
+			}
+		}
+		IF = {
+			limit = {
+				any_country = {
+					has_country_flag = mem_vazurans_target_4
+					NOT = {
+						has_country_flag = mem_vazurans_raided_empire
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					has_country_flag = mem_vazurans_target_4
+				}
+				random_list = {
+					3 = {
+						set_timed_country_flag = {
+							flag = mem_vazurans_raided_empire
+							years = 16
+						}
+					}
+					2 = {
+						set_timed_country_flag = {
+							flag = mem_vazurans_raided_empire
+							years = 19
+						}
+					}
+					1 = {
+						set_timed_country_flag = {
+							flag = mem_vazurans_raided_empire
+							years = 22
+						}
+					}
+				}
+			}
+		}		
+		IF = {
+			limit = {
+				any_country = {
+					has_country_flag = mem_vazurans_target_4
+				}
+			}
+			random_country = {
+				limit = {
+					has_country_flag = mem_vazurans_target_4
+				}
+				country_event = { id = mem_vazurans.3 days = 180 random = 160 }
+			}
+		}
+	}
+}
+
+# Event cycle to start raiding/retaliation fleet 5
+country_event = {
+	id = mem_vazurans.405
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_global_flag = mem_vazurans_enabled
+		NOR = {
+			has_global_flag = mem_vazurans_disabled
+			has_global_flag = mem_vazurans_finished
+			has_global_flag = mem_vazurans_raid_5_event
+		}
+	}
+	
+	immediate = {
+		#restarting the event
+		country_event = { id = mem_vazurans.405 days = 2160 random = 400 }
+		set_timed_global_flag = {
+			flag = mem_vazurans_raid_5_event
+			days = 1750			
+		}
+		IF = { #if there is a retaliation target without target number (should not happen, but better safe than sorry)
+			limit = {
+				NOT = { #makes sure there is no country with that precise target number
+					any_country = {
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+				any_country = { #makes sure the retaliation target does not have another target number already (checking for same number as above is redundand but allows for faster copy paste)
+					is_country_type = default
+					has_country_flag = mem_vazurans_retaliation
+					NOR = {
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_4
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					is_country_type = default
+					has_country_flag = mem_vazurans_retaliation
+					NOR = {
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_4
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+				set_country_flag = mem_vazurans_target_5
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				NOT = {
+					any_country = {
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+				any_country = {
+					is_country_type = default
+					NOR = {
+						has_country_flag = mem_vazurans_retaliation
+						has_country_flag = mem_vazurans_raided_empire
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_4
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					is_country_type = default
+					NOR = {
+						has_country_flag = mem_vazurans_retaliation
+						has_country_flag = mem_vazurans_raided_empire
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_4
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+				set_country_flag = mem_vazurans_target_5
+			}
+		}
+		IF = {
+			limit = {
+				any_country = {
+					has_country_flag = mem_vazurans_target_5
+					NOT = {
+						has_country_flag = mem_vazurans_raided_empire
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					has_country_flag = mem_vazurans_target_5
+				}
+				random_list = {
+					3 = {
+						set_timed_country_flag = {
+							flag = mem_vazurans_raided_empire
+							years = 16
+						}
+					}
+					2 = {
+						set_timed_country_flag = {
+							flag = mem_vazurans_raided_empire
+							years = 19
+						}
+					}
+					1 = {
+						set_timed_country_flag = {
+							flag = mem_vazurans_raided_empire
+							years = 22
+						}
+					}
+				}
+			}
+		}		
+		IF = {
+			limit = {
+				any_country = {
+					has_country_flag = mem_vazurans_target_5
+				}
+			}
+			random_country = {
+				limit = {
+					has_country_flag = mem_vazurans_target_5
+				}
+				country_event = { id = mem_vazurans.3 days = 180 random = 160 }
+			}
+		}
+	}
+}
+
+# Empire Targeting for Raids
+event = {
+	id = mem_vazurans.2
+	hide_window = yes
+
+	is_triggered_only = yes
+	
+	trigger = {
+		has_global_flag = mem_vazurans_enabled
+		NOR = {
+			has_global_flag = mem_vazurans_disabled
+			has_global_flag = mem_vazurans_finished
+		}
+		years_passed >= 19
+	}
+	
+	immediate = {
+		# Targeting first Raid Target
+		IF = {
+			limit = {
+				NOT = {
+					any_country = {
+						has_country_flag = mem_vazurans_target_1
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					is_country_type = default
+					NOR = {
+						has_country_flag = mem_vazurans_raided_empire #this is a timed flag set when an empire gets attacked
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_4
+						has_country_flag = mem_vazurans_target_5
+					}
+					any_owned_planet = {
+						is_colony = yes
+						is_under_colonization = no
+						is_capital = no
+						NOT = {
+							has_planet_flag = mem_vazurans_raided_planet #this is a timed flag set when the planet is raided
+						}
+					}
+				}
+				set_country_flag = mem_vazurans_target_1
+			}
+		}
+		# Targeting second Raid Target
+		IF = {
+			limit = {
+				NOT = {
+					any_country = {
+						has_country_flag = mem_vazurans_target_2
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					is_country_type = default
+					NOR = {
+						has_country_flag = mem_vazurans_raided_empire #this is a timed flag set when an empire gets attacked
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_4
+						has_country_flag = mem_vazurans_target_5
+					}
+					any_owned_planet = {
+						is_colony = yes
+						is_under_colonization = no
+						is_capital = no
+						NOT = {
+							has_planet_flag = mem_vazurans_raided_planet #this is a timed flag set when the planet is raided
+						}
+					}
+				}
+				set_country_flag = mem_vazurans_target_2
+			}
+		}
+		# Targeting third Raid Target
+		IF = {
+			limit = {
+				NOT = {
+					any_country = {
+						has_country_flag = mem_vazurans_target_3
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					is_country_type = default
+					NOR = {
+						has_country_flag = mem_vazurans_raided_empire #this is a timed flag set when an empire gets attacked
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_4
+						has_country_flag = mem_vazurans_target_5
+					}
+					any_owned_planet = {
+						is_colony = yes
+						is_under_colonization = no
+						is_capital = no
+						NOT = {
+							has_planet_flag = mem_vazurans_raided_planet #this is a timed flag set when the planet is raided
+						}
+					}
+				}
+				set_country_flag = mem_vazurans_target_3
+			}
+		}
+		# Targeting fourth Raid Target
+		IF = {
+			limit = {
+				NOT = {
+					any_country = {
+						has_country_flag = mem_vazurans_target_4
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					is_country_type = default
+					NOR = {
+						has_country_flag = mem_vazurans_raided_empire #this is a timed flag set when an empire gets attacked
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_5
+					}
+					any_owned_planet = {
+						is_colony = yes
+						is_under_colonization = no
+						is_capital = no
+						NOT = {
+							has_planet_flag = mem_vazurans_raided_planet #this is a timed flag set when the planet is raided
+						}
+					}
+				}
+				set_country_flag = mem_vazurans_target_4
+			}
+		}
+		# Targeting fifth Raid Target
+		IF = {
+			limit = {
+				NOT = {
+					any_country = {
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					is_country_type = default
+					NOR = {
+						has_country_flag = mem_vazurans_raided_empire #this is a timed flag set when an empire gets attacked
+						has_country_flag = mem_vazurans_target_1
+						has_country_flag = mem_vazurans_target_2
+						has_country_flag = mem_vazurans_target_3
+						has_country_flag = mem_vazurans_target_4
+					}
+					any_owned_planet = {
+						is_colony = yes
+						is_under_colonization = no
+						is_capital = no
+						NOT = {
+							has_planet_flag = mem_vazurans_raided_planet #this is a timed flag set when the planet is raided
+						}
+					}
+				}
+				set_country_flag = mem_vazurans_target_5
+			}
+		}
+		# TODO this is for testing purpose, take out later
+#		random_country = {
+#			limit = {
+#				is_ai = no
+#			}
+#			country_event = { id = mem_vazurans.99 days = 5 }
+#		}
+		#Following events set the vazuran Raids in motion
+		every_country = {
+			limit = {
+				OR = {
+					has_country_flag = mem_vazurans_target_1
+					has_country_flag = mem_vazurans_target_2
+					has_country_flag = mem_vazurans_target_3
+					has_country_flag = mem_vazurans_target_4
+					has_country_flag = mem_vazurans_target_5
+				}
+			}
+			country_event = { id = mem_vazurans.3 days = 30 random = 10 }
+			set_timed_country_flag = {
+				flag = mem_vazurans_raided_empire
+				years = 16
+			}
+		}
+		random_country = {
+			limit = {
+				has_country_flag = mem_vazurans_target_1
+			}
+			save_event_target_as = mem_vazurans_target_1
+		}
+		random_country = {
+			limit = {
+				has_country_flag = mem_vazurans_target_2
+			}
+			save_event_target_as = mem_vazurans_target_2
+		}
+		random_country = {
+			limit = {
+				has_country_flag = mem_vazurans_target_3
+			}
+			save_event_target_as = mem_vazurans_target_3
+		}
+		random_country = {
+			limit = {
+				has_country_flag = mem_vazurans_target_4
+			}
+			save_event_target_as = mem_vazurans_target_4
+		}
+		random_country = {
+			limit = {
+				has_country_flag = mem_vazurans_target_5
+			}
+			save_event_target_as = mem_vazurans_target_5
+		}
+		# TODO Also start a notification message for all not attacked human players from here later
+		every_country = {
+			limit = {
+				is_ai = no
+				NOR = {
+					has_country_flag = mem_vazurans_target_1
+					has_country_flag = mem_vazurans_target_2
+					has_country_flag = mem_vazurans_target_3
+					has_country_flag = mem_vazurans_target_4
+					has_country_flag = mem_vazurans_target_5
+				}
+			}
+			IF = { # checks if the country has direct contact to one of the targeted empires
+				limit = {
+					OR = { 
+						has_communications = event_target:mem_vazurans_target_1
+						has_communications = event_target:mem_vazurans_target_2
+						has_communications = event_target:mem_vazurans_target_3
+						has_communications = event_target:mem_vazurans_target_4
+						has_communications = event_target:mem_vazurans_target_5
+					}
+				}
+				country_event = { id = mem_vazurans.20 days = 60 random = 10 }
+			}
+			ELSE_IF = { # checks if the country has contact to another country that has contact to one of the targeted empires
+				limit = {
+					NOR = {
+						has_communications = event_target:mem_vazurans_target_1
+						has_communications = event_target:mem_vazurans_target_2
+						has_communications = event_target:mem_vazurans_target_3
+						has_communications = event_target:mem_vazurans_target_4
+						has_communications = event_target:mem_vazurans_target_5
+					}
+					any_country = {
+						has_communications = prev
+						OR = {
+							has_communications = event_target:mem_vazurans_target_1
+							has_communications = event_target:mem_vazurans_target_2
+							has_communications = event_target:mem_vazurans_target_3
+							has_communications = event_target:mem_vazurans_target_4
+							has_communications = event_target:mem_vazurans_target_5
+						}
+					}
+				}
+				country_event = { id = mem_vazurans.21 days = 90 random = 10 }
+			}
+		}
+	}
+}
+
+# Hidden Event to place the Ambient Object ( Dimensional Rift opening ) at the rim of a target system
+country_event = {
+	id = mem_vazurans.3
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		IF = { # check if the empire is target of a retaliation
+			limit = {
+				has_country_flag = mem_vazurans_retaliation
+			}
+			random_owned_planet = {
+				limit = {
+					is_capital = yes
+				}
+				set_timed_planet_flag = {
+					flag = mem_vazurans_raiding_target
+					days = 600
+				}
+				solar_system = {
+					random_system_planet = {
+						limit = {
+							is_star = yes
+						}
+						THIS = {
+							save_event_target_as = mem_vazurans_target_sun
+						}
+					}
+					create_ambient_object = { # TODO exchange that later with a custom made one from frog
+						type = "mem_vazuran_wormhole_big_object"
+					}
+					random_system_ambient_object = {
+						limit = { is_same_value = last_created_ambient_object }
+						set_location = {
+							target = event_target:mem_vazurans_target_sun
+							distance = 150
+							angle = random
+						}
+						set_ambient_object_flag = mem_vazurans_rift
+						save_event_target_as = mem_vazurans_rift
+					}
+				}
+			}
+			# start next event to notify the player
+			country_event = { id = mem_vazurans.4 days = 5 }
+			# start overnext event to open the rift and spawn enemy fleet
+			country_event = { id = mem_vazurans.5 days = 30 }
+		}
+		ELSE_IF = { # failsafe check if valid raiding target has been lost in the meantime because of a war or something else - check here and use normal raiding target
+			limit = {
+				any_owned_planet = {
+					is_colony = yes
+					is_under_colonization = no
+					is_capital = no
+					NOT = {
+						has_planet_flag = mem_vazurans_raided_planet
+					}
+				}
+			}
+			IF = {
+				limit = {
+					years_passed < 60
+					any_system_within_border = {
+						NOT = {
+							any_system_planet = {
+								OR = {
+									is_colony = yes
+									is_capital = yes
+								}
+							}
+						}
+					}
+				}
+				random_system_within_border = {
+					limit = {
+						NOT = {
+							any_system_planet = {
+								OR = {
+									is_colony = yes
+									is_capital = yes
+								}
+							}
+						}
+					}
+					random_system_planet = {
+						limit = {
+							is_star = yes
+						}
+						set_timed_planet_flag = {
+							flag = mem_vazurans_raiding_target
+							days = 600
+						}
+						THIS = {
+							save_event_target_as = mem_vazurans_target_sun
+						}
+					}
+					create_ambient_object = { # TODO exchange that later with a custom made one by frog
+						type = "mem_vazuran_wormhole_small_object"
+					}
+					random_system_ambient_object = {
+						limit = { is_same_value = last_created_ambient_object }
+						set_location = {
+							target = event_target:mem_vazurans_target_sun
+							distance = 150
+							angle = random
+						}
+						set_ambient_object_flag = mem_vazurans_rift
+						save_event_target_as = mem_vazurans_rift
+					}
+				}
+			}
+			ELSE_IF = {
+				limit = {
+					years_passed <= 120
+					any_system_within_border = {
+						NOT = {
+							any_system_planet = {
+								OR = {
+									is_colony = yes
+									is_capital = yes
+								}
+							}
+						}
+					}
+				}
+				random_list = {
+					1 = {
+						random_system_within_border = {
+							limit = {
+								NOT = {
+									any_system_planet = {
+										OR = {
+											is_colony = yes
+											is_capital = yes
+										}
+									}
+								}
+							}
+							random_system_planet = {
+								limit = {
+									is_star = yes
+								}
+								set_timed_planet_flag = {
+									flag = mem_vazurans_raiding_target
+									days = 600
+								}
+								THIS = {
+									save_event_target_as = mem_vazurans_target_sun
+								}
+							}
+							create_ambient_object = { # TODO exchange that later with a custom made one by frog
+								type = "mem_vazuran_wormhole_small_object"
+							}
+							random_system_ambient_object = {
+								limit = { is_same_value = last_created_ambient_object }
+								set_location = {
+									target = event_target:mem_vazurans_target_sun
+									distance = 150
+									angle = random
+								}
+								set_ambient_object_flag = mem_vazurans_rift
+								save_event_target_as = mem_vazurans_rift
+							}
+						}
+					}
+					1 = {
+						random_owned_planet = {
+							limit = {
+								is_colony = yes
+								is_under_colonization = no
+								is_capital = no
+								NOT = {
+									has_planet_flag = mem_vazurans_raided_planet
+								}
+							}
+							set_timed_planet_flag = {
+								flag = mem_vazurans_raiding_target
+								days = 600
+							}
+							solar_system = {
+								random_system_planet = {
+									limit = {
+										is_star = yes
+									}
+									THIS = {
+										save_event_target_as = mem_vazurans_target_sun
+									}
+								}
+								create_ambient_object = { # TODO exchange that later with a custom made one by frog
+									type = "mem_vazuran_wormhole_small_object"
+								}
+								random_system_ambient_object = {
+									limit = { is_same_value = last_created_ambient_object }
+									set_location = {
+										target = event_target:mem_vazurans_target_sun
+										distance = 150
+										angle = random
+									}
+									set_ambient_object_flag = mem_vazurans_rift
+									save_event_target_as = mem_vazurans_rift
+								}
+							}
+						}
+					}
+				}
+			}
+			ELSE = {
+				random_owned_planet = {
+					limit = {
+						is_colony = yes
+						is_under_colonization = no
+						is_capital = no
+						NOT = {
+							has_planet_flag = mem_vazurans_raided_planet
+						}
+					}
+					set_timed_planet_flag = {
+						flag = mem_vazurans_raiding_target
+						days = 600
+					}
+					solar_system = {
+						random_system_planet = {
+							limit = {
+								is_star = yes
+							}
+							THIS = {
+								save_event_target_as = mem_vazurans_target_sun
+							}
+						}
+						create_ambient_object = { # TODO exchange that later with a custom made one by frog
+							type = "mem_vazuran_wormhole_small_object"
+						}
+						random_system_ambient_object = {
+							limit = { is_same_value = last_created_ambient_object }
+							set_location = {
+								target = event_target:mem_vazurans_target_sun
+								distance = 150
+								angle = random
+							}
+							set_ambient_object_flag = mem_vazurans_rift
+							save_event_target_as = mem_vazurans_rift
+						}
+					}
+				}
+			}
+			# start next event to notify the player
+			country_event = { id = mem_vazurans.4 days = 5 }
+			# start overnext event to open the rift and spawn enemy fleet
+			country_event = { id = mem_vazurans.5 days = 30 }
+		}
+		ELSE = { # failsafe target - if not even the capital is left there is nothing happening anyway
+			random_system_within_border = {	
+				random_system_planet = {
+					limit = {
+						is_star = yes
+					}
+					set_timed_planet_flag = {
+						flag = mem_vazurans_raiding_target
+						days = 600
+					}
+					solar_system = {
+						random_system_planet = {
+							limit = {
+								is_star = yes
+							}
+							THIS = {
+								save_event_target_as = mem_vazurans_target_sun
+							}
+						}
+						create_ambient_object = { # TODO exchange that later with a custom made one by frog
+							type = "mem_vazuran_wormhole_small_object"
+						}
+						random_system_ambient_object = {
+							limit = { is_same_value = last_created_ambient_object }
+							set_location = {
+								target = event_target:mem_vazurans_target_sun
+								distance = 150
+								angle = random
+							}
+							set_ambient_object_flag = mem_vazurans_rift
+							save_event_target_as = mem_vazurans_rift
+						}
+					}
+				}
+			}
+			# start next event to notify the player
+			country_event = { id = mem_vazurans.4 days = 5 }
+			# start overnext event to open the rift and spawn enemy fleet
+			country_event = { id = mem_vazurans.5 days = 30 }
+		}
+		last_created_ambient_object = {
+			IF = {
+				limit = {
+					ROOT = {
+						has_country_flag = mem_vazurans_target_1
+					}
+				}
+				set_ambient_object_flag = mem_vazurans_rift_1
+			}
+			IF = {
+				limit = {
+					ROOT = {
+						has_country_flag = mem_vazurans_target_2
+					}
+				}
+				set_ambient_object_flag = mem_vazurans_rift_2
+			}
+			IF = {
+				limit = {
+					ROOT = {
+						has_country_flag = mem_vazurans_target_3
+					}
+				}
+				set_ambient_object_flag = mem_vazurans_rift_3
+			}
+			IF = {
+				limit = {
+					ROOT = {
+						has_country_flag = mem_vazurans_target_4
+					}
+				}
+				set_ambient_object_flag = mem_vazurans_rift_4
+			}
+			IF = {
+				limit = {
+					ROOT = {
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+				set_ambient_object_flag = mem_vazurans_rift_5
+			}
+		}
+		every_country = {
+			limit = {
+				is_ai = no
+				NOT = {
+					is_same_empire = ROOT
+				}
+			}
+			IF = { # checks if the country has direct contact to one of the targeted empires
+				limit = {
+					has_communications = ROOT
+				}
+				random_list = {
+					#1 = {}
+					1 = {
+						country_event = { id = mem_vazurans.20 days = 60 random = 10 }
+					}
+				}
+			}
+			ELSE_IF = { # checks if the country has contact to another country that has contact to one of the targeted empires
+				limit = {
+					any_country = {
+						has_communications = prev
+						is_same_empire = ROOT
+					}
+				}
+				country_event = { id = mem_vazurans.21 days = 90 random = 10 }
+			}
+		}
+	}
+}
+
+# Notification Event that a Rift is forming
+country_event = {
+	id = mem_vazurans.4
+	title = mem_vazurans.4.name
+	desc = { # for first encounter
+		text = mem_vazurans.4a.desc
+		trigger = {
+			NOR = { 
+				has_country_flag = mem_vazurans_retaliation 
+				has_country_flag = mem_vazurans_met
+				has_ethic = ethic_gestalt_consciousness
+			}
+		}
+	}
+	desc = { # for first encounter
+		text = mem_vazurans.4a.desc.gestalt
+		trigger = {
+			has_ethic = ethic_gestalt_consciousness
+			NOR = { 
+				has_country_flag = mem_vazurans_retaliation 
+				has_country_flag = mem_vazurans_met
+			}
+		}
+	}
+	desc = { # after first encounter has happened before
+		text = mem_vazurans.4b.desc
+		trigger = {
+			NOT = { 
+				has_country_flag = mem_vazurans_retaliation 
+			}
+			has_country_flag = mem_vazurans_met
+		}
+	}
+	desc = { # for retaliation encounter
+		text = mem_vazurans.4c.desc
+		trigger = { has_country_flag = mem_vazurans_retaliation }
+	}
+	picture = GFX_evt_mem_rift # TODO we will need custom art for a picture of one of those rifts opening
+	location = event_target:mem_vazurans_target_sun
+	
+	is_triggered_only = yes
+	
+	#response in first encounter
+	option = {
+		name = mem_vazurans.4.a
+		trigger = {
+			NOR = {
+				has_country_flag = mem_vazurans_met
+				has_country_flag = mem_vazurans_retaliation
+			}
+		}
+		capital_scope = {
+			enable_special_project = {
+				name = MEM_VAZURANS_RIFT_INVESTIGATION
+				location = this
+				owner = root
+			}
+		}
+	}
+	
+	#response in later encounter
+	option = {
+		name = mem_vazurans.4.b
+		trigger = {
+			has_country_flag = mem_vazurans_met
+			NOT = {
+				has_country_flag = mem_vazurans_retaliation
+			}
+		}
+	}
+	
+	#response in retaliation encounter
+	option = {
+		name = mem_vazurans.4.c
+		trigger = {
+			has_country_flag = mem_vazurans_retaliation
+		}
+	}
+}
+
+# Rift opens and fleet spawn events get linked
+country_event = {
+	id = mem_vazurans.5
+	title = mem_vazurans.5.name
+	desc = { # for first encounter
+		text = mem_vazurans.5a.desc
+		trigger = {
+			NOR = { 
+				has_country_flag = mem_vazurans_retaliation
+				has_country_flag = mem_vazurans_met
+			}
+		}
+	}
+	desc = { # after first encounter has happened before
+		text = mem_vazurans.5b.desc
+		trigger = {
+			NOT = { 
+				has_country_flag = mem_vazurans_retaliation 
+			}
+			has_country_flag = mem_vazurans_met
+		}
+	}
+	desc = { # for retaliation encounter
+		text = mem_vazurans.5c.desc
+		trigger = { has_country_flag = mem_vazurans_retaliation }
+	}
+	picture = GFX_evt_fleet_evil # TODO we will need custom art for a picture of an opened rifts with ships coming through
+	location = event_target:mem_vazurans_rift
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		IF = { #in case of retaliation strike
+			limit = {
+				has_country_flag = mem_vazurans_retaliation
+			}
+			# Spawn event with diplo screen telling the player to face their wrath
+			country_event = { id = mem_vazurans.7 days = 5 }
+			# Start spawning Retaliation fleet
+			country_event = { id = mem_vazurans.100 days = 2 }
+		}
+		IF = { #in case of first raiding encounter
+			limit = {
+				NOR = {
+					has_country_flag = mem_vazurans_retaliation
+					has_country_flag = mem_vazurans_met
+				}
+			}
+			# Start spawning Raiding fleet
+			country_event = { id = mem_vazurans.101 days = 2 }
+		}
+		IF = { #in case of later raiding encounter
+			limit = {
+				NOT = {
+					has_country_flag = mem_vazurans_retaliation
+				}
+				has_country_flag = mem_vazurans_met
+			}
+			# Start spawning Raiding fleet
+			country_event = { id = mem_vazurans.101 days = 2 }
+		}
+	}
+	#response in first encounter
+	option = {
+		name = mem_vazurans.5.a
+		trigger = {
+			NOR = {
+				has_country_flag = mem_vazurans_met
+				has_country_flag = mem_vazurans_retaliation
+			}
+		}
+		hidden_effect = {
+			country_event = { id = mem_vazurans.6 }
+		}
+	}
+	
+	#response in later encounter
+	option = {
+		name = mem_vazurans.5.b
+		trigger = {
+			has_country_flag = mem_vazurans_met
+			NOT = {
+				has_country_flag = mem_vazurans_retaliation
+			}
+		}
+	}
+	
+	#response in retaliation encounter
+	option = {
+		name = mem_vazurans.5.c
+		trigger = {
+			has_country_flag = mem_vazurans_retaliation
+		}
+	}
+}
+
+# First Contact message
+country_event = {
+	id = mem_vazurans.6
+	title = mem_vazurans.6.name
+	desc = mem_vazurans.6.desc
+	
+	is_triggered_only = yes
+	
+	diplomatic = yes
+	
+	immediate = {
+		random_country = {
+			limit = {
+				is_country_type = mem_vazurans
+			}
+			save_global_event_target_as = mem_vazurans_country
+		}
+		set_country_flag = mem_vazurans_met
+	}
+	
+	picture_event_data = {
+		portrait = event_target:mem_vazurans_country
+		room = mem_server_room
+	}
+
+	option = {
+		name = mem_vazurans.6.a
+		response_text = mem_vazurans.6.a.response
+	}
+	option = {
+		trigger = {
+			OR = {
+				has_ethic = ethic_pacifist
+				has_ethic = ethic_fanatic_pacifist
+			}
+		}
+		name = mem_vazurans.6.b
+		response_text = mem_vazurans.6.b.response
+	}
+	option = {
+		trigger = {
+			OR = {
+				has_ethic = "ethic_xenophobe"
+				has_ethic = "ethic_fanatic_xenophobe"
+			}
+		}
+		name = mem_vazurans.6.c
+		response_text = mem_vazurans.6.c.response
+	}
+}
+
+# Message for retaliation
+country_event = {
+	id = mem_vazurans.7
+	title = mem_vazurans.7.name
+	desc = {
+		trigger = {
+			switch = {
+				trigger = has_country_flag
+				mem_vazurans_damer_field_bypass_researched = { text = mem_vazurans.7b.desc }
+				default = { text = mem_vazurans.7a.desc }
+			}
+		}
+	}
+	
+	is_triggered_only = yes
+	
+	diplomatic = yes
+	
+	immediate = {
+		random_country = {
+			limit = {
+				is_country_type = mem_vazurans
+			}
+			save_global_event_target_as = mem_vazurans_country
+		}
+	}
+	
+	picture_event_data = {
+		portrait = event_target:mem_vazurans_country
+		room = mem_server_room
+	}
+
+	option = {
+		name = mem_vazurans.7.a
+	}
+}
+
+# Colony lost to Vazuran Terror attack
+country_event = {
+	id = mem_vazurans.8
+	title = mem_vazurans.8.name
+	desc = mem_vazurans.8.desc
+	picture = GFX_evt_nuclear_explosion
+	show_sound = event_air_raid_siren
+	location = FROM
+	is_triggered_only = yes
+
+	option = {
+		name = mem_vazurans.8.a
+		trigger = {
+			has_country_flag = mem_vazuran_defense_plan
+		}		
+	}
+
+	option = {
+		name = mem_vazurans.8.b
+		trigger = {
+			NOT = {
+				has_country_flag = mem_vazuran_defense_plan
+			}
+		}
+		enable_special_project = {
+			name = MEM_VAZURANS_DEFENSE_PLAN
+			location = capital_scope
+		}
+		hidden_effect = {
+			set_country_flag = mem_vazuran_defense_plan
+		}
+	}
+}
+
+# Colony attacked by Vazuran Raid
+country_event = {
+	id = mem_vazurans.9
+	title = mem_vazurans.9.name
+	desc = {
+		trigger = {
+			switch = {
+				trigger = has_country_flag
+				mem_vazurans_raid_small_damage = { text = mem_vazurans.9.desc.a }
+				default = { text = mem_vazurans.9.desc.b }
+			}
+		}
+	}
+	
+	picture = GFX_evt_burning_settlement
+	show_sound = event_air_raid_siren
+	location = FROM
+	is_triggered_only = yes
+
+	immediate = {
+		random_owned_planet = {
+			limit = {
+				has_planet_flag = mem_vazurans_raiding_target
+			}
+			save_event_target_as = mem_vazurans_raid_planet_name
+		}
+		IF = {
+			limit = {
+				FROM = {
+					OR = {
+						has_building = building_mem_planetary_shield_generator
+						has_building = building_mem_planetary_shield_generator_heavy
+						has_building = building_mem_planetary_shield_generator_orila
+					}
+				}
+			}
+			set_timed_country_flag = {
+				flag = mem_vazurans_raid_small_damage
+				years = 1
+			}
+		}
+	}
+
+	option = {
+		name = mem_vazurans.9.a
+		trigger = {
+			has_country_flag = mem_vazurans_raid_small_damage
+			has_country_flag = mem_vazuran_defense_plan
+		}
+	}
+
+	option = {
+		name = mem_vazurans.9.b
+		trigger = {
+			NOT = {
+				has_country_flag = mem_vazurans_raid_small_damage
+			}
+			has_country_flag = mem_vazuran_defense_plan
+		}
+	}
+
+	option = {
+		name = mem_vazurans.9.c
+		trigger = {
+			NOT = {
+				has_country_flag = mem_vazuran_defense_plan
+			}
+		}
+		enable_special_project = {
+			name = MEM_VAZURANS_DEFENSE_PLAN
+			location = capital_scope
+		}
+		hidden_effect = {
+			set_country_flag = mem_vazuran_defense_plan
+		}
+	}
+}
+
+# Establishing communications with every country that does not already know them (is started at fleet spawn 100 and 101)
+country_event = {
+	id = mem_vazurans.10
+    hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		every_country = {
+			limit = {
+				NOT = {
+					has_communications = ROOT
+				}
+			}
+			establish_communications_no_message = ROOT
+		}
+	}
+}
+
+# Information event about a known empire being attacked
+country_event = {
+	id = mem_vazurans.20
+	title = mem_vazurans.20.name
+	desc = {
+		trigger = { 
+			switch = { 
+				trigger = has_country_flag
+				# for those who have met them before
+				mem_vazurans_report_1 = {text = mem_vazurans.20b.desc}
+				mem_vazurans_report_2 = {text = mem_vazurans.20c.desc}
+				mem_vazurans_report_3 = {text = mem_vazurans.20d.desc}
+				# for those not having met them
+				default = {text = mem_vazurans.20a.desc} 
+			}
+		}
+	}
+
+	picture = GFX_evt_smugglers_in_bar
+	location = event_target:mem_vazuran_victim
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		FROM = {
+			save_event_target_as = mem_vazuran_victim
+		}
+		IF = {
+			limit = {
+				has_country_flag = mem_vazurans_met
+			}
+			random_list = {
+				1 = {
+					set_timed_country_flag = {
+						flag = mem_vazurans_report_1
+						years = 1
+					}
+				}
+				1 = {
+					set_timed_country_flag = {
+						flag = mem_vazurans_report_2
+						years = 1
+					}
+				}
+				1 = {
+					set_timed_country_flag = {
+						flag = mem_vazurans_report_3
+						years = 1
+					}
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = "WORRYING"
+	}
+}
+
+# Information event about an unknown empire being attacked
+country_event = {
+	id = mem_vazurans.21
+	title = mem_vazurans.21.name
+	desc = { # for those not having met them
+		text = mem_vazurans.21a.desc
+		trigger = {
+			NOT = { 
+				has_country_flag = mem_vazurans_met
+			}
+		}
+	}
+	desc = { # for those who have met them before
+		text = mem_vazurans.21b.desc
+		trigger = {
+			has_country_flag = mem_vazurans_met
+		}
+	}
+
+	picture = GFX_evt_smugglers_in_bar
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "WORRYING"
+	}
+}
+
+# Information event about Vazuran Homefleet defeated
+country_event = {
+	id = mem_vazurans.30
+	title = mem_vazurans.30.name
+	desc = mem_vazurans.30a.desc
+
+	picture = GFX_evt_smugglers_in_bar
+	
+	is_triggered_only = yes
+
+	immediate = {
+		random_country = {
+			limit = {
+				has_country_flag = mem_vazuran_victor
+			}
+			save_event_target_as = mem_vazuran_victor
+		}
+	}
+	
+	option = {
+		name = "EXCELLENT"
+	}
+}
+
+# Information event about Vazuran Homeworld taken
+country_event = {
+	id = mem_vazurans.31
+	title = mem_vazurans.31.name
+	desc = mem_vazurans.31a.desc
+
+	picture = GFX_evt_smugglers_in_bar
+	
+	is_triggered_only = yes
+
+	immediate = {
+		random_country = {
+			limit = {
+				has_country_flag = mem_vazuran_invader
+			}
+			save_event_target_as = mem_vazuran_invader
+		}
+	}
+	
+	option = {
+		name = mem_vazurans_31.a
+	}
+}
+
+# Finishing first Rift investigation
+country_event = {
+	id = mem_vazurans.40
+	title = mem_vazurans.40.name
+	desc = mem_vazurans.40.desc
+
+	picture = GFX_evt_mem_rift
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "WORRYING"
+	}
+}
+
+# Retaliation Fleet destroyed
+country_event = {
+	id = mem_vazurans.50
+	title = mem_vazurans.50.name
+	desc = {
+		trigger = {
+			has_country_flag = mem_vazurans_retaliation_aftermath_1
+		}
+		text = mem_vazurans.50a.desc
+	}
+	desc = {
+		trigger = {
+			has_country_flag = mem_vazurans_retaliation_aftermath_2
+			NOT = {
+				has_ethic = ethic_gestalt_consciousness
+			}
+		}
+		text = mem_vazurans.50b.desc
+	}
+	desc = {
+		trigger = {
+			has_country_flag = mem_vazurans_retaliation_aftermath_2
+			has_ethic = ethic_gestalt_consciousness
+		}
+		text = mem_vazurans.50b.desc.gestalt
+	}
+
+	picture = GFX_evt_mem_space_battle
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		IF = {
+			limit = {
+				has_country_flag = mem_vazurans_retaliation_fleet_destroyed
+			}
+			set_country_flag = mem_vazurans_retaliation_aftermath_1
+		}
+		ELSE = {
+			set_country_flag = mem_vazurans_retaliation_aftermath_2
+		}
+		set_country_flag = mem_vazurans_rift_creation_start
+	}
+	
+	option = {
+		name = mem_vazurans.50.a
+		add_research_option = tech_mem_vazuran_rift_stabilization
+	}
+}
+
+#Stabilization tech researched and project to stabilize rift set
+country_event = {
+	id = mem_vazurans.51
+	title = mem_vazurans.51.name
+	desc = mem_vazurans.51.desc
+
+	picture = GFX_evt_mem_rift
+	
+	trigger = {
+		NOR = {
+			has_global_flag = mem_vazurans_disabled
+			has_global_flag = mem_vazurans_finished
+		}
+		has_technology = tech_mem_vazuran_rift_stabilization
+		Not = {
+			has_country_flag = mem_vazurans_rift_stabilization_started
+		}
+	}
+	
+	mean_time_to_happen = {
+		days = 30
+	}
+	
+	immediate = {
+		set_country_flag = mem_vazurans_rift_stabilization_started
+	}
+	
+	option = {
+		name = "GOOD"
+		capital_scope = {
+			enable_special_project = {
+				name = MEM_VAZURANS_RIFT_STABILIZATION
+				location = this
+				owner = root
+			}
+		}
+	}
+}
+
+# vazuran system spawned
+country_event = {
+	id = mem_vazurans.52
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		no_scope = {
+			# makes system positions originate from galactic core
+			spawn_system = { 
+				min_distance >= 550
+				max_distance <= 560
+				min_orientation_angle = 96
+				max_orientation_angle = 102
+				initializer = "mem_vazuran_homesystem"
+				# is_discovered = yes
+			}
+		}
+		every_system = {
+			limit = { has_star_flag = mem_vazuran_homesystem }
+			isolate_system = yes
+		}
+		country_event = { id = mem_vazurans.53 days = 1 }
+	}
+}
+
+# Dimensional Portal constructed
+country_event = {
+	id = mem_vazurans.53
+	title = mem_vazurans.53.name
+	desc = {
+		trigger = {
+			NOT = {
+				has_ethic = ethic_gestalt_consciousness
+			}
+		}
+		text = mem_vazurans.53.desc
+	}
+	desc = {
+		trigger = {
+			has_ethic = ethic_gestalt_consciousness
+		}
+		text = mem_vazurans.53.desc.gestalt
+	}
+
+	picture = GFX_evt_mem_rift
+	is_triggered_only = yes
+
+	immediate = {
+		capital_scope = {
+			solar_system = {
+				set_star_flag = mem_vazuran_portal
+				spawn_megastructure = {
+					type = "mem_vazuran_gateway"
+					orbit_angle = 360
+                	orbit_distance = 200
+				}
+				random_system_megastructure = {
+					limit = {
+						is_megastructure_type = mem_vazuran_gateway
+					}
+					save_event_target_as = mem_vazuran_player_gate
+					create_ambient_object = {
+						type = "mem_vazuran_wormhole_small_object"
+					}
+					last_created_ambient_object = {
+						set_location = {
+							target = event_target:mem_vazuran_player_gate
+							distance = 0
+							angle = random
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = "GOOD"
+	}
+}
+
+# Decade pulse event
+event = {
+	id = mem_vazurans.90
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_global_flag = mem_vazurans_enabled
+		NOR = {
+			has_global_flag = mem_vazurans_disabled
+			has_global_flag = mem_vazurans_finished
+		}
+	}
+
+	immediate = {
+		If = {
+			limit = {
+				years_passed >= 100
+				years_passed < 150
+				NOT = {
+					has_global_flag = mem_vazurans_extermination
+				}
+				any_country = {
+					is_ai = yes
+					is_country_type = default
+				}
+			}
+			random_list = {
+				90 = {}
+				10 = {
+					random_country = {
+						limit = {
+							is_ai = yes
+							is_country_type = default
+						}
+						country_event = { id = mem_vazurans.300 days = 1750 random = 1700 }
+					}
+				}
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				years_passed >= 150
+				NOT = {
+					has_global_flag = mem_vazurans_extermination
+				}
+				any_country = {
+					is_ai = yes
+					is_country_type = default
+				}
+			}
+			random_list = {
+				80 = {}
+				20 = {
+					random_country = {
+						limit = {
+							is_ai = yes
+							is_country_type = default
+						}
+						country_event = { id = mem_vazurans.300 days = 1750 random = 1700 }
+					}
+				}
+			}
+		}
+		every_country = {
+			limit = {
+				has_country_flag = mem_vazurans_met
+				NOT = {
+					has_country_flag = mem_vazurans_damper_field_quest
+				}
+			}
+			country_event = { id = mem_vazurans.91 }
+		}
+	}
+}
+
+#bridge event to damper field quest
+country_event = {
+	id = mem_vazurans.91
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		IF = {
+			limit = {
+				years_passed >= 50
+				years_passed < 100
+			}
+			random_list = {
+				90 = {}
+				10 = {
+					country_event = { id = mem_vazurans.250 days = 1750 random = 1700 }
+					set_country_flag = mem_vazurans_damper_field_quest
+				}
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				years_passed >= 100
+				years_passed < 150
+			}
+			random_list = {
+				80 = {}
+				20 = {
+					country_event = { id = mem_vazurans.250 days = 1750 random = 1700 }
+					set_country_flag = mem_vazurans_damper_field_quest
+				}
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				years_passed >= 150
+			}
+			random_list = {
+				70 = {}
+				30 = {
+					country_event = { id = mem_vazurans.250 days = 1750 random = 1700 }
+					set_country_flag = mem_vazurans_damper_field_quest
+				}
+			}
+		}
+	}
+}
+
+# Retaliation Fleet spawn
+country_event = {
+	id = mem_vazurans.100
+    hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		create_mem_vazuran_country = yes
+		random_country = {
+			limit = {
+				has_country_flag = mem_vazurans_country
+			}
+			save_global_event_target_as = mem_vazurans_country
+			IF = {
+				limit = {
+					NOT = {
+						has_communications = ROOT
+					}
+				}
+				establish_communications_no_message = ROOT
+			}	
+		}
+		random_country = { # establish communications with all other empires
+			limit = {
+				has_country_flag = mem_vazurans_country
+			}
+			country_event = { id = mem_vazurans.10 days = 1 }
+		}
+		random_system = {
+			limit = {
+				any_system_planet = {
+					is_owned_by = root
+					is_capital = yes
+				}
+			}
+			random_system_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_vazurans_rift
+				}
+				create_mem_vazuran_retaliation_fleet = yes
+				last_created_fleet = { # fleet flag for bombarding event
+					set_fleet_flag = mem_vazurans_fleet
+					set_fleet_stance = aggressive
+					set_aggro_range_measure_from = self
+					set_aggro_range = 150
+					fleet_event = { id = mem_vazurans.110 days = 1 }
+				}
+				IF = { # check which attack number the empire has (1 to 5) for destruction check to know which empire will be the target of a retaliation strike
+					limit = {
+						ROOT = {
+							has_country_flag = mem_vazurans_target_1
+						}
+					}
+					last_created_fleet = {
+						set_fleet_flag = mem_vazurans_fleet_1
+					}
+				}
+				IF = { # check which attack number the empire has (1 to 5) for destruction check to know which empire will be the target of a retaliation strike
+					limit = {
+						ROOT = {
+							has_country_flag = mem_vazurans_target_2
+						}
+					}
+					last_created_fleet = {
+						set_fleet_flag = mem_vazurans_fleet_2
+					}
+				}
+				IF = { # check which attack number the empire has (1 to 5) for destruction check to know which empire will be the target of a retaliation strike
+					limit = {
+						ROOT = {
+							has_country_flag = mem_vazurans_target_3
+						}
+					}
+					last_created_fleet = {
+						set_fleet_flag = mem_vazurans_fleet_3
+					}
+				}
+				IF = { # check which attack number the empire has (1 to 5) for destruction check to know which empire will be the target of a retaliation strike
+					limit = {
+						ROOT = {
+							has_country_flag = mem_vazurans_target_4
+						}
+					}
+					last_created_fleet = {
+						set_fleet_flag = mem_vazurans_fleet_4
+					}
+				}
+				IF = { # check which attack number the empire has (1 to 5) for destruction check to know which empire will be the target of a retaliation strike
+					limit = {
+						ROOT = {
+							has_country_flag = mem_vazurans_target_5
+						}
+					}
+					last_created_fleet = {
+						set_fleet_flag = mem_vazurans_fleet_5
+					}
+				}
+			}
+		}
+	}
+}
+
+# Raiding Fleet spawn
+country_event = {
+	id = mem_vazurans.101
+    hide_window = yes
+	
+	is_triggered_only = yes
+
+	immediate = {
+		create_mem_vazuran_country = yes
+		random_country = {
+			limit = {
+				has_country_flag = mem_vazurans_country
+			}
+			save_global_event_target_as = mem_vazurans_country
+			IF = {
+				limit = {
+					NOT = {
+						has_communications = ROOT
+					}
+				}
+				establish_communications_no_message = ROOT
+			}	
+		}
+		random_country = { # establish communications with all other empires
+			limit = {
+				has_country_flag = mem_vazurans_country
+			}
+			country_event = { id = mem_vazurans.10 days = 1 }
+		}
+		random_system_within_border = {
+			limit = {
+				any_system_planet = {
+					has_planet_flag = mem_vazurans_raiding_target
+				}
+			}
+			random_system_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_vazurans_rift
+				}
+				mem_vazuran_raiding_fleet_spawn = yes
+				
+			}
+		}
+		last_created_fleet = { # fleet flag for bombarding event
+			set_fleet_flag = mem_vazurans_fleet
+			set_fleet_stance = aggressive
+			set_aggro_range_measure_from = self
+			set_aggro_range = 150
+			fleet_event = { id = mem_vazurans.110 days = 1 }
+		}
+		IF = { # check which attack number the empire has (1 to 5) for destruction check to know which empire will be the target of a retaliation strike
+			limit = {
+				ROOT = {
+					has_country_flag = mem_vazurans_target_1
+				}
+			}
+			last_created_fleet = {
+				set_fleet_flag = mem_vazurans_fleet_1
+			}
+		}
+		IF = { # check which attack number the empire has (1 to 5) for destruction check to know which empire will be the target of a retaliation strike
+			limit = {
+				ROOT = {
+					has_country_flag = mem_vazurans_target_2
+				}
+			}
+			last_created_fleet = {
+				set_fleet_flag = mem_vazurans_fleet_2
+			}
+		}
+		IF = { # check which attack number the empire has (1 to 5) for destruction check to know which empire will be the target of a retaliation strike
+			limit = {
+				ROOT = {
+					has_country_flag = mem_vazurans_target_3
+				}
+			}
+			last_created_fleet = {
+				set_fleet_flag = mem_vazurans_fleet_3
+			}
+		}
+		IF = { # check which attack number the empire has (1 to 5) for destruction check to know which empire will be the target of a retaliation strike
+			limit = {
+				ROOT = {
+					has_country_flag = mem_vazurans_target_4
+				}
+			}
+			last_created_fleet = {
+				set_fleet_flag = mem_vazurans_fleet_4
+			}
+		}
+		IF = { # check which attack number the empire has (1 to 5) for destruction check to know which empire will be the target of a retaliation strike
+			limit = {
+				ROOT = {
+					has_country_flag = mem_vazurans_target_5
+				}
+			}
+			last_created_fleet = {
+				set_fleet_flag = mem_vazurans_fleet_5
+			}
+		}
+	}
+}
+
+# vazuran Raiding or Retaliation fleet has been destroyed
+# This = owner of fleet 1 (combatant)
+# From = owner of fleet 2 (destroyed)
+# FromFrom = fleet 1
+# FromFromFrom = fleet 2
+country_event = {
+	id = mem_vazurans.105
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		FROMFROMFROM = {
+			has_fleet_flag = mem_vazurans_fleet
+		}
+	}
+	
+	immediate = {
+		# check for 1
+		IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_1
+				}
+				NOT = {
+					any_country = {
+						has_country_flag = mem_vazurans_target_1
+					}
+				}
+			}
+			ROOT = {
+				set_country_flag = mem_vazurans_retaliation
+				set_country_flag = mem_vazurans_target_1
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_1
+				}
+				any_country = {
+					has_country_flag = mem_vazurans_target_1
+					NOT = {
+						has_country_flag = mem_vazurans_retaliation
+					}
+					is_same_value = ROOT
+				}
+			}
+			ROOT = {
+				set_country_flag = mem_vazurans_retaliation
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_1
+				}
+				any_country = {
+					has_country_flag = mem_vazurans_target_1
+					NOT = {
+						has_country_flag = mem_vazurans_retaliation
+					}
+					NOT = {
+						is_same_value = ROOT
+					}
+				}
+			}
+			every_country = {
+				limit = {
+					has_country_flag = mem_vazurans_target_1
+				}
+				remove_country_flag = mem_vazurans_target_1
+			}
+			ROOT = {
+				set_country_flag = mem_vazurans_retaliation
+				set_country_flag = mem_vazurans_target_1
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_1
+				}
+				any_country = {
+					has_country_flag = mem_vazurans_target_1
+					has_country_flag = mem_vazurans_retaliation
+					NOT = {
+						is_same_value = ROOT
+					}
+				}
+			}
+			every_country = {
+				limit = {
+					has_country_flag = mem_vazurans_target_1
+				}
+				remove_country_flag = mem_vazurans_target_1
+				remove_country_flag = mem_vazurans_retaliation
+			}
+			ROOT = {
+				set_country_flag = mem_vazurans_retaliation
+				set_country_flag = mem_vazurans_target_1
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_1
+				}
+				any_country = {
+					has_country_flag = mem_vazurans_target_1
+					has_country_flag = mem_vazurans_retaliation
+					is_same_value = ROOT
+				}
+			}
+			ROOT = {
+				remove_country_flag = mem_vazurans_retaliation
+				remove_country_flag = mem_vazurans_target_1
+			}
+			IF = {
+				limit = {
+					ROOT = {
+						is_ai = no
+						NOT = {
+							has_country_flag = mem_vazurans_rift_creation_start
+						}
+					}
+				}
+				ROOT = {
+					set_country_flag = mem_vazurans_rift_creation_start
+					set_timed_country_flag = {
+						flag = mem_vazurans_retaliation_fleet_destroyed
+						years = 1
+					}
+					country_event = { id = mem_vazurans.50 days = 2}
+				}
+			}
+		}
+		IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_1
+				}
+			}
+			random_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_vazurans_rift_1
+				}
+				destroy_ambient_object = THIS
+			}
+		}
+		# check for 2
+		IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_2
+				}
+				NOT = {
+					any_country = {
+						has_country_flag = mem_vazurans_target_2
+					}
+				}
+			}
+			ROOT = {
+				set_country_flag = mem_vazurans_retaliation
+				set_country_flag = mem_vazurans_target_2
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_2
+				}
+				any_country = {
+					has_country_flag = mem_vazurans_target_2
+					NOT = {
+						has_country_flag = mem_vazurans_retaliation
+					}
+					is_same_value = ROOT
+				}
+			}
+			ROOT = {
+				set_country_flag = mem_vazurans_retaliation
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_2
+				}
+				any_country = {
+					has_country_flag = mem_vazurans_target_2
+					NOT = {
+						has_country_flag = mem_vazurans_retaliation
+					}
+					NOT = {
+						is_same_value = ROOT
+					}
+				}
+			}
+			every_country = {
+				limit = {
+					has_country_flag = mem_vazurans_target_2
+				}
+				remove_country_flag = mem_vazurans_target_2
+			}
+			ROOT = {
+				set_country_flag = mem_vazurans_retaliation
+				set_country_flag = mem_vazurans_target_2
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_2
+				}
+				any_country = {
+					has_country_flag = mem_vazurans_target_2
+					has_country_flag = mem_vazurans_retaliation
+					NOT = {
+						is_same_value = ROOT
+					}
+				}
+			}
+			every_country = {
+				limit = {
+					has_country_flag = mem_vazurans_target_2
+				}
+				remove_country_flag = mem_vazurans_target_2
+				remove_country_flag = mem_vazurans_retaliation
+			}
+			ROOT = {
+				set_country_flag = mem_vazurans_retaliation
+				set_country_flag = mem_vazurans_target_2
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_2
+				}
+				any_country = {
+					has_country_flag = mem_vazurans_target_2
+					has_country_flag = mem_vazurans_retaliation
+					is_same_value = ROOT
+				}
+			}
+			ROOT = {
+				remove_country_flag = mem_vazurans_retaliation
+				remove_country_flag = mem_vazurans_target_2
+			}
+			IF = {
+				limit = {
+					ROOT = {
+						is_ai = no
+						NOT = {
+							has_country_flag = mem_vazurans_rift_creation_start
+						}
+					}
+				}
+				ROOT = {
+					set_country_flag = mem_vazurans_rift_creation_start
+					set_timed_country_flag = {
+						flag = mem_vazurans_retaliation_fleet_destroyed
+						years = 1
+					}
+					country_event = { id = mem_vazurans.50 days = 2}
+				}
+			}
+		}
+		IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_2
+				}
+			}
+			random_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_vazurans_rift_2
+				}
+				destroy_ambient_object = THIS
+			}
+		}
+		# check for 3
+		IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_3
+				}
+				NOT = {
+					any_country = {
+						has_country_flag = mem_vazurans_target_3
+					}
+				}
+			}
+			ROOT = {
+				set_country_flag = mem_vazurans_retaliation
+				set_country_flag = mem_vazurans_target_3
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_3
+				}
+				any_country = {
+					has_country_flag = mem_vazurans_target_3
+					NOT = {
+						has_country_flag = mem_vazurans_retaliation
+					}
+					is_same_value = ROOT
+				}
+			}
+			ROOT = {
+				set_country_flag = mem_vazurans_retaliation
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_3
+				}
+				any_country = {
+					has_country_flag = mem_vazurans_target_3
+					NOT = {
+						has_country_flag = mem_vazurans_retaliation
+					}
+					NOT = {
+						is_same_value = ROOT
+					}
+				}
+			}
+			every_country = {
+				limit = {
+					has_country_flag = mem_vazurans_target_3
+				}
+				remove_country_flag = mem_vazurans_target_3
+			}
+			ROOT = {
+				set_country_flag = mem_vazurans_retaliation
+				set_country_flag = mem_vazurans_target_3
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_3
+				}
+				any_country = {
+					has_country_flag = mem_vazurans_target_3
+					has_country_flag = mem_vazurans_retaliation
+					NOT = {
+						is_same_value = ROOT
+					}
+				}
+			}
+			every_country = {
+				limit = {
+					has_country_flag = mem_vazurans_target_3
+				}
+				remove_country_flag = mem_vazurans_target_3
+				remove_country_flag = mem_vazurans_retaliation
+			}
+			ROOT = {
+				set_country_flag = mem_vazurans_retaliation
+				set_country_flag = mem_vazurans_target_3
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_3
+				}
+				any_country = {
+					has_country_flag = mem_vazurans_target_3
+					has_country_flag = mem_vazurans_retaliation
+					is_same_value = ROOT
+				}
+			}
+			ROOT = {
+				remove_country_flag = mem_vazurans_retaliation
+				remove_country_flag = mem_vazurans_target_3
+			}
+			IF = {
+				limit = {
+					ROOT = {
+						is_ai = no
+						NOT = {
+							has_country_flag = mem_vazurans_rift_creation_start
+						}
+					}
+				}
+				ROOT = {
+					set_country_flag = mem_vazurans_rift_creation_start
+					set_timed_country_flag = {
+						flag = mem_vazurans_retaliation_fleet_destroyed
+						years = 1
+					}
+					country_event = { id = mem_vazurans.50 days = 2}
+				}
+			}
+		}
+		IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_3
+				}
+			}
+			random_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_vazurans_rift_3
+				}
+				destroy_ambient_object = THIS
+			}
+		}
+		# check for 4
+		IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_4
+				}
+				NOT = {
+					any_country = {
+						has_country_flag = mem_vazurans_target_4
+					}
+				}
+			}
+			ROOT = {
+				set_country_flag = mem_vazurans_retaliation
+				set_country_flag = mem_vazurans_target_4
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_4
+				}
+				any_country = {
+					has_country_flag = mem_vazurans_target_4
+					NOT = {
+						has_country_flag = mem_vazurans_retaliation
+					}
+					is_same_value = ROOT
+				}
+			}
+			ROOT = {
+				set_country_flag = mem_vazurans_retaliation
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_4
+				}
+				any_country = {
+					has_country_flag = mem_vazurans_target_4
+					NOT = {
+						has_country_flag = mem_vazurans_retaliation
+					}
+					NOT = {
+						is_same_value = ROOT
+					}
+				}
+			}
+			every_country = {
+				limit = {
+					has_country_flag = mem_vazurans_target_4
+				}
+				remove_country_flag = mem_vazurans_target_4
+			}
+			ROOT = {
+				set_country_flag = mem_vazurans_retaliation
+				set_country_flag = mem_vazurans_target_4
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_4
+				}
+				any_country = {
+					has_country_flag = mem_vazurans_target_4
+					has_country_flag = mem_vazurans_retaliation
+					NOT = {
+						is_same_value = ROOT
+					}
+				}
+			}
+			every_country = {
+				limit = {
+					has_country_flag = mem_vazurans_target_4
+				}
+				remove_country_flag = mem_vazurans_target_4
+				remove_country_flag = mem_vazurans_retaliation
+			}
+			ROOT = {
+				set_country_flag = mem_vazurans_retaliation
+				set_country_flag = mem_vazurans_target_4
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_4
+				}
+				any_country = {
+					has_country_flag = mem_vazurans_target_4
+					has_country_flag = mem_vazurans_retaliation
+					is_same_value = ROOT
+				}
+			}
+			ROOT = {
+				remove_country_flag = mem_vazurans_retaliation
+				remove_country_flag = mem_vazurans_target_4
+			}
+			IF = {
+				limit = {
+					ROOT = {
+						is_ai = no
+						NOT = {
+							has_country_flag = mem_vazurans_rift_creation_start
+						}
+					}
+				}
+				ROOT = {
+					set_country_flag = mem_vazurans_rift_creation_start
+					set_timed_country_flag = {
+						flag = mem_vazurans_retaliation_fleet_destroyed
+						years = 1
+					}
+					country_event = { id = mem_vazurans.50 days = 2}
+				}
+			}
+		}
+		IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_4
+				}
+			}
+			random_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_vazurans_rift_4
+				}
+				destroy_ambient_object = THIS
+			}
+		}
+		# check for 5
+		IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_5
+				}
+				NOT = {
+					any_country = {
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+			}
+			ROOT = {
+				set_country_flag = mem_vazurans_retaliation
+				set_country_flag = mem_vazurans_target_5
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_5
+				}
+				any_country = {
+					has_country_flag = mem_vazurans_target_5
+					NOT = {
+						has_country_flag = mem_vazurans_retaliation
+					}
+					is_same_value = ROOT
+				}
+			}
+			ROOT = {
+				set_country_flag = mem_vazurans_retaliation
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_5
+				}
+				any_country = {
+					has_country_flag = mem_vazurans_target_5
+					NOT = {
+						has_country_flag = mem_vazurans_retaliation
+					}
+					NOT = {
+						is_same_value = ROOT
+					}
+				}
+			}
+			every_country = {
+				limit = {
+					has_country_flag = mem_vazurans_target_5
+				}
+				remove_country_flag = mem_vazurans_target_5
+			}
+			ROOT = {
+				set_country_flag = mem_vazurans_retaliation
+				set_country_flag = mem_vazurans_target_5
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_5
+				}
+				any_country = {
+					has_country_flag = mem_vazurans_target_5
+					has_country_flag = mem_vazurans_retaliation
+					NOT = {
+						is_same_value = ROOT
+					}
+				}
+			}
+			every_country = {
+				limit = {
+					has_country_flag = mem_vazurans_target_5
+				}
+				remove_country_flag = mem_vazurans_target_5
+				remove_country_flag = mem_vazurans_retaliation
+			}
+			ROOT = {
+				set_country_flag = mem_vazurans_retaliation
+				set_country_flag = mem_vazurans_target_5
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_5
+				}
+				any_country = {
+					has_country_flag = mem_vazurans_target_5
+					has_country_flag = mem_vazurans_retaliation
+					is_same_value = ROOT
+				}
+			}
+			ROOT = {
+				remove_country_flag = mem_vazurans_retaliation
+				remove_country_flag = mem_vazurans_target_5
+			}
+			IF = {
+				limit = {
+					ROOT = {
+						is_ai = no
+						NOT = {
+							has_country_flag = mem_vazurans_rift_creation_start
+						}
+					}
+				}
+				ROOT = {
+					set_country_flag = mem_vazurans_rift_creation_start
+					set_timed_country_flag = {
+						flag = mem_vazurans_retaliation_fleet_destroyed
+						years = 1
+					}
+					country_event = { id = mem_vazurans.50 days = 2}
+				}
+			}
+		}
+		IF = {
+			limit = {
+				FROMFROMFROM ={
+					has_fleet_flag = mem_vazurans_fleet_5
+				}
+			}
+			random_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_vazurans_rift_5
+				}
+				destroy_ambient_object = THIS
+			}
+		}
+	}
+}
+
+# tells the raiding or retaliation fleet to move to the target planet to start bombarding
+fleet_event = {
+	id = mem_vazurans.110
+	hide_window = yes
+	
+	is_triggered_only = yes
+
+	immediate = {
+		queue_actions = {
+			repeat	= {
+				find_closest_planet  = {
+					trigger = {
+						id = mem_vazurans_action.1
+						has_planet_flag = mem_vazurans_raiding_target
+					}
+					found_planet = {
+						move_to = this
+						orbit_planet = this
+					}
+				}
+				wait = {
+					duration = 120
+				}
+				effect = {
+					id = mem_vazurans_action.2
+					solar_system = {
+						random_system_planet = { 
+							limit = {
+								has_planet_flag = mem_vazurans_raiding_target
+							}
+							planet_event = { id = mem_vazurans.111 }
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+# Planet has been raided and now gets debuff and owner flags are being changed
+planet_event = {
+	id = mem_vazurans.111
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		solar_system = {
+            any_ship_in_system = { 
+                fleet = {
+                    exists = this
+					OR = {
+						has_fleet_flag = mem_vazurans_fleet_1
+						has_fleet_flag = mem_vazurans_fleet_2
+						has_fleet_flag = mem_vazurans_fleet_3
+						has_fleet_flag = mem_vazurans_fleet_4
+						has_fleet_flag = mem_vazurans_fleet_5
+					}
+                    orbit = {
+                        is_same_value = root
+                    }
+                }
+            }
+        }
+	}
+	
+	immediate = {
+		IF = {
+			limit = {
+				solar_system = {
+					owner = {
+						is_ai = yes
+					}
+				}	
+			}
+			solar_system = {
+				every_fleet_in_system = {
+					limit = {
+						OR = {
+							is_ship_size = mining_station
+							is_ship_size = research_station
+							is_ship_size = observation_station
+						}
+					}
+					destroy_fleet = THIS
+				}
+			}
+		}
+		IF = {
+			limit = {
+				solar_system = {
+					owner = {
+						is_ai = no
+						NOT = {
+							has_country_flag = mem_vazurans_rift_creation_start
+						}
+						has_country_flag = mem_vazurans_retaliation
+					}
+				}				
+			}
+			solar_system = {
+				owner = {
+					set_country_flag = mem_vazurans_rift_creation_start
+					country_event = { id = mem_vazurans.50 days = 180 random = 30 }
+				}
+			}
+		}
+		IF = {
+			limit = {
+				solar_system = {
+					owner = {
+						has_country_flag = mem_vazurans_target_1
+					}
+				}
+			}
+			set_timed_global_flag = {
+				flag = mem_vazurans_raid_1_finished
+				days = 720 # 2 years
+			}
+			solar_system = {
+				owner = {
+					remove_country_flag = mem_vazurans_target_1
+				}
+			}
+		}
+		IF = {
+			limit = {
+				solar_system = {
+					owner = {
+						has_country_flag = mem_vazurans_target_2
+					}
+				}
+			}
+			set_timed_global_flag = {
+				flag = mem_vazurans_raid_2_finished
+				days = 720 # 2 years
+			}
+			solar_system = {
+				owner = {
+					remove_country_flag = mem_vazurans_target_2
+				}
+			}
+		}
+		IF = {
+			limit = {
+				solar_system = {
+					owner = {
+						has_country_flag = mem_vazurans_target_3
+					}
+				}
+			}
+			set_timed_global_flag = {
+				flag = mem_vazurans_raid_3_finished
+				days = 720 # 2 years
+			}
+			solar_system = {
+				owner = {
+					remove_country_flag = mem_vazurans_target_3
+				}
+			}
+		}
+		IF = {
+			limit = {
+				solar_system = {
+					owner = {
+						has_country_flag = mem_vazurans_target_4
+					}
+				}
+			}
+			set_timed_global_flag = {
+				flag = mem_vazurans_raid_4_finished
+				days = 720 # 2 years
+			}
+			solar_system = {
+				owner = {
+					remove_country_flag = mem_vazurans_target_4
+				}
+			}
+		}
+		IF = {
+			limit = {
+				solar_system = {
+					owner = {
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+			}
+			set_timed_global_flag = {
+				flag = mem_vazurans_raid_5_finished
+				days = 720 # 2 years
+			}
+			solar_system = {
+				owner = {
+					remove_country_flag = mem_vazurans_target_5
+				}
+			}
+		}
+		IF = {
+			limit = {
+				solar_system = {
+					owner = {
+						has_country_flag = mem_vazurans_retaliation
+					}
+				}
+			}
+			mem_vazurans_planet_retaliation_effect = yes
+			solar_system = {
+				owner = {
+					remove_country_flag = mem_vazurans_retaliation
+				}
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				is_colony = yes
+				years_passed >= 100
+				habitable_planet = yes
+				NOR = {
+					has_building = building_mem_planetary_shield_generator
+					has_building = building_mem_planetary_shield_generator_heavy
+					has_building = building_mem_planetary_shield_generator_orila
+				}
+				num_pops < 40
+			}
+			random_list = {
+				5 = {
+					owner = {
+						country_event = { id = mem_vazurans.9 days = 1 }
+					}
+					mem_vazurans_planet_raiding_effect_1 = yes
+				}
+				2 = {
+					owner = {
+						country_event = { id = mem_vazurans.8 days = 1 }
+					}
+					mem_vazurans_planet_raiding_effect_2 = yes
+				}
+				1 = {
+					owner = {
+						country_event = { id = mem_vazurans.8 days = 1 }
+					}
+					mem_vazurans_planet_raiding_effect_3 = yes
+				}
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				is_colony = yes
+				years_passed >= 100
+				NOR = {
+					has_building = building_mem_planetary_shield_generator
+					has_building = building_mem_planetary_shield_generator_heavy
+					has_building = building_mem_planetary_shield_generator_orila
+				}
+				num_pops < 40
+			}
+			random_list = {
+				5 = {
+					owner = {
+						country_event = { id = mem_vazurans.9 days = 1 }
+					}
+					mem_vazurans_planet_raiding_effect_1 = yes
+				}
+				3 = {
+					owner = {
+						country_event = { id = mem_vazurans.8 days = 1 }
+					}
+					mem_vazurans_planet_raiding_effect_2 = yes
+				}
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				is_colony = yes
+			}
+			owner = {
+				country_event = { id = mem_vazurans.9 days = 1 }
+			}
+			mem_vazurans_planet_raiding_effect_1 = yes
+		}
+		solar_system = {
+			random_fleet_in_system = {
+				limit = {
+					exists = owner
+					owner = { is_country_type = mem_vazurans }
+				}
+				fleet_event = { id = mem_vazurans.112 days = 1 }
+			}
+		}
+	}
+}
+
+# sending raiding or retaliation fleet home to the rift and let them vanish
+fleet_event = {
+	id = mem_vazurans.112
+	hide_window = yes
+	
+	is_triggered_only = yes
+
+	immediate = {
+		solar_system = {
+			random_system_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_vazurans_rift
+				}
+				save_event_target_as = mem_vazurans_rift
+			}
+		}
+		clear_fleet_actions = ROOT
+		queue_actions = {
+			move_to = event_target:mem_vazurans_rift
+			effect = {
+				id = mem_vazurans_action.3
+				delete_fleet  = this
+			}
+		}
+	}
+}
+
+# delete Rift after fleet has left (on monthly pulse)
+event = {
+	id = mem_vazurans.113
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		OR = {
+			has_global_flag = mem_vazurans_raid_1_finished
+			has_global_flag = mem_vazurans_raid_2_finished
+			has_global_flag = mem_vazurans_raid_3_finished
+			has_global_flag = mem_vazurans_raid_4_finished
+			has_global_flag = mem_vazurans_raid_5_finished
+		}
+		any_ambient_object = {
+			has_ambient_object_flag = mem_vazurans_rift
+		}
+	}
+	
+	immediate = {
+		IF = {
+			limit = {
+				any_ambient_object = {
+					has_ambient_object_flag = mem_vazurans_rift_1
+				}
+				has_global_flag = mem_vazurans_raid_1_finished
+				NOT = {
+					any_country = {
+						any_owned_fleet = {
+							has_fleet_flag = mem_vazurans_fleet_1
+						}
+					}
+				}
+			}
+			random_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_vazurans_rift_1
+				}
+				destroy_ambient_object = THIS
+			}
+		}
+		IF = {
+			limit = {
+				any_ambient_object = {
+					has_ambient_object_flag = mem_vazurans_rift_2
+				}
+				has_global_flag = mem_vazurans_raid_2_finished
+				NOT = {
+					any_country = {
+						any_owned_fleet = {
+							has_fleet_flag = mem_vazurans_fleet_2
+						}
+					}
+				}
+			}
+			random_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_vazurans_rift_2
+				}
+				destroy_ambient_object = THIS
+			}
+		}
+		IF = {
+			limit = {
+				any_ambient_object = {
+					has_ambient_object_flag = mem_vazurans_rift_3
+				}
+				has_global_flag = mem_vazurans_raid_3_finished
+				NOT = {
+					any_country = {
+						any_owned_fleet = {
+							has_fleet_flag = mem_vazurans_fleet_3
+						}
+					}
+				}
+			}
+			random_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_vazurans_rift_3
+				}
+				destroy_ambient_object = THIS
+			}
+		}
+		IF = {
+			limit = {
+				any_ambient_object = {
+					has_ambient_object_flag = mem_vazurans_rift_4
+				}
+				has_global_flag = mem_vazurans_raid_4_finished
+				NOT = {
+					any_country = {
+						any_owned_fleet = {
+							has_fleet_flag = mem_vazurans_fleet_4
+						}
+					}
+				}
+			}
+			random_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_vazurans_rift_4
+				}
+				destroy_ambient_object = THIS
+			}
+		}
+		IF = {
+			limit = {
+				any_ambient_object = {
+					has_ambient_object_flag = mem_vazurans_rift_5
+				}
+				has_global_flag = mem_vazurans_raid_5_finished
+				NOT = {
+					any_country = {
+						any_owned_fleet = {
+							has_fleet_flag = mem_vazurans_fleet_5
+						}
+					}
+				}
+			}
+			random_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_vazurans_rift_5
+				}
+				destroy_ambient_object = THIS
+			}
+		}
+	}
+}
+
+# Triggers event when ship enters a system
+# Scope = Ship
+# From = System
+# FromFrom = Country
+ship_event = {
+	id = mem_vazurans.200
+	title = mem_vazurans.200.name
+	desc = { # haven't seen anything vazuran related so far
+		text = mem_vazurans.200a.desc
+		trigger = {
+			FromFrom = {
+				NOT = {
+					has_country_flag = mem_vazuran_destroyed_planet_found
+				}
+			}
+		}
+	}
+	desc = { # only seen another destroyed planet so far
+		text = mem_vazurans.200b.desc
+		trigger = {
+			FromFrom = {
+				NOT = {
+					has_country_flag = mem_vazurans_met
+				}
+				has_country_flag = mem_vazuran_destroyed_planet_found
+			}
+		}
+	}
+	desc = { # already met the vazurans and seen a destroyed planet
+		text = mem_vazurans.200c.desc
+		trigger = {
+			FromFrom = {
+				has_country_flag = mem_vazurans_met
+				has_country_flag = mem_vazuran_destroyed_planet_found
+			}
+		}
+	}
+	location = FROM
+	
+	picture = GFX_evt_shattered_planet
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		FromFrom = {
+			is_ai = no
+		}
+		From = {
+			has_star_flag = mem_vazuran_destroyed_planet_system
+		}
+	}
+	
+	immediate = {
+		From = {
+			remove_star_flag = mem_vazuran_destroyed_planet_system
+		}
+	}
+	
+	option = {
+		name = WORRYING
+		IF = {
+			limit = {
+				FromFrom = {
+					NOT = {
+						has_country_flag = mem_vazuran_destroyed_planet_found
+					}
+				}
+			}
+			solar_system = {
+				random_system_planet = {
+					limit = {
+						has_planet_flag = mem_vazuran_destroyed_planet
+					}
+					enable_special_project = {
+						name = MEM_VAZURANS_BROKEN_PLANET_INVESTIGATION
+						location = this
+						owner = root.owner
+					}
+				}
+			}
+			FromFrom = {
+				set_country_flag = mem_vazuran_destroyed_planet_found
+			}
+		}
+	}
+}
+
+# Finished Project on first broken world
+ship_event = {
+	id = mem_vazurans.201
+	title = mem_vazurans.201.name
+	desc = {
+		text = mem_vazurans.201a.desc
+		trigger = {
+			owner = {
+				NOT = {
+					has_country_flag = mem_vazurans_met
+				}
+			}
+		}
+	}
+	desc = {
+		text = mem_vazurans.201b.desc
+		trigger = {
+			owner = {
+				has_country_flag = mem_vazurans_met
+			}
+		}
+	}
+	picture = GFX_evt_shattered_planet
+	show_sound = event_scanner
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_vazurans.201.a
+	}
+}
+
+# Finished Anomaly Version 1
+ship_event = {
+	id = mem_vazurans.202
+	title = mem_vazurans.202.name
+	desc = mem_vazurans.202.desc
+	picture = GFX_evt_fleet_from_surface
+	show_sound = event_ship_bridge
+	location = FROM
+	
+	is_triggered_only = yes
+			
+	immediate = {
+		From = { 
+			clear_deposits = yes
+		}
+	}
+
+	option = {
+		name = WORRYING
+		hidden_effect = {
+			From = {
+				add_deposit = d_engineering_4
+			}
+		}
+	}
+}
+
+# Finished Anomaly Version 2
+ship_event = {
+	id = mem_vazurans.203
+	title = mem_vazurans.203.name
+	desc = {
+		text = mem_vazurans.203.desc
+		trigger = {
+			NOT = {
+				owner = { has_ethic = ethic_gestalt_consciousness }
+			}
+		}
+	}
+	desc = {
+		text = mem_vazurans.203.desc.gestalt
+		trigger = {
+			owner = { has_ethic = ethic_gestalt_consciousness }
+		}
+	}
+
+	picture = GFX_evt_mem_big_asteroid
+	show_sound = event_ship_bridge
+	location = FROM
+	
+	is_triggered_only = yes
+			
+	immediate = {
+		From = { 
+			clear_deposits = yes
+		}
+	}
+
+	option = {
+		name = WORRYING
+		hidden_effect = {
+			From = {
+				add_deposit = d_engineering_4
+			}
+		}
+	}
+}
+
+# Finished Anomaly Version 3
+ship_event = {
+	id = mem_vazurans.204
+	title = mem_vazurans.204.name
+	desc = mem_vazurans.204.desc
+	picture = GFX_evt_mem_apocalypse
+	show_sound = event_ship_bridge
+	location = FROM
+	
+	is_triggered_only = yes
+			
+	immediate = {
+		From = { 
+			clear_deposits = yes
+		}
+	}
+
+	option = {
+		name = WORRYING
+		leader = {
+			add_trait = leader_trait_scientist_psionic
+			add_trait = leader_trait_expertise_psionics
+		}
+		hidden_effect = {
+			From = {
+				add_deposit = d_society_4
+			}
+		}
+	}
+}
+
+# Finished Anomaly Version 4
+ship_event = {
+	id = mem_vazurans.205
+	title = mem_vazurans.205.name
+	desc = mem_vazurans.205.desc
+	picture = GFX_evt_satellite_in_orbit
+	show_sound = event_ship_bridge
+	location = FROM
+	
+	is_triggered_only = yes
+			
+	option = {
+		name = mem_vazurans.205.a
+		enable_special_project = {
+			name = MEM_VAZURANS_ANOMALY_PLANET_INVESTIGATION
+			location = FROM
+			owner = root.owner
+		}
+	}
+}
+
+# Finished Anomaly Version 4 Project
+ship_event = {
+	id = mem_vazurans.206
+	title = mem_vazurans.206.name
+	desc = mem_vazurans.206.desc
+	picture = GFX_evt_satellite_in_orbit
+	show_sound = event_ship_bridge
+	location = ROOT
+	
+	is_triggered_only = yes
+			
+	immediate = {
+	}
+
+	option = {
+		name = mem_vazurans.206.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+	}
+}
+
+# Finished Planet defense project
+country_event = {
+	id = mem_vazurans.240
+	title = mem_vazurans.240.name
+	desc = mem_vazurans.240.desc
+	picture = GFX_evt_physics_research
+	show_sound = event_laboratory_sound
+
+	is_triggered_only = yes
+
+	immediate = {
+		add_research_option = tech_planetary_shield_generator
+		add_tech_progress = {
+			tech = tech_planetary_shield_generator
+			progress = 0.25
+		}
+	}
+	option = {
+		name = mem_vazurans.240.a
+		IF = {
+			limit = {
+				NOT = {
+					has_technology = tech_planetary_shield_generator
+				}
+			}
+			add_research_option = tech_planetary_shield_generator
+			add_tech_progress = {
+				tech = tech_planetary_shield_generator
+				progress = 0.25
+			}
+		}
+		ELSE = {
+			add_research_option = mem_tech_planetary_shield_generator_heavy
+		}		
+	}
+}
+
+# Damper field story chain
+country_event = {
+	id = mem_vazurans.250
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		NOR = {
+			has_global_flag = mem_vazurans_disabled
+			has_global_flag = mem_vazurans_finished
+		}
+	}
+	immediate = {
+		random_list = {
+			1 = {
+				random_planet_within_border = {
+					limit = {
+						is_colony = no
+						is_capital = no
+						is_asteroid = no
+					}
+					set_planet_flag = mem_vazurans_damper_field_planet
+				}
+			}
+			1 = {
+				random_planet_within_border = {
+					limit = {
+						is_colony = no
+						is_asteroid = yes
+						has_deposit = no
+					}
+					set_planet_flag = mem_vazurans_damper_field_asteroid
+				}
+			}
+			1 = {}
+		}
+		IF = {
+			limit = {
+				any_planet_within_border = {
+					has_planet_flag = mem_vazurans_damper_field_planet
+				}
+			}
+			random_planet_within_border = {
+				limit = {
+					has_planet_flag = mem_vazurans_damper_field_planet
+				}
+				planet_event = { id = mem_vazurans.251 }
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				any_planet_within_border = {
+					has_planet_flag = mem_vazurans_damper_field_asteroid
+				}
+			}
+			random_planet_within_border = {
+				limit = {
+					has_planet_flag = mem_vazurans_damper_field_asteroid
+				}
+				planet_event = { id = mem_vazurans.253 }
+			}
+		}
+		ELSE = {
+			country_event = { id = mem_vazurans.255 }
+		}
+	}
+}
+
+# Damper field anomaly 1 gets spawned
+planet_event = {
+	id = mem_vazurans.251
+	title = mem_vazurans.251.name
+	desc = {
+		text = mem_vazurans.251.desc
+		trigger = {
+			NOT = {
+				owner = { has_ethic = ethic_gestalt_consciousness }
+			}
+		}
+	}
+	desc = {
+		text = mem_vazurans.251.desc.gestalt
+		trigger = {
+			owner = { has_ethic = ethic_gestalt_consciousness }
+		}
+	}
+	picture = GFX_evt_mining_operations
+	show_sound = event_administrative_work
+	location = ROOT
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_vazurans.251.a
+		add_anomaly = mem_vazurans_category_3
+	}
+}
+
+# anomaly finished
+ship_event = {
+	id = mem_vazurans.252
+	title = mem_vazurans.252.name
+	desc = {
+		text = mem_vazurans.252.desc
+		trigger = {
+			NOT = {
+				owner = { has_ethic = ethic_gestalt_consciousness }
+			}
+		}
+	}
+	desc = {
+		text = mem_vazurans.252.desc.gestalt
+		trigger = {
+			owner = { has_ethic = ethic_gestalt_consciousness }
+		}
+	}
+	picture = GFX_evt_mem_horror_corridor
+	show_sound = event_ship_bridge
+	location = FROM
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_vazurans.252.a
+		owner = {
+			capital_scope = {
+				enable_special_project = {
+					name = MEM_VAZURANS_DAMPER_FIELD_GENERATOR_INVESTIGATION
+					location = this
+					owner = root.owner
+				}
+			}
+		}
+	}
+}
+
+# Damper field anomaly 2 gets spawned
+planet_event = {
+	id = mem_vazurans.253
+	title = mem_vazurans.253.name
+	desc = {
+		text = mem_vazurans.253.desc
+		trigger = {
+			NOT = {
+				owner = { has_ethic = ethic_gestalt_consciousness }
+			}
+		}
+	}
+	desc = {
+		text = mem_vazurans.253.desc.gestalt
+		trigger = {
+			owner = { has_ethic = ethic_gestalt_consciousness }
+		}
+	}
+	picture = GFX_evt_mining_station
+	show_sound = event_administrative_work
+	location = ROOT
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_vazurans.253.a
+		add_anomaly = mem_vazurans_category_4
+	}
+}
+
+# anomaly finished
+ship_event = {
+	id = mem_vazurans.254
+	title = mem_vazurans.254.name
+	desc = {
+		text = mem_vazurans.254.desc
+		trigger = {
+			NOT = {
+				owner = { has_ethic = ethic_gestalt_consciousness }
+			}
+		}
+	}
+	desc = {
+		text = mem_vazurans.254.desc.gestalt
+		trigger = {
+			owner = { has_ethic = ethic_gestalt_consciousness }
+		}
+	}
+	picture = GFX_evt_mining_station
+	show_sound = event_ship_bridge
+	location = FROM
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_vazurans.254.a
+		owner = {
+			capital_scope = {
+				enable_special_project = {
+					name = MEM_VAZURANS_DAMPER_FIELD_GENERATOR_INVESTIGATION
+					location = this
+					owner = root.owner
+				}
+			}
+		}
+	}
+}
+
+# Drifting vazuran wreckage found in deep space
+country_event = {
+	id = mem_vazurans.255
+	title = mem_vazurans.255.name
+	desc = mem_vazurans.255.desc
+	picture = GFX_evt_space_debris
+	show_sound = event_ship_bridge
+	location = event_target:mem_vazurans_wreckage
+	is_triggered_only = yes
+
+	immediate = {
+		random_system_within_border = {
+			save_event_target_as = mem_vazurans_wreckage_system
+			random_system_planet = {
+				limit = {
+					is_star = yes
+				}
+				create_ambient_object = { # TODO exchange that later with a custom made one from frog
+					type = "mem_vazuran_wreckage_object"
+				}
+				last_created_ambient_object = {
+					set_location = {
+						target = prev
+						distance = 250
+						angle = random
+					}
+					set_ambient_object_flag = mem_vazurans_wreckage
+					save_event_target_as = mem_vazurans_wreckage
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_vazurans.255.a
+		enable_special_project = {
+			name = MEM_VAZURANS_WRECKAGE_INVESTIGATION
+			location = event_target:mem_vazurans_wreckage
+			owner = root
+		}
+	}
+}
+
+# wreckage investigation finished
+ship_event = {
+	id = mem_vazurans.256
+	title = mem_vazurans.256.name
+	desc = {
+		text = mem_vazurans.256.desc
+		trigger = {
+			NOT = {
+				owner = { has_ethic = ethic_gestalt_consciousness }
+			}
+		}
+	}
+	desc = {
+		text = mem_vazurans.256.desc.gestalt
+		trigger = {
+			owner = { has_ethic = ethic_gestalt_consciousness }
+		}
+	}
+	picture = GFX_evt_space_debris
+	show_sound = event_ship_bridge
+	location = FROM
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_vazurans.256.a
+		owner = {
+			capital_scope = {
+				enable_special_project = {
+					name = MEM_VAZURANS_DAMPER_FIELD_GENERATOR_INVESTIGATION
+					location = this
+					owner = root.owner
+				}
+			}
+		}
+	}
+}
+
+#Damper field project finished
+country_event = {
+	id = mem_vazurans.260
+	title = mem_vazurans.260.name
+	desc = mem_vazurans.260.desc
+	picture = GFX_evt_mem_strange_apparatus
+	show_sound = event_ship_bridge
+	is_triggered_only = yes
+
+	option = {
+		name = mem_vazurans.260.a
+		add_modifier = {
+			modifier = mem_vazurans_damper_field_exploit
+			days = -1
+		}
+		add_research_option = tech_mem_vazuran_damper_field_bypass 
+	}
+}
+
+# marking player with damper field bypass as retaliation target
+country_event = {
+	id = mem_vazurans.270
+	hide_window = yes
+	trigger =  {
+		NOR = {
+			has_global_flag = mem_vazurans_disabled
+			has_global_flag = mem_vazurans_finished
+			has_country_flag = mem_vazurans_damer_field_bypass_researched
+		}
+		has_technology = tech_mem_vazuran_damper_field_bypass
+		is_country_type = default
+		is_ai = no
+		NOT = {
+			any_country = {
+				has_country_flag = mem_vazurans_target_1
+			}
+		}
+	}
+	mean_time_to_happen = {
+		months = 24
+	}
+	immediate = {
+		set_country_flag = mem_vazurans_damer_field_bypass_researched
+		set_country_flag = mem_vazurans_target_1
+		set_country_flag = mem_vazurans_retaliation
+	}
+}
+
+# Setting flag for planetary shielf tech aquired to prevent planetary defense quest on planet raid
+country_event = {
+	id = mem_vazurans.271
+	hide_window = yes
+	trigger =  {
+		NOT = {
+			has_country_flag = mem_vazuran_defense_plan
+		}
+		has_technology = tech_planetary_shield_generator
+		is_country_type = default
+		is_ai = no
+	}
+	mean_time_to_happen = {
+		months = 2
+	}
+	immediate = {
+		set_country_flag = mem_vazuran_defense_plan
+	}
+}
+
+# Reaching Vazuran Homesystem
+# Triggers event when ship enters a system
+# Scope = Ship
+# From = System
+# FromFrom = Country
+ship_event = {
+	id = mem_vazurans.280
+	title = mem_vazurans.280.name
+	desc = mem_vazurans.280.desc
+	picture = GFX_evt_mem_vazuran_system
+	show_sound = event_scanner
+	location = From
+
+	is_triggered_only = yes
+
+	trigger = {
+		From = {
+			has_star_flag = mem_vazuran_homesystem
+		}
+		NOR = {
+			has_global_flag = mem_vazurans_finished
+			owner = {
+				has_country_flag = mem_vazurans_home_system_visited
+			}
+		}
+	}
+
+	immediate = {
+		owner = {
+			set_country_flag = mem_vazurans_home_system_visited
+		}
+	}
+
+	option = {
+		name = mem_vazurans.280.a
+	}
+}
+
+# Defeated Vazuran Homefleet
+# This = owner of fleet 1 (combatant)
+# From = owner of fleet 2 (destroyed)
+# FromFrom = fleet 1
+# FromFromFrom = fleet 2
+country_event = {
+	id = mem_vazurans.281
+	title = mem_vazurans.281.name
+	desc = mem_vazurans.281.desc
+	picture = GFX_evt_mem_space_battle
+	show_sound = event_space_battle
+	location = FromFrom
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		FROMFROMFROM = {
+			has_fleet_flag = mem_vazurans_home_fleet
+		}
+	}
+
+	immediate = {
+		set_country_flag = mem_vazuran_victor
+		set_global_flag = mem_vazurans_finished
+		random_system = {
+			limit = {
+				has_star_flag = mem_vazuran_homesystem
+			}
+			starbase = {
+				set_owner = root
+			}
+		}
+		every_country = {
+			limit = {
+				is_ai = no
+				NOT = {
+					has_country_flag = mem_vazuran_victor
+				}
+			}
+			country_event = { id = mem_vazurans.30 days = 20 random = 10 }
+		}
+	}
+
+	option = {
+		name = mem_vazurans.281
+	}
+}
+
+# Invaded Vazuran HQ
+# Triggers country_event for the attacker upon victory
+# (Before controller is switched)
+# This = country, leader attacker
+# From = country, planet owner
+# FromFrom = planet
+country_event = {
+	id = mem_vazurans.282
+	title = mem_vazurans.282.name
+	desc = {
+		text = mem_vazurans.282.desc
+		trigger = {
+			NOT = {
+				has_ethic = ethic_gestalt_consciousness
+			}
+		}
+	}
+	desc = {
+		text = mem_vazurans.282.desc.gestalt
+		trigger = {
+			has_ethic = ethic_gestalt_consciousness
+		}
+	}
+	picture = GFX_evt_mem_victory
+	show_sound = event_ground_battle
+
+	is_triggered_only = yes
+
+	trigger = {
+		From = {
+			is_same_value = event_target:mem_vazurans_country
+		}
+	}
+
+	immediate = {
+		set_country_flag = mem_vazuran_invader
+		FromFrom = {
+			add_deposit = d_ruined_arcology
+			add_deposit = d_ruined_arcology
+			add_deposit = d_ruined_arcology
+			add_deposit = d_ruined_arcology
+			add_deposit = d_ruined_arcology
+			add_deposit = d_ruined_arcology
+			add_deposit = d_ruined_arcology
+			owner = {
+				every_owned_pop = {
+					kill_pop = yes
+				}
+			}
+		}
+		every_country = {
+			limit = {
+				is_ai = no
+				NOT = {
+					has_country_flag = mem_vazuran_invader
+				}
+			}
+			country_event = { id = mem_vazurans.31 days = 20 random = 10 }
+		}
+	}
+
+	option = {
+		name = mem_vazurans.282.a
+		add_research_option = tech_mem_vazuran_xentronium_armor
+		add_tech_progress = {
+			tech = tech_mem_vazuran_xentronium_armor
+			progress = 0.1
+		}
+		add_research_option = tech_mem_vazuran_xentronium_rounds
+		hidden_effect = {
+			set_country_flag = mem_ended_vazuran_menace
+			every_country = {
+				limit = {
+					OR = {
+						is_country_type = default
+						is_country_type = fallen_empire
+						is_country_type = awakened_fallen_empire
+					}
+					NOT = { #should do the same as the above mentioned thing but does not exclude other human players
+						is_same_value = ROOT
+					}
+					has_communications = ROOT
+				}
+				add_opinion_modifier = {
+					who = ROOT
+					modifier = mem_ended_vazuran_menace
+				}
+			}
+		}
+	}
+}
+
+# Happens if an empire which defeated the vazurans establishes communications with a new empire
+# Executed right before a country has established communications with another country
+# This = Country which established the communications
+# From = Country which communications were established with
+country_event = {
+	id = mem_vazurans.283
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		OR = {
+			has_country_flag = mem_ended_vazuran_menace
+			FROM = {
+				has_country_flag = mem_ended_vazuran_menace
+			}
+		}
+	}
+	
+	immediate = {
+		IF = {
+			limit = {
+				has_country_flag = mem_ended_vazuran_menace
+				FROM = {
+					OR = {
+						is_country_type = default
+						is_country_type = fallen_empire
+						is_country_type = awakened_fallen_empire
+					}
+				}
+			}
+			FROM = {
+				add_opinion_modifier = {
+					who = ROOT
+					modifier = mem_ended_vazuran_menace
+				}
+			}
+		}
+		IF = {
+			limit = {
+				FROM = {
+					has_country_flag = mem_ended_vazuran_menace
+				}
+				OR = {
+					is_country_type = default
+					is_country_type = fallen_empire
+					is_country_type = awakened_fallen_empire
+				}
+			}
+			add_opinion_modifier = {
+				who = FROM
+				modifier = mem_ended_vazuran_menace
+			}
+		}
+	}
+}
+
+# fix bugged starbase
+country_event = {
+	id = mem_vazurans.284
+	hide_window = yes
+
+	is_triggered_only = yes
+	
+	immediate = {
+		random_system = {
+			limit = {
+				has_star_flag = mem_vazuran_homesystem
+			}
+			starbase = {
+				set_owner = root
+			}
+		}
+	}
+}
+
+# Extermination of an AI empire starts by decade pulse check
+country_event = {
+	id = mem_vazurans.300
+	hide_window = yes
+	fire_only_once = yes
+	is_triggered_only = yes
+
+	trigger = {
+		NOR = {
+			has_global_flag = mem_vazurans_extermination
+			has_global_flag = mem_vazurans_disabled
+			has_global_flag = mem_vazurans_finished
+		}
+		has_global_flag = mem_vazurans_enabled
+	}
+	
+
+	immediate = {
+		event_target:mem_vazurans_country = {
+			set_faction_hostility = {
+				target = root
+				set_hostile = yes
+				set_neutral = no
+				set_friendly = no
+			}
+		}
+		set_global_flag = mem_vazurans_extermination
+		set_country_flag = mem_vazurans_extermination_target
+		save_global_event_target_as = mem_vazurans_extermination_target
+		random_owned_planet = {
+			limit = {
+				OR = {
+					is_capital = yes
+					is_colony = yes
+				}
+			}
+			set_planet_flag = mem_vazurans_extermination_target
+			solar_system = {
+				random_system_planet = {
+					limit = {
+						is_star = yes
+					}
+					THIS = {
+						save_event_target_as = mem_vazurans_extermination_target_sun
+					}
+				}
+				create_ambient_object = { # TODO exchange that later with a custom made one from frog
+					type = "mem_vazuran_wormhole_big_object"
+				}
+				random_system_ambient_object = {
+					limit = { is_same_value = last_created_ambient_object }
+					set_location = {
+						target = event_target:mem_vazurans_extermination_target_sun
+						distance = 150
+						angle = random
+					}
+					set_ambient_object_flag = mem_vazurans_extermination_rift
+					save_event_target_as = mem_vazurans_extermination_rift
+				}
+			}
+		}
+		country_event = { id = mem_vazurans.301 days = 5 }
+		every_country = {
+			limit = {
+				is_ai = no
+			}
+			country_event = { id = mem_vazurans.306 days = 90 }
+		}
+	}
+}
+
+# Rift opens and extermination fleet spawns
+country_event = {
+	id = mem_vazurans.301
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		create_mem_vazuran_country = yes
+		random_country = {
+			limit = {
+				has_country_flag = mem_vazurans_country
+			}
+			save_global_event_target_as = mem_vazurans_country
+			IF = {
+				limit = {
+					NOT = {
+						has_communications = ROOT
+					}
+				}
+				establish_communications_no_message = ROOT
+			}	
+		}
+		random_country = { # establish communications with all other empires
+			limit = {
+				has_country_flag = mem_vazurans_country
+			}
+			country_event = { id = mem_vazurans.10 days = 1 }
+		}
+		random_system = {
+			limit = {
+				any_system_ambient_object = {
+					has_mem_vazurans_extermination_rift = yes
+				}
+			}
+			random_system_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_vazurans_extermination_rift
+				}
+				create_mem_vazuran_extermination_fleet = yes
+				last_created_fleet = { # fleet flag for bombarding event
+					set_fleet_flag = mem_vazurans_extermination_fleet
+					set_fleet_stance = aggressive
+					set_aggro_range_measure_from = self
+					set_aggro_range = 150
+					fleet_event = { id = mem_vazurans.302 days = 1 }
+				}
+			}
+		}
+	}
+}
+
+# tells the raiding or extermination fleet to move to the target planet to start bombarding
+fleet_event = {
+	id = mem_vazurans.302
+	hide_window = yes
+	
+	is_triggered_only = yes
+
+	immediate = {
+		queue_actions = {
+			repeat	= {
+				find_closest_planet  = {
+					trigger = {
+						id = mem_vazurans_extermination_action.1
+						has_planet_flag = mem_vazurans_extermination_target
+					}
+					found_planet = {
+						move_to = this
+						orbit_planet = this
+					}
+				}
+				wait = {
+					duration = 120
+				}
+				effect = {
+					id = mem_vazurans_extermination_action.2
+					solar_system = {
+						random_system_planet = { 
+							limit = {
+								has_planet_flag = mem_vazurans_extermination_target
+							}
+							planet_event = { id = mem_vazurans.303 }
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+# Planet has been bombarded and now colony gets destroyed
+planet_event = {
+	id = mem_vazurans.303
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		solar_system = {
+            any_ship_in_system = { 
+                fleet = {
+                    exists = this
+					has_fleet_flag = mem_vazurans_extermination_fleet
+                    orbit = {
+                        is_same_value = root
+                    }
+                }
+            }
+        }
+	}
+	
+	immediate = {
+		IF = {
+			limit = {
+				habitable_planet = yes
+			}
+			random_list = {
+				3 = {
+					mem_vazurans_planet_raiding_effect_2 = yes
+				}
+				2 = {
+					mem_vazurans_planet_raiding_effect_3 = yes
+				}
+			}
+		}
+		ELSE = {
+			mem_vazurans_planet_raiding_effect_2 = yes
+		}
+		remove_planet_flag = mem_vazurans_extermination_target
+		IF = {
+			limit = {
+				solar_system = {
+					any_system_planet = {
+						has_owner = yes
+						owner = {
+							has_country_flag = mem_vazurans_extermination_target
+						}
+						OR = {
+							is_capital = yes
+							is_colony = yes
+						}
+					}
+				}
+			}
+			solar_system = {
+				random_system_planet = {
+					limit = {
+						has_owner = yes
+						owner = {
+							has_country_flag = mem_vazurans_extermination_target
+						}
+						OR = {
+							is_capital = yes
+							is_colony = yes
+						}
+					}
+					set_planet_flag = mem_vazurans_extermination_target
+				}
+				random_fleet_in_system = {
+					limit = {
+						exists = owner
+						owner = { is_country_type = mem_vazurans }
+						has_fleet_flag = mem_vazurans_extermination_fleet
+					}
+					fleet_event = { id = mem_vazurans.302 days = 1 }
+				}
+			}
+		}
+		ELSE = {
+			solar_system = {
+				random_fleet_in_system = {
+					limit = {
+						exists = owner
+						owner = { is_country_type = mem_vazurans }
+						has_fleet_flag = mem_vazurans_extermination_fleet
+					}
+					fleet_event = { id = mem_vazurans.304 days = 1 }
+				}
+			}
+			IF = {
+				limit = {
+					any_country = {
+						has_country_flag = mem_vazurans_extermination_target
+					}
+				}
+				random_country = {
+					limit = {
+						has_country_flag = mem_vazurans_extermination_target
+					}
+					country_event = { id = mem_vazurans.305 days = 90 }
+					random_owned_planet = {
+						limit = {
+							OR = {
+								is_capital = yes
+								is_colony = yes
+							}
+						}
+						set_planet_flag = mem_vazurans_extermination_target
+					}
+				}
+			}
+		}
+	}
+}
+
+# sending extermination fleet home to the rift and let them vanish
+fleet_event = {
+	id = mem_vazurans.304
+	hide_window = yes
+	
+	is_triggered_only = yes
+
+	immediate = {
+		orbit = {
+			solar_system = {
+				random_system_ambient_object = {
+					limit = {
+						has_ambient_object_flag = mem_vazurans_extermination_rift
+					}
+					save_event_target_as = mem_vazurans_extermination_rift
+				}
+			}
+		}
+		clear_fleet_actions = ROOT
+		queue_actions = {
+			move_to = event_target:mem_vazurans_extermination_rift
+			effect = {
+				id = mem_vazurans_action.4
+				delete_fleet  = this
+			}
+		}
+	}
+}
+
+# next target system gets a Portal
+country_event = {
+	id = mem_vazurans.305
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		random_system = {
+			limit = {
+				any_system_ambient_object = {
+					has_mem_vazurans_extermination_rift = yes
+				}
+			}
+			random_system_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_vazurans_extermination_rift
+				}
+				destroy_ambient_object = THIS
+			}
+		}
+		IF = {
+			limit = {
+				NOR = {
+					has_global_flag = mem_vazurans_disabled
+					has_global_flag = mem_vazurans_finished
+				}
+				any_owned_planet = {
+					has_planet_flag = mem_vazurans_extermination_target
+				}
+			}
+			random_owned_planet = {
+				limit = {
+					has_planet_flag = mem_vazurans_extermination_target
+				}
+				solar_system = {
+					random_system_planet = {
+						limit = {
+							is_star = yes
+						}
+						THIS = {
+							save_event_target_as = mem_vazurans_extermination_target_sun
+						}
+					}
+					create_ambient_object = { # TODO exchange that later with a custom made one from frog
+						type = "mem_vazuran_wormhole_big_object"
+					}
+					random_system_ambient_object = {
+						limit = { is_same_value = last_created_ambient_object }
+						set_location = {
+							target = event_target:mem_vazurans_extermination_target_sun
+							distance = 150
+							angle = random
+						}
+						set_ambient_object_flag = mem_vazurans_extermination_rift
+						save_event_target_as = mem_vazurans_extermination_rift
+					}
+				}
+			}
+			country_event = { id = mem_vazurans.301 days = 5 }
+		}
+	}
+}
+
+# Player is informed of Vazurans commiting genocide
+country_event = {
+	id = mem_vazurans.306
+	title = mem_vazurans.306.name
+	desc = mem_vazurans.306.desc
+	picture = GFX_evt_fleet_evil
+	show_sound = event_default
+	location = event_target:mem_vazurans_extermination_target
+
+	is_triggered_only = yes
+
+	option = {
+		name = mem_vazurans.306.a
+	}	
+}
+
+# spawn testsystem
+country_event = {
+	id = mem_vazurans.93
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		capital_scope = {
+			solar_system = {
+				spawn_system = { 
+					min_distance >= 30
+					max_distance <= 50
+					initializer = "mem_vazuran_event_system_01"
+				}
+			}
+		}
+	}
+}
+
+# planet class change test for headquarters habitat
+planet_event = {
+	id = mem_vazurans.94
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		change_pc = pc_mem_vazuran_habitat
+		solar_system = {
+#			spawn_system = { 
+#				min_distance >= 30
+#				max_distance <= 50
+#				initializer = "mem_vazuran_homesystem"
+#				# is_discovered = yes
+#			}
+#			spawn_planet = {
+#				class = "pc_mem_vazuran_habitat"
+#				location = root
+#				orbit_location = yes
+#				orbit_angle_offset = 45
+#				orbit_distance_offset = 9.899
+#				size = 25
+#				has_ring = no
+#				
+#				init_effect = {
+#					set_name = "HABITAT_PLANET_NAME"
+		#				set_planet_entity = {
+		#					entity = "orbital_habitat_entity"
+		#					graphical_culture = fromfrom
+		#				}
+#					surveyed = {
+#						set_surveyed = yes
+#						surveyor = FROM
+#					}
+#					set_all_comms_surveyed = yes
+#					while = {
+#						limit = {
+#							any_tile = { has_blocker = yes }
+#						}
+#						random_tile = {
+#							limit = { has_blocker = yes }
+#							remove_blocker = yes
+#						}
+#					}
+#					set_planet_flag = megastructure
+#					set_planet_flag = habitat
+#				}
+#			}
+#			spawn_megastructure = { 
+#                type = "spy_orb_4" 
+#                location = prev
+#                owner = space_owner
+#            }
+		}
+	}
+}
+
+# spawn testfleet at capital
+country_event = {
+	id = mem_vazurans.95
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		create_country = {
+			name = "The Dark Ones"
+			type = mem_vazurans
+			flag = {
+				icon = {
+					category = "domination"
+					file = "domination_21.dds"
+				}
+				background= {
+					category = "backgrounds"
+					file = "00_solid.dds"
+				}
+				colors={
+					"black"
+					"dark_purple"
+					"null"
+					"null"
+				}
+			}
+		}
+		last_created_country = {
+			set_country_flag = mem_vazurans_country
+			set_graphical_culture = fallen_empire_04
+			save_global_event_target_as = mem_vazurans_country
+			IF = {
+				limit = {
+					NOT = {
+						has_communications = ROOT
+					}
+				}
+				establish_communications_no_message = ROOT
+			}
+		}
+		capital_scope = {
+			create_mem_vazuran_retaliation_fleet = yes
+		}
+	}
+}
+
+# Test Event deleting flagged objects
+country_event = {
+	id = mem_vazurans.96
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_ambient_object = {
+			limit = {
+				has_ambient_object_flag = mem_vazurans_test
+			}
+			destroy_ambient_object = THIS
+		}
+	}
+}
+
+# Test Event for the wormhole station
+country_event = {
+	id = mem_vazurans.97
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_owned_planet = {
+			limit = {
+				is_capital = yes
+			}
+			solar_system = {
+				random_system_planet = {
+					limit = {
+						is_star = yes
+					}
+					create_ambient_object = { # TODO exchange that later with a custom made one from frog
+						type = "mem_vazuran_wormhole_station_object"
+					}
+					last_created_ambient_object = {
+						set_location = {
+							target = prev
+							distance = 250
+							angle = random
+						}
+						set_ambient_object_flag = mem_vazurans_test
+						save_event_target_as = mem_vazurans_test
+					}
+				}
+			}
+		}
+	}
+}
+
+# Test Event for the Rift
+country_event = {
+	id = mem_vazurans.98
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_owned_planet = {
+			limit = {
+				is_capital = yes
+			}
+			solar_system = {
+				random_system_planet = {
+					limit = {
+						is_star = yes
+					}
+					create_ambient_object = { # TODO exchange that later with a custom made one from frog
+						type = "mem_vazuran_wormhole_small_object"
+					}
+					last_created_ambient_object = {
+						set_location = {
+							target = prev
+							distance = 250
+							angle = random
+						}
+						set_ambient_object_flag = mem_vazurans_test
+						save_event_target_as = mem_vazurans_test
+					}
+					create_ambient_object = { # TODO exchange that later with a custom made one from frog
+						type = "mem_vazuran_wormhole_big_object"
+					}
+					last_created_ambient_object = {
+						set_location = {
+							target = prev
+							distance = 250
+							angle = random
+						}
+						set_ambient_object_flag = mem_vazurans_test
+						save_event_target_as = mem_vazurans_test
+					}
+					create_ambient_object = { # TODO exchange that later with a custom made one from frog
+						type = "mem_vazuran_wormhole_station_object"
+					}
+					last_created_ambient_object = {
+						set_location = {
+							target = prev
+							distance = 250
+							angle = random
+						}
+						set_ambient_object_flag = mem_vazurans_test
+						save_event_target_as = mem_vazurans_test
+					}
+				}
+			}
+		}
+	}
+}
+
+#Test Event to show Targets
+#country_event = {
+#	id = mem_vazurans.99
+#	title = "vazuran Test"
+#	desc = "All flags have been set"
+#	picture = GFX_evt_mem_space_battle
+#	
+#	is_triggered_only = yes
+#	
+#	immediate = {
+#		remove_point_of_interest = mem_vazurans_target.1
+#		remove_point_of_interest = mem_vazurans_target.2
+#		remove_point_of_interest = mem_vazurans_target.3
+#		remove_point_of_interest = mem_vazurans_target.4
+#		remove_point_of_interest = mem_vazurans_target.5
+#		random_country = {
+#			limit = {
+#				has_country_flag = mem_vazurans_target_1
+#			}
+#			save_event_target_as = mem_vazurans_target_1
+#		}		
+#		create_point_of_interest = {
+#			id = mem_vazurans_target.1
+#			name = "mem_vazurans_target_1"
+#			desc = "mem_vazurans_target_1_desc"
+#			location = event_target:mem_vazurans_target_1
+#		}
+#		random_country = {
+#			limit = {
+#				has_country_flag = mem_vazurans_target_2
+#			}
+#			save_event_target_as = mem_vazurans_target_2
+#		}		
+#		create_point_of_interest = {
+#			id = mem_vazurans_target.2
+#			name = "mem_vazurans_target_2"
+#			desc = "mem_vazurans_target_2_desc"
+#			location = event_target:mem_vazurans_target_2
+#		}
+#		random_country = {
+#			limit = {
+#				has_country_flag = mem_vazurans_target_3
+#			}
+#			save_event_target_as = mem_vazurans_target_3
+#		}		
+#		create_point_of_interest = {
+#			id = mem_vazurans_target.3
+#			name = "mem_vazurans_target_3"
+#			desc = "mem_vazurans_target_3_desc"
+#			location = event_target:mem_vazurans_target_3
+#		}
+#		random_country = {
+#			limit = {
+#				has_country_flag = mem_vazurans_target_4
+#			}
+#			save_event_target_as = mem_vazurans_target_4
+#		}		
+#		create_point_of_interest = {
+#			id = mem_vazurans_target.4
+#			name = "mem_vazurans_target_4"
+#			desc = "mem_vazurans_target_4_desc"
+#			location = event_target:mem_vazurans_target_4
+#		}
+#		random_country = {
+#			limit = {
+#				has_country_flag = mem_vazurans_target_5
+#			}
+#			save_event_target_as = mem_vazurans_target_5
+#		}		
+#		create_point_of_interest = {
+#			id = mem_vazurans_target.5
+#			name = "mem_vazurans_target_5"
+#			desc = "mem_vazurans_target_5_desc"
+#			location = event_target:mem_vazurans_target_5
+#		}
+#	}
+#	
+#	option = {
+#		name = "OK"
+#	}
+#}

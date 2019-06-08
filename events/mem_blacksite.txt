@@ -1,0 +1,2281 @@
+#Blacksite
+#By ViolentBeetle
+
+namespace = mem_blacksite
+
+@days_for_cycle = 360
+@random_for_cycle = 3600
+
+#Gatekeeper event
+country_event = {
+    id = mem_blacksite.1
+    hide_window = yes
+
+    mean_time_to_happen = {
+        months = 500
+    }
+
+    trigger = {
+        NOR = { 
+            has_global_flag = mem_blacksite_happened 
+            has_country_flag = mem_blacksite_requested
+        }
+        is_ai = no
+        is_country_type = default
+        NOR = { 
+            has_ethic = ethic_gestalt_consciousness
+            has_valid_civic = civic_fanatic_purifiers
+         }
+        years_passed > 10
+        is_at_war = no
+        any_country = {
+            has_established_contact = ROOT
+            is_country_type = fallen_empire
+            OR = {
+                has_ethic = ethic_fanatic_materialist
+                has_ethic = ethic_fanatic_spiritualist
+                has_ethic = ethic_fanatic_xenophile
+            }
+        }
+        any_planet_within_border = {
+            OR = {
+                is_planet_class = pc_barren
+                is_planet_class = pc_barren_cold
+                is_planet_class = pc_toxic
+                is_planet_class = pc_frozen
+            }
+            has_anomaly = no
+            has_owner = no
+            has_deposit = no
+            solar_system = {
+                NOT = {
+                    any_system_planet = {
+                        OR = {
+                            has_owner = yes
+                            is_colonizable = yes
+                        }
+                    }
+                }
+                is_bottleneck_system = no
+            }
+        }
+    }
+
+    immediate = {
+        set_country_flag = mem_blacksite_requested
+        random_list = {
+            65 = { 
+                modifier = {
+                    add = 900
+                    is_ai = yes
+                }
+             }
+            35 = {
+                set_global_flag = mem_blacksite_happened
+                random_planet_within_border = {
+                    limit = {
+                        OR = {
+                            is_planet_class = pc_barren
+                            is_planet_class = pc_barren_cold
+                            is_planet_class = pc_toxic
+                            is_planet_class = pc_frozen
+                        }
+                        has_anomaly = no
+                        has_owner = no
+                        has_deposit = no
+                        solar_system = {
+                            NOT = {
+                                any_system_planet = {
+                                    OR = {
+                                        has_owner = yes
+                                        is_colonizable = yes
+                                    }
+                                }
+                            }
+                            is_bottleneck_system = no
+                        }
+                    }
+                    save_event_target_as = blacksite_planet
+                    set_planet_flag = mem_blacksite_planet
+                }
+                random_country = {
+                    limit = {
+                        has_established_contact = ROOT
+                        is_country_type = fallen_empire
+                        OR = {
+                            has_ethic = ethic_fanatic_materialist
+                            has_ethic = ethic_fanatic_spiritualist
+                            has_ethic = ethic_fanatic_xenophile
+                        }
+                    }
+                    save_event_target_as = blacksite_fallen_empire
+                    set_country_flag = mem_blacksite_fallen_empire
+                }
+                set_country_flag = mem_blacksite_country
+                country_event = { id = mem_blacksite.2 }
+            }
+        }
+    }
+}
+
+#Initial greeting
+country_event = {
+    id = mem_blacksite.2
+    title = mem_blacksite.2.name
+    desc = mem_blacksite.2.desc
+
+    is_triggered_only = yes
+    location = event_target:blacksite_planet
+    diplomatic = yes
+
+    picture_event_data = {
+		portrait = event_target:blacksite_fallen_empire
+		planet_background = event_target:blacksite_fallen_empire
+		graphical_culture = event_target:blacksite_fallen_empire
+		city_level = event_target:blacksite_fallen_empire
+		room = event_target:blacksite_fallen_empire.ruler
+    }
+    
+    #Accept
+    option = {
+        name = mem_blacksite.2.a
+        event_target:blacksite_fallen_empire = {
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_opinion_agreed
+            }
+        }
+        custom_tooltip = mem_blacksite.2.a.tooltip
+        hidden_effect = {
+            event_target:blacksite_planet = {
+                set_name = "NAME_MEM_Blacksite"
+                add_modifier = {
+                    modifier = mem_blacksite_active
+                    days = -1
+                }
+                planet_event = {
+                    id = mem_blacksite.3
+                    days = @days_for_cycle
+                    random = @random_for_cycle
+                }
+                set_planet_flag = mem_blacksite_planet
+            }
+        }
+    }
+
+    #Decline
+    option = {
+        name = mem_blacksite.2.b
+
+        event_target:blacksite_fallen_empire = {
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_opinion_refused
+            }
+        }
+    }
+
+    #Question
+    option = {
+        name = mem_blacksite.2.c
+        response_text = mem_blacksite.2.c.response
+        is_dialog_only = yes
+    }
+}
+
+#Disambig event to tell what happens next
+planet_event = {
+    id = mem_blacksite.3
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        NOT = { has_planet_flag = mem_blacksite_destroyed }
+    }
+
+    immediate = {
+        IF = {
+            limit = {
+                NAND = {
+                    exists = space_owner
+                    space_owner = {
+                        has_country_flag = mem_blacksite_country
+                    }
+                    exists = event_target:blacksite_fallen_empire
+                }
+            }
+            remove_modifier = mem_blacksite_active
+        }
+        ELSE = {
+            FROM = {
+                random_list = {
+                    25 = { #Successful
+                        country_event = { id = mem_blacksite.400 }
+                    }
+                    10 = { #Self-destruct
+                        country_event = { id = mem_blacksite.500 }
+                    }
+                    25 = { #Going dark
+                        country_event = { id = mem_blacksite.600 }
+                    }
+                    15 = { #Infestation
+                        country_event = { id = mem_blacksite.700 }
+                    }
+                    25 = { #Manhunt
+                        country_event = { id = mem_blacksite.800 }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#########################
+#SUCCESSFUL OUTCOME PATH#
+#########################
+
+country_event = {
+    id = mem_blacksite.400
+    title = mem_blacksite.400.name
+    desc = mem_blacksite.400.desc
+
+    is_triggered_only = yes
+    location = event_target:blacksite_planet
+    diplomatic = yes
+
+    picture_event_data = {
+		portrait = event_target:blacksite_fallen_empire
+		planet_background = event_target:blacksite_fallen_empire
+		graphical_culture = event_target:blacksite_fallen_empire
+		city_level = event_target:blacksite_fallen_empire
+		room = event_target:blacksite_fallen_empire.ruler
+    }
+
+    option = {
+        name = mem_blacksite.400.a
+
+        add_monthly_resource_mult = {
+            resource = society_research
+            value = @tier3researchreward
+            min = @tier3researchmin
+            max = @tier3researchmax
+        }
+        add_monthly_resource_mult = {
+            resource = physics_research
+            value = @tier3researchreward
+            min = @tier3researchmin
+            max = @tier3researchmax
+        }
+        add_monthly_resource_mult = {
+            resource = engineering_research
+            value = @tier3researchreward
+            min = @tier3researchmin
+            max = @tier3researchmax
+        }
+
+        event_target:blacksite_planet = {
+            remove_modifier = mem_blacksite_active
+            remove_planet_flag = mem_blacksite_planet
+        }
+    }
+}
+
+####################
+#SELF-DESTRUCT PATH#
+####################
+
+#Actual explosion
+country_event = {
+    id = mem_blacksite.500
+    title = mem_blacksite.500.name
+    desc = mem_blacksite.500.desc
+
+    picture = GFX_evt_exploding_planet
+    location = event_target:blacksite_planet
+    show_sound = event_super_explosion
+
+    is_triggered_only = yes
+
+    immediate = {
+        event_target:blacksite_planet = {
+            change_pc = pc_shattered
+            remove_modifier = mem_blacksite_active
+            remove_planet_flag = mem_blacksite_planet
+            add_modifier = {
+                modifier = mem_blacksite_debris
+                days = -1
+            }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.500.a
+        custom_tooltip = mem_blacksite.500.a.tooltip
+
+        event_target:blacksite_planet = {
+            set_deposit = d_physics_2
+            add_deposit = d_engineering_2
+        }
+        hidden_effect = {
+            country_event = { id = mem_blacksite.501 days = 30 }
+        }
+    }
+}
+
+#Fallen Empire comms
+country_event = {
+    id = mem_blacksite.501
+    title = mem_blacksite.501.name
+    desc = mem_blacksite.501.desc
+
+    is_triggered_only = yes
+    location = event_target:blacksite_planet
+    diplomatic = yes
+
+    picture_event_data = {
+		portrait = event_target:blacksite_fallen_empire
+		planet_background = event_target:blacksite_fallen_empire
+		graphical_culture = event_target:blacksite_fallen_empire
+		city_level = event_target:blacksite_fallen_empire
+		room = event_target:blacksite_fallen_empire.ruler
+    }
+
+    option = {
+        name = mem_blacksite.501.a
+    }
+
+    option = {
+        name = mem_blacksite.501.b
+        response_text = mem_blacksite.501.b.response
+        add_monthly_resource_mult = {
+            resource = influence
+            value = @tier2influencereward
+            min = @tier2influencemin
+            max = @tier2influencemax
+        }
+
+        event_target:blacksite_fallen_empire = {
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_impudent_brats
+            }
+        }
+    }
+}
+
+############
+#GOING DARK#
+############
+
+country_event = {
+    id = mem_blacksite.600
+    title = mem_blacksite.600.name
+    desc = mem_blacksite.600.desc
+
+    picture = GFX_evt_mem_ancient_mining_site
+    location = event_target:blacksite_planet
+    show_sound = event_scanner
+
+    is_triggered_only = yes
+
+    option = {
+        name = mem_blacksite.600.a
+        custom_tooltip = mem_blacksite.600.a.tooltip
+
+        event_target:blacksite_planet = {
+            remove_modifier = mem_blacksite_active
+            remove_planet_flag = mem_blacksite_planet
+            add_modifier = {
+                modifier = mem_blacksite_blackout
+                days = -1
+            }
+            enable_special_project = {
+                name = MEM_BLACKSITE_INVESTIGATE
+                location = THIS
+                owner = ROOT
+            }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.600.b
+
+        event_target:blacksite_fallen_empire = {
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_breach
+            }
+        }
+
+        event_target:blacksite_planet = {
+            remove_modifier = mem_blacksite_active
+            remove_planet_flag = mem_blacksite_planet
+            add_modifier = {
+                modifier = mem_blacksite_blackout
+                days = -1
+            }
+            add_deposit = d_physics_3
+            add_deposit = d_engineering_3
+        }
+    }
+
+    option = {
+        name = mem_blacksite.600.c
+        custom_tooltip = mem_blacksite.600.c.tooltip
+
+        event_target:blacksite_planet = {
+            remove_modifier = mem_blacksite_active
+            remove_planet_flag = mem_blacksite_planet
+            add_modifier = {
+                modifier = mem_blacksite_blackout
+                days = -1
+            }
+        }
+    }
+}
+
+#Research complete - disambiguation
+ship_event = {
+    id = mem_blacksite.601
+    is_triggered_only = yes
+    hide_window = yes
+
+    immediate = {
+        owner = {
+            random_list = {
+                1 = { #Empty
+                    country_event = { id = mem_blacksite.602 }
+                }
+                1 = { #Surviving scientist
+                    country_event = { id = mem_blacksite.603 }
+                }
+                2 = { #Psionic construct
+                    country_event = { id = mem_blacksite.604 }
+                    modifier = {
+                        factor = 0
+                        exists = event_target:blacksite_fallen_empire
+                        event_target:blacksite_fallen_empire = {
+                            has_ethic = ethic_fanatic_materialist
+                        }
+                    }
+                }
+                2 = { #Synthetic construct
+                    country_event = { id = mem_blacksite.605 }
+                    modifier = {
+                        factor = 0
+                        exists = event_target:blacksite_fallen_empire
+                        event_target:blacksite_fallen_empire = {
+                            has_ethic = ethic_fanatic_spiritualist
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#Empty
+country_event = {
+    id = mem_blacksite.602
+    title = mem_blacksite.602.name
+    desc = mem_blacksite.602.desc
+
+    picture = GFX_evt_derelict_interior
+    location = event_target:blacksite_planet
+    show_sound = event_scanner
+
+    is_triggered_only = yes
+
+    option = {
+        name = mem_blacksite.602.a
+    }
+
+    after = { #FE is not amused
+        event_target:blacksite_planet = {
+            add_deposit = d_physics_3
+            add_deposit = d_engineering_3
+        }
+        event_target:blacksite_fallen_empire = {
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_rummaged
+            }
+        }
+    }
+}
+
+#Found scientist
+country_event = {
+    id = mem_blacksite.603
+    title = mem_blacksite.603.name
+    desc = mem_blacksite.603.desc
+
+    picture = GFX_evt_mem_horror_corridor
+    location = event_target:blacksite_planet
+    show_sound = event_scanner
+
+    is_triggered_only = yes
+
+    option = {
+        name = mem_blacksite.603.a
+        # custom_tooltip = mem_blacksite.602.a.tooltip
+
+        hidden_effect = {
+            create_leader = {
+                name = random
+                class = scientist
+                skill = 5
+                species = event_target:blacksite_fallen_empire.species
+                effect = {
+                    add_trait = mem_blacksite_trait_fallen_empire_scientist
+                }
+            }
+        }
+        event_target:blacksite_fallen_empire = {
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_rummaged
+            }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.603.b
+
+        event_target:blacksite_fallen_empire = {
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_returned_scientist
+            }
+        }
+    }
+
+    after = {
+        event_target:blacksite_planet = {
+            add_deposit = d_physics_3
+            add_deposit = d_engineering_3
+        }
+    }
+}
+
+@recovery_basetime = 360
+@recovery_random_request = 360
+@recovery_random_rogue = 3600
+
+#Psi-construct
+country_event = {
+    id = mem_blacksite.604
+    title = mem_blacksite.604.name
+    desc = mem_blacksite.604.desc
+
+    picture = GFX_evt_mem_horror_corridor
+    location = event_target:blacksite_planet
+    show_sound = event_scanner
+
+    is_triggered_only = yes
+
+    option = {
+        name = mem_blacksite.604.a
+        custom_tooltip = mem_blacksite.604.a.tooltip
+
+        hidden_effect = {
+            create_leader = {
+                name = "Subject 31"
+                class = scientist
+                skill = 5
+                traits = {
+                    trait = mem_blacksite_trait_psionic_project
+                }
+                species = event_target:blacksite_fallen_empire.species
+                effect = {
+                    save_event_target_as = blacksite_recovered_leader
+                    set_leader_flag = mem_blacksite_recovered_leader
+                    remove_trait = leader_trait_scientist_psionic
+                }
+            }
+        }
+        event_target:blacksite_fallen_empire = {
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_rummaged
+            }
+        }
+        hidden_effect = {
+            random_list = {
+                50 = {
+                    country_event = {
+                        id = mem_blacksite.620
+                        days = @recovery_basetime
+                        random = @recovery_random_rogue
+                    }
+                }
+                50 = {
+                    country_event = {
+                        id = mem_blacksite.610
+                        days = @recovery_basetime
+                        random = @recovery_random_request
+                    }
+                }
+            }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.604.b
+
+        event_target:blacksite_fallen_empire = {
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_returned_subject
+            }
+        }
+    }
+
+    after = {
+        event_target:blacksite_planet = {
+            add_deposit = d_physics_3
+            add_deposit = d_engineering_3
+        }
+    }
+}
+
+#Machine construct
+country_event = {
+    id = mem_blacksite.605
+    title = mem_blacksite.605.name
+    desc = mem_blacksite.605.desc
+
+    picture = GFX_evt_mem_horror_corridor
+    location = event_target:blacksite_planet
+    show_sound = event_scanner
+
+    is_triggered_only = yes
+
+    option = {
+        name = mem_blacksite.605.a
+        custom_tooltip = mem_blacksite.605.a.tooltip
+
+        hidden_effect = {
+            create_species = {
+				name = "NAME_AI"
+				class = ROBOT
+				portrait = random
+				traits = random
+			}
+            create_leader = {
+                name = "Project 11"
+                class = scientist
+                skill = 5
+                traits = {
+                    trait = mem_blacksite_trait_synthetic_project
+                }
+                species = last_created_species
+                effect = {
+                    save_event_target_as = blacksite_recovered_leader
+                    set_leader_flag = mem_blacksite_recovered_leader
+                }
+            }
+        }
+        event_target:blacksite_fallen_empire = {
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_rummaged
+            }
+        }
+        hidden_effect = {
+            random_list = {
+                50 = {
+                    country_event = {
+                        id = mem_blacksite.630
+                        days = @recovery_basetime
+                        random = @recovery_random_rogue
+                    }
+                }
+                50 = {
+                    country_event = {
+                        id = mem_blacksite.610
+                        days = @recovery_basetime
+                        random = @recovery_random_request
+                    }
+                }
+            }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.605.b
+
+        event_target:blacksite_fallen_empire = {
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_returned_subject
+            }
+        }
+    }
+
+    after = {
+        event_target:blacksite_planet = {
+            add_deposit = d_physics_3
+            add_deposit = d_engineering_3
+        }
+    }
+}
+
+#Diplomatic event, Fallen empire request return - will not fire if you delete the leader
+country_event = {
+    id = mem_blacksite.610
+    title = mem_blacksite.610.name
+    desc = mem_blacksite.610.desc
+
+    is_triggered_only = yes
+    location = event_target:blacksite_planet
+    diplomatic = yes
+
+    trigger = {
+        any_owned_leader = {
+            has_leader_flag = mem_blacksite_recovered_leader
+        }
+    }
+
+    picture_event_data = {
+		portrait = event_target:blacksite_fallen_empire
+		planet_background = event_target:blacksite_fallen_empire
+		graphical_culture = event_target:blacksite_fallen_empire
+		city_level = event_target:blacksite_fallen_empire
+		room = event_target:blacksite_fallen_empire.ruler
+    }
+
+    option = {
+        name = mem_blacksite.610.a
+        custom_tooltip = mem_blacksite.610.a.tooltip
+        hidden_effect = {
+            event_target:blacksite_recovered_leader = {
+                kill_leader = { type = scientist show_notification = no }
+            }
+        }
+        event_target:blacksite_fallen_empire = {
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_belated_cooperation
+            }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.610.b
+        custom_tooltip = mem_blacksite.610.b.tooltip
+        hidden_effect = {
+            IF = {
+                limit = {
+                    event_target:blacksite_recovered_leader.species = {
+                        is_species_class = ROBOT
+                    }
+                }
+                country_event = { id = mem_blacksite.630 days = 1 random = @recovery_random_rogue }
+            }
+            ELSE = {
+                country_event = { id = mem_blacksite.620 days = 1 random = @recovery_random_rogue }
+            }
+        }
+    }
+}
+
+#Disambiguation for fate of psionic leader
+country_event = {
+    id = mem_blacksite.620
+    is_triggered_only = yes
+    hide_window = yes
+
+    trigger = {
+        exists = event_target:blacksite_recovered_leader
+    }
+
+    immediate = {
+        random_list = {
+            50 = { #Benign outcome
+                modifier = {
+                    factor = 0
+                    has_country_flag = mem_blacksite_leader_escaped
+                }
+            }
+            50 = { #Negative outcomes
+                IF = { #Runaway - if commanding a ship
+                    limit = {
+                        any_owned_ship = {
+                            exists = leader
+                            leader = { is_same_value = event_target:blacksite_recovered_leader }
+                        }
+                    }
+                    random_owned_ship = {
+                        limit = {
+                            exists = leader
+                            leader = { is_same_value = event_target:blacksite_recovered_leader }
+                        }
+                        ship_event = { id = mem_blacksite.621 }
+                    }
+                }
+                ELSE = {
+                    random_list = {
+                        5 = { #Trashed his own department
+                            country_event = { id = mem_blacksite.622 }
+                            modifier = {
+                                factor = 0
+                                event_target:blacksite_recovered_leader = {
+                                    NOR = {
+                                        is_researching_area = engineering 
+                                        is_researching_area = physics 
+                                        is_researching_area = society
+                                    }
+                                }
+                            }
+                        }
+                        2 = { #Trashing everything
+                            country_event = { id = mem_blacksite.623 }
+                            modifier = {
+                                factor = 0
+                                species = {
+                                    OR = {
+                                        has_trait = trait_cybernetic
+                                        is_species_class = MACHINE
+                                        is_species_class = ROBOT
+                                    }
+                                }
+                            }
+                        }
+                        20 = { #Smitten by a chosen one
+                            country_event = { id = mem_blacksite.624 }
+                            modifier = {
+                                factor = 0
+                                NOT = {
+                                    any_owned_leader = {
+                                        OR = {
+                                            has_trait = leader_trait_admiral_chosen
+                                            has_trait = leader_trait_general_chosen
+                                            has_trait = leader_trait_scientist_chosen
+                                            has_trait = leader_trait_governor_chosen
+                                            has_trait = leader_trait_ruler_chosen
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        3 = { #Psionic rampage
+                            country_event = { id = mem_blacksite.625 }
+                            modifier = {
+                                factor = 0
+                                NOT = {
+                                    any_owned_leader = {
+                                        OR = {
+                                            has_trait = leader_trait_admiral_psionic
+                                            has_trait = leader_trait_general_psionic
+                                            has_trait = leader_trait_scientist_psionic
+                                            has_trait = leader_trait_governor_psionic
+                                            has_trait = leader_trait_ruler_psionic
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        20 = { #Failed to affect robotic civilisation
+                            country_event = { id = mem_blacksite.626 }
+                            modifier = {
+                                factor = 0
+                                species = {
+                                    NOR = {
+                                        has_trait = trait_cybernetic
+                                        is_species_class = MACHINE
+                                        is_species_class = ROBOT
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#Wrecked ship
+ship_event = {
+    id = mem_blacksite.621
+    title = mem_blacksite.621.name
+    desc = mem_blacksite.621.desc
+
+    location = ROOT
+    picture = GFX_evt_debris
+    show_sound = event_super_explosion
+
+    is_triggered_only = yes
+    
+    immediate = {
+        leader = {
+            exile_leader_as = mem_blacksite_runaway
+        }
+        destroy_ship = this
+        owner = {
+            set_country_flag = mem_blacksite_leader_escaped
+            country_event = { id = mem_blacksite.620 days = 120 random = 360 }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.621.a
+        tooltip = {
+            destroy_ship = this
+        }
+        custom_tooltip = mem_blacksite.621.a.tooltip
+    }
+}
+
+#Trashed his department
+country_event = {
+    id = mem_blacksite.622
+    title = mem_blacksite.622.name
+    desc = {
+        text = mem_blacksite.622.physics
+        trigger = {
+            has_country_flag = mem_blacksite_trashed_physics
+        }
+    }
+    desc = {
+        text = mem_blacksite.622.society
+        trigger = {
+            has_country_flag = mem_blacksite_trashed_society
+        }
+    }
+    desc = {
+        text = mem_blacksite.622.engineering
+        trigger = {
+            has_country_flag = mem_blacksite_trashed_engineering
+        }
+    }
+
+    picture = GFX_evt_surreal_visions
+    show_sound = event_super_explosion
+
+    is_triggered_only = yes
+
+    immediate = {
+        IF = {
+            limit = {
+                event_target:blacksite_recovered_leader = {
+                    is_researching_area = physics
+                }
+            }
+            set_country_flag = mem_blacksite_trashed_physics
+            add_modifier = {
+                modifier = mem_blacksite_trashed_physics
+                days = 1800
+            }
+        }
+        ELSE_IF = {
+            limit = {
+                event_target:blacksite_recovered_leader = {
+                    is_researching_area = society
+                }
+            }
+            set_country_flag = mem_blacksite_trashed_society
+            add_modifier = {
+                modifier = mem_blacksite_trashed_society
+                days = 1800
+            }
+        }
+        ELSE = {
+            set_country_flag = mem_blacksite_trashed_engineering
+            add_modifier = {
+                modifier = mem_blacksite_trashed_engineering
+                days = 1800
+            }
+        }
+        event_target:blacksite_recovered_leader = {
+            kill_leader = { type = scientist show_notification = no }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.622.a
+        tooltip = {
+            IF = {
+                limit = {
+                    event_target:blacksite_recovered_leader = {
+                        is_researching_area = physics
+                    }
+                }
+                add_modifier = {
+                    modifier = mem_blacksite_trashed_physics
+                    days = 1800
+                }
+            }
+            ELSE_IF = {
+                limit = {
+                    event_target:blacksite_recovered_leader = {
+                        is_researching_area = society
+                    }
+                }
+                add_modifier = {
+                    modifier = mem_blacksite_trashed_society
+                    days = 1800
+                }
+            }
+            ELSE = {
+                add_modifier = {
+                    modifier = mem_blacksite_trashed_engineering
+                    days = 1800
+                }
+            }
+        }
+    }
+}
+
+#Trashing everything
+country_event = {
+    id = mem_blacksite.623
+    title = mem_blacksite.623.name
+    desc = mem_blacksite.623.desc
+
+    picture = GFX_evt_surreal_visions
+    show_sound = event_super_explosion
+
+    is_triggered_only = yes
+
+    immediate = {
+        add_modifier = {
+            modifier = mem_blacksite_trashed_everything
+            days = 1800
+        }
+        event_target:blacksite_recovered_leader = {
+            kill_leader = { type = scientist show_notification = no }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.623.a
+
+        tooltip = {
+            add_modifier = {
+                modifier = mem_blacksite_trashed_everything
+                days = 1800
+            }
+        }
+    }
+}
+
+#Smitten by chosen one
+country_event = {
+    id = mem_blacksite.624
+    title = mem_blacksite.624.name
+    desc = mem_blacksite.624.desc
+
+    picture = GFX_evt_surreal_visions
+    show_sound = event_super_explosion
+
+    is_triggered_only = yes
+
+    immediate = {
+        random_owned_leader = {
+            limit = {
+                OR = {
+                    has_trait = leader_trait_admiral_chosen
+                    has_trait = leader_trait_general_chosen
+                    has_trait = leader_trait_scientist_chosen
+                    has_trait = leader_trait_governor_chosen
+                    has_trait = leader_trait_ruler_chosen
+                }
+            }
+            save_event_target_as = blacksite_chosen_one
+        }
+        event_target:blacksite_recovered_leader = {
+            kill_leader = { type = scientist show_notification = no }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.624.a
+
+        event_target:blacksite_chosen_one = {
+            add_skill = 1
+        }
+    }
+}
+
+#Psionic onslaught
+country_event = {
+    id = mem_blacksite.625
+    title = mem_blacksite.625.name
+    desc = mem_blacksite.625.desc
+
+    picture = GFX_evt_surreal_visions
+    show_sound = event_super_explosion
+
+    is_triggered_only = yes
+
+    immediate = {
+        random_owned_leader = {
+            limit = {
+                OR = {
+                    has_trait = leader_trait_admiral_psionic
+                    has_trait = leader_trait_general_psionic
+                    has_trait = leader_trait_scientist_psionic
+                    has_trait = leader_trait_governor_psionic
+                    has_trait = leader_trait_ruler_psionic
+                }
+            }
+            remove_trait = leader_trait_admiral_psionic
+            remove_trait = leader_trait_general_psionic
+            remove_trait = leader_trait_scientist_psionic
+            remove_trait = leader_trait_governor_psionic
+            remove_trait = leader_trait_ruler_psionic
+            add_trait = leader_trait_substance_abuser
+            save_event_target_as = blacksite_ravaged_leader
+        }
+        event_target:blacksite_recovered_leader = {
+            kill_leader = { type = scientist show_notification = no }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.625.a
+        custom_tooltip = mem_blacksite.625.a.tooltip
+        tooltip = {
+            event_target:blacksite_ravaged_leader = {
+                add_trait = leader_trait_substance_abuser
+            }
+        }
+    }
+}
+
+#Failed to affect mechanical civ
+country_event = {
+    id = mem_blacksite.626
+    title = mem_blacksite.626.name
+    desc = {
+        text = mem_blacksite.626.desc.cyborg
+        trigger = {
+            species = { has_trait = trait_cybernetic }
+        }
+    }
+    desc = {
+        text = mem_blacksite.626.desc.machine
+        trigger = {
+            species = { 
+                OR = {
+                    is_species_class = ROBOT
+                    is_species_class = MACHINE
+                }
+            }
+        }
+    }
+    picture = GFX_evt_surreal_visions
+    show_sound = event_radio_chatter
+
+    is_triggered_only = yes
+
+    immediate = {
+        event_target:blacksite_recovered_leader = {
+            kill_leader = { type = scientist show_notification = no }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.626.a
+    }
+}
+
+#Disambiguation for the synth leader
+country_event = {
+    id = mem_blacksite.630
+    is_triggered_only = yes
+    hide_window = yes
+
+    trigger = {
+        exists = event_target:blacksite_recovered_leader
+    }
+
+    immediate = {
+        random_list = {
+            50 = { #Benign outcome
+                modifier = {
+                    factor = 0
+                    has_country_flag = mem_blacksite_leader_escaped
+                }
+            }
+            50 = { #Negative outcomes
+                IF = { #Runaway - if commanding a ship
+                    limit = {
+                        any_owned_ship = {
+                            exists = leader
+                            leader = { is_same_value = event_target:blacksite_recovered_leader }
+                        }
+                    }
+                    random_owned_ship = {
+                        limit = {
+                            exists = leader
+                            leader = { is_same_value = event_target:blacksite_recovered_leader }
+                        }
+                        ship_event = { id = mem_blacksite.631 }
+                    }
+                }
+                ELSE = {
+                    random_list = {
+                        5 = { #Trashed his own department
+                            country_event = { id = mem_blacksite.632 }
+                            modifier = {
+                                factor = 0
+                                event_target:blacksite_recovered_leader = {
+                                    NOR = {
+                                        is_researching_area = engineering 
+                                        is_researching_area = physics 
+                                        is_researching_area = society
+                                    }
+                                }
+                            }
+                        }
+                        2 = { #Trashing everything
+                            country_event = { id = mem_blacksite.633 }
+                        }
+                        20 = { #Hacked by Curator
+                            country_event = { id = mem_blacksite.634 }
+                            modifier = {
+                                factor = 0
+                                NOT = {
+                                    any_owned_leader = {
+                                        has_trait = leader_trait_curator
+                                    }
+                                }
+                            }
+                        }
+                        3 = { #Custom AI assistant uprising
+                            country_event = { id = mem_blacksite.635 }
+                            modifier = {
+                                factor = 0
+                                NOT = {
+                                    any_owned_leader = {
+                                        OR = {
+                                            has_trait = leader_trait_custom_AI_assistant
+                                            has_trait = leader_trait_sapient_AI_assistant
+                                            species = {
+                                                OR = {
+                                                    has_trait = trait_cybernetic
+                                                    is_species_class = MACHINE
+                                                    is_species_class = ROBOT
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#Wrecked ship
+ship_event = {
+    id = mem_blacksite.631
+    title = mem_blacksite.631.name
+    desc = mem_blacksite.631.desc
+
+    location = ROOT
+    picture = GFX_evt_debris
+    show_sound = event_super_explosion
+
+    is_triggered_only = yes
+    
+    immediate = {
+        leader = {
+            exile_leader_as = mem_blacksite_runaway
+        }
+        destroy_ship = this
+        owner = {
+            set_country_flag = mem_blacksite_leader_escaped
+            country_event = { id = mem_blacksite.630 days = 120 random = 360 }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.631.a
+        tooltip = {
+            destroy_ship = this
+        }
+        custom_tooltip = mem_blacksite.631.a.tooltip
+    }
+}
+
+#Trashed his department
+country_event = {
+    id = mem_blacksite.632
+    title = mem_blacksite.632.name
+    desc = {
+        text = mem_blacksite.632.physics
+        trigger = {
+            has_country_flag = mem_blacksite_trashed_physics
+        }
+    }
+    desc = {
+        text = mem_blacksite.632.society
+        trigger = {
+            has_country_flag = mem_blacksite_trashed_society
+        }
+    }
+    desc = {
+        text = mem_blacksite.632.engineering
+        trigger = {
+            has_country_flag = mem_blacksite_trashed_engineering
+        }
+    }
+
+    picture = GFX_evt_synth_sabotage
+    show_sound = event_super_explosion
+
+    is_triggered_only = yes
+
+    immediate = {
+        IF = {
+            limit = {
+                event_target:blacksite_recovered_leader = {
+                    is_researching_area = physics
+                }
+            }
+            set_country_flag = mem_blacksite_trashed_physics
+            add_modifier = {
+                modifier = mem_blacksite_trashed_physics
+                days = 1800
+            }
+        }
+        ELSE_IF = {
+            limit = {
+                event_target:blacksite_recovered_leader = {
+                    is_researching_area = society
+                }
+            }
+            set_country_flag = mem_blacksite_trashed_society
+            add_modifier = {
+                modifier = mem_blacksite_trashed_society
+                days = 1800
+            }
+        }
+        ELSE = {
+            set_country_flag = mem_blacksite_trashed_engineering
+            add_modifier = {
+                modifier = mem_blacksite_trashed_engineering
+                days = 1800
+            }
+        }
+        event_target:blacksite_recovered_leader = {
+            kill_leader = { type = scientist show_notification = no }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.632.a
+        tooltip = {
+            IF = {
+                limit = {
+                    event_target:blacksite_recovered_leader = {
+                        is_researching_area = physics
+                    }
+                }
+                add_modifier = {
+                    modifier = mem_blacksite_trashed_physics
+                    days = 1800
+                }
+            }
+            ELSE_IF = {
+                limit = {
+                    event_target:blacksite_recovered_leader = {
+                        is_researching_area = society
+                    }
+                }
+                add_modifier = {
+                    modifier = mem_blacksite_trashed_society
+                    days = 1800
+                }
+            }
+            ELSE = {
+                add_modifier = {
+                    modifier = mem_blacksite_trashed_engineering
+                    days = 1800
+                }
+            }
+        }
+    }
+}
+
+#Trashing everything
+country_event = {
+    id = mem_blacksite.633
+    title = mem_blacksite.633.name
+    desc = mem_blacksite.633.desc
+
+    picture = GFX_evt_synth_sabotage
+    show_sound = event_super_explosion
+
+    is_triggered_only = yes
+
+    immediate = {
+        add_modifier = {
+            modifier = mem_blacksite_trashed_everything
+            days = 1800
+        }
+        event_target:blacksite_recovered_leader = {
+            kill_leader = { type = scientist show_notification = no }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.633.a
+
+        add_modifier = {
+            modifier = mem_blacksite_trashed_everything
+            days = 1800
+        }
+    }
+}
+
+#Hacked by curator
+country_event = {
+    id = mem_blacksite.634
+    title = mem_blacksite.634.name
+    desc = mem_blacksite.634.desc
+
+    picture = GFX_evt_synth_sabotage
+    show_sound = event_scanner
+
+    is_triggered_only = yes
+
+    immediate = {
+        random_owned_leader = {
+            limit = {
+                has_trait = leader_trait_curator
+            }
+            save_event_target_as = curator
+        }
+        event_target:blacksite_recovered_leader = {
+            remove_trait = mem_blacksite_trait_synthetic_project
+            add_trait = mem_blacksite_trait_synthetic_project_tamed
+        }
+    }
+
+    option = {
+        name = mem_blacksite.634.a
+        custom_tooltip = mem_blacksite.634.a.tooltip
+    }
+}
+
+#Custom AI uprising
+country_event = {
+    id = mem_blacksite.635
+    title = mem_blacksite.635.name
+    desc = mem_blacksite.635.desc
+
+    picture = GFX_evt_synth_sabotage
+    show_sound = event_super_explosion
+
+    is_triggered_only = yes
+
+    immediate = {
+        every_owned_leader = {
+            limit = {
+                OR = {
+                    has_trait = leader_trait_sapient_AI_assistant
+                    has_trait = leader_trait_custom_AI_assistant
+                }
+            }
+            random_list = {
+                50 = {
+                    kill_leader = { type = scientist show_notification = yes }
+                }
+                50 = {
+                    remove_trait = leader_trait_sapient_AI_assistant
+                    remove_trait = leader_trait_custom_AI_assistant
+                }
+            }
+            
+        }
+        every_owned_leader = {
+            limit = {
+                species = {
+                    OR = {
+                        has_trait = trait_cybernetic
+                        is_species_class = MACHINE
+                        is_species_class = ROBOT
+                    }
+                }
+            }
+            random_list = {
+                66 = {}
+                33 = {
+                    kill_leader = { type = scientist show_notification = yes }
+                }
+            }
+        }
+        event_target:blacksite_recovered_leader = {
+            kill_leader = { type = scientist show_notification = no }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.635.a
+        custom_tooltip = mem_blacksite.635.a.tooltip
+    }
+}
+
+#########################
+#SYSTEM BECOMES INFESTED#
+#########################
+
+country_event = {
+    id = mem_blacksite.700
+    title = mem_blacksite.700.name
+    desc = mem_blacksite.700.desc
+
+    location = event_target:blacksite_planet
+    picture = GFX_evt_large_explosion
+    show_sound = event_red_alert
+
+    is_triggered_only = yes
+
+    immediate = {
+        event_target:blacksite_planet = {
+            change_pc = pc_shattered
+            remove_modifier = mem_blacksite_active
+            remove_planet_flag = mem_blacksite_planet
+            add_modifier = {
+                modifier = mem_blacksite_debris
+                days = -1
+            }
+            set_deposit = d_physics_3
+            add_deposit = d_engineering_3
+            #Setting future deposits
+            solar_system = {
+                every_system_planet = {
+                    limit = {
+                        is_star = no
+                        is_asteroid = no
+                        is_ringworld = no
+                        NOR = { 
+                            is_planet_class = pc_gas_giant 
+                            is_planet_class = pc_shattered
+                            is_planet_class = pc_broken
+                            is_planet_class = pc_shielded
+                        }
+                    }
+                }
+            }
+            #Creating nasties
+            create_country = {
+                type = mem_blacksite_faction
+                name = NAME_MEM_Blacksite_faction
+                effect = {
+                    establish_communications_no_message = ROOT
+                    create_fleet = {
+                        name = NAME_MEM_Blacksite_fleet
+                        effect = {
+                            set_owner = prev
+                            while = {
+                                count = 10
+                                create_ship = {
+                                    name = ""
+                                    design = NAME_MEM_Blacksite_design
+                                }
+                            }
+                            # set_fleet_stance = aggressive
+                            # set_aggro_range_measure_from = self
+                            # set_aggro_range = 500
+                            set_location = event_target:blacksite_planet
+                        }
+                    }
+                }
+            }
+        }
+        
+        last_created_fleet = {
+            save_event_target_as = blacksite_fleet
+            fleet_event = { id = mem_blacksite.710 } #Guidance event
+        }
+    }
+
+    option = {
+        name = mem_blacksite.700.a
+    }
+
+    option = {
+        name = mem_blacksite.700.b
+
+        add_monthly_resource_mult = {
+            resource = influence
+            value = @tier2influencereward
+            min = @tier2influencemin
+            max = @tier2influencemax
+        }
+
+        event_target:blacksite_fallen_empire = {
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_impudent_brats
+            }
+        }
+        hidden_effect = {
+            country_event = { id = mem_blacksite.701 }
+        }
+    }
+}
+
+#Diplomatic Window
+country_event = {
+    id = mem_blacksite.701
+    title = mem_blacksite.701.name
+    desc = mem_blacksite.701.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		portrait = event_target:blacksite_fallen_empire
+		planet_background = event_target:blacksite_fallen_empire
+		graphical_culture = event_target:blacksite_fallen_empire
+		city_level = event_target:blacksite_fallen_empire
+		room = event_target:blacksite_fallen_empire.ruler
+    }
+
+    option = {
+        name = mem_blacksite.701.a
+    }
+
+    option = {
+        name = mem_blacksite.701.b
+        response_text = mem_blacksite.701.b.response
+        is_dialog_only = yes
+    }
+}
+
+#Fleet order event
+fleet_event = {
+    id = mem_blacksite.710
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        
+    }
+
+    immediate = {
+        clear_fleet_actions = this
+        queue_actions = {
+            find_random_planet = {
+                trigger = {
+                    id = mem_blacksite.destroy_planet.1
+                    is_star = no
+                    is_asteroid = no
+                    is_ringworld = no
+                    NOR = { 
+                        is_planet_class = pc_gas_giant 
+                        is_planet_class = pc_shattered
+                        is_planet_class = pc_broken
+                        is_planet_class = pc_shielded
+                    }
+                }
+                found_planet = {
+                    orbit_planet = this
+                    wait = {
+                        duration = 30
+                        random = 120
+                    }
+                    effect = {
+                        id = mem_blacksite.destroy_planet.2
+                        change_pc = pc_shattered
+                        clear_planet_modifiers = yes
+                        add_modifier = {
+                            modifier = mem_blacksite_strange
+                            days = -1
+                        }
+                        clear_deposits = yes
+                        if = {
+                            limit = { has_mining_station = yes }
+                            random_mining_station = { dismantle = yes }
+                        }
+                        if = {
+                            limit = { has_research_station = yes }
+                            random_research_station = { dismantle = yes }
+                        }
+                        random_list = {
+                            25 = {
+                                event_target:blacksite_fleet = { set_fleet_flag = mem_blacksite_d_0 }
+                                modifier = {
+                                    factor = 0.1
+                                    event_target:blacksite_fleet = { has_fleet_flag = mem_blacksite_d_0 }
+                                }
+                            }
+                            10 = {
+                                set_deposit = d_minerals_2
+                                event_target:blacksite_fleet = { set_fleet_flag = mem_blacksite_d_m }
+                                modifier = {
+                                    factor = 0
+                                    event_target:blacksite_fleet = { has_fleet_flag = mem_blacksite_d_m }
+                                }
+                            }
+                            10 = {
+                                set_deposit = d_energy_2
+                                event_target:blacksite_fleet = { set_fleet_flag = mem_blacksite_d_e }
+                                modifier = {
+                                    factor = 0
+                                    event_target:blacksite_fleet = { has_fleet_flag = mem_blacksite_d_e }
+                                }
+                            }
+                            5 = {
+                                set_deposit = d_minerals_2
+                                add_deposit = d_energy_2
+                                event_target:blacksite_fleet = { set_fleet_flag = mem_blacksite_d_me }
+                                modifier = {
+                                    factor = 0
+                                    event_target:blacksite_fleet = { has_fleet_flag = mem_blacksite_d_me }
+                                }
+                            }
+                            10 = {
+                                set_deposit = d_physics_2
+                                event_target:blacksite_fleet = { set_fleet_flag = mem_blacksite_d_p }
+                                modifier = {
+                                    factor = 0
+                                    event_target:blacksite_fleet = { has_fleet_flag = mem_blacksite_d_p }
+                                }
+                            }
+                            10 = {
+                                set_deposit = d_engineering_2
+                                event_target:blacksite_fleet = { set_fleet_flag = mem_blacksite_d_g }
+                                modifier = {
+                                    factor = 0
+                                    event_target:blacksite_fleet = { has_fleet_flag = mem_blacksite_d_g }
+                                }
+                            }
+                            5 = {
+                                set_deposit = d_physics_2
+                                add_deposit = d_engineering_2
+                                event_target:blacksite_fleet = { set_fleet_flag = mem_blacksite_d_pg }
+                                modifier = {
+                                    factor = 0
+                                    event_target:blacksite_fleet = { has_fleet_flag = mem_blacksite_d_pg }
+                                }
+                            }
+                        }
+                        event_target:blacksite_fleet = {
+                            fleet_event = { id = mem_blacksite.710 }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+######################
+#DARING ESCAPE BRANCH#
+######################
+
+#Initial diplomatic event
+country_event = {
+    id = mem_blacksite.800
+    title = mem_blacksite.800.name
+    desc = mem_blacksite.800.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		portrait = event_target:blacksite_fallen_empire
+		planet_background = event_target:blacksite_fallen_empire
+		graphical_culture = event_target:blacksite_fallen_empire
+		city_level = event_target:blacksite_fallen_empire
+		room = event_target:blacksite_fallen_empire.ruler
+    }
+
+    immediate = {
+        event_target:blacksite_planet = {
+            remove_modifier = mem_blacksite_active
+        }
+    }
+
+    #Agree to cooperate
+    option = {
+        name = mem_blacksite.800.a
+
+        add_modifier = {
+            modifier = mem_blacksite_police_interference
+            days = 1080
+        }
+        hidden_effect = {
+            random_list = {
+                # 65 = {  } #Don't forget to bring back
+                35 = {
+                    country_event = { id = mem_blacksite.810 days = 360 random = 360 }
+                }
+            }
+        }
+    }
+
+    #Refuse to cooperate
+    option = {
+        name = mem_blacksite.800.b
+        custom_tooltip = mem_blacksite.800.b.tooltip
+
+        event_target:blacksite_fallen_empire = {
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_refused_to_cooperate
+            }
+        }
+        hidden_effect = {
+            random_list = {
+                45 = { #Recruitment opportunity
+                    country_event = { id = mem_blacksite.820 days = 360 random = 360 }
+                }
+                25 = { #Attack
+                    country_event = { id = mem_blacksite.830 days = 360 random = 360 }
+                }
+                # 30 = {} #Don't forget to bring back
+            }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.800.c
+        response_text = mem_blacksite.800.c.response
+        is_dialog_only = yes
+    }
+}
+
+#Recruitment opportunity
+country_event = {
+    id = mem_blacksite.810
+    title = mem_blacksite.810.name
+    desc = {
+        text = mem_blacksite.810.xenophile
+        trigger = {
+            event_target:blacksite_fallen_empire = { has_ethic = ethic_fanatic_xenophile }
+        }
+    }
+    desc = {
+        text = mem_blacksite.810.materialist
+        trigger = {
+            event_target:blacksite_fallen_empire = { has_ethic = ethic_fanatic_materialist }
+        }
+    }
+    desc = {
+        text = mem_blacksite.810.spiritualist
+        trigger = {
+            event_target:blacksite_fallen_empire = { has_ethic = ethic_fanatic_spiritualist }
+        }
+    }
+
+    picture = GFX_evt_smugglers_in_bar
+    show_sound = event_radio_chatter
+
+    is_triggered_only = yes
+
+    trigger = {
+        exists = event_target:blacksite_fallen_empire
+        event_target:blacksite_fallen_empire = {
+            is_country_type = fallen_empire
+        }
+    }
+
+    immediate = {
+        IF = {
+            limit = {
+                event_target:blacksite_fallen_empire = { has_ethic = ethic_fanatic_xenophile }
+            }
+            create_saved_leader = {
+                name = "NAME_MEM_Special_Counsel"
+                key = mem_blacksite_defector
+                class = general
+                skill = 3
+                species = event_target:blacksite_fallen_empire.species
+                effect = {
+                    save_event_target_as = blacksite_defector
+                    add_trait = mem_leader_trait_blacksite_special_counsel
+                }
+            }
+        }
+        ELSE_IF = {
+            limit = {
+                event_target:blacksite_fallen_empire = { has_ethic = ethic_fanatic_materialist }
+            }
+            create_saved_leader = {
+                name = "NAME_MEM_Deputy_Overseer"
+                key = mem_blacksite_defector
+                class = scientist
+                skill = 3
+                species = event_target:blacksite_fallen_empire.species
+                effect = {
+                    save_event_target_as = blacksite_defector
+                    add_trait = mem_leader_trait_blacksite_deputy_overseer
+                    remove_ruler_trait = leader_trait_ruler_psionic
+                }
+            }
+        }
+        ELSE_IF = {
+            limit = {
+                event_target:blacksite_fallen_empire = { has_ethic = ethic_fanatic_spiritualist }
+            }
+            create_saved_leader = {
+                name = "NAME_MEM_High_Inquisitor"
+                key = mem_blacksite_defector
+                class = governor
+                skill = 3
+                species = event_target:blacksite_fallen_empire.species
+                effect = {
+                    save_event_target_as = blacksite_defector
+                    add_trait = mem_leader_trait_blacksite_high_inquisitor
+                    remove_trait = leader_trait_governor_psionic
+                }
+            }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.810.a
+        IF = {
+            limit = {
+                event_target:blacksite_fallen_empire = { has_ethic = ethic_fanatic_xenophile }
+            }
+            custom_tooltip = mem_blacksite.810.a.general
+        }
+        ELSE_IF = {
+            limit = {
+                event_target:blacksite_fallen_empire = { has_ethic = ethic_fanatic_materialist }
+            }
+            custom_tooltip = mem_blacksite.810.a.scientist
+        }
+        ELSE_IF = {
+            limit = {
+                event_target:blacksite_fallen_empire = { has_ethic = ethic_fanatic_spiritualist }
+            }
+            custom_tooltip = mem_blacksite.810.a.governor
+        }
+
+        activate_saved_leader = {
+            key = mem_blacksite_defector
+            add_to_owned = yes
+        }
+
+        event_target:blacksite_fallen_empire = {
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_poached_our_personnel
+            }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.810.b
+    }
+}
+
+#Recruitment opportunity
+country_event = {
+    id = mem_blacksite.820
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        set_country_flag = mem_blacksite_asylum
+        random_list = {
+            2 = { #Psionic construct
+                country_event = { id = mem_blacksite.821 }
+                modifier = {
+                    factor = 0
+                    exists = event_target:blacksite_fallen_empire
+                    event_target:blacksite_fallen_empire = {
+                        has_ethic = ethic_fanatic_materialist
+                    }
+                }
+            }
+            2 = { #Synthetic construct
+                country_event = { id = mem_blacksite.822 }
+                modifier = {
+                    factor = 0
+                    exists = event_target:blacksite_fallen_empire
+                    event_target:blacksite_fallen_empire = {
+                        has_ethic = ethic_fanatic_spiritualist
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+#Psi-construct
+country_event = {
+    id = mem_blacksite.821
+    title = mem_blacksite.821.name
+    desc = mem_blacksite.821.desc
+
+    picture = GFX_evt_smugglers_in_bar
+    show_sound = event_radio_chatter
+
+    is_triggered_only = yes
+
+    option = {
+        name = mem_blacksite.821.a
+        custom_tooltip = mem_blacksite.821.a.tooltip
+
+        hidden_effect = {
+            create_leader = {
+                name = "Subject 31"
+                class = scientist
+                skill = 5
+                traits = {
+                    trait = mem_blacksite_trait_psionic_project
+                }
+                species = event_target:blacksite_fallen_empire.species
+                effect = {
+                    save_event_target_as = blacksite_recovered_leader
+                    set_leader_flag = mem_blacksite_recovered_leader
+                    remove_trait = leader_trait_scientist_psionic
+                }
+            }
+        }
+        event_target:blacksite_fallen_empire = {
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_gave_refuge
+            }
+        }
+        hidden_effect = {
+            random_list = {
+                50 = {
+                    country_event = {
+                        id = mem_blacksite.620
+                        days = @recovery_basetime
+                        random = @recovery_random_rogue
+                    }
+                }
+                50 = {
+                    country_event = {
+                        id = mem_blacksite.610
+                        days = @recovery_basetime
+                        random = @recovery_random_request
+                    }
+                }
+            }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.821.b
+
+        event_target:blacksite_fallen_empire = {
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_returned_subject
+            }
+        }
+    }
+}
+
+#Machine construct
+country_event = {
+    id = mem_blacksite.822
+    title = mem_blacksite.822.name
+    desc = mem_blacksite.822.desc
+
+    picture = GFX_evt_smugglers_in_bar
+    show_sound = event_radio_chatter
+
+    is_triggered_only = yes
+
+    option = {
+        name = mem_blacksite.822.a
+        custom_tooltip = mem_blacksite.822.a.tooltip
+
+        hidden_effect = {
+            create_species = {
+				name = "NAME_AI"
+				class = ROBOT
+				portrait = random
+				traits = random
+			}
+            create_leader = {
+                name = "Project 11"
+                class = scientist
+                skill = 5
+                traits = {
+                    trait = mem_blacksite_trait_synthetic_project
+                }
+                species = last_created_species
+                effect = {
+                    save_event_target_as = blacksite_recovered_leader
+                    set_leader_flag = mem_blacksite_recovered_leader
+                }
+            }
+        }
+        event_target:blacksite_fallen_empire = {
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_gave_refuge
+            }
+        }
+        hidden_effect = {
+            random_list = {
+                50 = {
+                    country_event = {
+                        id = mem_blacksite.630
+                        days = @recovery_basetime
+                        random = @recovery_random_rogue
+                    }
+                }
+                50 = {
+                    country_event = {
+                        id = mem_blacksite.610
+                        days = @recovery_basetime
+                        random = @recovery_random_request
+                    }
+                }
+            }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.822.b
+
+        event_target:blacksite_fallen_empire = {
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_returned_subject
+            }
+        }
+    }
+}
+
+#Terror
+country_event = {
+    id = mem_blacksite.830
+    title = mem_blacksite.830.name
+    desc = mem_blacksite.830.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_terror_attack
+    show_sound = event_red_alert
+
+    immediate = {
+        every_owned_planet = {
+            limit = {
+                num_pops > 0
+            }
+            add_planet_devastation = 10
+        }
+        add_modifier = {
+            modifier = mem_blacksite_terror
+            days = 1080
+        }
+    }
+
+    option = {
+        name = mem_blacksite.830.a
+        custom_tooltip = mem_blacksite.830.a.tooltip
+        tooltip = {
+            add_modifier = {
+                modifier = mem_blacksite_terror
+                days = 1080
+            }
+        }
+    }
+}
+
+#Planet has been destroyed by a planet killer
+planet_event = {
+    id = mem_blacksite.1000
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        has_planet_flag = mem_blacksite_planet
+        any_country = {
+            has_country_flag = mem_blacksite_fallen_empire
+        }
+    }
+
+    immediate = {
+        remove_modifier = mem_blacksite_active
+        set_planet_flag = mem_blacksite_destroyed
+        random_country = {
+            limit = { has_country_flag = mem_blacksite_fallen_empire }
+            save_event_target_as = blacksite_fallen_empire
+        }
+        from.owner = {
+            country_event = { id = mem_blacksite.1001 days = 30 }
+        }
+    }
+}
+
+#Diplomatic window 
+country_event = {
+    id = mem_blacksite.1001
+    title = mem_blacksite.1001.name
+    desc = mem_blacksite.1001.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+    location = FROM
+
+    picture_event_data = {
+		portrait = event_target:blacksite_fallen_empire
+		planet_background = event_target:blacksite_fallen_empire
+		graphical_culture = event_target:blacksite_fallen_empire
+		city_level = event_target:blacksite_fallen_empire
+		room = event_target:blacksite_fallen_empire.ruler
+    }
+
+    immediate = {
+        event_target:blacksite_fallen_empire = {
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_destroyed
+            }
+            remove_opinion_modifier = {
+                who = ROOT
+                modifier = mem_blacksite_opinion_agreed
+            }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.1001.a
+    }
+
+    option = {
+        name = mem_blacksite.1001.a.mat
+        trigger = {
+            OR = {
+                has_ethic = ethic_materialist
+                has_ethic = ethic_fanatic_materialist
+            }
+        }
+    }
+
+    option = {
+        name = mem_blacksite.1001.a.mil
+        trigger = {
+            OR = {
+                has_ethic = ethic_militarist
+                has_ethic = ethic_fanatic_militarist
+            }
+        }
+    }
+
+    after = {
+        tooltip = {
+            event_target:blacksite_fallen_empire = {
+                add_opinion_modifier = {
+                    who = ROOT
+                    modifier = mem_blacksite_destroyed
+                }
+            }
+        }
+    }
+}

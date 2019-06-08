@@ -1,0 +1,1116 @@
+#Crucible
+#By ViolentBeetle
+
+namespace = mem_crucible
+
+#Initiation of the maintenance loop
+event = {
+    id = mem_crucible.1
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        has_global_flag = mem_crucible_system_spawned
+    }
+
+    immediate = {
+        random_planet = {
+            limit = { has_planet_flag = mem_crucible_planet }
+            planet_event = { id = mem_crucible.2 }
+        }
+    }
+}
+
+@maintenance_loop = 60
+@maintenance_loop_random = 300
+
+#Planet's maintenance loop
+planet_event = {
+    id = mem_crucible.2
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        NOT = { has_planet_flag = mem_crucible_stop_the_loop }
+        exists = event_target:mem_crucible_country
+    }
+
+    immediate = {
+        change_variable = {
+            which = mem_crucible_timer
+            value = 1
+        }
+        IF = { #Above all else, checking for hostile observation action being taken - instant shrouding if yes
+            limit = {
+                has_observation_outpost = yes
+                observation_outpost = {
+                    NOR = {
+                        has_mission = passive_observation
+                        has_mission = specimen_collection
+                    }
+                }
+            }
+            observation_outpost_owner = {
+                set_country_flag = mem_crucible_took_hostile_action
+                country_event = { id = mem_crucible.6 }
+            }
+            observation_outpost = {
+                dismantle = yes
+			}
+			every_owned_pop = { kill_pop = yes }
+			remove_all_buildings = yes
+			remove_all_districts = yes
+            change_pc = pc_shrouded
+        }
+        ELSE_IF = { #Checking if someone took over
+            limit = {
+                exists = owner
+                owner = { NOT = { is_country_type = primitive } }
+            }
+            planet_event = { id = mem_crucible.7 }
+        }
+        ELSE_IF = { #If country is still primitive check whenever they should advance
+            limit = {                
+                exists = owner
+                owner = {
+                    is_country_type = primitive
+                }
+                check_variable = {
+                    which = mem_crucible_timer
+                    value > 9
+                }
+            }
+            owner = { mem_crucible_advance_ages = yes }
+            set_variable = {
+                which = mem_crucible_timer
+                value = 0
+            }
+        }
+        ELSE_IF = { #If they are shrouded, check whenever they should de-shroud
+            limit = {
+                is_planet_class = pc_shrouded
+                check_variable = {
+                    which = mem_crucible_timer
+                    value > 14
+                }
+                NAND = { #If you took any hostile action against the planet, it will not de-shroud, until someone else takes over the system
+                    exists = space_owner
+                    space_owner = {
+                        has_country_flag = mem_crucible_took_hostile_action
+                    }
+                }
+            }
+            change_pc = pc_gaia
+            change_variable = {
+                which = mem_crucible_ran_loops
+                value = 1
+            }
+            reroll_planet = yes
+            event_target:mem_crucible_country = {
+                set_country_type = primitive
+                clear_ethos = yes
+                country_add_ethic = ethic_fanatic_xenophobe
+                random_list = {
+                    1 = { country_add_ethic = ethic_militarist }
+                    1 = { country_add_ethic = ethic_pacifist }
+                    1 = { country_add_ethic = ethic_egalitarian }
+                    1 = { country_add_ethic = ethic_authoritarian }
+                    1 = { country_add_ethic = ethic_spiritualist }
+                    1 = { country_add_ethic = ethic_materialist }
+                }
+                set_country_flag = stone_age
+                set_primitive_age = stone_age
+                remove_country_flag = mem_crucible_insanity_age
+                change_government = {
+                    authority = random
+                    civics = {
+                        civic = civic_secret_of_fire
+                        civic = civic_the_wheel
+                    }
+                }
+                set_graphical_culture = preindustrial_01
+            }
+            set_owner = event_target:mem_crucible_country
+			set_name = Volch
+			
+			while = {
+				count = 2
+				add_district = district_city
+				add_district = district_farming
+				add_district = district_mining
+				add_district = district_generator
+			}
+			while = {
+				count = 4
+				create_pop = {
+					species = owner
+				}					
+			}
+			add_building = building_crude_huts
+
+            set_variable = {
+                which = mem_crucible_timer
+                value = 0
+            }
+
+            IF = {
+                limit = { exists = space_owner }
+                space_owner = {
+                    set_country_flag = mem_crucible_witnessed_rebirth
+                    country_event = { id = mem_crucible.5 }
+                }
+            }
+
+            every_playable_country = {
+                limit = {
+                    NOT = { has_established_contact = event_target:mem_crucible_country }
+                    prev = {
+                        is_surveyed = {
+                            who = prev
+                            status = yes
+                        }
+                    }
+                }
+                establish_communications_no_message = event_target:mem_crucible_country
+            }
+        }
+        ELSE_IF = { #If something weird happened to a planet, reform it as shrouded. Mark space owner as hostile, he probably broke it
+            limit = {
+                NOR = {
+                    is_planet_class = pc_gaia
+                    is_planet_class = pc_shrouded
+                }
+            }
+            change_pc = pc_shrouded
+            IF = {
+                limit = { exists = space_owner }
+                space_owner = {
+                    set_country_flag = mem_crucible_took_hostile_action
+                }
+            }
+        }
+
+        #Checking if it's time for observer to step in
+        IF = {
+            limit = { 
+                NOT = { has_global_flag = mem_crucible_someone_was_offered_quest }
+                has_observation_outpost = yes 
+                observation_outpost_owner = {
+                    NOT = { has_country_flag = mem_crucible_offered_quest }
+                    has_country_flag = mem_crucible_witnessed_rebirth
+                    check_variable = {
+                        which = mem_crucible_witnessed_death
+                        value > 1
+                    }
+                }
+            }
+            #Notifying player goes here
+            random_list = {
+                90 = {
+                    modifier = {
+                        add = 150
+                        observation_outpost_owner = {
+                            is_ai = yes
+                        }
+                    }
+                }
+                10 = {
+                    observation_outpost_owner = {
+                        country_event = { id = mem_crucible.100 days = 15 }
+                    }
+                }
+            }
+        }
+
+        #Checking if somebody shattered controller planet somehow
+        event_target:mem_crucible_controller_planet = {
+            IF = {
+                limit = {
+                    NOT = { is_planet_class = pc_shrouded }
+                }
+                change_pc = pc_shrouded
+            }
+        }
+
+        #Return to loop
+        planet_event = { id = mem_crucible.2 days = @maintenance_loop random = @maintenance_loop_random }
+    }
+}
+
+#Notification of Insanity Age
+country_event = {
+    id = mem_crucible.3
+    title = mem_crucible.3.name
+    desc = mem_crucible.3.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_burning_settlement
+    location = FROM
+    show_sound = event_public_unrest
+
+    option = {
+        name = mem_crucible.3.a
+    }
+}
+
+#Notification of shrouding
+country_event = {
+    id = mem_crucible.4
+    title = mem_crucible.4.name
+    desc = {
+        text = mem_crucible.4.desc.first
+        trigger = {
+            check_variable = {
+                which = mem_crucible_witnessed_death
+                value = 1
+            }
+        }
+    }
+    desc = {
+        text = mem_crucible.4.desc.latter
+        trigger = {
+            check_variable = {
+                which = mem_crucible_witnessed_death
+                value > 1
+            }
+        }
+    }
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_gray_gooed_planet
+    location = FROM
+    show_sound = event_mystic_reveal
+
+    option = {
+        name = mem_crucible.4.a
+    }
+}
+
+#Notification of de-shrouding
+country_event = {
+    id = mem_crucible.5
+    title = mem_crucible.5.name
+    desc = {
+        text = mem_crucible.5.desc.never_seen_death
+        trigger = {
+            check_variable = {
+                which = mem_crucible_witnessed_death
+                value = 0
+            }
+        }
+    }
+    desc = {
+        text = mem_crucible.5.desc.seen_death
+        trigger = {
+            check_variable = {
+                which = mem_crucible_witnessed_death
+                value = 1
+            }
+        }
+    }
+    desc = {
+        text = mem_crucible.5.desc.seen_many_deaths
+        trigger = {
+            check_variable = {
+                which = mem_crucible_witnessed_death
+                value > 1
+            }
+        }
+    }
+
+    is_triggered_only = yes
+
+    trigger = {
+        NOT = { has_country_flag = mem_crucible_ignore_events }
+    }
+
+    picture = GFX_evt_alien_cavemen
+    location = FROM
+    show_sound = event_mystic_reveal
+
+    option = {
+        name = mem_crucible.5.a
+    }
+
+    option = {
+        name = mem_crucible.5.a
+
+        exclusive_trigger = {
+            check_variable = {
+                which = mem_crucible_witnessed_death
+                value > 1
+            }
+        }
+    }
+}
+
+#Notification that planet reacted to hostile action
+country_event = {
+    id = mem_crucible.6
+    title = mem_crucible.6.name
+    desc = mem_crucible.6.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_gray_gooed_planet
+    location = FROM
+    show_sound = event_mystic_reveal
+    
+    option = {
+        name = mem_crucible.6.a
+    }
+}
+
+#Planet event - why did you conquer the planet
+planet_event = {
+    id = mem_crucible.7
+    title = mem_crucible.7.name
+    desc = mem_crucible.7.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_gray_gooed_planet
+    location = ROOT
+    show_sound = event_mystic_reveal
+
+    immediate = {
+        owner = {
+            set_country_flag = mem_crucible_took_hostile_action
+        }
+		every_owned_pop = { kill_pop = yes }
+		remove_all_buildings = yes
+		remove_all_districts = yes
+        change_pc = pc_shrouded
+    }
+
+    option = {
+        name = mem_crucible.7.a
+
+        tooltip = {
+            change_pc = pc_shrouded
+        }
+    }
+}
+
+#Surveying insane planet
+ship_event = {
+    id = mem_crucible.8
+    title = mem_crucible.8.name
+    desc = mem_crucible.8.desc
+
+    is_triggered_only = yes
+
+    trigger = {
+        FROM = {
+            exists = owner
+            owner = {
+                is_country_type = primitive
+                has_country_flag = mem_crucible_insanity_age
+            }
+        }
+    }
+
+    picture = GFX_evt_burning_settlement
+    location = FROM
+    show_sound = event_public_unrest
+
+    option = {
+		name = INTERESTING
+		owner = {
+			hidden_effect = { 
+				country_event = { 
+					id = story.6 
+					days = 30  
+					scopes = {
+						fromfrom = from.owner
+					}
+				} 
+			}
+		}
+	}
+}
+
+#On planet occupied - store planet owner
+planet_event = {
+    id = mem_crucible.9
+    is_triggered_only = yes
+    hide_window = yes
+
+    trigger = {
+        owner = {
+            is_country_type = primitive
+            has_country_flag = mem_crucible_country
+        }
+    }
+
+    immediate = {
+        owner = {
+            set_country_type = mem_crucible_dummy_country
+        }
+    }
+}
+
+#On planet zero health
+planet_event = {
+    id = mem_crucible.10
+    is_triggered_only = yes
+    hide_window = yes
+
+    trigger = {
+        owner = {
+            is_country_type = primitive
+            has_country_flag = mem_crucible_country
+        }
+    }
+
+    immediate = {
+        owner = {
+            set_country_type = mem_crucible_dummy_country
+        }
+		every_owned_pop = { kill_pop = yes }
+		remove_all_buildings = yes
+		remove_all_districts = yes
+        change_pc = pc_shrouded
+        FROM = {
+            set_country_flag = mem_crucible_took_hostile_action
+            country_event = { id =  mem_crucible.11 }
+        }
+    }
+}
+
+#Player notificied what they did
+country_event = {
+    id = mem_crucible.11
+    title = mem_crucible.11.name
+    desc = mem_crucible.11.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_gray_gooed_planet
+    location = FROM
+    show_sound = event_mystic_reveal
+    
+    option = {
+        name = mem_crucible.11.a
+    }
+}
+
+####################
+# ACTUAL STORYLINE #
+####################
+
+#Well, let's get started - offering a special project
+country_event = {
+    id = mem_crucible.100
+    title = mem_crucible.100.name
+    desc = mem_crucible.100.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_hive_mind
+    location = FROM
+    show_sound = event_mystic_reveal
+
+    immediate = {
+        set_country_flag = mem_crucible_offered_quest
+        set_global_flag = mem_crucible_someone_was_offered_quest
+    }
+
+    option = {
+        name = mem_crucible.100.a
+
+        begin_event_chain = {
+            event_chain = mem_crucible_chain
+            target = this
+        }
+        hidden_effect = {
+            enable_special_project = {
+                name = MEM_CRUCIBLE_STUDY_HOMEWORLD
+                location = event_target:mem_crucible_planet
+                owner = root
+            }
+            enable_special_project = {
+                name = MEM_CRUCIBLE_STUDY_CONTROLLER
+                location = event_target:mem_crucible_controller_planet
+                owner = root
+            }
+        }
+    }
+
+    option = {
+        name = mem_crucible.100.b
+        custom_tooltip = mem_crucible.100.b.tooltip
+
+        set_country_flag = mem_crucible_ignore_events
+        remove_global_flag = mem_crucible_someone_was_offered_quest
+    }
+}
+
+# Completed homeworld survey
+ship_event = {
+    id = mem_crucible.101
+    title = mem_crucible.101.name
+    desc = mem_crucible.101.desc
+
+    is_triggered_only = yes
+
+    location = event_target:mem_crucible_planet
+    picture = GFX_evt_hive_mind
+    show_sound = event_mystic_reveal
+
+    option = {
+        name = mem_crucible.101.a
+    }
+
+    after = {
+        owner = {
+            add_monthly_resource_mult = {
+				resource = unity
+				value = @tier3unityreward
+				min = @tier3unitymin
+				max = @tier3unitymax
+			}
+        }
+        hidden_effect = {
+            owner = {
+                set_country_flag = mem_crucible_examined_homeworld
+                country_event = {
+                    id = mem_crucible.200
+                    days = 30
+                }
+            }
+        }
+    }
+}
+
+# Completion of controller planet survey
+ship_event = {
+    id = mem_crucible.102
+    title = mem_crucible.102.name
+    desc = mem_crucible.102.desc
+
+    is_triggered_only = yes
+
+    location = event_target:mem_crucible_controller_planet
+    picture = GFX_evt_shrouded
+    show_sound = event_mystic_reveal
+
+    option = {
+        name = mem_crucible.102.a
+    }
+
+    after = {
+        owner = {
+            add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+        }
+        hidden_effect = {
+            owner = {
+                set_country_flag = mem_crucible_examined_controller
+                country_event = {
+                    id = mem_crucible.200
+                    days = 30
+                }
+            }
+        }
+    }
+}
+
+# After two events are complete
+country_event = {
+    id = mem_crucible.200
+    title = mem_crucible.200.name
+    desc = mem_crucible.200.desc
+
+    is_triggered_only = yes
+
+    location = event_target:mem_crucible_controller_planet.solar_system
+	picture = GFX_evt_space_monster
+	show_sound = event_mystic_reveal
+
+    trigger = {
+        has_country_flag = mem_crucible_examined_homeworld
+        has_country_flag = mem_crucible_examined_controller
+        NOT = {
+            has_country_flag = mem_crucible_received_final_project
+        }
+    }
+
+    immediate = {
+        set_country_flag = mem_crucible_received_final_project
+    }
+
+    option = {
+        name = mem_crucible.200.a
+        add_resource = {
+			influence = 100
+		}
+        enable_special_project = {
+            name = MEM_CRUCIBLE_CONTACT_THE_CONTROLLER
+            location = event_target:mem_crucible_controller_planet
+            owner = root
+        }
+    }
+
+    option = {
+        name = mem_crucible.200.b
+        custom_tooltip = mem_crucible.100.b.tooltip
+        add_resource = {
+			influence = 100
+		}
+        set_country_flag = mem_crucible_ignore_events
+        remove_global_flag = mem_crucible_someone_was_offered_quest
+        end_event_chain = mem_crucible_chain
+    }
+}
+
+# Contact made
+country_event = {
+    id = mem_crucible.201
+    title = mem_crucible.201.name
+    desc = mem_crucible.201.desc
+
+    is_triggered_only = yes
+
+    location = event_target:mem_crucible_controller_planet
+    picture = GFX_evt_space_monster
+    show_sound = event_mystic_reveal
+
+    option = { #Disable the controller
+        name = mem_crucible.201.a
+        custom_tooltip = mem_crucible.201.a.tooltip
+
+        hidden_effect = {
+            event_target:mem_crucible_planet = {
+				every_owned_pop = { kill_pop = yes }
+				remove_all_buildings = yes
+				remove_all_districts = yes
+                set_planet_flag = mem_crucible_stop_the_loop
+                change_pc = pc_shrouded
+                planet_event = { id = mem_crucible.300 days = 60 }
+            }
+            country_event = { id = mem_crucible.302 days = 90 }
+        }
+    }
+
+    option = { #Solve the controller's problem
+        name = mem_crucible.201.b
+
+        enable_special_project = {
+            name = MEM_CRUCIBLE_SOLVE_THE_PROBLEM
+            location = event_target:mem_crucible_controller_planet
+            owner = root
+        }
+    }
+
+    option = { #Change parameters 
+        name = mem_crucible.201.c
+
+        trigger = {
+            OR = {
+                has_trait = trait_latent_psionic
+                has_trait = trait_psionic
+            }
+        }
+        enable_special_project = {
+            name = MEM_CRUCIBLE_CHANGE_THE_PROBLEM
+            location = event_target:mem_crucible_controller_planet
+            owner = root
+        }
+    }
+
+    option = { #Hijack controller
+        name = mem_crucible.201.d
+
+        trigger = {
+            OR = {
+                has_authority = auth_machine_intelligence
+                has_trait = trait_cybernetic
+                is_synthetic_empire = yes
+            }
+            always = no #Maybe add it later, be prepared
+        }
+    }
+
+    option = { #Screw you guys
+        name = mem_crucible.201.e
+        add_resource = {
+			influence = 300
+		}
+        set_country_flag = mem_crucible_ignore_events
+        remove_global_flag = mem_crucible_someone_was_offered_quest
+        end_event_chain = mem_crucible_chain
+    }
+}
+
+################
+# FINAL EVENTS #
+################
+
+# Delayed effect on shrouded planet
+planet_event = {
+    id = mem_crucible.300
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        create_country = {
+            name = "True Voldareen"
+            type = mem_blacksite_faction #Destroying outposts
+            flag = {
+                icon = {
+                    category = spherical
+                    file = flag_spherical_1.dds
+                }
+                background = {
+                    category = backgrounds
+                    file = triangle_split.dds
+                }
+                colors = {
+                    "red"
+                    "pink"
+                    "null"
+                    "null"
+                }
+            }
+            effect = {
+                every_playable_country = {
+                    establish_communications_no_message = prev
+                }
+                set_country_flag = mem_crucible_true_voldareen
+            }
+        }
+        create_fleet = {
+            name = "True Voldareen"
+            effect = {
+                set_owner = last_created_country
+                set_location = root
+                create_ship = {
+                    name = "True Voldareen"
+                    design = NAME_Corrupted_Avatar
+                    effect = {
+                        set_ship_flag = mem_crucible_true_voldareen_ship
+                        #Gonna make adjustments probably
+                    }
+                }
+                set_fleet_stance = aggressive
+                set_aggro_range_measure_from = self
+                set_aggro_range = 500
+            }
+        }
+        change_pc = pc_gaia
+        reroll_planet = yes
+        IF = {
+            limit = { exists = space_owner }
+            space_owner = {
+                country_event = { id = mem_crucible.301 }
+            }
+        }
+    }
+}
+
+#Notification
+country_event = {
+    id = mem_crucible.301
+    title = mem_crucible.301.name
+    desc = mem_crucible.301.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_space_monster
+    location = event_target:mem_crucible_controller_planet
+    show_sound = event_mystic_reveal
+
+    option = {
+        name = mem_crucible.301.a
+        end_event_chain = mem_crucible_chain
+    }
+}
+
+#Fallen empire dislike
+country_event = {
+    id = mem_crucible.302
+    title = TRANSMISSION
+    desc = {
+        text = mem_crucible.302.xenophile
+        trigger = {
+            event_target:angry_empire = {
+                OR = {
+                    has_ethic = ethic_fanatic_xenophile
+                    has_ethic = ethic_fanatic_materialist
+                }
+            }
+        }
+    }
+    desc = {
+        text = mem_crucible.302.xenophobe
+        trigger = {
+            event_target:angry_empire = {
+                OR = {
+                    has_ethic = ethic_fanatic_xenophobe
+                    has_ethic = ethic_fanatic_spiritualist
+                }
+            }
+        }
+    }
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		portrait = event_target:angry_empire
+		planet_background = event_target:angry_empire
+		graphical_culture = event_target:angry_empire
+		city_level = event_target:angry_empire
+		room = event_target:angry_empire.ruler
+    }
+    
+    trigger = {
+        any_country = {
+            is_country_type = fallen_empire
+            OR = {
+                has_ethic = ethic_fanatic_xenophobe
+                has_ethic = ethic_fanatic_spiritualist
+                has_ethic = ethic_fanatic_xenophile
+                has_ethic = ethic_fanatic_materialist
+            }
+        }
+    }
+
+    immediate = {
+        random_country = {
+            limit = {
+                is_country_type = fallen_empire
+                OR = {
+                    has_ethic = ethic_fanatic_xenophobe
+                    has_ethic = ethic_fanatic_spiritualist
+                    has_ethic = ethic_fanatic_xenophile
+                    has_ethic = ethic_fanatic_materialist
+                }
+            }
+            save_event_target_as = angry_empire
+        }
+        every_country = {
+            limit = {
+                is_country_type = fallen_empire
+                OR = {
+                    has_ethic = ethic_fanatic_xenophobe
+                    has_ethic = ethic_fanatic_spiritualist
+                    has_ethic = ethic_fanatic_xenophile
+                    has_ethic = ethic_fanatic_materialist
+                }
+            }
+            establish_communications_no_message = root
+            add_opinion_modifier = {
+                who = root
+                modifier = mem_crucible_broke_crucible
+            }
+        }
+    }
+
+    option = {
+        name = mem_crucible.302.a
+    }
+
+    option = {
+        name = mem_crucible.302.b
+
+        trigger = {
+            OR = {
+                has_ethic = ethic_materialist
+                has_ethic = ethic_fanatic_materialist
+            }
+        }
+    }
+
+    option = {
+        name = mem_crucible.302.c
+
+        trigger = {
+            OR = {
+                has_ethic = ethic_egalitarian
+                has_ethic = ethic_fanatic_egalitarian
+                has_ethic = ethic_pacifist
+                has_ethic = ethic_fanatic_pacifist
+                has_ethic = ethic_xenophile
+                has_ethic = ethic_fanatic_xenophile
+            }
+        }
+    }
+
+    option = {
+        name = mem_crucible.302.d
+
+        trigger = {
+            OR = {
+                has_ethic = ethic_fanatic_xenophobe
+                has_ethic = ethic_xenophobe
+                has_ethic = ethic_fanatic_militarist
+                has_ethic = ethic_militarist
+            }
+        }
+    }
+
+    after = {
+        tooltip = {
+            every_country = {
+                limit = {
+                    is_country_type = fallen_empire
+                    OR = {
+                        has_ethic = ethic_fanatic_xenophobe
+                        has_ethic = ethic_fanatic_spiritualist
+                        has_ethic = ethic_fanatic_xenophile
+                        has_ethic = ethic_fanatic_materialist
+                    }
+                }
+                add_opinion_modifier = {
+                    who = root
+                    modifier = mem_crucible_broke_crucible
+                }
+            }
+        }
+    }
+}
+
+#Problem solved
+country_event = {
+    id = mem_crucible.310
+    title = mem_crucible.310.name
+    desc = mem_crucible.310.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_space_monster
+    location = event_target:mem_crucible_controller_planet
+    show_sound = event_mystic_reveal
+
+    immediate = {
+        event_target:mem_crucible_controller_planet = {
+            change_pc = pc_nuked
+            reroll_planet = yes
+			clear_blockers = yes
+            add_deposit = d_mem_crucible_controller
+            set_planet_flag = primtives_nuked_themselves
+            set_planet_flag = colony_event
+            set_planet_flag = mem_crucible_stop_the_loop
+        }
+        event_target:mem_crucible_planet = {
+			every_owned_pop = { kill_pop = yes }
+			remove_all_buildings = yes
+			remove_all_districts = yes
+            change_pc = pc_shrouded
+            set_planet_flag = mem_crucible_stop_the_loop
+        }
+    }
+
+    option = {
+        name = EXCELLENT
+        end_event_chain = mem_crucible_chain
+    }
+}
+
+#Changing the problem
+country_event = {
+    id = mem_crucible.320
+    title = mem_crucible.320.name
+    desc = mem_crucible.320.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_space_monster
+    location = event_target:mem_crucible_controller_planet
+    show_sound = event_mystic_reveal
+
+    immediate = {
+        event_target:mem_crucible_controller_planet = {
+            change_pc = pc_nuked
+            reroll_planet = yes
+            clear_blockers = yes
+            add_deposit = d_mem_crucible_controller
+            set_planet_flag = primtives_nuked_themselves
+            set_planet_flag = colony_event
+        }
+        event_target:mem_crucible_country = {
+            clear_ethos = yes
+            country_add_ethic = ethic_xenophile
+            country_add_ethic = ethic_pacifist
+            country_add_ethic = ethic_spiritualist
+            modify_species = {
+                species = this
+                base = none
+                add_trait = trait_psionic
+            }
+            change_dominant_species = { species = last_created_species change_all = yes }
+        }
+        event_target:mem_crucible_planet = {
+            IF = {
+                limit = {
+                    NOT = { is_planet_class = pc_gaia }
+                }
+                change_pc = pc_gaia
+                reroll_planet = yes
+                event_target:mem_crucible_country = {
+                    set_country_type = primitive
+                    set_country_flag = stone_age
+                    set_primitive_age = stone_age
+                    remove_country_flag = mem_crucible_insanity_age
+                    change_government = {
+                        authority = random
+                        civics = {
+                            civic = civic_secret_of_fire
+                            civic = civic_the_wheel
+                        }
+                    }
+                    set_graphical_culture = preindustrial_01
+                }
+                set_owner = event_target:mem_crucible_country
+                set_name = Volch
+				while = {
+					count = 2
+					add_district = district_city
+					add_district = district_farming
+					add_district = district_mining
+					add_district = district_generator
+				}
+				while = {
+					count = 4
+					create_pop = {
+						species = last_created
+					}					
+				}
+				add_building = building_crude_huts
+	
+            }
+            ELSE = {
+                set_owner = event_target:mem_crucible_country
+                set_name = Volch
+                every_owned_pop = {
+                    random_list = {
+                        1 = { pop_change_ethic = ethic_xenophile }
+                        1 = { pop_change_ethic = ethic_pacifist }
+                        1 = { pop_change_ethic = ethic_spiritualist }
+                    }
+                }
+                event_target:mem_crucible_country = {
+                    IF = {
+                        limit = { has_country_flag = mem_crucible_insanity_age }
+                        set_country_flag = industrial_age
+                        set_primitive_age = industrial_age
+                    }
+                }
+            }
+            set_planet_flag = mem_crucible_stop_the_loop
+        }
+    }
+
+    option = {
+        name = EXCELLENT
+        end_event_chain = mem_crucible_chain
+    }
+}

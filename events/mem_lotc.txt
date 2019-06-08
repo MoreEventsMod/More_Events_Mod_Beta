@@ -4,31 +4,12 @@
 
 namespace = mem_lotc
 
-@min_distance = 20
-@max_distance = 60
-
-@tier1researchreward = 6
-@tier1researchmin = 60
-@tier1researchmax = 150
-@tier2researchreward = 12
-@tier2researchmin = 90
-@tier2researchmax = 250
-@tier3researchreward = 18
-@tier3researchmin = 120
-@tier3researchmax = 350
-@tier4researchreward = 24
-@tier4researchmin = 150
-@tier4researchmax = 500
-@tier5researchreward = 48
-@tier5researchmin = 300
-@tier5researchmax = 1000
-
 # Anomaly survey success
 ship_event = {
 	id = mem_lotc.1
 	title = "mem_lotc.1.name"
 	desc = "mem_lotc.1.desc"
-	picture = "GFX_evt_dead_city"
+	picture = "GFX_evt_derelict_interior"
 	is_triggered_only = yes
 	
 	immediate = {
@@ -56,234 +37,168 @@ ship_event = {
 		}
 		
 		hidden_effect = {
-		
-			#FIRST PROJECT
-			IF = {
-				limit = {
-					any_system = {
-						any_planet = {is_planet_class = pc_ocean }
-						distance = {
-							source = event_target:start
-							max_distance = @max_distance
-							min_distance = @min_distance
-						}
-						NOT = { has_star_flag = mem_lotc_start_system }
-					}
-				}
-				
-				random_planet = {
+			set_spawn_system_batch = begin
+			FROM = {
+				#First project
+				closest_system = {
 					limit = {
-						is_planet_class = pc_ocean
-						distance = {
-							source = event_target:start
-							max_distance = @max_distance
-							min_distance = @min_distance
+						NOR = {
+							has_star_flag = hostile_system
+							is_pirate_system = yes
 						}
-						solar_system = { 
-							NOT = { has_star_flag = mem_lotc_start_system } 
+						has_access_fleet = root.owner
+						any_system_planet = {
+							OR = {
+								is_planet_class = pc_ocean
+								is_planet_class = pc_continental
+								is_planet_class = pc_gaia
+								is_planet_class = pc_tropical
+							}
+							NOT = { exists = owner }
 						}
 					}
-					set_planet_flag = mem_lotc_first
-				}
-				
-				else = {
-					IF = {
+					min_steps = 2
+					max_steps = 5
+					random_system_planet = {
 						limit = {
-							any_system = {
-								OR = {
-									any_planet = {is_planet_class = pc_continental }
-									any_planet = {is_planet_class = pc_gaia }
-								}
-								distance = {
-									source = event_target:start
-									max_distance = @max_distance
-									min_distance = @min_distance
-								}
-								NOT = { has_star_flag = mem_lotc_start_system }
+							OR = {
+								is_planet_class = pc_ocean
+								is_planet_class = pc_continental
+								is_planet_class = pc_gaia
+								is_planet_class = pc_tropical
 							}
+							NOT = { exists = owner }
 						}
-						
-						random_planet = {
-							limit = {
-								OR = {
-									is_planet_class = pc_continental
-									is_planet_class = pc_gaia 
-								}
-								distance = {
-									source = event_target:start
-									max_distance = @max_distance
-									min_distance = @min_distance
-								}
-								solar_system = { 
-									NOT = { has_star_flag = mem_lotc_start_system } 
-								}
-							}
-							set_planet_flag = mem_lotc_first
-						}
-						
-						else = {
-							IF = {
-								limit = {
-									any_system = {
-										any_planet = {is_planet_class = pc_tropical }
-										distance = {
-											source = event_target:start
-											max_distance = @max_distance
-											min_distance = @min_distance
-										}
-										NOT = { has_star_flag = mem_lotc_start_system }
-									}
-								}
-								
-								random_planet = {
-									limit = {
-										is_planet_class = pc_tropical
-										distance = {
-											source = event_target:start
-											max_distance = @max_distance
-											min_distance = @min_distance
-										}
-										solar_system = { 
-											NOT = { has_star_flag = mem_lotc_start_system } 
-										}
-									}
-									set_planet_flag = mem_lotc_first
-								}
-								
-								else = {
-									#FALLBACK INITIALIZER
-									event_target:start = {
-										spawn_system = {
-											max_distance = @max_distance
-											min_distance = @min_distance
-											initializer = "mem_lotc_first_init"
-										}
-									}
-								}
-							}
-						}
+						save_event_target_as = mem_lotc_first_planet
 					}
 				}
-			}
-			
-			#SECOND PROJECT
-			event_target:start = {
-				spawn_system = {
-					max_distance = @max_distance
-					min_distance = @min_distance
-					initializer = "mem_lotc_second_init"
-				}
-			}
-			
-			#THIRD PROJECT
-			IF = {
-				limit = {
-					any_system = {
-						any_planet = { is_planet_class = pc_gas_giant }
-						NOT = { has_star_flag = mem_lotc_second }
-						NOT = { any_planet = { has_planet_flag = mem_lotc_first } }
-						distance = {
-							source = event_target:start
-							max_distance = @max_distance
-							min_distance = @min_distance
-						}
-						NOT = { has_star_flag = mem_lotc_start_system }
-					}		
-				}
-				
-				random_planet = {
+				IF = {
 					limit = {
-						is_planet_class = pc_gas_giant
-						distance = {
-							source = event_target:start
-							max_distance = @max_distance
-							min_distance = @min_distance
+						NOT = { exists = event_target:mem_lotc_first_planet }
+					}
+					closest_system = {
+						limit = {
+							NOT = { has_star_flag = mem_lotc_used_as_spawner }
 						}
-						solar_system = { 
-							NOT = { has_star_flag = mem_lotc_start_system } 
-							NOT = { has_star_flag = mem_lotc_second }
-							NOT = { any_planet = { has_planet_flag = mem_lotc_first } }
+						min_steps = 1
+						set_star_flag = mem_lotc_used_as_spawner
+						spawn_system = {
+							max_distance <= 20
+							min_distance >= 5
+							initializer = "mem_lotc_first_init"
 						}
 					}
-					set_planet_flag = mem_lotc_third
 				}
-				
-				else = {
-					#FALLBACK SPAWN
-					event_target:start = {
+				#Second project
+				closest_system = {
+					limit = {
+						NOT = { has_star_flag = mem_lotc_used_as_spawner }
+					}
+					min_steps = 1
+					set_star_flag = mem_lotc_used_as_spawner
+					spawn_system = {
+						max_distance <= 20
+						min_distance >= 5
+						initializer = "mem_lotc_second_init"
+					}
+				}
+				#Third project
+				closest_system = {
+					limit = {
+						NOR = {
+							has_star_flag = hostile_system
+							is_pirate_system = yes
+							has_star_flag = mem_lotc_second
+							any_system_planet = { 
+								OR = {
+									is_same_value = event_target:mem_lotc_first_planet 
+								}
+							}
+						}
+						has_access_fleet = root.owner
+						any_system_planet = {
+							is_planet_class = pc_gas_giant
+						}
+					}
+					min_steps = 2
+					max_steps = 5
+					random_system_planet = {
+						limit = { is_planet_class = pc_gas_giant }
+						save_event_target_as = mem_lotc_third_planet
+					}
+				}
+				IF = {
+					limit = {
+						NOT = { exists = event_target:mem_lotc_third_planet }
+					}
+					closest_system = {
+						limit = {
+							NOT = { has_star_flag = mem_lotc_used_as_spawner }
+						}
+						min_steps = 1
+						set_star_flag = mem_lotc_used_as_spawner
 						spawn_system = {
-							max_distance = @max_distance
-							min_distance = @min_distance
+							max_distance <= 20
+							min_distance >= 5
 							initializer = "mem_lotc_third_init"
 						}
 					}
 				}
-			}
-			
-			#FOURTH PROJECT
-			IF = {
-				limit = {
-					any_system = {
-						OR = {
-							any_planet = { is_planet_class = pc_barren }
-							any_planet = { is_planet_class = pc_barren_cold }
-						}
-						NOT = { has_star_flag = mem_lotc_second }
-						NOT = { any_planet = { has_planet_flag = mem_lotc_first } }
-						NOT = { any_planet = { has_planet_flag = mem_lotc_third } }
-						distance = {
-							source = event_target:start
-							max_distance = @max_distance
-							min_distance = @min_distance
-						}
-						NOT = { has_star_flag = mem_lotc_start_system }
-					}		
-				}
-				
-				random_planet = {
+				#Fourth project
+				closest_system = {
 					limit = {
-						OR = {
-							is_planet_class = pc_barren
-							is_planet_class = pc_barren_cold
+						NOR = {
+							has_star_flag = hostile_system
+							is_pirate_system = yes
+							has_star_flag = mem_lotc_second
+							any_system_planet = { 
+								OR = {
+									is_same_value = event_target:mem_lotc_first_planet 
+									is_same_value = event_target:mem_lotc_third_planet
+								}
+							}
 						}
-						distance = {
-							source = event_target:start
-							max_distance = @max_distance
-							min_distance = @min_distance
-						}
-						solar_system = { 
-							NOT = { has_star_flag = mem_lotc_start_system } 
+						has_access_fleet = root.owner
+						any_system_planet = {
+							OR = {
+								is_planet_class = pc_barren
+								is_planet_class = pc_barren_cold
+							}
 						}
 					}
-					set_planet_flag = mem_lotc_fourth
+					min_steps = 2
+					max_steps = 5
+					random_system_planet = {
+						limit = {
+							OR = {
+								is_planet_class = pc_barren
+								is_planet_class = pc_barren_cold
+							}
+						}
+						save_event_target_as = mem_lotc_fourth_planet
+					}
 				}
-				
-				else = {
-					#FALLBACK SPAWN
-					event_target:start = {
+				IF = {
+					limit = {
+						NOT = { exists = event_target:mem_lotc_fourth_planet }
+					}
+					closest_system = {
+						limit = {
+							NOT = { has_star_flag = mem_lotc_used_as_spawner }
+						}
+						min_steps = 1
+						set_star_flag = mem_lotc_used_as_spawner
 						spawn_system = {
-							max_distance = @max_distance
-							min_distance = @min_distance
+							max_distance <= 20
+							min_distance >= 5
 							initializer = "mem_lotc_fourth_init"
 						}
 					}
 				}
+				set_spawn_system_batch = end
 			}
 
-		
-		
-			#PROJECT ASSIGNMENT
-			random_planet = {
-				limit = {
-					has_planet_flag = mem_lotc_first
-				}
-				enable_special_project = {
-					name = "MEM_LOTC_FIRST"
-					location = this
-					owner = root
-				}
-			}
-			
+			#Project issuing
 			random_system = {
 				limit = {
 					has_star_flag = mem_lotc_second
@@ -300,26 +215,30 @@ ship_event = {
 			owner = {
 				set_country_flag = mem_lotc_going_for_it
 			}
-			
-			random_planet = {
-				limit = {
-					has_planet_flag = mem_lotc_third
-				}
-				enable_special_project = {
-					name = "MEM_LOTC_THIRD"
-					location = this
-					owner = root
-				}
+
+			enable_special_project = {
+				name = "MEM_LOTC_FIRST"
+				location = event_target:mem_lotc_first_planet
+				owner = root
 			}
-			random_planet = {
-				limit = {
-					has_planet_flag = mem_lotc_fourth
-				}
-				enable_special_project = {
-					name = "MEM_LOTC_FOURTH"
-					location = this
-					owner = root
-				}
+			enable_special_project = {
+				name = "MEM_LOTC_THIRD"
+				location = event_target:mem_lotc_third_planet
+				owner = root
+			}
+			enable_special_project = {
+				name = "MEM_LOTC_FOURTH"
+				location = event_target:mem_lotc_fourth_planet
+				owner = root
+			}
+		}
+	}
+
+	option = {
+		name = NOTIME
+		owner = { 
+			add_resource = {
+				influence = 250
 			}
 		}
 	}
@@ -398,8 +317,6 @@ ship_event = {
 		name = OK
 	}
 }
-
-#On action: cruiser taken out
 
 
 
@@ -489,21 +406,19 @@ ship_event = {
 					id = mem_lotc.7
 				}
 			}
-			else = {
-				IF = {
-					limit = {
-						any_country = {
-							has_country_flag = mem_lotc_found_the_second
-						}
-					}
-					every_country = {
-						limit = {
-							has_country_flag = mem_lotc_found_the_second
-						}
-						country_event = {
-							id = mem_lotc.8
-						}
-					}
+		}
+		ELSE_IF = {
+			limit = {
+				any_country = {
+					has_country_flag = mem_lotc_found_the_second
+				}
+			}
+			every_country = {
+				limit = {
+					has_country_flag = mem_lotc_found_the_second
+				}
+				country_event = {
+					id = mem_lotc.8
 				}
 			}
 		}
@@ -696,8 +611,8 @@ country_event = {
 		hidden_effect = {
 			event_target:start = {
 				spawn_system = {
-					max_distance = @max_distance
-					min_distance = @min_distance
+					max_distance <= 20
+					min_distance >= 5
 					initializer = "mem_lotc_homeworld_init"
 				}
 			}
@@ -728,7 +643,7 @@ ship_event = {
 	title = mem_lotc.12.name
 	desc = mem_lotc.12.desc
 	
-	picture = GFX_evt_ship_in_orbit
+	picture = GFX_evt_ruined_system
 	
 	is_triggered_only = yes
 	
@@ -949,10 +864,8 @@ ship_event = {
 			}
 		}
 		event_target:venus = {
-			orbital_deposit_tile = {
-				add_deposit = d_rich_engineering_deposit
-				add_deposit = d_rich_society_deposit
-			}
+			add_deposit = d_engineering_2
+			add_deposit = d_society_2
 		}
 		
 	}	
@@ -1001,9 +914,7 @@ ship_event = {
 			}
 		}
 		event_target:venus_1 = {
-			orbital_deposit_tile = {
-				add_deposit = d_immense_mineral_deposit
-			}
+			add_deposit = d_minerals_3
 		}
 	}	
 }
@@ -1110,9 +1021,7 @@ ship_event = {
 			}
 		}
 		event_target:luna = {
-			orbital_deposit_tile = {
-				add_deposit = d_vast_society_deposit
-			}
+			add_deposit = d_society_3
 		}
 	}	
 }
@@ -1247,9 +1156,7 @@ ship_event = {
 			}
 		}
 		event_target:the_asteroid = {
-			orbital_deposit_tile = {
-				add_deposit = d_immense_mineral_deposit
-			}
+			add_deposit = d_minerals_3
 		}
 		
 	}	
@@ -1330,10 +1237,8 @@ ship_event = {
 			}
 		}
 		event_target:jupiter_1 = {
-			orbital_deposit_tile = {
-				add_deposit = d_vast_mineral_deposit
-				add_deposit = d_vast_energy_deposit
-			}
+			add_deposit = d_minerals_3
+			add_deposit = d_energy_3
 		}
 	}	
 }
@@ -1422,7 +1327,7 @@ ship_event = {
 	
 	is_triggered_only = yes
 	
-	picture = GFX_evt_gas_giant
+	picture = GFX_evt_ruined_system
 	
 	immediate = {
 		owner = {
@@ -1450,10 +1355,8 @@ ship_event = {
 			}
 		}
 		event_target:saturn = {
-			orbital_deposit_tile = {
-				add_deposit = d_rich_engineering_deposit
-				add_deposit = d_rich_physics_deposit
-			}
+			add_deposit = d_engineering_2
+			add_deposit = d_physics_2
 		}
 		
 	}	
@@ -1501,9 +1404,7 @@ ship_event = {
 			}
 		}
 		event_target:saturn_1 = {
-			orbital_deposit_tile = {
-				add_deposit = d_rich_physics_deposit
-			}
+			add_deposit = d_physics_2
 		}
 		
 	}	
@@ -1551,10 +1452,8 @@ ship_event = {
 			}
 		}
 		event_target:saturn_2 = {
-			orbital_deposit_tile = {
-				add_deposit = d_physics_deposit
-				add_deposit = d_society_deposit
-			}
+			add_deposit = d_physics_1
+			add_deposit = d_society_1
 		}
 	}	
 }
@@ -1637,6 +1536,26 @@ country_event = {
 	}
 }
 
+# On building outpost in Carchar system - it was a weird thing to happen
+ship_event = {
+	id = mem_lotc.271
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		solar_system = { has_star_flag = mem_lotc_homeworld }
+	}
+
+	immediate = {
+		owner = {
+			country_event = {
+				id = mem_lotc.27
+				days = 10
+			}
+		}
+	}
+}
+
 
 #Succesfully found
 country_event = {
@@ -1669,8 +1588,8 @@ country_event = {
 		hidden_effect = {
 			event_target:start = {
 				spawn_system = {
-					max_distance = @max_distance
-					min_distance = @min_distance
+					max_distance <= 20
+					min_distance >= 5
 					initializer = "mem_lotc_colony_init"
 				}
 			}
@@ -1790,28 +1709,28 @@ planet_event = {
 				set_aggro_range = 100
 				set_owner = event_target:owners
 				while = {
-					count = 2
+					count = 1
 					create_ship = {
 						name = "NAME_mem_lotc_battleship"
 						design = "NAME_mem_lotc_battleship"
 					}
 				}
 				while = {
-					count = 6
+					count = 3
 					create_ship = {
 						name = "NAME_mem_lotc_cruiser"
 						design = "NAME_mem_lotc_cruiser"
 					}
 				}
 				while = {
-					count = 20
+					count = 10
 					create_ship = {
 						name = "NAME_mem_lotc_destroyer"
 						design = "NAME_mem_lotc_destroyer"
 					}
 				}
 				while = {
-					count = 36
+					count = 15
 					create_ship = {
 						name = "NAME_mem_lotc_corvette"
 						design = "NAME_mem_lotc_corvette"
@@ -1931,7 +1850,7 @@ ship_event = {
 		}
 	}
 	
-	picture = GFX_evt_ship_in_orbit
+	picture = GFX_evt_ruined_system
 	
 	option = {
 		name = OK

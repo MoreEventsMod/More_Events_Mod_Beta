@@ -1,0 +1,603 @@
+####################################
+#
+# Vazuran Menace - Event Systems
+#
+# Coding by Malthus
+#
+####################################
+
+namespace = mem_vazuran_systems
+
+# mem_vazurans.1   |A ship reaches the system
+
+########################################################
+# Fleet Spawning and Raiding Events
+########################################################
+
+########################################################
+# Introductionary Events
+########################################################
+
+########################################################
+# Story Events
+########################################################
+
+
+# A ship reaches the system
+# Triggers event when ship enters a system
+# Scope = Ship
+# From = System
+# FromFrom = Country
+ship_event = {
+	id = mem_vazuran_systems.1
+	title = mem_vazuran_systems.1.name
+	desc = {
+		trigger = {
+			switch = {
+				trigger = has_global_flag
+				mem_vazuran_event_system_01_scourge_line = { text = mem_vazuran_systems.1a.desc }
+				mem_vazuran_event_system_01_colony_trap_line = { text = mem_vazuran_systems.1b.desc }
+			}
+		}
+	}
+	picture = GFX_evt_ruined_system
+	show_sound = event_ship_bridge
+	location = From
+
+	is_triggered_only = yes
+
+	trigger = {
+		From = {
+			has_star_flag = mem_vazuran_event_system_01
+		}
+		NOT = {
+			has_global_flag = mem_vazuran_event_system_01_cleared
+		}
+		owner = {
+			is_ai = no
+			NOT = {
+				has_country_flag = mem_vazuran_event_system_01_found
+			}
+		}
+	}
+	
+	immediate = {
+		owner = {
+			set_country_flag = mem_vazuran_event_system_01_found
+		}
+		solar_system = {
+			save_global_event_target_as = mem_vazuran_event_system_01
+		}
+		IF = {
+			limit = {
+				NOT = {
+					has_global_flag = mem_vazuran_event_system_01_started
+				}
+			}
+			set_global_flag = mem_vazuran_event_system_01_started
+			random_list = {
+				# Scourge Story line
+				1 = {
+					set_global_flag = mem_vazuran_event_system_01_scourge_line
+					while = {
+						count = 10
+						solar_system = {
+							random_system_ambient_object = {
+								limit = {
+									has_ambient_object_flag = mem_vazuran_event_system_01_debris
+									NOR = {
+										has_ambient_object_flag = mem_vazuran_event_system_01_debris_used
+										has_ambient_object_flag = mem_vazuran_event_system_01_debris_scourge_big
+										has_ambient_object_flag = mem_vazuran_event_system_01_debris_scourge_small
+									}
+								}
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris_used
+								create_ambient_object = {
+									type = "dead_swarm_large_object"
+									location = this
+								}
+								last_created_ambient_object = { 
+									set_location = {
+										target = prev
+										distance = 13
+									}
+									set_ambient_object_flag = mem_vazuran_event_system_01_debris
+									set_ambient_object_flag = mem_vazuran_event_system_01_debris_scourge_big
+								}
+							}
+							solar_system = {
+								random_system_ambient_object = {
+									limit = {
+										has_ambient_object_flag = mem_vazuran_event_system_01_debris
+										NOR = {
+											has_ambient_object_flag = mem_vazuran_event_system_01_debris_used
+											has_ambient_object_flag = mem_vazuran_event_system_01_debris_scourge_big
+											has_ambient_object_flag = mem_vazuran_event_system_01_debris_scourge_small
+										}
+									}
+									set_ambient_object_flag = mem_vazuran_event_system_01_debris_used
+									create_ambient_object = {
+										type = "dead_swarm_small_object"
+										location = this
+									}
+									last_created_ambient_object = { 
+										set_location = {
+											target = prev
+											distance = 10
+										}
+										set_ambient_object_flag = mem_vazuran_event_system_01_debris
+										set_ambient_object_flag = mem_vazuran_event_system_01_debris_scourge_small
+									}
+								}
+							}
+							solar_system = {
+								random_system_ambient_object = {
+									limit = {
+										has_ambient_object_flag = mem_vazuran_event_system_01_debris
+										NOR = {
+											has_ambient_object_flag = mem_vazuran_event_system_01_debris_used
+											has_ambient_object_flag = mem_vazuran_event_system_01_debris_scourge_big
+											has_ambient_object_flag = mem_vazuran_event_system_01_debris_scourge_small
+										}
+									}
+									set_ambient_object_flag = mem_vazuran_event_system_01_debris_used
+									create_ambient_object = {
+										type = "dead_swarm_small_object"
+										location = this
+									}
+									last_created_ambient_object = { 
+										set_location = {
+											target = prev
+											distance = 6
+										}
+										set_ambient_object_flag = mem_vazuran_event_system_01_debris
+										set_ambient_object_flag = mem_vazuran_event_system_01_debris_scourge_small
+									}
+								}
+							}
+							solar_system = {
+								random_system_ambient_object = {
+									limit = {
+										has_ambient_object_flag = mem_vazuran_event_system_01_debris
+										NOR = {
+											has_ambient_object_flag = mem_vazuran_event_system_01_debris_used
+											has_ambient_object_flag = mem_vazuran_event_system_01_debris_scourge_big
+											has_ambient_object_flag = mem_vazuran_event_system_01_debris_scourge_small
+										}
+									}
+									set_ambient_object_flag = mem_vazuran_event_system_01_debris_used
+									create_ambient_object = {
+										type = "dead_swarm_small_object"
+										location = this
+									}
+									last_created_ambient_object = { 
+										set_location = {
+											target = prev
+											distance = 4
+										}
+										set_ambient_object_flag = mem_vazuran_event_system_01_debris
+										set_ambient_object_flag = mem_vazuran_event_system_01_debris_scourge_small
+									}
+								}
+							}
+						}
+					}
+					
+				}
+				# Colony Trap Story Line
+				0 = {
+					set_global_flag = mem_vazuran_event_system_01_colony_trap_line
+					solar_system = {
+						random_system_ambient_object = {
+							limit = {
+								has_ambient_object_flag = mem_vazuran_event_system_01_debris_drones_01
+							}
+							create_ambient_object = {
+								type = "mem_vazuran_drone_object"
+								location = this
+							}
+							last_created_ambient_object = { 
+								set_location = {
+									target = prev
+									distance = 4
+								}
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris_drone
+							}
+							create_ambient_object = {
+								type = "mem_vazuran_drone_object"
+								location = this
+							}
+							last_created_ambient_object = { 
+								set_location = {
+									target = prev
+									distance = 7
+								}
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris_drone
+							}
+							create_ambient_object = {
+								type = "mem_vazuran_drone_object"
+								location = this
+							}
+							last_created_ambient_object = { 
+								set_location = {
+									target = prev
+									distance = 11
+								}
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris_drone
+							}
+							create_ambient_object = {
+								type = "mem_vazuran_drone_object"
+								location = this
+							}
+							last_created_ambient_object = { 
+								set_location = {
+									target = prev
+									distance = 14
+								}
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris_drone
+							}
+						}
+						random_system_ambient_object = {
+							limit = {
+								has_ambient_object_flag = mem_vazuran_event_system_01_debris_drones_02
+							}
+							create_ambient_object = {
+								type = "mem_vazuran_drone_object"
+								location = this
+							}
+							last_created_ambient_object = { 
+								set_location = {
+									target = prev
+									distance = 4
+								}
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris_drone
+							}
+							create_ambient_object = {
+								type = "mem_vazuran_drone_object"
+								location = this
+							}
+							last_created_ambient_object = { 
+								set_location = {
+									target = prev
+									distance = 7
+								}
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris_drone
+							}
+							create_ambient_object = {
+								type = "mem_vazuran_drone_object"
+								location = this
+							}
+							last_created_ambient_object = { 
+								set_location = {
+									target = prev
+									distance = 11
+								}
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris_drone
+							}
+							create_ambient_object = {
+								type = "mem_vazuran_drone_object"
+								location = this
+							}
+							last_created_ambient_object = { 
+								set_location = {
+									target = prev
+									distance = 14
+								}
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris_drone
+							}
+						}
+						random_system_ambient_object = {
+							limit = {
+								has_ambient_object_flag = mem_vazuran_event_system_01_debris_drones_03
+							}
+							create_ambient_object = {
+								type = "mem_vazuran_drone_object"
+								location = this
+							}
+							last_created_ambient_object = { 
+								set_location = {
+									target = prev
+									distance = 4
+								}
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris_drone
+							}
+							create_ambient_object = {
+								type = "mem_vazuran_drone_object"
+								location = this
+							}
+							last_created_ambient_object = { 
+								set_location = {
+									target = prev
+									distance = 7
+								}
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris_drone
+							}
+							create_ambient_object = {
+								type = "mem_vazuran_drone_object"
+								location = this
+							}
+							last_created_ambient_object = { 
+								set_location = {
+									target = prev
+									distance = 11
+								}
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris_drone
+							}
+							create_ambient_object = {
+								type = "mem_vazuran_drone_object"
+								location = this
+							}
+							last_created_ambient_object = { 
+								set_location = {
+									target = prev
+									distance = 14
+								}
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris
+								set_ambient_object_flag = mem_vazuran_event_system_01_debris_drone
+							}
+						}
+					}
+				}
+			}
+		}
+		IF = {
+			limit = {
+				has_global_flag = mem_vazuran_event_system_01_scourge_line
+			}
+			solar_system = {
+				random_system_ambient_object = {
+					limit = {
+						has_ambient_object_flag = mem_vazuran_event_system_01_debris
+						NOR = {
+							has_ambient_object_flag = mem_vazuran_event_system_01_debris_used
+							has_ambient_object_flag = mem_vazuran_event_system_01_debris_scourge_big
+							has_ambient_object_flag = mem_vazuran_event_system_01_debris_scourge_small
+						}
+					}
+					set_ambient_object_flag = mem_vazuran_event_system_01_debris_used
+					create_ambient_object = {
+						type = "mem_vazuran_event_system_swarm_large_object"
+						location = this
+					}
+					last_created_ambient_object = { 
+						set_location = {
+							target = prev
+							distance = 13
+						}
+						set_ambient_object_flag = mem_vazuran_event_system_01_debris
+						set_ambient_object_flag = mem_vazuran_event_system_01_debris_scourge_big
+						set_ambient_object_flag = mem_vazuran_event_system_01_debris_scourge_project
+					}
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_vazuran_systems.1.a
+		trigger = {
+			has_global_flag = mem_vazuran_event_system_01_scourge_line
+		}
+		owner = {
+			begin_event_chain = {
+				event_chain = mem_vazuran_event_system_scourge_chain
+				target = root.owner
+			}
+		}
+		solar_system = {
+			random_system_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_vazuran_event_system_01_debris_scourge_project
+				}
+				enable_special_project = {
+					name = MEM_VAZURAN_EVENT_SYSTEM_SCOURGE_INVESTIGATION_01
+					location = this
+					owner = root.owner
+				}
+			}
+		}
+		solar_system = {
+			random_system_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_vazuran_event_system_01_debris_station
+				}
+				enable_special_project = {
+					name = MEM_VAZURAN_EVENT_SYSTEM_SCOURGE_INVESTIGATION_02
+					location = this
+					owner = root.owner
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_vazuran_systems.1.b
+		trigger = {
+			has_global_flag = mem_vazuran_event_system_01_colony_trap_line
+		}
+		owner = {
+			begin_event_chain = {
+				event_chain = mem_vazuran_event_system_colony_trap_chain
+				target = root.owner
+			}
+		}
+		solar_system = {
+			random_system_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_vazuran_event_system_01_debris_station
+				}
+				enable_special_project = {
+					name = MEM_VAZURAN_EVENT_SYSTEM_SCOURGE_INVESTIGATION_02
+					location = this
+					owner = root.owner
+				}
+			}
+		}
+	}
+}
+
+########################################################
+# Scourge Event Chain
+########################################################
+
+# Finishing the bioship project
+ship_event = {
+	id = mem_vazuran_systems.101
+	title = mem_vazuran_systems.101.name
+	desc = mem_vazuran_systems.101.desc
+	picture = GFX_evt_ruined_system
+	show_sound = event_ship_bridge
+	location = this
+
+	is_triggered_only = yes
+
+	immediate = {
+		owner = {
+			add_event_chain_counter = {
+				event_chain = mem_vazuran_event_system_scourge_chain
+				counter = mem_vazuran_event_system_scourge_projects_researched 
+				amount = 1 
+			}
+		}
+	}
+
+	option = {
+		name = mem_vazuran_systems.101.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		hidden_effect = {
+			owner = {
+				if = {
+					limit = {
+						has_completed_event_chain_counter = {
+							event_chain = mem_vazuran_event_system_scourge_chain
+							counter = mem_vazuran_event_system_scourge_projects_researched
+						}
+					}
+					country_event = { id = mem_vazuran_systems.103 }
+				}
+			}
+		}
+	}
+}
+
+# Finishing the debris project
+ship_event = {
+	id = mem_vazuran_systems.102
+	title = mem_vazuran_systems.102.name
+	desc = mem_vazuran_systems.102.desc
+	picture = GFX_evt_ruined_system
+	show_sound = event_ship_bridge
+	location = this
+
+	is_triggered_only = yes
+
+	immediate = {
+		owner = {
+			add_event_chain_counter = {
+				event_chain = mem_vazuran_event_system_scourge_chain
+				counter = mem_vazuran_event_system_scourge_projects_researched 
+				amount = 1 
+			}
+		}
+	}
+
+	after = {
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+		hidden_effect = {
+			owner = {
+				if = {
+					limit = {
+						has_completed_event_chain_counter = {
+							event_chain = mem_vazuran_event_system_scourge_chain
+							counter = mem_vazuran_event_system_scourge_projects_researched
+						}
+					}
+					country_event = { id = mem_vazuran_systems.103 }
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_vazuran_systems.102.a
+		trigger = {
+			owner = {
+				NOR = {
+					has_civic = civic_machine_terminator
+					has_civic = civic_fanatic_purifiers
+					has_civic = civic_hive_devouring_swarm
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_vazuran_systems.102.b
+		trigger = {
+			owner = {
+				has_civic = civic_machine_terminator
+			}
+		}
+	}
+
+	option = {
+		name = mem_vazuran_systems.102.c
+		trigger = {
+			owner = {
+				has_civic = civic_fanatic_purifiers
+			}
+		}
+	}
+
+	option = {
+		name = mem_vazuran_systems.102.d
+		trigger = {
+			owner = {
+				has_civic = civic_hive_devouring_swarm
+			}
+		}
+	}
+}
+
+# Finishing Scourge Event Chain
+country_event = {
+	id = mem_vazuran_systems.103
+	title = mem_vazuran_systems.103.name
+	desc = mem_vazuran_systems.103.desc
+	picture = GFX_evt_ruined_system
+	show_sound = event_ship_bridge
+	location = event_target:mem_vazuran_event_system_01
+
+	is_triggered_only = yes
+
+	option = {
+		name = mem_vazuran_systems.103.a
+		end_event_chain = mem_vazuran_event_system_scourge_chain
+		add_research_option = tech_mem_scourge_damage_bonus
+	}
+}

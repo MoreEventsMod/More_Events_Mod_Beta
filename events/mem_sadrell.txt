@@ -1,0 +1,3156 @@
+# The Return of the Sadrell
+# By ViolentBeetle
+
+namespace = mem_sadrell
+
+# Game start event: Plug in missing systems if any failed to spawn. Place anomalies
+event = {
+    id = mem_sadrell.1
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        has_global_flag = mem_sadrell_cluster_spawned
+    }
+
+    immediate = {
+        # Spawning the for essentials; if any are missing.
+        random_list = { # Determining the future
+            70 = {
+                random_list = {
+                    80 = { set_global_flag = mem_sadrell_will_return }
+                    20 = {
+                        set_global_flag = mem_sadrell_will_return_ass
+                        modifier = {
+                            factor = 0
+                            NOT = { host_has_dlc = "Synthetic Dawn Story Pack" }
+                        }
+                    }
+                }
+            }
+            # 0 = { set_global_flag = mem_sadrell_will_desert } # Likely will not be implemented due to similarity with message
+            15 = { set_global_flag = mem_sadrell_will_send_message }
+            15 = { set_global_flag = mem_sadrell_nothing_will_happen }
+        }
+        # random_list = {
+        #     33 = {
+        #         set_timed_global_flag = { flag = mem_sadrell_delay_flag days = 27000 }
+        #     }
+        #     33 = {
+        #         set_timed_global_flag = { flag = mem_sadrell_delay_flag days = 30000 }
+        #     }
+        #     33 = {
+        #         set_timed_global_flag = { flag = mem_sadrell_delay_flag days = 33000 }
+        #     }
+        # }
+        every_system = { # It did its job
+            limit = {
+                has_star_flag = mem_sadrell_home_cluster
+            }
+            remove_star_flag = empire_cluster
+        }
+        random_system = {
+            limit = { has_star_flag = mem_sadrell_gate_system }
+            set_spawn_system_batch = begin
+            IF = {
+                limit = {
+                    NOT = { any_system = { has_star_flag = mem_sadrell_homeworld_system } }
+                }
+                spawn_system = {
+                    min_distance >= 15
+                    max_distance <= 20
+                    min_orientation_angle = 24
+                    max_orientation_angle = 66
+                    initializer = mem_sadrell_0_1
+                }
+                random_system = {
+                    limit = { has_star_flag = mem_sadrell_homeworld_system }
+                    isolate_system = yes
+                    add_hyperlane = {
+                        from = this
+                        to = prev
+                    }
+                }
+                # log = "0-1"
+            }
+            IF = {
+                limit = {
+                    NOT = { any_system = { has_star_flag = mem_sadrell_industrial_system } }
+                }
+                spawn_system = {
+                    min_distance >= 15
+                    max_distance <= 20
+                    min_orientation_angle = 94
+                    max_orientation_angle = 136
+                    initializer = mem_sadrell_0_2
+                }
+                random_system = {
+                    limit = { has_star_flag = mem_sadrell_industrial_system }
+                    isolate_system = yes
+                    add_hyperlane = {
+                        from = this
+                        to = prev
+                    }
+                }
+                # log = "0-2"
+            }
+            IF = {
+                limit = {
+                    NOT = { any_system = { has_star_flag = mem_sadrell_agri_system } }
+                }
+                spawn_system = {
+                    min_distance >= 15
+                    max_distance <= 20
+                    min_orientation_angle = 164
+                    max_orientation_angle = 206
+                    initializer = mem_sadrell_0_3
+                }
+                random_system = {
+                    limit = { has_star_flag = mem_sadrell_agri_system }
+                    isolate_system = yes
+                    add_hyperlane = {
+                        from = this
+                        to = prev
+                    }
+                }
+                # log = "0-3"
+            }
+            IF = {
+                limit = {
+                    NOT = { any_system = { has_star_flag = mem_sadrell_science_system } }
+                }
+                spawn_system = {
+                    min_distance >= 15
+                    max_distance <= 20
+                    min_orientation_angle = 234
+                    max_orientation_angle = 306
+                    initializer = mem_sadrell_0_4
+                }
+                random_system = {
+                    limit = { has_star_flag = mem_sadrell_science_system }
+                    isolate_system = yes
+                    add_hyperlane = {
+                        from = this
+                        to = prev
+                    }
+                }
+                # log = "0-4"
+            }
+            set_spawn_system_batch = end
+        }
+        # Spawn anomalies here, maybe. Or perhaps put them through random picks? Or both?
+    }
+}
+
+# On entering system for the first time
+ship_event = {
+    id = mem_sadrell.2
+    title = mem_sadrell.2.name
+    desc = mem_sadrell.2.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_drifting_gateway
+    location = FROM
+    show_sound = event_scanner
+
+    trigger = {
+        FROM = { 
+            has_star_flag = mem_sadrell_gate_system 
+            has_megastructure = mem_sadrell_gateway_inactive
+        }
+        owner = {
+            NOT = { has_country_flag = mem_sadrell_encountered_gate }
+            is_country_type = default
+        }
+    }
+
+    immediate = {
+        set_global_flag = mem_sadrell_someone_encountered_the_gate
+        owner = {
+            set_country_flag = mem_sadrell_encountered_gate
+        }
+    }
+
+    option = {
+        name = INTERESTING
+    }
+}
+
+# Spawn Sadrell cluster. Either call it or copy it later
+event = {
+    id = mem_sadrell.3
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        random_megastructure = {
+            limit = { is_megastructure_type = mem_sadrell_gateway_inactive }
+            remove_megastructure = this
+            solar_system = {
+                spawn_megastructure = {
+                    type = mem_sadrell_gateway_active
+                    orbit_angle = 0
+                    orbit_distance = 60
+                    location = solar_system
+                }
+                random_system_megastructure = {
+                    limit = { is_megastructure_type = mem_sadrell_gateway_active }
+                    activate_gateway = this
+                }
+            }            
+        }
+        mem_sadrell_generate_cluster = yes
+    }
+}
+
+# Event to open the gate - deciding who goes there
+country_event = {
+    id = mem_sadrell.4
+    hide_window = yes
+
+    mean_time_to_happen = {
+        years = 5
+    }
+
+    trigger = {
+        # log = "Trying to trigger .4"
+        is_country_type = global_event
+        has_global_flag = mem_sadrell_cluster_spawned
+        has_global_flag = mem_sadrell_someone_encountered_the_gate
+        NOT = { has_global_flag = mem_sadrell_nothing_will_happen }
+        mid_game_years_passed = 50
+        NOR = {
+            # has_global_flag = mem_sadrell_delay_flag
+            has_global_flag = mem_sadrell_situation_resolved
+        }
+        any_system = {
+            has_star_flag = mem_sadrell_gate_system
+            has_megastructure = mem_sadrell_gateway_inactive
+        }
+    }
+
+    immediate = {
+        # log = ".4 triggered"
+        random_system = {
+            limit = { has_star_flag = mem_sadrell_gate_system }
+            save_event_target_as = gate_system
+        }
+        IF = {
+            limit = { has_global_flag = mem_sadrell_will_return }
+            event_target:gate_system.star = {
+                planet_event = { id = mem_sadrell.100 } # Trigger return of the sadrell
+            }
+        }
+        ELSE_IF = {
+            limit = { has_global_flag = mem_sadrell_will_return_ass }
+            event_target:gate_system.star = {
+                planet_event = { id = mem_sadrell.200 } # Trigger return of the assimilated Sadrell
+            }
+        }
+        ELSE_IF = {
+            limit = { has_global_flag = mem_sadrell_will_send_message }
+            event_target:gate_system.star = {
+                planet_event = { id = mem_sadrell.300 } # Trigger return of the assimilated Sadrell
+            }
+        }
+    }
+}
+
+#################################
+### SADRELL RETURN RESOLUTION ###
+#################################
+
+# Spawn Sadrell Country. Check who, if anyone at all, owns the cluster
+planet_event = {
+    id = mem_sadrell.100
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        NOT = {
+            any_system = {
+                has_star_flag = mem_sadrell_home_cluster
+                exists = space_owner
+                space_owner = {
+                    NOR = {
+                        is_country_type = default
+                        is_country_type = fallen_empire
+                        is_country_type = dormant_marauders
+                    }
+                }
+            }
+        }
+    }
+
+    immediate = {
+        set_global_flag = mem_sadrell_situation_resolved
+        create_country = {
+            type = mem_sadrell_country
+            species = event_target:mem_sadrell_species
+            authority = auth_democratic
+            flag = {
+                icon = {
+                    category = "blocky"
+                    file = "flag_blocky_17.dds"
+                }
+                background={
+                    category = "backgrounds"
+                    file = "new_dawn.dds"
+                }
+                colors = {
+                    "yellow"
+                    "black"
+                    "null"
+                    "null"
+                }
+            }
+
+            effect = {
+                save_event_target_as = newcomer_country
+                set_country_flag = mem_sadrell_country_regular
+                add_modifier = {
+                    modifier = mem_sadrell_starting_boon
+                    days = 1800
+                }
+            }
+        }
+        IF = {
+            limit = { # Gate is owned by someone
+                event_target:gate_system = { 
+                    exists = space_owner 
+                    space_owner = { is_country_type = default } 
+                } 
+            }
+            event_target:gate_system.space_owner = {
+                set_country_flag = mem_sadrell_message_receiver
+                save_event_target_as = message_receiver
+                country_event = { id = mem_sadrell.101 }
+            }
+            every_playable_country = {
+                limit = {
+                    any_system = {
+                        has_star_flag = mem_sadrell_gate_system
+                        prev = {
+                            intel_level = {
+                                level > none
+                                system = prev
+                            }
+                        }
+                    }
+                    NOT = { has_country_flag = mem_sadrell_message_receiver }
+                }
+                country_event = { id = mem_sadrell.103 }
+            }
+        }
+        ELSE_IF = {
+            limit = {
+                any_system = {
+                    has_star_flag = mem_sadrell_home_cluster
+                    exists = space_owner
+                    space_owner = { is_country_type = default }
+                }
+            }
+            event_target:gate_system = {
+                closest_system = {
+                    limit = { 
+                        has_star_flag = mem_sadrell_home_cluster
+                        exists = space_owner 
+                    }
+                    space_owner = {
+                        set_country_flag = mem_sadrell_message_receiver
+                        save_event_target_as = message_receiver
+                        country_event = { id = mem_sadrell.102 }
+                    }
+                }
+            }
+            every_playable_country = {
+                limit = {
+                    any_system = {
+                        has_star_flag = mem_sadrell_gate_system
+                        prev = {
+                            intel_level = {
+                                level > none
+                                system = prev
+                            }
+                        }
+                    }
+                    NOT = { has_country_flag = mem_sadrell_message_receiver }
+                }
+                country_event = { id = mem_sadrell.103 }
+            }
+        }
+        ELSE = {
+            mem_sadrell_generate_cluster = yes
+            every_playable_country = {
+                limit = {
+                    any_system = {
+                        has_star_flag = mem_sadrell_gate_system
+                        prev = {
+                            intel_level = {
+                                level > none
+                                system = prev
+                            }
+                        }
+                    }
+                    NOT = { has_country_flag = mem_sadrell_message_receiver }
+                }
+                establish_communications_no_message = event_target:newcomer_country
+                country_event = { id = mem_sadrell.104 }
+            }
+            event_target:newcomer_country = {
+                clear_ethos = yes
+                country_add_ethic = ethic_fanatic_materialist
+                country_add_ethic = ethic_egalitarian
+                set_country_type = default
+                change_government = {
+                    civics = random
+                }
+                set_name = "Sadrell Exiles"
+            }
+            mem_sadrell_create_sadrell_colonies = yes
+            mem_sadrell_place_stations = yes
+            every_system = {
+                limit = { 
+                    has_star_flag = mem_sadrell_home_cluster
+                    NOT = { exists = space_owner } 
+                    NOT = {
+                        any_ship_in_system = {
+                            owner = {
+                                NOT = { is_country_type = default }
+                            }
+                        }
+                    }
+                }
+                create_starbase = {
+                    size = starbase_outpost
+                    owner = event_target:newcomer_country
+                }
+            }
+        }
+    }
+}
+
+# System owner is notified that Orphan Gate is active
+country_event = {
+    id = mem_sadrell.101
+    title = mem_sadrell.101.name
+    desc = mem_sadrell.101.desc
+
+    is_triggered_only = yes
+
+    location = event_target:gate_system
+    picture = GFX_evt_drifting_gateway
+    show_sound = event_alien_signal
+
+    immediate = {
+        establish_communications_no_message = event_target:newcomer_country
+    }
+
+    option = {
+        name = ONSCREEN
+        hidden_effect = {
+            country_event = { id = mem_sadrell.110 }
+        }
+    }
+}
+
+# Ownerless gateway, but with different player owns closest system.
+country_event = {
+    id = mem_sadrell.102
+    title = mem_sadrell.102.name
+    desc = mem_sadrell.102.desc
+
+    is_triggered_only = yes
+
+    location = event_target:gate_system
+    picture = GFX_evt_drifting_gateway
+    show_sound = event_alien_signal
+
+    immediate = {
+        establish_communications_no_message = event_target:newcomer_country
+    }
+
+    option = {
+        name = ONSCREEN
+        hidden_effect = {
+            country_event = { id = mem_sadrell.110 }
+        }
+    }
+}
+
+# Other countries eveasedrop on conversations
+country_event = { # Actually in most cases player will see AI instantly pick options
+    id = mem_sadrell.103
+    title = mem_sadrell.103.name
+    desc = mem_sadrell.103.desc
+
+    is_triggered_only = yes
+
+    trigger = {
+        is_ai = no
+        always = no
+    }
+
+    location = event_target:gate_system
+    picture = GFX_evt_drifting_gateway
+
+    option = {
+        name = INTERESTING
+    }
+}
+
+# Countries watch as Sadrell move into unclaimed systems
+country_event = {
+    id = mem_sadrell.104
+    title = mem_sadrell.104.name
+    desc = mem_sadrell.104.desc
+
+    is_triggered_only = yes
+
+    location = event_target:gate_system
+    picture = GFX_evt_drifting_gateway
+    show_sound = event_default
+    
+    trigger = {
+        is_ai = no
+    }
+
+    option = {
+        name = ONSCREEN
+        hidden_effect = {
+            country_event = { id = mem_sadrell.130 }
+        }
+    }
+}
+
+# Diplomatic event 
+country_event = {
+    id = mem_sadrell.110
+    title = TRANSMISSION
+    desc = mem_sadrell.110.desc
+
+    diplomatic = yes
+    is_triggered_only = yes
+    location = event_target:gate_system
+
+    picture_event_data = {
+		portrait = event_target:newcomer_country
+		room = mem_server_room
+    }
+    
+    option = { # Agree to the proposal
+        name = mem_sadrell.110.a
+        set_global_flag = mem_sadrell_land_ceded
+
+        hidden_effect = {
+            country_event = { id = mem_sadrell.111 }
+        }
+
+        ai_chance = {
+            factor = 50
+            modifier = {
+                factor = 2
+                fleet_power < 2500
+            }
+            modifier = {
+                factor = 1.5
+                fleet_power < 5000
+            }
+            modifier = {
+                factor = 0.5
+                is_xenophobe = yes
+            }
+            modifier = {
+                factor = 0.75
+                is_militarist = yes
+            }
+            modifier = {
+                factor = 0.75
+                is_spiritualist = yes
+            }
+            modifier = {
+                factor = 1.5
+                is_pacifist = yes
+            }
+            modifier = {
+                factor = 2
+                is_xenophile = yes
+            }
+        }
+    }
+
+    option = { # Disagree
+        name = mem_sadrell.110.b
+        default_hide_option = yes
+
+        hidden_effect = {
+            country_event = { id = mem_sadrell.112 }
+        }
+
+        ai_chance = {
+            factor = 150
+            modifier = {
+                factor = 2
+                fleet_power > 10000
+            }
+            modifier = {
+                factor = 2
+                fleet_power > 15000
+            }
+            modifier = {
+                factor = 1.25
+                has_ethic = ethic_gestalt_consciousness
+            }
+            modifier = {
+                factor = 0.5
+                is_at_war = yes
+            }
+        }
+    }
+
+    option = { # Offer to vassalize them
+        name = mem_sadrell.110.c
+
+        hidden_effect = {
+            country_event = { id = mem_sadrell.113 }
+        }
+
+        trigger = {
+            NOT = { exists = overlord }
+        }
+
+        allow = {
+            is_at_war = no
+            custom_tooltip = {
+                fail_text = "requires_actor_not_inward_perfection"
+                NOT = { has_valid_civic = civic_inwards_perfection }
+            }
+            # custom_tooltip = {
+            #     fail_text = requires_domination_adopted
+            #     has_subjugation_req = yes
+            # }
+        }
+
+        ai_chance = {
+            factor = 100
+            modifier = {
+                factor = 0
+                fleet_power < 5000
+            }
+            modifier = {
+                factor = 1.5
+                fleet_power > 10000
+            }
+            modifier = {
+                factor = 0.75
+                is_xenophile = yes
+            }
+            modifier = {
+                factor = 0.75
+                is_egalitarian = yes
+            }
+            modifier = {
+                factor = 0.25
+                is_xenophobe = yes
+            }
+            modifier = {
+                factor = 1.75
+                is_authoritarian = yes
+            }
+        }
+    }
+
+    option = { # Invite to form a federation
+        name = mem_sadrell.110.d
+        set_global_flag = mem_sadrell_federation
+
+        trigger = {
+            NOT = { has_valid_civic = civic_machine_terminator }
+            has_federation = no
+            NOT = { exists = overlord }
+        }
+
+        allow = {
+            custom_tooltip = {
+                fail_text = "requires_tradition_the_federation"
+                OR = {
+                    has_authority = auth_machine_intelligence
+                    has_federation = yes
+                    has_non_swapped_tradition = tr_diplomacy_the_federation
+                    NOT = { is_country_type = default }
+                }
+            }
+            custom_tooltip = {
+                fail_text = "requires_tradition_universal_compatibility"
+                OR = {
+                    NOT = { has_authority = auth_machine_intelligence }
+                    has_federation = yes
+                    has_swapped_tradition = tr_versatility_universal_compatibility
+                    NOT = { is_country_type = default }
+                }
+            }
+            custom_tooltip = {
+                fail_text = "requires_actor_not_inward_perfection"
+                NOT = { has_valid_civic = civic_inwards_perfection }
+            }
+            custom_tooltip = {
+                fail_text = "requires_actor_not_barbaric_despoilers"
+                NOT = { has_valid_civic = civic_barbaric_despoilers }
+            }
+        }
+
+        hidden_effect = {
+            country_event = { id = mem_sadrell.115 }
+        }
+
+        ai_chance = {
+            factor = 100
+            modifier = {
+                factor = 3
+                has_ai_personality = federation_builders
+            }
+            modifier = {
+                factor = 0.2
+                is_xenophobe = yes
+            }
+            modifier = {
+                factor = 0.5
+                is_spiritualist = yes
+            }
+        }
+    }
+
+    option = { # Offer to join existing federation
+        name = mem_sadrell.110.e
+
+        trigger = {
+            NOT = { has_valid_civic = civic_machine_terminator }
+            has_federation = yes
+        }
+
+        hidden_effect = {
+            country_event = { id = mem_sadrell.120 }
+        }
+
+        ai_chance = {
+            factor = 100
+            modifier = {
+                factor = 10
+                has_ai_personality = federation_builders
+            }
+            modifier = {
+                factor = 0.5
+                is_xenophobe = yes
+            }
+            modifier = {
+                factor = 0.75
+                is_spiritualist = yes
+            }
+        }
+    }
+
+    option = { # Ask for a bit of backstory
+        name = mem_sadrell.110.f
+        is_dialog_only = yes
+        response_text = mem_sadrell.110.f.response
+        ai_chance = {
+            factor = 0
+        }
+    }
+
+    option = { # Ask about cluster
+        name = mem_sadrell.110.g
+        is_dialog_only = yes
+        response_text = mem_sadrell.110.g.response
+        ai_chance = {
+            factor = 0
+        }
+    }
+
+    option = {
+        name = mem_sadrell.110.purifier
+        set_global_flag = mem_sadrell_total_war
+
+        exclusive_trigger = {
+            has_valid_civic = civic_fanatic_purifiers
+            
+        }
+
+        hidden_effect = {
+            country_event = { id = mem_sadrell.116 }
+        }
+    }
+
+    option = {
+        name = mem_sadrell.110.swarm
+        set_global_flag = mem_sadrell_total_war
+
+        exclusive_trigger = {
+            has_valid_civic = civic_hive_devouring_swarm
+        }
+
+        hidden_effect = {
+            country_event = { id = mem_sadrell.116 }
+        }
+    }
+
+    option = {
+        name = mem_sadrell.110.terminator
+        set_global_flag = mem_sadrell_total_war
+
+        exclusive_trigger = {
+            has_valid_civic = civic_machine_terminator
+        }
+
+        hidden_effect = {
+            country_event = { id = mem_sadrell.116 }
+        }
+    }
+}
+
+# Player agreed; Sadrell are happy
+country_event = {
+    id = mem_sadrell.111
+    title = TRANSMISSION
+    desc = mem_sadrell.111.desc
+
+    diplomatic = yes
+    is_triggered_only = yes
+    location = event_target:gate_system
+
+    picture_event_data = {
+		portrait = event_target:newcomer_country
+		room = mem_server_room
+    }
+
+    immediate = {
+        mem_sadrell_generate_cluster = yes
+        every_playable_country = {
+            limit = {
+                OR = {
+                    any_system = {
+                        has_star_flag = mem_sadrell_gate_system
+                        prev = {
+                            intel_level = {
+                                level > none
+                                system = prev
+                            }
+                        }
+                    }
+                    has_communications = root
+                }
+                NOT = { is_same_value = root }
+            }
+            country_event = { id = mem_sadrell.131 }
+        }
+        event_target:newcomer_country = {
+            clear_ethos = yes
+            country_add_ethic = ethic_fanatic_materialist
+            country_add_ethic = ethic_egalitarian
+            set_country_type = default
+            change_government = {
+                civics = random
+            }
+            set_name = "Sadrell Exiles"
+        }
+        mem_sadrell_create_sadrell_colonies = yes
+        mem_sadrell_place_stations = yes
+        every_system = {
+            limit = { 
+                has_star_flag = mem_sadrell_home_cluster
+                NOT = { exists = space_owner } 
+                NOT = {
+                    any_ship_in_system = {
+                        owner = {
+                            NOT = { is_country_type = default }
+                        }
+                    }
+                }
+            }
+            create_starbase = {
+                size = starbase_outpost
+                owner = event_target:newcomer_country
+            }
+        }
+        every_system_within_border = {
+            limit = { has_star_flag = mem_sadrell_home_cluster }
+            set_star_flag = mem_sadrell_system_flip
+            IF = {
+                limit = { exists = starbase }
+                starbase = {
+                    set_owner = event_target:newcomer_country
+                }
+            }
+            ELSE = {
+                create_starbase = {
+                    size = starbase_outpost
+                    owner = event_target:newcomer_country
+                }
+            }
+            every_system_planet = {
+                limit = {
+                    exists = owner
+                    owner = { is_same_value = root }
+                }
+                set_owner = event_target:newcomer_country
+                set_planet_flag = mem_sadrell_moved_in
+                while = {
+                    count = 10
+                    IF = {
+                        limit = {
+                            free_housing > 1
+                        }
+                        create_pop = {
+                            species = event_target:mem_sadrell_species
+                        }
+                    }
+                    ELSE_IF = {
+                        limit = {
+                            any_owned_pop = {
+                                NOT = { is_same_species = event_target:mem_sadrell_species }
+                            }
+                        }
+                        random_owned_pop = {
+                            limit = { 
+                                NOT = { is_same_species = event_target:mem_sadrell_species } 
+                            }
+                            kill_pop = yes
+                        }
+                        create_pop = {
+                            species = event_target:mem_sadrell_species
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    option = {
+        name = mem_sadrell.111.a
+
+        ai_chance = {
+            factor = 100
+        }
+    }
+
+    option = { #Claim all the systems
+        name = mem_sadrell.111.b 
+        custom_tooltip = mem_sadrell.111.b.tooltip
+        # TODO: Add negative opinion later
+        hidden_effect = {
+            every_system = {
+                limit = { has_star_flag = mem_sadrell_system_flip }
+                add_claims = {
+                    who = root
+                    num_of_claims = 10
+                    show_notification = yes
+                }
+            }
+        }
+
+        ai_chance = {
+            factor = 50
+            modifier = {
+                factor = 0.5
+                OR = {
+                    is_xenophile = yes
+                    is_pacifist = yes
+                }
+            }
+            modifier = {
+                factor = 10
+                OR = {
+                    is_xenophobe = yes
+                    is_militarist = yes
+                }
+            }
+        }
+    }
+}
+
+# Sadrell are upset that you would be so unreasonable
+country_event = {
+    id = mem_sadrell.112
+    title = TRANSMISSION
+    desc = {
+        text = mem_sadrell.112.desc
+        trigger = {
+            NOT = { has_country_flag = mem_sadrell_failed_vassalisation }
+        }
+    }
+    desc = {
+        text = mem_sadrell.112.desc.failed_vassalisation
+        trigger = {
+            has_country_flag = mem_sadrell_failed_vassalisation
+        }
+    }
+
+    diplomatic = yes
+    is_triggered_only = yes
+    location = event_target:gate_system
+
+    picture_event_data = {
+		portrait = event_target:newcomer_country
+		room = mem_server_room
+    }
+
+    immediate = {
+        mem_sadrell_generate_cluster = yes
+        event_target:newcomer_country = {
+            clear_ethos = yes
+            country_add_ethic = ethic_materialist
+            country_add_ethic = ethic_egalitarian
+            country_add_ethic = ethic_militarist
+            set_country_type = default
+            change_government = {
+                civics = random
+            }
+            set_name = "Sadrell Exiles"
+        }
+        mem_sadrell_create_sadrell_colonies = yes
+        mem_sadrell_place_stations = yes
+
+        IF = {
+            limit = { has_valid_civic = civic_machine_assimilator }  # Out of all total warriors, only assimilators are able to get here
+            set_global_flag = mem_sadrell_total_war
+            event_target:newcomer_country = {
+                declare_war = {
+                    target = root
+                    name = "Sadrell Homecoming"
+                    attacker_war_goal = wg_end_threat_assimilators
+                }
+            }
+        }
+        ELSE = {
+            set_global_flag = mem_sadrell_war
+            every_system = {
+                limit = { 
+                    has_star_flag = mem_sadrell_home_cluster 
+                    exists = space_owner
+                    space_owner = {
+                        OR = {
+                            is_same_value = root
+                            AND = {
+                                exists = overlord
+                                OR = {
+                                    is_subject_type = vassal
+                                    is_subject_type = protectorate
+                                }
+                                overlord = {
+                                    is_same_value = root
+                                }
+                            }
+                        }
+                    }
+                }
+                add_claims = {
+                    who = event_target:newcomer_country
+                    num_of_claims = 10
+                    show_notification = yes
+                }
+            }
+            event_target:newcomer_country = {
+                declare_war = {
+                    target = root
+                    name = "Sadrell Homecoming"
+                    attacker_war_goal = wg_conquest
+                }
+            }
+        }
+        every_playable_country = {
+            limit = {
+                OR = {
+                    any_system = {
+                        has_star_flag = mem_sadrell_gate_system
+                        prev = {
+                            intel_level = {
+                                level > none
+                                system = prev
+                            }
+                        }
+                    }
+                    has_communications = root
+                }
+                NOT = { is_same_value = root }
+            }
+            country_event = { id = mem_sadrell.131 }
+        }
+    }
+
+    option = {
+        name = mem_sadrell.112.a
+    }
+
+    option = {
+        name = mem_sadrell.112.mil
+        exclusive_trigger = {
+            has_ethic = ethic_militarist
+            has_ethic = ethic_fanatic_militarist
+            has_ethic = ethic_xenophobe
+            has_ethic = ethic_fanatic_xenophobe
+        }
+    }
+
+    option = {
+        name = mem_sadrell.112.pac
+        exclusive_trigger = {
+            has_ethic = ethic_pacifist
+            has_ethic = ethic_fanatic_pacifist
+            has_ethic = ethic_xenophile
+            has_ethic = ethic_fanatic_xenophile
+        }
+    }
+}
+
+@cb_subjugation_length = 360
+
+# Decider whenever you actually get to vassalize them
+country_event = {
+    id = mem_sadrell.113
+    is_triggered_only = yes
+    hide_window = yes
+
+    immediate = {
+        random_list = {
+            50 = {
+                set_country_flag = mem_sadrell_failed_vassalisation
+                add_casus_belli = {
+                    type = cb_subjugation
+                    who = event_target:newcomer_country
+                    days = @cb_subjugation_length
+                }
+                country_event = { id = mem_sadrell.112 }
+                modifier = {
+                    factor = 0
+                    fleet_power > 15000
+                }                
+            }
+            50 = {
+                country_event = { id = mem_sadrell.114 }
+                modifier = {
+                    factor = 0
+                    fleet_power < 5000
+                }
+                modifier = {
+                    factor = 0.5
+                    fleet_power < 7500
+                }
+                modifier = {
+                    factor = 1.5
+                    fleet_power > 10000
+                }
+            }
+        }
+    }
+}
+
+# Sadrell agree to be vassalized
+country_event = {
+    id = mem_sadrell.114
+    title = TRANSMISSION
+    desc = mem_sadrell.114.desc
+
+    diplomatic = yes
+    is_triggered_only = yes
+    location = event_target:gate_system
+
+    picture_event_data = {
+		portrait = event_target:newcomer_country
+		room = mem_server_room
+    }
+
+    immediate = {
+        set_global_flag = mem_sadrell_vassalized
+        mem_sadrell_generate_cluster = yes
+        every_playable_country = {
+            limit = {
+                OR = {
+                    any_system = {
+                        has_star_flag = mem_sadrell_gate_system
+                        prev = {
+                            intel_level = {
+                                level > none
+                                system = prev
+                            }
+                        }
+                    }
+                    has_communications = root
+                }
+                NOT = { is_same_value = root }
+            }
+            country_event = { id = mem_sadrell.131 }
+        }
+        event_target:newcomer_country = {
+            clear_ethos = yes
+            country_add_ethic = ethic_fanatic_materialist
+            country_add_ethic = ethic_xenophile
+            set_country_type = default
+            change_government = {
+                civics = random
+            }
+            set_name = "Sadrell Exiles"
+            set_subject_of = {
+				who = root
+				subject_type = vassal
+			}
+        }
+        mem_sadrell_create_sadrell_colonies = yes
+        mem_sadrell_place_stations = yes
+        every_system = {
+            limit = { 
+                has_star_flag = mem_sadrell_home_cluster
+                NOT = { exists = space_owner } 
+                NOT = {
+                    any_ship_in_system = {
+                        owner = {
+                            NOT = { is_country_type = default }
+                        }
+                    }
+                }
+            }
+            create_starbase = {
+                size = starbase_outpost
+                owner = event_target:newcomer_country
+            }
+        }
+        every_system_within_border = {
+            limit = { has_star_flag = mem_sadrell_home_cluster }
+            set_star_flag = mem_sadrell_system_flip
+            IF = {
+                limit = { exists = starbase }
+                starbase = {
+                    set_owner = event_target:newcomer_country
+                }
+            }
+            ELSE = {
+                create_starbase = {
+                    size = starbase_outpost
+                    owner = event_target:newcomer_country
+                }
+            }
+            every_system_planet = {
+                limit = {
+                    exists = owner
+                    owner = { is_same_value = root }
+                }
+                set_owner = event_target:newcomer_country
+                set_planet_flag = mem_sadrell_moved_in
+                while = {
+                    count = 4
+                    while = {
+                        count = 10
+                        IF = {
+                            limit = {
+                                free_housing > 1
+                            }
+                            create_pop = {
+                                species = event_target:mem_sadrell_species
+                            }
+                        }
+                        ELSE_IF = {
+                            limit = {
+                                any_owned_pop = {
+                                    NOT = { is_same_species = event_target:mem_sadrell_species }
+                                }
+                            }
+                            random_owned_pop = {
+                                limit = { 
+                                    NOT = { is_same_species = event_target:mem_sadrell_species } 
+                                }
+                                kill_pop = yes
+                            }
+                            create_pop = {
+                                species = event_target:mem_sadrell_species
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    option = {
+        name = EXCELLENT
+    }
+}
+
+# Sadrell agree to form a federation
+country_event = {
+    id = mem_sadrell.115
+    title = TRANSMISSION
+    desc = {
+        text = mem_sadrell.115.desc
+        trigger = {
+            NOT = { has_global_flag = mem_sadrell_federation_breakdown }
+        }
+    }
+    desc = {
+        text = mem_sadrell.115.desc.breakdown
+        trigger = {
+            has_global_flag = mem_sadrell_federation_breakdown
+        }
+    }
+
+    diplomatic = yes
+    is_triggered_only = yes
+    location = event_target:gate_system
+
+    picture_event_data = {
+		portrait = event_target:newcomer_country
+		room = mem_server_room
+    }
+
+    immediate = {
+        mem_sadrell_generate_cluster = yes
+        every_playable_country = {
+            limit = {
+                OR = {
+                    any_system = {
+                        has_star_flag = mem_sadrell_gate_system
+                        prev = {
+                            intel_level = {
+                                level > none
+                                system = prev
+                            }
+                        }
+                    }
+                    has_communications = root
+                }
+                NOT = { is_same_value = root }
+            }
+            country_event = { id = mem_sadrell.131 }
+        }
+        event_target:newcomer_country = {
+            clear_ethos = yes
+            country_add_ethic = ethic_materialist
+            country_add_ethic = ethic_xenophile
+            country_add_ethic = ethic_egalitarian
+            set_country_type = default
+            change_government = {
+                civics = random
+            }
+            set_name = "Sadrell Exiles"
+            join_alliance = {
+                who = root
+                name = "[gate_system.GetName] Accord"
+                override_requirements = yes
+            }
+        }
+        mem_sadrell_create_sadrell_colonies = yes
+        mem_sadrell_place_stations = yes
+        every_system = {
+            limit = { 
+                has_star_flag = mem_sadrell_home_cluster
+                NOT = { exists = space_owner } 
+                NOT = {
+                    any_ship_in_system = {
+                        owner = {
+                            NOT = { is_country_type = default }
+                        }
+                    }
+                }
+            }
+            create_starbase = {
+                size = starbase_outpost
+                owner = event_target:newcomer_country
+            }
+        }
+        every_system_within_border = {
+            limit = { has_star_flag = mem_sadrell_home_cluster }
+            set_star_flag = mem_sadrell_system_flip
+            IF = {
+                limit = { exists = starbase }
+                starbase = {
+                    set_owner = event_target:newcomer_country
+                }
+            }
+            ELSE = {
+                create_starbase = {
+                    size = starbase_outpost
+                    owner = event_target:newcomer_country
+                }
+            }
+            every_system_planet = {
+                limit = {
+                    exists = owner
+                    owner = { is_same_value = root }
+                }
+                set_owner = event_target:newcomer_country
+                set_planet_flag = mem_sadrell_moved_in
+                while = {
+                    count = 8
+                    while = {
+                        count = 10
+                        IF = {
+                            limit = {
+                                free_housing > 1
+                            }
+                            create_pop = {
+                                species = event_target:mem_sadrell_species
+                            }
+                        }
+                        ELSE_IF = {
+                            limit = {
+                                any_owned_pop = {
+                                    NOT = { is_same_species = event_target:mem_sadrell_species }
+                                }
+                            }
+                            random_owned_pop = {
+                                limit = { 
+                                    NOT = { is_same_species = event_target:mem_sadrell_species } 
+                                }
+                                kill_pop = yes
+                            }
+                            create_pop = {
+                                species = event_target:mem_sadrell_species
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    option = {
+        name = EXCELLENT
+    }
+}
+
+# Sadrell react negatively towards purifier-types
+country_event = {
+    id = mem_sadrell.116
+    title = TRANSMISSION
+    desc = mem_sadrell.116.desc
+
+    diplomatic = yes
+    is_triggered_only = yes
+    location = event_target:gate_system
+
+    picture_event_data = {
+		portrait = event_target:newcomer_country
+		room = mem_server_room
+    }
+
+    immediate = {
+        mem_sadrell_generate_cluster = yes
+        every_playable_country = {
+            limit = {
+                OR = {
+                    any_system = {
+                        has_star_flag = mem_sadrell_gate_system
+                        prev = {
+                            intel_level = {
+                                level > none
+                                system = prev
+                            }
+                        }
+                    }
+                    has_communications = root
+                }
+                NOT = { is_same_value = root }
+            }
+            country_event = { id = mem_sadrell.131 }
+        }
+        event_target:newcomer_country = {
+            clear_ethos = yes
+            country_add_ethic = ethic_materialist
+            country_add_ethic = ethic_xenophobe
+            country_add_ethic = ethic_militarist
+            set_country_type = default
+            change_government = {
+                civics = random
+            }
+            set_name = "Sadrell Exiles"
+        }
+        mem_sadrell_create_sadrell_colonies = yes
+        mem_sadrell_place_stations = yes
+
+        IF = {
+            limit = {
+                OR = {
+                    has_valid_civic = civic_fanatic_purifiers
+				    has_valid_civic = civic_machine_terminator
+                }
+            }
+            event_target:newcomer_country = {
+                declare_war = {
+                    target = root
+                    name = "Sadrell Homecoming"
+                    attacker_war_goal = wg_end_threat
+                }
+            }
+        }
+        ELSE = {
+            set_global_flag = mem_sadrell_total_war
+            event_target:newcomer_country = {
+                declare_war = {
+                    target = root
+                    name = "Sadrell Homecoming"
+                    attacker_war_goal = wg_end_threat_swarm
+                }
+            }
+        }
+    }
+    
+    option = {
+        name = mem_sadrell.116.purifier
+        trigger = {
+            has_valid_civic = civic_fanatic_purifiers
+        }
+    }
+    option = {
+        name = mem_sadrell.116.teminator
+        trigger = {
+            has_valid_civic = civic_machine_terminator
+        }
+    }
+    option = {
+        name = mem_sadrell.116.swarm
+        trigger = {
+            has_valid_civic = civic_hive_devouring_swarm
+        }
+    }
+}
+
+# Sarel aknowledge your offer of dimplomacy - begin polling
+country_event = {
+    id = mem_sadrell.120
+    title = TRANSMISSION
+    desc = mem_sadrell.120.desc
+
+    diplomatic = yes
+    is_triggered_only = yes
+    location = event_target:gate_system
+
+    picture_event_data = {
+		portrait = event_target:newcomer_country
+		room = mem_server_room
+    }
+
+    option = {
+        name = mem_sadrell.120.a
+    }
+
+    after = {
+        hidden_effect = {
+            change_variable = {
+                which = mem_sadrell_vote_balance
+                value = 1
+            }
+            every_country = {
+                limit = {
+                    is_in_federation_with = root
+                    not = { is_same_value = root }
+                }
+                set_country_flag = mem_sadrell_vote_pending
+                country_event = { id = mem_sadrell.121 }
+            }
+        }
+    }
+}
+
+# Asking for vote
+country_event = {
+    id = mem_sadrell.121
+    title = mem_sadrell.121.name
+    desc = mem_sadrell.121.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_arguing_senate
+    show_sound = event_factions
+
+    option = { # Yay!
+        name = mem_sadrell.121.a
+        set_country_flag = mem_sadrell_vote_yes
+
+        hidden_effect = {
+            FROM = {
+                change_variable = {
+                    which = mem_sadrell_vote_balance
+                    value = 1
+                }
+            }
+        }
+
+        ai_chance = {
+            factor = 100
+            modifier = {
+                factor = 2
+                is_xenophile = yes
+            }
+            modifier = {
+                factor = 1.5
+                is_pacifist = yes
+            }
+            modifier = {
+                factor = 1.5
+                OR = {
+                    is_materialist = yes
+                    has_authority = auth_machine_intelligence
+                }
+            }
+        }
+    }
+
+    option = { # Abstain
+        name = mem_sadrell.121.b
+        set_country_flag = mem_sadrell_vote_abstain
+        ai_chance = {
+            factor = 150
+        }
+    }
+
+    option = { # Nay.
+        name = mem_sadrell.121.c
+        set_country_flag = mem_sadrell_vote_no
+
+        hidden_effect = {
+            FROM = {
+                change_variable = {
+                    which = mem_sadrell_vote_balance
+                    value = -1
+                }
+            }
+        }
+
+        ai_chance = {
+            factor = 75
+            modifier = {
+                factor = 1.5
+                is_xenophobe = yes
+            }
+            modifier = {
+                factor = 1.5
+                is_militarist = yes
+            }
+            modifier = {
+                factor = 1.5
+                is_authoritarian = yes
+            }
+            modifier = {
+                factor = 1.5
+                is_spiritualist = yes
+            }
+        }
+    }
+
+    after = {
+        FROM = { country_event = { id = mem_sadrell.122 days = 14 } }
+    }
+}
+
+# Vote tallying
+country_event = {
+    id = mem_sadrell.122
+    title = mem_sadrell.122.name
+    desc = mem_sadrell.122.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_arguing_senate
+    show_sound = event_factions
+
+    trigger = {
+        NOR = {
+            any_country = {
+                has_country_flag = mem_sadrell_vote_pending
+                NOR = {
+                    has_country_flag = mem_sadrell_vote_yes
+                    has_country_flag = mem_sadrell_vote_abstain
+                    has_country_flag = mem_sadrell_vote_no
+                }
+            }
+            has_country_flag = mem_sadrell_votes_tallied
+        }
+    }
+
+    immediate = {
+        set_country_flag = mem_sadrell_votes_tallied
+    }
+
+    option = {
+        name = mem_sadrell.122.a
+        trigger = {
+            check_variable = {
+                which = mem_sadrell_vote_balance
+                value > 0
+            }
+        }
+        hidden_effect = {
+            country_event = { id = mem_sadrell.123 }
+        }
+    }
+
+    option = {
+        name = mem_sadrell.122.b
+        trigger = {
+            check_variable = {
+                which = mem_sadrell_vote_balance
+                value < 1
+            }
+        }
+        hidden_effect = {
+            country_event = { id = mem_sadrell.124 }
+        }
+    }
+
+    after = {
+        every_country = {
+            limit = { has_country_flag = mem_sadrell_vote_pending }
+            IF = {
+                limit = { has_country_flag = mem_sadrell_vote_yes }
+                custom_tooltip = mem_sadrell_vote_yes
+            }
+            IF = {
+                limit = { has_country_flag = mem_sadrell_vote_abstain }
+                custom_tooltip = mem_sadrell_vote_abstain
+            }
+            IF = {
+                limit = { has_country_flag = mem_sadrell_vote_no }
+                custom_tooltip = mem_sadrell_vote_no
+            }
+        }
+    }
+}
+
+# Sadrell join the federation
+country_event = {
+    id = mem_sadrell.123
+    title = TRANSMISSION
+    desc = mem_sadrell.123.desc
+
+    diplomatic = yes
+    is_triggered_only = yes
+    location = event_target:gate_system
+
+    picture_event_data = {
+		portrait = event_target:newcomer_country
+		room = mem_server_room
+    }
+
+    immediate = {
+        set_global_flag = mem_sadrell_joined_federation
+        mem_sadrell_generate_cluster = yes
+        every_playable_country = {
+            limit = {
+                OR = {
+                    any_system = {
+                        has_star_flag = mem_sadrell_gate_system
+                        prev = {
+                            intel_level = {
+                                level > none
+                                system = prev
+                            }
+                        }
+                    }
+                    has_communications = root
+                }
+                NOT = { is_same_value = root }
+            }
+            country_event = { id = mem_sadrell.131 }
+        }
+        event_target:newcomer_country = {
+            clear_ethos = yes
+            country_add_ethic = ethic_materialist
+            country_add_ethic = ethic_xenophile
+            country_add_ethic = ethic_egalitarian
+            set_country_type = default
+            change_government = {
+                civics = random
+            }
+            set_name = "Sadrell Exiles"
+            join_alliance = {
+                who = root
+                override_requirements = yes
+            }
+        }
+        mem_sadrell_create_sadrell_colonies = yes
+        mem_sadrell_place_stations = yes
+        every_system = {
+            limit = { 
+                has_star_flag = mem_sadrell_home_cluster
+                NOT = { exists = space_owner } 
+                NOT = {
+                    any_ship_in_system = {
+                        owner = {
+                            NOT = { is_country_type = default }
+                        }
+                    }
+                }
+            }
+            create_starbase = {
+                size = starbase_outpost
+                owner = event_target:newcomer_country
+            }
+        }
+        every_system_within_border = {
+            limit = { has_star_flag = mem_sadrell_home_cluster }
+            set_star_flag = mem_sadrell_system_flip
+            IF = {
+                limit = { exists = starbase }
+                starbase = {
+                    set_owner = event_target:newcomer_country
+                }
+            }
+            ELSE = {
+                create_starbase = {
+                    size = starbase_outpost
+                    owner = event_target:newcomer_country
+                }
+            }
+            every_system_planet = {
+                limit = {
+                    exists = owner
+                    owner = { is_same_value = root }
+                }
+                set_owner = event_target:newcomer_country
+                set_planet_flag = mem_sadrell_moved_in
+                while = {
+                    count = 10
+                    IF = {
+                        limit = {
+                            free_housing > 1
+                        }
+                        create_pop = {
+                            species = event_target:mem_sadrell_species
+                        }
+                    }
+                    ELSE_IF = {
+                        limit = {
+                            any_owned_pop = {
+                                NOT = { is_same_species = event_target:mem_sadrell_species }
+                            }
+                        }
+                        random_owned_pop = {
+                            limit = { 
+                                NOT = { is_same_species = event_target:mem_sadrell_species } 
+                            }
+                            kill_pop = yes
+                        }
+                        create_pop = {
+                            species = event_target:mem_sadrell_species
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    option = {
+        name = EXCELLENT
+    }
+}
+
+# Sadrell respond to failed vote
+country_event = {
+    id = mem_sadrell.124
+    title = TRANSMISSION
+    desc = mem_sadrell.124.desc
+
+    diplomatic = yes
+    is_triggered_only = yes
+    location = event_target:gate_system
+
+    picture_event_data = {
+		portrait = event_target:newcomer_country
+		room = mem_server_room
+    }
+
+    option = {
+        name = mem_sadrell.124.a
+
+        hidden_effect = {
+            set_global_flag = mem_sadrell_federation_breakdown
+            leave_alliance = { override_requirements = yes }
+            country_event = { id = mem_sadrell.115 }
+        }
+    }
+
+    option = {
+        name = mem_sadrell.124.b
+        set_global_flag = mem_sadrell_land_ceded
+        hidden_effect = {
+            country_event = { id = mem_sadrell.111 }
+        }
+    }
+
+    option = {
+        name = mem_sadrell.124.c
+        default_hide_option = yes
+        hidden_effect = {
+            country_event = { id = mem_sadrell.112 }
+        }
+    }
+}
+
+# Diplo event if they move into systems unowned
+country_event = {
+    id = mem_sadrell.130
+    title = TRANSMISSION
+    desc = mem_sadrell.130.desc
+
+    diplomatic = yes
+    is_triggered_only = yes
+    location = event_target:gate_system
+
+    picture_event_data = {
+		portrait = event_target:newcomer_country
+		room = mem_server_room
+    }
+
+    option = {
+        name = mem_sadrell.130.a
+        trigger = {
+            is_xenophobe = no
+            is_xenophile = no
+        }
+    }
+
+    option = {
+        name = mem_sadrell.130.phobe
+        trigger = {
+            OR = {
+                has_ethic = ethic_fanatic_xenophobe
+                has_ethic = ethic_xenophobe
+            }
+        }
+    }
+
+    option = {
+        name = mem_sadrell.130.phile
+        trigger = {
+            OR = {
+                has_ethic = ethic_fanatic_xenophile
+                has_ethic = ethic_xenophile
+            }
+        }
+    }
+
+    option = { # Ask for a bit of backstory
+        name = mem_sadrell.110.f
+        is_dialog_only = yes
+        response_text = mem_sadrell.110.f.response
+        ai_chance = {
+            factor = 0
+        }
+    }
+
+    option = { # Ask about cluster
+        name = mem_sadrell.110.g
+        is_dialog_only = yes
+        response_text = mem_sadrell.110.g.response
+        ai_chance = {
+            factor = 0
+        }
+    }
+
+    option = {
+        name = mem_sadrell.110.purifier
+
+        exclusive_trigger = {
+            has_valid_civic = civic_fanatic_purifiers            
+        }
+    }
+
+    option = {
+        name = mem_sadrell.110.swarm
+
+        exclusive_trigger = {
+            has_valid_civic = civic_hive_devouring_swarm
+        }
+    }
+
+    option = {
+        name = mem_sadrell.110.terminator
+
+        exclusive_trigger = {
+            has_valid_civic = civic_machine_terminator
+        }
+    }
+}
+
+# Pop-up to notify other factions
+country_event = {
+    id = mem_sadrell.131
+    title = mem_sadrell.131.name
+    desc = {
+        text = mem_sadrell.131.ceded
+        trigger = {
+            has_global_flag = mem_sadrell_land_ceded
+        }
+    }
+    desc = {
+        text = mem_sadrell.131.war
+        trigger = {
+            has_global_flag = mem_sadrell_war
+        }
+    }
+    desc = {
+        text = mem_sadrell.131.total_war
+        trigger = {
+            has_global_flag = mem_sadrell_total_war
+        }
+    }
+    desc = {
+        text = mem_sadrell.131.vassalized
+        trigger = {
+            has_global_flag = mem_sadrell_vassalized
+        }
+    }
+    desc = {
+        text = mem_sadrell.131.formed_federation
+        trigger = {
+            has_global_flag = mem_sadrell_federation
+        }
+    }
+    desc = {
+        text = mem_sadrell.131.federation_breakdown
+        trigger = {
+            has_global_flag = mem_sadrell_federation_breakdown
+        }
+    }
+    desc = {
+        text = mem_sadrell.131.joined_federation
+        trigger = {
+            has_global_flag = mem_sadrell_joined_federation
+        }
+    }
+
+    is_triggered_only = yes
+
+    location = event_target:gate_system
+    picture = GFX_evt_drifting_gateway
+    show_sound = event_default
+
+    immediate = {
+        establish_communications_no_message = event_target:newcomer_country
+    }
+
+    option = {
+        name = OK
+    }
+}
+
+# TODO: Decide whenever Sadrell should request system transfers and in what context
+
+# Sadrell dismantle one of their void homes and move into their ancestral planets
+country_event = {
+    id = mem_sadrell.140
+    hide_window = yes
+
+    mean_time_to_happen = {
+        years = 5
+    }
+
+    trigger = {
+        has_country_flag = mem_sadrell_country_regular
+        is_at_war = no
+        any_system_within_border = {
+            has_star_flag = mem_sadrell_home_cluster
+            any_system_planet = {
+                is_colonizable = yes
+                # has_anomaly = no
+                NOT = { exists = owner }
+            }
+        }
+        any_owned_ship = {
+            is_ship_size = mem_sadrell_void_home
+        }
+    }
+
+    immediate = {
+        random_owned_ship = {
+            limit = {
+                is_ship_size = mem_sadrell_void_home
+            }
+            delete_ship = this
+        }
+        add_resource = {
+            minerals = 500
+            energy = 500
+            food = 500
+        }
+        random_system_within_border = {
+            limit = {
+                has_star_flag = mem_sadrell_home_cluster
+                any_system_planet = {
+                    is_colonizable = yes
+                    # has_anomaly = no
+                    NOT = { exists = owner }
+                }
+            }
+            random_system_planet = {
+                limit = {
+                    is_colonizable = yes
+                    # has_anomaly = no
+                    NOT = { exists = owner }
+                }
+                # # log = "[This.GetName] is being colonized"
+                create_colony = {
+                    owner = root
+                    species = event_target:mem_sadrell_species
+                }
+                while = {
+                    count = 4
+                    create_pop = { species = event_target:mem_sadrell_species }
+                }
+                set_planet_flag = mem_sadrell_voidhome_applied
+            }
+        }   
+    }
+}
+
+# Sadrell move pops to planets from a voidhome
+planet_event = {
+    id = mem_sadrell.141
+    hide_window = yes
+
+    mean_time_to_happen = {
+        years = 5
+    }
+
+    trigger = {
+        exists = owner
+        NOT = { has_planet_flag = mem_sadrell_voidhome_applied }
+        owner = {
+            OR = {
+                has_country_flag = mem_sadrell_country_regular
+                has_country_flag = mem_sadrell_assimilator_country
+                any_owned_ship = {
+                    is_ship_size = mem_sadrell_void_home
+                }
+            }
+        }
+        num_pops > 0
+    }
+
+    immediate = {
+        owner = {
+            random_owned_ship = {
+                limit = {
+                    is_ship_size = mem_sadrell_void_home
+                }
+                delete_ship = this
+            }
+            add_resource = {
+                minerals = 500
+                energy = 500
+                food = 500
+            }
+        }
+        while = {
+            count = 4
+            create_pop = { species = event_target:mem_sadrell_species }
+        }
+        set_planet_flag = mem_sadrell_voidhome_applied
+    }
+}
+
+#####################################
+### RETURN OF ASSIMILATED SADRELL ###
+#####################################
+
+planet_event = {
+    id = mem_sadrell.200
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        NOT = {
+            any_system = {
+                has_star_flag = mem_sadrell_home_cluster
+                exists = space_owner
+                space_owner = {
+                    NOR = {
+                        is_country_type = default
+                        is_country_type = fallen_empire
+                        is_country_type = dormant_marauders
+                    }
+                }
+            }
+        }
+    }
+
+    immediate = {
+        set_global_flag = mem_sadrell_situation_resolved
+        create_species = {
+            name = Archivist
+            adjective = Archivist
+            plural = Archivists
+            class = MACHINE
+            portrait = random
+            traits = {
+                trait = trait_machine_unit
+                trait = trait_robot_power_drills
+                trait = trait_robot_learning_algorithms
+                trait = trait_robot_uncanny
+            }
+
+            effect = {
+                save_event_target_as = robot_species
+                # apply_robotic_pop_growth_behavior = yes
+            }
+        }
+        # event_target:mem_sadrell_species = { apply_robotic_pop_growth_behavior = yes } # You are assimilated now
+        create_country = {
+            type = mem_sadrell_country
+            species = event_target:robot_species
+            ethos = {
+                ethic = ethic_gestalt_consciousness
+            }
+            authority = auth_machine_intelligence
+            civics = {
+                civic = civic_machine_assimilator
+                civic = random
+            }
+            flag = {
+                icon = {
+                    category = "blocky"
+                    file = "flag_blocky_17.dds"
+                }
+                background={
+                    category = "backgrounds"
+                    file = "new_dawn.dds"
+                }
+                colors = {
+                    "orange"
+                    "black"
+                    "null"
+                    "null"
+                }
+            }
+
+            effect = {
+                save_event_target_as = newcomer_country
+                set_graphical_culture = avian_01
+                set_country_flag = mem_sadrell_assimilator_country
+                add_modifier = {
+                    modifier = mem_sadrell_starting_boon
+                    days = 1800
+                }
+            }
+        }
+        mem_sadrell_generate_cluster = yes
+        mem_sadrell_create_mixed_voidhomes = yes
+        event_target:newcomer_country = {
+            set_country_type = default
+        }
+        mem_sadrell_create_sadrell_colonies = yes
+        event_target:mem_sadrell_species = {
+            set_citizenship_type = {
+                country = event_target:newcomer_country
+                type = citizenship_full_machine
+            }
+        }
+        # event_target:newcomer_country = { # There are a few adjustments in scripted effect, but most are easier done here
+        #     every_owned_planet = {
+        #         every_tile = {
+        #             limit = { has_building = building_capital_2 }
+        #             set_building = building_machine_capital_2
+        #         }
+        #         every_tile = {
+        #             limit = { has_building = building_hydroponics_farm_3 }
+        #             set_building = building_power_plant_3
+        #         }
+        #         every_tile = {
+        #             limit = { 
+        #                 has_pop = yes
+        #                 pop = { has_trait = trait_mechanical }
+        #             }
+        #             pop = { kill_pop = yes }
+        #             create_pop = {
+        #                 species = event_target:robot_species
+        #             }
+        #         }
+        #     }
+        # }
+        # log = "[gate_system.GetName]"
+        every_playable_country = {
+            limit = {
+                any_system = {
+                    has_star_flag = mem_sadrell_gate_system
+                    prev = {
+                        intel_level = {
+                            level > none
+                            system = prev
+                        }
+                    }
+                }
+            }
+            country_event = { id = mem_sadrell.201 }
+        }
+    }
+}
+
+# Notify of gate activation
+country_event = {
+    id = mem_sadrell.201
+    title = mem_sadrell.201.name
+    desc = mem_sadrell.201.desc
+
+    is_triggered_only = yes
+
+    immediate = {
+        establish_communications_no_message = event_target:newcomer_country
+    }
+
+    trigger = {
+    }
+
+    picture = GFX_evt_drifting_gateway
+    location = event_target:gate_system
+    show_sound = event_alien_signal
+
+    option = {
+        name = ONSCREEN
+        # log = "[Root.GetName] got a pop-up"
+        hidden_effect = {
+            IF = {
+                limit = { is_ai = no }
+                country_event = { id = mem_sadrell.202 }
+            }
+        }
+    }
+}
+
+# Diplomatic event
+country_event = {
+    id = mem_sadrell.202
+    title = TRANSMISSION
+    desc = mem_sadrell.202.desc
+
+    diplomatic = yes
+    is_triggered_only = yes
+    location = event_target:gate_system
+
+    picture_event_data = {
+		portrait = event_target:newcomer_country
+        room = event_target:newcomer_country
+        planet_background = event_target:desert_colony
+		graphical_culture = event_target:newcomer_country
+		city_level = event_target:desert_colony
+    }
+
+    option = {
+        name = mem_sadrell.202.a
+        trigger = {
+            OR = {
+                has_valid_civic = civic_machine_servitor
+                NOR = {
+                    has_ethic = ethic_xenophobe
+                    has_ethic = ethic_fanatic_xenophobe
+                    has_ethic = ethic_militarist
+                    has_ethic = ethic_fanatic_militarist
+                    has_valid_civic = civic_hive_devouring_swarm
+                    has_authority = auth_machine_intelligence
+                }
+            }
+        }
+    }
+
+    option = {
+        name = mem_sadrell.202.phobe
+
+        trigger = {
+            OR = {
+                has_ethic = ethic_xenophobe
+                has_ethic = ethic_fanatic_xenophobe
+                has_ethic = ethic_militarist
+                has_ethic = ethic_fanatic_militarist
+            }
+        }
+    }
+
+    option = {
+        name = mem_sadrell.202.swarm
+
+        exclusive_trigger = {
+            has_valid_civic = civic_hive_devouring_swarm
+        }
+    }
+
+    option = {
+        name = mem_sadrell.202.purifier
+        exclusive_trigger = {
+            has_valid_civic = civic_fanatic_purifiers
+        }
+    }
+
+    option = {
+        name = mem_sadrell.202.machine
+        trigger = {
+            has_authority = auth_machine_intelligence
+            NOR = {
+                has_valid_civic = civic_machine_assimilator
+                has_valid_civic = civic_machine_servitor
+            }
+        }
+    }
+
+    option = {
+        name = mem_sadrell.202.assimilator
+        trigger = {
+            has_valid_civic = civic_machine_assimilator
+        }
+    }
+
+    option = {
+        name = mem_sadrell.202.terminator
+        trigger = {
+            has_valid_civic = civic_machine_terminator
+        }
+    }
+
+    option = {
+        name = mem_sadrell.202.b
+        is_dialog_only = yes
+        response_text = mem_sadrell.202.b.response
+        ai_chance = {
+            factor = 0
+        }
+    }
+
+    option = {
+        name = mem_sadrell.202.c
+        is_dialog_only = yes
+        response_text = mem_sadrell.202.c.response
+        ai_chance = {
+            factor = 0
+        }
+    }
+}
+
+###################################
+### MESSAGE IN A BOTTLE OUTCOME ###
+###################################
+
+# Initial setup
+planet_event = {
+    id = mem_sadrell.300
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        event_target:gate_system = {
+            exists = space_owner
+            space_owner = { is_country_type = default }
+        }
+    }
+
+    immediate = {
+        set_global_flag = mem_sadrell_situation_resolved
+        mem_sadrell_generate_cluster = yes
+        mem_sadrell_create_ruined_voidhomes = yes
+        random_system = {
+            limit = { has_star_flag = mem_sadrell_1_0 }
+            while = {
+                count = 3
+                create_ambient_object = {
+                    type = ancient_battlefield_02_object
+                }
+            }
+        }
+        event_target:desert_colony = {
+            change_pc = pc_nuked
+            reroll_planet = yes
+            set_planet_flag = primitives_nuked_themselves
+        }
+        event_target:tundra_colony = {
+            change_pc = pc_nuked
+            reroll_planet = yes
+            set_planet_flag = primitives_nuked_themselves
+        }
+        every_system = {
+            limit = {
+                has_star_flag = mem_sadrell_extant_cluster
+            }
+            create_ambient_object = {
+                type = ancient_battlefield_02_object
+            }
+        }
+        event_target:gate_system = {
+            random_system_megastructure = {
+                limit = { is_megastructure_type = mem_sadrell_gateway_active }
+                save_event_target_as = terminus
+            }
+        }
+        create_ambient_object = {
+            type = mem_sadrell_probe
+            location = root
+        }
+        last_created_ambient_object = {
+            save_event_target_as = sadrell_probe
+            set_location = {
+                target = event_target:terminus
+                distance = 30
+                angle = random
+            }
+        }
+        event_target:gate_system = {
+            space_owner = { country_event = { id = mem_sadrell.301 } }
+            every_playable_country = {
+                limit = {
+                    intel_level = {
+                        level > none
+                        system = prev
+                    }
+                    NOT = { is_same_value = prev.space_owner }
+                }
+                country_event = { id = mem_sadrell.302 }
+            }
+        }
+    }
+}
+
+# System owner is notified of gate opening
+country_event = {
+    id = mem_sadrell.301
+    title = mem_sadrell.301.name
+    desc = mem_sadrell.301.desc
+
+    is_triggered_only = yes
+
+    location = event_target:gate_system
+    picture = GFX_evt_drifting_gateway
+    show_sound = event_alien_signal
+
+    option = {
+        name = mem_sadrell.301.a
+
+        enable_special_project = {
+            name = MEM_SADRELL_PROBE_PROJECT
+            location = event_target:sadrell_probe
+            owner = root
+        }
+    }
+
+    option = {
+        name = mem_sadrell.301.b
+
+        add_resource = {
+            influence = 50
+        }
+    }
+}
+
+# Everyone else is notified too
+country_event = {
+    id = mem_sadrell.302
+    title = mem_sadrell.302.name
+    desc = mem_sadrell.302.desc
+
+    is_triggered_only = yes
+
+    location = event_target:gate_system
+    picture = GFX_evt_drifting_gateway
+    show_sound = event_scanner
+
+    option = {
+        name = INTERESTING
+    }
+}
+
+# Ship event on project completion
+ship_event = {
+    id = mem_sadrell.303
+    title = mem_sadrell.303.name
+    desc = mem_sadrell.303.desc
+
+    is_triggered_only = yes
+
+    location = event_target:gate_system
+    picture = GFX_evt_satellite_in_orbit
+    
+    immediate = {
+        event_target:sadrell_probe = {
+            destroy_ambient_object = this
+        }
+    }
+
+    option = {
+        name = ONSCREEN
+
+        owner = {
+            add_monthly_resource_mult = {
+				resource = unity
+				value = @tier3unityreward
+				min = @tier3unitymin
+				max = @tier3unitymax
+            }
+            add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+            }
+            hidden_effect = {
+                country_event = { id = mem_sadrell.304 }
+            }
+        }
+    }
+}
+
+# Diplomatic event to read the probe
+country_event = {
+    id = mem_sadrell.304
+    title = mem_sadrell.304.name
+    desc = mem_sadrell.304.desc
+
+    is_triggered_only = yes
+
+    diplomatic = yes
+    picture_event_data = {
+		room = no_video_feed_room
+    }
+    
+    option = {
+        name = mem_sadrell.304.a
+        default_hide_option = yes
+    }
+
+    option = {
+        name = mem_sadrell.304.b
+        is_dialog_only = yes
+        response_text = mem_sadrell.304.b.response
+    }
+
+    option = {
+        name = mem_sadrell.304.c
+        is_dialog_only = yes
+        response_text = mem_sadrell.304.c.response
+    }
+
+    option = {
+        name = mem_sadrell.304.d
+        is_dialog_only = yes
+        response_text = mem_sadrell.304.d.response
+    }
+
+    option = {
+        name = mem_sadrell.304.e
+        is_dialog_only = yes
+        response_text = mem_sadrell.304.e.response
+    }
+    option = {
+        name = mem_sadrell.304.f
+        is_dialog_only = yes
+        response_text = mem_sadrell.304.f.response
+    }
+}
+
+# Entering cluster
+ship_event = {
+    id = mem_sadrell.305
+    title = mem_sadrell.305.name
+    desc = mem_sadrell.305.desc
+
+    is_triggered_only = yes
+
+    trigger = {
+        has_global_flag = mem_sadrell_will_send_message
+        FROM = {
+            has_star_flag = mem_sadrell_extant_cluster
+        }
+        owner = {
+            NOT = { has_country_flag = mem_sadrell_visited_cluster }
+        }
+    }
+
+    immediate = {
+        owner = {
+            set_country_flag = mem_sadrell_visited_cluster
+        }
+    }
+
+    picture = GFX_evt_ruined_system
+    location = FROM
+
+    option = {
+        name = INTERESTING
+    }
+}
+
+#################
+### ANOMALIES ###
+#################
+
+# Toxic terraform
+ship_event = {
+    id = mem_sadrell.1000
+    title = mem_sadrell.1000.name
+    desc = mem_sadrell.1000.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mining_operations
+    location = FROM
+    show_sound = event_scanner
+
+    immediate = { owner = { country_event = { id = story.5 days = 30 } } }
+
+    option = {
+        name = INTERESTING
+        owner = {
+            add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+            }
+        }
+        FROM = {
+            add_modifier = {
+                modifier = mem_sadrell_terraform_mod
+                days = -1
+            }
+            set_deposit = d_society_6
+        }
+    }
+}
+
+# Old fleet engagement
+ship_event = {
+    id = mem_sadrell.1001
+    title = mem_sadrell.1001.name
+    desc = mem_sadrell.1001.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_small_space_battle
+    location = FROM
+    show_sound = event_scanner
+
+    immediate = { owner = { country_event = { id = story.5 days = 30 } } }
+
+    option = {
+        name = INTERESTING
+        owner = {
+            add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+            }
+        }
+        FROM = {
+            add_modifier = {
+                modifier = mem_sadrell_battlefield_mod
+                days = -1
+            }
+            set_deposit = d_engineering_6
+        }
+    }
+}
+
+# Old station
+ship_event = {
+    id = mem_sadrell.1002
+    title = mem_sadrell.1002.name
+    desc = mem_sadrell.1002.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_space_station
+    location = FROM
+    show_sound = event_scanner
+
+    immediate = {
+        owner = { country_event = { id = story.5 days = 30 } }
+        FROM = {
+            add_modifier = {
+                modifier = mem_sadrell_old_station_mod
+                days = -1
+            }
+        }
+    }
+
+    option = {
+        name = INTERESTING
+        owner = {
+            add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+            }
+        }
+    }
+}
+
+# Broadcaster
+ship_event = {
+    id = mem_sadrell.1003
+    title = mem_sadrell.1003.name
+    desc = mem_sadrell.1003.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_derelict_interior
+    location = FROM
+    show_sound = event_scanner
+
+    immediate = {
+        owner = { country_event = { id = story.5 days = 30 } }
+        FROM = {
+            add_modifier = {
+                modifier = mem_sadrell_broadcaster_mod
+                days = -1
+            }
+        }
+    }
+
+    option = {
+        name = INTERESTING
+        owner = {
+            add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+            }
+        }
+    }
+}
+
+# Destroyed liner
+ship_event = {
+    id = mem_sadrell.1004
+    title = mem_sadrell.1004.name
+    desc = mem_sadrell.1004.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_spaceship_wreck
+    location = FROM
+    show_sound = event_scanner
+
+    immediate = {
+        owner = { country_event = { id = story.5 days = 30 } }
+        FROM = {
+            add_modifier = {
+                modifier = mem_sadrell_liner_mod
+                days = -1
+            }
+        }
+    }
+
+    option = {
+        name = INTERESTING
+        owner = {
+            add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+            }
+        }
+    }
+}
+
+# Heritage site
+ship_event = {
+    id = mem_sadrell.1005
+    title = mem_sadrell.1005.name
+    desc = mem_sadrell.1005.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_ancient_mining_site
+    location = FROM
+    show_sound = event_scanner
+
+    immediate = { owner = { country_event = { id = story.5 days = 30 } } }
+
+    option = {
+        name = INTERESTING
+        owner = {
+            add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+            }
+        }
+        FROM = {
+            add_modifier = {
+                modifier = mem_sadrell_heritage_mod
+                days = -1
+            }
+            set_deposit = d_engineering_3
+            add_deposit = d_society_3
+        }
+    }
+}
+
+# Fallen Homeworld
+ship_event = {
+    id = mem_sadrell.1100
+    title = mem_sadrell.1100.name
+    desc = mem_sadrell.1100.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_city_ruins
+    location = FROM
+    show_sound = event_ghost_town
+
+    immediate = { owner = { country_event = { id = story.5 days = 30 } } }
+    
+    trigger = {
+        owner = { is_ai = no }
+        FROM = {
+            has_planet_flag = mem_sadrell_homeworld
+            NOT = { exists = owner }
+        }
+    }
+
+    option = {
+        name = INTERESTING
+        custom_tooltip = mem_sadrell.1100.a.tooltip
+    }
+}
+
+# Fallen Industrial World
+ship_event = {
+    id = mem_sadrell.1101
+    title = mem_sadrell.1101.name
+    desc = mem_sadrell.1101.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_ancient_mining_site
+    location = FROM
+    show_sound = event_ghost_town
+
+    immediate = { owner = { country_event = { id = story.5 days = 30 } } }
+
+    trigger = {
+        owner = { is_ai = no }
+        FROM = {
+            has_planet_flag = mem_sadrell_industrial
+            NOT = { exists = owner }
+        }
+    }
+
+    option = {
+        name = INTERESTING
+        custom_tooltip = mem_sadrell.1101.a.tooltip
+    }
+}
+
+# Fallen agri world
+ship_event = {
+    id = mem_sadrell.1102
+    title = mem_sadrell.1102.name
+    desc = mem_sadrell.1102.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_mem_farmland
+    location = FROM
+    show_sound = event_ghost_town
+
+    immediate = { owner = { country_event = { id = story.5 days = 30 } } }
+
+    trigger = {
+        owner = { is_ai = no }
+        FROM = {
+            has_planet_flag = mem_sadrell_agri_world
+            NOT = { exists = owner }
+        }
+    }
+
+    option = {
+        name = INTERESTING
+        custom_tooltip = mem_sadrell.1102.a.tooltip
+    }
+}
+
+# Watery grave
+ship_event = {
+    id = mem_sadrell.1103
+    title = mem_sadrell.1103.name
+    desc = mem_sadrell.1103.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_city_ruins
+    location = FROM
+    show_sound = event_ghost_town
+
+    immediate = { owner = { country_event = { id = story.5 days = 30 } } }
+
+    trigger = {
+        owner = { is_ai = no }
+        FROM = {
+            has_planet_flag = mem_sadrell_science_system_1
+            NOT = { exists = owner }
+        }
+    }
+
+    option = {
+        name = INTERESTING
+        custom_tooltip = mem_sadrell.1103.a.tooltip
+    }
+}
+
+# Alpine research labs
+ship_event = {
+    id = mem_sadrell.1104
+    title = mem_sadrell.1104.name
+    desc = mem_sadrell.1104.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_city_ruins
+    location = FROM
+    show_sound = event_ghost_town
+
+    immediate = { owner = { country_event = { id = story.5 days = 30 } } }
+
+    trigger = {
+        owner = { is_ai = no }
+        FROM = {
+            has_planet_flag = mem_sadrell_science_system_2
+            NOT = { exists = owner }
+        }
+    }
+
+    option = {
+        name = INTERESTING
+        custom_tooltip = mem_sadrell.1104.a.tooltip
+    }
+}
+
+# Killing a void home
+# This = owner of ship 1 (combatant)
+# From = owner of ship 2 (destroyed)
+# FromFrom = ship 1
+# FromFromFrom = ship 2
+country_event = {
+    id = mem_sadrell.1200
+    title = mem_sadrell.1200.name
+    desc = {
+        text = mem_sadrell.1200.desc.normal
+        trigger = {
+            FROM = { has_country_flag = mem_sadrell_country_regular }
+        }
+    }
+    desc = {
+        text = mem_sadrell.1200.desc.ass
+        trigger = {
+            FROM = { has_country_flag = mem_sadrell_assimilator_country }
+        }
+    }
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_large_explosion
+
+    trigger = {
+        FROMFROMFROM = { is_ship_size = mem_sadrell_void_home }
+        is_country_type = default
+        FROM = {
+            OR = {
+                has_country_flag = mem_sadrell_country_regular
+                has_country_flag = mem_sadrell_assimilator_country
+            }
+        }
+    }
+
+    immediate = {
+        FROM = {
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_sadrell_void_home_wrecker                
+            }
+        }
+    }
+
+    option = {
+        name = OK
+    }
+
+    option = {
+        name = mem_sadrell.1200.pac
+
+        exclusive_trigger = {
+            OR = {
+                has_ethic = ethic_pacifist
+                has_ethic = ethic_fanatic_pacifist
+                has_valid_civic = civic_machine_servitor
+                has_ethic = ethic_xenophile
+                has_ethic = ethic_fanatic_xenophile
+            }
+            FROM = { has_country_flag = mem_sadrell_country_regular }
+        }
+    }
+
+    option = {
+        name = mem_sadrell.1200.mil
+
+        exclusive_trigger = {
+            OR = {
+                has_ethic = ethic_militarist
+                has_ethic = ethic_fanatic_militarist
+            }
+            FROM = { has_country_flag = mem_sadrell_country_regular }
+        }
+    }
+
+    option = {
+        name = mem_sadrell.1200.auth
+
+        exclusive_trigger = {
+            OR = {
+                has_ethic = ethic_authoritarian
+                has_ethic = ethic_fanatic_authoritarian
+            }
+            FROM = { has_country_flag = mem_sadrell_country_regular }
+        }
+    }
+
+    option = {
+        name = mem_sadrell.1200.pur
+
+        exclusive_trigger = {
+            has_valid_civic = civic_fanatic_purifiers
+            FROM = { has_country_flag = mem_sadrell_country_regular }
+        }
+    }
+    option = {
+        name = mem_sadrell.1200.term
+
+        exclusive_trigger = {
+            has_valid_civic = civic_machine_terminator
+            FROM = { has_country_flag = mem_sadrell_country_regular }
+        }
+    }
+    option = {
+        name = mem_sadrell.1200.swarm
+
+        exclusive_trigger = {
+            has_valid_civic = civic_hive_devouring_swarm
+            FROM = { has_country_flag = mem_sadrell_country_regular }
+        }
+    }
+
+    after = {
+        tooltip = {
+            FROM = {
+                add_opinion_modifier = {
+                    who = ROOT
+                    modifier = mem_sadrell_void_home_wrecker                
+                }
+            }
+        }
+        add_resource = {
+            alloys = 100
+            volatile_motes = 5
+            exotic_gases = 5
+            rare_crystals = 5
+        }
+    }
+}

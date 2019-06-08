@@ -1,0 +1,198 @@
+#Reincarnie system
+mem_crucible_system = {
+    name = Crucible
+    class = sc_binary_10
+    flags = { mem_crucible_system primitive_system }
+    asteroid_belt = {
+		type = rocky_asteroid_belt
+		radius = 100
+    }
+    asteroid_belt = {
+		type = icy_asteroid_belt
+		radius = 215
+    }
+    
+    usage = misc_system_init
+	usage_odds = {
+		base = 2000000
+		modifier = {
+			factor = 0
+			is_bottleneck_system = yes
+        }
+        modifier = {
+            factor = 0
+            has_star_flag = empire_cluster
+        }
+	}
+    max_instances = 1
+    scaled_spawn_chance = 8
+
+    planet = {
+        class = star
+        size = 25
+        orbit_distance = 0
+    }
+
+    change_orbit = 20
+
+    planet = {
+        count = 2
+        orbit_distance = 30
+        size = { min = 12 max = 25 }
+
+        moon = {
+            count = { min = 0 max = 1 }
+            orbit_distance = 8
+        }
+    }
+
+    change_orbit = 20
+
+    planet = {
+        count = 3
+        class = pc_asteroid
+        size = { min = 4 max = 7 }
+        orbit_angle = { min = 100 max = 140 }
+        orbit_distance = 0
+    }
+
+    planet = {
+        count = 2
+        orbit_distance = 35
+        class = pc_gas_giant
+
+        change_orbit = 5
+        moon = {
+            count = { min = 1 max = 3 }
+            orbit_distance = 5
+        }
+    }
+
+    change_orbit = 25
+
+    planet = {
+        count = 3
+        class = pc_ice_asteroid
+        size = { min = 4 max = 7 }
+        orbit_angle = { min = 100 max = 140 }
+        orbit_distance = 0
+    }
+
+    planet = {
+        class = star
+        orbit_distance = 100
+        orbit_angle = 150
+        satellite_naming_policy = upper_case_roman_numerals
+
+        planet = {
+            class = pc_molten
+            size = 13
+            orbit_distance = 20
+        }
+
+        planet = {
+            class = pc_shrouded
+            size = 25
+            flags = { mem_crucible_controller_planet }
+            orbit_distance = 30
+
+            init_effect = {
+                prevent_anomaly = yes
+                save_global_event_target_as = mem_crucible_controller_planet
+            }
+
+            moon = {
+                name = Volch
+                class = pc_gaia
+                size = 16
+                orbit_distance = 12
+
+                flags = { mem_crucible_planet }
+
+                init_effect = {
+                    save_global_event_target_as = mem_crucible_planet
+                    prevent_anomaly = yes
+                    create_species = {
+                        name = Voldareen
+                        plural = Voldareens
+                        adjective = Voldareen
+                        class = random_non_machine #Maybe change back to fixed?
+                        portrait = random
+                        homeworld = this
+                        traits = {
+                            trait = trait_deviants
+                            trait = trait_repugnant
+                            trait = trait_venerable
+                        }
+                        effect = {
+                            save_global_event_target_as = mem_crucible_species
+                        }
+                    }
+                    create_country = {
+                        type = primitive
+                        name = random
+                        species = last_created_species
+                        flag = {
+                            icon = {
+                                category = spherical
+                                file = flag_spherical_1.dds
+                            }
+                            background = {
+                                category = backgrounds
+                                file = triangle_split.dds
+                            }
+                            colors = {
+                                "red"
+                                "pink"
+                                "null"
+                                "null"
+                            }
+                        }
+                        ethos = {
+                            ethic = ethic_fanatic_xenophobe
+                            ethic = random
+                        }
+                        authority = random
+                        civics = {
+                            civic = civic_secret_of_fire
+                            civic = civic_the_wheel
+                        }
+                        effect = {
+                            save_global_event_target_as = mem_crucible_country
+                            set_country_flag = stone_age
+                            set_country_flag = recently_advanced
+                            set_primitive_age = stone_age
+                            set_country_flag = mem_crucible_country
+                            set_graphical_culture = preindustrial_01
+                        }
+                    }
+                    set_owner = last_created_country
+                    while = {
+                        count = 4
+                        create_pop = {
+                            species = last_created
+                        }					
+                    }
+                    add_building = building_crude_huts
+                    remove_building = building_colony_shelter
+                    create_army = {
+                        name = "NAME_Primitive_Army"
+                        owner = event_target:mem_crucible_country
+                        species = event_target:mem_crucible_country
+                        type = "primitive_army"
+                    }
+                }
+            }
+        }
+
+        planet = {
+            class = pc_frozen
+            orbit_distance = 20
+            size = 20
+        }
+    }
+
+    init_effect = {
+        set_global_flag = mem_crucible_system_spawned
+    }
+}

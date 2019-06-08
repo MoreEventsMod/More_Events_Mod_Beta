@@ -1,0 +1,409 @@
+mem_rebel_yell_system_1 = {
+    class = rl_binary_starting_stars
+    # name = "Setrisina"
+    usage = misc_system_init
+    usage_odds = {
+        base = 100000
+        modifier = {
+            factor = 0
+            OR = {
+                has_star_flag = empire_cluster
+                is_fe_cluster = yes
+                is_inside_nebula = no
+                is_bottleneck_system = yes
+            }
+        }
+    }
+    scaled_spawn_chance = 8
+    max_instances = 1
+
+    flags = { empire_cluster mem_rebel_yell_signal_system } # Why? To supress wormholes
+
+    change_orbit = 25
+
+    planet = {
+        class = star
+        orbit_distance = 0
+        size = 25
+
+        init_effect = {
+            set_deposit = d_energy_4
+        }
+    }
+    planet = {
+        class = star
+        orbit_distance = 0
+        size = 12
+        orbit_angle = 180
+
+        init_effect = {
+            set_deposit = d_physics_3
+        }
+    }
+
+    change_orbit = 20
+
+    planet = {
+        count = 3
+        class = random_non_colonizable
+        orbit_distance = { min = 20 max = 25 }
+    }
+
+    planet = {
+        class = pc_gas_giant
+        size = 30
+        orbit_distance = 30
+
+        moon = {
+            class = pc_mem_broken_city
+            orbit_distance = 15
+            size = 15
+
+            flags = { mem_rebel_yell_broken_city }
+
+            init_effect = {
+                prevent_anomaly = yes
+                clear_deposits = yes
+                add_deposit = d_society_5
+                add_deposit = d_engineering_5
+            }
+        }
+
+        moon = {
+            class = random_non_colonizable
+            size = 8
+            orbit_distance = 5
+        }
+    }
+
+    planet = {
+        count = 4
+        class = random_non_colonizable
+        orbit_distance = { min = 25 max = 30 }
+
+        moon = {
+            count = { min = 0 max = 1 }
+            class = random_non_colonizable
+            orbit_distance = 10
+        }
+    }
+
+    planet = {
+        class = pc_gas_giant
+        orbit_distance = 30
+        size = 25
+
+        moon = {
+            class = pc_barren_cold
+            orbit_distance = 10
+            flags = { mem_rebel_yell_signal_moon }
+        }
+
+        moon = {
+            count = 2
+            orbit_distance = 5
+            class = random_non_colonizable
+        }
+    }
+
+    init_effect = {
+        while = {
+            count = 15
+            create_ambient_object = {
+                type = "large_debris_object"
+                location = this
+            }
+        }
+    }
+}
+
+# Bosss system
+mem_rebel_yell_system_2 = {
+    class = rl_standard_stars
+    name = "Hallermel"
+    prevent_anomalies = yes
+
+    flags = { mem_rebel_yell_boss_system }
+
+    asteroid_belt = {
+        type = rocky_asteroid_belt
+        radius = 80        
+    }
+
+    asteroid_belt = {
+        type = icy_asteroid_belt
+        radius = 200
+    }
+
+    planet = {
+        class = star
+        size = 30
+        orbit_distance = 0
+    }
+
+    change_orbit = 20
+
+    planet = {
+        count = 2
+        class = random_non_colonizable
+        orbit_distance = 20
+    }
+
+    change_orbit = 20
+
+    planet = {
+        count = 3
+        class = pc_asteroid
+        size = { min = 4 max = 8 }
+        orbit_distance = 0
+    }
+
+    planet = {
+        class = random_non_colonizable
+        size = 25
+        orbit_distance = 30
+
+        flags = { mem_rebel_yell_boss_origin_planet }
+
+        moon = {
+            class = random_non_colonizable
+            size = 12
+            orbit_distance = 10
+        }
+
+        init_effect = {
+            save_event_target_as = patrol_starting_planet
+            create_country = {
+                name = "Resistance"
+                type = mem_station_smasher
+
+                flag = {
+                    icon = {
+                        category = zoological
+                        file = "flag_zoological_6.dds"
+                    }
+                    background = {
+                        category = backgrounds
+                        file = "pattern_01.dds"
+                    }
+                    colors = {
+                        "red"
+                        "beige"
+                        "null"
+                        "null"
+                    }
+                }
+
+                effect = {
+                    set_country_flag = mem_rebel_yell_resistance_country
+                    
+
+                    create_species = {
+                        class = ROBOT
+                        portrait = default_robot
+                        traits = {
+                            trait = trait_machine_unit
+                        }
+                    }
+
+                    create_leader = {
+                        name = "Resistance Custodian"
+                        species = last_created_species
+                        class = admiral
+
+                        traits = {
+                            trait = mem_rebel_yell_custodian_trait
+                        }
+                        
+                        effect = {
+                            set_leader_flag = mem_rebel_yell_custodian
+                            save_event_target_as = custodian_bot
+                        }
+                    }
+                    create_leader = {
+                        name = "Recon Custodian"
+                        species = last_created_species
+                        class = admiral
+
+                        traits = {
+                            trait = mem_rebel_yell_recon_custodian_trait
+                        }
+                        
+                        effect = {
+                            set_leader_flag = mem_rebel_yell_custodian
+                            save_event_target_as = recon_bot
+                        }
+                    }
+                }
+            }
+
+            create_fleet = {
+                name = "Resistance Remnants"
+
+                effect = {
+                    create_ship = {
+                        name = "Glory of Caitharay"
+                        design = NAME_MEM_Rebel_Yell_Paladin
+
+                        effect = {
+                            set_ship_flag = mem_rebel_yell_prize_ship
+                            set_disable_at_health = 0.25
+                        }
+                    }
+                    create_ship = {
+                        name = Carridan
+                        design = NAME_MEM_Rebel_Yell_Knight
+                    }
+                    create_ship = {
+                        name = Parnost
+                        design = NAME_MEM_Rebel_Yell_Knight
+                    }
+                    create_ship = {
+                        name = Hiltaria
+                        design = NAME_MEM_Rebel_Yell_Knight
+                    }
+                    create_ship = {
+                        name = Elledan
+                        design = NAME_MEM_Rebel_Yell_Knight
+                    }
+                    create_ship = {
+                        name = Dilmant
+                        design = NAME_MEM_Rebel_Yell_Knight
+                    }
+                    create_ship = {
+                        name = Vencharon
+                        design = NAME_MEM_Rebel_Yell_Knight
+                    }
+
+                    set_owner = last_created_country
+                    set_location = prev
+                    set_formation_scale = 3.0
+                    set_leader = event_target:custodian_bot
+                }
+            }
+
+            create_fleet = {
+                name = "Resistance Recon Detachment"
+
+                effect = {
+                    create_ship = {
+                        name = Sellett
+                        design = NAME_MEM_Rebel_Yell_Knight
+                    }
+                    create_ship = {
+                        name = Dontrana
+                        design = NAME_MEM_Rebel_Yell_Knight
+                    }
+                    create_ship = {
+                        name = Mirdijan
+                        design = NAME_MEM_Rebel_Yell_Knight
+                    }
+                    create_ship = {
+                        name = Hennaria
+                        design = NAME_MEM_Rebel_Yell_Knight
+                    }
+
+                    set_owner = last_created_country
+                    set_location = prev
+                    set_leader = event_target:recon_bot
+
+                    queue_actions = {
+                        repeat = {
+                            wait = {
+                                duration = 30
+                            }
+                            find_closest_system = {
+                                trigger = {
+                                    id = mem_rebel_yell.patrol_trigger.1
+                                    has_star_flag = mem_rebel_yell_signal_system
+                                }
+                                found_system = {
+                                    move_to = this
+                                    effect = {
+                                        id = mem_rebel_yell.patrol_trigger.2
+                                        prev = { set_fleet_stance = aggressive }
+                                        random_system_ambient_object = {
+                                            save_event_target_as = debris_of_interest
+                                        }
+                                    }
+                                    move_to = event_target:debris_of_interest
+                                }
+                            }
+                            wait = {
+                                duration = 360
+                            }
+                            find_closest_system = {
+                                trigger = {
+                                    id = mem_rebel_yell.patrol_trigger.3
+                                    has_star_flag = mem_rebel_yell_boss_system
+                                }
+                                found_system = {
+                                    move_to = THIS
+                                    effect = { 
+                                        id = mem_rebel_yell.patrol_trigger.4 
+                                        prev = { set_fleet_stance = passive }
+                                    }
+                                    find_closest_planet = {
+                                        trigger = {
+                                            id = mem_rebel_yell.patrol_trigger.5
+                                            has_planet_flag = mem_rebel_yell_boss_origin_planet
+                                        }
+                                        found_planet = {
+                                            move_to = this
+                                        }
+                                    }
+                                }
+                                
+                            }
+                            wait = {
+                                duration = 3600
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    planet = {
+        count = 2
+        class = random_non_colonizable
+        orbit_distance = 30
+
+        moon = {
+            count = { min = 0 max = 1 }
+            orbit_distance = 10
+        }
+    }
+
+    change_orbit = 30
+
+    planet = {
+        count = 3
+        class = pc_ice_asteroid
+        size = { min = 4 max = 8 }
+        orbit_distance = 0
+    }
+
+    planet = {
+        class = pc_gas_giant
+        orbit_distance = 35
+
+        change_orbit = 5
+
+        moon = {
+            count = 3
+            class = random_non_colonizable
+            orbit_distance = 5
+        }
+    }
+
+    init_effect = {
+        save_event_target_as = boss_system
+        spawn_natural_wormhole = {
+            bypass_type = wormhole
+            random_pos = yes
+            orbit_angle = 360
+        }
+    }
+}

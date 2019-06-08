@@ -6,32 +6,18 @@
 
 namespace = mem_space_monster_attacks
 
-@tier1materialreward = 6
-@tier1materialmin = 100
-@tier1materialmax = 500
-@tier2materialreward = 12
-@tier2materialmin = 150
-@tier2materialmax = 1000
-@tier3materialreward = 18
-@tier3materialmin = 250
-@tier3materialmax = 1500
-@tier4materialreward = 24
-@tier4materialmin = 350
-@tier4materialmax = 2000
-@tier5materialreward = 48
-@tier5materialmin = 700
-@tier5materialmax = 4000
-
 planet_event = {
 	id = mem_space_monster_attacks.1000
 	hide_window = yes
 	fire_only_once = yes
 	
 	trigger = {
-		NOT = {
+		NOR = {
 			has_global_flag = mem_space_monster_attacks_crystal
+			has_planet_flag = mem_space_monster_attacks_nope
 		}
-		NOT = { is_planet_class = pc_habitat }
+		is_under_colonization = no
+		habitable_structure = no
 		has_owner = yes
 		owner = {
 			is_ai = no
@@ -46,10 +32,17 @@ planet_event = {
 	}
 	
 	immediate = {
-		set_global_flag = mem_space_monster_attacks_crystal
 		random_list = {
-			90 = {}
-			10 = { planet_event = { id = mem_space_monster_attacks.1 } }
+			50 = {
+				set_planet_flag = mem_space_monster_attacks_nope
+			}
+			30 = {
+				set_global_flag = mem_space_monster_attacks_crystal
+			}
+			10 = {
+				set_global_flag = mem_space_monster_attacks_crystal
+				planet_event = { id = mem_space_monster_attacks.1 }
+			}
 		}
 	}
 }
@@ -174,34 +167,7 @@ planet_event = {
 				}
 			}
 		}
-		random_tile = {
-			limit = {
-				has_building = yes
-				is_ruined = no
-			}
-			set_ruined = yes
-		}
-		random_tile = {
-			limit = {
-				has_building = yes
-				is_ruined = no
-			}
-			set_ruined = yes
-		}
-		random_tile = {
-			limit = {
-				has_building = yes
-				is_ruined = no
-			}
-			set_ruined = yes
-		}
-		random_tile = {
-			limit = {
-				has_building = yes
-				is_ruined = no
-			}
-			set_ruined = yes
-		}
+		add_planet_devastation = 70
 		planet_event = { id = mem_space_monster_attacks.6 days = 180 random = 30 }
 	}
 	
@@ -246,6 +212,12 @@ country_event = {
 			min = @tier3materialmin
 			max = @tier3materialmax
 		}
+		add_monthly_resource_mult = {
+			resource = rare_crystals
+			value = @tier2materialreward
+			min = @tier2materialmin
+			max = @tier2materialmax
+		}
 		enable_special_project = {
 			name = MEM_SPACE_MONSTER_ATTACKS_CRYSTAL_STUDY
 			location = event_target:pc_home
@@ -287,6 +259,12 @@ country_event = {
 			min = @tier3materialmin
 			max = @tier3materialmax
 		}
+		add_monthly_resource_mult = {
+			resource = rare_crystals
+			value = @tier2materialreward
+			min = @tier2materialmin
+			max = @tier2materialmax
+		}
 		enable_special_project = {
 			name = MEM_SPACE_MONSTER_ATTACKS_CRYSTAL_STUDY
 			location = event_target:pc_home
@@ -319,17 +297,17 @@ country_event = {
 			}
 			add_monthly_resource_mult = {
 				resource = society_research
-				value = 50
-				min = 1500
-				max = 2500
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
 			}
-			ELSE = {
-				add_monthly_resource_mult = {
-					resource = society_research
-					value = 50
-					min = 2500
-					max = 4000
-				}
+		}
+		ELSE = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier4researchreward
+				min = @tier4researchmin
+				max = @tier4researchmax
 			}
 		}
 	}
@@ -348,10 +326,10 @@ planet_event = {
 	option = {
 		name = mem_space_monster_attacks.6.a
 		custom_tooltip = mem_space_monster_attacks.6.a.tooltip
-		add_modifier = {
-			modifier = mem_crystal_harvest
-			days = -1
-		}
+#		add_modifier = {
+#			modifier = mem_crystal_harvest
+#			days = -1
+#		}
 		hidden_effect = {
 			IF = {
 				limit = {
@@ -362,14 +340,15 @@ planet_event = {
 				planet_event = { id = mem_space_monster_attacks.7 days = 1800 random = 360 }
 			}
 		}
+		add_deposit = d_mem_crystals_mining
 	}
 	option = {
 		name = mem_space_monster_attacks.6.b
 		custom_tooltip = mem_space_monster_attacks.6.b.tooltip
-		add_modifier = {
-			modifier = mem_crystal_study
-			days = -1
-		}
+#		add_modifier = {
+#			modifier = mem_crystal_study
+#			days = -1
+#		}
 		hidden_effect = {
 			IF = {
 				limit = {
@@ -380,6 +359,7 @@ planet_event = {
 				planet_event = { id = mem_space_monster_attacks.7 days = 1800 random = 360 }
 			}
 		}
+		add_deposit = d_mem_crystals_science
 	}
 	option = {
 		name = mem_space_monster_attacks.6.c
@@ -434,9 +414,15 @@ planet_event = {
 		owner = {
 			add_monthly_resource_mult = {
 				resource = minerals
-				value = 50
-				min = 1000
-				max = 1600
+				value = @tier4materialreward
+				min = @tier4materialmin
+				max = @tier4materialmax
+			}
+			add_monthly_resource_mult = {
+				resource = rare_crystals
+				value = @tier3materialreward
+				min = @tier3materialmin
+				max = @tier3materialmax
 			}
 		}
 	}

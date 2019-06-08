@@ -6,45 +6,6 @@
 
 namespace = mem_duel_ritual
 
-@tier1materialreward = 6
-@tier1materialmin = 100
-@tier1materialmax = 500
-@tier2materialreward = 12
-@tier2materialmin = 150
-@tier2materialmax = 1000
-@tier3materialreward = 18
-@tier3materialmin = 250
-@tier3materialmax = 1500
-@tier4materialreward = 24
-@tier4materialmin = 350
-@tier4materialmax = 2000
-
-@tier1influencereward = 6
-@tier1influencemin = 40
-@tier1influencemax = 100
-@tier2influencereward = 12
-@tier2influencemin = 80
-@tier2influencemax = 175
-@tier3influencereward = 18
-@tier3influencemin = 125
-@tier3influencemax = 250
-@tier4influencereward = 24
-@tier4influencemin = 150
-@tier4influencemax = 300
-
-@tier1researchreward = 6
-@tier1researchmin = 60
-@tier1researchmax = 150
-@tier2researchreward = 12
-@tier2researchmin = 90
-@tier2researchmax = 250
-@tier3researchreward = 18
-@tier3researchmin = 120
-@tier3researchmax = 350
-@tier4researchreward = 24
-@tier4researchmin = 150
-@tier4researchmax = 500
-
 ################################################################################
 ################################################################################
 ################################################################################
@@ -63,6 +24,13 @@ country_event = {
 	trigger = {
 		is_country_type = default
 		is_primitive = no
+		is_ai = no
+		is_machine_empire = no
+		is_hive_empire = no
+		NOR = {
+			has_civic = civic_fanatic_purifiers
+			has_country_flag = mem_duel_ritual
+		}
 		from = {
 			is_primitive = yes
 			OR = {
@@ -95,7 +63,16 @@ country_event = {
 				}
 			}
 			random_list = {
-				60 = { planet_event = { id = mem_duel_ritual.4 days = 180 random = 25 } }	# Event happens after some time
+				60 = { # Event happens after some time
+					planet_event = {
+						id = mem_duel_ritual.4
+						days = 180
+						random = 25
+					}
+					ROOT = {
+						set_country_flag = mem_duel_ritual
+					}
+				}	
 				40 = { }	# nothing happens and event can happen after next invasion of other primitive race
 			}
 		}
@@ -112,18 +89,11 @@ planet_event = {
 	is_triggered_only = yes
 	
 	trigger = {
-		owner = {
-			NOT = {
-				has_country_flag = mem_duel_ritual
-			}
-		}
+		exists = owner
 		has_planet_flag = mem_duel_ritual
 	}
 	
 	immediate = {
-		owner = {
-			set_country_flag = mem_duel_ritual
-		}
 		random_owned_pop = {
 			limit = {
 				has_pop_flag = mem_duel_ritual
@@ -210,25 +180,28 @@ planet_event = {
 		custom_tooltip = mem_duel_ritual.5.b.tooltip
 		trigger = { 
 			owner = {
-				AND = {
-					OR = {
-						has_ethic = ethic_xenophobe
-						has_ethic = ethic_fanatic_xenophobe
-						has_ethic = ethic_militarist
-						has_ethic = ethic_fanatic_militarist
-					}
-					NOR = {
-						has_ethic = ethic_xenophile
-						has_ethic = ethic_fanatic_xenophile
-					}
+				OR = {
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
+				}
+				NOR = {
+					has_ethic = ethic_xenophile
+					has_ethic = ethic_fanatic_xenophile
 				}
 			}
 		}
 		owner = {
-			add_influence = 50
+			add_monthly_resource_mult = {
+				resource = influence
+				value = @tier1influencereward
+				min = @tier1influencemin
+				max = @tier1influencemax
+			}
 		}
 		hidden_effect = {
-			every_pop = {
+			every_owned_pop = {
 				limit = {
 					has_modifier = mem_suppressed_primitives_01
 				}
@@ -329,11 +302,16 @@ planet_event = {
 		name = mem_duel_ritual.6.c
 		custom_tooltip = mem_duel_ritual.6.c.tooltip
 		owner = {
-			add_influence = 50
+			add_monthly_resource_mult = {
+				resource = influence
+				value = @tier1influencereward
+				min = @tier1influencemin
+				max = @tier1influencemax
+			}
 		}
 		response_text = mem_duel_ritual.6.c.response
 		hidden_effect = {
-			every_pop = {
+			every_owned_pop = {
 				limit = {
 					has_modifier = mem_suppressed_primitives_01
 				}
@@ -416,19 +394,16 @@ pop_event = {
 					}
 					IF = {
 						limit = {
-							NOR = {
-								has_modifier = pop_enslaved
-								has_modifier = pop_purging
-								has_modifier = pop_uplifted
-								has_modifier = culture_shock_bronze_age
-								has_modifier = culture_shock_iron_age
-								has_modifier = culture_shock_late_medieval_age
-								has_modifier = culture_shock_renaissance_age
-								has_modifier = culture_shock_steam_age
-								has_modifier = culture_shock_industrial_age
-								has_modifier = culture_shock_machine_age
-								has_modifier = culture_shock_atomic_age
-								has_modifier = culture_shock_early_space_age
+							has_culture_shock = no
+							mem_has_happiness = yes
+							OR = {
+								has_citizenship_type = { type = citizenship_full country = prev }
+								has_citizenship_type = { type = citizenship_caste_system country = prev }
+								has_citizenship_type = { type = citizenship_organic_trophy country = prev }
+								AND = {
+									has_trait = trait_mechanical
+									prev = { has_policy_flag = ai_full_rights }
+								}
 							}
 						}
 						add_modifier = {
@@ -486,8 +461,6 @@ pop_event = {
 					IF = {
 						limit = {
 							NOR = {
-								has_modifier = pop_enslaved
-								has_modifier = pop_purging
 								has_modifier = pop_uplifted
 								has_modifier = culture_shock_bronze_age
 								has_modifier = culture_shock_iron_age
@@ -499,6 +472,9 @@ pop_event = {
 								has_modifier = culture_shock_atomic_age
 								has_modifier = culture_shock_early_space_age
 							}
+							is_being_purged = no
+							is_being_assimilated = no
+							is_enslaved = no
 						}
 						add_modifier = {
 							modifier = mem_humiliated_masterrace
@@ -593,8 +569,6 @@ pop_event = {
 					IF = {
 						limit = {
 							NOR = {
-								has_modifier = pop_enslaved
-								has_modifier = pop_purging
 								has_modifier = pop_uplifted
 								has_modifier = culture_shock_bronze_age
 								has_modifier = culture_shock_iron_age
@@ -606,6 +580,9 @@ pop_event = {
 								has_modifier = culture_shock_atomic_age
 								has_modifier = culture_shock_early_space_age
 							}
+							is_being_purged = no
+							is_being_assimilated = no
+							is_enslaved = no
 						}
 						add_modifier = {
 							modifier = mem_proud_masterrace
@@ -662,8 +639,6 @@ pop_event = {
 					IF = {
 						limit = {
 							NOR = {
-								has_modifier = pop_enslaved
-								has_modifier = pop_purging
 								has_modifier = pop_uplifted
 								has_modifier = culture_shock_bronze_age
 								has_modifier = culture_shock_iron_age
@@ -675,6 +650,9 @@ pop_event = {
 								has_modifier = culture_shock_atomic_age
 								has_modifier = culture_shock_early_space_age
 							}
+							is_being_purged = no
+							is_being_assimilated = no
+							is_enslaved = no
 						}
 						add_modifier = {
 							modifier = mem_humiliated_masterrace
