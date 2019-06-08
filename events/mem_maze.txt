@@ -3,117 +3,37 @@ namespace = mem_maze
 #The Maze
 #By ViolentBeetle
 
-#Seeding the planet with special blocker, I guess (on_colonized)
-planet_event = {
-	id = mem_maze.1
-	
-	hide_window = yes
-	
-	is_triggered_only = yes
-	
-	trigger = {
-		#NOT = { has_global_flag = mem_maze_set }
-		owner = {
-			is_ai = no
-		}
-		any_tile = {
-			OR = {
-				has_blocker = tb_mountain_range
-				has_blocker = tb_dense_jungle
-				has_blocker = tb_quicksand_basin
-				has_blocker = tb_massive_glacier
-				has_blocker = tb_toxic_kelp
-			}
-		}
-	}
-	
-	immediate = {
-		#set_global_flag = mem_maze_set
-		random_list = {
-			0 = {}
-			100 = {
-				random_tile = {
-					limit = {
-						OR = {
-							has_blocker = tb_mountain_range
-							has_blocker = tb_dense_jungle
-							has_blocker = tb_quicksand_basin
-							has_blocker = tb_massive_glacier
-							has_blocker = tb_toxic_kelp
-						}
-					}
-					IF = {
-						limit = { has_blocker = tb_mountain_range }
-						planet = { set_planet_flag = mem_maze_m@prev }
-					}
-					IF = {
-						limit = { has_blocker = tb_dense_jungle }
-						planet = { set_planet_flag = mem_maze_j@prev }
-					}
-					IF = {
-						limit = { has_blocker = tb_quicksand_basin }
-						planet = { set_planet_flag = mem_maze_q@prev }
-					}
-					IF = {
-						limit = { has_blocker = tb_massive_glacier }
-						planet = { set_planet_flag = mem_maze_g@prev }
-					}
-					IF = {
-						limit = { has_blocker = tb_toxic_kelp }
-						planet = { set_planet_flag = mem_maze_k@prev }
-					}
-				}
-			}
-		}
-	}
-}
+#Event 1 is seeding planet with flags, it is no longer relevant.
+
 
 #Removed the blocker (on_action)
 planet_event = {
 	id = mem_maze.2
 	
 	title = mem_maze.2.name
+	desc = mem_maze.2.desc.j
 	desc = {
+		text = mem_maze.2.desc.machine
 		trigger = {
-			switch = {
-				trigger = has_planet_flag
-				mem_maze_m@from = { text = mem_maze.2.desc.m }
-				mem_maze_j@from = { text = mem_maze.2.desc.j }
-				mem_maze_q@from = { text = mem_maze.2.desc.q }
-				mem_maze_g@from = { text = mem_maze.2.desc.g }
-				mem_maze_k@from = { text = mem_maze.2.desc.k }
+			owner = {
+				is_machine_empire = yes
 			}
 		}
 	}
-	picture = GFX_evt_alien_ruins
+	desc = {
+		text = mem_maze.2.desc.hive
+		trigger = {
+			owner = {
+				is_hive_empire = yes
+			}
+		}
+	}
+	picture = GFX_evt_overgrown_city
 	
 	is_triggered_only = yes
 	
-	trigger = {
-		NOT = { has_planet_flag = mem_maze_uncovered }
-		owner = {
-			NOT = { has_country_flag = mem_maze_discoverer }
-		}
-		OR = {
-			has_planet_flag = mem_maze_m@from
-			has_planet_flag = mem_maze_j@from
-			has_planet_flag = mem_maze_q@from
-			has_planet_flag = mem_maze_g@from
-			has_planet_flag = mem_maze_k@from
-		}
-	}
-	
 	immediate = {
 		set_planet_flag = mem_maze_uncovered
-		planet_event = {
-			id = mem_maze.3
-			days = 1
-		}
-		planet_event = { #Fix timing later
-			id = mem_maze.4
-			days = 30 
-			random = 10
-		}
 		owner = {
 			set_country_flag = mem_maze_discoverer
 		}
@@ -121,138 +41,133 @@ planet_event = {
 	
 	option = {
 		name = INTERESTING
+		trigger = {
+			owner = { is_gestalt = no }
+		}
+	}
+
+	option = {
+		name = mem_maze.2.gest
+		trigger = {
+			owner = { is_gestalt = yes }
+		}
+	}
+
+	after = {
+		add_deposit = d_mem_maze_temple
+		create_archaeological_site = mem_maze_dig_site
 	}
 }
 
-#Workaround since previous event can't place blocker
-planet_event = {
-	id = mem_maze.3
-	
-	hide_window = yes
-	
-	is_triggered_only = yes
-	
-	immediate = {
-		random_tile = {
-			limit = {
-				planet = {
-					OR = {
-						has_planet_flag = mem_maze_m@prev
-						has_planet_flag = mem_maze_j@prev
-						has_planet_flag = mem_maze_q@prev
-						has_planet_flag = mem_maze_g@prev
-						has_planet_flag = mem_maze_k@prev
-					}
-				}
-			}
-			set_blocker = mem_tb_maze1
-		}
-	}
-}
+# Workaround since previous event can't place blocker - removed for being useless. 
 
 #Step one
-planet_event = {
-	id = mem_maze.4
-	title = mem_maze.4.name
-	desc = mem_maze.4.desc
+# planet_event = {
+# 	id = mem_maze.4
+# 	title = mem_maze.4.name
+# 	desc = mem_maze.4.desc
 	
-	picture = GFX_evt_alien_ruins
+# 	picture = GFX_evt_alien_ruins
 	
-	is_triggered_only = yes
+# 	is_triggered_only = yes
 	
-	trigger = {
-		owner = {
-			has_country_flag = mem_maze_discoverer
-			NOT = { has_country_flag = mem_maze_progressed }
-		}
-	}
+# 	trigger = {
+# 		owner = {
+# 			has_country_flag = mem_maze_discoverer
+# 			NOT = { has_country_flag = mem_maze_progressed }
+# 		}
+# 	}
 	
-	immediate = {
-		owner = {
-			set_country_flag = mem_maze_progressed
-		}
-	}
+# 	immediate = {
+# 		owner = {
+# 			set_country_flag = mem_maze_progressed
+# 		}
+# 	}
 	
-	option = {
-		name = mem_maze.4a
+# 	option = {
+# 		name = mem_maze.4a
 		
-		begin_event_chain = {
-			event_chain = mem_maze_chain
-			target = ROOT
-		}
+# 		begin_event_chain = {
+# 			event_chain = mem_maze_chain
+# 			target = ROOT
+# 		}
 		
-		enable_special_project = {
-			name = "MEM_MAZE_0_PROJECT"
-			location = this
-			owner = root
-		}
-	}
+# 		enable_special_project = {
+# 			name = "MEM_MAZE_0_PROJECT"
+# 			location = this
+# 			owner = root
+# 		}
+# 	}
 	
-	option = {
-		name = mem_maze.4b
-		custom_tooltip = mem_maze.4b.tooltip
-	}
+# 	option = {
+# 		name = mem_maze.4b
+# 		custom_tooltip = mem_maze.4b.tooltip
+# 	}
 	
-	option = {
-		name = mem_maze.4c
-		custom_tooltip = mem_maze.4c.tooltip
+# 	option = {
+# 		name = mem_maze.4c
+# 		custom_tooltip = mem_maze.4c.tooltip
 		
-		trigger = {
-			owner = {
-				OR = {
-					has_ethic = ethic_spiritualist
-					has_ethic = ethic_fanatic_spiritualist
-				}
-			}
-		}
-		hidden_effect = {
-			random_tile = {
-				limit = { has_blocker = mem_tb_maze1 }
-				set_blocker = mem_tb_maze_holy
-			}
-		}
-	}
-}
+# 		trigger = {
+# 			owner = {
+# 				OR = {
+# 					has_ethic = ethic_spiritualist
+# 					has_ethic = ethic_fanatic_spiritualist
+# 				}
+# 			}
+# 		}
+# 		hidden_effect = {
+# 			random_tile = {
+# 				limit = { has_blocker = mem_tb_maze1 }
+# 				set_blocker = mem_tb_maze_holy
+# 			}
+# 		}
+# 	}
+# }
 
-#Step two
-planet_event = {
+#Maze is cracked
+fleet_event = {
 	id = mem_maze.5
 	title = mem_maze.5.name
 	desc = mem_maze.5.desc
 	
 	picture = GFX_evt_alien_ruins
 	
+	archaeology = yes
 	is_triggered_only = yes
+	
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { 
+			set_site_progress_locked = no 
+			planet = { set_planet_flag = mem_maze_is_cracked }
+		} 
+	}
 	
 	option = {
 		name = mem_maze.5a
 		
 		save_event_target_as = maze_planet
-		
-		random_tile = {
-			limit = { has_blocker = mem_tb_maze1 }
-			set_blocker = mem_tb_maze2
-		}
-		enable_special_project = {
-			name = "MEM_MAZE_1_PROJECT"
-			location = this
-			owner = root
-		}
 	}
 }
 
 #First expedition is over
 
-ship_event = {
+fleet_event = {
 	id = mem_maze.6
 	title = mem_maze.6.name
 	desc = mem_maze.6.desc
 	
 	picture = GFX_evt_alien_ruins
 	
+	archaeology = yes
 	is_triggered_only = yes
-	
+
 	immediate = {
+		fromfrom = { set_site_progress_locked = yes }
 		leader = {
 			save_event_target_as = officer
 		}
@@ -260,11 +175,7 @@ ship_event = {
 			type = scientist
 			show_notification = no
 		}
-		event_target:maze_planet = {
-			random_tile = {
-				limit = { has_blocker = mem_tb_maze2 }
-				set_blocker = mem_tb_maze3
-			}
+		fromfrom = {
 			every_owned_pop = {
 				add_modifier = {
 					modifier = mem_maze_unhappy
@@ -272,38 +183,37 @@ ship_event = {
 				}
 			}
 		}
+		owner = {
+			change_variable = {
+				which = mem_maze_fed_scientists_to_it
+				value = 1			
+			}
+		}
+	}
+
+	after = { 
+		fromfrom = { set_site_progress_locked = no } 
 	}
 	
 	option = {
 		name = mem_maze.6a
-		
-		enable_special_project = {
-			name = "MEM_MAZE_2_PROJECT"
-			location = event_target:maze_planet
-			owner = root
-		}
-	}
-	
-	option = {
-		name = mem_maze.6b
-		
-		owner = {
-			add_influence = 25
-		}
+		fromfrom = { add_stage_clues = 1 }
 	}
 }
 
 #Second expedition is over
-ship_event = {
+fleet_event = {
 	id = mem_maze.7
 	title = mem_maze.7.name
 	desc = mem_maze.7.desc
 	
 	picture = GFX_evt_alien_ruins
 	
+	archaeology = yes
 	is_triggered_only = yes
-	
+
 	immediate = {
+		fromfrom = { set_site_progress_locked = yes }
 		leader = {
 			save_event_target_as = officer
 		}
@@ -311,7 +221,7 @@ ship_event = {
 			type = scientist
 			show_notification = no
 		}
-		event_target:maze_planet = {
+		fromfrom = {
 			every_owned_pop = {
 				add_modifier = {
 					modifier = mem_maze_unhappy
@@ -319,38 +229,37 @@ ship_event = {
 				}
 			}
 		}
+		owner = {
+			change_variable = {
+				which = mem_maze_fed_scientists_to_it
+				value = 1			
+			}
+		}
+	}
+
+	after = { 
+		fromfrom = { set_site_progress_locked = no } 
 	}
 	
 	option = {
 		name = mem_maze.7a
-		
-		enable_special_project = {
-			name = "MEM_MAZE_3_PROJECT"
-			location = event_target:maze_planet
-			owner = root
-		}
-	}
-	
-	option = {
-		name = mem_maze.6b
-		
-		owner = {
-			add_influence = 50
-		}
+		fromfrom = { add_stage_clues = 1 }
 	}
 }
 
 #Third expedition is over
-ship_event = {
+fleet_event = {
 	id = mem_maze.8
 	title = mem_maze.8.name
 	desc = mem_maze.8.desc
 	
 	picture = GFX_evt_alien_ruins
 	
+	archaeology = yes
 	is_triggered_only = yes
-	
+
 	immediate = {
+		fromfrom = { set_site_progress_locked = yes }
 		leader = {
 			save_event_target_as = officer
 		}
@@ -358,7 +267,7 @@ ship_event = {
 			type = scientist
 			show_notification = no
 		}
-		event_target:maze_planet = {
+		fromfrom = {
 			every_owned_pop = {
 				add_modifier = {
 					modifier = mem_maze_unhappy
@@ -366,38 +275,37 @@ ship_event = {
 				}
 			}
 		}
+		owner = {
+			change_variable = {
+				which = mem_maze_fed_scientists_to_it
+				value = 1			
+			}
+		}
+	}
+
+	after = { 
+		fromfrom = { set_site_progress_locked = no } 
 	}
 	
 	option = {
 		name = mem_maze.8a
-		
-		enable_special_project = {
-			name = "MEM_MAZE_4_PROJECT"
-			location = event_target:maze_planet
-			owner = root
-		}
-	}
-	
-	option = {
-		name = mem_maze.6b
-		
-		owner = {
-			add_influence = 75
-		}
+		fromfrom = { add_stage_clues = 1 }
 	}
 }
 
 #Forth expedition is over
-ship_event = {
+fleet_event = {
 	id = mem_maze.9
 	title = mem_maze.9.name
 	desc = mem_maze.9.desc
 	
 	picture = GFX_evt_alien_ruins
 	
+	archaeology = yes
 	is_triggered_only = yes
-	
+
 	immediate = {
+		fromfrom = { set_site_progress_locked = yes }
 		leader = {
 			save_event_target_as = officer
 		}
@@ -405,7 +313,7 @@ ship_event = {
 			type = scientist
 			show_notification = no
 		}
-		event_target:maze_planet = {
+		fromfrom = {
 			every_owned_pop = {
 				add_modifier = {
 					modifier = mem_maze_unhappy
@@ -413,46 +321,47 @@ ship_event = {
 				}
 			}
 		}
+		owner = {
+			change_variable = {
+				which = mem_maze_fed_scientists_to_it
+				value = 1			
+			}
+		}
+	}
+
+	after = { 
+		fromfrom = { set_site_progress_locked = no } 
 	}
 	
 	option = {
 		name = mem_maze.9a
-		
-		enable_special_project = {
-			name = "MEM_MAZE_5_PROJECT"
-			location = event_target:maze_planet
-			owner = root
-		}
-	}
-	
-	option = {
-		name = mem_maze.6b
-		
-		owner = {
-			add_influence = 100
-		}
+		fromfrom = { add_stage_clues = 1 }
 	}
 }
 
 #Fifth expedition is over
-ship_event = {
+fleet_event = {
 	id = mem_maze.10
 	title = mem_maze.10.name
 	desc = mem_maze.10.desc
 	
 	picture = GFX_evt_alien_ruins
 	
+	archaeology = yes
 	is_triggered_only = yes
-	
+
 	immediate = {
+		from = { set_site_progress_locked = yes }
+		from_planet = {
+			save_event_target_as = maze_planet
+		}
 		leader = {
 			save_event_target_as = officer
-			set_leader_flag = mem_maze_leader
-			
 		}
-		fleet = { 
-			set_event_locked = yes
-		}
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
 	}
 	
 	option = {
@@ -689,13 +598,6 @@ country_event = {
 	
 	after = {
 		hidden_effect = {
-			event_target:maze_planet = {
-				random_tile = {
-					limit = { has_blocker = mem_tb_maze3 }
-					remove_blocker = yes
-					set_building = mem_maze_building
-				}
-			}
 			country_event = {
 				id = mem_maze.13
 				days = 7
