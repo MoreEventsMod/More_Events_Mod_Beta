@@ -14,7 +14,7 @@ planet_event = {
 	desc = mem_maze.2.desc.j
 	desc = {
 		text = mem_maze.2.desc.machine
-		trigger = {
+		exclusive_trigger = {
 			owner = {
 				is_machine_empire = yes
 			}
@@ -22,7 +22,7 @@ planet_event = {
 	}
 	desc = {
 		text = mem_maze.2.desc.hive
-		trigger = {
+		exclusive_trigger = {
 			owner = {
 				is_hive_empire = yes
 			}
@@ -55,7 +55,7 @@ planet_event = {
 
 	after = {
 		add_deposit = d_mem_maze_temple
-		create_archaeological_site = mem_maze_dig_site
+		set_global_flag = mem_maze_overgrowth_removed
 	}
 }
 
@@ -131,7 +131,7 @@ fleet_event = {
 	title = mem_maze.5.name
 	desc = mem_maze.5.desc
 	
-	picture = GFX_evt_alien_ruins
+	picture = GFX_evt_discovered_hidden_door
 	
 	archaeology = yes
 	is_triggered_only = yes
@@ -154,6 +154,8 @@ fleet_event = {
 	}
 }
 
+@stage_clue_for_death = 2
+
 #First expedition is over
 
 fleet_event = {
@@ -161,7 +163,7 @@ fleet_event = {
 	title = mem_maze.6.name
 	desc = mem_maze.6.desc
 	
-	picture = GFX_evt_alien_ruins
+	picture = GFX_evt_crusher_droid
 	
 	archaeology = yes
 	is_triggered_only = yes
@@ -197,7 +199,18 @@ fleet_event = {
 	
 	option = {
 		name = mem_maze.6a
-		fromfrom = { add_stage_clues = 1 }
+		fromfrom = { add_stage_clues = @stage_clue_for_death }
+	}
+
+	option = {
+		name = mem_maze.6b
+		custom_tooltip = mem_maze_cancellation
+		owner = { 
+			set_country_flag = mem_maze_cancelled 
+			add_resource = {
+				influence = 250
+			}
+		}
 	}
 }
 
@@ -207,7 +220,7 @@ fleet_event = {
 	title = mem_maze.7.name
 	desc = mem_maze.7.desc
 	
-	picture = GFX_evt_alien_ruins
+	picture = GFX_evt_analyzing_artifacts
 	
 	archaeology = yes
 	is_triggered_only = yes
@@ -243,7 +256,18 @@ fleet_event = {
 	
 	option = {
 		name = mem_maze.7a
-		fromfrom = { add_stage_clues = 1 }
+		fromfrom = { add_stage_clues = @stage_clue_for_death }
+	}
+
+	option = {
+		name = mem_maze.6b
+		custom_tooltip = mem_maze_cancellation
+		owner = { 
+			set_country_flag = mem_maze_cancelled 
+			add_resource = {
+				influence = 250
+			}
+		}
 	}
 }
 
@@ -253,7 +277,7 @@ fleet_event = {
 	title = mem_maze.8.name
 	desc = mem_maze.8.desc
 	
-	picture = GFX_evt_alien_ruins
+	picture = GFX_evt_ancient_records
 	
 	archaeology = yes
 	is_triggered_only = yes
@@ -289,7 +313,18 @@ fleet_event = {
 	
 	option = {
 		name = mem_maze.8a
-		fromfrom = { add_stage_clues = 1 }
+		fromfrom = { add_stage_clues = @stage_clue_for_death }
+	}
+
+	option = {
+		name = mem_maze.6b
+		custom_tooltip = mem_maze_cancellation
+		owner = { 
+			set_country_flag = mem_maze_cancelled 
+			add_resource = {
+				influence = 250
+			}
+		}
 	}
 }
 
@@ -299,7 +334,7 @@ fleet_event = {
 	title = mem_maze.9.name
 	desc = mem_maze.9.desc
 	
-	picture = GFX_evt_alien_ruins
+	picture = GFX_evt_archaeology_trap
 	
 	archaeology = yes
 	is_triggered_only = yes
@@ -335,7 +370,18 @@ fleet_event = {
 	
 	option = {
 		name = mem_maze.9a
-		fromfrom = { add_stage_clues = 1 }
+		fromfrom = { add_stage_clues = @stage_clue_for_death }
+	}
+
+	option = {
+		name = mem_maze.6b
+		custom_tooltip = mem_maze_cancellation
+		owner = { 
+			set_country_flag = mem_maze_cancelled 
+			add_resource = {
+				influence = 250
+			}
+		}
 	}
 }
 
@@ -357,7 +403,9 @@ fleet_event = {
 		}
 		leader = {
 			save_event_target_as = officer
+			exile_leader_as = mem_maze_officer
 		}
+		# set_event_locked = yes
 	}
 
 	after = { 
@@ -597,6 +645,7 @@ country_event = {
 	}
 	
 	after = {
+		log = ".13 called"
 		hidden_effect = {
 			country_event = {
 				id = mem_maze.13
@@ -654,7 +703,7 @@ country_event = {
 	}
 	
 	option = {
-		name = mem_maze.11b.au
+		name = mem_maze.12b.au
 		# response_text = mem_maze.12.farewell
 		
 		trigger = {
@@ -764,13 +813,26 @@ country_event = {
 	
 	option = {
 		name = mem_maze.13a
+		set_global_flag = mem_maze_is_now_finished
+		custom_tooltip = mem_maz.13a.tooltip
 		
-		random_owned_leader = {
-			limit = { has_leader_flag = mem_maze_leader }
+		event_target:officer = {
 			add_trait = mem_leader_strange_insight
-			fleet = { set_event_locked = no }
+		}
+		create_fleet = {
+			name = ""
+			effect = {
+				create_ship = {
+					random_existing_design = science
+				}
+				set_owner = root
+				set_leader = event_target:officer
+				delete_fleet = {
+					target = THIS					
+				}
+			}
 		}
 		
-		end_event_chain = mem_maze_chain
+		# end_event_chain = mem_maze_chain
 	}
 }
