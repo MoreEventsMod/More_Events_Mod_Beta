@@ -3,9 +3,9 @@
 
 namespace = mem_severance
 
-@days_to_start = 100
-@loop_length = 30
-@time_to_sudden_death = 200
+@days_to_start = 1080
+@loop_length = 180
+@time_to_sudden_death = 10800
 
 # Intro event - why no FTL
 fleet_event = {
@@ -279,6 +279,7 @@ fleet_event = {
                 planet_event = {
                     id = mem_severance.7
                     days = @days_to_start
+                    random = 360
                 }
             }
         }
@@ -293,11 +294,15 @@ planet_event = {
 
     immediate = {
         random_list = {
-            95 = {
+            195 = {
                 planet_event = { id = mem_severance.7 days = @loop_length }
                 modifier = {
-                    factor = 0.1
+                    factor = 0.2
                     NOT = { has_planet_flag = mem_severance_time_to_sudden_death }
+                }
+                modifier = {
+                    factor = 5
+                    mid_game_years_passed < 25
                 }
             }
             5 = {
@@ -343,6 +348,44 @@ event = {
     }
 }
 
+# On entering system event
+fleet_event = {
+    id = mem_severance.11
+    title = mem_severance.11.name
+    desc = mem_severance.11.desc
+
+    is_triggered_only = yes
+
+    show_sound = event_default
+    location = FROM
+    picture = GFX_evt_wormhole
+
+    trigger = {
+        owner = {
+            is_ai = no
+            NOT = { has_country_flag = mem_severance_visited_system }
+        }
+        FROM = {
+            has_star_flag = mem_severance_relic_system
+            any_system_planet = {
+                has_planet_flag = mem_severance_relic_world
+                is_planet_class = pc_relic
+                NOT = { exists = owner }
+            }
+        }
+    }
+
+    immediate = {
+        owner = {
+            set_country_flag = mem_severance_visited_system
+        }
+    }
+
+    option = {
+        name = OK
+    }
+}
+
 # Harvesters arrive
 planet_event = {
     id = mem_severance.20
@@ -381,11 +424,13 @@ planet_event = {
             effect = {
                 set_graphical_culture = ai_01
                 save_event_target_as = harvester_country
+                set_country_flag = mem_severance_harvesting_country
             }
         }
         solar_system = {
             create_ambient_object = {
                 type = mem_severance_wormhole_object
+                duration = 150
             }
             last_created_ambient_object = {
                 save_event_target_as = the_rift
@@ -447,14 +492,14 @@ planet_event = {
                     design = NAME_MEM_Severance_Harvester
                 }
                 while = {
-                    count = 4
+                    count = 2
                     create_ship = {
                         name = random
                         design = NAME_MEM_Severance_Large
                     }
                 }
                 while = {
-                    count = 4
+                    count = 6
                     create_ship = {
                         name = random
                         design = NAME_MEM_Severance_Small
@@ -462,6 +507,7 @@ planet_event = {
                 }
                 set_location = event_target:the_rift
                 set_fleet_stance = aggressive
+                set_fleet_flag = mem_severance_harvester_prime
                 queue_actions = {
                     move_to = event_target:first_marker
                 }
@@ -472,20 +518,7 @@ planet_event = {
             name = "Harvester Wing Ascension"
             effect = {
                 set_owner = event_target:harvester_country
-                while = {
-                    count = 1
-                    create_ship = {
-                        name = random
-                        design = NAME_MEM_Severance_Large
-                    }
-                }
-                while = {
-                    count = 9
-                    create_ship = {
-                        name = random
-                        design = NAME_MEM_Severance_Small
-                    }
-                }
+                mem_severance_fill_harvester_wing = yes
                 set_location = event_target:the_rift
                 set_fleet_stance = aggressive
                 queue_actions = {
@@ -498,20 +531,7 @@ planet_event = {
             name = "Harvester Wing Remembrance"
             effect = {
                 set_owner = event_target:harvester_country
-                while = {
-                    count = 1
-                    create_ship = {
-                        name = random
-                        design = NAME_MEM_Severance_Large
-                    }
-                }
-                while = {
-                    count = 9
-                    create_ship = {
-                        name = random
-                        design = NAME_MEM_Severance_Small
-                    }
-                }
+                mem_severance_fill_harvester_wing = yes
                 set_location = event_target:the_rift
                 set_fleet_stance = aggressive
                 queue_actions = {
@@ -524,20 +544,7 @@ planet_event = {
             name = "Harvester Wing Salvation"
             effect = {
                 set_owner = event_target:harvester_country
-                while = {
-                    count = 1
-                    create_ship = {
-                        name = random
-                        design = NAME_MEM_Severance_Large
-                    }
-                }
-                while = {
-                    count = 9
-                    create_ship = {
-                        name = random
-                        design = NAME_MEM_Severance_Small
-                    }
-                }
+                mem_severance_fill_harvester_wing = yes
                 set_location = event_target:the_rift
                 set_fleet_stance = aggressive
                 queue_actions = {
@@ -627,5 +634,130 @@ country_event = {
         name = mem_severance.21.c
         response_text = mem_severance.21.c.reply
         is_dialog_only = yes
+    }
+}
+
+# Harvesters lost their seiging fleet, retargeting
+country_event = {
+    id = mem_severance.22
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        has_country_flag = mem_severance_harvesting_country
+        FROMFROM = {
+            has_fleet_flag = mem_severance_bombing_fleet
+        }
+    }
+
+
+    immediate = {
+        random_planet = {
+            limit = {
+                has_planet_flag = mem_severance_relic_world
+            }
+            save_event_target_as = relic_planet
+        }
+        random_owned_fleet = {
+            weights = {
+                base = 100
+                modifier = {
+                    mult = 0.01
+                    has_fleet_flag = mem_severance_harvester_prime
+                }
+            }
+            set_fleet_flag = mem_severance_bombing_fleet
+            queue_actions = {
+                move_to = event_target:relic_planet
+                orbit_planet = event_target:relic_planet
+            }
+        }
+    }
+}
+
+# Command core is destroyed
+country_event = {
+    id = mem_severance.23
+    title = mem_severance.23.name
+    desc = mem_severance.23.desc
+
+    is_triggered_only = yes
+
+    location = FROMFROMFROM
+    show_sound = event_super_explosion
+    picture = GFX_evt_mem_spaceship_wreck
+
+    trigger = {
+        FROM = {
+            has_country_flag = mem_severance_harvesting_country
+        }
+        FROMFROMFROM = {
+            is_ship_size = mem_severance_harvester_hub
+        }
+    }
+
+    immediate = {
+        FROM = {
+            destroy_country = yes
+        }
+    }
+
+    option = {
+        name = EXCELLENT
+        add_relic = r_mem_severance_core
+    }
+}
+
+@triumph_duration = 3600
+
+# AI's little helper - MTTH event to trigger reward
+country_event = {
+    id = mem_severance.24
+    hide_window = yes
+
+    mean_time_to_happen = {
+        years = 10
+    }
+
+    trigger = {
+        is_ai = yes
+        is_country_type = default
+        exists = capital_scope
+        NOT = { has_modifier = relic_activation_cooldown }
+    }
+
+    immediate = {
+        add_modifier = {
+            modifier = "relic_activation_cooldown" 
+            days = @triumph_duration
+        }
+        mem_severance_generate_harvester_reward_group = yes
+        log = "AI's little helper activated Harvester Core for [This.GetName]!"
+    }
+}
+
+# Planet devastated
+planet_event = {
+    id = mem_severance.25
+    title = mem_severance.25.name
+    desc = mem_severance.25.desc
+
+    is_triggered_only = yes
+
+    location = ROOT
+    show_sound = event_planetary_riot
+    picture = GFX_evt_mem_ancient_robots_attack_01
+
+    trigger = {
+        planet_devastation >= 100
+        from = { has_country_flag = mem_severance_harvesting_country }
+    }
+
+    immediate = {
+        destroy_colony = yes
+    }
+
+    option = {
+        name = TERRIBLE
     }
 }
