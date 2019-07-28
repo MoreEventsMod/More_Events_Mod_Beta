@@ -1,0 +1,297 @@
+# Dread Pirate's Mask
+# By ViolentBeetle
+
+namespace = mem_dread_pirate
+
+# Raiding ship destruction incident - on_ship_destroyed_victim
+country_event = {
+    id = mem_dread_pirate.1
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        mid_game_years_passed < 25
+        is_country_type = marauder_raiders
+        from = {
+            is_ai = no
+            NOT = { has_country_flag = mem_dread_pirate_offered_quest }
+        }
+        any_country = {
+            is_country_type = dormant_marauders
+            has_country_flag = parent_of@root
+            from = {
+                has_country_flag = raid_target_of@prev
+            }
+        }        
+        fromfromfrom.solar_system = {
+            exists = space_owner
+            space_owner = {
+                is_same_value = from
+            }
+        }
+    }
+
+    immediate = {
+        log = "Dread Pirate Intro Rolled"
+        random_list = {
+            200 = {  }
+            3 = {
+                log = "Roll Passed"
+                fromfromfrom.solar_system = { save_event_target_as = combat_system }
+                random_country = {
+                    limit = {
+                        is_country_type = dormant_marauders
+                        has_country_flag = parent_of@root
+                        from = {
+                            has_country_flag = raid_target_of@prev
+                        }
+                    }
+                    save_event_target_as = marauder_sender
+                }
+                from = {
+                    country_event = {
+                        id = mem_dread_pirate.2 days = 30
+                    }
+                }
+            }
+        }
+    }
+}
+
+# Dread pirate intro
+country_event = {
+    id = mem_dread_pirate.2
+    title = mem_dread_pirate.2.name
+    desc = mem_dread_pirate.2.desc
+
+    is_triggered_only = yes
+    location = event_target:the_planet
+
+    show_sound = event_sensor_ping
+    picture = GFX_evt_mem_heavy_damage
+
+    trigger = {
+        NOT = { has_country_flag = mem_dread_pirate_offered_quest }
+        NOT = { has_global_flag = mem_dread_pirate_global_lock }
+        exists = event_target:marauder_sender
+        event_target:marauder_sender = {
+            is_country_type = dormant_marauders
+        }                    
+        any_planet_within_border = {
+            OR = {
+                is_planet_class = pc_barren
+                is_planet_class = pc_barren_cold
+            }
+            NOT = { exists = archaeological_site }
+            has_anomaly = no
+            solar_system = {
+                NOT = { is_same_value = root.capital_scope.solar_system }
+            }
+        }
+    }
+
+    immediate = {
+        set_country_flag = mem_dread_pirate_offered_quest
+        set_global_flag = mem_dread_pirate_global_lock
+        random_planet_within_border = {
+            limit = {
+                OR = {
+                    is_planet_class = pc_barren
+                    is_planet_class = pc_barren_cold
+                }
+                NOT = { exists = archaeological_site }
+                has_anomaly = no
+                solar_system = {
+                    NOT = { is_same_value = root.capital_scope.solar_system }
+                }
+            }
+            save_event_target_as = the_planet
+        }
+    }
+
+    option = {
+        name = mem_dread_pirate.2.a
+        set_country_flag = mem_dread_pirate_has_quest
+        event_target:the_planet = {
+            enable_special_project = {
+                name = MEM_DREAD_PIRATE_PROJECT
+                location = this
+                owner = root
+            }
+        }
+    }
+
+    option = {
+        name = NOTIME
+        remove_global_flag = mem_dread_pirate_global_lock
+        add_resource = {
+            influence = 250
+        }
+    }
+}
+
+# Special project complete, issuing a dig site
+ship_event = {
+    id = mem_dread_pirate.3
+    title = mem_dread_pirate.3.name
+    desc = mem_dread_pirate.3.desc
+
+    is_triggered_only = yes
+    
+    show_sound = event_sensor_ping
+    location = event_target:the_planet
+    picture = GFX_evt_mining_operations
+
+    option = {
+        name = mem_dread_pirate.3.a
+        event_target:the_planet = {
+            create_archaeological_site = mem_dread_pirate_dig_site
+        }
+    }
+}
+
+### DIG SITES ###
+fleet_event = {
+    id = mem_dread_pirate.11
+    title = mem_dread_pirate.11.name
+    desc = mem_dread_pirate.11.desc
+
+    is_triggered_only = yes
+    archaeology = yes
+
+    picture = GFX_evt_underground_city
+    show_sound = event_finding_loot
+
+    immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+    }
+
+    option = {
+        name = DIG
+        small_artifact_reward = yes
+    }
+}
+fleet_event = {
+    id = mem_dread_pirate.12
+    title = mem_dread_pirate.12.name
+    desc = mem_dread_pirate.12.desc
+
+    is_triggered_only = yes
+    archaeology = yes
+
+    picture = GFX_evt_smugglers_in_bar
+    show_sound = event_finding_loot
+
+    immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+    }
+
+    option = {
+        name = DIG
+        small_artifact_reward = yes
+    }
+}
+fleet_event = {
+    id = mem_dread_pirate.13
+    title = mem_dread_pirate.13.name
+    desc = mem_dread_pirate.13.desc
+
+    is_triggered_only = yes
+    archaeology = yes
+
+    picture = GFX_evt_derelict_interior
+    show_sound = event_finding_loot
+
+    immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+    }
+
+    option = {
+        name = DIG
+        medium_artifact_reward = yes
+    }
+}
+fleet_event = {
+    id = mem_dread_pirate.14
+    title = mem_dread_pirate.14.name
+    desc = mem_dread_pirate.14.desc
+
+    is_triggered_only = yes
+    archaeology = yes
+
+    picture = GFX_evt_archaeologists_escaping
+    show_sound = event_finding_loot
+
+    immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+    }
+
+    option = {
+        name = DIG
+        medium_artifact_reward = yes
+    }
+}
+fleet_event = {
+    id = mem_dread_pirate.15
+    title = mem_dread_pirate.15.name
+    desc = mem_dread_pirate.15.desc
+
+    is_triggered_only = yes
+    archaeology = yes
+
+    picture = GFX_evt_mem_horror_corridor
+    show_sound = event_finding_loot
+
+    immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+    }
+
+    option = {
+        name = DIG
+        medium_artifact_reward = yes
+    }
+}
+fleet_event = {
+    id = mem_dread_pirate.16
+    title = mem_dread_pirate.16.name
+    desc = mem_dread_pirate.16.desc
+
+    is_triggered_only = yes
+    archaeology = yes
+
+    picture = GFX_evt_in_the_dark
+    show_sound = event_finding_loot
+
+    immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+    }
+
+    option = {
+        name = mem_dread_pirate.16.a
+        large_artifact_reward = yes
+    }
+}
