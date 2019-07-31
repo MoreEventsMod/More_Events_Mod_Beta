@@ -290,6 +290,191 @@ fleet_event = {
     option = {
         name = mem_dread_pirate.16.a
         large_artifact_reward = yes
+        owner = { set_country_flag = mem_dread_pirate_finished_the_dig }
+        hidden_effect = {
+            create_country = {
+                name = "Dread Pirate Fleet"
+                type = mem_dread_pirate_country
+                flag = {
+                    icon = {
+                        category = pirate
+                        file = flag_pirate_9.dds
+                    }
+                    background = {
+                        category = background
+                        file = triangle_split.dds
+                    }
+                    colors = {
+                        "red"
+                        "black"
+                        "null"
+                        "null"
+                    }
+                }
+                name_list = PRT1
+                effect = {
+                    set_graphical_culture = pirate_01
+                    save_event_target_as = dread_pirate_country
+                    every_country = {
+                        limit = {
+                            is_country_type = dormant_marauders
+                        }
+                        set_faction_hostility = {
+                            target = prev
+                            set_hostile = no
+                        }
+                    }
+                    country_event = { id = mem_dread_pirate.20 days = 10 }
+                }
+            }
+        }
+    }
+}
+
+# Dread Pirate fleet's spawning
+country_event = {
+    id = mem_dread_pirate.20
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        NOT = { has_global_flag = mem_dread_pirate_first_encounter }
+        any_country = {
+            is_country_type = dormant_marauders
+        }
+    }
+
+    immediate = {
+        random_country = {
+            limit = { is_country_type = dormant_marauders }
+            event_target:dread_pirate_country = {
+                create_leader = {
+                    class = admiral
+                    skill = 10
+                    species = prev.species
+                    effect = {
+                        set_leader_flag = mem_dread_pirate_first_leader
+                    }
+                }
+            }
+            random_system_within_border = {
+                create_fleet = {
+                    name = "Dread Pirate's Forces"
+                    effect = {
+                        set_owner = event_target:dread_pirate_country
+                        while = {
+                            count = 3
+                            create_ship = {
+                                design = NAME_Black_Earl
+                            }
+                        }
+                        while = {
+                            count = 5
+                            create_ship = {
+                                design = NAME_Marauder
+                            }
+                        }
+                        while = {
+                            count = 5
+                            create_ship = {
+                                design = NAME_Corsair
+                            }
+                        }
+                        while = {
+                            count = 8
+                            create_ship = {
+                                design = NAME_Reaver
+                            }
+                        }
+                        while = {
+                            count = 8
+                            create_ship = {
+                                design = NAME_Brigand
+                            }
+                        }
+                        save_event_target_as = dread_fleet
+                        set_location = prev
+                        set_leader = last_created_leader
+                        set_fleet_flag = mem_dread_pirate_the_first_fleet
+                    }
+                }
+                closest_system = {
+                    limit = {
+                        exists = owner
+                        owner = { has_country_flag = mem_dread_pirate_finished_the_dig }
+                    }
+                    event_target:dread_fleet = {
+                        auto_move_to_planet = {
+                            target = prev.star
+                            clear_auto_move_on_arrival = yes                            
+                        }
+                    }
+                    log = "Set Dread Pirate to [This.GetName]"
+                }
+            }
+        }
+        country_event = { id = mem_dread_pirate.21 days = 10 }
+    }
+}
+
+# Safety checks in case path breaks
+country_event = {
+    id = mem_dread_pirate.21
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        NOT = { has_global_flag = mem_dread_pirate_first_encounter }
+    }
+
+    immediate = {
+        log = ".21 loop engaged"
+        IF = {
+            limit = {
+                NOT = {
+                    any_owned_fleet = {
+                        has_fleet_flag = mem_dread_pirate_the_first_fleet
+                    }
+                }
+            }
+            log = "Fleet not found"
+            country_event = { id = mem_dread_pirate.20 days = 20 }
+        }
+        ELSE = {
+            log = "Fleet found"
+            random_owned_fleet = {
+                limit = { has_fleet_flag = mem_dread_pirate_the_first_fleet }
+                IF = {
+                    limit = {
+                        # Check for lack of galleon when ready
+                    }
+                    log = "Galleon not found"
+                    delete_fleet = this
+                }
+                ELSE_IF = {
+                    limit = {
+                        is_fleet_idle = yes
+                        is_in_combat = no
+                    }
+                    log = "Fleet stuck"
+                    clear_fleet_actions = this
+                    closest_system = {
+                        limit = {
+                            exists = owner
+                            owner = { has_country_flag = mem_dread_pirate_finished_the_dig }
+                        }
+                        prev = {
+                            auto_move_to_planet = {
+                                target = prev.star
+                                clear_auto_move_on_arrival = yes                            
+                            }
+                        }
+                        log = "Set Dread Pirate to [This.GetName]"
+                    }
+                }
+            }
+            country_event = { id = mem_dread_pirate.21 days = 10 }
+        }
     }
 }
 
@@ -316,6 +501,6 @@ country_event = {
             save_event_target_as = raiding_marauder
             species = { save_event_target_as = marauder_species }
         }
-        country_event = { id = marauder.101 days = 1 random = 10 }
+        country_event = { id = marauder.101 }
     }
 }
