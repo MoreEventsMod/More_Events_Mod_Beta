@@ -349,6 +349,7 @@ country_event = {
             limit = { is_country_type = dormant_marauders }
             event_target:dread_pirate_country = {
                 create_leader = {
+                    name = Raewynn
                     class = admiral
                     skill = 10
                     species = prev.species
@@ -390,6 +391,16 @@ country_event = {
                             count = 8
                             create_ship = {
                                 design = NAME_Brigand
+                            }
+                        }
+                        create_ship_design = {
+                            design = NAME_MEM_Dread_Pirate_Galleon
+                        }
+                        create_ship = {
+                            name = "Dread Lord"
+                            design = last_created_design
+                            effect = {
+                                set_ship_flag = mem_dread_pirate_first_flagship
                             }
                         }
                         save_event_target_as = dread_fleet
@@ -446,9 +457,13 @@ country_event = {
                 limit = { has_fleet_flag = mem_dread_pirate_the_first_fleet }
                 IF = {
                     limit = {
-                        # Check for lack of galleon when ready
+                        NAND = {
+                            any_owned_ship = { has_ship_flag = mem_dread_pirate_first_flagship }
+                            exists = leader
+                        }
+                        is_in_combat = no
                     }
-                    log = "Galleon not found"
+                    log = "Galleon or leader not found"
                     delete_fleet = this
                 }
                 ELSE_IF = {
@@ -474,6 +489,95 @@ country_event = {
                 }
             }
             country_event = { id = mem_dread_pirate.21 days = 10 }
+        }
+    }
+}
+
+# Dread Pirate delegation hits the system for the first time, galleon must be present
+ship_event = {
+    id = mem_dread_pirate.22
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        NOT = { has_global_flag = mem_dread_pirate_first_encounter }
+        owner = { is_country_type = mem_dread_pirate_country }
+        has_ship_flag = mem_dread_pirate_first_flagship
+        exists = leader
+        from = {
+            exists = owner
+            owner = { has_country_flag = mem_dread_pirate_finished_the_dig }
+        }
+    }
+
+    immediate = {
+        fleet = { clear_fleet_actions = this }
+        owner = { save_event_target_as = dread_pirate_country }
+        leader = { save_event_target_as = convo_portrait }
+        set_global_flag = mem_dread_pirate_first_encounter
+        from.owner = {
+            country_event = { id = mem_dread_pirate.23 }
+        }
+    }
+}
+
+# Dread pirate have entered our system
+country_event = {
+    id = mem_dread_pirate.23
+    title = mem_dread_pirate.23.name
+    desc = mem_dread_pirate.23.desc
+
+    is_triggered_only = yes
+
+    location = from
+    show_sound = event_yellow_alert
+    picture = GFX_evt_unidentified_ship
+
+    option = {
+        name = ONSCREEN
+        hidden_effect = {
+            establish_communications_no_message = event_target:dread_pirate_country
+            country_event = { id = mem_dread_pirate.24 }
+        }
+    }
+}
+
+# Dread pirate convo
+country_event = {
+    id = mem_dread_pirate.23
+    title = TRANSMISSION
+    desc = mem_dread_pirate.23.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+        portrait = event_target:convo_portrait
+		room = "ethic_spaceship_room"
+    }
+
+    option = {
+        name = mem_dread_pirate.23.a
+        response_text = mem_dread_pirate.23.a.response
+        hidden_effect = {
+            event_target:dread_pirate_country = {
+                set_faction_hostility = {
+                    target = root
+                    set_hostile = yes
+                }
+            }
+        }
+    }
+    option = {
+        name = mem_dread_pirate.23.b
+        response_text = mem_dread_pirate.23.b.response
+        hidden_effect = {
+            event_target:dread_pirate_country = {
+                set_faction_hostility = {
+                    target = root
+                    set_hostile = yes
+                }
+            }
         }
     }
 }
