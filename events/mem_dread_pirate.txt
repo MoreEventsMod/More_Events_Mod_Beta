@@ -102,6 +102,7 @@ country_event = {
                     NOT = { is_same_value = event_target:combat_system }
                 }
             }
+            set_planet_flag = mem_dread_pirate_tomb_planet
             save_event_target_as = the_planet
         }
     }
@@ -353,6 +354,7 @@ country_event = {
                     class = admiral
                     skill = 10
                     species = prev.species
+                    gender = male
                     effect = {
                         set_leader_flag = mem_dread_pirate_first_leader
                     }
@@ -515,6 +517,12 @@ ship_event = {
         owner = { save_event_target_as = dread_pirate_country }
         leader = { save_event_target_as = convo_portrait }
         set_global_flag = mem_dread_pirate_first_encounter
+        random_planet = {
+            limit = {
+                has_planet_flag = mem_dread_pirate_tomb_planet
+            }
+            save_event_target_as = the_planet
+        }
         from.owner = {
             country_event = { id = mem_dread_pirate.23 }
         }
@@ -544,9 +552,9 @@ country_event = {
 
 # Dread pirate convo
 country_event = {
-    id = mem_dread_pirate.23
+    id = mem_dread_pirate.24
     title = TRANSMISSION
-    desc = mem_dread_pirate.23.desc
+    desc = mem_dread_pirate.24.desc
 
     is_triggered_only = yes
     diplomatic = yes
@@ -557,8 +565,8 @@ country_event = {
     }
 
     option = {
-        name = mem_dread_pirate.23.a
-        response_text = mem_dread_pirate.23.a.response
+        name = mem_dread_pirate.24.a
+        response_text = mem_dread_pirate.24.a.response
         hidden_effect = {
             event_target:dread_pirate_country = {
                 set_faction_hostility = {
@@ -569,8 +577,8 @@ country_event = {
         }
     }
     option = {
-        name = mem_dread_pirate.23.b
-        response_text = mem_dread_pirate.23.b.response
+        name = mem_dread_pirate.24.b
+        response_text = mem_dread_pirate.24.b.response
         hidden_effect = {
             event_target:dread_pirate_country = {
                 set_faction_hostility = {
@@ -581,20 +589,25 @@ country_event = {
         }
     }
     option = {
-        name = mem_dread_pirate.23.c
-        response_text = mem_dread_pirate.23.c.response
+        name = mem_dread_pirate.24.c
+        response_text = mem_dread_pirate.24.c.response
         is_dialog_only = yes
     }
     option = {
-        name = mem_dread_pirate.23.d
-        response_text = mem_dread_pirate.23.d.response
+        name = mem_dread_pirate.24.d
+        response_text = mem_dread_pirate.24.d.response
+        is_dialog_only = yes
+    }
+    option = {
+        name = mem_dread_pirate.24.e
+        response_text = mem_dread_pirate.24.e.response
         is_dialog_only = yes
     }
 }
 
 # Trigger on shooting down the galleon
 country_event = {
-    id = mem_dread_pirate.24
+    id = mem_dread_pirate.25
     hide_window = yes
     is_triggered_only = yes
 
@@ -610,16 +623,17 @@ country_event = {
                 has_global_flag = mem_dread_pirate_first_encounter
             }
             create_ambient_object = {
-                type = pirate_01_galleon_destroyed_entity
+                type = mem_dread_pirate_destroyed_galleon
                 location = fromfrom
             }
             last_created_ambient_object = {
                 save_event_target_as = dead_galleon
             }
+            fromfromfrom.solar_system = { save_event_target_as = combat_system }
             from = { save_event_target_as = ship_killer }
             random_country = {
                 limit = { has_country_flag = mem_dread_pirate_finished_the_dig }
-                country_event = { id = mem_dread_pirate.25 }
+                country_event = { id = mem_dread_pirate.26 }
             }
         }
         ELSE = {
@@ -632,16 +646,16 @@ country_event = {
 
 # Pop up telling us we taken down the ship
 country_event = {
-    id = mem_dread_pirate.25
-    title = mem_dread_pirate.25.name
+    id = mem_dread_pirate.26
+    title = mem_dread_pirate.26.name
     desc = {
-        text = mem_dread_pirate.25.desc.1
+        text = mem_dread_pirate.26.desc.1
         trigger = {
             is_same_value = event_target:ship_killer
         }
     }
     desc = {
-        text = mem_dread_pirate.25.desc.2
+        text = mem_dread_pirate.26.desc.2
         trigger = {
             NOT = { is_same_value = event_target:ship_killer }
         }
@@ -654,7 +668,7 @@ country_event = {
     picture = GFX_evt_pirates_attacking_cargo
 
     option = {
-        name = mem_dread_pirate.25.a
+        name = mem_dread_pirate.26.a
         enable_special_project = {
             name = MEM_DREAD_PIRATE_BOARDING_PROJECT
             location = event_target:dead_galleon
@@ -665,9 +679,9 @@ country_event = {
 
 # Special project resolution
 ship_event = {
-    id = mem_dread_pirate.26
-    title = mem_dread_pirate.26.name
-    desc = mem_dread_pirate.26.desc
+    id = mem_dread_pirate.27
+    title = mem_dread_pirate.27.name
+    desc = mem_dread_pirate.27.desc
 
     is_triggered_only = yes
 
@@ -676,7 +690,7 @@ ship_event = {
     picture = GFX_evt_mem_spaceship_wreck
 
     option = {
-        name = mem_dread_pirate.26.a
+        name = mem_dread_pirate.27.a
         owner.capital_scope = {
             enable_special_project = {
                 name = MEM_DREAD_PIRATE_TRIANGULATION_PROJECT
@@ -688,7 +702,7 @@ ship_event = {
 }
 
 # The final chapter resolution: Triangulation special project complete
-country_event = {
+ship_event = {
     id = mem_dread_pirate.30
     title = mem_dread_pirate.30.name
     desc = mem_dread_pirate.30.desc
@@ -697,9 +711,13 @@ country_event = {
 
     show_sound = event_sensor_ping
     picture = GFX_evt_star_chart
+    location = event_target:the_planet
 
     option = {
         name = mem_dread_pirate.30.a
+        owner = {
+            set_country_flag = mem_dread_pirate_found_the_system
+        }
     }
 }
 
