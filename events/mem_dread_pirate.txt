@@ -372,33 +372,30 @@ country_event = {
                     effect = {
                         set_owner = event_target:dread_pirate_country
                         while = {
-                            count = 3
+                            count = 16
                             create_ship = {
-                                design = NAME_Black_Earl
-                            }
-                        }
-                        while = {
-                            count = 5
-                            create_ship = {
-                                design = NAME_Marauder
-                            }
-                        }
-                        while = {
-                            count = 5
-                            create_ship = {
-                                design = NAME_Corsair
+                                name = random
+                                design = "NAME_Outrider"
+                                prefix = no
+                                graphical_culture = "pirate_01"
                             }
                         }
                         while = {
                             count = 8
                             create_ship = {
-                                design = NAME_Reaver
+                                name = random
+                                design = "NAME_Lancer"
+                                prefix = no
+                                graphical_culture = "pirate_01"
                             }
                         }
                         while = {
-                            count = 8
+                            count = 4
                             create_ship = {
-                                design = NAME_Brigand
+                                name = random
+                                design = "NAME_Void_Champion"
+                                prefix = no
+                                graphical_culture = "pirate_01"
                             }
                         }
                         create_ship_design = {
@@ -965,13 +962,13 @@ country_event = {
 	}
 
     trigger = {
-        any_country = {
+        any_relation = {
             is_country_type = dormant_marauders
         }
     }
 
     immediate = {
-        random_country = {
+        random_relation = {
             limit = { is_country_type = dormant_marauders }
             save_event_target_as = mar_country
         }
@@ -979,6 +976,124 @@ country_event = {
 
     option = {
         name = mem_dread_pirate.36.a
+    }
+}
+
+# Pop up when triggering the relic
+country_event = {
+    id = mem_dread_pirate.40
+    title = mem_dread_pirate.40.name
+    desc = {
+        text = mem_dread_pirate.40.desc.1
+        trigger = {
+            event_target:marauder_country = {
+                has_country_flag = marauder_1
+            }
+        }
+    }
+    desc = {
+        text = mem_dread_pirate.40.desc.2
+        trigger = {
+            event_target:marauder_country = {
+                has_country_flag = marauder_2
+            }
+        }
+    }
+    desc = {
+        text = mem_dread_pirate.40.desc.3
+        trigger = {
+            event_target:marauder_country = {
+                has_country_flag = marauder_3
+            }
+        }
+    }
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		portrait = event_target:mar_country
+		room = ethic_spaceship_room
+    }
+    
+    immediate = {
+        random_relation = {
+            limit = { is_country_type = dormant_marauders }
+            save_event_target_as = marauder_country
+        }
+        IF = {
+            limit = {
+                NOT = {
+                    any_owned_leader = {
+                        has_leader_flag = mem_dread_pirate_relic_leader
+                    }
+                }
+            }
+            create_leader = {
+                type = admiral
+                species = event_target:marauder_country
+                skill = 3
+                effect = {
+                    set_leader_flag = mem_dread_pirate_relic_leader
+                    save_event_target_as = new_leader
+                    add_trait = mem_dread_pirate_relic_admiral
+                    add_ruler_trait = mem_dread_pirate_relic_ruler
+                }
+            }
+        }
+        create_fleet = {
+            name = "Dread Disciples"
+            effect = {
+                set_owner = event_target:marauder_country
+                while = {
+                    count = 4
+                    random_list = {
+                        25 = {
+                            create_ship = {
+                                name = random
+                                design = NAME_Void_Champion
+                            }
+                        }
+                        25 = {
+                            while = {
+                                count = 2
+                                create_ship = {
+                                    name = random
+                                    design = NAME_Lancer
+                                }
+                            }
+                        }
+                        25 = {
+                            while = {
+                                count = 4
+                                create_ship = {
+                                    name = random
+                                    design = NAME_Outrider
+                                }
+                            }
+                        }
+                        25 = {
+                            create_ship = {
+                                design = NAME_Lancer
+                            }
+                            while = {
+                                count = 2
+                                create_ship = {
+                                    name = random
+                                    design = NAME_Outrider
+                                }
+                            }
+                        }
+                    }
+                }
+                set_owner = root
+                set_location = root.capital_scope
+                IF = {
+                    limit = { exists = event_target:new_leader }
+                    set_leader = event_target:new_leader
+                }
+            }
+        }
     }
 }
 

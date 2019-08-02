@@ -1,0 +1,61 @@
+@activation_cost = 150
+@triumph_duration = 3600
+
+r_mem_dread_pirate_mask = {
+    activation_duration = @triumph_duration
+	portrait = GFX_mem_relic_dwarf_fortress_boot
+	sound = "relic_activation_the_rubricator"
+
+
+	resources = {
+		category = relics
+		# Activation cost
+		cost = {
+			influence = @activation_cost
+		}
+    }
+    
+    ai_weight = {
+        weight = 100
+    }
+
+    triggered_country_modifier = {
+        potential = {
+            always = yes
+        }
+        ship_weapon_damage = 0.15
+        ship_speed_mult = 0.15
+        damage_vs_country_type_dormant_marauders_mult = 0.25
+        damage_vs_country_type_awakened_marauders_mult = 0.25
+    }
+
+    active_effect = {
+        custom_tooltip = mem_dread_pirate_relic_activation_effect
+        hidden_effect = {
+            country_event = { id = mem_dread_pirate.40 }
+        }
+        custom_tooltip = relic_triumph_cooldown
+		hidden_effect = {
+			add_modifier = {
+				modifier = "relic_activation_cooldown" 
+				days = @triumph_duration
+			}		
+		}
+    }
+
+    possible = {
+        custom_tooltip = {
+			fail_text = "requires_relic_no_cooldown"
+			NOT = { has_modifier = relic_activation_cooldown }
+        }
+        custom_tooltip = {
+            fail_text = mem_dread_pirate_requires_some_marauders
+            any_relation = {
+                is_country_type = dormant_marauders
+            }
+        }
+        hidden_trigger = {
+            exists = capital_scope
+        }
+    }
+}
