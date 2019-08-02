@@ -732,7 +732,7 @@ ship_event = {
                 limit = { has_planet_flag = mem_dread_pirate_tomb_planet }
                 spawn_system = {
                     initializer = mem_dread_pirate_final_system
-                    min_distance = 20
+                    min_distance = 15
                     max_distance = 25
                 }
             }
@@ -745,6 +745,143 @@ ship_event = {
                 desc = mem_dread_pirate_poi_desc
                 event_chain = mem_dread_pirate_chain
                 location = event_target:final_system                
+            }
+        }
+    }
+}
+
+# On entering the final system
+ship_event = {
+    id = mem_dread_pirate.31
+    title = mem_dread_pirate.31.name
+    desc = mem_dread_pirate.31.desc
+
+    is_triggered_only = yes
+
+    show_sound = event_radio_chatter
+    location = FROM
+    picture = GFX_evt_unknown_ships
+
+    trigger = {
+        NOT = { has_global_flag = mem_dread_pirate_story_ended }
+        from = {
+            has_star_flag = mem_dread_pirate_final_system
+            any_ship_in_system = {
+                has_ship_flag = mem_dread_pirate_final_boss
+            }
+        }
+        owner = {
+            has_country_flag = mem_dread_pirate_found_the_system
+            NOT = { has_country_flag = mem_dread_pirate_chatted_with_pirate }
+        }
+    }
+
+    immediate = {
+        owner = {
+            set_country_flag = mem_dread_pirate_chatted_with_pirate
+            random_country = {
+                limit = {
+                    has_country_flag = mem_dread_pirate_boss_country
+                }
+                establish_communications_no_message = prev
+                random_owned_leader = {
+                    limit = {
+                        has_leader_flag = mem_dread_pirate_raewynn
+                    }
+                    save_event_target_as = raewynn
+                }
+            }
+        }
+    }
+
+    option = {
+        name = ONSCREEN
+        hidden_effect = {
+            owner = {
+                country_event = {
+                    id = mem_dread_pirate.32
+                }
+            }
+        }
+    }
+}
+
+country_event = {
+    id = mem_dread_pirate.32
+    title = TRANSMISSION
+    desc = mem_dread_pirate.32.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+        portrait = event_target:raewynn
+        room = mem_dread_pirate_final_room
+    }
+
+    option = {
+        name = mem_dread_pirate.32.a
+        default_hide_option = yes
+    }
+
+    option = {
+        name = mem_dread_pirate.32.b
+        response_text = mem_dread_pirate.32.b.response
+        is_dialog_only = yes
+
+        trigger = {
+            NOR = {
+                has_valid_civic = civic_fanatic_purifiers
+                has_valid_civic = civic_hive_devouring_swarm
+                has_valid_civic = civic_machine_terminator
+            }
+        }
+    }
+    option = {
+        name = mem_dread_pirate.32.c
+        response_text = mem_dread_pirate.32.c.response
+        is_dialog_only = yes
+    }
+    option = {
+        name = mem_dread_pirate.32.d
+        response_text = mem_dread_pirate.32.d.response
+        is_dialog_only = yes
+    }
+    option = {
+        name = mem_dread_pirate.32.e
+        response_text = mem_dread_pirate.32.e.response
+        is_dialog_only = yes
+    }
+}
+
+# Country event to trigger when ship is killed
+country_event = {
+    id = mem_dread_pirate.33
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        fromfrom = {
+            has_ship_flag = mem_dread_pirate_final_boss
+        }
+    }
+
+    immediate = {
+        every_owned_ship = {
+            destroy_ship = this
+        }
+        FROM = {
+            if = {
+                limit = { has_country_flag = mem_dread_pirate_found_the_system }
+                country_event = {
+                    id = mem_dread_pirate.34                    
+                }
+            }
+            else = {
+                random_country = {
+                    limit = { has_country_flag = mem_dread_pirate_found_the_system }
+                    country_event = { id = mem_dread_pirate.35 }
+                }
             }
         }
     }
