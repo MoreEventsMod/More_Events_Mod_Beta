@@ -1,0 +1,1752 @@
+#################################
+# Distress Signal anomalies
+# Idea and writing by Malthus and ViolentBeetle
+# Code by Tuttu
+#################################
+
+namespace = mem_distress_signal
+
+@mem_stranded_influence_gain1 = 50
+@mem_stranded_influence_gain2 = 100
+@mem_stranded_influence_gain3 = 150
+@mem_stranded_society_gain1 = 250
+@mem_stranded_society_gain2 = 500
+@mem_stranded_society_gain3 = 1000
+@mem_crash_site_society_gain = 150
+@mem_crash_site_influence_gain = 100
+@tier1researchreward = 6
+@tier1researchmin = 60
+@tier1researchmax = 150
+
+# TODO : Change event sounds
+
+# Failure and Critical failure
+ship_event = {
+	id = mem_distress_signal.1
+	title = "mem_distress_signal.1.name"
+	desc = "mem_distress_signal.1.desc"
+	picture =  GFX_evt_ship_in_orbit 
+	show_sound = event_ship_bridge
+	location = FROM
+
+	is_triggered_only = yes
+
+	option = {
+		name = mem_distress_signal.1.a
+	}
+}
+
+#################################
+## STRANDED SURVIVOR
+#################################
+
+# Stranded - Intial event
+ship_event = {
+	id = mem_distress_signal.100
+	title = "mem_distress_signal.100.name"
+	desc = "mem_distress_signal.100.desc"
+	picture =  GFX_evt_mem_wreckage_shelter 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+	
+	immediate {
+		FROM = { save_event_target_as = mem_distress_signal_stranded_planet }
+		set_global_flag = mem_distress_signal_stranded
+	}
+	
+	# Available to everyone but Hive Mind and Fanatic purifiers if there's a free leader slot
+	option = {
+		name = mem_distress_signal.100.common.welcome
+		trigger = {
+			root.owner = {
+				free_leader_slots > 0
+				NOT = {
+					has_ethic = ethic_hive_mind
+					has_civic = civic_fanatic_purifiers
+				}
+			}		
+		}
+		
+		custom_tooltip = mem_distress_signal.100.tooltip	
+		hidden_effect = {
+			create_species = {
+				name = random
+				class = random
+				portrait = random
+				traits = random
+			}			
+		
+			owner = {
+				create_leader = {
+					type = scientist
+					species = last_created
+					name = "Bheer Gry'Ills"
+					skill = 500
+					traits = {
+						trait = leader_trait_custom_AI_assistant
+					}
+				}
+				
+				last_created_leader = {
+					save_event_target_as = mem_distress_signal_stranded_scientist
+					set_leader_flag = mem_distress_signal_stranded_scientist
+					random_list = {
+						50 = { add_trait = leader_trait_adaptable }
+						40 = { add_trait = leader_trait_roamer }
+						10 = { add_trait = leader_trait_arrested_development }
+					}
+				}				
+			}
+		}
+	}
+	
+	# Available to everyone but Hive Mind and Fanatical Purifiers if there's no free leader slot
+	option = {
+		name = mem_distress_signal.100.common.welcome.full
+		
+		trigger = {
+			root.owner = {
+				free_leader_slots = 0
+				NOT = {
+					has_ethic = ethic_hive_mind
+					has_civic = civic_fanatic_purifiers
+				}
+			}		
+		}		
+		
+		Root.Owner = {
+			if = {
+				limit = {
+					NOT = { has_tech_option = tech_colonization_2 }
+				}
+				add_research_option = tech_colonization_2
+				add_tech_progress = {
+					tech = tech_colonization_2
+					progress = 0.10
+				}
+				add_society_research = @mem_stranded_society_gain2
+				else = {
+					if = {
+						limit = {
+							has_technology = tech_colonization_2
+							NOT = { has_tech_option = tech_colonization_3 }
+						}
+						add_research_option = tech_colonization_3
+						add_tech_progress = {
+							tech = tech_colonization_3
+							progress = 0.10
+						}
+						add_society_research = @mem_stranded_society_gain2
+						else = {
+							if = {
+								limit = {
+									has_technology = tech_colonization_2
+									has_technology = tech_colonization_3
+									NOT = { has_tech_option = tech_colonization_4 }
+								}
+								add_research_option = tech_colonization_4
+								add_tech_progress = {
+									tech = tech_colonization_4
+									progress = 0.10
+								}
+								add_society_research = @mem_stranded_society_gain2
+								else = {
+									if = {
+										limit = {
+											has_technology = tech_colonization_2
+											has_technology = tech_colonization_3
+											has_technology = tech_colonization_4
+											NOT = { has_tech_option = tech_colonization_5 }
+										}
+										add_research_option = tech_colonization_5
+										add_tech_progress = {
+											tech = tech_colonization_5
+											progress = 0.10
+										}
+										add_society_research = @mem_stranded_society_gain2
+										else = { add_society_research = @mem_stranded_society_gain3 }
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	# Available only to Xenophobe but not Fanatical Purifier
+	option = {
+		name = mem_distress_signal.100.xenophobe.leave
+		trigger = {
+			root.owner = {
+				OR = {
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+				NOT = { has_civic = civic_fanatic_purifiers }
+			}		
+		}
+		custom_tooltip = mem_distress_signal.100.xeno.tooltip	
+		hidden_effect = { ship_event = { id = mem_distress_signal.101 } }
+	}
+	
+	# Available only to Fanatical Purifiers
+	option = {
+		name = mem_distress_signal.100.fanapurif
+		trigger = {
+			root.owner = {
+				has_civic = civic_fanatic_purifiers
+			}		
+		}
+		Root.Owner = { add_influence = @mem_stranded_influence_gain1 }
+	}	
+	
+	# Available only to Hive Mind with "Genetic Resequencing" Tech, a free leader slot
+	# And not having the Devouring Swarm Civic
+	option = {
+		name = mem_distress_signal.100.hive.welcome
+		trigger = {
+			root.owner = {
+				free_leader_slots > 0
+				has_ethic = ethic_hive_mind
+				has_technology = tech_genetic_resequencing
+				Not = { has_civic = civic_hive_devouring_swarm }
+			}		
+		}
+		
+		custom_tooltip = mem_distress_signal.100.tooltip	
+		hidden_effect = {
+			create_species = {
+				name = random
+				class = random
+				portrait = random
+				traits = random
+			}			
+		
+			owner = {
+				create_leader = {
+					type = scientist
+					species = last_created
+					name = "Bheer Gry'Ills"
+					skill = 500
+					traits = {
+						trait = leader_trait_custom_AI_assistant
+						#trait = random_trait
+					}
+				}
+				
+				last_created_leader = {
+					save_event_target_as = mem_distress_signal_stranded_scientist
+					random_list = {
+						50 = { add_trait = leader_trait_adaptable }
+						40 = { add_trait = leader_trait_roamer }
+						10 = { add_trait = leader_trait_arrested_development }
+					}
+				}				
+			}
+		}
+	}
+	
+	# Available only to Hive Mind with "Genetic Resequencing" Tech without free leader slot
+	# And not having the Devouring Swarm Civic
+	option = {
+		name = mem_distress_signal.100.hive.welcome.full
+		trigger = {
+			root.owner = {
+				free_leader_slots = 0
+				has_ethic = ethic_hive_mind
+				has_technology = tech_genetic_resequencing
+				Not = { has_civic = civic_hive_devouring_swarm }
+			}		
+		}
+		Root.Owner = {			
+			if = {
+				limit = {
+					NOT = { has_tech_option = tech_colonization_2 }
+				}
+				add_research_option = tech_colonization_2
+				add_tech_progress = {
+					tech = tech_colonization_2
+					progress = 0.10
+				}
+				add_society_research = @mem_stranded_society_gain2
+				else = {
+					if = {
+						limit = {
+							has_technology = tech_colonization_2
+							NOT = { has_tech_option = tech_colonization_3 }
+						}
+						add_research_option = tech_colonization_3
+						add_tech_progress = {
+							tech = tech_colonization_3
+							progress = 0.10
+						}
+						add_society_research = @mem_stranded_society_gain2
+						else = {
+							if = {
+								limit = {
+									has_technology = tech_colonization_2
+									has_technology = tech_colonization_3
+									NOT = { has_tech_option = tech_colonization_4 }
+								}
+								add_research_option = tech_colonization_4
+								add_tech_progress = {
+									tech = tech_colonization_4
+									progress = 0.10
+								}
+								add_society_research = @mem_stranded_society_gain2
+								else = {
+									if = {
+										limit = {
+											has_technology = tech_colonization_2
+											has_technology = tech_colonization_3
+											has_technology = tech_colonization_4
+											NOT = { has_tech_option = tech_colonization_5 }
+										}
+										add_research_option = tech_colonization_5
+										add_tech_progress = {
+											tech = tech_colonization_5
+											progress = 0.10
+										}
+										add_society_research = @mem_stranded_society_gain2
+										else = { add_society_research = @mem_stranded_society_gain3 }
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	# Available only to Hive Mind without "Genetic Resequencing" Tech
+	# And not having the Devouring Swarm Civic
+	option = {
+		name = mem_distress_signal.100.hive.leave
+		trigger = {
+			root.owner = {
+				has_ethic = ethic_hive_mind
+				NOT = { 
+					has_technology = tech_genetic_resequencing 
+					has_civic = civic_hive_devouring_swarm
+				}
+			}		
+		}		
+	}
+	
+	# Available only to Hive Mind with Devouring Swarm Civic
+	option = {
+		name = mem_distress_signal.100.hive.devouring
+		trigger = {
+			root.owner = {
+				has_ethic = ethic_hive_mind
+				has_civic = civic_hive_devouring_swarm
+			}		
+		}
+		Root.Owner = { add_influence = @mem_stranded_influence_gain1 }
+	}
+}
+
+# Stranded - "Roulette" event selector
+# Also called by the end of the Xenophobe Special Project
+ship_event = {
+	id = mem_distress_signal.101
+	hide_window = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		Root.Owner = { 
+			hidden_effect = {
+				change_variable = { 
+					which = "mem_ds_stranded_survivors_story" 
+					value = 1 
+				}
+			}
+		}
+		if = {
+			limit = {
+				Root.owner = {
+					has_country_flag = mem_ds_stranded_survival1
+					has_country_flag = mem_ds_stranded_survival2
+					has_country_flag = mem_ds_stranded_survival3
+				}
+			}
+			ship_event = { id = mem_distress_signal.110 days = 60 random = 10 }
+			else = {
+				random_list = {	
+					10 = { 
+						if = {
+							limit ={
+								NOT = { 
+									Root.Owner = { 
+										has_country_flag = mem_ds_stranded_survival1
+									}
+								}
+							}							
+							FROM = {
+								enable_special_project = {
+									name = "MEM_DISTRESS_SIGNAL_STRANDED_SURVIVOR_STORY_1_PROJECT"
+									owner = ROOT
+									location = event_target:mem_distress_signal_stranded_planet
+								}
+							}
+							
+							else = {
+								hidden_effect = { ship_event = { id = mem_distress_signal.101 } }
+							}
+						}
+					}
+					10 = { 
+						if = {
+							limit ={
+								NOT = { 
+									Root.Owner = { 
+										has_country_flag = mem_ds_stranded_survival2
+									}
+								}
+							}
+							FROM = {
+								enable_special_project = {
+									name = "MEM_DISTRESS_SIGNAL_STRANDED_SURVIVOR_STORY_2_PROJECT"
+									owner = ROOT
+									location = event_target:mem_distress_signal_stranded_planet
+								}
+							}
+							
+							else = {
+								hidden_effect = { ship_event = { id = mem_distress_signal.101 } }
+							}
+						}
+					}
+					10 = { 
+						if = {
+							limit ={
+								NOT = { 
+									Root.Owner = { 
+										has_country_flag = mem_ds_stranded_survival3
+									}
+								}
+							}
+							FROM = {
+								enable_special_project = {
+									name = "MEM_DISTRESS_SIGNAL_STRANDED_SURVIVOR_STORY_3_PROJECT"
+									owner = ROOT
+									location = event_target:mem_distress_signal_stranded_planet
+								}
+							}
+							
+							else = {
+								hidden_effect = { ship_event = { id = mem_distress_signal.101 } }
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+# Stranded - Survivor's story #1
+ship_event = {
+	id = mem_distress_signal.102
+	title = "mem_distress_signal.102.name"
+	desc = "mem_distress_signal.102.desc"
+	picture =  GFX_evt_mem_wreckage_shelter 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+	
+	immediate {
+		Root.Owner = { 
+			set_country_flag = mem_ds_stranded_survival1 
+		}		
+	}
+		
+	option = {
+		trigger = {
+			NOT = {
+				Root.owner = {
+					has_country_flag = mem_ds_stranded_survival1
+					has_country_flag = mem_ds_stranded_survival2
+					has_country_flag = mem_ds_stranded_survival3
+				}
+			}
+		}
+		name = mem_distress_signal.102.continue
+		hidden_effect = { ship_event = { id = mem_distress_signal.101 } } 		
+	}	
+	
+	option = {
+		trigger = {
+			NOT = {
+				Root.owner = {
+					has_country_flag = mem_ds_stranded_survival1
+					has_country_flag = mem_ds_stranded_survival2
+					has_country_flag = mem_ds_stranded_survival3
+				}
+			}
+		}
+		name = mem_distress_signal.102.stop
+		if = {
+			limit = {
+				Root.Owner = {
+					check_variable = {
+						which = "mem_ds_stranded_survivors_story" 
+						value = 1
+					}				
+				}
+			}	
+			Root.Owner = { add_society_research = @mem_stranded_society_gain1 }
+			else = {
+				if = {
+					limit = {
+						Root.Owner = {
+							check_variable = {
+								which = "mem_ds_stranded_survivors_story" 
+								value = 2
+							}				
+						}				
+					}	
+					Root.Owner = { add_society_research = @mem_stranded_society_gain2 }
+					else = {
+						Root.Owner = { add_society_research = @mem_stranded_society_gain3 }
+					}
+				}
+			}
+		}
+	}
+	
+	option = {
+		trigger = {
+			Root.owner = {
+				has_country_flag = mem_ds_stranded_survival1
+				has_country_flag = mem_ds_stranded_survival2
+				has_country_flag = mem_ds_stranded_survival3
+			}
+		}
+		name = mem_distress_signal.finalstop
+		hidden_effect = { ship_event = { id = mem_distress_signal.101 } } 		
+	}	
+}
+
+# Stranded - Survivor's story #2
+ship_event = {
+	id = mem_distress_signal.103
+	title = "mem_distress_signal.103.name"
+	desc = "mem_distress_signal.103.desc"
+	picture =  GFX_evt_mem_wreckage_shelter 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+	
+	immediate {
+		Root.Owner = { 
+			set_country_flag = mem_ds_stranded_survival2 
+		}		
+	}
+	
+	option = {
+		trigger = {
+			NOT = {
+				Root.owner = {
+					has_country_flag = mem_ds_stranded_survival1
+					has_country_flag = mem_ds_stranded_survival2
+					has_country_flag = mem_ds_stranded_survival3
+				}
+			}
+		}
+		name = mem_distress_signal.103.continue
+		hidden_effect = { ship_event = { id = mem_distress_signal.101 } } 		
+	}	
+	
+	option = {
+		trigger = {
+			NOT = {
+				Root.owner = {
+					has_country_flag = mem_ds_stranded_survival1
+					has_country_flag = mem_ds_stranded_survival2
+					has_country_flag = mem_ds_stranded_survival3
+				}
+			}
+		}
+		name = mem_distress_signal.103.stop
+		if = {
+			limit = {
+				Root.Owner = {
+					check_variable = {
+						which = "mem_ds_stranded_survivors_story" 
+						value = 1
+					}				
+				}
+			}	
+			Root.Owner = { add_society_research = @mem_stranded_society_gain1 }
+			else = {
+				if = {
+					limit = {
+						Root.Owner = {
+							check_variable = {
+								which = "mem_ds_stranded_survivors_story" 
+								value = 2
+							}				
+						}
+					}	
+					Root.Owner = { add_society_research = @mem_stranded_society_gain2 }
+					else = {
+						Root.Owner = { add_society_research = @mem_stranded_society_gain3 }
+					}
+				}
+			}
+		}
+	}
+		
+	option = {
+		trigger = {
+			Root.owner = {
+				has_country_flag = mem_ds_stranded_survival1
+				has_country_flag = mem_ds_stranded_survival2
+				has_country_flag = mem_ds_stranded_survival3
+			}
+		}
+		name = mem_distress_signal.finalstop
+		hidden_effect = { ship_event = { id = mem_distress_signal.101 } } 		
+	}	
+}
+
+# Stranded - Survivor's story #3
+ship_event = {
+	id = mem_distress_signal.104
+	title = "mem_distress_signal.104.name"
+	desc = "mem_distress_signal.104.desc"
+	picture =  GFX_evt_mem_wreckage_shelter 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+	
+	immediate {
+		Root.Owner = { 
+			set_country_flag = mem_ds_stranded_survival3 
+		}		
+	}
+	
+	option = {
+		trigger = {
+			NOT = {
+				Root.owner = {
+					has_country_flag = mem_ds_stranded_survival1
+					has_country_flag = mem_ds_stranded_survival2
+					has_country_flag = mem_ds_stranded_survival3
+				}
+			}
+		}
+		name = mem_distress_signal.104.continue
+		hidden_effect = { ship_event = { id = mem_distress_signal.101 } } 		
+	}	
+	
+	option = {
+		trigger = {
+			NOT = {
+				Root.owner = {
+					has_country_flag = mem_ds_stranded_survival1
+					has_country_flag = mem_ds_stranded_survival2
+					has_country_flag = mem_ds_stranded_survival3
+				}
+			}
+		}
+		name = mem_distress_signal.104.stop
+		if = {
+			limit = {
+				Root.Owner = {
+					check_variable = {
+						which = "mem_ds_stranded_survivors_story" 
+						value = 1
+					}				
+				}
+			}	
+			Root.Owner = { add_society_research = @mem_stranded_influence_gain1 }
+			else = {
+				if = {
+					limit = {
+						Root.Owner = {
+							check_variable = {
+								which = "mem_ds_stranded_survivors_story" 
+								value = 2
+							}				
+						}
+					}	
+					Root.Owner = { add_society_research = @mem_stranded_influence_gain2 }
+					else = {
+						Root.Owner = { add_society_research = @mem_stranded_influence_gain3 }
+					}
+				}
+			}
+		}
+	}
+		
+	option = {
+		trigger = {
+			Root.owner = {
+				has_country_flag = mem_ds_stranded_survival1
+				has_country_flag = mem_ds_stranded_survival2
+				has_country_flag = mem_ds_stranded_survival3
+			}
+		}
+		name = mem_distress_signal.finalstop
+		hidden_effect = { ship_event = { id = mem_distress_signal.101 } } 		
+	}	
+}
+
+# Stranded - Survivor's Death
+ship_event = {
+	id = mem_distress_signal.105
+	title = "mem_distress_signal.105.name"
+	desc = "mem_distress_signal.105.desc"
+	picture =  GFX_evt_mem_wreckage_shelter 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+	
+	option = {
+		name = mem_distress_signal.105.a
+	}		
+}
+
+# Stranded - Survivor is a Star
+ship_event = {
+	id = mem_distress_signal.110
+	title = "mem_distress_signal.110.name"
+	desc = "mem_distress_signal.110.desc"
+	picture =  GFX_evt_news_room 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes		
+	
+	option = {
+		name = mem_distress_signal.110.continue
+		hidden_effect = { ship_event = { id = mem_distress_signal.111 days = 60 random = 10 } } 		
+	}
+	option = {
+		name = mem_distress_signal.110.cease		
+		Root.Owner = { 
+			add_influence = -150
+		}
+		hidden_effect = {
+			random_list = {
+				50 = { ship_event = { id = mem_distress_signal.120 days = 30 random = 5 } }
+				50 = { ship_event = { id = mem_distress_signal.121 days = 30 random = 5 } }
+			}
+		}
+	}
+}
+
+# Stranded - Survivor for Governor
+ship_event = {
+	id = mem_distress_signal.111
+	title = "mem_distress_signal.111.name"
+	desc = "mem_distress_signal.111.desc"
+	picture =  GFX_evt_news_room 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes		
+	
+	option = {
+		trigger = {
+			Root.Owner = { free_leader_slots > 0 }
+		}
+		name = mem_distress_signal.111.accept
+		custom_tooltip = mem_distress_signal.101.tooltip	
+		hidden_effect = {
+			create_species = {
+				name = random
+				class = random
+				portrait = random
+				traits = random
+			}			
+		
+			owner = {
+				create_leader = {
+					type = governor
+					species = last_created
+					name = "Bheer Gry'Ills"
+					skill = 500
+					traits = {
+						trait = leader_trait_agrarian_upbringing 
+						trait = leader_trait_resilient 
+					}
+				}
+				
+				last_created_leader = {
+					save_event_target_as = mem_distress_signal_stranded_governor
+				}				
+			}
+		}
+	}
+	
+	option = {
+		trigger = {
+			Root.Owner = { free_leader_slots = 0 }
+		}
+		name = mem_distress_signal.111.accept.full
+		Root.Owner = { add_influence = @mem_stranded_influence_gain3
+		}
+	}
+
+	option = {
+		name = mem_distress_signal.111.deny		
+	}
+}
+
+# Stranded - Media Censhorship - Success
+ship_event = {
+	id = mem_distress_signal.120
+	title = "mem_distress_signal.120.name"
+	desc = "mem_distress_signal.120.desc"
+	picture =  GFX_evt_news_room 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes		
+	
+	option = {
+		name = mem_distress_signal.120.a
+		Root.Owner = { 
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax 
+			}
+		}		
+	}	
+}
+
+# Stranded - Media Censhorship - Failure
+ship_event = {
+	id = mem_distress_signal.121
+	title = "mem_distress_signal.121.name"
+	desc = "mem_distress_signal.121.desc"
+	picture =  GFX_evt_news_room 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes		
+	
+	option = {
+		name = mem_distress_signal.121.a
+		Root.Owner = { add_modifier = mem_distress_signal_stranted_survivor_media_censorship_failure days = 60 }
+	}
+}
+
+#Todo : Modifier pour faire le gouverneur en deux étapes. Laissez le temps aux vidéo de se répandre : possibilité de tout stopper (Unrest et Unhappiness) ou de laisser continuer.
+#		Si continuer, proposer l'intégration du survivant dans l'empire. Plus tard, il devient une start et peut devenir gouverneur ou crever de la drogue.
+
+#################################
+## ROCK THRASHERS
+#################################
+
+# Rock Thrashers - Initial event
+ship_event = {
+	id = mem_distress_signal.200
+	title = "mem_distress_signal.200.name"
+	desc = "mem_distress_signal.200.desc"
+	picture =  GFX_evt_mem_strange_tectonics 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+
+	immediate = {
+		FROM = {
+			save_event_target_as = mem_distress_signal_rock_thrashers_planet
+			set_planet_flag = mem_distress_signal_rock_thrashers_planet
+		}
+		set_global_flag = mem_distress_signal_rock_thrashers
+	}
+	
+	option = {
+		name = mem_distress_signal.200.a		
+		FROM = {
+			set_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_not_completed
+			enable_special_project = {
+				name = "MEM_DISTRESS_SIGNAL_ROCK_THRASHERS_DISCOVERY_PROJECT"
+				owner = ROOT
+				location = FROM
+			}			
+		}
+	}
+	
+	option = {
+		name = mem_distress_signal.200.b
+		Root.Owner = { add_influence = 50 }
+	}
+}
+
+# Rock Thrashers - Initial Special Project success
+ship_event = {
+	id = mem_distress_signal.201
+	title = "mem_distress_signal.201.name"
+	desc = "mem_distress_signal.201.desc"
+	picture =  GFX_evt_mem_strange_tectonics 
+	show_sound = event_sensor_ping
+	location = event_target:mem_distress_signal_rock_thrashers_planet
+
+	is_triggered_only = yes	
+
+	option = {
+		name = mem_distress_signal.201.a.neutral
+		trigger = {
+			root.owner = {
+				NOR = {
+					has_ethic = ethic_xenophile
+					has_ethic = ethic_fanatic_xenophile
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		event_target:mem_distress_signal_rock_thrashers_planet = {
+			add_modifier = {
+				modifier = mem_distress_signal_rock_thrashers_pm
+				days = -1
+			}			
+			remove_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_not_completed
+			hidden_effect = { planet_event = { id = mem_distress_signal.220 days = 165 random = 15 } }
+		}
+	}
+
+	option = {
+		name = mem_distress_signal.201.a.xenophile
+		trigger = { 
+			root.owner = {
+				OR = {
+					has_ethic = ethic_xenophile
+					has_ethic = ethic_fanatic_xenophile
+				}
+			}
+		}
+		event_target:mem_distress_signal_rock_thrashers_planet = {
+			add_modifier = {
+				modifier = mem_distress_signal_rock_thrashers_pm
+				days = -1
+			}
+			remove_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_not_completed
+			hidden_effect = { planet_event = { id = mem_distress_signal.220 days = 165 random = 15 } }
+		}
+	}
+	
+	option = {
+		name = mem_distress_signal.201.a.xenophobe
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		event_target:mem_distress_signal_rock_thrashers_planet = {
+			add_modifier = {
+				modifier = mem_distress_signal_rock_thrashers_pm
+				days = -1
+			}
+			remove_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_not_completed
+			hidden_effect = { planet_event = { id = mem_distress_signal.220 days = 165 random = 15 } }
+		}
+	}
+}
+
+# Rock Thrashers - After colonization if the initial special project hasn't been completed
+# Only used to trigger mem_distress_signal.211 with a 30 days delay on planet with the good flag
+planet_event = {
+	id = mem_distress_signal.210
+	hide_window = yes
+	is_triggered_only = yes	
+
+	trigger = {
+		has_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_not_completed
+	}
+	immediate = { 		
+		planet_event = { id = mem_distress_signal.211 days = 30 }
+		Owner = {
+			random_owned_planet = {
+				limit = { has_planet_flag = mem_distress_signal_rock_thrashers_planet }
+			}			
+		}
+	}
+}
+
+# Rock Thrashers - If initial project is not completed, reminder and option to remove it.
+planet_event = {
+	id = mem_distress_signal.211
+	title = "mem_distress_signal.211.name"
+	desc = "mem_distress_signal.211.desc"
+	picture =  GFX_evt_mem_strange_tectonics 
+	show_sound = event_sensor_ping
+	location = This
+
+	is_triggered_only = yes	
+	
+	option = {
+		name = mem_distress_signal.211.a
+	}
+	
+	option = {
+		name = mem_distress_signal.211.b
+		This = { set_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_refused }
+		This.Owner = {
+			abort_special_project = {
+				type = MEM_DISTRESS_SIGNAL_ROCK_THRASHERS_DISCOVERY_PROJECT
+			}
+		}
+		hidden_effect = { planet_event = { id = mem_distress_signal.221 days = 165 random = 15 } }
+	}
+}
+
+# Rock Thrashers - If initial project has been COMPLETED, Rock Thrashers causing damage randomly
+planet_event = {
+	id = mem_distress_signal.220
+	title = "mem_distress_signal.220.name"
+	desc = "mem_distress_signal.220.desc"
+	picture =  GFX_evt_mem_strange_tectonics 
+	show_sound = event_sensor_ping
+	location = This
+
+	trigger = {		
+		has_modifier = mem_distress_signal_rock_thrashers_planet
+		has_colony = yes
+		NOT = {	
+			has_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_refused 
+			has_planet_flag = mem_distress_signal_rock_thrashers_migration_explained
+		}
+		check_variable = {
+			which = "mem_ds_rock_thrashers_migrations" 
+			value < 3
+		}
+	}
+	
+	mean_time_to_happen = {	days = 360 }
+	
+	immediate = {
+		This.Owner = { 
+			hidden_effect = {
+				change_variable = { 
+					which = "mem_ds_rock_thrashers_migrations" 
+					value = 1 
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = mem_distress_signal.220.a
+		add_modifier = {
+			modifier = mem_distress_signal_rock_thrashers_damage_pm
+			days = 45
+		}
+		Owner = { add_minerals = -250 random = 38 }
+	}
+	
+	option = {
+		name = mem_distress_signal.220.b
+		trigger = {
+			check_variable = {
+				which = "mem_ds_rock_thrashers_migrations" 
+				value = 3
+			}
+		}
+		enable_special_project = {
+			name = "MEM_DISTRESS_SIGNAL_ROCK_THRASHERS_MIGRATION_PROJECT"
+			owner = ROOT
+			location = THIS
+		}
+	}
+
+}
+# TODO : Faire 220 et 221 / Ajouter le SP
+# Rock Thrashers - If initial project has been REJECTED, Rock Thrashers "attack" after 5 to 6 months that also lead to their discovery
+planet_event = {
+	id = mem_distress_signal.221
+	title = "mem_distress_signal.221.name"
+	desc = "mem_distress_signal.221.desc"
+	picture =  GFX_evt_mem_strange_tectonics 
+	show_sound = event_sensor_ping
+	location = This
+
+	is_triggered_only = yes	
+	
+	option = {
+		name = mem_distress_signal.221.a
+	}
+	
+	option = {
+		name = mem_distress_signal.221.b
+		This = { set_planet_flag = mem_distress_signal_rock_thrashers_discovery_sp_refused }
+		This.Owner = {
+			abort_special_project = {
+				type = MEM_DISTRESS_SIGNAL_ROCK_THRASHERS_DISCOVERY_PROJECT
+			}
+		}
+		hidden_effect = { planet_event = { id = mem_distress_signal.221 days = 165 random = 15 } }
+	}
+}
+
+#################################
+## COLONY SHIP CRASH SITE
+#################################
+
+# Colony ship crash site - Initial event
+ship_event = {
+	id = mem_distress_signal.300
+	title = "mem_distress_signal.300.name"
+	desc = "mem_distress_signal.300.desc"
+	picture =  GFX_evt_landing_ship 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+
+	option = {
+		name = mem_distress_signal.300.a		
+		FROM = {
+			save_event_target_as = mem_distress_signal_colony_ship_planet
+			set_planet_flag = mem_distress_signal_colony_planet
+			enable_special_project = {
+				name = "MEM_DISTRESS_SIGNAL_COLONY_SHIP_PROJECT"
+				owner = ROOT
+				location = FROM
+			}
+		}
+	}
+}
+
+# Crash site - No survivors
+ship_event = {
+	id = mem_distress_signal.301
+	title = "mem_distress_signal.301.name"
+	desc = "mem_distress_signal.301.desc"
+	picture =  GFX_evt_landing_ship 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+
+	option = {
+		name = mem_distress_signal.301.a.common	
+		ROOT = {
+			add_society_research = @mem_crash_site_society_gain
+		}
+	}
+	
+	option = {
+		name = mem_distress_signal.301.a.xenocoll
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_authoritarian
+					has_ethic = ethic_fanatic_authoritarian
+				}
+			}
+		}
+		ROOT = {
+			add_society_research = @mem_crash_site_society_gain
+		}
+	}
+}
+
+#Crash site - Failed colony
+ship_event = {
+	id = mem_distress_signal.302
+	title = "mem_distress_signal.302.name"
+	desc = "mem_distress_signal.302.desc"
+	picture =  GFX_evt_landing_ship 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+
+	option = {
+		name = mem_distress_signal.302.a.common	
+		ROOT = {
+			add_society_research = @mem_crash_site_society_gain
+		}
+	}
+	
+	option = {
+		name = mem_distress_signal.302.a.xenocoll
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_authoritarian
+					has_ethic = ethic_fanatic_authoritarian
+				}
+			}
+		}
+		ROOT = {
+			add_society_research = @mem_crash_site_society_gain
+		}
+	}
+}
+
+#Crash site - Thriving settlement
+ship_event = {
+	id = mem_distress_signal.303
+	title = "mem_distress_signal.303.name"
+	desc = "mem_distress_signal.303.desc"
+	picture =  GFX_evt_landing_ship 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+	
+	immediate = {
+		event_target:mem_distress_signal_colony_ship_planet = {
+			#if = {
+			#	limit = { any_tile = { has_blocker = no } }
+			#	random_tile = {
+			#		limit = { has_blocker = no }
+			#		set_blocker = tb_mem_lost_colony
+			#	}
+			#	else = {
+			#		random_tile = { set_blocker = tb_mem_lost_colony }
+			#	}
+			#}
+			orbital_deposit_tile = { clear_deposits = yes }
+			orbital_deposit_tile = {
+				add_deposit = d_immense_society_deposit
+			}
+		}
+	}
+
+	option = {
+		name = mem_distress_signal.303.a.common	
+		event_target:mem_distress_signal_colony_ship_planet = {
+			add_modifier = {
+				modifier = mem_distress_signal_lost_colony_pm
+				days = -1
+			}
+		}
+	}
+	
+	option = {
+		name = mem_distress_signal.303.a.xenocoll
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_authoritarian
+					has_ethic = ethic_fanatic_authoritarian
+				}
+			}
+		}
+		event_target:mem_distress_signal_colony_ship_planet = {
+			add_modifier = {
+				modifier = mem_distress_signal_lost_colony_pm
+				days = -1
+			}
+		}
+	}
+	
+	option = {
+		name = mem_distress_signal.303.a.materialist
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+				}
+			}
+		}
+		event_target:mem_distress_signal_colony_ship_planet = {
+			add_modifier = {
+				modifier = mem_distress_signal_lost_colony_pm
+				days = -1
+			}
+		}
+	}
+	
+	option = {
+		name = mem_distress_signal.303.a.spiritualist
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_spiritualist
+					has_ethic = ethic_fanatic_spiritualist
+				}
+			}
+		}
+		event_target:mem_distress_signal_colony_ship_planet = {
+			add_modifier = {
+				modifier = mem_distress_signal_lost_colony_pm
+				days = -1
+			}
+		}	
+	
+	option = {
+		name = mem_distress_signal.303.a.fanxenophobe
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		event_target:mem_distress_signal_colony_ship_planet = {
+			add_modifier = {
+				modifier = mem_distress_signal_lost_colony_pm
+				days = -1
+			}
+			
+			enable_special_project = {
+				name = "MEM_DISTRESS_SIGNAL_DESTROY_COLONY_PROJECT"
+				owner = ROOT
+				location = event_target:mem_distress_signal_colony_ship_planet
+			}
+		}
+	}
+}
+
+#Crash site - Colony destruction
+ship_event = {
+	id = mem_distress_signal.304
+	title = "mem_distress_signal.304.name"
+	desc = "mem_distress_signal.304.desc"
+	picture =  GFX_evt_burning_settlement 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+
+	option = {
+		name = mem_distress_signal.304.a
+		ROOT = {
+			 add_influence  = @mem_crash_site_influence_gain
+		}
+	}
+}
+
+#Crash site - Planet colonized - Called by on_action
+planet_event = {
+	id = mem_distress_signal.305
+	hide_window = yes
+	is_triggered_only = yes	
+	
+	trigger = {
+		has_planet_flag = mem_distress_signal_colony_planet
+	}
+
+	immediate = {
+		planet_event = { id = mem_distress_signal.306 days = 30 }
+	}
+}
+
+#Crash site - Planet colonized - Survivors encountered
+planet_event = {
+	id = mem_distress_signal.306
+	title = "mem_distress_signal.306.name"
+	desc = "mem_distress_signal.306.desc"
+	picture =  GFX_evt_burning_settlement 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+
+	# First set of option : let them keep their way of life
+	## Blocked for Fanatic Collectivist, Fanatic Xenophobes and ethos with special answer
+	option = {
+		name = mem_distress_signal.306.a.common
+		
+		trigger = {
+			root.owner = {
+				NOR = {				
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_fanatic_authoritarian
+					has_ethic = ethic_xenophile
+					has_ethic = ethic_fanatic_xenophile
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+				}
+			}
+		}
+		
+		custom_tooltip = mem_distress_signal.306.a.tooltip
+		event_target:mem_distress_signal_colony_ship_planet = {
+			orbital_deposit_tile = { clear_deposits = yes }
+			random_tile = {
+				limit = {
+					has_blocker = no
+					has_building = no
+				}
+				set_blocker = "tb_mem_lost_colony"
+			}
+		}	
+		
+		hidden_effect = { 
+			if = {
+				limit = {
+					OR = {
+						has_ethic = ethic_authoritarian
+					}
+				}
+				random_list = {
+					# Almost between 15 and 50 years - Primitive way of life died out
+					#3 = { planet_event = { id = mem_distress_signal.307 days = 11520 random = 6120 } }
+					3 = { planet_event = { id = mem_distress_signal.307 years = 32 random = 17 } }
+					# Almost between 10 and 30 years - Primitive way of life spreads further
+					#2 = { planet_event = { id = mem_distress_signal.308 days = 7200 random = 3600 } }
+					2 = { planet_event = { id = mem_distress_signal.308 years = 20 random = 10 } }
+					2 = { #No follow up } 
+				}
+				else = {
+					if = {
+						limit = {
+							OR = {
+								has_ethic = ethic_fanatic_authoritarian
+							}
+						}
+						random_list = {
+							# Almost between 15 and 50 years - Primitive way of life died out
+							#4 = { planet_event = { id = mem_distress_signal.307 days = 11520 random = 6120 } }
+							4 = { planet_event = { id = mem_distress_signal.307 years = 32 random = 17 } }
+							# Almost between 10 and 30 years - Primitive way of life spreads further
+							#2 = { planet_event = { id = mem_distress_signal.308 days = 7200 random = 3600 } }
+							2 = { planet_event = { id = mem_distress_signal.308 years = 20 random = 10 } }
+							2 = { #No follow up } 
+						}
+						else = {
+							random_list = { #TODO : change weight
+								# Almost between 15 and 50 years - Primitive way of life died out
+								#2 = { planet_event = { id = mem_distress_signal.307 days = 11520 random = 6120 } }
+								2 = { planet_event = { id = mem_distress_signal.307 years = 32 random = 17 } }
+								# Almost between 10 and 30 years - Primitive way of life spreads further
+								#2 = { planet_event = { id = mem_distress_signal.308 days = 7200 random = 3600 } }
+								2 = { planet_event = { id = mem_distress_signal.308 years = 20 random = 10 } }
+								2 = { #No follow up } 
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	## Special answer for Xenophile ethos
+	option = {
+		name = mem_distress_signal.306.a.xenophile
+		
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_xenophile
+					has_ethic = ethic_fanatic_xenophile
+				}
+			}
+		}
+		
+		custom_tooltip = mem_distress_signal.306.a.tooltip
+		event_target:mem_distress_signal_colony_ship_planet = {
+			orbital_deposit_tile = { clear_deposits = yes }
+			random_tile = {
+				limit = {
+					has_blocker = no
+					has_building = no
+				}
+				set_blocker = "tb_mem_lost_colony"
+			}
+		}
+		
+		hidden_effect = { 
+			random_list = {
+				# Almost between 15 and 50 years - Primitive way of life died out
+				#2 = { planet_event = { id = mem_distress_signal.307 days = 11520 random = 6120 } }
+				2 = { planet_event = { id = mem_distress_signal.307 years = 32 random = 17 } }
+				# Almost between 10 and 30 years - Primitive way of life spreads further
+				#2 = { planet_event = { id = mem_distress_signal.308 days = 7200 random = 3600 } }
+				2 = { planet_event = { id = mem_distress_signal.308 years = 20 random = 10 } }
+				2 = { #No follow up } 
+			}
+		}
+	}
+	
+	## Special answer for Regular Xenophobe
+	option = {
+		name = mem_distress_signal.306.a.regxenophobe
+		
+		trigger = {
+			root.owner = { has_ethic = ethic_xenophobe }
+		}
+		
+		custom_tooltip = mem_distress_signal.306.a.tooltip
+		event_target:mem_distress_signal_colony_ship_planet = {
+			orbital_deposit_tile = { clear_deposits = yes }
+			random_tile = {
+				limit = {
+					has_blocker = no
+					has_building = no
+				}
+				set_blocker = "tb_mem_lost_colony"
+			}
+		}
+		
+		hidden_effect = { 
+			random_list = {
+				# Almost between 15 and 50 years - Primitive way of life died out
+				#2 = { planet_event = { id = mem_distress_signal.307 days = 11520 random = 6120 } }
+				2 = { planet_event = { id = mem_distress_signal.307 years = 32 random = 17 } }
+				# Almost between 10 and 30 years - Primitive way of life spreads further
+				#2 = { planet_event = { id = mem_distress_signal.308 days = 7200 random = 3600 } }
+				2 = { planet_event = { id = mem_distress_signal.308 years = 20 random = 10 } }
+				2 = { #No follow up } 
+			}
+		}
+	}
+	
+	## Special answer for Materialist ethos
+	option = {
+		name = mem_distress_signal.306.a.materialist
+		
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+				}
+			}
+		}
+		
+		custom_tooltip = mem_distress_signal.306.a.tooltip
+		event_target:mem_distress_signal_colony_ship_planet = {
+			orbital_deposit_tile = { clear_deposits = yes }
+			random_tile = {
+				limit = {
+					has_blocker = no
+					has_building = no
+				}
+				set_blocker = "tb_mem_lost_colony"
+			}
+		}
+		
+		hidden_effect = { 
+			if = {
+				limit = {
+					OR = {
+						has_ethic = ethic_materialist
+					}
+				}
+				random_list = {
+					# Almost between 15 and 50 years - Primitive way of life died out
+					#3 = { planet_event = { id = mem_distress_signal.307 days = 11520 random = 6120 } }
+					3 = { planet_event = { id = mem_distress_signal.307 years = 32 random = 17 } }
+					# Almost between 10 and 30 years - Primitive way of life spreads further
+					#2 = { planet_event = { id = mem_distress_signal.308 days = 7200 random = 3600 } }
+					2 = { planet_event = { id = mem_distress_signal.308 years = 20 random = 10 } }
+					2 = { #No follow up } 
+				}
+				else = {
+					if = {
+						limit = {
+							OR = {
+								has_ethic = ethic_fanatic_materialist
+							}
+						}
+						random_list = {
+							# Almost between 15 and 50 years - Primitive way of life died out
+							#4 = { planet_event = { id = mem_distress_signal.307 days = 11520 random = 6120 } }
+							4 = { planet_event = { id = mem_distress_signal.307 years = 32 random = 17 } }
+							# Almost between 10 and 30 years - Primitive way of life spreads further
+							#2 = { planet_event = { id = mem_distress_signal.308 days = 7200 random = 3600 } }
+							2 = { planet_event = { id = mem_distress_signal.308 years = 20 random = 10 } }
+							2 = { #No follow up } 
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	# Second set of option : integrate them
+	## Blocked for Fanatic Individualist / Egalitarian and ethos with special answer
+	option = {
+		name = mem_distress_signal.306.b.common
+		
+		trigger = {
+			root.owner = {
+				NOR = {				
+					has_ethic = ethic_fanatic_egalitarian
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe			
+				}
+			}
+		}
+		
+		custom_tooltip = mem_distress_signal.306.b.tooltip
+		hidden_effect = { planet_event = mem_distress_signal.308 }
+	}
+	
+	## Special answer for Materialist ethos
+	option = {
+		name = mem_distress_signal.306.b.materialist
+		
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+				}
+			}
+		}
+		
+		custom_tooltip = mem_distress_signal.306.b.tooltip
+		hidden_effect = { planet_event = mem_distress_signal.308 }
+	}
+	
+	## Special answer for Xenophobe ethos
+	option = {
+		name = mem_distress_signal.306.b.xenophobe
+		
+		trigger = {
+			root.owner = {
+				OR = {				
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		
+		custom_tooltip = mem_distress_signal.306.b.tooltip
+		hidden_effect = { planet_event = mem_distress_signal.308 }
+	}
+	
+	# Third set of option : purge them
+	option = {
+		name = mem_distress_signal.306.c
+		
+		trigger = {
+			root.owner = { has_ethic = ethic_fanatic_xenophobe }
+		}
+		
+		ROOT.owner = { add_influence = @mem_crash_site_influence_gain }
+	}
+}
+
+# TODO : faire cet event
+#Crash site - Planet colonized - Primitive way of live died out
+planet_event = {
+	id = mem_distress_signal.307
+	title = "mem_distress_signal.307.name"
+	desc = "mem_distress_signal.307.desc"
+	picture =  GFX_evt_burning_settlement 
+	show_sound = event_sensor_ping
+	location = FROM
+
+	is_triggered_only = yes	
+
+	# First set of option : let them keep their way of life
+	## Blocked for Fanatic Collectivist, Fanatic Xenophobes and ethos with special answer
+	option = {
+		name = mem_distress_signal.307.a.common
+		
+		trigger = {
+			root.owner = {
+				NOR = {				
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_fanatic_authoritarian
+					has_ethic = ethic_xenophile
+					has_ethic = ethic_fanatic_xenophile
+					has_ethic = ethic_materialist
+					has_ethic = ethic_fanatic_materialist
+				}
+			}
+		}
+		
+		custom_tooltip = mem_distress_signal.307.a.tooltip
+		hidden_effect = { planet_event = mem_distress_signal.309 }
+	}
+}
+
+#################################
+## DEBUG
+#################################
+country_event = {
+	id = mem_distress_signal.1000
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		ROOT = {
+			country_add_ethic = "ethic_xenophobe"
+		}
+	}
+}
+
+country_event = {
+	id = mem_distress_signal.1001
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		ROOT = {
+			remove_country_flag = mem_ds_stranded_survival1
+			remove_country_flag = mem_ds_stranded_survival2
+			remove_country_flag = mem_ds_stranded_survival3
+		}
+		remove_global_flag = mem_distress_signal_stranded
+	}
+}
+
+country_event = {
+	id = mem_distress_signal.1002
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		hidden_effect = {
+			create_species = {
+				name = random
+				class = random
+				portrait = random
+				traits = random
+			}			
+					
+			create_leader = {
+				type = governor
+				species = last_created
+				name = "Bheer Gry'Ills"
+				skill = 500
+				traits = {
+					trait = leader_trait_custom_AI_assistant
+					#trait = random_trait
+				}
+			}
+			
+			last_created_leader = {
+				save_event_target_as = mem_distress_signal_stranded_governor
+				random_list = {
+					50 = { add_trait = leader_trait_adaptable }
+					40 = { add_trait = leader_trait_roamer }
+					10 = { add_trait = leader_trait_arrested_development }
+				}
+			}							
+		}
+	}
+}
