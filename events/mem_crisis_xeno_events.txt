@@ -1,0 +1,124 @@
+# [CRISIS] Xenomorph Mid-game Crisis
+# Idea by Malthus
+# Code and Writing by Z8MB1E
+
+namespace = mem_crisis_xeno
+
+# Xenomorph Crisis Begins (HIDDEN)
+country_event = {
+    id = mem_crisis_xeno.1
+    hide_window = yes
+    is_triggered_only = yes
+    
+    immediate = {
+        # observer_event = { id = mem_observer.1 } - May add this later.
+        random_country = {
+            limit = {
+                is_country_type = default
+                NOT = { has_country_flag = mem_crisis_xeno_happened }
+            }
+
+            # This planet shall be ground zero for the Pestilence.
+            random_owned_planet = {
+                limit = {
+                    has_planet_modifier = pm_dangerous_wildlife
+                    is_colony = yes
+                }
+                save_global_event_target_as = mem_crisis_xeno_planet
+                planet_event = { id = mem_crisis_xeno.2 }
+            }   
+        }
+    }
+}
+
+# Dangerous Wildlife Attack Settlement
+planet_event = {
+    id = mem_crisis_xeno.2
+    title = mem_crisis_xeno.2.name
+    desc = mem_crisis_xeno.2.desc
+    picture = GFX_evt_burning_settlement
+    location = from
+    show_sound = event_dangerous_animals
+
+    is_triggered_only = yes
+    
+    immediate = {
+        add_planet_devastation = 5
+        remove_modifier = dangerous_wildlife
+        add_modifier = { modifier = mem_terrorizing_predators }
+    }
+
+    option = {
+        name = mem_crisis_xeno.2.a
+        custom_tooltip = mem_crisis_xeno.2.a.tooltip
+        
+        enable_special_project = {
+            name = "MEM_PREDATORY_SPECIMEN_ANAYLSIS_PROJECT"
+            location = THIS
+        }
+    }
+
+    option = {
+        name = mem_crisis_xeno.2.b
+        custom_tooltip = mem_crisis_xeno.2.b.tooltip
+
+        enable_special_project = {
+            name = "MEM_STRANGE_FUNGUS_ANALYSIS_PROJECT"
+            location = THIS
+        }
+    }
+
+    option = {
+        name = mem_crisis_xeno.2.c
+        custom_tooltip = mem_crisis_xeno.2.c.tooltip
+
+        owner = {
+            add_resource = {
+                influence = 25
+            }
+        }
+        mem_crisis_xeno_keep_going = yes     
+    }
+}
+
+# Revealed Genetic Manipulation (SPECIAL PROJECT)
+country_event = {
+    id = mem_crisis_xeno.3
+    title = mem_crisis_xeno.3.name
+    desc = mem_crisis_xeno.3.desc
+    picture = GFX_evt_genetic_modification
+    show_sound = event_laboratory_sound
+    
+    is_triggered_only = yes
+
+    option = {
+        name = mem_crisis_xeno.3.a
+        custom_tooltip = mem_crisis_xeno.3.a.tooltip
+
+        begin_event_chain = {
+            event_chain = "mem_crisis_xeno_chain"
+            target = root
+        }
+        enable_special_project = {
+            name = "MEM_STRANGE_FUNGUS_DISSECTION_PROJECT"
+            location = event_target:mem_crisis_xeno_planet
+        }
+    }
+
+    option = {
+        name = mem_crisis_xeno.3.b
+        custom_tooltip = mem_crisis_xeno.3.b.tooltip
+        
+        event_target:mem_crisis_xeno_planet = {
+            add_modifier = { modifier = mem_fungus_observation }
+        }
+        mem_crisis_xeno_keep_going = yes
+        
+    }
+    option = {
+        name = mem_crisis_xeno.3.c
+        custom_tooltip = mem_crisis_xeno.3.c.tooltip
+        
+        
+    }
+}
