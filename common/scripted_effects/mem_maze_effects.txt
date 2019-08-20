@@ -1,0 +1,147 @@
+@ARCHAEOLOGICAL_SITE_XP_0_CLUE = 10
+@ARCHAEOLOGICAL_SITE_XP_1_CLUE = 25
+@ARCHAEOLOGICAL_SITE_XP_2_CLUE = 40
+
+mem_maze_trap = {
+    # IF = {
+    #     limit = {
+    #         prev.planet = {
+    #             NOT = { has_planet_flag = mem_maze_is_cracked }
+    #         }
+    #     }
+    # }
+    log = "trap engaged."
+    IF = {
+        limit = {
+            owner = {
+                check_variable = {
+                    which = mem_maze_fed_scientists_to_it
+                    value = 0
+                }
+            }
+        }
+        fleet_event = { id = mem_maze.6 }
+    }
+    ELSE_IF = {
+        limit = {
+            owner = {
+                check_variable = {
+                    which = mem_maze_fed_scientists_to_it
+                    value = 1
+                }
+            }
+        }
+        fleet_event = { id = mem_maze.7 }
+    }
+    ELSE_IF = {
+        limit = {
+            owner = {
+                check_variable = {
+                    which = mem_maze_fed_scientists_to_it
+                    value = 2
+                }
+            }
+        }
+        fleet_event = { id = mem_maze.8 }
+    }
+    ELSE_IF = {
+        limit = {
+            owner = {
+                check_variable = {
+                    which = mem_maze_fed_scientists_to_it
+                    value = 3
+                }
+            }
+        }
+        fleet_event = { id = mem_maze.9 }
+    }
+}
+
+mem_maze_roll_fail_custom_effect = {
+    switch = {
+		trigger = is_site_current_stage_score_no_die
+		-8 = { standard_archaeological_site_on_roll_failed_case = { SCORE=-8 } }
+		-7 = { standard_archaeological_site_on_roll_failed_case = { SCORE=-7 } }
+		-6 = { standard_archaeological_site_on_roll_failed_case = { SCORE=-6 } }
+		-5 = { standard_archaeological_site_on_roll_failed_case = { SCORE=-5 } }
+		-4 = { standard_archaeological_site_on_roll_failed_case = { SCORE=-4 } }
+		-3 = { standard_archaeological_site_on_roll_failed_case = { SCORE=-3 } }
+		-2 = { standard_archaeological_site_on_roll_failed_case = { SCORE=-2 } }
+		-1 = { standard_archaeological_site_on_roll_failed_case = { SCORE=-1 } }
+		0 = { standard_archaeological_site_on_roll_failed_case = { SCORE=0 } }
+		1 = { standard_archaeological_site_on_roll_failed_case = { SCORE=1 } }
+		2 = { standard_archaeological_site_on_roll_failed_case = { SCORE=2 } }
+		3 = { standard_archaeological_site_on_roll_failed_case = { SCORE=3 } }
+		4 = { standard_archaeological_site_on_roll_failed_case = { SCORE=4 } }
+		5 = { standard_archaeological_site_on_roll_failed_case = { SCORE=5 } }
+		6 = { standard_archaeological_site_on_roll_failed_case = { SCORE=6 } }
+		7 = { standard_archaeological_site_on_roll_failed_case = { SCORE=7 } }
+		8 = { standard_archaeological_site_on_roll_failed_case = { SCORE=8 } }
+		9 = { standard_archaeological_site_on_roll_failed_case = { SCORE=9 } }
+		10 = { standard_archaeological_site_on_roll_failed_case = { SCORE=10 } }
+		11 = { standard_archaeological_site_on_roll_failed_case = { SCORE=11 } }
+		12 = { standard_archaeological_site_on_roll_failed_case = { SCORE=12 } }
+		13 = { standard_archaeological_site_on_roll_failed_case = { SCORE=13 } }
+		14 >= { standard_archaeological_site_on_roll_failed_case = { SCORE=14 } }
+	}
+	hidden_effect ={
+        IF = {
+            limit = { is_site_at_stage = 0 }
+            log = "Zero stage is now"
+        }
+		switch = {
+			trigger = is_site_current_stage_score
+			5 <= {
+                log = "Red Fail"
+				prev = {
+					leader = { add_experience = @ARCHAEOLOGICAL_SITE_XP_0_CLUE }
+					random_list = {
+						35 = {}
+						65 = {
+							modifier = {
+								factor = 0
+								prev = { is_site_at_stage = 0 }
+							}
+							mem_maze_trap = yes
+						}
+					}
+				}
+			}
+			10 <= { 
+                log = "Yellow Fail"
+                add_stage_clues = 1 
+                prev = { leader = { add_experience = @ARCHAEOLOGICAL_SITE_XP_1_CLUE } } 
+                prev = {
+					leader = { add_experience = @ARCHAEOLOGICAL_SITE_XP_0_CLUE }
+					random_list = {
+						60 = {}
+						40 = {
+							modifier = {
+								factor = 0
+								prev = { is_site_at_stage = 0 }
+							}
+							mem_maze_trap = yes
+						}
+					}
+				}
+            }
+			13 <= { 
+                log = "Green Fail"
+                add_stage_clues = 2 prev = { leader = { add_experience = @ARCHAEOLOGICAL_SITE_XP_2_CLUE } } 
+                prev = {
+					leader = { add_experience = @ARCHAEOLOGICAL_SITE_XP_0_CLUE }
+					random_list = {
+						85 = {}
+						15 = {
+							modifier = {
+								factor = 0
+								prev = { is_site_at_stage = 0 }
+							}
+							mem_maze_trap = yes
+						}
+					}
+				}
+            }
+		}
+	}
+}
