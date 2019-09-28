@@ -1,0 +1,447 @@
+# Black Rain
+# By ViolentBeetle
+
+namespace = mem_black_rain
+
+# Initial trigger. Probably tied to mid-game
+@timer = 1
+@timermax = 29
+event = {
+	id = mem_black_rain.1
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		any_country = {
+			is_ai = no
+			is_gestalt = no
+		}
+	}
+
+	immediate = {
+		random_country = {
+			limit = {
+				is_country_type = default
+				num_communications > 4
+				num_owned_planets > 4
+				any_owned_planet = {
+					is_capital = no
+					num_pops > 10
+				}
+				is_gestalt = no
+				is_mechanical_empire = no
+			}
+			weights = {
+				base = 100
+				modifier = {
+					mult = 1.5
+					OR = {
+						has_valid_civic = civic_criminal_heritage
+						has_valid_civic = civic_barbaric_despoilers
+					}
+				}
+				modifier = {
+					mult = 0.5
+					OR = {
+						has_valid_civic = civic_inwards_perfection
+						has_valid_civic = civic_fanatic_purifiers
+					}
+				}
+				modifier = {
+					mult = 0.5
+					is_ai = no
+				}
+			}
+			country_event = {
+				id = mem_black_rain.2
+				days = @timer
+				random = @timermax
+			}
+		}
+	}
+}
+
+#Black rain appears
+country_event = {
+	id = mem_black_rain.2
+	title = mem_black_rain.2.name
+	desc = mem_black_rain.2.desc
+
+	is_triggered_only = yes
+
+	picture = GFX_evt_dark_alley
+	location = event_target:starting_planet
+	show_sound = event_planetary_riot
+
+	trigger = {
+		any_owned_planet = {
+			is_capital = no
+			num_pops > 10
+		}
+		is_mechanical_empire = no
+	}
+
+	immediate = {
+		set_global_flag = mem_black_rain_started
+		set_country_flag = mem_black_rain_affected_country
+		set_country_flag = mem_black_rain_origin_country
+		random_owned_planet = {
+			limit = {
+				is_capital = no
+				num_pops > 10
+			}
+			save_event_target_as = starting_planet
+			add_modifier = {
+				modifier = mem_black_rain_appeared
+				days = -1
+			}
+		}
+		every_relation = {
+			limit = {
+				NOT = { is_same_value = root }
+				is_gestalt = no
+			}
+			country_event = {
+				id = mem_black_rain.3
+			}
+		}
+	}
+
+	option = {
+		name = mem_black_rain.2.a
+	}
+
+	after = {
+		tooltip = {
+			event_target:starting_planet = {
+				add_modifier = {
+					modifier = mem_black_rain_appeared
+					days = -1
+				}
+			}
+		}
+	}
+}
+
+# Other empires are notified
+country_event = {
+	id = mem_black_rain.3
+	title = mem_black_rain.3.name
+	desc = mem_black_rain.3.desc
+
+	is_triggered_only = yes
+
+	picture = GFX_evt_dark_alley
+	location = event_target:starting_planet
+	show_sound = event_planetary_riot
+
+	option = {
+		name = mem_black_rain.3.a
+	}
+}
+
+# Spread event
+@spread_chance = 3
+country_event = {
+	id = mem_black_rain.4
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_global_flag = mem_black_rain_started
+	}
+
+	immediate = {
+		every_country = {
+			limit = { has_country_flag = mem_black_rain_affected_country }
+			random_list = {
+				100 = {
+					log = "[This.GetName] spread roll fail"
+					modifier = {
+						factor = 2
+						OR = {
+							has_valid_civic = civic_fanatic_purifiers
+							has_valid_civic = civic_inwards_perfection
+						}
+					}
+					modifier = {
+						factor = 0.5
+						OR = {
+							has_valid_civic = civic_barbaric_despoilers
+							has_valid_civic = civic_criminal_heritage
+						}
+					}
+				}
+				99 = {
+					save_event_target_as = origin_of_spread
+					random_relation = {
+						limit = {
+							NOT = { has_country_flag = mem_black_rain_affected_country }
+							is_gestalt = no
+							is_country_type = default
+						}
+						weights = {
+							base = 100
+							modifier = {
+								mult = 1.25
+								is_neighbor_of = prev
+							}
+							modifier = {
+								mult = 1.25
+								has_commercial_pact = prev
+							}
+							modifier = {
+								mult = 1.25
+								has_migration_access = prev
+							}
+							modifier = {
+								mult = 2.5
+								exists = overlord
+								overlord = { is_same_value = prevprev }
+							}
+							modifier = {
+								mult = 1.5
+								prev = {
+									exists = overlord
+									overlord = { is_same_value = prevprev }
+								}
+							}
+							modifier = {
+								mult = 1.75
+								is_in_federation_with = prev
+							}
+							modifier = {
+								mult = 0.5
+								has_closed_borders = prev
+							}
+							modifier = {
+								mult = 0.75
+								OR = {
+									has_valid_civic = civic_inwards_perfection
+									has_valid_civic = civic_fanatic_purifiers
+								}
+							}
+							modifier = {
+								mult = 0.5
+								is_rival = prev
+							}
+							modifier = {
+								mult = 0.1
+								OR = {
+									num_pops < 25
+									num_owned_planets < 2
+								}
+							}
+						}
+						country_event = {
+							id = mem_black_rain.5
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+# Country is subjected to pop ups
+country_event = {
+	id = mem_black_rain.5
+	title = mem_black_rain.5.name
+	desc = {
+		text = mem_black_rain.5.desc.generic
+		trigger = {
+			NOR = {
+				is_neighbor_of = event_target:origin_of_spread
+				has_commercial_pact = event_target:origin_of_spread
+				has_closed_borders = event_target:origin_of_spread
+				AND = {
+					exists = overlord
+					overlord = { is_same_value = event_target:origin_of_spread }
+				}
+				event_target:origin_of_spread = {
+					exists = overlord
+					overlord = { is_same_value = event_target:origin_of_spread }
+				}
+				is_in_federation_with = event_target:origin_of_spread
+				is_rival = event_target:origin_of_spread
+				event_target:starting_planet = {
+					has_branch_office = yes
+					branch_office_owner = {
+						is_same_value = event_target:origin_of_spread
+					}
+				}
+			}
+		}
+	}
+	desc = {
+		text = mem_black_rain.5.desc.neigbour
+		trigger = {
+			is_neighbor_of = event_target:origin_of_spread
+			NOR = {
+				has_closed_borders = event_target:origin_of_spread
+				is_rival = event_target:origin_of_spread
+			}
+		}
+	}
+	desc = {
+		text = mem_black_rain.5.desc.migration
+		trigger = {
+			has_migration_access = event_target:origin_of_spread
+		}
+	}
+	desc = {
+		text = mem_black_rain.5.desc.pact
+		trigger = {
+			has_commercial_pact = event_target:origin_of_spread
+			NOT = {
+				event_target:starting_planet = {
+					has_branch_office = yes
+					branch_office_owner = {
+						is_same_value = event_target:origin_of_spread
+					}
+				}
+			}
+		}
+	}
+	desc = {
+		text = mem_black_rain.5.desc.closed
+		trigger = {
+			has_closed_borders = event_target:origin_of_spread
+		}
+	}
+	desc = {
+		text = mem_black_rain.5.desc.rival
+		trigger = {
+			is_rival = event_target:origin_of_spread
+		}
+	}
+	desc = {
+		text = mem_black_rain.5.desc.close_relations
+		trigger = {
+			OR = {
+				AND = {
+					exists = overlord
+					overlord = { is_same_value = event_target:origin_of_spread }
+				}
+				event_target:origin_of_spread = {
+					exists = overlord
+					overlord = { is_same_value = event_target:origin_of_spread }
+				}
+				is_in_federation_with = event_target:origin_of_spread
+			}
+		}
+	}
+	desc = {
+		text = mem_black_rain.5.branch
+		trigger = {
+			event_target:starting_planet = {
+				has_branch_office = yes
+				branch_office_owner = {
+					is_same_value = event_target:origin_of_spread
+					NOT = { has_valid_civic = civic_criminal_heritage }
+				}
+			}
+		}
+	}
+	desc = {
+		text = mem_black_rain.5.branch_criminal
+		trigger = {
+			event_target:starting_planet = {
+				has_branch_office = yes
+				branch_office_owner = {
+					is_same_value = event_target:origin_of_spread
+					has_valid_civic = civic_criminal_heritage
+				}
+			}
+		}
+	}
+
+	is_triggered_only = yes
+
+	picture = GFX_evt_dark_alley
+	location = event_target:starting_planet
+	show_sound = event_planetary_riot
+
+	trigger = {
+	}
+
+	immediate = {
+		log = "[This.GetName] gets Black Rain"
+		set_country_flag = mem_black_rain_affected_country
+		save_event_target_as = spread_receiver
+		random_owned_planet = {
+			weights = {
+				base = 10
+				modifier = {
+					mult = 0.1
+					is_capital = yes
+				}
+				modifier = {
+					mult = 10
+					has_branch_office = yes
+					branch_office_owner = {
+						is_same_value = event_target:origin_of_spread
+					}	
+				}
+			}
+			save_event_target_as = starting_planet
+		}
+		every_relation = {
+			limit = {
+				NOT = { is_same_value = root }
+				is_gestalt = no
+				is_ai = no
+			}
+			create_message = {
+				type = EVENT_MESSAGE_TYPE
+				localization = MEM_BLACK_RAIN_NEW_COUNTRY_AFFECTED
+				days = 30
+				target = event_target:starting_planet
+				variable = {
+					type = name
+					localization = RECEIVER
+					scope = root
+				}
+				variable = {
+					type = name
+					localization = ORIGIN
+					scope = event_target:origin_of_spread
+				}
+			}
+		}
+		event_target:starting_planet = {
+			add_modifier = {
+				modifier = mem_black_rain_appeared
+				days = -1
+			}
+		}
+	}
+
+	option = {
+		name = mem_black_rain.5.a
+	}
+
+	option = {
+		name = mem_black_rain.5.a.pur
+		trigger = {
+			has_valid_civic = civic_fanatic_purifiers
+		}
+	}
+	option = {
+		name = mem_black_rain.5.a.per
+		trigger = {
+			has_valid_civic = civic_inwards_perfection
+		}
+	}
+
+	after = {
+		tooltip = {
+			event_target:starting_planet = {
+				add_modifier = {
+					modifier = mem_black_rain_appeared
+					days = -1
+				}
+			}
+		}
+	}
+}
