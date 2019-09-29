@@ -6,6 +6,9 @@ namespace = mem_black_rain
 # Initial trigger. Probably tied to mid-game
 @timer = 1
 @timermax = 29
+
+@spreadloop = 10
+@spreadloopmax = 10
 event = {
 	id = mem_black_rain.1
 	hide_window = yes
@@ -105,6 +108,7 @@ country_event = {
 				id = mem_black_rain.3
 			}
 		}
+		country_event = { id = mem_black_rain.4 days = @spreadloop random = @spreadloopmax }
 	}
 
 	option = {
@@ -149,97 +153,127 @@ country_event = {
 
 	trigger = {
 		has_global_flag = mem_black_rain_started
+		has_country_flag = mem_black_rain_affected_country
 	}
 
 	immediate = {
-		every_country = {
-			limit = { has_country_flag = mem_black_rain_affected_country }
-			random_list = {
-				100 = {
-					log = "[This.GetName] spread roll fail"
-					modifier = {
-						factor = 2
-						OR = {
-							has_valid_civic = civic_fanatic_purifiers
-							has_valid_civic = civic_inwards_perfection
-						}
+		log = "[This.GetName] is rolling Black Rain"
+		random_list = {
+			100 = {
+				log = "[This.GetName] spread roll fail"
+				modifier = {
+					factor = 2
+					OR = {
+						has_valid_civic = civic_fanatic_purifiers
+						has_valid_civic = civic_inwards_perfection
 					}
-					modifier = {
-						factor = 0.5
-						OR = {
-							has_valid_civic = civic_barbaric_despoilers
-							has_valid_civic = civic_criminal_heritage
+				}
+				modifier = {
+					factor = 0.5
+					OR = {
+						has_valid_civic = civic_barbaric_despoilers
+						has_valid_civic = civic_criminal_heritage
+					}
+				}
+			}
+			99 = {
+				modifier = {
+					factor = 0
+					NOT = {
+						any_owned_planet = {
+							NOT = {
+								has_modifier = mem_black_rain_appeared
+							}
 						}
 					}
 				}
-				99 = {
-					save_event_target_as = origin_of_spread
-					random_relation = {
-						limit = {
-							NOT = { has_country_flag = mem_black_rain_affected_country }
-							is_gestalt = no
-							is_country_type = default
+				random_owned_planet = {
+					limit = {
+						NOT = {
+							has_modifier = mem_black_rain_appeared
 						}
-						weights = {
-							base = 100
-							modifier = {
-								mult = 1.25
-								is_neighbor_of = prev
+					}
+					weights = {
+						base = 10
+						modifier = {
+							mult = 0.1
+							OR = {
+								is_capital = yes
+								num_pops < 11
 							}
-							modifier = {
-								mult = 1.25
-								has_commercial_pact = prev
-							}
-							modifier = {
-								mult = 1.25
-								has_migration_access = prev
-							}
-							modifier = {
-								mult = 2.5
+						}
+					}
+					planet_event = { id = mem_black_rain.6 }
+				}
+			}
+			99 = {
+				save_event_target_as = origin_of_spread
+				random_relation = {
+					limit = {
+						NOT = { has_country_flag = mem_black_rain_affected_country }
+						is_gestalt = no
+						is_country_type = default
+					}
+					weights = {
+						base = 100
+						modifier = {
+							mult = 1.25
+							is_neighbor_of = prev
+						}
+						modifier = {
+							mult = 1.25
+							has_commercial_pact = prev
+						}
+						modifier = {
+							mult = 1.25
+							has_migration_access = prev
+						}
+						modifier = {
+							mult = 2.5
+							exists = overlord
+							overlord = { is_same_value = prevprev }
+						}
+						modifier = {
+							mult = 1.5
+							prev = {
 								exists = overlord
 								overlord = { is_same_value = prevprev }
 							}
-							modifier = {
-								mult = 1.5
-								prev = {
-									exists = overlord
-									overlord = { is_same_value = prevprev }
-								}
-							}
-							modifier = {
-								mult = 1.75
-								is_in_federation_with = prev
-							}
-							modifier = {
-								mult = 0.5
-								has_closed_borders = prev
-							}
-							modifier = {
-								mult = 0.75
-								OR = {
-									has_valid_civic = civic_inwards_perfection
-									has_valid_civic = civic_fanatic_purifiers
-								}
-							}
-							modifier = {
-								mult = 0.5
-								is_rival = prev
-							}
-							modifier = {
-								mult = 0.1
-								OR = {
-									num_pops < 25
-									num_owned_planets < 2
-								}
+						}
+						modifier = {
+							mult = 1.75
+							is_in_federation_with = prev
+						}
+						modifier = {
+							mult = 0.5
+							has_closed_borders = prev
+						}
+						modifier = {
+							mult = 0.75
+							OR = {
+								has_valid_civic = civic_inwards_perfection
+								has_valid_civic = civic_fanatic_purifiers
 							}
 						}
-						country_event = {
-							id = mem_black_rain.5
+						modifier = {
+							mult = 0.5
+							is_rival = prev
 						}
+						modifier = {
+							mult = 0.1
+							OR = {
+								num_pops < 25
+								num_owned_planets < 2
+							}
+						}
+					}
+					country_event = {
+						id = mem_black_rain.5
 					}
 				}
 			}
 		}
+		country_event = { id = mem_black_rain.4 days = @spreadloop random = @spreadloopmax }
 	}
 }
 
@@ -415,6 +449,7 @@ country_event = {
 				days = -1
 			}
 		}
+		country_event = { id = mem_black_rain.4 days = @spreadloop random = @spreadloopmax }
 	}
 
 	option = {
@@ -437,6 +472,68 @@ country_event = {
 	after = {
 		tooltip = {
 			event_target:starting_planet = {
+				add_modifier = {
+					modifier = mem_black_rain_appeared
+					days = -1
+				}
+			}
+		}
+	}
+}
+
+# Black rain appears on another planet
+planet_event = {
+	id = mem_black_rain.6
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		log = "Black Rain spreads on [This.GetName]"
+		add_modifier = {
+			modifier = mem_black_rain_appeared
+			days = -1
+		}
+		owner = {
+			create_message = {
+				type = EVENT_MESSAGE_TYPE
+				localization = MEM_BLACK_RAIN_NEW_PLANET_AFFECTED
+				days = 30
+				target = root
+				variable = {
+					type = name
+					localization = PLANET
+					scope = root
+				}
+			}
+			country_event = { id = mem_black_rain.7 }
+		}
+	}
+}
+
+# Notification for the first time
+country_event = {
+	id = mem_black_rain.7
+	title = mem_black_rain.7.name
+	desc = mem_black_rain.7.desc
+
+	is_triggered_only = yes
+
+	location = from
+	picture = GFX_evt_dark_alley
+	show_sound = event_planetary_riot
+
+	trigger = {
+		NOT = { has_country_flag = mem_black_rain_received_planet_notification }
+	}
+
+	immediate = {
+		set_country_flag = mem_black_rain_received_planet_notification
+	}
+
+	option = {
+		name = mem_black_rain.7.a
+		tooltip = {
+			from = {
 				add_modifier = {
 					modifier = mem_black_rain_appeared
 					days = -1
