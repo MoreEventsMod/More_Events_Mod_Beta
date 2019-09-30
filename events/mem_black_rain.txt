@@ -33,6 +33,15 @@ event = {
 				}
 				is_gestalt = no
 				is_mechanical_empire = no
+				NOT = {
+					any_country = {
+						is_ai = no
+						NOR = {
+							is_same_value = prev
+							has_communications = prev
+						}
+					}
+				}
 			}
 			weights = {
 				base = 100
@@ -88,6 +97,10 @@ country_event = {
 		set_global_flag = mem_black_rain_started
 		set_country_flag = mem_black_rain_affected_country
 		set_country_flag = mem_black_rain_origin_country
+		add_modifier = {
+			modifier = mem_black_rain_ongoing_country
+			days = -1
+		}
 		random_owned_planet = {
 			limit = {
 				is_capital = no
@@ -117,6 +130,10 @@ country_event = {
 
 	after = {
 		tooltip = {
+			add_modifier = {
+				modifier = mem_black_rain_ongoing_country
+				days = -1
+			}
 			event_target:starting_planet = {
 				add_modifier = {
 					modifier = mem_black_rain_appeared
@@ -273,6 +290,13 @@ country_event = {
 				}
 			}
 		}
+		random_owned_planet = {
+			limit = {
+				has_modifier = mem_black_rain_appeared
+				NOT = { has_planet_flag = mem_black_rain_plevent_cooldown }
+			}
+			planet_event = { id = mem_black_rain.100 days = 30 }
+		}
 		country_event = { id = mem_black_rain.4 days = @spreadloop random = @spreadloopmax }
 	}
 }
@@ -402,6 +426,10 @@ country_event = {
 	immediate = {
 		log = "[This.GetName] gets Black Rain"
 		set_country_flag = mem_black_rain_affected_country
+		add_modifier = {
+			modifier = mem_black_rain_ongoing_country
+			days = -1
+		}
 		save_event_target_as = spread_receiver
 		random_owned_planet = {
 			weights = {
@@ -471,6 +499,10 @@ country_event = {
 
 	after = {
 		tooltip = {
+			add_modifier = {
+				modifier = mem_black_rain_ongoing_country
+				days = -1
+			}
 			event_target:starting_planet = {
 				add_modifier = {
 					modifier = mem_black_rain_appeared
@@ -539,6 +571,110 @@ country_event = {
 					days = -1
 				}
 			}
+		}
+	}
+}
+
+# Ownerless planet - clear modifiers
+planet_event = {
+	id = mem_black_rain.8
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		mem_black_rain_clear_planetary_modifiers = yes
+	}
+}
+
+# Planet transfer - check for new owner, clear mods if that's an issue
+planet_event = {
+	id = mem_black_rain.9
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_modifier = mem_black_rain_appeared
+	}
+
+	immediate = {
+		IF = {
+			limit = {
+				owner = {
+					is_gestalt = no
+					is_mechanical_empire = no
+				}
+			}
+			owner = {
+				country_event = { id = mem_black_rain.10 days = 30 }
+			}
+		}
+		ELSE = {
+			mem_black_rain_clear_planetary_modifiers = yes
+		}
+	}
+}
+
+# Planet transfer - player is notified that he picked up druggie planet
+country_event = {
+	id = mem_black_rain.10
+	title = mem_black_rain.10.name
+	desc = mem_black_rain.10.desc
+
+	is_triggered_only = yes
+
+	location = from
+	picture = GFX_evt_dark_alley
+	show_sound = event_planetary_riot
+
+	trigger = {
+		NOT = { has_country_flag = mem_black_rain_affected_country }
+		has_global_flag = mem_black_rain_started
+		from = {
+			exists = owner
+			owner = {
+				is_same_value = root
+			}
+			has_modifier = mem_black_rain_appeared
+		}
+	}
+
+	immediate = {
+		set_country_flag = mem_black_rain_affected_country
+		add_modifier = {
+			modifier = mem_black_rain_ongoing_country
+			days = -1
+		}
+	}
+
+	option = {
+		name = mem_black_rain.10.a
+		tooltip = {
+			add_modifier = {
+				modifier = mem_black_rain_ongoing_country
+				days = -1
+			}
+		}
+	}
+}
+
+#The big fork of unfortunate planetary events
+planet_event = {
+	id = mem_black_rain.100
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_modifier = mem_black_rain_appeared
+		NOT = { has_planet_flag = mem_black_rain_plevent_cooldown }
+	}
+
+	immediate = {
+		set_timed_planet_flag = {
+			flag = mem_black_rain_plevent_cooldown
+			days = 1080
+		}
+		random_list = {
+			100 = {}
 		}
 	}
 }
