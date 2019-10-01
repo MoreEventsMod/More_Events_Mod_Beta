@@ -675,6 +675,149 @@ planet_event = {
 		}
 		random_list = {
 			100 = {}
+			5 = {
+				planet_event = { id = mem_black_rain.101 }
+				modifier = {
+					factor = 0
+					NAND = {
+						any_owned_pop = {
+							is_same_species = owner
+							is_organic_species = yes
+						}
+						count_owned_pops = {
+							limit = {
+								NOT = {
+									is_same_species = owner
+								}
+								is_organic_species = yes
+								is_pop_category = worker
+								is_being_purged = no
+							}
+							count > 2
+						}
+						NOT = {
+							owner = { has_country_flag = mem_black_rain_bigot_event }
+						}
+					}
+				}
+			}
 		}
 	}
 }
+
+#Minorities mad; controversial statements
+planet_event = {
+	id = mem_black_rain.101
+	title = mem_black_rain.101.name
+	desc = mem_black_rain.101.desc
+
+	is_triggered_only = yes
+
+	picture = GFX_evt_alien_segregation
+	show_sound = event_planetary_riot
+	location = ROOT
+
+	immediate = {
+		random_owned_pop = {
+			limit = {
+				NOT = {
+					is_same_species = owner
+				}
+				is_organic_species = yes
+				is_pop_category = worker
+				is_being_purged = no
+			}
+			species = {
+				save_event_target_as = victim_species
+			}
+			kill_pop = yes
+		}
+		owner = {
+			set_country_flag = mem_black_rain_bigot_event
+			create_saved_leader = {
+				key = mem_black_rain_bigot_leader
+				class = governor
+				species = root.owner
+				effect = {
+					save_event_target_as = bigot_leader
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_black_rain.101.a
+
+		trigger = {
+			owner = {
+				NOT = { has_ethic = ethic_fanatic_xenophobe }
+			}
+		}
+
+		owner = {
+			add_resource = {
+				influence = -50
+			}
+		}
+	}
+
+	option = {
+		name = mem_black_rain.101.b
+
+		trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_xenophobe
+				}
+			}
+		}
+
+		add_modifier = {
+			modifier = mem_black_rain_outraged_minorities
+			days = 360
+		}
+		owner = {
+			add_resource = {
+				influence = 100
+			}
+		}
+	}
+
+	option = {
+		name = mem_black_rain.101.c
+
+		trigger = {
+			owner = {
+				NOR = {
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_xenophobe
+				}
+			}
+		}
+
+		add_modifier = {
+			modifier = mem_black_rain_outraged_minorities
+			days = 360
+		}
+	}
+
+	option = {
+		name = mem_black_rain.101.d
+
+		trigger = {
+			event_target:victim_species = {
+				has_citizenship_type = {
+					country = root.owner
+					type = citizenship_slavery
+				}
+			}
+		}
+
+		add_modifier = {
+			modifier = mem_black_rain_outraged_minorities
+			days = 360
+		}
+	}
+}
+
