@@ -33,6 +33,11 @@ ship_event = {
 
 	option = {
 		name = INTERESTING
+		tooltip = {
+			FROM = {
+				create_archaeological_site = mem_mountain_gas_giant_dig_site
+			}
+		}
 	}
 }
 
@@ -288,11 +293,19 @@ country_event = {
 
 	option = {
 		name = mem_mountain.23.b
+		response_text = mem_mountain.23.b.response
 		default_hide_option = yes
 
 		event_target:the_planet = {
 			add_deposit = d_society_10
-			# add_deposit = d_society_5
+			add_modifier = {
+				modifier = mem_mountain_imprisoned_dragon
+				days = -1
+			}
+		}
+		add_modifier = {
+			modifier = mem_mountain_imprisoned_dragon_control
+			days = -1
 		}
 
 		trigger = {
@@ -346,6 +359,14 @@ country_event = {
 		is_dialog_only = yes
 		response_text = mem_mountain.23.d.tooltip
 
+		trigger = {
+			NOR = {
+				has_valid_civic = civic_fanatic_purifiers
+				has_valid_civic = civic_machine_terminator
+				has_valid_civic = civic_hive_devouring_swarm
+			}
+		}
+
 		ai_chance = {
 			factor = 0
 		}
@@ -355,6 +376,14 @@ country_event = {
 		is_dialog_only = yes
 		response_text = mem_mountain.23.e.tooltip
 
+		trigger = {
+			NOR = {
+				has_valid_civic = civic_fanatic_purifiers
+				has_valid_civic = civic_machine_terminator
+				has_valid_civic = civic_hive_devouring_swarm
+			}
+		}
+
 		ai_chance = {
 			factor = 0
 		}
@@ -363,6 +392,14 @@ country_event = {
 		name = mem_mountain.23.f
 		is_dialog_only = yes
 		response_text = mem_mountain.23.f.tooltip
+
+		trigger = {
+			NOR = {
+				has_valid_civic = civic_fanatic_purifiers
+				has_valid_civic = civic_machine_terminator
+				has_valid_civic = civic_hive_devouring_swarm
+			}
+		}
 
 		ai_chance = {
 			factor = 0
@@ -400,9 +437,164 @@ country_event = {
 	show_sound = event_activating_unknown_technology
 
 	immediate = {
+		create_country = {
+			name = "Ancient Wyrm"
+			type = neutral_faction
+			flag = {
+				icon = {
+					category = "zoological"
+					file = "flag_zoological_5.dds"
+				}
+				background = {
+					category = "backgrounds"
+					file = "00_solid.dds"
+				}
+				colors = {
+					"grey"
+					"grey"
+					"null"
+					"null"
+				}
+			}
+			effect = {
+				set_country_flag = mem_mountain_dragon_country
+				save_event_target_as = dragon_country
+				establish_communications_no_message = root
+			}
+		}
+		create_fleet = {
+			name = "Ancient Wyrm"
+			effect = {
+				create_ship = {
+					name = "Pale Wing"
+					design = "Ancient Wyrm"
+					effect = {
+						add_modifier = {
+							modifier = mem_mountain_dragon_fatigue
+							days = 9000
+						}
+						add_modifier = {
+							modifier = mem_mountain_dragon_fatigue
+							days = 3600
+						}
+						add_modifier = {
+							modifier = mem_mountain_dragon_fatigue
+							days = 900
+						}
+					}
+				}
+				set_owner = event_target:dragon_country
+				set_location = event_target:the_planet
+				save_event_target_as = dragon_fleet
+			}
+			settings = {
+				spawn_debris = no
+				can_change_composition = no
+				can_change_leader = no
+			}
+		}
 	}
 
 	option = {
 		name = ONSCREEN
+		hidden_effect = {
+			country_event = {
+				id = mem_mountain.26
+			}
+		}
+	}
+}
+
+country_event = {
+	id = mem_mountain.26
+	title = mem_mountain.23.name
+	desc = mem_mountain.26.desc
+
+	is_triggered_only = yes
+	diplomatic = yes
+	location = event_target:the_planet
+
+	picture_event_data = {
+		room = no_video_feed_room
+	}
+
+	option = {
+		name = mem_mountain.26.a
+		response_text = mem_mountain.26.a.response
+
+		event_target:dragon_fleet = {
+			set_owner = root
+		}
+	}
+
+	option = {
+		name = mem_mountain.26.b
+		response_text = mem_mountain.26.b.resonse
+		default_hide_option = yes
+
+		add_modifier = {
+			modifier = mem_mountain_dragon_friendship
+			days = 7500
+		}
+		hidden_effect = {
+			random_rim_system = {
+				limit = {
+					NOT = {
+						has_star_flag = hostile_system
+						is_same_value = event_target:the_planet.solar_system
+					}
+					any_system_planet = {
+						is_star = no
+					}
+				}
+				weights = {
+					base = 1
+					modifier = {
+						mult = 100
+						NOT = {
+							exists = space_owner
+						}
+					}
+					modifier = {
+						mult = 0.01
+						exists = space_owner
+						space_owner = {
+							is_same_value = root
+						}
+					}
+				}
+				random_system_planet = {
+					limit = {
+						is_star = no
+					}
+					save_event_target_as = destination
+				}
+			}
+			event_target:dragon_fleet = {
+				auto_move_to_planet = {
+					target = event_target:destination
+					clear_auto_move_on_arrival = no
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_mountain.26.c
+		response_text = mem_mountain.26.c.response
+		is_dialog_only = yes
+
+		ai_chance = {
+			factor = 0
+		}
+	}
+	option = {
+		name = mem_mountain.26.d
+		response_text = mem_mountain.26.d.response
+		is_dialog_only = yes
+
+		ai_chance = {
+			factor = 0
+		}
 	}
 }
