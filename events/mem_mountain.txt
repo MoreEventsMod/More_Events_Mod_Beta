@@ -537,10 +537,11 @@ country_event = {
 			modifier = mem_mountain_dragon_friendship
 			days = 7500
 		}
+		set_country_flag = mem_mountain_dragon_releaser
 		hidden_effect = {
 			random_rim_system = {
 				limit = {
-					NOT = {
+					NOR = {
 						has_star_flag = hostile_system
 						is_same_value = event_target:the_planet.solar_system
 					}
@@ -597,5 +598,160 @@ country_event = {
 		ai_chance = {
 			factor = 0
 		}
+	}
+}
+
+# Remove friendship modifier if you attack released dragon
+country_event = {
+	id = mem_mountain.40
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			has_country_flag = mem_mountain_dragon_country
+		}
+		has_modifier = mem_mountain_dragon_friendship
+	}
+
+	immediate = {
+		remove_modifier = mem_mountain_dragon_friendship
+		set_country_flag = mem_mountain_released_then_attacked
+	}
+}
+
+# Killed dragon
+country_event = {
+	id = mem_mountain.41
+	title = mem_mountain.41.name
+	desc = mem_mountain.41.desc
+
+	is_triggered_only = yes
+
+	location = FROMFROM
+	picture = GFX_evt_space_dragon_blue
+	show_sound = event_bad_omen
+
+	trigger = {
+		FROM = {
+			has_country_flag = mem_mountain_dragon_country
+		}
+	}
+
+	immediate = {
+		fromfrom.solar_system = { save_event_target_as = combat_system }
+		IF = {
+			limit = {
+				NOT = { has_country_flag = mem_mountain_dragon_releaser }
+			}
+			random_country = {
+				limit = {
+					has_country_flag = mem_mountain_dragon_releaser
+				}
+				remove_modifier = mem_mountain_dragon_friendship
+				country_event = { id = mem_mountain.42}
+			}
+		}
+	}
+
+	option = {
+		name = OK
+		add_research_option = tech_mem_mountain_scales
+	}
+}
+
+# Somebody killed dragon
+country_event = {
+	id = mem_mountain.42
+	title = mem_mountain.42.name
+	desc = mem_mountain.42.desc
+
+	is_triggered_only = yes
+
+	picture = GFX_evt_space_dragon_blue
+	show_sound = event_bad_omen
+
+	option = {
+		name = mem_mountain.42.a
+		trigger = {
+			NOT = { has_country_flag = mem_mountain_released_then_attacked }
+		}
+	}
+	option = {
+		name = OK
+		trigger = {
+			has_country_flag = mem_mountain_released_then_attacked
+		}
+	}
+}
+
+# Wyrm leaves the galaxy if it is independent
+country_event = {
+	id = mem_mountain.43
+	hide_window = yes
+
+	mean_time_to_happen = {
+		years = 10
+	}
+
+	trigger = {
+		has_country_flag = mem_mountain_dragon_country
+		any_owned_fleet = {
+			exists = solar_system
+			is_fleet_idle = yes
+			is_in_combat = no
+		}
+		any_owned_ship = {
+			NOT = { has_modifier = mem_mountain_dragon_fatigue }
+		}
+	}
+
+	immediate = {
+		random_country = {
+			limit = {
+				has_country_flag = mem_mountain_dragon_releaser
+				NOT = { has_country_flag = mem_mountain_released_then_attacked }
+			}
+		}
+		random_owned_fleet = {
+			solar_system = {
+				create_ambient_object = {
+					type = mem_dummy_object
+					location = this
+				}
+				last_created_ambient_object = {
+					set_location = {
+						target = prev.star
+						distance = 350
+					}
+					save_event_target_as = exodus_marker
+				}
+			}
+			queue_actions = {
+				move_to = event_target:exodus_marker
+				effect = {
+					id = mem_mountain.exodus_order
+					delete_fleet = this
+				}
+			}
+		}
+	}
+}
+
+# Dragon says farewell
+country_event = {
+	id = mem_mountain.44
+	title = mem_mountain.23.name
+	desc = mem_mountain.44.desc
+
+	is_triggered_only = yes
+	diplomatic = yes
+
+	picture_event_data = {
+		room = no_video_feed_room
+	}
+
+	option = {
+		name = mem_mountain.44.a
 	}
 }
