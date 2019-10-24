@@ -94,75 +94,23 @@ event = {
 	hide_window = yes
 
 	is_triggered_only = yes
-	
+
 	immediate = {
-		random_list = {
-			19 = {
-				set_global_flag = mem_vazurans_disabled
-			}
-			1 = {
-				set_global_flag = mem_vazurans_enabled
-				every_country = {
-					limit = {
-						is_country_type = default
-					}
-					random_list = {
-						1 = {
-							capital_scope = {
-								solar_system = {
-									random_neighbor_system = {
-										random_neighbor_system = {
-											limit = {
-												NOT = {
-													has_star_flag = empire_home_system
-												}
-												any_system_planet = {
-													OR = {
-														is_planet_class = pc_barren
-														is_planet_class = pc_barren_cold
-														is_planet_class = pc_toxic
-														is_planet_class = pc_frozen
-													}
-												}
-											}
-											set_star_flag = mem_vazuran_destroyed_planet_system
-											random_system_planet = {
-												limit = {
-													OR = {
-														is_planet_class = pc_barren
-														is_planet_class = pc_barren_cold
-														is_planet_class = pc_toxic
-														is_planet_class = pc_frozen
-													}
-												}
-												random_list = {
-													1 = {
-														change_pc = pc_shattered
-													}
-													1 = {
-														change_pc = pc_broken
-													}
-												}
-												set_planet_flag = mem_vazuran_destroyed_planet
-											}
-										}
-									}
-								}
-							}
-						}
-						1 = {
-						}
-					}
+		IF = {
+			limit = {
+				any_country = {
+					has_origin = origin_mem_from_the_ashes
 				}
-				random_country = {
-					limit = {
-						is_country_type = global_event
-					}
-					country_event = { id = mem_vazurans.401 days = 7200 random = 1000 } # TODO change to 30 years later
-					country_event = { id = mem_vazurans.402 days = 7200 random = 1000 }
-					country_event = { id = mem_vazurans.403 days = 7200 random = 1000 }
-					country_event = { id = mem_vazurans.404 days = 7200 random = 1000 }
-					country_event = { id = mem_vazurans.405 days = 7200 random = 1000 }
+			}
+			start_mem_vazuran_menace = yes
+		}
+		ELSE = {
+			random_list = {
+				19 = {
+					set_global_flag = mem_vazurans_disabled
+				}
+				1 = {
+					start_mem_vazuran_menace = yes
 				}
 			}
 		}
@@ -1775,7 +1723,14 @@ country_event = {
 country_event = {
 	id = mem_vazurans.6
 	title = mem_vazurans.6.name
-	desc = mem_vazurans.6.desc
+	desc = {
+		text = mem_vazurans.6a.desc
+		trigger = { NOT = { has_country_flag = mem_vazurans_from_the_ashes }}
+	}
+	desc = {
+		text = mem_vazurans.6b.desc
+		trigger = { has_country_flag = mem_vazurans_from_the_ashes }
+	}
 	
 	is_triggered_only = yes
 	
@@ -1787,6 +1742,12 @@ country_event = {
 				is_country_type = mem_vazurans
 			}
 			save_global_event_target_as = mem_vazurans_country
+		}
+		IF = {
+			limit = {
+				has_origin = origin_mem_from_the_ashes
+			}
+			set_country_flag = mem_vazurans_from_the_ashes
 		}
 		set_country_flag = mem_vazurans_met
 	}
