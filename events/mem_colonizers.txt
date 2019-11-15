@@ -348,7 +348,7 @@ country_event = {
 		}
 
 		add_resource = {
-			minerals = -1000
+			alloys = -1000
 		}
 		mem_colonizers_roll_for_boons = yes
 		remove_country_flag = mem_colonizers_diplo_engaged
@@ -360,13 +360,13 @@ country_event = {
 		}
 		allow = {
 			resource_stockpile_compare = {
-				resource = minerals
+				resource = alloys
 				value >= 1500
 			}
 		}
 
 		add_resource = {
-			minerals = -1500
+			alloys = -1500
 		}
 		mem_colonizers_roll_for_boons = yes
 		remove_country_flag = mem_colonizers_diplo_engaged
@@ -545,6 +545,167 @@ ship_event = {
 				special_project = MEM_COLONIZERS_TEST
 				target = event_target:project_location
 			}
+		}
+	}
+}
+
+#####################
+# MIDGAME EXPANSION #
+#####################
+
+# Pulse event to start the whole thing
+event = {
+	id = mem_colonizers.1000
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		random_country = {
+			limit = {
+				is_country_type = mem_colonizers_dormant_country
+			}
+			set_country_flag = mem_colonizers_begin_expansion
+			save_event_target_as = colonizer_country
+			country_event = { # Bounce to add an optional delay
+				id = mem_colonizers.1001
+			}
+		}
+	}
+}
+
+# Trigger to expand countries
+country_event = {
+	id = mem_colonizers.1001
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		every_country = {
+			limit = {
+				is_country_type = default
+			}
+			IF = {
+				limit = {
+					has_communications = root
+				}
+				country_event = {
+					id = mem_colonizers.1002
+				}
+			}
+			ELSE = {
+				country_event = {
+					id = mem_colonizers.1003
+				}
+			}
+		}
+	}
+}
+
+# Diplomatic event with those already in contact
+country_event = {
+	id = mem_colonizers.1002
+	title = MEM_COLONIZERS_HEADER
+	desc = mem_colonizers.1002.desc
+
+	is_triggered_only = yes
+	diplomatic = yes
+
+	picture_event_data = {
+		room = mem_colonizers_room
+	}
+
+	option = {
+		name = WORRYING
+	}
+}
+
+# Comms init
+country_event = {
+	id = mem_colonizers.1003
+	title = mem_colonizers.1003.name
+	desc = mem_colonizers.1003.desc
+
+	is_triggered_only = yes
+
+	# location = FROM
+	picture = GFX_evt_federation_fleet
+	show_sound = event_alien_signal
+
+	option = {
+		name = ONSCREEN
+		add_resource = {
+			influence = 30
+		}
+		hidden_effect = {
+			establish_communications_no_message = event_target:colonizer_country
+			country_event = {
+				id = mem_colonizers.1004
+			}
+		}
+	}
+}
+
+# Diplo greetings
+country_event = {
+	id = mem_colonizers.1004
+	title = MEM_COLONIZERS_HEADER
+	desc = mem_colonizers.1004.desc
+
+	is_triggered_only = yes
+	diplomatic = yes
+
+	picture_event_data = {
+		room = mem_colonizers_room
+	}
+
+	option = {
+		name = mem_colonizers.2.a
+		trigger = {
+			NOR = {
+				has_valid_civic = civic_fanatic_purifiers
+				has_valid_civic = civic_machine_terminator
+				has_valid_civic = civic_hive_devouring_swarm
+			}
+		}
+	}
+	option = {
+		name = mem_colonizers.2.b
+		trigger = {
+			OR = {
+				has_ethic = ethic_xenophile
+				has_ethic = ethic_fanatic_xenophile
+				has_valid_civic = civic_machine_servitor
+			}
+		}
+	}
+	option = {
+		name = mem_colonizers.2.c
+		trigger = {
+			OR = {
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_fanatic_xenophobe
+			}
+			NOT = {
+				has_valid_civic = civic_fanatic_purifiers
+			}
+		}
+	}
+	option = {
+		name = mem_colonizers.2.d
+		trigger = {
+			has_valid_civic = civic_fanatic_purifiers
+		}
+	}
+	option = {
+		name = mem_colonizers.2.e
+		trigger = {
+			has_valid_civic = civic_hive_devouring_swarm
+		}
+	}
+	option = {
+		name = mem_colonizers.2.f
+		trigger = {
+			has_valid_civic = civic_machine_terminator
 		}
 	}
 }
