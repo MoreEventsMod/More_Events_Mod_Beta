@@ -1,0 +1,273 @@
+# Shielded Precursors
+# By ViolentBeetle
+
+namespace = mem_shieldcursors
+
+# Game start event. Checking clusters, deciding on shieldcursor type
+event = {
+	id = mem_shieldcursors.1
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		any_system = {
+			has_star_flag = mem_shieldcustor_system
+		}
+	}
+
+	immediate = {
+		random_list = {
+			1 = { set_global_flag = mem_shieldcursor_brain_drain }
+			# 1 = { set_global_flag = mem_shieldcursor_morgolg }
+			# 1 = { set_global_flag = mem_shieldcursor_xaal }
+		}
+		random_system = {
+			limit = {
+				has_star_flag = mem_shieldcustor_system
+			}
+			every_system = {
+				limit = {
+					distance = {
+						source = prev
+						use_bypasses = no
+						min_jumps = 1
+						max_jumps = 2
+					}
+				}
+				set_star_flag = mem_shieldcursor_cluster
+				set_star_flag = mem_shieldcursor_cluster_t1
+			}
+			every_system = {
+				limit = {
+					distance = {
+						source = prev
+						use_bypasses = no
+						min_jumps = 3
+						max_jumps = 4
+					}
+				}
+				set_star_flag = mem_shieldcursor_cluster
+				set_star_flag = mem_shieldcursor_cluster_t2
+			}
+		}
+	}
+}
+
+# Surveying shielded world
+ship_event = {
+	id = mem_shieldcursors.2
+	title = mem_shieldcursors.2.name
+	desc = mem_shieldcursors.2.desc
+
+	is_triggered_only = yes
+
+	show_sound = event_default
+	location = FROM
+	picture = GFX_evt_shielded_planet
+
+	trigger = {
+		FROM = {
+			has_planet_flag = mem_shieldcursor_planet
+			is_planet_class = pc_shielded
+		}
+		owner = {
+			NOT = {
+				has_country_flag = mem_shieldcursors_completed_last_dig
+			}
+		}
+	}
+
+	option = {
+		name = INTERESTING
+	}
+}
+
+#########################
+# BRAIN DRAIN STORYLINE #
+#########################
+
+ship_event = {
+	id = mem_shieldcursors.100
+	title = mem_shieldcursors.100.name
+	desc = mem_shieldcursors.100.desc
+
+	is_triggered_only = yes
+
+	location = FROM
+	show_sound = event_default
+	picture = GFX_evt_mem_spaceship_wreck
+
+	trigger = {
+		NOT = { has_global_flag = mem_shieldcursors_dig_site_tripped }
+		has_global_flag = mem_shieldcursor_brain_drain
+		FROM = {
+			solar_system = {
+				has_star_flag = mem_shieldcursor_cluster
+			}
+			OR = {
+				is_planet_class = pc_barren
+				is_planet_class = pc_barren_cold
+				is_planet_class = pc_toxic
+				is_planet_class = pc_gas_giant
+				is_planet_class = pc_frozen
+				is_planet_class = pc_molten
+			}
+			is_moon = no
+		}
+	}
+
+	immediate = {
+		set_global_flag = mem_shieldcursors_dig_site_tripped
+	}
+
+	option = {
+		name = mem_shieldcursors.100.a
+
+		FROM = {
+			create_archaeological_site = mem_shieldcursors_brain_drain_site_1
+		}
+
+		ai_chance = {
+			factor = 100
+		}
+	}
+
+	option = {
+		name = mem_shieldcursors.100.b
+		custom_tooltip = mem_shieldcursors.100.b.tooltip
+
+		trigger = {
+			owner = { is_ai = no }
+		}
+	}
+}
+
+# Dig site event 1
+fleet_event = {
+	id = mem_shieldcursors.101
+	title = mem_shieldcursors.101.name
+	desc = mem_shieldcursors.101.desc
+
+	archaeology = yes
+	is_triggered_only = yes
+
+	picture = GFX_evt_derelict_interior
+	show_sound = event_finding_loot
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+    
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+
+	option = {
+		name = DIG
+		small_artifact_reward = yes
+	}
+}
+
+# Dig site event 2
+fleet_event = {
+	id = mem_shieldcursors.102
+	title = mem_shieldcursors.102.name
+	desc = mem_shieldcursors.102.desc
+
+	archaeology = yes
+	is_triggered_only = yes
+
+	picture = GFX_evt_mem_horror_corridor
+	show_sound = event_finding_loot
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+    
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+
+	option = {
+		name = DIG
+		small_artifact_reward = yes
+	}
+}
+
+# Dig site event 3
+fleet_event = {
+	id = mem_shieldcursors.103
+	title = mem_shieldcursors.103.name
+	desc = mem_shieldcursors.103.desc
+
+	archaeology = yes
+	is_triggered_only = yes
+
+	picture = GFX_evt_ancient_databank
+	show_sound = event_finding_loot
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+    
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+
+	option = {
+		name = DIG
+		small_artifact_reward = yes
+	}
+}
+
+# Dig site event 4
+fleet_event = {
+	id = mem_shieldcursors.104
+	title = mem_shieldcursors.104.name
+	desc = mem_shieldcursors.104.desc
+
+	archaeology = yes
+	is_triggered_only = yes
+
+	picture = GFX_evt_ship_in_orbit_2
+	show_sound = event_finding_loot
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+		random_planet = {
+			limit = {
+				OR = {
+					is_planet_class = pc_barren_cold
+					is_planet_class = pc_barren
+				}
+				solar_system = {
+					has_star_flag = mem_shieldcursor_cluster
+					NOT = { is_same_value = from.planet.solar_system }
+				}
+			}
+			weights = {
+				base = 1
+				modifier = {
+					mult = 100
+					solar_system = {
+						has_star_flag = mem_shieldcursor_cluster_t2
+					}
+				}
+			}
+			save_event_target_as = next_target
+		}
+	}
+    
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+
+	option = {
+		name = mem_shieldcursors.104.a
+		IF = {
+			limit = {
+				exists = event_target:next_target
+			}
+		}
+	}
+}
