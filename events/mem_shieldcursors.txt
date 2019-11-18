@@ -113,6 +113,8 @@ ship_event = {
 				is_planet_class = pc_molten
 			}
 			is_moon = no
+			has_anomaly = no
+			NOT = { exists = archaeological_site }
 		}
 	}
 
@@ -244,6 +246,8 @@ fleet_event = {
 					has_star_flag = mem_shieldcursor_cluster
 					NOT = { is_same_value = from.planet.solar_system }
 				}
+				has_anomaly = no
+				NOT = { exists = archaeological_site }
 			}
 			weights = {
 				base = 1
@@ -251,6 +255,13 @@ fleet_event = {
 					mult = 100
 					solar_system = {
 						has_star_flag = mem_shieldcursor_cluster_t2
+					}
+				}
+				modiifer = {
+					mult = 5
+					solar_system = {
+						exists = space_owner
+						space_owner = { is_same_value = root.owner }
 					}
 				}
 			}
@@ -264,10 +275,115 @@ fleet_event = {
 
 	option = {
 		name = mem_shieldcursors.104.a
+		from.planet = {
+			save_event_target_as = ship_planet
+		}
 		IF = {
 			limit = {
 				exists = event_target:next_target
 			}
+			enable_special_project = {
+				name = MEM_SHIELDCURSORS_BRAIN_DRAIN_COLONY
+				location = event_target:next_target
+				owner = root.owner
+			}
 		}
+	}
+}
+
+# Finish first project
+ship_event = {
+	id = mem_shieldcursors.110
+	title = mem_shieldcursors.110.name
+	desc = mem_shieldcursors.110.desc
+
+	is_triggered_only = yes
+
+	location = event_target:next_target
+	picture = GFX_evt_mining_operations
+	show_sound = event_default
+
+	option = {
+		name = INTERESTING
+		event_target:next_target = {
+			create_archaeological_site = mem_shieldcursors_brain_drain_site_2
+		}
+	}
+}
+
+# Second dig site. Stage 1
+fleet_event = {
+	id = mem_shieldcursors.111
+	title = mem_shieldcursors.111.name
+	desc = mem_shieldcursors.111.desc
+
+	archaeology = yes
+	is_triggered_only = yes
+
+	picture = GFX_evt_tradestation_interior
+	show_sound = event_finding_loot
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+    
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+
+	option = {
+		name = DIG
+		small_artifact_reward = yes
+	}
+}
+
+# Second dig site. Stage 2
+fleet_event = {
+	id = mem_shieldcursors.112
+	title = mem_shieldcursors.112.name
+	desc = mem_shieldcursors.112.desc
+
+	archaeology = yes
+	is_triggered_only = yes
+
+	picture = GFX_evt_hive_mind
+	show_sound = event_finding_loot
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+    
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+
+	option = {
+		name = DIG
+		small_artifact_reward = yes
+	}
+}
+
+# Second dig site. Stage 3
+fleet_event = {
+	id = mem_shieldcursors.113
+	title = mem_shieldcursors.113.name
+	desc = mem_shieldcursors.113.desc
+
+	archaeology = yes
+	is_triggered_only = yes
+
+	picture = GFX_evt_star_chart
+	show_sound = event_finding_loot
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+    
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+
+	option = {
+		name = mem_shieldcursors.113.a
 	}
 }
