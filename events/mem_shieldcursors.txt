@@ -278,6 +278,9 @@ fleet_event = {
 		from.planet = {
 			save_event_target_as = ship_planet
 		}
+		owner = {
+			set_country_flag = mem_shieldcursors_investigator
+		}
 		IF = {
 			limit = {
 				exists = event_target:next_target
@@ -377,6 +380,38 @@ fleet_event = {
 
 	immediate = {
 		from = { set_site_progress_locked = yes }
+
+		random_planet = {
+			limit = {
+				OR = {
+					is_planet_class = pc_barren_cold
+					is_planet_class = pc_barren
+				}
+				solar_system = {
+					has_star_flag = mem_shieldcursor_cluster
+					NOT = { is_same_value = from.planet.solar_system }
+				}
+				has_anomaly = no
+				NOT = { exists = archaeological_site }
+			}
+			weights = {
+				base = 1
+				modifier = {
+					mult = 100
+					solar_system = {
+						has_star_flag = mem_shieldcursor_cluster_t1
+					}
+				}
+				modiifer = {
+					mult = 5
+					solar_system = {
+						exists = space_owner
+						space_owner = { is_same_value = root.owner }
+					}
+				}
+			}
+			save_event_target_as = girb_homeworld
+		}
 	}
     
 	after = { 
@@ -385,5 +420,147 @@ fleet_event = {
 
 	option = {
 		name = mem_shieldcursors.113.a
+		IF = {
+			limit = {
+				exists = event_target:girb_homeworld
+			}
+			enable_special_project = {
+				name = MEM_SHIELDCURSORS_GIRB_HOMEWORLD
+				location = event_target:girb_homeworld
+				owner = root.owner
+			}
+		}
+	}
+}
+
+# Finish first project
+ship_event = {
+	id = mem_shieldcursors.120
+	title = mem_shieldcursors.120.name
+	desc = mem_shieldcursors.120.desc
+
+	is_triggered_only = yes
+
+	location = event_target:next_target
+	picture = GFX_evt_mining_operations
+	show_sound = event_default
+
+	option = {
+		name = INTERESTING
+		event_target:girb_homeworld = {
+			create_archaeological_site = mem_shieldcursors_brain_drain_site_3
+		}
+	}
+}
+
+# Third dig site. Stage 1
+fleet_event = {
+	id = mem_shieldcursors.121
+	title = mem_shieldcursors.121.name
+	desc = mem_shieldcursors.121.desc
+
+	archaeology = yes
+	is_triggered_only = yes
+
+	picture = GFX_evt_tradestation_interior
+	show_sound = event_finding_loot
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+    
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+
+	option = {
+		name = DIG
+		small_artifact_reward = yes
+	}
+}
+
+# Second dig site. Stage 2
+fleet_event = {
+	id = mem_shieldcursors.122
+	title = mem_shieldcursors.122.name
+	desc = mem_shieldcursors.122.desc
+
+	archaeology = yes
+	is_triggered_only = yes
+
+	picture = GFX_evt_hive_mind
+	show_sound = event_finding_loot
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+    
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+
+	option = {
+		name = DIG
+		small_artifact_reward = yes
+	}
+}
+
+# Second dig site. Stage 3
+fleet_event = {
+	id = mem_shieldcursors.123
+	title = mem_shieldcursors.123.name
+	desc = mem_shieldcursors.123.desc
+
+	archaeology = yes
+	is_triggered_only = yes
+
+	picture = GFX_evt_star_chart
+	show_sound = event_finding_loot
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+
+		random_planet = {
+			limit = {
+				has_planet_flag = mem_shieldcursor_planet
+			}
+			save_event_target_as = shielded_planet
+		}
+	}
+    
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+
+	option = {
+		name = mem_shiedcursors.123.a
+		enable_special_project = {
+			name = MEM_SHIELDCURSORS_DROP_SHIELD
+			location = event_target:shielded_planet
+			owner = root.owner
+		}
+	}
+}
+
+#Droping the shield for Brain Drain
+ship_event = {
+	id = mem_shieldcursors.130
+	title = mem_shieldcursors.130.name
+	desc = mem_shieldcursors.130.desc
+
+	is_triggered_only = yes
+
+	show_sound = event_default
+	picture = GFX_evt_shielded_planet
+	location = event_target:shielded_planet
+
+	option = {
+		name = mem_shieldcursors.130.a
+		event_target:shielded_planet = {
+			change_pc = pc_relic
+			hidden_effect = {
+				relic_world_deposits = yes
+			}
+		}
 	}
 }
