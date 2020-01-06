@@ -1,0 +1,433 @@
+# Outsiders
+# By ViolentBeetle
+
+namespace = mem_outsiders
+
+# Stage 1: Captain's Log, arrival
+fleet_event = {
+	id = mem_outsiders.1
+	title = mem_outsiders.1.name
+	desc = mem_outsiders.1.desc
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	picture = GFX_evt_archaeology_camp
+	show_sound = event_dig_site
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+	
+	option = {
+		name = DIG
+		small_artifact_reward = yes
+	}
+}
+
+# Stage 2: Captain's Log, Death
+fleet_event = {
+	id = mem_outsiders.2
+	title = mem_outsiders.2.name
+	desc = mem_outsiders.2.desc
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	picture = GFX_evt_huge_monument
+	show_sound = event_dig_site
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+	
+	option = {
+		name = DIG
+		small_artifact_reward = yes
+	}
+}
+
+# Stage 3: Captain's Log, Aliens
+fleet_event = {
+	id = mem_outsiders.3
+	title = mem_outsiders.3.name
+	desc = mem_outsiders.3.desc
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	picture = GFX_evt_mem_factory_02
+	show_sound = event_dig_site
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+	
+	option = {
+		name = DIG
+		small_artifact_reward = yes
+	}
+}
+
+# Stage 4: Captain's Log, Discovery
+fleet_event = {
+	id = mem_outsiders.4
+	title = mem_outsiders.4.name
+	desc = mem_outsiders.4.desc
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	picture = GFX_evt_ancient_databank
+	show_sound = event_laboratory_sound
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+	
+	option = {
+		name = DIG
+		small_artifact_reward = yes
+	}
+}
+
+# Stage 5: Captain's Log, Leak
+fleet_event = {
+	id = mem_outsiders.5
+	title = mem_outsiders.5.name
+	desc = mem_outsiders.5.desc
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	picture = GFX_evt_tradestation_interior
+	show_sound = event_planetary_riot
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+	
+	option = {
+		name = DIG
+		small_artifact_reward = yes
+	}
+}
+
+@response_time = 3600
+
+# Stage 5: Captain's Log, Coup
+fleet_event = {
+	id = mem_outsiders.6
+	title = mem_outsiders.6.name
+	desc = mem_outsiders.6.desc
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	picture = GFX_evt_generator_powerup
+	show_sound = event_planetary_riot
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+	
+	option = {
+		name = mem_outsiders.6.a
+		custom_tooltip = mem_outsiders.6.a.tooltip
+		owner = {
+			hidden_effect = {
+				random_list = {
+					75 = { country_event = { id = mem_outsiders.7 days = @response_time } }
+					45 = {  }
+				}
+			}
+			add_resource = {
+				influence = 100
+			}
+			IF = {
+				limit = {
+					NOT = { has_technology = tech_mine_dark_matter }
+				}
+				add_research_option = tech_mine_dark_matter
+			}
+		}
+		from.planet = {
+			change_pc = pc_shattered
+			set_deposit = d_dark_matter_deposit_2
+		}
+
+		trigger = {
+			owner = {
+				NOR = {
+					has_ethic = ethic_fanatic_xenophobe
+					has_valid_civic = civic_hive_devouring_swarm
+					has_valid_civic = civic_fanatic_purifiers
+				}
+			}
+		}
+
+		ai_chance = {
+			factor = 1000
+			modifier = {
+				factor = 0
+				owner = {
+					is_xenophobe = yes
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_outsiders.6.b
+		owner = {
+			add_resource = {
+				alloys = 1500
+				rare_crystals = 50
+				volatile_motes = 50
+				exotic_gases = 50
+				minor_artifacts = 25
+			}
+		}
+
+		ai_chance = {
+			factor = 10
+		}
+	}
+}
+
+# Signal reaches out
+country_event = {
+	id = mem_outsiders.7
+	title = mem_outsider.7.name
+	desc = mem_outsider.7.desc
+
+	is_triggered_only = yes
+
+	picture = GFX_evt_physics_research
+	show_sound = event_alien_signal
+
+	option = {
+		name = ONSCREEN
+		hidden_effect = {
+			country_event = {
+				id = mem_outsiders.8
+			}
+		}
+	}
+}
+
+# Diplo event
+country_event = {
+	id = mem_outsiders.8
+	title = TRANSMISSION
+	desc = mem_outsiders.8.desc
+
+	is_triggered_only = yes
+	diplomatic = yes
+
+	picture_event_data = {
+		room = no_video_feed_room
+	}
+
+	immediate = {
+		while = {
+			count = 2
+			random_list = {
+				25 = { 
+					set_country_flag = mem_outsiders_give_beam
+					modifier = {
+						factor = 0
+						has_country_flag = mem_outsiders_give_beam
+					}
+				}
+				25 = { 
+					set_country_flag = mem_outsiders_give_power 
+					modifier = {
+						factor = 0
+						has_country_flag = mem_outsiders_give_power
+					}
+				}
+				25 = { 
+					set_country_flag = mem_outsiders_give_impellers 
+					modifier = {
+						factor = 0
+						has_country_flag = mem_outsiders_give_impellers
+					}
+				}
+				25 = { 
+					set_country_flag = mem_outsiders_give_confounder 
+					modifier = {
+						factor = 0
+						has_country_flag = mem_outsiders_give_confounder
+					}
+				}
+				15 = { 
+					set_country_flag = mem_outsiders_give_jump 
+					modifier = {
+						factor = 0
+						has_country_flag = mem_outsiders_give_jump
+					}
+				}
+				15 = { 
+					set_country_flag = mem_outsiders_give_random_2 
+					modifier = {
+						factor = 0
+						has_country_flag = mem_outsiders_give_random_2
+					}
+				}
+				# 15 = { 
+				# 	set_country_flag = mem_outsiders_give_random_3 
+				# 	modifier = {
+				# 		factor = 0
+				# 		has_country_flag = mem_outsiders_give_random_3
+				# 	}
+				# }
+				# 15 = { 
+				# 	set_country_flag = mem_outsiders_give_random_4
+				# 	modifier = {
+				# 		factor = 0
+				# 		has_country_flag = mem_outsiders_give_random_4
+				# 	} 
+				# }
+			}
+		}
+	}
+
+	option = {
+		name = mem_outsiders.8.a
+		response_text = mem_outsiders.8.a.response
+
+		IF = {
+			limit = {
+				has_country_flag = mem_outsiders_give_beam
+			}
+			add_research_option = tech_mem_outsiders_weaponized_rift
+		}
+		IF = {
+			limit = {
+				has_country_flag = mem_outsiders_give_impellers
+			}
+			add_research_option = tech_mem_outsiders_rift_impellers
+		}
+		IF = {
+			limit = {
+				has_country_flag = mem_outsiders_give_power
+			}
+			add_research_option = tech_mem_outsiders_flux_power
+		}
+		IF = {
+			limit = {
+				has_country_flag = mem_outsiders_give_confounder
+			}
+			add_research_option = tech_mem_outsiders_flux_campouphlage
+		}
+		IF = {
+			limit = {
+				has_country_flag = mem_outsiders_give_jump
+				NOT = { has_technology = tech_jump_drive_1 }
+			}
+			add_research_option = tech_jump_drive_1
+		}
+		IF = {
+			limit = {
+				has_country_flag = mem_outsiders_give_random_2
+			}
+			add_random_research_option = {
+				add_progress = 0.99
+				area = physics
+				tier = 2
+				ignore_prereqs = no
+				fail_effects = {
+					add_monthly_resource_mult = {
+						resource = physics_research
+						value = @tier5researchreward
+						min = @tier5researchmin
+						max = @tier5researchmax
+					}
+				}
+			}
+		}
+		IF = {
+			limit = {
+				has_country_flag = mem_outsiders_give_random_3
+			}
+			add_random_research_option = {
+				add_progress = 0.99
+				area = physics
+				tier = 3
+				ignore_prereqs = no
+				fail_effects = {
+					add_monthly_resource_mult = {
+						resource = physics_research
+						value = @tier5researchreward
+						min = @tier5researchmin
+						max = @tier5researchmax
+					}
+				}
+			}
+		}
+		IF = {
+			limit = {
+				has_country_flag = mem_outsiders_give_random_4
+			}
+			add_random_research_option = {
+				add_progress = 0.99
+				area = physics
+				tier = 4
+				ignore_prereqs = no
+				fail_effects = {
+					add_monthly_resource_mult = {
+						resource = physics_research
+						value = @tier5researchreward
+						min = @tier5researchmin
+						max = @tier5researchmax
+					}
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_outsiders.8.b
+		is_dialog_only = yes
+		response_text = mem_outsiders.8.b.response
+	}
+	option = {
+		name = mem_outsiders.8.c
+		is_dialog_only = yes
+		response_text = mem_outsiders.8.c.response
+	}
+	option = {
+		name = mem_outsiders.8.d
+		is_dialog_only = yes
+		response_text = mem_outsiders.8.d.response
+	}
+	option = {
+		name = mem_outsiders.8.e
+		is_dialog_only = yes
+		response_text = mem_outsiders.8.e.response
+	}
+}
