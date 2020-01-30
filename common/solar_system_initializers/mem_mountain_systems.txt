@@ -1,0 +1,179 @@
+mem_mountain_system = {
+	# name = MOUNTAIN
+	class = rl_standard_stars
+
+	flags = { mem_mountain_system hostile_system }
+
+	usage = misc_system_init
+	usage_odds = {
+		base = 10000
+		modifier = {
+			factor = 0
+			OR = {
+				has_star_flag = empire_cluster
+				is_fe_cluster = yes
+				is_bottleneck_system = yes
+			}
+		}
+	}
+	scaled_spawn_chance = 8
+	max_instances = 1
+
+	asteroid_belt = {
+		type = rocky_asteroid_belt
+		radius = 130
+	}
+
+	asteroid_belt = {
+		type = icy_asteroid_belt
+		radius = 200
+	}
+
+	planet = {
+		class = star
+		size = 30
+		orbit_distance = 0
+	}
+
+	change_orbit = 40
+
+	planet = {
+		count = 2
+		class = random_non_colonizable
+		orbit_distance = 20
+
+		moon = {
+			count = { min = 0 max = 1 }
+			class = random_non_colonizable
+			orbit_distance = 10
+		}
+	}
+
+	planet = {
+		class = pc_mem_broken_city
+		size = 25
+		orbit_distance = 25
+	}
+
+	change_orbit = 25
+
+	planet = {
+		count = 3
+		class = pc_asteroid
+		orbit_distance = 0
+		orbit_angle = { min = 90 max = 140 }
+	}
+
+	planet = {
+		class = pc_gas_giant
+		size = 25
+		orbit_distance = 35
+		has_ring = no
+
+		flags = { mem_mountain_gas_giant }
+
+		init_effect = {
+			prevent_anomaly = yes 
+			create_ambient_object = {
+				type = mem_mountain_ring
+				location = this
+				use_3d_location = yes
+				entity_offset_height = 0
+				entity_offset = { min = 0 max = 0 }
+			}
+
+		}
+
+		moon = {
+			class = pc_barren
+			orbit_distance = 15
+			size = 9
+		}
+
+		moon = {
+			class = pc_shielded
+			orbit_distance = 5
+			size = 15
+
+			flags = { mem_mountain_moon }
+		}
+	}
+
+	change_orbit = 35
+
+	planet = {
+		count = 3
+		class = pc_ice_asteroid
+		orbit_distance = 0
+		orbit_angle = { min = 90 max = 140 }
+	}
+
+	change_orbit = 20
+
+	planet = {
+		count = 3
+		class = random_non_colonizable
+		orbit_distance = 20
+
+		moon = {
+			count = { min = 0 max = 1 }
+			class = random_non_colonizable
+			orbit_distance = 10
+		}
+	}
+
+	init_effect = {
+        while = {
+            count = 14
+            create_ambient_object = {
+                type = "large_debris_object"
+                location = this
+            }
+        }
+        while = {
+            count = 3
+            create_ambient_object = {
+                type = "ancient_battlefield_02_object"
+                location = this
+            }
+        }
+        while = {
+            count = 8
+            create_ambient_object = {
+                type = "abandoned_starbase_01_object"
+                location = this
+            }
+        }
+		create_country = {
+			name = "Ancient Guardians"
+			type = faction
+			ignore_initial_colony_error = yes
+			effect = {
+				set_country_flag = mem_mountain_guardian_country
+			}
+		}
+		create_ship_design = {
+			design = "Shram Nol Ohoor"
+		}
+		every_system_planet = {
+			limit = {
+				is_planet_class = pc_asteroid
+			}
+			create_fleet = {
+				name = "Guardian Fleet"
+				effect = {
+					while = {
+						count = 6
+						create_ship = {
+							name = ""
+							design = last_created_design
+						}
+					}
+					set_fleet_stance = aggressive
+					set_location = prev
+					set_owner = last_created_country
+				}
+			}
+		}
+    }
+}

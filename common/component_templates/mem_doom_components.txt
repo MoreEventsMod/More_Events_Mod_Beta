@@ -1,0 +1,127 @@
+weapon_component_template = {
+    key = "MEM_COMPONENT_DOOM_DRAGON_BEAM"
+    hidden = yes
+
+    size = titanic
+    icon = "GFX_ship_part_world_cracker"
+    icon_frame = 1
+	type = instant
+
+    entity = "invisible_turret_entity"
+    projectile_gfx = mem_doom_titan_laser
+
+    tags = { weapon_type_energy }
+    ai_tags = { weapon_role_anti_hull }
+
+    size_restriction = { mem_doom_dragon_ship }
+
+    firing_arc = 15.0
+	min_range = 30.0
+    static_rotation = yes
+    
+    damage = { min = 750.00 max = 12500.00 } windup = { min = 30 max = 45 }
+    total_fire_time = 150
+    range = 250
+    accuracy = 0.5
+    tracking = 0.0
+    armor_penetration = 1.0
+    shield_penetration = 1.0
+}
+
+weapon_component_template = {
+    key = MEM_COMPONENT_DOOM_DRAGON_PROJECTION
+    hidden = yes
+
+    size = medium
+    icon = "GFX_mem_rebel_yell_weapon"
+    icon_frame = 1
+	type = instant
+    
+    entity = invisible_turret_entity
+    projectile_gfx = mem_doom_projection_weapon
+
+    size_restriction = { mem_doom_dragon_ship }
+
+    tags = { weapon_type_energy }
+    ai_tags = { weapon_role_anti_hull }
+
+    damage = { min = 1.00 max = 220.00 } windup = { min = 2 max = 20 }
+    total_fire_time = 30
+    range = 100
+    accuracy = 1.0
+    tracking = 1.0
+    armor_penetration = 1.0
+    shield_penetration = 1.0
+}
+
+@shield_add = 666
+
+utility_component_template = {
+    key = "MEM_DOOM_SHIELD"
+    hidden = yes
+	size = large
+	icon = "GFX_mem_doom_sheild"
+	icon_frame = 1
+	power = 0
+	resources = {
+		category = ship_components
+    }
+    size_restriction = { mem_doom_dragon_ship }
+	modifier = {
+		ship_shield_add = @shield_add
+		ship_shield_regen_add_static = @regen_L7 #Regeneration per day
+	}
+	# prerequisites = { "tech_psionic_shield" }
+	# component_set = "PSI_SHIELD"
+
+	ai_weight = {
+		weight = 0
+	}
+}
+
+@shipAuraRange = 80
+@stationSmallAuraRange = 70
+@stationMediumAuraRange = 90
+@stationLargeAuraRange = 110
+
+utility_component_template = {
+	key = "MEM_DOOM_AURA_SHIELD_DAMPENER"
+	size = medium
+	icon = "GFX_ship_part_aura_shield_dampener"
+	icon_frame = 1
+    power = 0
+    hidden = yes
+	
+	size_restriction = { mem_doom_dragon_ship }
+	component_set = "ship_aura_components"
+	
+	hostile_aura = {
+		name = "aura_shield_dampener"
+		radius = @shipAuraRange
+		apply_on = ships
+		
+		stack_info = {			#A ship can only be affected by one aura of a certain id. If multiple auras have the same ID the one with the highest priority will be applied.
+			id = hostile_shield_dampener
+			priority = 1
+		}
+		
+		modifier = {
+			ship_shield_mult = -0.20
+		}
+		
+		graphics = {
+			area_effect = {
+				entity = "circle_area_entity"
+				dynamic_scale = yes
+			}
+			ship_effect = {
+				entity = "ship_aura_negative_entity"
+				dynamic_scale = no
+			}
+		}
+	}
+	
+	ai_weight = {
+		weight = 0
+	}
+}

@@ -15,12 +15,13 @@ namespace = mem_ea_uplifter
  
 # Extinct Abductors Anomaly Success
 ship_event = {
-    id = mem_ea_uplifter.1
-    title = mem_ea_uplifter.1.name
-    desc = mem_ea_uplifter.1.desc
-    picture = GFX_evt_mem_orila_pods
-    show_sound = event_mystic_reveal
-	location = FROM   
+    id = mem_ea_uplifter.100
+    title = mem_ea_uplifter.100.name
+    desc = mem_ea_uplifter.100.desc
+    picture = GFX_evt_alien_ruins
+	#picture = GFX_evt_mem_orila_pods
+    #show_sound = event_mystic_reveal
+	location = FROM
     is_triggered_only = yes
     immediate = {
 		set_global_flag = mem_ea_uplifter_quest_started
@@ -31,13 +32,14 @@ ship_event = {
     	}
     }
     option = {
-        name = mem_ea_uplifter.1.a
+        name = mem_ea_uplifter.100.a
 		FROM = {
-			enable_special_project = {
-				name = MEM_EA_UPLIFTER_INVESTIGATION
-				location = this
-				owner = root.owner
-			}
+		#	enable_special_project = {
+		#		name = MEM_EA_UPLIFTER_INVESTIGATION
+		#		location = this
+		#		owner = root.owner
+		#	}
+			create_archaeological_site = mem_ea_uplifter_digsite_1
 			save_event_target_as = mem_ea_start
 			set_planet_flag = mem_ea_start
 		}
@@ -56,33 +58,100 @@ ship_event = {
 	}
 }
 
+#EA Uplifter digsite stage 1
+fleet_event = {
+    id = mem_ea_uplifter.102
+    title = mem_ea_uplifter.102.name
+    desc = mem_ea_uplifter.102.desc
+    picture = GFX_evt_alien_ruins
+	location = FROM   
+	archaeology = yes
+    is_triggered_only = yes
+    immediate = {
+        from = { set_site_progress_locked = yes }
+    }
+
+    after = { 
+        from = { set_site_progress_locked = no } 
+    }
+    option = {
+        name = mem_ea_uplifter.102.a
+		small_artifact_reward = yes
+	}
+}
+
+#EA Uplifter digsite stage 2
+fleet_event = {
+    id = mem_ea_uplifter.103
+    title = mem_ea_uplifter.103.name
+    desc = mem_ea_uplifter.103.desc
+    picture = GFX_evt_mem_orila_pods
+    show_sound = event_mystic_reveal
+	location = FROM  
+	archaeology = yes	
+    is_triggered_only = yes
+    immediate = {
+        from = { set_site_progress_locked = yes }
+    }
+
+    after = { 
+        from = { set_site_progress_locked = no } 
+    }
+    option = {
+        name = mem_ea_uplifter.103.a
+		small_artifact_reward = yes
+	}
+}
+
+#EA Uplifter digsite stage 3
 # Extinct Abductors Special Project at Anomaly Side Finished and points of interest for event chain are being set
-ship_event = {
-	id = mem_ea_uplifter.2
-	title = mem_ea_uplifter.2.name
-	desc = mem_ea_uplifter.2.desc
+fleet_event = {
+	id = mem_ea_uplifter.104
+	title = mem_ea_uplifter.104.name
+	desc = mem_ea_uplifter.104.desc
 	picture = GFX_evt_mem_orila_pods
 	show_sound = event_scanner
 	location = FROM
-	is_triggered_only = yes	
+	archaeology = yes
+	is_triggered_only = yes
 	option = {
-		name = mem_extinct_abductors.2.a
+		name = mem_ea_uplifter.104.a
 		owner = {
 			begin_event_chain = {
 				event_chain = "mem_ea_uplifter_chain"
-				target = root
+				target = This
 			}
 			add_monthly_resource_mult = {
 				resource = society_research
-				value = @tier1researchreward
-				min = @tier1researchmin
-				max = @tier1researchmax
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
 			}
 		}
 		leader = { add_experience = 200 }
 		hidden_effect = {
-			solar_system = { set_star_flag = mem_ea_uplifter_system_0 }
 			owner = {
+				country_event = { id = mem_ea_uplifter.105 days = 1 }
+			}
+		}
+	}
+}
+
+country_event = {
+	id = mem_ea_uplifter.105
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		random_system = {
+			limit = {
+				any_system_planet = {
+					has_planet_flag = mem_ea_start
+				}
+			}
+			set_star_flag = mem_ea_uplifter_system_0
+			root = {
 				capital_scope = { save_event_target_as = capital }
 			}
 			# First try to target system
@@ -96,7 +165,7 @@ ship_event = {
 						max_distance <= 80
 						min_distance >= 2
 					}
-					NOT = {
+					NOR = {
 						has_star_flag = mem_ea_uplifter_system_0
 						has_star_flag = hostile_system
 					}
@@ -241,34 +310,35 @@ ship_event = {
 					save_event_target_as = mem_ea_uplifter_system_4
 				}
 			}
-			create_point_of_interest = {
-				id = mem_ea_uplifter_system.1
-				name = "mem_ea_uplifter_system_1"
-				desc = "mem_ea_uplifter_system_1_desc"
-				event_chain = "mem_ea_uplifter_chain"
-				location = event_target:mem_ea_uplifter_system_1
-			}
-			create_point_of_interest = {
-				id = mem_ea_uplifter_system.2
-				name = "mem_ea_uplifter_system_2"
-				desc = "mem_ea_uplifter_system_2_desc"
-				event_chain = "mem_ea_uplifter_chain"
-				location = event_target:mem_ea_uplifter_system_2
-			}
-			create_point_of_interest = {
-				id = mem_ea_uplifter_system.3
-				name = "mem_ea_uplifter_system_3"
-				desc = "mem_ea_uplifter_system_3_desc"
-				event_chain = "mem_ea_uplifter_chain"
-				location = event_target:mem_ea_uplifter_system_3
-			}
-			create_point_of_interest = {
-				id = mem_ea_uplifter_system.4
-				name = "mem_ea_uplifter_system_4"
-				desc = "mem_ea_uplifter_system_4_desc"
-				event_chain = "mem_ea_uplifter_chain"
-				location = event_target:mem_ea_uplifter_system_4
-			}
+			
+		}
+		create_point_of_interest = {
+			id = mem_ea_uplifter_system.1
+			name = "mem_ea_uplifter_system_1"
+			desc = "mem_ea_uplifter_system_1_desc"
+			event_chain = "mem_ea_uplifter_chain"
+			location = event_target:mem_ea_uplifter_system_1
+		}
+		create_point_of_interest = {
+			id = mem_ea_uplifter_system.2
+			name = "mem_ea_uplifter_system_2"
+			desc = "mem_ea_uplifter_system_2_desc"
+			event_chain = "mem_ea_uplifter_chain"
+			location = event_target:mem_ea_uplifter_system_2
+		}
+		create_point_of_interest = {
+			id = mem_ea_uplifter_system.3
+			name = "mem_ea_uplifter_system_3"
+			desc = "mem_ea_uplifter_system_3_desc"
+			event_chain = "mem_ea_uplifter_chain"
+			location = event_target:mem_ea_uplifter_system_3
+		}
+		create_point_of_interest = {
+			id = mem_ea_uplifter_system.4
+			name = "mem_ea_uplifter_system_4"
+			desc = "mem_ea_uplifter_system_4_desc"
+			event_chain = "mem_ea_uplifter_chain"
+			location = event_target:mem_ea_uplifter_system_4
 		}
 	}
 }
@@ -672,7 +742,7 @@ ship_event = {
 		name = mem_ea_uplifter.10.a
 		leader = { add_experience = 100 }
 		fromfrom = {
-			random_list = {
+			locked_random_list = {
 				33 = {
 					fromfrom = {
 						add_deposit = d_minerals_3
