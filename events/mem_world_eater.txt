@@ -18,27 +18,71 @@ event = {
         random_list = {
             0 = {}
             35 = {
-                random_country = {
-                    limit = { is_country_type = global_event }
-                    country_event = { id = mem_world_eater.2 days = 36 random = 36 }
+                set_global_flag = mem_world_eater_enabled
+            }
+        }
+    }
+}
+
+# On building the lure, make a roll
+planet_event = {
+    id = mem_world_eater.2
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        exists = owner
+        owner = {
+            NOT = {
+                has_country_flag = mem_world_eater_spared
+            }
+        }
+        has_building = building_mem_world_eater_lure
+    }
+
+    immediate = {
+        log = "[Root.GetName] making a lure roll"
+        random_list = {
+            0 = {
+                owner = {
+                    set_country_flag = mem_world_eater_spared
+                }
+            }
+            55 = {
+                planet_event = {
+                    id = mem_world_eater.3
                 }
             }
         }
     }
 }
 
-# Actual beginning
-country_event = {
-    id = mem_world_eater.2
-    hide_window = yes
+# The arrival
+planet_event = {
+    id = mem_world_eater.3
+    title = mem_world_eater.3.name
+    desc = mem_world_eater.3.desc
+
     is_triggered_only = yes
 
-    trigger = {
-        NOT = { has_global_flag = mem_world_eater_started }
-    }
+    picture = GFX_evt_mem_rift
+    show_sound = event_yellow_alert
+    location = event_target:arrival_system
 
     immediate = {
-        set_global_flag = mem_world_eater_started
+        owner = {
+            save_event_target_as = the_summoner
+            set_country_flag = mem_world_eater_summoner
+            every_relation = {
+                limit = {
+                    is_country_type = default
+                }
+                add_opinion_modifier = {
+                    who = PREV
+                    modifier = mem_world_eater_opened_rift
+                }
+            }
+        }
         create_country = {
             name = "World Eater"
             type = mem_world_eater_country
@@ -60,66 +104,56 @@ country_event = {
             }
             effect = {
                 log = "[This.GetName] country created"
+                save_event_target_as = world_eater_country
             }
         }
-        random_rim_system = {
+        random_system = {
             limit = {
-                OR = {
-                    NOT = { exists = space_owner }
-                    owner = { is_country_type = default }
+                distance = {
+                    source = ROOT
+                    min_jumps = 1
+                    max_jumps = 2
                 }
             }
-            save_event_target_as = ingress_point
-        }
-        every_country = {
-            limit = {
-                is_country_type = default
+            save_event_target_as = arrival_system
+            create_ambient_object = {
+                type = mem_world_eater_sinkhole
+                location = this
+                duration = 360   
             }
-            country_event = { id = mem_world_eater.3 }
+            last_created_ambient_object = {
+                save_event_target_as = entry_sinkhole
+            }
+            IF = {
+                limit = { exists = space_owner }
+                space_owner = {
+                    country_event = { id = mem_world_eater.7 }
+                }
+            }
         }
-        random_country = {
-            limit = { is_country_type = mem_world_eater_country }
-            log = "[This.GetName] .4 event is called in 36 days"
-            country_event = { id = mem_world_eater.4 days = 36 }
+        event_target:world_eater_country = {
+            country_event = {
+                id = mem_world_eater.4
+                days = 60
+            }
         }
     }
-}
-
-# Pop up for player with a warning
-country_event = {
-    id = mem_world_eater.3
-    title = mem_world_eater.3.name
-    desc = mem_world_eater.3.desc
-
-    is_triggered_only = yes
-
-    picture = GFX_evt_mem_rift
-    location = event_target:ingress_point
-    show_sound = event_sensor_ping
 
     option = {
         name = mem_world_eater.3.a
     }
 }
 
-# World Eater enters space
+# Let's get it started!
 country_event = {
     id = mem_world_eater.4
     hide_window = yes
     is_triggered_only = yes
 
     immediate = {
-        log = "World Eater Enters Space. Effect applied to country [This.GetName]. Solar system is [ingress_point.GetName]"
-        event_target:ingress_point = {
-            create_ambient_object = {
-                type = mem_world_eater_sinkhole
-                location = this
-                duration = 360   
-            }
-        }
-        last_created_ambient_object = {
-            save_event_target_as = entry_sinkhole
-        }
+        set_global_flag = mem_world_eater_showed_up
+        log = "World Eater Enters Space. Effect applied to country [This.GetName]. Solar system is [arrival_system.GetName]"
+        create_ship_design = { design = "Swallower of Worlds" }
         create_fleet = {
             name = "Swallower of Worlds"
             effect = {
@@ -127,7 +161,7 @@ country_event = {
                     name = "Swallower of Worlds"
                     design = "Swallower of Worlds"
                     effect = {
-                        set_disable_at_health = 0.1
+                        # set_disable_at_health = 0.1
                         set_ship_flag = mem_world_eater_ship
                         save_event_target_as = world_eater_ship
                     }
@@ -137,7 +171,7 @@ country_event = {
                 set_fleet_flag = mem_world_eater_fleet
             }
         }
-        event_target:ingress_point = {
+        event_target:arrival_system = {
             IF = {
                 limit = { exists = space_owner }
                 space_owner = {
@@ -154,8 +188,6 @@ country_event = {
                 country_event = { id = mem_world_eater.6 }
             }            
         }
-        # set_country_flag = mem_world_eater_scouting_mode
-        country_event = { id = mem_world_eater.7 }
     }
 }
 
@@ -163,7 +195,20 @@ country_event = {
 country_event = {
     id = mem_world_eater.5
     title = mem_world_eater.5.name
-    desc = mem_world_eater.5.desc
+    desc = {
+        trigger = {
+            has_country_flag = mem_world_eater_summoner
+        }
+        text = mem_world_eater.5.desc.summoner
+    }
+    desc = {
+        trigger = {
+            NOT = {
+                has_country_flag = mem_world_eater_summoner
+            }
+        }
+        text = mem_world_eater.5.desc.not_summoner
+    }
 
     is_triggered_only = yes
 
@@ -177,6 +222,15 @@ country_event = {
 
     option = {
         name = BATTLESTATIONS
+        IF = {
+            limit = {
+                NOT = { has_country_flag = mem_world_eater_summoner }
+            }
+            add_opinion_modifier = {
+                who = event_target:the_summoner
+                modifier = mem_world_eater_unleashed_eater_on_me
+            }
+        }
     }
 }
 
@@ -184,11 +238,24 @@ country_event = {
 country_event = {
     id = mem_world_eater.6
     title = mem_world_eater.5.name
-    desc = mem_world_eater.6.desc
+    desc = {
+        trigger = {
+            has_country_flag = mem_world_eater_summoner
+        }
+        text = mem_world_eater.6.desc.summoner
+    }
+    desc = {
+        trigger = {
+            NOT = {
+                has_country_flag = mem_world_eater_summoner
+            }
+        }
+        text = mem_world_eater.6.desc.not_summoner
+    }
 
     is_triggered_only = yes
 
-    location = event_target:ingress_point
+    location = event_target:arrival_system
     show_sound = event_sensor_ping
     picture = GFX_evt_unspeakable_horror
 
@@ -197,71 +264,158 @@ country_event = {
     }
 
     option = {
-        name = OK
+        name = mem_world_eater.6.a
+        IF = {
+            limit = {
+                NOT = { has_country_flag = mem_world_eater_summoner }
+            }
+            add_opinion_modifier = {
+                who = event_target:the_summoner
+                modifier = mem_world_eater_unleashed_the_eater
+            }
+        }
     }
 }
 
-# World Eater Logic - main loop
+# Space owner is notified of a wormhole
 country_event = {
     id = mem_world_eater.7
+    title = mem_world_eater.7.name
+    desc = mem_world_eater.7.desc
+
     is_triggered_only = yes
-    hide_window = yes
+
+    picture = GFX_evt_mem_rift
+    show_sound = event_yellow_alert
+    location = event_target:arrival_system
+
+    option = {
+        name = mem_world_eater.7.a
+    }
+}
+
+# World Ether eats the planet
+planet_event = {
+    id = mem_world_eater.8
+    title = mem_world_eater.8.name
+    desc = mem_world_eater.8.desc
+
+    is_triggered_only = yes
+
+    picture = GFX_evt_space_monster
+    location = ROOT
+    show_sound = event_screams
+
+    trigger = {
+        planet_devastation >= 100
+        FROM = {
+            is_country_type = mem_world_eater_country
+        }
+    }
 
     immediate = {
-        log = "[This.GetName] engages decision-making loop."
-        random_owned_fleet = {
-            IF = {
-                limit = {
-                    OR = {
-                        is_fleet_idle = no
-                        is_in_combat = yes
-                    }
-                }
-                log = "Fleet is otherwise busy - skipped loop"
-            }
-            ELSE_IF = {
-                limit = {
-                    owner = {
-                        has_country_flag = mem_world_eater_hungry_mode
-                    }
-                }
-                log = "Engaging hungry mode."
-            }
-            ELSE = {
-                # limit = {
-                #     owner = {
-                #         has_country_flag = mem_world_eater_scouting_mode
-                #     }
-                # }
-                log = "Engaging scouting mode"
-                solar_system = {
-                    random_neighbor_system = {
-                        random_system_planet = {
-                            limit = {
-                                NOT = { exists = owner }
-                            }
-                            log = "[This.GetName] is the scouting target"
-                            prevprevprev = {
-                                auto_move_to_planet = {
-                                    target = PREV
-                                    clear_auto_move_on_arrival = yes
-                                }
-                            }
+        log = "[Root.GetName] eaten"
+        IF = {
+            limit = { is_planet_class = pc_habitat }
+            remove_planet = yes
+        }
+        ELSE_IF = {
+            limit = { is_planet_class = pc_ringworld_habitable }
+            change_pc = pc_ringworld_habitable_damaged
+            reset_planet = yes
+        }
+        ELSE = {
+            random_list = {
+                40 = {
+                    destroy_colony = yes
+                    change_pc = pc_nuked
+                    reroll_planet = yes
+                    # Add deposit later
+                    modifier = {
+                        factor = 0
+                        OR = {
+                            is_planet_class = pc_nuked
+                            is_planet_class = pc_relic
+                            is_planet_class = pc_hive
+                            is_planet_class = pc_machine
+                            is_planet_class = pc_city
                         }
                     }
                 }
-                owner = {
+                30 = {
                     random_list = {
-                        80 = {
-                            log = "Remaining is scouting mode."
-                        }
-                        20 = {
-                            log = "Switching to hungry mode"
-                            set_country_flag = mem_world_eater_hungry_mode
-                        }
+                        50 = { change_pc = pc_barren }
+                        50 = { change_pc = pc_barren_cold }
                     }
+                    reset_planet = yes
+                    add_modifier = {
+                        modifier = terraforming_candidate
+                    }
+                }
+                30 = {
+                    change_pc = pc_toxic
+                    reset_planet = yes
                 }
             }
         }
+    }
+
+    option = {
+        name = mem_world_eater.8.a
+    }
+}
+
+# World Eater's Defeat
+country_event = {
+    id = mem_world_eater.9
+    title = mem_world_eater.9.name
+    desc = mem_world_eater.9.desc
+
+    is_triggered_only = yes
+
+    show_sound = event_space_battle
+    location = FROMFROM
+    picture = GFX_evt_space_monster
+
+    trigger = {
+        FROM = { is_country_type = mem_world_eater_country }
+    }
+
+    immediate = {
+        log = "[Root.GetName] killed World Eater"
+        FROMFROM.Solar_System = { save_event_target_as = battle_system }
+        every_playable_country = {
+            limit = {
+                NOT = { is_same_value = root }
+            }
+            add_opinion_modifier = {
+                who = ROOT
+                modifier = mem_world_eater_defeated_it
+            }
+            country_event = {
+                id = mem_world_eater.10
+            }
+        }
+    }
+
+    option = {
+        name = mem_world_eater.9.a
+    }
+}
+
+#Notification for all
+country_event = {
+    id = mem_world_eater.10
+    title = mem_world_eater.10.name
+    desc = mem_world_eater.10.desc
+
+    is_triggered_only = yes
+
+    location = event_target:battle_system
+    show_sound = event_celebration
+    picture = GFX_evt_space_monster
+
+    option = {
+        name = OK
     }
 }

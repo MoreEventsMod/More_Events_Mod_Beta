@@ -1,0 +1,161 @@
+@delay = 36
+@random = 36
+
+building_mem_world_eater_lure = {
+	base_buildtime = 360
+	can_be_ruined = no
+	category = research
+
+	potential = {
+		NOT = { has_modifier = resort_colony }	
+		NOT = { has_modifier = slave_colony }
+		owner = {
+			NOT = { has_country_flag = mem_world_eater_built_lure }
+			is_country_type = default
+		}
+	}
+
+	destroy_trigger = {
+		OR = {
+			has_modifier = slave_colony
+			has_modifier = resort_colony
+		}
+	}
+
+	allow = {
+		has_upgraded_capital = yes
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = { is_regular_empire = yes }
+		}
+		modifier = {
+			job_researcher_add = 1
+			job_mem_world_eater_researcher_add = 1
+		}
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = { is_gestalt = yes }
+		}
+		modifier = {
+			job_mem_world_eater_researcher_gestalt_add = 1
+		}
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = { is_hive_empire = yes }
+		}
+		modifier = {
+			job_brain_drone_add = 1
+		}
+	}
+	
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = { is_machine_empire = yes }
+		}
+		modifier = {	
+			job_calculator_add = 1
+		}
+	}
+
+	planet_modifier = {
+		planet_researchers_physics_research_produces_mult = 0.2
+	}
+
+	prerequisites = {
+		tech_mem_world_eater_lure
+	}
+
+	triggered_desc = {
+		trigger = { 
+			exists = owner
+			owner = { is_regular_empire = yes } 
+		}
+		text = job_researcher_effect_desc
+	}
+
+	triggered_desc = {
+		trigger = { 
+			exists = owner
+			owner = { is_hive_empire = yes } 
+		}
+		text = job_brain_drone_effect_desc
+	}
+
+	triggered_desc = {
+		trigger = { 
+			exists = owner
+			owner = { is_machine_empire = yes } 
+		}
+		text = job_calculator_effect_desc
+	}
+	triggered_desc = {
+		trigger = { 
+			NOT = { has_global_flag = mem_world_eater_showed_up }
+		}
+		text = building_mem_world_eater_lure_warning
+	}
+
+	on_queued = {
+		owner = { set_country_flag = mem_world_eater_built_lure }
+	}
+
+	on_unqueued = {
+		owner = { remove_country_flag = mem_world_eater_built_lure }
+	}
+
+	on_built = {
+		planet_event = {
+			id = mem_world_eater.2
+			days = @delay
+			random = @random
+		}
+	}
+
+	on_destroy = {
+		owner = { remove_country_flag = mem_world_eater_built_lure }
+	}
+
+	ai_weight = {
+		weight = 0
+		modifier = {
+			weight = 30000 # This building is very important for AI to screw you over - no harm will be done if built ahead of schedule
+			num_pops >= 15
+			free_amenities > 2 #Prevents running out of amenities
+			owner = {
+				OR = {
+					has_monthly_income = {
+						resource = consumer_goods
+						value > 0
+					}
+					country_uses_consumer_goods = no
+				}
+			} # so that we don't run out of consumer goods
+			OR = {
+				has_building = building_research_lab_2
+				has_building = building_research_lab_3
+				has_building = building_research_lab_1
+			}
+		}
+		modifier = {
+			factor = 0.25
+			is_capital = yes # Don't want to nuke own capital
+		}
+		modifier = {
+			factor = 0
+			NOT = { has_global_flag = mem_world_eater_showed_up }
+			owner = {
+				fleet_power < 25000 # Won't want to reisk leviathan
+			}
+		}
+	}
+}
