@@ -107,6 +107,9 @@ planet_event = {
             effect = {
                 log = "[This.GetName] country created"
                 save_event_target_as = world_eater_country
+                add_modifier = {
+                    modifier = mem_world_eater_power
+                }
             }
         }
         random_system = {
@@ -320,7 +323,7 @@ planet_event = {
     }
 
     immediate = {
-        log = "[Root.GetName] eaten"
+        log = "[Root.GetName] eaten by [From.GetName]"
         IF = {
             limit = { is_planet_class = pc_habitat }
             remove_planet = yes
@@ -336,7 +339,11 @@ planet_event = {
                     destroy_colony = yes
                     change_pc = pc_nuked
                     reroll_planet = yes
-                    # Add deposit later
+                    add_modifier = {
+                        modifier = mem_world_eater_devastation
+                    }
+                    set_planet_flag = primitives_nuked_themselves
+                    set_planet_flag = colony_event
                     modifier = {
                         factor = 0
                         OR = {
@@ -345,6 +352,7 @@ planet_event = {
                             is_planet_class = pc_hive
                             is_planet_class = pc_machine
                             is_planet_class = pc_city
+                            has_modifier = mem_world_eater_devastation
                         }
                     }
                 }
@@ -361,6 +369,14 @@ planet_event = {
                 30 = {
                     change_pc = pc_toxic
                     reset_planet = yes
+                }
+            }
+        }
+        FROM = {
+            random_owned_ship = {
+                add_modifier = {
+                    modifier = mem_world_eater_well_fed
+                    days = 360
                 }
             }
         }
@@ -406,6 +422,51 @@ country_event = {
 
     option = {
         name = mem_world_eater.9.a
+        add_resource = {
+            alloys = 1500
+            minerals = 3000
+            sr_dark_matter = 500
+            sr_living_metal = 500
+        }
+        add_random_research_option = {
+            add_progress = 0.50
+            area = engineering
+            ignore_prereqs = no
+            fail_effects = {
+                add_monthly_resource_mult = {
+                    resource = engineering_research
+                    value = @tier5researchreward
+                    min = @tier5researchmin
+                    max = @tier5researchmax
+                }
+            }
+        }
+        add_random_research_option = {
+            add_progress = 0.50
+            area = physics
+            ignore_prereqs = no
+            fail_effects = {
+                add_monthly_resource_mult = {
+                    resource = physics_research
+                    value = @tier5researchreward
+                    min = @tier5researchmin
+                    max = @tier5researchmax
+                }
+            }
+        }
+        add_random_research_option = {
+            add_progress = 0.50
+            area = society
+            ignore_prereqs = no
+            fail_effects = {
+                add_monthly_resource_mult = {
+                    resource = society_research
+                    value = @tier5researchreward
+                    min = @tier5researchmin
+                    max = @tier5researchmax
+                }
+            }
+        }
     }
 }
 
