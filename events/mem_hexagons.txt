@@ -1,0 +1,276 @@
+# Hexagons
+# By ViolentBeetle
+
+namespace = mem_hexagons
+
+fleet_event = {
+	id = mem_hexagons.1
+	title = mem_hexagons.1.name
+	desc = mem_hexagons.1.desc
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	show_sound = event_finding_loot
+	picture = GFX_evt_landing_ship
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+		leader = { save_event_target_as = the_leader }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+	
+	option = {
+		name = DIG
+		event_target:the_leader = {
+			IF = {
+				limit = {
+					NOR = {
+						has_trait = leader_trait_expertise_new_worlds
+						num_traits > 4
+					}
+				}
+				add_trait = leader_trait_expertise_new_worlds
+			}
+			ELSE = {
+				add_experience = 250
+			}
+		}
+	}
+}
+
+fleet_event = {
+	id = mem_hexagons.2
+	title = mem_hexagons.2.name
+	desc = mem_hexagons.2.desc
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	show_sound = event_finding_loot
+	picture = GFX_evt_baol_ruins
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+	
+	option = {
+		name = DIG
+		medium_artifact_reward = yes
+	}
+}
+fleet_event = {
+	id = mem_hexagons.3
+	title = mem_hexagons.3.name
+	desc = mem_hexagons.3.desc
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	show_sound = event_finding_loot
+	picture = GFX_evt_genetic_modification
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+	
+	option = {
+		name = DIG
+		owner = {
+			IF = {
+				limit = {
+					OR = {
+						NOT = { has_authority = auth_machine_intelligence }
+						has_civic = civic_machine_assimilator
+					}
+					NOT = { has_technology = tech_cloning }
+				}
+				add_research_option = tech_cloning
+				add_tech_progress = {
+					tech = tech_cloning
+					progress = 0.6
+				}
+			}
+			ELSE = {
+				add_monthly_resource_mult = {
+					resource = society_research
+					value = @tier4researchreward
+					min = @tier4researchmin
+					max = @tier4researchmax
+				}
+			}
+		}
+	}
+}
+fleet_event = {
+	id = mem_hexagons.4
+	title = mem_hexagons.4.name
+	desc = mem_hexagons.4.desc
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	show_sound = event_finding_loot
+	picture = GFX_evt_mem_factory_01
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+	
+	option = {
+		name = mem_hexagons.4.a
+		hidden_effect = {
+			owner = {
+				country_event = {
+					id = mem_hexagons.5
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_hexagons.4.b
+		large_artefact_reward = yes
+	}
+}
+
+# Diplo Intro
+country_event = {
+	id = mem_hexagons.5
+	title = mem_hexagons.5.name
+	desc = mem_hexagons.5.desc
+
+	is_triggered_only = yes
+
+	diplomatic = yes
+
+	picture_event_data = {
+		room = no_video_feed_room
+	}
+
+	option = {
+		name = mem_hexagons.5.a
+
+		hidden_effect = {
+			country_event = {
+				id = mem_hexagons.6
+			}
+		}
+	}
+}
+
+# Diplo with the AI
+country_event = {
+	id = mem_hexagons.6
+	title = mem_hexagons.6.name
+	desc = mem_hexagons.6.desc
+
+	is_triggered_only = yes
+
+	diplomatic = yes
+
+	picture_event_data = {
+		room = no_video_feed_room
+	}
+
+	option = {
+		name = mem_hexagons.6.a
+		custom_tooltip = mem_hexagons.6.a.tooltip
+		hidden_effect = {
+			create_species = {
+				name = AI
+				class = MACHINE
+				traits = {
+					trait = trait_machine_unit
+					trait = trait_robot_enhanced_memory
+				}
+			}
+			create_leader = {
+				name = Stationary
+				class = governor
+				species = last_created_species
+				skill = 4
+				event_leader = yes
+				set_age = 10904
+				traits = {
+					trait = mem_leader_trait_hexagons
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_hexagons.6.b
+		large_artifact_reward = yes
+	}
+
+	option = {
+		name = mem_hexagons.6.c
+
+		trigger = {
+			NOR = {
+				has_authority = auth_hive_mind
+				has_authority = auth_machine_intelligence
+				has_technology = tech_sapient_ai
+				has_policy_flag = ai_outlawed
+			}
+		}
+
+		add_research_option = tech_sapient_ai
+	}
+
+	option = {
+		name = mem_hexagons.6.d
+
+		trigger = {
+			is_gestalt = no
+			OR = {
+				has_policy_flag = ai_outlawed
+				has_ethic = ethic_fanatic_spiritualist
+				has_ethic = ethic_spiritualist
+			}
+		}
+
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier5unityreward
+			min = @tier5unitymin
+			max = @tier5unitymax
+		}
+	}
+
+	option = {
+		name = mem_hexagons.6.x
+		is_dialog_only = yes
+		response_text = mem_hexagons.6.x.response
+	}
+	option = {
+		name = mem_hexagons.6.y
+		is_dialog_only = yes
+		response_text = mem_hexagons.6.y.response
+	}
+	option = {
+		name = mem_hexagons.6.z
+		is_dialog_only = yes
+		response_text = mem_hexagons.6.z.response
+
+		trigger = {
+			has_valid_civic = civic_machine_terminator
+		}
+	}
+}
