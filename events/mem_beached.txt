@@ -1,0 +1,332 @@
+# Beached
+# By ViolentBeetle
+
+namespace = mem_beached
+
+ship_event = {
+	id = mem_beached.1
+	title = mem_beached.1.name
+	desc = mem_beached.1.desc
+
+	is_triggered_only = yes
+
+	location = FROM
+	show_sound = event_space_whale
+	picture = GFX_evt_unidentified_monster
+
+	immediate = {
+		FROM = { save_event_target_as = the_asteroid }
+	}
+
+	option = {
+		name = mem_beached.1.a
+
+		enable_special_project = {
+			name = MEM_BEACHED_PROJECT
+			location = FROM
+			owner = root.owner
+		}
+
+		trigger = {
+			owner = {
+				NOR = {
+					has_valid_civic = civic_fanatic_purifiers
+					has_valid_civic = civic_machine_terminator
+					has_valid_civic = civic_hive_devouring_swarm
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_beached.1.b
+		owner = {
+			add_resource = {
+				influence = 50
+			}
+		}
+
+		trigger = {
+			owner = {
+				NAND = {
+					has_valid_civic = civic_hive_devouring_swarm
+					is_lithoid_empire = no
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_beached.1.c
+		owner = {
+			give_technology = {
+				tech = tech_space_whale_weapon_1
+			}
+		}
+
+		trigger = {
+			owner = {
+				NOT = {
+					has_technology = tech_space_whale_weapon_1
+				}
+				NAND = {
+					has_valid_civic = civic_hive_devouring_swarm
+					is_lithoid_empire = no
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_beached.1.d
+
+		owner = {
+			add_resource = {
+				food = 500
+			}
+		}
+
+		trigger = {
+			owner = {
+				has_valid_civic = civic_hive_devouring_swarm
+				is_lithoid_empire = no
+			}
+		}
+	}
+}
+
+# Project completion
+ship_event = {
+	id = mem_beached.2
+	title = mem_beached.2.name
+	desc = mem_beached.2.desc
+
+	is_triggered_only = yes
+
+	location = event_target:the_asteroid
+	show_sound = event_space_whale
+	picture = GFX_evt_unidentified_monster
+
+	immediate = {
+		create_country = {
+			name = "Rescued Tiyanki"
+			type = neutral_faction
+			flag = {
+				icon = {
+					category = "zoological"
+					file = "flag_zoological_1.dds"
+				}
+				background= {
+					category = "backgrounds"
+					file = "00_solid.dds"
+				}
+				colors={
+					"black"
+					"black"
+					"null"
+					"null"
+				}
+			}
+			effect = {
+				save_event_target_as = whale_country
+				establish_communications_no_message = root.owner
+			}
+		}
+		create_fleet = {
+			name = "Tiyanki Stray"
+			effect = {
+				create_ship_design = {
+					design = NAME_MEM_Beached_The_Matriarch
+				}
+				create_ship = {
+					name = "Tiyanki Stray"
+					design = last_created_design
+					effect = {
+						save_event_target_as = whale_ship
+						add_modifier = {
+							modifier = mem_beached_vigor
+						}
+						add_modifier = {
+							modifier = mem_beached_wound
+							days = 1800
+						}
+						add_modifier = {
+							modifier = mem_beached_wound
+							days = 3600
+						}
+						add_modifier = {
+							modifier = mem_beached_wound
+							days = 7200
+						}
+						reduce_hp_percent = 0.5
+					}
+				}
+				set_owner = last_created_country
+				set_location = event_target:the_asteroid
+				save_event_target_as = whale_fleet
+			}
+			settings = {
+				can_change_composition = no
+				can_change_leader = no
+			}
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			event_target:whale_ship = {
+				ship_event = {
+					id = mem_beached.3
+					days = 30
+				}
+				ship_event = { id = mem_beached.4 days = 60 }
+			}
+		}
+	}
+
+	option = {
+		name = mem_beached.2.a
+		event_target:whale_fleet = {
+			set_owner = root.owner
+		}
+	}
+	option = {
+		name = mem_beached.2.b
+		hidden_effect = {
+			create_tiyanki_country = yes
+			event_target:whale_fleet = {
+				set_owner = event_target:tiyanki_country
+				event_target:tiyanki_country = {
+					random_owned_fleet = {
+						prevprev = {
+							auto_follow_fleet = {
+								target = prev
+								attack_fleet = no
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+# Please name
+ship_event = {
+	id = mem_beached.3
+	title = mem_beached.3.name
+	desc = mem_beached.3.desc
+
+	is_triggered_only = yes
+
+	location = root
+	show_sound = event_space_whale
+	picture = GFX_evt_unidentified_monster
+
+	trigger = {
+		owner = {
+			is_country_type = default
+			is_gestalt = no
+		}
+	}
+
+	after = {
+	}
+
+	option = {
+		name = mem_beached_3.no_name
+	}
+	option = {
+		name = mem_beached_3.flopsy
+		hidden_effect = {
+			set_name = Flopsy
+			fleet = { set_name = Flopsy }
+		}
+	}
+	option = {
+		name = mem_beached_3.jewel
+		hidden_effect = {
+			set_name = Jewel
+			fleet = { set_name = Jewel }
+		}
+	}
+	option = {
+		name = mem_beached_3.candy
+		hidden_effect = {
+			set_name = Candy
+			fleet = { set_name = Candy }
+		}
+	}
+	option = {
+		name = mem_beached_3.greenie
+		hidden_effect = {
+			set_name = Greenie
+			fleet = { set_name = Greenie }
+		}
+	}
+	option = {
+		name = mem_beached_3.crystal
+		hidden_effect = {
+			set_name = Crystal
+			fleet = { set_name = Crystal }
+		}
+	}
+	option = {
+		name = mem_beached_3.starlight
+		hidden_effect = {
+			set_name = Starlight
+			fleet = { set_name = Starlight }
+		}
+	}
+	option = {
+		name = mem_beached_3.salad
+		hidden_effect = {
+			set_name = Salad
+			fleet = { set_name = Salad }
+		}
+	}
+}
+
+# Cow gives birth
+
+ship_event = {
+	id = mem_beached.4
+	title = mem_beached.4.name
+	desc = mem_beached.4.desc
+
+	is_triggered_only = yes
+
+	location = root
+	show_sound = event_space_whale
+	picture = GFX_evt_unidentified_monster
+
+	immediate = {
+		create_ship_design = {
+			design = NAME_MEM_Beached_Tiyanki_Calf
+		}
+		fleet = {
+			create_ship = {
+				design = last_created_design
+				effect = {
+					set_name = "[Root.GetName] Jr."
+				}
+			}
+			create_ship = {
+				design = last_created_design
+				effect = {
+					set_name = "Little [Root.GetName]"
+				}
+			}
+			create_ship = {
+				design = last_created_design
+				effect = {
+					set_name = "[Root.GetName] the Younger"
+				}
+			}
+		}
+	}
+
+	option = {
+		name = INTERESTING
+	}
+}
