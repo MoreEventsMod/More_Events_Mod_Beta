@@ -1,0 +1,121 @@
+namespace = mem_fainthearted
+
+# Gamestart Event
+country_event = {
+	id = mem_fainthearted.1
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_mem_fainthearted
+	}
+
+	immediate = {
+		give_technology = {
+			tech = tech_sensors_2
+			message = no
+		}
+		give_technology = {
+			tech = tech_sensors_3
+			message = no
+		}
+		add_modifier = {
+			modifier = mem_fainthearted_country
+			days = -1
+		}
+		add_modifier = {
+			modifier = mem_fainthearted_research_1
+			days = 14400
+		}
+		country_event = {
+			id = mem_fainthearted.2
+			days = 7200
+		}
+	}
+}
+
+country_event = {
+	id = mem_fainthearted.2
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		remove_modifier = mem_fainthearted_research_1
+		add_modifier = {
+			modifier = mem_fainthearted_research_2
+			days = 7200
+		}
+	}
+}
+
+
+# Executed right before a country has established communications with another country
+# This = Country which established the communications
+# From = Country which communications were established with
+country_event = {
+	id = mem_fainthearted.3
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		OR = {
+			has_origin = origin_mem_fainthearted
+			FROM = {
+				has_origin = origin_mem_fainthearted
+			}
+		}
+	}
+	
+	immediate = {
+		IF = {
+			limit = {
+				has_origin = origin_mem_fainthearted
+				FROM = {
+					is_country_type = default
+					NOR = {
+						has_ethic = ethic_pacifist
+						has_ethic = ethic_fanatic_pacifist
+					}
+					OR = {
+						has_ethic = ethic_fanatic_militarist
+						has_ethic = ethic_militarist
+						has_ethic = ethic_fanatic_xenophobe
+						has_ethic = ethic_xenophobe
+						has_ethic = ethic_fanatic_authoritarian
+						has_ethic = ethic_authoritarian
+					}
+				}
+			}
+			FROM = {
+				add_opinion_modifier = {
+					who = ROOT
+					modifier = mem_opinion_cowards
+				}
+			}
+		}
+		IF = {
+			limit = {
+				FROM = {
+					has_origin = origin_mem_fainthearted
+				}
+				is_country_type = default
+				NOR = {
+					has_ethic = ethic_pacifist
+					has_ethic = ethic_fanatic_pacifist
+				}
+				OR = {
+					has_ethic = ethic_fanatic_militarist
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_authoritarian
+					has_ethic = ethic_authoritarian
+				}
+			}
+			add_opinion_modifier = {
+				who = FROM
+				modifier = mem_opinion_cowards
+			}
+		}
+	}
+}
