@@ -478,7 +478,6 @@ ship_event = {
 				country_event = { id = mem_planetary_shields.11 }
 			}
 		}
-		
 		create_country = {
 			name = "NAME_Old_One"
 			type = cloud
@@ -2564,7 +2563,7 @@ event = {
 		}
 		if = {
 			limit = {
-				years_passed > 28
+				years_passed > 48
 				NOT = { has_global_flag = amoeba_garrison_spawn_cooldown }
 				NOT = { has_global_flag = no_more_amoeba_garrison_spawns }
 				exists = event_target:amoeba_home_system
@@ -2628,7 +2627,7 @@ event = {
 											}
 											if = {
 												limit = {
-													years_passed > 49
+													years_passed > 79
 												}
 												while = {
 													count = 3
@@ -2663,7 +2662,7 @@ event = {
 											}
 											if = {
 												limit = {
-													years_passed > 49
+													years_passed > 79
 												}
 												while = {
 													count = 3
@@ -2698,7 +2697,7 @@ event = {
 											}
 											if = {
 												limit = {
-													years_passed > 49
+													years_passed > 79
 												}
 												while = {
 													count = 3
@@ -2733,7 +2732,7 @@ event = {
 											}
 											if = {
 												limit = {
-													years_passed > 49
+													years_passed > 79
 												}
 												while = {
 													count = 3
@@ -3388,7 +3387,7 @@ country_event = {
 			country_event = { id = galcom.107 }
 		}
 		else = {
-			country_event = { id = galactic_features.385 }
+			country_event = { id = galactic_features.385 days = 1 }
 		}
 	}
 }
@@ -3404,9 +3403,33 @@ country_event = {
 
 	is_triggered_only = yes
 
+	abort_trigger = {
+		any_owned_fleet = {
+			is_in_combat = yes
+			any_combatant_fleet = {
+				owner = {
+					OR = {
+						is_country_type = tiyanki
+						is_country_type = tiyanki_garrison
+					}
+				}
+			}
+		}
+	}
+	abort_effect = {
+		remove_country_flag = no_cows
+		remove_country_flag = no_bulls
+		remove_country_flag = no_calves
+		remove_country_flag = no_hatchlings
+	}
+
 	immediate = {
 		if = {
 			limit = {
+				check_variable = {
+					which = tiyanki_cow_kill_counter
+					value < 1
+				}
 				check_variable = {
 					which = tiyanki_cow_kills
 					value < 1
@@ -3417,6 +3440,10 @@ country_event = {
 		if = {
 			limit = {
 				check_variable = {
+					which = tiyanki_bull_kill_counter
+					value < 1
+				}
+				check_variable = {
 					which = tiyanki_bull_kills
 					value < 1
 				}
@@ -3426,6 +3453,10 @@ country_event = {
 		if = {
 			limit = {
 				check_variable = {
+					which = tiyanki_calf_kill_counter
+					value < 1
+				}
+				check_variable = {
 					which = tiyanki_calf_kills
 					value < 1
 				}
@@ -3434,6 +3465,10 @@ country_event = {
 		}
 		if = {
 			limit = {
+				check_variable = {
+					which = tiyanki_hatchling_kill_counter
+					value < 1
+				}
 				check_variable = {
 					which = tiyanki_hatchling_kills
 					value < 1
@@ -3457,12 +3492,10 @@ country_event = {
 				which = tiyanki_cow_credits
 				value = 500
 			}
-			add_resource = { energy = 500 }
 			change_variable = { 
 				which = tiyanki_cow_gas
 				value = 50
 			}
-			add_resource = { exotic_gases = 50 }
 			change_variable = { 
 				which = tiyanki_cow_kills
 				value = -1 
@@ -3483,12 +3516,10 @@ country_event = {
 				which = tiyanki_bull_credits
 				value = 500
 			}
-			add_resource = { energy = 500 }
 			change_variable = { 
 				which = tiyanki_bull_gas
 				value = 50
 			}
-			add_resource = { exotic_gases = 50 }
 			change_variable = { 
 				which = tiyanki_bull_kills
 				value = -1 
@@ -3509,12 +3540,10 @@ country_event = {
 				which = tiyanki_calf_credits
 				value = 250
 			}
-			add_resource = { energy = 250 }
 			change_variable = { 
 				which = tiyanki_calf_gas
 				value = 25
 			}
-			add_resource = { exotic_gases = 25 }
 			change_variable = { 
 				which = tiyanki_calf_kills
 				value = -1 
@@ -3535,12 +3564,10 @@ country_event = {
 				which = tiyanki_hatchling_credits
 				value = 150
 			}
-			add_resource = { energy = 150 }
 			change_variable = { 
 				which = tiyanki_hatchling_gas
 				value = 15
 			}
-			add_resource = { exotic_gases = 15 }
 			change_variable = { 
 				which = tiyanki_hatchling_kills
 				value = -1 
@@ -3578,6 +3605,62 @@ country_event = {
 
 	after = {
 		hidden_effect = {
+			while = {
+				limit = {
+					check_variable = {
+						which = tiyanki_cow_kill_counter
+						value > 0
+					}
+				}
+				change_variable = { 
+					which = tiyanki_cow_kill_counter
+					value = -1
+				}
+				add_resource = { energy = 500 }
+				add_resource = { exotic_gases = 50 }
+			}
+			while = {
+				limit = {
+					check_variable = {
+						which = tiyanki_bull_kill_counter
+						value > 0
+					}
+				}
+				change_variable = { 
+					which = tiyanki_bull_kill_counter
+					value = -1 
+				}
+				add_resource = { energy = 500 }
+				add_resource = { exotic_gases = 50 }
+			}
+			while = {
+				limit = {
+					check_variable = {
+						which = tiyanki_calf_kill_counter
+						value > 0
+					}
+				}
+				change_variable = { 
+					which = tiyanki_calf_kill_counter
+					value = -1
+				}
+				add_resource = { energy = 250 }
+				add_resource = { exotic_gases = 25 }
+			}
+			while = {
+				limit = {
+					check_variable = {
+						which = tiyanki_hatchling_kill_counter
+						value > 0
+					}
+				}
+				change_variable = { 
+					which = tiyanki_hatchling_kill_counter
+					value = -1
+				}
+				add_resource = { energy = 150 }
+				add_resource = { exotic_gases = 15 }
+			}
 			reset_tiyanki_variables = yes
 			 # Return to neutral so other Tiyanki aren't hostile
 			set_faction_hostility = {
@@ -3654,14 +3737,14 @@ country_event = {
 	is_triggered_only = yes
 
 	immediate = {
-		random_list = {
-			50 = {
-				set_global_flag = ongoing_space_storm
-				every_system = {
-					limit = {
-						is_inside_nebula = no
-						NOT = { has_star_flag = vluur_system }
-					}
+		set_global_flag = ongoing_space_storm
+		every_system = {
+			limit = {
+				is_inside_nebula = no
+				NOT = { has_star_flag = vluur_system }
+			}
+			random_list = {
+				50 = {
 					set_star_flag = storm_system
 					star = {
 						create_ambient_object = {
@@ -3679,42 +3762,42 @@ country_event = {
 					}
 					add_modifier = { modifier = space_storm }
 				}
-				country_event = { id = galactic_features.403 days = 1800 random = 1800 }
-				if = {
-					limit = { 
-						is_galactic_community_formed = yes
-						any_playable_country = {
-							is_galactic_community_member = yes
-							NOT = { has_ethic = ethic_gestalt_consciousness }
-						}
-					}
-					random_playable_country = {
-						limit = { 
-							is_galactic_community_member = yes
-							NOT = { has_ethic = ethic_gestalt_consciousness }
-						}
-						create_leader = {
-							class = admiral
-							species = owner_main_species
-							effect = {
-								save_global_event_target_as = storm_name
-								exile_leader_as = storm_name
-							}
-						}
-					}
-					every_playable_country = {
-						limit = { is_ai = no }
-						country_event = { id = galactic_features.405 }
-					}
+				50 = {}
+			}
+		}
+		country_event = { id = galactic_features.403 days = 1800 random = 1800 }
+		if = {
+			limit = { 
+				is_galactic_community_formed = yes
+				any_playable_country = {
+					is_galactic_community_member = yes
+					NOT = { has_ethic = ethic_gestalt_consciousness }
 				}
-				else = {
-					every_playable_country = {
-						limit = { is_ai = no }
-						country_event = { id = galactic_features.402 }
+			}
+			random_playable_country = {
+				limit = { 
+					is_galactic_community_member = yes
+					NOT = { has_ethic = ethic_gestalt_consciousness }
+				}
+				create_leader = {
+					class = admiral
+					species = owner_main_species
+					effect = {
+						save_global_event_target_as = storm_name
+						exile_leader_as = storm_name
 					}
 				}
 			}
-			50 = {}
+			every_playable_country = {
+				limit = { is_ai = no }
+				country_event = { id = galactic_features.405 }
+			}
+		}
+		else = {
+			every_playable_country = {
+				limit = { is_ai = no }
+				country_event = { id = galactic_features.402 }
+			}
 		}
 	}
 }
@@ -3766,6 +3849,7 @@ country_event = {
 				destroy_ambient_object = this
 			}
 			remove_star_flag = storm_system
+			remove_modifier = space_storm
 		}
 		if = {
 			limit = { is_galactic_community_formed = yes }
