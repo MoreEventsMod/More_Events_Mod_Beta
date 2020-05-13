@@ -1,0 +1,266 @@
+namespace = mem_fainthearted
+
+# Gamestart Event
+country_event = {
+	id = mem_fainthearted.1
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_origin = origin_mem_fainthearted
+	}
+
+	immediate = {
+		give_technology = {
+			tech = tech_sensors_2
+			message = no
+		}
+		give_technology = {
+			tech = tech_sensors_3
+			message = no
+		}
+		add_modifier = {
+			modifier = mem_fainthearted_country
+			days = -1
+		}
+		add_modifier = {
+			modifier = mem_fainthearted_research_1
+			days = 14400
+		}
+		country_event = {
+			id = mem_fainthearted.2
+			days = 7200
+		}
+		IF = {
+			limit = {
+				any_system = {
+					distance = {
+						source = root.capital_scope
+						use_bypasses = no
+						min_jumps = 1
+						max_jumps = 2
+					}
+					any_system_planet = {
+						habitability = {
+							who = root.species
+							value > 5.9
+						}
+					}
+				}
+			}
+			random_system = {
+				limit = {
+					distance = {
+						source = root.capital_scope
+						use_bypasses = no
+						min_jumps = 1
+						max_jumps = 2
+					}
+					any_system_planet = {
+						habitability = {
+							who = root.species
+							value > 5.9
+						}
+					}
+				}
+				random_system_planet = {
+					limit = {
+						habitability = {
+							who = root.species
+							value > 5.9
+						}
+					}
+					set_planet_flag = mem_fainthearted_forsaken
+					prevent_anomaly = yes
+				}
+			}
+		}
+		IF = {
+			limit = {
+				NOT = {
+					any_system = {
+						distance = {
+							source = root.capital_scope
+							use_bypasses = no
+							min_jumps = 1
+							max_jumps = 2
+						}
+						any_system_planet = {
+							has_planet_flag = mem_fainthearted_forsaken
+						}
+					}
+				}
+			}
+			random_system = {
+				limit = {
+					distance = {
+						source = root.capital_scope
+						use_bypasses = no
+						min_jumps = 1
+						max_jumps = 2
+					}
+					any_system_planet = {
+						planet_size > 10
+						planet_size < 26
+						OR = {
+							is_planet_class = pc_frozen
+							is_planet_class = pc_barren
+							is_planet_class = pc_barren_cold
+						}
+					}
+				}
+				random_system_planet = {
+					limit = {
+						planet_size > 10
+						planet_size < 26
+						OR = {
+							is_planet_class = pc_frozen
+							is_planet_class = pc_barren
+							is_planet_class = pc_barren_cold
+						}
+					}
+					change_pc = pc_nuked
+					reset_planet = yes
+					set_planet_flag = mem_fainthearted_forsaken
+					prevent_anomaly = yes
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = mem_fainthearted.2
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		remove_modifier = mem_fainthearted_research_1
+		add_modifier = {
+			modifier = mem_fainthearted_research_2
+			days = 7200
+		}
+	}
+}
+
+
+# Executed right before a country has established communications with another country
+# This = Country which established the communications
+# From = Country which communications were established with
+country_event = {
+	id = mem_fainthearted.3
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		OR = {
+			has_origin = origin_mem_fainthearted
+			FROM = {
+				has_origin = origin_mem_fainthearted
+			}
+		}
+	}
+	
+	immediate = {
+		IF = {
+			limit = {
+				has_origin = origin_mem_fainthearted
+				FROM = {
+					is_country_type = default
+					NOR = {
+						has_ethic = ethic_pacifist
+						has_ethic = ethic_fanatic_pacifist
+					}
+					OR = {
+						has_ethic = ethic_fanatic_militarist
+						has_ethic = ethic_militarist
+						has_ethic = ethic_fanatic_xenophobe
+						has_ethic = ethic_xenophobe
+						has_ethic = ethic_fanatic_authoritarian
+						has_ethic = ethic_authoritarian
+					}
+				}
+			}
+			FROM = {
+				add_opinion_modifier = {
+					who = ROOT
+					modifier = mem_opinion_cowards
+				}
+			}
+		}
+		IF = {
+			limit = {
+				FROM = {
+					has_origin = origin_mem_fainthearted
+				}
+				is_country_type = default
+				NOR = {
+					has_ethic = ethic_pacifist
+					has_ethic = ethic_fanatic_pacifist
+				}
+				OR = {
+					has_ethic = ethic_fanatic_militarist
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_authoritarian
+					has_ethic = ethic_authoritarian
+				}
+			}
+			add_opinion_modifier = {
+				who = FROM
+				modifier = mem_opinion_cowards
+			}
+		}
+	}
+}
+
+# A ship has surveyed a planet.
+# Scope = Ship
+# From = Planet
+ship_event = {
+	id = mem_fainthearted.4
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			has_planet_flag = mem_fainthearted_forsaken
+		}
+		owner = {
+			has_origin = origin_mem_fainthearted
+			NOT = {
+				has_country_flag = mem_fainthearted_forsaken_found
+			}
+		}
+	}
+
+	immediate = {
+		owner = {
+			set_country_flag = mem_fainthearted_forsaken_found
+		}
+		FROM = {
+			add_anomaly = {
+				category = mem_vazurans_category_5
+			}
+		}
+	}
+}
+
+ship_event = {
+	id = mem_fainthearted.5
+	title = mem_fainthearted.5.name
+	desc = mem_fainthearted.5.desc
+	picture = GFX_evt_mem_apocalypse
+	show_sound = event_ground_battle
+	is_triggered_only = yes
+
+	immediate = {
+		#TODO
+	}
+
+	option = {
+		name = mem_fainthearted.5.a
+		
+	}
+}
