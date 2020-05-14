@@ -12,7 +12,7 @@
 import os, sys, getopt
 
 #default to exporting from English to all other languages and not overwriting pre-existing files
-allLanguages = {'l_braz_por', 'l_english', 'l_french', 'l_german', 'l_polish', 'l_russian', 'l_spanish'}
+allLanguages = {'l_braz_por', 'l_english', 'l_french', 'l_german', 'l_polish', 'l_russian', 'l_spanish', 'l_simp_chinese'}
 sourceLanguage = 'l_english'
 ignoreLanguages = set([])
 overwrite = False

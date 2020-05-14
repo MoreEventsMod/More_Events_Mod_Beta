@@ -227,6 +227,7 @@ planet_event = {
                                 ethic = ethic_militarist
                             }
                             authority = auth_imperial
+                            origin = origin_mem_out_of_time
                             civics = {
                                 civic = civic_fanatic_purifiers
                                 civic = civic_warrior_culture
@@ -267,6 +268,79 @@ planet_event = {
                     }
                     33 = {
                         create_species = {
+                            name = Stone
+                            plural = Stones
+                            adjective = Stone
+                            class = LITHOID
+                            portrait = lith2
+                            name_list = LITHOID2
+                            traits = {
+                                trait="trait_lithoid"
+                                trait="trait_lithoid_volatile_excretions"
+                                trait="trait_wasteful"
+                                trait="trait_decadent"
+                                trait="trait_industrious"
+                            }
+                            homeworld = this
+                            effect = {
+                                save_event_target_as = newcomer_species
+                            }
+                        }
+                        create_country = {
+                            type = mem_broken_clock_country
+                            # name = "Dool'Rakkan Reborn"
+                            species = last_created_species
+                            name_list = LITHOID2
+                            ethos = {
+                                ethic = ethic_fanatic_xenophobe
+                                ethic = ethic_spiritualist
+                            }
+                            authority = auth_dictatorial
+                            origin = origin_mem_out_of_time
+                            civics = {
+                                civic = civic_fanatic_purifiers
+                                civic = civic_mining_guilds
+                                civic = civic_philosopher_king
+                            }
+                            flag = {
+                                icon = {
+                                    category = "zoological"
+                                    file = "flag_zoological_24.dds"
+                                }
+                                background={
+                                    category="backgrounds"
+                                    file="v.dds"
+                                }
+                                colors = {
+                                    "dark_purple"
+                                    "red"
+                                    "null"
+                                    "null"
+                                }
+                            }
+                            day_zero_contact = no
+                            effect = {
+                                save_event_target_as = unwelcome_guests
+                                set_country_flag = mem_broken_clock_newcomers
+                                set_timed_country_flag = { flag = day_0 days = 7 }
+                                # mem_broken_clock_give_tech = yes
+                                add_modifier = {
+                                    modifier = mem_broken_clock_ai_cheat
+                                    days = -1
+                                }
+                                add_modifier = {
+                                    modifier = mem_broken_clock_ai_cheat_temp
+                                    days = 3600
+                                }
+                            }
+                        }
+                        modifier = {
+                            factor = 0
+                            has_lithoids = no
+                        }
+                    }
+                    33 = {
+                        create_species = {
                             name = SEI
                             plural = SEI
                             adjective = SEI
@@ -297,6 +371,7 @@ planet_event = {
                                 civic = civic_machine_rockbreakers
                                 civic = civic_machine_replication
                             }
+                            origin = origin_mem_out_of_time
                             flag = {
                                 icon = {
                                     category = pointy
@@ -369,6 +444,7 @@ planet_event = {
                                 civic = civic_hive_strength_of_legions
                                 civic = civic_hive_subspace_ephapse
                             }
+                            origin = origin_mem_out_of_time
                             flag = {
                                 icon = {
                                     category = zoological
@@ -534,8 +610,8 @@ planet_event = {
                         switch = {
                             trigger = has_authority
                             auth_machine_intelligence = { prev = { add_district = district_nexus } }
-                            auth_machine_intelligence = { prev = { add_district = district_hive } }
-                            auth_imperial = { prev = { add_district = district_city } }
+                            auth_hive_mind = { prev = { add_district = district_hive } }
+                            default = { prev = { add_district = district_city } }
                         }
                     }
                 }
@@ -550,6 +626,11 @@ planet_event = {
                             owner = { has_authority = auth_machine_intelligence }
                         }
                         add_district = district_generator
+                    }
+                    ELSE_IF = {
+                        limit = {
+                            owner = { is_lithoid_empire = yes }
+                        }
                     }
                     ELSE = {
                         add_district = district_farming
@@ -567,39 +648,30 @@ planet_event = {
                         owner = { has_authority = auth_hive_mind }
                     }
                     add_building = building_hive_major_capital
+                    add_building = building_maintenance_depot
+                    add_building = building_hive_warren
                 }
                 ELSE_IF = {
                     limit = {
                         owner = { has_authority = auth_machine_intelligence }
                     }
                     add_building = building_machine_major_capital
+                    add_building = building_maintenance_depot
+                    add_building = building_maintenance_depot
                 }
                 ELSE = {
                     add_building = building_major_capital
+                    add_building = building_hall_judgment
                 }
                 while = {
                     count = 3
                     add_building = building_fortress
                 }
-                add_building = building_hall_judgment
                 add_building = building_mineral_purification_hub
                 add_building = building_dimensional_fabricator
                 add_building = building_class_4_singularity
-                while = {
-                    count = 2
-                    random_list = {
-                        1 = {
-                            add_building = building_hydroponics_farm
-                            modifier = {
-                                factor = 0
-                                owner = { is_gestalt = yes }
-                            }
-                        }
-                        1 = {
-                            add_building = building_energy_grid
-                        }
-                    }
-                }
+                add_building = building_energy_grid
+                set_capital = yes
             }
 
             every_system_planet = {
@@ -651,7 +723,7 @@ planet_event = {
                             trigger = has_authority
                             auth_machine_intelligence = { prev = { add_district = district_rw_nexus } }
                             auth_machine_intelligence = { prev = { add_district = district_rw_hive } }
-                            auth_imperial = { prev = { add_district = district_rw_city } }
+                            default = { prev = { add_district = district_rw_city } }
                         }
                     }
                 }
@@ -673,6 +745,12 @@ planet_event = {
                         }
                         add_district = district_rw_generator
                     }
+                    ELSE_IF = {
+                        limit = {
+                            owner = { is_lithoid_empire = yes }
+                        }
+                        add_district = district_rw_science
+                    }
                     ELSE = {
                         add_district = district_rw_farming
                     }
@@ -692,21 +770,25 @@ planet_event = {
                         owner = { has_authority = auth_hive_mind }
                     }
                     add_building = building_hive_major_capital
+                    add_building = building_maintenance_depot
+                    add_building = building_hive_warren
                 }
                 ELSE_IF = {
                     limit = {
                         owner = { has_authority = auth_machine_intelligence }
                     }
                     add_building = building_machine_major_capital
+                    add_building = building_maintenance_depot
+                    add_building = building_maintenance_depot
                 }
                 ELSE = {
                     add_building = building_major_capital
+                    add_building = building_hall_judgment
                 }
                 while = {
                     count = 3
                     add_building = building_fortress
                 }
-                add_building = building_hall_judgment
                 while = {
                     count = 5
                     add_building = building_research_lab_1
@@ -751,6 +833,10 @@ planet_event = {
                     limit = { has_authority = auth_machine_intelligence }
                     set_name = "Sustained Eradication Initiative"
                 }
+                ELSE_IF = { 
+                    limit = { is_lithoid_empire = yes }
+                    set_name = "Primacy of Stone"
+                }
                 ELSE = {
                     set_name = "Dool'Rakkan Reborn"
                 }
@@ -758,7 +844,12 @@ planet_event = {
 					influence = 1000
 					minerals = 5000
 					food = 200
-					energy = 5000
+                    energy = 5000
+                    alloys = 5000
+                    exotic_gases = 1000
+                    volatile_motes = 1000
+                    rare_crystals = 1000
+                    consumer_goods = 5000
 				}
                 add_100_unity_per_year_passed = yes
                 while = {
@@ -989,7 +1080,18 @@ country_event = {
 country_event = {
     id = mem_broken_clock.1003
     title = TRANSMISSION
-    desc = mem_broken_clock.1003.desc
+    desc = {
+        text = mem_broken_clock.1003.desc
+        trigger = {
+            event_target:unwelcome_guests = { is_lithoid_empire = no }
+        }
+    }
+    desc = {
+        text = mem_broken_clock.1003.desc.lith
+        trigger = {
+            event_target:unwelcome_guests = { is_lithoid_empire = yes }
+        }
+    }
 
     diplomatic = yes
     location = event_target:unwelcome_guests.capital_scope
