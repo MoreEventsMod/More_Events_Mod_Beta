@@ -1,0 +1,535 @@
+########################
+# Dwarf Fortress
+# Code by Malthus
+# Text by ViolentBeetle
+########################
+
+namespace = mem_dwarf_fortress
+
+#simple fail - setting flag for later spawn of site
+ship_event = {
+	id = mem_dwarf_fortress.1
+	title = mem_dwarf_fortress.1.name
+	desc = mem_dwarf_fortress.1.desc
+	picture = GFX_evt_mem_inferno
+	show_sound = event_solar_fusion
+	location = FROMFROM
+	
+	is_triggered_only = yes
+
+	immediate = {
+		set_global_flag = mem_dwarf_fortress_spawn
+		FROMFROM = {
+			set_planet_flag = mem_dwarf_fortress_planet
+		}
+		owner = {
+			set_country_flag = mem_dwarf_fortress
+		}		
+	}
+	
+	option = {
+		name = mem_dwarf_fortress.1.a
+	}	
+}
+
+#spawn the site later
+country_event = {
+	id = mem_dwarf_fortress.2
+	title = mem_dwarf_fortress.2.name
+	desc = mem_dwarf_fortress.2.desc
+	picture = GFX_evt_in_the_dark
+	show_sound = event_structural_collapse
+	location = event_target:mem_dwarf_fortress_planet
+	
+	mean_time_to_happen = {
+		months = 200
+	}
+
+	trigger = {
+		has_global_flag = mem_dwarf_fortress_spawn
+		has_country_flag = mem_dwarf_fortress
+		any_planet_within_border = {
+			has_planet_flag = mem_dwarf_fortress_planet
+			has_mining_station = yes
+		}
+	}
+
+	
+	immediate = {
+		random_planet_within_border = {
+			limit = {
+				has_planet_flag = mem_dwarf_fortress_planet
+			}
+			save_global_event_target_as = mem_dwarf_fortress_planet
+		}
+		remove_global_flag = mem_dwarf_fortress_spawn
+	}
+	
+	option = {
+		name = mem_dwarf_fortress.2.a
+		event_target:mem_dwarf_fortress_planet = {
+			create_archaeological_site = mem_dwarf_fortress_site
+			mining_station = { dismantle = yes }
+			clear_deposits = yes	
+		}			
+	}
+	
+	option = {
+		name = mem_dwarf_fortress.2.b
+		add_monthly_resource_mult = {
+			resource = influence
+			value = @tier1influencereward
+			min = @tier1influencemin
+			max = @tier1influencemax
+		}
+	}
+}
+
+#anomaly success, found digsite
+ship_event = {
+	id = mem_dwarf_fortress.3
+	title = mem_dwarf_fortress.3.name
+	desc = mem_dwarf_fortress.3.desc
+	picture = GFX_evt_in_the_dark
+	show_sound = event_mystic_reveal
+	location = event_target:mem_dwarf_fortress_planet
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		FROM = {
+			clear_deposits = yes
+			set_planet_flag = mem_dwarf_fortress_planet
+			save_global_event_target_as = mem_dwarf_fortress_planet
+		}
+		owner = {
+			set_country_flag = mem_dwarf_fortress
+		}
+	}
+	
+	option = {
+		name = mem_dwarf_fortress.3.a
+		FROM = {
+			create_archaeological_site = mem_dwarf_fortress_site
+		}
+	}
+}
+
+#Dwarf fortress digsite stage 1 Pressure plate
+fleet_event = {
+    id = mem_dwarf_fortress.4
+    title = mem_dwarf_fortress.4.name
+	desc = {
+		trigger = {
+			hidden:owner = { 
+				switch = { 
+					trigger = has_country_flag 
+					mem_dwarf_fortress_outcome_1 = {text = mem_dwarf_fortress.4.desc_01}
+					mem_dwarf_fortress_outcome_2 = {text = mem_dwarf_fortress.4.desc_02}
+					mem_dwarf_fortress_outcome_3 = {text = mem_dwarf_fortress.4.desc_03}
+					# fallback for testing
+					default = {text = "something went wrong (mem_dwarf_fortress.4)"} 
+				}
+			}
+		}
+	}
+    picture = GFX_evt_archaeologists_escaping
+	archaeology = yes
+    is_triggered_only = yes
+	
+	immediate = {
+		from = { set_site_progress_locked = yes }
+		mem_dwarf_fortress_list = yes
+		leader = {
+			save_event_target_as = mem_dead_scientist
+		}
+    }
+
+    after = { 
+		from = { set_site_progress_locked = no } 
+		owner = {
+			If = {
+				limit = {
+					has_country_flag = mem_dwarf_fortress_outcome_1
+				}
+				remove_country_flag = mem_dwarf_fortress_outcome_1
+			}
+			If = {
+				limit = {
+					has_country_flag = mem_dwarf_fortress_outcome_2
+				}
+				remove_country_flag = mem_dwarf_fortress_outcome_2
+			}
+			If = {
+				limit = {
+					has_country_flag = mem_dwarf_fortress_outcome_3
+				}
+				remove_country_flag = mem_dwarf_fortress_outcome_3
+			}
+		}
+    }
+    option = {
+		trigger = {
+			owner = {
+				has_country_flag = mem_dwarf_fortress_outcome_1
+			}
+		}
+        name = mem_dwarf_fortress.4.a
+		small_artifact_reward = yes
+		event_target:mem_dead_scientist = {
+			kill_leader = {
+				type = scientist
+			}
+		}
+	}
+	option = {
+		trigger = {
+			owner = {
+				has_country_flag = mem_dwarf_fortress_outcome_2
+			}
+		}
+        name = mem_dwarf_fortress.4.b
+		small_artifact_reward = yes
+		locked_random_list = {
+			10 = {
+				modifier = {
+					factor = 0
+					event_target:mem_dead_scientist = {
+						has_trait = leader_trait_maimed
+					}
+				}
+				event_target:mem_dead_scientist = {
+					add_trait = leader_trait_maimed
+				}
+			}
+			10 = {
+				modifier = {
+					factor = 0
+					event_target:mem_dead_scientist = {
+						has_trait = leader_trait_mem_traumatized
+					}
+				}
+				event_target:mem_dead_scientist = {
+					add_trait = leader_trait_mem_traumatized
+				}
+			}
+		}
+	}
+	option = {
+		trigger = {
+			owner = {
+				NOR = {
+					has_country_flag = mem_dwarf_fortress_outcome_1
+					has_country_flag = mem_dwarf_fortress_outcome_2
+				}
+			}
+		}
+        name = mem_dwarf_fortress.4.c
+	}
+}
+
+#Dwarf fortress digsite stage 2 Cave in collumn
+fleet_event = {
+    id = mem_dwarf_fortress.5
+    title = mem_dwarf_fortress.5.name
+    desc = {
+		trigger = {
+			hidden:owner = { 
+				switch = { 
+					trigger = has_country_flag 
+					mem_dwarf_fortress_outcome_1 = {text = mem_dwarf_fortress.5.desc_01}
+					mem_dwarf_fortress_outcome_2 = {text = mem_dwarf_fortress.5.desc_02}
+					mem_dwarf_fortress_outcome_3 = {text = mem_dwarf_fortress.5.desc_03}
+					# fallback for testing
+					default = {text = "something went wrong (mem_dwarf_fortress.5)"} 
+				}
+			}
+		}
+	}
+    picture = GFX_evt_ancient_artifact
+	archaeology = yes	
+	is_triggered_only = yes
+	
+    immediate = {
+		from = { set_site_progress_locked = yes }
+		mem_dwarf_fortress_list = yes
+		leader = {
+			save_event_target_as = mem_dead_scientist
+		}
+    }
+
+    after = { 
+		from = { set_site_progress_locked = no } 
+		owner = {
+			If = {
+				limit = {
+					has_country_flag = mem_dwarf_fortress_outcome_1
+				}
+				remove_country_flag = mem_dwarf_fortress_outcome_1
+			}
+			If = {
+				limit = {
+					has_country_flag = mem_dwarf_fortress_outcome_2
+				}
+				remove_country_flag = mem_dwarf_fortress_outcome_2
+			}
+			If = {
+				limit = {
+					has_country_flag = mem_dwarf_fortress_outcome_3
+				}
+				remove_country_flag = mem_dwarf_fortress_outcome_3
+			}
+		}
+    }
+    option = {
+		trigger = {
+			owner = {
+				has_country_flag = mem_dwarf_fortress_outcome_1
+			}
+		}
+        name = mem_dwarf_fortress.5.a
+		small_artifact_reward = yes
+		event_target:mem_dead_scientist = {
+			kill_leader = {
+				type = scientist
+			}
+		}
+	}
+	option = {
+		trigger = {
+			owner = {
+				has_country_flag = mem_dwarf_fortress_outcome_2
+			}
+		}
+        name = mem_dwarf_fortress.5.b
+		small_artifact_reward = yes
+		locked_random_list = {
+			10 = {
+				modifier = {
+					factor = 0
+					event_target:mem_dead_scientist = {
+						has_trait = leader_trait_maimed
+					}
+				}
+				event_target:mem_dead_scientist = {
+					add_trait = leader_trait_maimed
+				}
+			}
+			10 = {
+				modifier = {
+					factor = 0
+					event_target:mem_dead_scientist = {
+						has_trait = leader_trait_mem_traumatized
+					}
+				}
+				event_target:mem_dead_scientist = {
+					add_trait = leader_trait_mem_traumatized
+				}
+			}
+		}
+	}
+	option = {
+		trigger = {
+			owner = {
+				NOR = {
+					has_country_flag = mem_dwarf_fortress_outcome_1
+					has_country_flag = mem_dwarf_fortress_outcome_2
+				}
+			}
+		}
+        name = mem_dwarf_fortress.5.c
+	}
+}
+
+#Dwarf fortress digsite stage 3 - Danger room
+fleet_event = {
+	id = mem_dwarf_fortress.6
+	title = mem_dwarf_fortress.6.name
+	desc = {
+		trigger = {
+			hidden:owner = { 
+				switch = { 
+					trigger = has_country_flag 
+					mem_dwarf_fortress_outcome_1 = {text = mem_dwarf_fortress.6.desc_01}
+					mem_dwarf_fortress_outcome_2 = {text = mem_dwarf_fortress.6.desc_01}
+					mem_dwarf_fortress_outcome_3 = {text = mem_dwarf_fortress.6.desc_02}
+					# fallback for testing
+					default = {text = "something went wrong (mem_dwarf_fortress.6)"} 
+				}
+			}
+		}
+	}
+	picture = GFX_evt_archaeology_trap
+	archaeology = yes
+    is_triggered_only = yes
+	
+	immediate = {
+		from = { set_site_progress_locked = yes }
+		mem_dwarf_fortress_list = yes
+		leader = {
+			save_event_target_as = mem_dead_scientist
+		}
+    }
+
+    after = { 
+		from = { set_site_progress_locked = no } 
+		owner = {
+			If = {
+				limit = {
+					has_country_flag = mem_dwarf_fortress_outcome_1
+				}
+				remove_country_flag = mem_dwarf_fortress_outcome_1
+			}
+			If = {
+				limit = {
+					has_country_flag = mem_dwarf_fortress_outcome_2
+				}
+				remove_country_flag = mem_dwarf_fortress_outcome_2
+			}
+			If = {
+				limit = {
+					has_country_flag = mem_dwarf_fortress_outcome_3
+				}
+				remove_country_flag = mem_dwarf_fortress_outcome_3
+			}
+		}
+		
+    }
+    option = {
+		trigger = {
+			owner = {
+				has_country_flag = mem_dwarf_fortress_outcome_1
+			}
+		}
+        name = mem_dwarf_fortress.6.a
+		small_artifact_reward = yes
+		event_target:mem_dead_scientist = {
+			kill_leader = {
+				type = scientist
+			}
+		}
+	}
+	option = {
+		trigger = {
+			owner = {
+				has_country_flag = mem_dwarf_fortress_outcome_2
+			}
+		}
+        name = mem_dwarf_fortress.6.b
+		small_artifact_reward = yes
+		locked_random_list = {
+			10 = {
+				modifier = {
+					factor = 0
+					event_target:mem_dead_scientist = {
+						has_trait = leader_trait_maimed
+					}
+				}
+				event_target:mem_dead_scientist = {
+					add_trait = leader_trait_maimed
+				}
+			}
+			10 = {
+				modifier = {
+					factor = 0
+					event_target:mem_dead_scientist = {
+						has_trait = leader_trait_mem_traumatized
+					}
+				}
+				event_target:mem_dead_scientist = {
+					add_trait = leader_trait_mem_traumatized
+				}
+			}
+		}
+	}
+	option = {
+		trigger = {
+			owner = {
+				NOR = {
+					has_country_flag = mem_dwarf_fortress_outcome_1
+					has_country_flag = mem_dwarf_fortress_outcome_2
+				}
+			}
+		}
+        name = mem_dwarf_fortress.6.c
+		small_artifact_reward = yes
+	}
+}
+
+#Dwarf fortress digsite stage 4 - Commercial district
+fleet_event = {
+	id = mem_dwarf_fortress.7
+	title = mem_dwarf_fortress.7.name
+	desc = mem_dwarf_fortress.7.desc
+	picture = GFX_evt_underground_city
+	archaeology = yes
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+		mem_dwarf_fortress_list = yes
+    }
+
+    after = { 
+		from = { set_site_progress_locked = no } 
+	}
+
+	option = {
+		name = mem_dwarf_fortress.7.a
+		small_artifact_reward = yes
+	}
+}
+
+#Dwarf fortress digsite stage 5 - Central district
+fleet_event = {
+	id = mem_dwarf_fortress.8
+	title = mem_dwarf_fortress.8.name
+	desc = mem_dwarf_fortress.8.desc
+	picture = GFX_evt_mem_lava_fortress
+	archaeology = yes
+	is_triggered_only = yes
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+		mem_dwarf_fortress_list = yes
+    }
+
+    after = { 
+		from = { set_site_progress_locked = no } 
+	}
+	
+	option = {
+		name = mem_dwarf_fortress.8.a
+		small_artifact_reward = yes
+	}
+}
+
+#Dwarf fortress digsite stage 6 - Core-boring section
+fleet_event = {
+	id = mem_dwarf_fortress.9
+	title = mem_dwarf_fortress.9.name
+	desc = mem_dwarf_fortress.9.desc
+	picture = GFX_evt_mem_factory_01
+	archaeology = yes
+	is_triggered_only = yes
+	
+	option = {
+		name = mem_dwarf_fortress.9.a
+		random_planet = {
+			limit = {
+				has_planet_flag = mem_dwarf_fortress_planet
+			}
+			add_deposit = d_living_metal_deposit
+		}
+		owner = {
+			add_relic = r_mem_dwarf_fortress_boot
+			add_research_option = tech_mine_living_metal
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+		}
+	}
+}

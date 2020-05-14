@@ -1,0 +1,64 @@
+@activation_cost = 150
+@triumph_duration = 3600
+
+r_mem_wpdr_production_matrix = {
+	activation_duration = @triumph_duration
+	sound = relic_activation_cybrex_war_forge
+	portrait = GFX_relic_mem_wpdr_production_matrix
+
+	resources = {
+		category = relics
+		# Activation cost
+		cost = {
+			influence = @activation_cost
+		}
+	}
+	
+	ai_weight = {
+		weight = 100
+		modifier = {
+			factor = 0
+			used_naval_capacity_percent >= 1
+		}
+	}
+
+	triggered_country_modifier = {
+		potential = {
+			always = yes
+		}
+		ships_upkeep_mult = -0.1
+	}
+
+	score = 1500
+
+	active_effect = {
+        custom_tooltip = mem_wpdr_production_matrix_tooltip
+		hidden_effect = {
+            create_fleet = {
+				name = "Weapon Platforms"
+				effect = {
+					set_owner = root
+					while = {
+						count = 8
+						mem_wpdr_create_random_platform = yes
+					}
+					set_location = root.capital_scope
+				}
+			}
+        }
+		custom_tooltip = relic_triumph_cooldown
+		hidden_effect = {
+			add_modifier = {
+				modifier = "relic_activation_cooldown" 
+				days = @triumph_duration
+			}		
+		}
+	}
+	
+	possible = {
+		custom_tooltip = {
+			fail_text = "requires_relic_no_cooldown"
+			NOT = { has_modifier = relic_activation_cooldown }
+        }
+	}
+}

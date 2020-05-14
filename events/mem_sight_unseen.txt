@@ -1,0 +1,962 @@
+# Sight Unseen
+# By ViolentBeetle
+
+namespace = mem_sight_unseen
+
+# Anomaly resolution
+ship_event = {
+	id = mem_sight_unseen.1
+	title = mem_sight_unseen.1.name
+	desc = mem_sight_unseen.1.desc
+
+	is_triggered_only = yes
+
+	location = FROM
+	show_sound = event_alien_signal
+	picture = GFX_evt_mining_station
+
+	option = {
+		name = mem_sight_unseen.1.a
+		owner.capital_scope = {
+			enable_special_project = {
+				name = MEM_SIGHT_UNSEEN_STUDY_VIEWER
+				location = THIS
+				owner = root
+			}
+		}
+	}
+
+	option = {
+		name = NOTIME
+		owner = {
+			add_resource = {
+				influence = 100
+			}
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			owner = {
+				country_event = {
+					id = story.5 days = 30
+				}
+			}
+		}
+	}
+}
+
+# First project research complete
+country_event = {
+	id = mem_sight_unseen.2
+	title = mem_sight_unseen.2.name
+	desc = mem_sight_unseen.2.desc
+
+	is_triggered_only = yes
+
+	show_sound = event_activating_unknown_technology
+	picture = GFX_evt_surreal_visions
+
+	option = {
+		name = mem_sight_unseen.2.a
+		begin_event_chain = {
+			event_chain = mem_sight_unseen_event_chain
+			target = this
+		}
+		trigger = {
+			NOT = { has_valid_civic = civic_fanatic_purifiers }
+		}
+	}
+
+	option = {
+		name = mem_sight_unseen.2.b
+		add_modifier = {
+			modifier = mem_sight_unseen_studying_viewer
+			days = 7200
+		}
+		trigger = {
+			NOT = { has_valid_civic = civic_fanatic_purifiers }
+		}
+	}
+
+	option = {
+		name = mem_sight_unseen.2.c
+		custom_tooltip = mem_sight_unseen.2.c.tooltip
+
+		add_monthly_resource_mult = {
+			resource = unity
+			value = @tier4unityreward
+			min = @tier4unitymin
+			max = @tier4unitymax
+		}
+
+		trigger = {
+			has_valid_civic = civic_fanatic_purifiers
+		}
+	}
+}
+
+# Trigger project generation
+country_event = {
+	id = mem_sight_unseen.3
+	title = mem_sight_unseen.3.name
+	desc = mem_sight_unseen.3.desc
+
+	mean_time_to_happen = {
+		years = 5
+	}
+
+	picture = GFX_evt_surreal_visions
+	show_sound = event_default
+	location = event_target:soft_spot_planet
+
+	trigger = {
+		has_event_chain = mem_sight_unseen_event_chain
+		NOR = {
+			has_country_flag = mem_sight_unseen_timeout
+			has_country_flag = mem_sight_unseen_project_enabled
+			has_country_flag = mem_sight_unseen_end_chain
+		}
+		any_owned_planet = {
+			is_capital = no
+			num_pops > 1
+			NOT = { has_planet_flag = mem_sight_unseen_was_a_candidate }
+		}
+	}
+
+	immediate = {
+		set_timed_country_flag = {
+			flag = mem_sight_unseen_timeout
+			days = 720
+		}
+		random_owned_planet = {
+			limit = {
+				is_capital = no
+				num_pops > 1
+				NOT = { has_planet_flag = mem_sight_unseen_was_a_candidate }
+			}
+			save_event_target_as = soft_spot_planet
+			set_planet_flag = mem_sight_unseen_was_a_candidate
+		}
+	}
+
+	option = {
+		name = mem_sight_unseen.3.a
+		set_country_flag = mem_sight_unseen_project_enabled
+		event_target:soft_spot_planet = {
+			enable_special_project = {
+				name = MEM_SIGHT_UNSEEN_PROBE_SOFT_SPOT
+				location = THIS
+				owner = ROOT
+			}
+		}
+	}
+
+	option = {
+		name = mem_sight_unseen.3.b
+		custom_tooltip = mem_sight_unseen.3.b.tooltip
+	}
+}
+
+@modifierlength = 3600
+# Resoultuion: Cube Factory
+planet_event = {
+	id = mem_sight_unseen.4
+	title = mem_sight_unseen.4.name
+	desc = mem_sight_unseen.4.desc
+
+	is_triggered_only = yes
+
+	location = ROOT
+	show_sound = event_activating_unknown_technology
+	picture = GFX_evt_mem_factory_01
+
+	immediate = {
+		owner = {
+			set_country_flag = mem_sight_unseen_event_4
+			set_country_flag = mem_sight_unseen_first_success
+		}
+	}
+
+	after = {
+		owner = {
+			add_event_chain_counter = {
+				event_chain = mem_sight_unseen_event_chain
+				counter = mem_sight_unseen_soft_spots_found
+				amount = 1
+			}
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_PUBLISH
+		add_modifier = {
+			modifier = mem_sight_unseen_modifier_4
+			days = @modifierlength
+		}
+	}
+}
+
+# Resoultuion: Slimy Dance
+planet_event = {
+	id = mem_sight_unseen.5
+	title = mem_sight_unseen.5.name
+	desc = mem_sight_unseen.5.desc
+
+	is_triggered_only = yes
+
+	location = ROOT
+	show_sound = event_activating_unknown_technology
+	picture = GFX_evt_surreal_visions
+
+	immediate = {
+		owner = {
+			set_country_flag = mem_sight_unseen_event_5
+			set_country_flag = mem_sight_unseen_first_success
+		}
+	}
+
+	after = {
+		owner = {
+			add_event_chain_counter = {
+				event_chain = mem_sight_unseen_event_chain
+				counter = mem_sight_unseen_soft_spots_found
+				amount = 1
+			}
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_PUBLISH
+		random_list = {
+			50 = {
+				add_modifier = {
+					modifier = mem_sight_unseen_modifier_5_good
+					days = @modifierlength
+				}
+			}
+			50 = {
+				add_modifier = {
+					modifier = mem_sight_unseen_modifier_5_bad
+					days = @modifierlength
+				}
+			}
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_NO_PUBLISH
+	}
+}
+
+# Resoultuion: Head Games
+planet_event = {
+	id = mem_sight_unseen.6
+	title = mem_sight_unseen.6.name
+	desc = mem_sight_unseen.6.desc
+
+	is_triggered_only = yes
+
+	location = ROOT
+	show_sound = event_activating_unknown_technology
+	picture = GFX_evt_surreal_visions
+
+	immediate = {
+		owner = {
+			set_country_flag = mem_sight_unseen_event_6
+			set_country_flag = mem_sight_unseen_first_success
+		}
+	}
+
+	after = {
+		owner = {
+			add_event_chain_counter = {
+				event_chain = mem_sight_unseen_event_chain
+				counter = mem_sight_unseen_soft_spots_found
+				amount = 1
+			}
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_PUBLISH
+		random_list = {
+			50 = {
+				add_modifier = {
+					modifier = mem_sight_unseen_modifier_6_good
+					days = @modifierlength
+				}
+			}
+			50 = {
+				add_modifier = {
+					modifier = mem_sight_unseen_modifier_6_bad
+					days = @modifierlength
+				}
+			}
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_NO_PUBLISH
+	}
+}
+
+# Resoultuion: The Eye
+planet_event = {
+	id = mem_sight_unseen.7
+	title = mem_sight_unseen.7.name
+	desc = mem_sight_unseen.7.desc
+
+	is_triggered_only = yes
+
+	location = ROOT
+	show_sound = event_activating_unknown_technology
+	picture = GFX_evt_surreal_visions
+
+	immediate = {
+		owner = {
+			set_country_flag = mem_sight_unseen_event_7
+			set_country_flag = mem_sight_unseen_first_success
+		}
+	}
+
+	after = {
+		owner = {
+			add_event_chain_counter = {
+				event_chain = mem_sight_unseen_event_chain
+				counter = mem_sight_unseen_soft_spots_found
+				amount = 1
+			}
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_PUBLISH
+		add_modifier = {
+			modifier = mem_sight_unseen_modifier_7
+			days = @modifierlength
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_NO_PUBLISH
+	}
+}
+
+# Resoultuion: Little Big Ruin
+planet_event = {
+	id = mem_sight_unseen.8
+	title = mem_sight_unseen.8.name
+	desc = mem_sight_unseen.8.desc
+
+	is_triggered_only = yes
+
+	location = ROOT
+	show_sound = event_activating_unknown_technology
+	picture = GFX_evt_surreal_visions
+
+	immediate = {
+		owner = {
+			set_country_flag = mem_sight_unseen_event_8
+			set_country_flag = mem_sight_unseen_first_success
+		}
+	}
+
+	after = {
+		owner = {
+			add_event_chain_counter = {
+				event_chain = mem_sight_unseen_event_chain
+				counter = mem_sight_unseen_soft_spots_found
+				amount = 1
+			}
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_PUBLISH
+		random_list = {
+			50 = {
+				add_modifier = {
+					modifier = mem_sight_unseen_modifier_8_good
+					days = @modifierlength
+				}
+			}
+			50 = {
+				add_modifier = {
+					modifier = mem_sight_unseen_modifier_8_bad
+					days = @modifierlength
+				}
+			}
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_NO_PUBLISH
+	}
+}
+
+# Resoultuion: Downhill
+planet_event = {
+	id = mem_sight_unseen.9
+	title = mem_sight_unseen.9.name
+	desc = mem_sight_unseen.9.desc
+
+	is_triggered_only = yes
+
+	location = ROOT
+	show_sound = event_activating_unknown_technology
+	picture = GFX_evt_surreal_visions
+
+	immediate = {
+		owner = {
+			set_country_flag = mem_sight_unseen_event_9
+			set_country_flag = mem_sight_unseen_first_success
+		}
+	}
+
+	after = {
+		owner = {
+			add_event_chain_counter = {
+				event_chain = mem_sight_unseen_event_chain
+				counter = mem_sight_unseen_soft_spots_found
+				amount = 1
+			}
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_PUBLISH
+		add_modifier = {
+			modifier = mem_sight_unseen_modifier_9
+			days = @modifierlength
+		}
+	}
+}
+
+# Resoultuion: Distant Light
+planet_event = {
+	id = mem_sight_unseen.10
+	title = mem_sight_unseen.10.name
+	desc = mem_sight_unseen.10.desc
+
+	is_triggered_only = yes
+
+	location = ROOT
+	show_sound = event_activating_unknown_technology
+	picture = GFX_evt_surreal_visions
+
+	immediate = {
+		owner = {
+			set_country_flag = mem_sight_unseen_event_10
+			set_country_flag = mem_sight_unseen_first_success
+		}
+	}
+
+	after = {
+		owner = {
+			add_event_chain_counter = {
+				event_chain = mem_sight_unseen_event_chain
+				counter = mem_sight_unseen_soft_spots_found
+				amount = 1
+			}
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_PUBLISH
+		add_modifier = {
+			modifier = mem_sight_unseen_modifier_10
+			days = @modifierlength
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_NO_PUBLISH
+	}
+}
+
+# Resoultuion: Pyramid Building
+planet_event = {
+	id = mem_sight_unseen.11
+	title = mem_sight_unseen.11.name
+	desc = mem_sight_unseen.11.desc
+
+	is_triggered_only = yes
+
+	location = ROOT
+	show_sound = event_activating_unknown_technology
+	picture = GFX_evt_medieval_alien_civilization
+
+	immediate = {
+		owner = {
+			set_country_flag = mem_sight_unseen_event_11
+			set_country_flag = mem_sight_unseen_first_success
+		}
+	}
+
+	after = {
+		owner = {
+			add_event_chain_counter = {
+				event_chain = mem_sight_unseen_event_chain
+				counter = mem_sight_unseen_soft_spots_found
+				amount = 1
+			}
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_PUBLISH
+		random_list = {
+			50 = {
+				add_modifier = {
+					modifier = mem_sight_unseen_modifier_11_good
+					days = @modifierlength
+				}
+			}
+			50 = {
+				add_modifier = {
+					modifier = mem_sight_unseen_modifier_11_bad
+					days = @modifierlength
+				}
+			}
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_NO_PUBLISH
+	}
+}
+
+# Resoultuion: Endless Prison
+planet_event = {
+	id = mem_sight_unseen.12
+	title = mem_sight_unseen.12.name
+	desc = mem_sight_unseen.12.desc
+
+	is_triggered_only = yes
+
+	location = ROOT
+	show_sound = event_activating_unknown_technology
+	picture = GFX_evt_surreal_visions
+
+	immediate = {
+		owner = {
+			set_country_flag = mem_sight_unseen_event_12
+			set_country_flag = mem_sight_unseen_first_success
+		}
+	}
+
+	after = {
+		owner = {
+			add_event_chain_counter = {
+				event_chain = mem_sight_unseen_event_chain
+				counter = mem_sight_unseen_soft_spots_found
+				amount = 1
+			}
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_PUBLISH
+		add_modifier = {
+			modifier = mem_sight_unseen_modifier_12
+			days = @modifierlength
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_NO_PUBLISH
+	}
+}
+
+# Resoultuion: Scene of Cargange
+planet_event = {
+	id = mem_sight_unseen.13
+	title = mem_sight_unseen.13.name
+	desc = mem_sight_unseen.13.desc
+
+	is_triggered_only = yes
+
+	location = ROOT
+	show_sound = event_activating_unknown_technology
+	picture = GFX_evt_surreal_visions
+
+	immediate = {
+		owner = {
+			set_country_flag = mem_sight_unseen_event_13
+			set_country_flag = mem_sight_unseen_first_success
+		}
+	}
+
+	after = {
+		owner = {
+			add_event_chain_counter = {
+				event_chain = mem_sight_unseen_event_chain
+				counter = mem_sight_unseen_soft_spots_found
+				amount = 1
+			}
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_PUBLISH
+		add_modifier = {
+			modifier = mem_sight_unseen_modifier_13
+			days = @modifierlength
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_NO_PUBLISH
+	}
+}
+
+# Resoultuion: Bedtime
+planet_event = {
+	id = mem_sight_unseen.14
+	title = mem_sight_unseen.14.name
+	desc = mem_sight_unseen.14.desc
+
+	is_triggered_only = yes
+
+	location = ROOT
+	show_sound = event_activating_unknown_technology
+	picture = GFX_evt_emergency_workers
+
+	immediate = {
+		owner = {
+			set_country_flag = mem_sight_unseen_event_14
+			set_country_flag = mem_sight_unseen_first_success
+		}
+	}
+
+	after = {
+		owner = {
+			add_event_chain_counter = {
+				event_chain = mem_sight_unseen_event_chain
+				counter = mem_sight_unseen_soft_spots_found
+				amount = 1
+			}
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_PUBLISH
+		add_modifier = {
+			modifier = mem_sight_unseen_modifier_14
+			days = @modifierlength
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_NO_PUBLISH
+	}
+}
+
+# Resoultuion: Ball World
+planet_event = {
+	id = mem_sight_unseen.15
+	title = mem_sight_unseen.15.name
+	desc = mem_sight_unseen.15.desc
+
+	is_triggered_only = yes
+
+	location = ROOT
+	show_sound = event_activating_unknown_technology
+	picture = GFX_evt_surreal_visions
+
+	immediate = {
+		owner = {
+			set_country_flag = mem_sight_unseen_event_15
+			set_country_flag = mem_sight_unseen_first_success
+		}
+	}
+
+	after = {
+		owner = {
+			add_event_chain_counter = {
+				event_chain = mem_sight_unseen_event_chain
+				counter = mem_sight_unseen_soft_spots_found
+				amount = 1
+			}
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_PUBLISH
+		add_modifier = {
+			modifier = mem_sight_unseen_modifier_15
+			days = @modifierlength
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_NO_PUBLISH
+	}
+}
+
+# Resoultuion: Breaorcacy in Action
+planet_event = {
+	id = mem_sight_unseen.16
+	title = mem_sight_unseen.16.name
+	desc = mem_sight_unseen.16.desc
+
+	is_triggered_only = yes
+
+	location = ROOT
+	show_sound = event_activating_unknown_technology
+	picture = GFX_evt_medieval_alien_civilization
+
+	immediate = {
+		owner = {
+			set_country_flag = mem_sight_unseen_event_16
+			set_country_flag = mem_sight_unseen_first_success
+		}
+	}
+
+	after = {
+		owner = {
+			add_event_chain_counter = {
+				event_chain = mem_sight_unseen_event_chain
+				counter = mem_sight_unseen_soft_spots_found
+				amount = 1
+			}
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_PUBLISH
+		random_list = {
+			50 = {
+				add_modifier = {
+					modifier = mem_sight_unseen_modifier_16_good
+					days = @modifierlength
+				}
+			}
+			50 = {
+				add_modifier = {
+					modifier = mem_sight_unseen_modifier_16_bad
+					days = @modifierlength
+				}
+			}
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_NO_PUBLISH
+	}
+}
+
+# Resoultuion: The Tree
+planet_event = {
+	id = mem_sight_unseen.17
+	title = mem_sight_unseen.17.name
+	desc = mem_sight_unseen.17.desc
+
+	is_triggered_only = yes
+
+	location = ROOT
+	show_sound = event_activating_unknown_technology
+	picture = GFX_evt_baol_devolved
+
+	immediate = {
+		owner = {
+			set_country_flag = mem_sight_unseen_event_17
+			set_country_flag = mem_sight_unseen_first_success
+		}
+	}
+
+	after = {
+		owner = {
+			add_event_chain_counter = {
+				event_chain = mem_sight_unseen_event_chain
+				counter = mem_sight_unseen_soft_spots_found
+				amount = 1
+			}
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_PUBLISH
+		add_modifier = {
+			modifier = mem_sight_unseen_modifier_17
+			days = @modifierlength
+		}
+	}
+
+	# option = {
+	# 	name = MEM_SIGHT_UNSEEN_NO_PUBLISH
+	# }
+}
+
+# Resoultuion: Tanslucent Forest
+planet_event = {
+	id = mem_sight_unseen.18
+	title = mem_sight_unseen.18.name
+	desc = mem_sight_unseen.18.desc
+
+	is_triggered_only = yes
+
+	location = ROOT
+	show_sound = event_activating_unknown_technology
+	picture = GFX_evt_alien_nature
+
+	immediate = {
+		owner = {
+			set_country_flag = mem_sight_unseen_event_18
+			set_country_flag = mem_sight_unseen_first_success
+		}
+	}
+
+	after = {
+		owner = {
+			add_event_chain_counter = {
+				event_chain = mem_sight_unseen_event_chain
+				counter = mem_sight_unseen_soft_spots_found
+				amount = 1
+			}
+		}
+	}
+
+	option = {
+		name = mem_sight_unseen.18.a
+
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+	}
+
+	# option = {
+	# 	name = MEM_SIGHT_UNSEEN_PUBLISH
+	# 	add_modifier = {
+	# 		modifier = mem_sight_unseen_modifier_18
+	# 		days = @modifierlength
+	# 	}
+	# }
+
+	# option = {
+	# 	name = MEM_SIGHT_UNSEEN_NO_PUBLISH
+	# }
+}
+
+# Resoultuion: Tanslucent Forest
+planet_event = {
+	id = mem_sight_unseen.19
+	title = mem_sight_unseen.19.name
+	desc = mem_sight_unseen.19.desc
+
+	is_triggered_only = yes
+
+	location = ROOT
+	show_sound = event_activating_unknown_technology
+	picture = GFX_evt_gray_goo
+
+	immediate = {
+		owner = {
+			set_country_flag = mem_sight_unseen_event_19
+			set_country_flag = mem_sight_unseen_first_success
+		}
+	}
+
+	after = {
+		owner = {
+			add_event_chain_counter = {
+				event_chain = mem_sight_unseen_event_chain
+				counter = mem_sight_unseen_soft_spots_found
+				amount = 1
+			}
+		}
+	}
+
+	option = {
+		name = MEM_SIGHT_UNSEEN_PUBLISH
+		add_modifier = {
+			modifier = mem_sight_unseen_modifier_19
+			days = @modifierlength
+		}
+	}
+
+	# option = {
+	# 	name = MEM_SIGHT_UNSEEN_NO_PUBLISH
+	# }
+}
+
+# Failure event: mirror broke
+planet_event = {
+	id = mem_sight_unseen.100
+	title = mem_sight_unseen.100.name
+	desc = mem_sight_unseen.100.desc
+
+	is_triggered_only = yes
+
+	location = ROOT
+	picture = GFX_evt_big_landing_ship
+	show_sound = event_power_down
+
+	immediate = {
+		owner = {
+			set_country_flag = mem_sight_unseen_end_chain
+		}
+	}
+
+	option = {
+		name = UNFORTUNATE
+		owner = {
+			end_event_chain = mem_sight_unseen_event_chain
+		}
+	}
+}
+
+# Failure event: mirror shut down
+planet_event = {
+	id = mem_sight_unseen.101
+	title = mem_sight_unseen.101.name
+	desc = mem_sight_unseen.101.desc
+
+	is_triggered_only = yes
+
+	location = ROOT
+	picture = GFX_evt_engineering_research
+	show_sound = event_power_down
+
+	immediate = {
+		owner = {
+			set_country_flag = mem_sight_unseen_end_chain
+		}
+	}
+
+	option = {
+		name = UNFORTUNATE
+		owner = {
+			end_event_chain = mem_sight_unseen_event_chain
+		}
+	}
+}
+
+# Failure event: mirror shut down
+planet_event = {
+	id = mem_sight_unseen.102
+	title = mem_sight_unseen.102.name
+	desc = mem_sight_unseen.102.desc
+
+	is_triggered_only = yes
+
+	location = ROOT
+	picture = GFX_evt_engineering_research
+	show_sound = event_power_down
+
+	immediate = {
+	}
+
+	option = {
+		name = UNFORTUNATE
+		owner = {
+			end_event_chain = mem_sight_unseen_event_chain
+		}
+	}
+}

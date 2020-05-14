@@ -1,0 +1,844 @@
+# Dragon's Mountain
+# By ViolentBeetle
+
+namespace = mem_mountain
+
+# On_Survey; Add dig site
+ship_event = {
+	id = mem_mountain.1
+	title = mem_mountain.1.name
+	desc = mem_mountain.1.desc
+
+	is_triggered_only = yes
+
+	picture = GFX_evt_ruined_system
+	location = FROM
+	show_sound = event_sensor_ping
+
+	trigger = {
+		FROM = {
+			has_planet_flag = mem_mountain_gas_giant
+			NOT = {
+				has_global_flag = mem_mountain_dig_spawned
+			}
+		}
+	}
+
+	immediate = {
+		set_global_flag = mem_mountain_dig_spawned
+		FROM = {
+			create_archaeological_site = mem_mountain_gas_giant_dig_site
+		}
+	}
+
+	option = {
+		name = INTERESTING
+		tooltip = {
+			FROM = {
+				create_archaeological_site = mem_mountain_gas_giant_dig_site
+			}
+		}
+	}
+}
+
+### DIG SITE ONE ###
+
+fleet_event = {
+	id = mem_mountain.10
+	title = mem_mountain.10.name
+	desc = mem_mountain.10.desc
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	picture = GFX_evt_ship_offloading_cargo
+	show_sound = event_door_opening
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+	
+	option = {
+		name = DIG
+	}
+}
+
+fleet_event = {
+	id = mem_mountain.11
+	title = mem_mountain.11.name
+	desc = mem_mountain.11.desc
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	picture = GFX_evt_space_station
+	show_sound = event_door_opening
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+	
+	option = {
+		name = DIG
+	}
+}
+
+fleet_event = {
+	id = mem_mountain.12
+	title = mem_mountain.12.name
+	desc = mem_mountain.12.desc
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	picture = GFX_evt_ancient_databank
+	show_sound = event_door_opening
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+	
+	option = {
+		name = DIG
+	}
+}
+
+fleet_event = {
+	id = mem_mountain.13
+	title = mem_mountain.13.name
+	desc = mem_mountain.13.desc
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	picture = GFX_evt_shielded_planet
+	show_sound = event_energy_field
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+		random_planet = {
+			limit = {
+				has_planet_flag = mem_mountain_moon
+			}
+			save_event_target_as = shielded_moon
+		}
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+	
+	option = {
+		name = mem_mountain.13.a
+
+		event_target:shielded_moon = {
+			change_pc = pc_barren_cold
+			add_deposit = d_society_5
+			create_archaeological_site = mem_mountain_moon_dig_site
+		}
+		IF = {
+            limit = {
+                NOT = {
+                    has_global_flag = mem_planetary_shield_worlds_OFF
+                }
+            }
+            random_country = {
+                country_event = { id = mem_planetary_shields.11 }
+            }
+        }
+	}
+}
+
+### DIG SITE TWO ###
+
+fleet_event = {
+	id = mem_mountain.20
+	title = mem_mountain.20.name
+	desc = mem_mountain.20.desc
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	picture = GFX_evt_mem_evil_hideout
+	show_sound = event_door_opening
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+	
+	option = {
+		name = DIG
+	}
+}
+
+fleet_event = {
+	id = mem_mountain.21
+	title = mem_mountain.21.name
+	desc = mem_mountain.21.desc
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	picture = GFX_evt_mem_alien_pilgrimage
+	show_sound = event_door_opening
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+	
+	option = {
+		name = DIG
+	}
+}
+
+fleet_event = {
+	id = mem_mountain.22
+	title = mem_mountain.22.name
+	desc = mem_mountain.22.desc
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	picture = GFX_evt_space_dragon_blue
+	show_sound = event_door_opening
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+		from.planet = { save_event_target_as = the_planet }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+	
+	option = {
+		name = ONSCREEN
+		hidden_effect = {
+			owner = {
+				country_event = { id = mem_mountain.23 }
+			}
+		}
+	}
+}
+
+# Diplo with Wyrm
+country_event = {
+	id = mem_mountain.23
+	title = mem_mountain.23.name
+	desc = mem_mountain.23.desc
+
+	is_triggered_only = yes
+	diplomatic = yes
+	location = event_target:the_planet
+
+	picture_event_data = {
+		room = no_video_feed_room
+	}
+
+	# Kill the dragon
+	option = {
+		name = mem_mountain.23.a
+
+		hidden_effect = {
+			country_event = { id = mem_mountain.24 }
+		}
+
+		trigger = {
+			NOR = {
+				has_valid_civic = civic_fanatic_purifiers
+				has_valid_civic = civic_machine_terminator
+				has_valid_civic = civic_hive_devouring_swarm
+				is_xenophile = yes
+			}
+		}
+
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 100
+				is_xenophobe = yes
+			}
+		}
+	}
+
+	option = {
+		name = mem_mountain.23.a.purifier
+
+		hidden_effect = {
+			country_event = { id = mem_mountain.24 }
+		}
+
+		trigger = {
+			OR = {
+				has_valid_civic = civic_fanatic_purifiers
+				has_valid_civic = civic_machine_terminator
+				has_valid_civic = civic_hive_devouring_swarm
+			}
+		}
+
+		ai_chance = {
+			factor = 10000
+		}
+	}
+
+	option = {
+		name = mem_mountain.23.b
+		response_text = mem_mountain.23.b.response
+		default_hide_option = yes
+
+		event_target:the_planet = {
+			add_deposit = d_society_10
+			add_modifier = {
+				modifier = mem_mountain_imprisoned_dragon
+				days = -1
+			}
+		}
+		add_modifier = {
+			modifier = mem_mountain_imprisoned_dragon_control
+			days = -1
+		}
+
+		trigger = {
+			NOR = {
+				has_valid_civic = civic_fanatic_purifiers
+				has_valid_civic = civic_machine_terminator
+				has_valid_civic = civic_hive_devouring_swarm
+			}
+		}
+
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 100
+				is_gestalt = yes
+			}
+		}
+	}
+
+	option = {
+		name = mem_mountain.23.c
+		response_text = mem_mountain.23.c.response
+
+		hidden_effect = {
+			country_event = {
+				id = mem_mountain.25
+				days = 7
+			}
+		}
+
+		trigger = {
+			NOR = {
+				has_valid_civic = civic_fanatic_purifiers
+				has_valid_civic = civic_machine_terminator
+				has_valid_civic = civic_hive_devouring_swarm
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
+
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 100
+				is_xenophile = yes
+			}
+		}
+	}
+
+	option = {
+		name = mem_mountain.23.d
+		is_dialog_only = yes
+		response_text = mem_mountain.23.d.tooltip
+
+		trigger = {
+			NOR = {
+				has_valid_civic = civic_fanatic_purifiers
+				has_valid_civic = civic_machine_terminator
+				has_valid_civic = civic_hive_devouring_swarm
+			}
+		}
+
+		ai_chance = {
+			factor = 0
+		}
+	}
+	option = {
+		name = mem_mountain.23.e
+		is_dialog_only = yes
+		response_text = mem_mountain.23.e.tooltip
+
+		trigger = {
+			NOR = {
+				has_valid_civic = civic_fanatic_purifiers
+				has_valid_civic = civic_machine_terminator
+				has_valid_civic = civic_hive_devouring_swarm
+			}
+		}
+
+		ai_chance = {
+			factor = 0
+		}
+	}
+	option = {
+		name = mem_mountain.23.f
+		is_dialog_only = yes
+		response_text = mem_mountain.23.f.tooltip
+
+		trigger = {
+			NOR = {
+				has_valid_civic = civic_fanatic_purifiers
+				has_valid_civic = civic_machine_terminator
+				has_valid_civic = civic_hive_devouring_swarm
+			}
+		}
+
+		ai_chance = {
+			factor = 0
+		}
+	}
+}
+
+# Dragon dies
+country_event = {
+	id = mem_mountain.24
+	title = mem_mountain.24.name
+	desc = mem_mountain.24.desc
+
+	is_triggered_only = yes
+
+	location = event_target:the_planet
+	picture = GFX_evt_shielded_planet
+	show_sound = event_activating_unknown_technology
+
+	option = {
+		name = INTERESTING
+		add_research_option = tech_mem_mountain_scales
+	}
+}
+
+# Dragon is freed
+country_event = {
+	id = mem_mountain.25
+	title = mem_mountain.25.name
+	desc = mem_mountain.25.desc
+
+	is_triggered_only = yes
+
+	location = event_target:the_planet
+	picture = GFX_evt_space_dragon_blue
+	show_sound = event_activating_unknown_technology
+
+	immediate = {
+		create_country = {
+			name = "Ancient Wyrm"
+			type = neutral_faction
+			flag = {
+				icon = {
+					category = "zoological"
+					file = "flag_zoological_5.dds"
+				}
+				background = {
+					category = "backgrounds"
+					file = "00_solid.dds"
+				}
+				colors = {
+					"grey"
+					"grey"
+					"null"
+					"null"
+				}
+			}
+			effect = {
+				set_country_flag = mem_mountain_dragon_country
+				save_event_target_as = dragon_country
+				establish_communications_no_message = root
+			}
+		}
+		create_fleet = {
+			name = "Pale Wing"
+			effect = {
+				create_ship = {
+					name = "Pale Wing"
+					design = "Ancient Wyrm"
+					effect = {
+						add_modifier = {
+							modifier = mem_mountain_dragon_fatigue
+							days = 9000
+						}
+						add_modifier = {
+							modifier = mem_mountain_dragon_fatigue
+							days = 3600
+						}
+						add_modifier = {
+							modifier = mem_mountain_dragon_fatigue
+							days = 900
+						}
+					}
+				}
+				set_owner = event_target:dragon_country
+				set_location = event_target:the_planet
+				save_event_target_as = dragon_fleet
+			}
+			settings = {
+				spawn_debris = no
+				can_change_composition = no
+				can_change_leader = no
+				uses_naval_capacity = no
+				can_disband = no
+			}
+		}
+	}
+
+	option = {
+		name = ONSCREEN
+		hidden_effect = {
+			country_event = {
+				id = mem_mountain.26
+			}
+		}
+	}
+}
+
+country_event = {
+	id = mem_mountain.26
+	title = mem_mountain.23.name
+	desc = mem_mountain.26.desc
+
+	is_triggered_only = yes
+	diplomatic = yes
+	location = event_target:the_planet
+
+	picture_event_data = {
+		room = no_video_feed_room
+	}
+
+	option = {
+		name = mem_mountain.26.a
+		response_text = mem_mountain.26.a.response
+
+		event_target:dragon_fleet = {
+			set_owner = root
+		}
+
+		ai_chance = {
+			factor = 8
+		}
+	}
+
+	option = {
+		name = mem_mountain.26.b
+		response_text = mem_mountain.26.b.resonse
+		default_hide_option = yes
+
+		add_modifier = {
+			modifier = mem_mountain_dragon_friendship
+			days = 7500
+		}
+		set_country_flag = mem_mountain_dragon_releaser
+		hidden_effect = {
+			random_rim_system = {
+				limit = {
+					NOR = {
+						has_star_flag = hostile_system
+						is_same_value = event_target:the_planet.solar_system
+						AND = {
+							exists = space_owner
+							space_owner = {
+								is_crisis_faction = yes
+							}
+						}
+					}
+					any_system_planet = {
+						is_star = no
+					}
+				}
+				weights = {
+					base = 1
+					modifier = {
+						mult = 100
+						NOT = {
+							exists = space_owner
+						}
+					}
+					modifier = {
+						mult = 0.01
+						exists = space_owner
+						space_owner = {
+							is_same_value = root
+						}
+					}
+				}
+				random_system_planet = {
+					limit = {
+						is_star = no
+					}
+					save_event_target_as = destination
+				}
+			}
+			event_target:dragon_fleet = {
+				auto_move_to_planet = {
+					target = event_target:destination
+					clear_auto_move_on_arrival = no
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_mountain.26.c
+		response_text = mem_mountain.26.c.response
+		is_dialog_only = yes
+
+		ai_chance = {
+			factor = 0
+		}
+	}
+	option = {
+		name = mem_mountain.26.d
+		response_text = mem_mountain.26.d.response
+		is_dialog_only = yes
+
+		ai_chance = {
+			factor = 0
+		}
+	}
+}
+
+# Remove friendship modifier if you attack released dragon
+country_event = {
+	id = mem_mountain.40
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			has_country_flag = mem_mountain_dragon_country
+		}
+		has_modifier = mem_mountain_dragon_friendship
+	}
+
+	immediate = {
+		remove_modifier = mem_mountain_dragon_friendship
+		set_country_flag = mem_mountain_released_then_attacked
+	}
+}
+
+# Killed dragon
+country_event = {
+	id = mem_mountain.41
+	title = mem_mountain.41.name
+	desc = mem_mountain.41.desc
+
+	is_triggered_only = yes
+
+	location = FROMFROM
+	picture = GFX_evt_space_dragon_blue
+	show_sound = event_bad_omen
+
+	trigger = {
+		NOT = {
+			has_country_flag = mem_mountain_dragon_releaser
+		}
+		FROM = {
+			has_country_flag = mem_mountain_dragon_country
+		}
+	}
+
+	immediate = {
+		fromfrom.solar_system = { save_event_target_as = combat_system }
+		IF = {
+			limit = {
+				NOT = { has_country_flag = mem_mountain_dragon_releaser }
+			}
+			random_country = {
+				limit = {
+					has_country_flag = mem_mountain_dragon_releaser
+				}
+				remove_modifier = mem_mountain_dragon_friendship
+				country_event = { id = mem_mountain.42}
+			}
+		}
+	}
+
+	option = {
+		name = OK
+		add_research_option = tech_mem_mountain_scales
+	}
+}
+
+# Somebody killed dragon
+country_event = {
+	id = mem_mountain.42
+	title = mem_mountain.42.name
+	desc = mem_mountain.42.desc
+
+	is_triggered_only = yes
+
+	picture = GFX_evt_space_dragon_blue
+	show_sound = event_bad_omen
+
+	option = {
+		name = mem_mountain.42.a
+		trigger = {
+			NOT = { has_country_flag = mem_mountain_released_then_attacked }
+		}
+		IF = {
+			limit = {
+				from = { is_country_type = default }
+			}
+			add_opinion_modifier = {
+				who = FROM
+				modifier = mem_mountain_slain_dragon
+			}
+		}
+	}
+	option = {
+		name = OK
+		trigger = {
+			has_country_flag = mem_mountain_released_then_attacked
+		}
+	}
+}
+
+# Wyrm leaves the galaxy if it is independent
+country_event = {
+	id = mem_mountain.43
+	hide_window = yes
+
+	mean_time_to_happen = {
+		years = 10
+	}
+
+	trigger = {
+		has_country_flag = mem_mountain_dragon_country
+		any_owned_fleet = {
+			exists = solar_system
+			is_fleet_idle = yes
+			is_in_combat = no
+		}
+		any_owned_ship = {
+			NOT = { has_modifier = mem_mountain_dragon_fatigue }
+		}
+	}
+
+	immediate = {
+		random_country = {
+			limit = {
+				has_country_flag = mem_mountain_dragon_releaser
+				NOT = { has_country_flag = mem_mountain_released_then_attacked }
+			}
+		}
+		random_owned_fleet = {
+			solar_system = {
+				create_ambient_object = {
+					type = mem_dummy_object
+					location = this
+				}
+				last_created_ambient_object = {
+					set_location = {
+						target = prev.star
+						distance = 350
+					}
+					save_event_target_as = exodus_marker
+				}
+			}
+			queue_actions = {
+				move_to = event_target:exodus_marker
+				effect = {
+					id = mem_mountain.exodus_order
+					delete_fleet = this
+				}
+			}
+		}
+	}
+}
+
+# Dragon says farewell
+country_event = {
+	id = mem_mountain.44
+	title = mem_mountain.23.name
+	desc = mem_mountain.44.desc
+
+	is_triggered_only = yes
+	diplomatic = yes
+
+	picture_event_data = {
+		room = no_video_feed_room
+	}
+
+	option = {
+		name = mem_mountain.44.a
+	}
+}
+
+# Exchange modifiers around following border shift
+country_event = {
+	id = mem_mountain.45
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			has_star_flag = mem_mountain_system
+			any_system_planet = {
+				has_modifier = mem_mountain_imprisoned_dragon
+			}
+		}
+	}
+
+	immediate = {
+		every_country = {
+			limit = {
+				has_modifier = mem_mountain_imprisoned_dragon_control
+			}
+			remove_modifier = mem_mountain_imprisoned_dragon_control
+		}
+		add_modifier = {
+			modifier = mem_mountain_imprisoned_dragon_control
+			days = -1
+		}
+	}
+}
+
+# You killed dragon
+country_event = {
+	id = mem_mountain.46
+	title = mem_mountain.46.name
+	desc = mem_mountain.46.desc
+
+	is_triggered_only = yes
+
+	location = fromfrom
+	picture = GFX_evt_space_dragon_blue
+	show_sound = event_bad_omen
+
+	trigger = {
+		has_country_flag = mem_mountain_dragon_releaser
+		from = {
+			has_country_flag = mem_mountain_dragon_country
+		}
+	}
+
+	option = {
+		name = mem_mountain.46.a
+	}
+}

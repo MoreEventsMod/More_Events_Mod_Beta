@@ -31,29 +31,11 @@ ship_event = {
 	
 	immediate = {
 		from = {
-			clear_deposits = yes
-
-			set_planet_flag = mem_llayid_planet
-			solar_system = {
-				set_star_flag = mem_llayid_system
-			}
-
 			add_modifier = {
 				modifier = mem_llayid_planet
 				days = -1
 			}
-		}
-		owner = {
-			begin_event_chain = {
-				event_chain = mem_llayids_chain
-			}
-			create_point_of_interest = {
-				id = mem_llayids_poi.1
-				name = mem_llayids_poi_title
-				desc = mem_llayids_poi_desc
-				event_chain = mem_llayids_chain
-				location = from
-			}
+			save_event_target_as = mem_llayid_planet
 		}
 	}
 
@@ -61,7 +43,7 @@ ship_event = {
 		name = mem_llayids.1.A
 
 		from = {
-			set_deposit = d_society_4
+			create_archaeological_site = mem_llayids_dig_site
 		}
 
 		hidden_effect = {
@@ -71,16 +53,17 @@ ship_event = {
 		}
 
 		trigger = {
-			NOT = {
-				owner = {
-					OR = {
-						has_valid_civic = civic_fanatic_purifiers
-						has_valid_civic = civic_hive_devouring_swarm
-						has_valid_civic = civic_machine_terminator
-						has_ethic = ethic_fanatic_militarist
-						has_ethic = ethic_fanatic_authoritarian
-						has_ethic = ethic_fanatic_xenophobe
-						has_ethic = ethic_xenophobe
+			owner = {
+				OR = {
+					has_ethic = ethic_xenophile
+					has_ethic = ethic_fanatic_xenophile
+					AND = {
+						NOT = { has_ethic = ethic_xenophobe }
+						NOT = { has_ethic = ethic_fanatic_xenophobe }
+						OR = {
+							has_ethic = ethic_pacifist
+							has_ethic = ethic_fanatic_pacifist
+						}
 					}
 				}
 			}
@@ -91,7 +74,7 @@ ship_event = {
 		name = mem_llayids.1.B
 
 		from = {
-			set_deposit = d_society_4
+			create_archaeological_site = mem_llayids_dig_site
 		}
 
 		hidden_effect = {
@@ -107,6 +90,14 @@ ship_event = {
 						has_valid_civic = civic_fanatic_purifiers
 						has_valid_civic = civic_hive_devouring_swarm
 						has_valid_civic = civic_machine_terminator
+						has_ethic = ethic_xenophobe
+						has_ethic = ethic_fanatic_xenophobe
+						has_ethic = ethic_militarist
+						has_ethic = ethic_fanatic_militarist
+						has_ethic = ethic_xenophile
+						has_ethic = ethic_fanatic_xenophile
+						has_ethic = ethic_pacifist
+						has_ethic = ethic_fanatic_pacifist
 					}
 				}
 			}
@@ -117,27 +108,17 @@ ship_event = {
 		name = mem_llayids.1.C
 
 		from = {
-			set_deposit = d_society_4
-		}
-
-		hidden_effect = {
-			owner = {
-				set_country_flag = mem_llayid_investigate
-				set_country_flag = mem_llayid_investigate_weapon
-			}
+			create_archaeological_site = mem_llayids_dig_site
 		}
 
 		trigger = {
-			NOT = {
-				owner = {
-					OR = {
-						has_valid_civic = civic_fanatic_purifiers
-						has_valid_civic = civic_hive_devouring_swarm
-						has_valid_civic = civic_machine_terminator
-						has_ethic = ethic_fanatic_xenophile
-						has_ethic = ethic_fanatic_pacifist
-						has_ethic = ethic_pacifist
-					}
+			owner = {
+				NOT = { has_valid_civic = civic_fanatic_purifiers }
+				OR = {
+					has_ethic = ethic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_militarist
+					has_ethic = ethic_fanatic_militarist
 				}
 			}
 		}
@@ -146,14 +127,17 @@ ship_event = {
 	option = {
 		name = mem_llayids.1.purifier
 
-		from = {
-			set_deposit = d_society_4
-		}
-
-		hidden_effect = {
-			owner = {
-				set_country_flag = mem_llayid_investigate_weapon
+		owner = {
+			hidden_effect = {
+				begin_event_chain = {
+					event_chain = mem_llayids_chain
+				}
 			}
+		}
+		enable_special_project = {
+			name = mem_llayid_weapon_investigation
+			location = from
+			owner = root.owner
 		}
 
 		trigger = {
@@ -165,14 +149,17 @@ ship_event = {
 	option = {
 		name = mem_llayids.1.swarm
 
-		from = {
-			set_deposit = d_society_4
-		}
-
-		hidden_effect = {
-			owner = {
-				set_country_flag = mem_llayid_investigate_weapon
+		owner = {
+			hidden_effect = {
+				begin_event_chain = {
+					event_chain = mem_llayids_chain
+				}
 			}
+		}
+		enable_special_project = {
+			name = mem_llayid_weapon_investigation
+			location = from
+			owner = root.owner
 		}
 
 		trigger = {
@@ -184,14 +171,17 @@ ship_event = {
 	option = {
 		name = mem_llayids.1.terminator
 
-		from = {
-			set_deposit = d_society_4
-		}
-
-		hidden_effect = {
-			owner = {
-				set_country_flag = mem_llayid_investigate_weapon
+		owner = {
+			hidden_effect = {
+				begin_event_chain = {
+					event_chain = mem_llayids_chain
+				}
 			}
+		}
+		enable_special_project = {
+			name = mem_llayid_weapon_investigation
+			location = from
+			owner = root.owner
 		}
 
 		trigger = {
@@ -203,130 +193,19 @@ ship_event = {
 }
 
 
-# This = construction ship
-# From = planet it is built on
-# Fires when construction is complete,
-# immediately before station is created
 ship_event = {
-	id = mem_llayids.2
-	title = mem_llayids.2.title
-	desc = {
-		text = mem_llayids.2.desc.weapon
-		trigger = {
-			owner = { has_country_flag = mem_llayid_investigate_weapon }
-		}
-	}
-	desc = {
-		text = mem_llayids.2.desc
-		trigger = {
-			owner = { has_country_flag = mem_llayid_investigate }
-		}
-	}
-	picture = GFX_evt_space_debris
-	location = FROM
-
-	is_triggered_only = yes
-
-	trigger = {
-		from = {
-			has_planet_flag = mem_llayid_planet
-		}
-		owner = {
-			OR = {
-				has_country_flag = mem_llayid_investigate
-				has_country_flag = mem_llayid_investigate_weapon
-			}
-		}
-	}
-
-	immediate = {
-		from = {
-			save_event_target_as = mem_llayid_planet
-		}
-	}
-
-	option = {
-		name = OK
-		
-		hidden_effect = {
-			owner = {
-				if = {
-					limit = {
-						has_country_flag = mem_llayid_investigate
-						has_country_flag = mem_llayid_investigate_weapon
-					}
-					remove_country_flag = mem_llayid_investigate_weapon
-				}
-				if = {
-					limit = {
-						has_country_flag = mem_llayid_investigate_weapon
-						NOT = {
-							has_country_flag = mem_llayid_investigate
-						}
-					}
-					country_event = { id = mem_llayids.3 days = 720 }
-				}
-				else = {
-					country_event = { id = mem_llayids.5 days = 360 }
-				}
-			}
-		}
-	}
-}
-
-#Purifier version
-country_event = {
-	id = mem_llayids.3
-	hide_window = yes
-	is_triggered_only = yes
-
-	immediate = {
-		if = {
-			limit = {
-				any_system_within_border = {
-					has_star_flag = mem_llayid_system
-					any_system_planet = {
-						has_planet_flag = mem_llayid_planet
-						has_research_station = yes
-					}
-				}
-			}
-			country_event = { id = mem_llayids.4 }
-		}
-		else_if = {
-			limit = {
-				any_system_within_border = {
-					has_star_flag = mem_llayid_system
-					any_system_planet = {
-						has_planet_flag = mem_llayid_planet
-					}
-				}
-			}
-			event_target:mem_llayid_planet = {
-				save_event_target_as = mem_llayid_planet
-			}
-			country_event = { id = mem_llayids.3 days = 720 }
-		}
-		else = {
-			end_event_chain = mem_llayids_chain
-		}
-	}
-}
-
-
-country_event = {
 	id = mem_llayids.4
 	title = mem_llayids.4.title
 	desc = {
-		trigger = { not = { has_ethic = ethic_gestalt_consciousness } }
+		trigger = { NOT = { owner = { has_ethic = ethic_gestalt_consciousness } } }
 		text = mem_llayids.4.desc
 	}
 	desc = {
-		trigger = { has_authority = auth_hive_mind }
+		trigger = { owner = { has_authority = auth_hive_mind } }
 		text = mem_llayids.4.desc.hive
 	}
 	desc = {
-		trigger = { has_authority = auth_machine_intelligence }
+		trigger = { owner = { has_authority = auth_machine_intelligence } }
 		text = mem_llayids.4.desc.machine
 	}
 	picture = GFX_evt_space_debris
@@ -335,288 +214,186 @@ country_event = {
 	is_triggered_only = yes
 
 	immediate = {
-		remove_country_flag = mem_llayid_investigate_weapon
-
-		end_event_chain = mem_llayids_chain
+		owner = { end_event_chain = mem_llayids_chain }
+		event_target:mem_llayid_planet = {
+			clear_deposits = yes
+		}
 	}
 
 	option = {
 		name = mem_llayids.4.A
 		
-		add_monthly_resource_mult = {
-			resource = society_research
-			value = 4
-			min = 100
+		event_target:mem_llayid_planet = {
+			set_deposit = d_society_4
 		}
-	}
-}
-
-
-#Normal version
-country_event = {
-	id = mem_llayids.5
-	hide_window = yes
-	is_triggered_only = yes
-
-
-	immediate = {
-		if = {
-			limit = {
-				any_system_within_border = {
-					has_star_flag = mem_llayid_system
-					any_system_planet = {
-						has_planet_flag = mem_llayid_planet
-						has_research_station = yes
-					}
-				}
+		small_artifact_reward = yes
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = 4
+				min = 100
 			}
-			country_event = { id = mem_llayids.6 }
-		}
-		else_if = {
-			limit = {
-				any_system_within_border = {
-					has_star_flag = mem_llayid_system
-					any_system_planet = {
-						has_planet_flag = mem_llayid_planet
-					}
-				}
-			}
-			event_target:mem_llayid_planet = {
-				save_event_target_as = mem_llayid_planet
-			}
-			country_event = { id = mem_llayids.5 days = 720 }
-		}
-		else = {
-			end_event_chain = mem_llayids_chain
 		}
 	}
 }
 
 
 
-
-country_event = {
+fleet_event = {
 	id = mem_llayids.6
 	title = mem_llayids.6.name
 	desc = {
-		trigger = { not = { has_ethic = ethic_gestalt_consciousness } }
+		trigger = { NOT = { owner = { has_ethic = ethic_gestalt_consciousness } } }
 		text = mem_llayids.6.desc
 	}
 	desc = {
-		trigger = { has_authority = auth_hive_mind }
+		trigger = { owner = { has_authority = auth_hive_mind } }
 		text = mem_llayids.6.desc.hive
 	}
 	desc = {
-		trigger = { has_authority = auth_machine_intelligence }
+		trigger = { owner = { has_authority = auth_machine_intelligence } }
 		text = mem_llayids.6.desc.machine
 	}
 	picture = GFX_evt_space_debris
-	location = event_target:mem_llayid_planet
+	location = from
+	archaeology = yes
+	show_sound = event_dig_site
 
 	is_triggered_only = yes
-
-	immediate = {
-	}
 
 	option = {
-		name = INTERESTING
-
-		add_monthly_resource_mult = {
-			resource = society_research
-			value = 3
-		}
-
-		hidden_effect = {
-			country_event = { id = mem_llayids.7 days = 480 random = 360 }
-		}
+		name = INTRIGUING
+		small_artifact_reward = yes
 	}
 }
 
-
-#Gatekeeper to 2nd event
-country_event = {
-	id = mem_llayids.7
-	hide_window = yes
-	is_triggered_only = yes
-
-	immediate = {
-		if = {
-			limit = {
-				any_system_within_border = {
-					has_star_flag = mem_llayid_system
-					any_system_planet = {
-						has_planet_flag = mem_llayid_planet
-						has_research_station = yes
-					}
-				}
-			}
-			country_event = { id = mem_llayids.8 }
-		}
-		else_if = {
-			limit = {
-				any_system_within_border = {
-					has_star_flag = mem_llayid_system
-					any_system_planet = {
-						has_planet_flag = mem_llayid_planet
-					}
-				}
-			}
-			event_target:mem_llayid_planet = {
-				save_event_target_as = mem_llayid_planet
-			}
-			country_event = { id = mem_llayids.7 days = 720 }
-		}
-		else = {
-			end_event_chain = mem_llayids_chain
-		}
-	}
-}
-
-
-country_event = {
+fleet_event = {
 	id = mem_llayids.8
 	title = mem_llayids.8.name
 	desc = {
-		trigger = { not = { has_ethic = ethic_gestalt_consciousness } }
+		trigger = { NOT = { owner = { has_ethic = ethic_gestalt_consciousness } } }
 		text = mem_llayids.8.desc
 	}
 	desc = {
-		trigger = { has_authority = auth_hive_mind }
+		trigger = { owner = { has_authority = auth_hive_mind } }
 		text = mem_llayids.8.desc.hive
 	}
 	desc = {
-		trigger = { has_authority = auth_machine_intelligence }
+		trigger = { owner = { has_authority = auth_machine_intelligence } }
 		text = mem_llayids.8.desc.machine
 	}
 	picture = GFX_evt_space_debris
-	location = event_target:mem_llayid_planet
+	location = from
+	archaeology = yes
+	show_sound = event_dig_site
 
 	is_triggered_only = yes
-
-	immediate = {
-	}
 
 	option = {
 		name = mem_llayids.8.option
-
-		add_monthly_resource_mult = {
-			resource = society_research
-			value = 3
-		}
-
-		hidden_effect = {
-			country_event = { id = mem_llayids.9 days = 480 random = 360 }
-		}
+		small_artifact_reward = yes
 	}
 }
 
-
-#Gatekeeper to 3rd event (that sets the special project)
-country_event = {
-	id = mem_llayids.9
-	hide_window = yes
-	is_triggered_only = yes
-
-	immediate = {
-		if = {
-			limit = {
-				any_system_within_border = {
-					has_star_flag = mem_llayid_system
-					any_system_planet = {
-						has_planet_flag = mem_llayid_planet
-						has_research_station = yes
-					}
-				}
-			}
-			country_event = { id = mem_llayids.10 }
-		}
-		else_if = {
-			limit = {
-				any_system_within_border = {
-					has_star_flag = mem_llayid_system
-					any_system_planet = {
-						has_planet_flag = mem_llayid_planet
-					}
-				}
-			}
-			event_target:mem_llayid_planet = {
-				save_event_target_as = mem_llayid_planet
-			}
-			country_event = { id = mem_llayids.9 days = 720 }
-		}
-		else = {
-			end_event_chain = mem_llayids_chain
-		}
-	}
-}
-
-
-country_event = {
+fleet_event = {
 	id = mem_llayids.10
 	title = mem_llayids.10.name
 	desc = {
-		trigger = { not = { has_ethic = ethic_gestalt_consciousness } }
+		trigger = { NOT = { owner = { has_ethic = ethic_gestalt_consciousness } } }
 		text = mem_llayids.10.desc
 	}
 	desc = {
-		trigger = { has_authority = auth_hive_mind }
+		trigger = { owner = { has_authority = auth_hive_mind } }
 		text = mem_llayids.10.desc.hive
 	}
 	desc = {
-		trigger = { has_authority = auth_machine_intelligence }
+		trigger = { owner = { has_authority = auth_machine_intelligence } }
 		text = mem_llayids.10.desc.machine
 	}
 	picture = GFX_evt_enigmatic_cache
-	location = event_target:mem_llayid_planet
+	location = from
+	archaeology = yes
+	show_sound = event_finding_loot
 
 	is_triggered_only = yes
 
 	immediate = {
+		from.planet = {
+			hidden_effect = { save_event_target_as = mem_llayid_planet }
+		}
 	}
 
 	option = {
 		name = INTERESTING
-
-		enable_special_project = {
-			name = mem_llayid_investigation
-			location = event_target:mem_llayid_planet
+		medium_artifact_reward = yes
+		
+		hidden_effect = {
+			begin_event_chain = {
+				event_chain = mem_llayids_chain
+			}
+		}
+		from = {
+			planet = {
+				hidden_effect = {
+					create_point_of_interest = {
+						id = mem_llayids_poi.1
+						name = mem_llayids_poi_title
+						desc = mem_llayids_poi_desc
+						event_chain = mem_llayids_chain
+						location = this
+					}
+				}
+			}
+		}
+		owner = {
+			enable_special_project = {
+				name = mem_llayid_investigation
+				location = capital_scope
+			}
 		}
 	}
 }
 
 
 #Conclusion of the Chain
-ship_event = {
+planet_event = {
 	id = mem_llayids.15
 	title = mem_llayids.15.name
 	desc = mem_llayids.15.desc
 	picture = GFX_evt_enigmatic_cache
-	location = event_target:mem_llayid_planet
 
 	is_triggered_only = yes
 	
 	immediate = {
-		event_target:mem_llayid_planet = {
-			remove_planet_flag = mem_llayid_planet
-			solar_system = {
-				remove_star_flag = mem_llayid_system
-			}
-		}
 		owner = {
 			remove_country_flag = mem_llayid_investigate
 			end_event_chain = mem_llayids_chain
+		}
+		event_target:mem_llayid_planet = {
+			clear_deposits = ye
 		}
 	}
 
 	option = {
 		name = FASCINATING
 
+		event_target:mem_llayid_planet = {
+			set_deposit = d_society_6
+		}
 		owner = {
 			add_monthly_resource_mult = {
 				resource = society_research
-				value = 18
+				value = 24
 				min = 200
-				max = 3000
+			}
+			if = {
+				limit = {
+					NOT = { has_technology = tech_habitat_1 }
+				}
+				locked_random_list = {
+					1 = { add_research_option = tech_habitat_1 }
+					9 = { }
+				}
 			}
 		}
 	}

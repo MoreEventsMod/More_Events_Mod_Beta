@@ -1,0 +1,1205 @@
+# Dread Pirate's Mask
+# By ViolentBeetle
+
+namespace = mem_dread_pirate
+
+# Raiding ship destruction incident - on_ship_destroyed_victim
+country_event = {
+    id = mem_dread_pirate.1
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        # log = "[Root.GetName] evaluates a trigger. [fromfromfrom.solar_system.GetName] system."
+        end_game_years_passed < 1
+        is_country_type = marauder_raiders
+        from = {
+            is_ai = no
+            NOT = { has_country_flag = mem_dread_pirate_offered_quest }
+            NOR = {
+                has_valid_civic = civic_fanatic_purifiers
+                has_valid_civic = civic_hive_devouring_swarm
+                has_valid_civic = civic_hive_devouring_swarm
+                has_country_flag = mem_dread_pirate_initial_fail
+            }
+        }
+        any_country = {
+            is_country_type = dormant_marauders
+            has_country_flag = parent_of@root
+            from = {
+                has_country_flag = raid_target_of@prev
+            }
+        }    
+    }
+
+    immediate = {
+        # log = "Dread Pirate Intro Rolled"
+        random_list = {
+            200 = {  }
+            18 = {
+                # log = "Roll Passed"
+                fromfromfrom.solar_system = { save_event_target_as = combat_system }
+                random_country = {
+                    limit = {
+                        is_country_type = dormant_marauders
+                        has_country_flag = parent_of@root
+                        from = {
+                            has_country_flag = raid_target_of@prev
+                        }
+                    }
+                    save_event_target_as = marauder_sender
+                }
+                from = {
+                    country_event = {
+                        id = mem_dread_pirate.2 days = 30
+                    }
+                }
+            }
+            10 = { set_country_flag = mem_dread_pirate_initial_fail }
+        }
+    }
+}
+
+# Dread pirate intro
+country_event = {
+    id = mem_dread_pirate.2
+    title = mem_dread_pirate.2.name
+    desc = mem_dread_pirate.2.desc
+
+    is_triggered_only = yes
+    location = event_target:the_planet
+
+    show_sound = event_sensor_ping
+    picture = GFX_evt_mem_heavy_damage
+
+    trigger = {
+        NOT = { has_country_flag = mem_dread_pirate_offered_quest }
+        NOT = { has_global_flag = mem_dread_pirate_global_lock }
+        exists = event_target:marauder_sender
+        event_target:marauder_sender = {
+            is_country_type = dormant_marauders
+        }                    
+        any_planet_within_border = {
+            OR = {
+                is_planet_class = pc_barren
+                is_planet_class = pc_barren_cold
+            }
+            NOT = { exists = archaeological_site }
+            has_anomaly = no
+            solar_system = {
+                NOT = { is_same_value = root.capital_scope.solar_system }
+                NOT = { is_same_value = event_target:combat_system }
+            }
+        }
+    }
+
+    immediate = {
+        set_country_flag = mem_dread_pirate_offered_quest
+        set_global_flag = mem_dread_pirate_global_lock
+        random_planet_within_border = {
+            limit = {
+                OR = {
+                    is_planet_class = pc_barren
+                    is_planet_class = pc_barren_cold
+                }
+                NOT = { exists = archaeological_site }
+                has_anomaly = no
+                solar_system = {
+                    NOT = { is_same_value = root.capital_scope.solar_system }
+                    NOT = { is_same_value = event_target:combat_system }
+                }
+            }
+            save_event_target_as = the_planet
+        }
+    }
+
+    option = {
+        event_target:the_planet = {
+            set_planet_flag = mem_dread_pirate_tomb_planet
+        }
+        name = mem_dread_pirate.2.a
+        set_country_flag = mem_dread_pirate_has_quest
+        begin_event_chain = {
+            event_chain = mem_dread_pirate_chain
+            target = root
+        }
+        event_target:the_planet = {
+            enable_special_project = {
+                name = MEM_DREAD_PIRATE_PROJECT
+                location = this
+                owner = root
+            }
+        }
+    }
+
+    option = {
+        name = NOTIME
+        remove_global_flag = mem_dread_pirate_global_lock
+        add_resource = {
+            influence = 250
+        }
+    }
+}
+
+# Special project complete, issuing a dig site
+ship_event = {
+    id = mem_dread_pirate.3
+    title = mem_dread_pirate.3.name
+    desc = mem_dread_pirate.3.desc
+
+    is_triggered_only = yes
+    
+    show_sound = event_sensor_ping
+    location = event_target:the_planet
+    picture = GFX_evt_mining_operations
+
+    option = {
+        name = mem_dread_pirate.3.a
+        event_target:the_planet = {
+            create_archaeological_site = mem_dread_pirate_dig_site
+        }
+    }
+}
+
+### DIG SITES ###
+fleet_event = {
+    id = mem_dread_pirate.11
+    title = mem_dread_pirate.11.name
+    desc = mem_dread_pirate.11.desc
+
+    is_triggered_only = yes
+    archaeology = yes
+
+    picture = GFX_evt_underground_city
+    show_sound = event_finding_loot
+
+    immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+    }
+
+    option = {
+        name = DIG
+        leader = {
+            add_experience = 100
+        }
+    }
+}
+fleet_event = {
+    id = mem_dread_pirate.12
+    title = mem_dread_pirate.12.name
+    desc = mem_dread_pirate.12.desc
+
+    is_triggered_only = yes
+    archaeology = yes
+
+    picture = GFX_evt_smugglers_in_bar
+    show_sound = event_finding_loot
+
+    immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+    }
+
+    option = {
+        name = DIG
+        owner = {
+            add_monthly_resource_mult = {
+                resource = society_research
+                value = @tier2researchreward
+                min = @tier2researchmin
+                max = @tier2researchmax
+            }
+        }
+    }
+}
+fleet_event = {
+    id = mem_dread_pirate.13
+    title = mem_dread_pirate.13.name
+    desc = mem_dread_pirate.13.desc
+
+    is_triggered_only = yes
+    archaeology = yes
+
+    picture = GFX_evt_archaeologists_escaping
+    show_sound = event_finding_loot
+
+    immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+    }
+
+    option = {
+        name = DIG
+        owner = {
+            add_monthly_resource_mult = {
+                resource = engineering_research
+                value = @tier4researchreward
+                min = @tier4researchmin
+                max = @tier4researchmax
+            }
+        }
+    }
+}
+fleet_event = {
+    id = mem_dread_pirate.14
+    title = mem_dread_pirate.14.name
+    desc = mem_dread_pirate.14.desc
+
+    is_triggered_only = yes
+    archaeology = yes
+
+    picture = GFX_evt_derelict_interior
+    show_sound = event_finding_loot
+
+    immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+    }
+
+    option = {
+        name = DIG
+        owner = {
+            add_monthly_resource_mult = {
+                resource = society_research
+                value = @tier4researchreward
+                min = @tier4researchmin
+                max = @tier4researchmax
+            }
+        }
+    }
+}
+fleet_event = {
+    id = mem_dread_pirate.15
+    title = mem_dread_pirate.15.name
+    desc = mem_dread_pirate.15.desc
+
+    is_triggered_only = yes
+    archaeology = yes
+
+    picture = GFX_evt_hidden_door
+    show_sound = event_finding_loot
+
+    immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+    }
+
+    option = {
+        name = DIG
+        owner = {
+            add_monthly_resource_mult = {
+                resource = society_research
+                value = @tier4researchreward
+                min = @tier4researchmin
+                max = @tier4researchmax
+            }
+        }
+    }
+}
+fleet_event = {
+    id = mem_dread_pirate.16
+    title = mem_dread_pirate.16.name
+    desc = mem_dread_pirate.16.desc
+
+    is_triggered_only = yes
+    archaeology = yes
+
+    picture = GFX_evt_in_the_dark
+    show_sound = event_finding_loot
+
+    immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+
+	after = { 
+		from = { set_site_progress_locked = no } 
+    }
+
+    option = {
+        name = mem_dread_pirate.16.a
+        IF = {
+            limit = {
+                has_ancrel = yes
+                leader = {
+                    NOT = { has_trait = leader_trait_archaeologist_ancrel }
+                }
+            }
+            leader = {
+                add_trait = leader_trait_archaeologist_ancrel
+            }
+        }
+        ELSE = {
+            leader = {
+                add_experience = 1000
+            }
+        }
+        owner = { set_country_flag = mem_dread_pirate_finished_the_dig }
+        hidden_effect = {
+            create_country = {
+                name = "Dread Pirate Fleet"
+                type = mem_dread_pirate_country
+                flag = {
+                    icon = {
+                        category = pirate
+                        file = flag_pirate_9.dds
+                    }
+                    background = {
+                        category = backgrounds
+                        file = triangle_split.dds
+                    }
+                    colors = {
+                        "red"
+                        "black"
+                        "null"
+                        "null"
+                    }
+                }
+                name_list = PRT1
+                effect = {
+                    set_graphical_culture = pirate_01
+                    save_event_target_as = dread_pirate_country
+                    every_country = {
+                        limit = {
+                            is_country_type = dormant_marauders
+                        }
+                        set_faction_hostility = {
+                            target = prev
+                            set_hostile = no
+                        }
+                    }
+                    country_event = { id = mem_dread_pirate.20 days = 10 }
+                }
+            }
+        }
+    }
+}
+
+# Dread Pirate fleet's spawning
+country_event = {
+    id = mem_dread_pirate.20
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        NOT = { has_global_flag = mem_dread_pirate_first_encounter }
+        any_country = {
+            is_country_type = dormant_marauders
+        }
+    }
+
+    immediate = {
+        random_country = {
+            limit = { is_country_type = dormant_marauders }
+            event_target:dread_pirate_country = {
+                create_leader = {
+                    name = Raewynn
+                    class = admiral
+                    skill = 3
+                    species = prev.species
+                    gender = male
+                    effect = {
+                        set_leader_flag = mem_dread_pirate_first_leader
+                        add_trait = leader_trait_mercenary_warrior
+                    }
+                }
+            }
+            random_system_within_border = {
+                create_fleet = {
+                    name = "Dread Pirate's Forces"
+                    effect = {
+                        set_owner = event_target:dread_pirate_country
+                        while = {
+                            count = 6
+                            create_ship = {
+                                name = random
+                                design = "NAME_Outrider"
+                                prefix = no
+                                graphical_culture = "pirate_01"
+                            }
+                        }
+                        while = {
+                            count = 4
+                            create_ship = {
+                                name = random
+                                design = "NAME_Lancer"
+                                prefix = no
+                                graphical_culture = "pirate_01"
+                            }
+                        }
+                        while = {
+                            count = 2
+                            create_ship = {
+                                name = random
+                                design = "NAME_Void_Champion"
+                                prefix = no
+                                graphical_culture = "pirate_01"
+                            }
+                        }
+                        create_ship_design = {
+                            design = NAME_MEM_Dread_Pirate_Galleon
+                        }
+                        create_ship = {
+                            name = "Dread Lord"
+                            design = last_created_design
+                            effect = {
+                                set_ship_flag = mem_dread_pirate_first_flagship
+                            }
+                        }
+                        save_event_target_as = dread_fleet
+                        set_location = prev
+                        set_leader = last_created_leader
+                        set_fleet_flag = mem_dread_pirate_the_first_fleet
+                    }
+                }
+                closest_system = {
+                    limit = {
+                        exists = owner
+                        owner = { has_country_flag = mem_dread_pirate_finished_the_dig }
+                    }
+                    event_target:dread_fleet = {
+                        auto_move_to_planet = {
+                            target = prev.star
+                            clear_auto_move_on_arrival = yes                            
+                        }
+                    }
+                    # log = "Set Dread Pirate to [This.GetName]"
+                }
+            }
+        }
+        country_event = { id = mem_dread_pirate.21 days = 10 }
+    }
+}
+
+# Safety checks in case path breaks
+country_event = {
+    id = mem_dread_pirate.21
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        NOT = { has_global_flag = mem_dread_pirate_first_encounter }
+    }
+
+    immediate = {
+        # log = ".21 loop engaged"
+        IF = {
+            limit = {
+                NOT = {
+                    any_owned_fleet = {
+                        has_fleet_flag = mem_dread_pirate_the_first_fleet
+                    }
+                }
+            }
+            # log = "Fleet not found"
+            country_event = { id = mem_dread_pirate.20 days = 20 }
+        }
+        ELSE = {
+            # log = "Fleet found"
+            random_owned_fleet = {
+                limit = { has_fleet_flag = mem_dread_pirate_the_first_fleet }
+                IF = {
+                    limit = { exists = solar_system }
+                    # log = "Found in system: [Solar_System.GetName]"
+                }
+                ELSE = {
+                    # log = "In in hyperspace I guess?"
+                }
+                IF = {
+                    limit = {
+                        NAND = {
+                            any_owned_ship = { has_ship_flag = mem_dread_pirate_first_flagship }
+                            exists = leader
+                        }
+                        is_in_combat = no
+                    }
+                    # log = "Galleon or leader not found"
+                    delete_fleet = this
+                }
+                ELSE_IF = {
+                    limit = {
+                        is_fleet_idle = yes
+                        is_in_combat = no
+                    }
+                    # log = "Fleet stuck"
+                    clear_fleet_actions = this
+                    closest_system = {
+                        limit = {
+                            NOT = {
+                                is_same_value = prev.solar_system
+                            }
+                            exists = owner
+                            owner = { has_country_flag = mem_dread_pirate_finished_the_dig }
+                        }
+                        prev = {
+                            auto_move_to_planet = {
+                                target = prev.star
+                                clear_auto_move_on_arrival = yes                            
+                            }
+                        }
+                        # log = "Set Dread Pirate to [This.GetName]"
+                    }
+                }
+            }
+            country_event = { id = mem_dread_pirate.21 days = 10 }
+        }
+    }
+}
+
+# Dread Pirate delegation hits the system for the first time, galleon must be present
+ship_event = {
+    id = mem_dread_pirate.22
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        NOT = { has_global_flag = mem_dread_pirate_first_encounter }
+        owner = { is_country_type = mem_dread_pirate_country }
+        has_ship_flag = mem_dread_pirate_first_flagship
+        exists = leader
+        from = {
+            exists = owner
+            owner = { has_country_flag = mem_dread_pirate_finished_the_dig }
+        }
+    }
+
+    immediate = {
+        fleet = { clear_fleet_actions = this }
+        owner = { save_event_target_as = dread_pirate_country }
+        leader = { save_event_target_as = convo_portrait }
+        set_global_flag = mem_dread_pirate_first_encounter
+        random_planet = {
+            limit = {
+                has_planet_flag = mem_dread_pirate_tomb_planet
+            }
+            save_event_target_as = the_planet
+        }
+        from.owner = {
+            country_event = { id = mem_dread_pirate.23 }
+        }
+    }
+}
+
+# Dread pirate have entered our system
+country_event = {
+    id = mem_dread_pirate.23
+    title = mem_dread_pirate.23.name
+    desc = mem_dread_pirate.23.desc
+
+    is_triggered_only = yes
+
+    location = from
+    show_sound = event_yellow_alert
+    picture = GFX_evt_pirate_armada
+
+    option = {
+        name = ONSCREEN
+        hidden_effect = {
+            establish_communications_no_message = event_target:dread_pirate_country
+            country_event = { id = mem_dread_pirate.24 }
+        }
+    }
+}
+
+# Dread pirate convo
+country_event = {
+    id = mem_dread_pirate.24
+    title = TRANSMISSION
+    desc = mem_dread_pirate.24.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+        portrait = event_target:convo_portrait
+		room = "ethic_spaceship_room"
+    }
+
+    option = {
+        name = mem_dread_pirate.24.a
+        response_text = mem_dread_pirate.24.a.response
+        hidden_effect = {
+            event_target:dread_pirate_country = {
+                set_faction_hostility = {
+                    target = root
+                    set_hostile = yes
+                }
+                every_owned_fleet = {
+                    set_fleet_stance = aggressive
+                }
+            }
+        }
+    }
+    option = {
+        name = mem_dread_pirate.24.b
+        response_text = mem_dread_pirate.24.b.response
+        hidden_effect = {
+            event_target:dread_pirate_country = {
+                set_faction_hostility = {
+                    target = root
+                    set_hostile = yes
+                }
+                every_owned_fleet = {
+                    set_fleet_stance = aggressive
+                }
+            }
+        }
+    }
+    option = {
+        name = mem_dread_pirate.24.c
+        response_text = mem_dread_pirate.24.c.response
+        is_dialog_only = yes
+    }
+    option = {
+        name = mem_dread_pirate.24.d
+        response_text = mem_dread_pirate.24.d.response
+        is_dialog_only = yes
+    }
+    option = {
+        name = mem_dread_pirate.24.e
+        response_text = mem_dread_pirate.24.e.response
+        is_dialog_only = yes
+    }
+}
+
+# Trigger on shooting down the galleon
+country_event = {
+    id = mem_dread_pirate.25
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        is_country_type = mem_dread_pirate_country
+        fromfrom = { has_ship_flag = mem_dread_pirate_first_flagship }
+    }
+
+    immediate = {
+        # log = "Galleon dead"
+        IF = {
+            limit = {
+                has_global_flag = mem_dread_pirate_first_encounter
+            }
+            create_ambient_object = {
+                type = mem_dread_pirate_destroyed_galleon
+                location = fromfrom
+            }
+            last_created_ambient_object = {
+                save_event_target_as = dead_galleon
+            }
+            fromfromfrom.solar_system = { save_event_target_as = combat_system }
+            from = { save_event_target_as = ship_killer }            
+            random_planet = {
+                limit = {
+                    has_planet_flag = mem_dread_pirate_tomb_planet
+                }
+                save_event_target_as = the_planet
+            }
+            random_country = {
+                limit = { has_country_flag = mem_dread_pirate_finished_the_dig }
+                country_event = { id = mem_dread_pirate.26 }
+            }
+        }
+        ELSE = {
+            fromfrom.fleet = {
+                clear_fleet_actions = this
+            }
+        }
+    }
+}
+
+# Pop up telling us we taken down the ship
+country_event = {
+    id = mem_dread_pirate.26
+    title = mem_dread_pirate.26.name
+    desc = {
+        text = mem_dread_pirate.26.desc.1
+        trigger = {
+            is_same_value = event_target:ship_killer
+        }
+    }
+    desc = {
+        text = mem_dread_pirate.26.desc.2
+        trigger = {
+            NOT = { is_same_value = event_target:ship_killer }
+        }
+    }
+
+    is_triggered_only = yes
+
+    location = event_target:dead_galleon
+    show_sound = event_space_battle
+    picture = GFX_evt_pirates_attacking_cargo
+
+    option = {
+        name = mem_dread_pirate.26.a
+        enable_special_project = {
+            name = MEM_DREAD_PIRATE_BOARDING_PROJECT
+            location = event_target:dead_galleon
+            owner = root
+        }
+    }
+}
+
+# Special project resolution
+ship_event = {
+    id = mem_dread_pirate.27
+    title = mem_dread_pirate.27.name
+    desc = mem_dread_pirate.27.desc
+
+    is_triggered_only = yes
+
+    location = event_target:dead_galleon
+    show_sound = event_default
+    picture = GFX_evt_mem_spaceship_wreck
+
+    option = {
+        name = mem_dread_pirate.27.a
+        owner.capital_scope = {
+            enable_special_project = {
+                name = MEM_DREAD_PIRATE_TRIANGULATION_PROJECT
+                location = event_target:the_planet
+                owner = root
+            }
+        }
+    }
+}
+
+# The final chapter resolution: Triangulation special project complete
+ship_event = {
+    id = mem_dread_pirate.30
+    title = mem_dread_pirate.30.name
+    desc = mem_dread_pirate.30.desc
+
+    is_triggered_only = yes
+
+    show_sound = event_sensor_ping
+    picture = GFX_evt_star_chart
+    location = event_target:the_planet
+
+    option = {
+        name = mem_dread_pirate.30.a
+        hidden_effect = {
+            random_planet = {
+                limit = { has_planet_flag = mem_dread_pirate_tomb_planet }
+                spawn_system = {
+                    initializer = mem_dread_pirate_final_system
+                    min_distance = 8
+                    max_distance = 15
+                }
+            }
+        }
+        owner = {
+            set_country_flag = mem_dread_pirate_found_the_system
+            create_point_of_interest = {
+                id = mem_dread_pirate_poi
+                name = mem_dread_pirate_poi_name
+                desc = mem_dread_pirate_poi_desc
+                event_chain = mem_dread_pirate_chain
+                location = event_target:final_system                
+            }
+        }
+    }
+}
+
+# On entering the final system
+ship_event = {
+    id = mem_dread_pirate.31
+    title = mem_dread_pirate.31.name
+    desc = mem_dread_pirate.31.desc
+
+    is_triggered_only = yes
+
+    show_sound = event_radio_chatter
+    location = FROM
+    picture = GFX_evt_unknown_ships
+
+    trigger = {
+        NOT = { has_global_flag = mem_dread_pirate_story_ended }
+        from = {
+            has_star_flag = mem_dread_pirate_final_system
+            any_ship_in_system = {
+                has_ship_flag = mem_dread_pirate_final_boss
+            }
+        }
+        owner = {
+            has_country_flag = mem_dread_pirate_found_the_system
+            NOT = { has_country_flag = mem_dread_pirate_chatted_with_pirate }
+        }
+    }
+
+    immediate = {
+        owner = {
+            set_country_flag = mem_dread_pirate_chatted_with_pirate
+            random_country = {
+                limit = {
+                    has_country_flag = mem_dread_pirate_boss_country
+                }
+                establish_communications_no_message = prev
+                random_owned_leader = {
+                    limit = {
+                        has_leader_flag = mem_dread_pirate_raewynn
+                    }
+                    save_event_target_as = raewynn
+                }
+            }
+        }
+        random_planet = {
+            limit = { has_planet_flag = mem_dread_pirate_tomb_planet }
+            save_event_target_as = the_planet
+        }
+    }
+
+    option = {
+        name = ONSCREEN
+        hidden_effect = {
+            owner = {
+                country_event = {
+                    id = mem_dread_pirate.32
+                }
+            }
+        }
+    }
+}
+
+country_event = {
+    id = mem_dread_pirate.32
+    title = TRANSMISSION
+    desc = mem_dread_pirate.32.desc
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+        portrait = event_target:raewynn
+        room = mem_dread_pirate_final_room
+    }
+
+    option = {
+        name = mem_dread_pirate.32.a
+        default_hide_option = yes
+    }
+
+    option = {
+        name = mem_dread_pirate.32.b
+        response_text = mem_dread_pirate.32.b.response
+        is_dialog_only = yes
+
+        trigger = {
+            NOR = {
+                has_valid_civic = civic_fanatic_purifiers
+                has_valid_civic = civic_hive_devouring_swarm
+                has_valid_civic = civic_machine_terminator
+            }
+        }
+    }
+    option = {
+        name = mem_dread_pirate.32.c
+        response_text = mem_dread_pirate.32.c.response
+        is_dialog_only = yes
+    }
+    option = {
+        name = mem_dread_pirate.32.d
+        response_text = mem_dread_pirate.32.d.response
+        is_dialog_only = yes
+    }
+    option = {
+        name = mem_dread_pirate.32.e
+        response_text = mem_dread_pirate.32.e.response
+        is_dialog_only = yes
+    }
+}
+
+# Country event to trigger when ship is killed
+country_event = {
+    id = mem_dread_pirate.33
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        fromfrom = {
+            has_ship_flag = mem_dread_pirate_final_boss
+        }
+    }
+
+    immediate = {
+        every_owned_ship = {
+            destroy_ship = this
+        }
+        fromfromfrom.solar_system = { save_event_target_as = combat_system }
+        FROM = {
+            if = {
+                limit = { has_country_flag = mem_dread_pirate_found_the_system }
+                country_event = {
+                    id = mem_dread_pirate.34                    
+                }
+            }
+            else = {
+                random_country = {
+                    limit = { has_country_flag = mem_dread_pirate_found_the_system }
+                    country_event = { id = mem_dread_pirate.35 }
+                }
+            }
+        }
+    }
+}
+
+# We killed the boss
+country_event = {
+    id = mem_dread_pirate.34
+    title = mem_dread_pirate.34.name
+    desc = mem_dread_pirate.34.desc
+
+    is_triggered_only = yes
+
+    location = event_target:combat_system
+    show_sound = event_ship_explosion
+    picture = GFX_evt_sabotaged_ship
+
+    option = {
+        name = EXCELLENT
+        add_relic = r_mem_dread_pirate_mask
+        end_event_chain = mem_dread_pirate_chain
+        hidden_effect = {
+            country_event = {
+                id = mem_dread_pirate.36
+            }
+        }
+    }
+}
+
+# Someone else killed the ship
+country_event = {
+    id = mem_dread_pirate.35
+    title = mem_dread_pirate.35.name
+    desc = mem_dread_pirate.35.desc
+
+    is_triggered_only = yes
+
+    location = event_target:combat_system
+    show_sound = event_ship_explosion
+    picture = GFX_evt_mem_space_battle
+
+    option = {
+        name = mem_dread_pirate.35.a
+        end_event_chain = mem_dread_pirate_chain
+    }
+}
+
+# Marauders talk ship about you
+country_event = {
+    id = mem_dread_pirate.36
+    title = mem_dread_pirate.36.name
+    desc = {
+        text = mem_dread_pirate.36.desc.1
+        trigger = {
+            event_target:mar_country = {
+                has_country_flag = marauder_1
+            }
+        }
+    }
+    desc = {
+        text = mem_dread_pirate.36.desc.2
+        trigger = {
+            event_target:mar_country = {
+                has_country_flag = marauder_2
+            }
+        }
+    }
+    desc = {
+        text = mem_dread_pirate.36.desc.3
+        trigger = {
+            event_target:mar_country = {
+                has_country_flag = marauder_3
+            }
+        }
+    }
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		portrait = event_target:mar_country
+		room = ethic_spaceship_room
+	}
+
+    trigger = {
+        any_relation = {
+            is_country_type = dormant_marauders
+        }
+    }
+
+    immediate = {
+        random_relation = {
+            limit = { is_country_type = dormant_marauders }
+            save_event_target_as = mar_country
+        }
+    }
+
+    option = {
+        name = mem_dread_pirate.36.a
+    }
+}
+
+# Pop up when triggering the relic
+country_event = {
+    id = mem_dread_pirate.40
+    title = mem_dread_pirate.40.name
+    desc = {
+        text = mem_dread_pirate.40.desc.1
+        trigger = {
+            event_target:marauder_country = {
+                has_country_flag = marauder_1
+            }
+        }
+    }
+    desc = {
+        text = mem_dread_pirate.40.desc.2
+        trigger = {
+            event_target:marauder_country = {
+                has_country_flag = marauder_2
+            }
+        }
+    }
+    desc = {
+        text = mem_dread_pirate.40.desc.3
+        trigger = {
+            event_target:marauder_country = {
+                has_country_flag = marauder_3
+            }
+        }
+    }
+
+    is_triggered_only = yes
+    diplomatic = yes
+
+    picture_event_data = {
+		portrait = event_target:marauder_country
+		room = ethic_spaceship_room
+    }
+    
+    immediate = {
+        random_relation = {
+            limit = { is_country_type = dormant_marauders }
+            save_event_target_as = marauder_country
+        }
+        IF = {
+            limit = {
+                NOT = {
+                    any_owned_leader = {
+                        has_leader_flag = mem_dread_pirate_relic_leader
+                    }
+                }
+            }
+            create_leader = {
+                class = admiral
+                species = event_target:marauder_country
+                skill = 3
+                effect = {
+                    set_leader_flag = mem_dread_pirate_relic_leader
+                    save_event_target_as = new_leader
+                    add_trait = mem_dread_pirate_relic_admiral
+                    # add_ruler_trait = mem_dread_pirate_relic_ruler
+                }
+            }
+        }
+        create_fleet = {
+            name = "Dread Disciples"
+            effect = {
+                set_owner = event_target:marauder_country
+                while = {
+                    count = 5
+                    random_list = {
+                        25 = {
+                            create_ship = {
+                                name = random
+                                design = NAME_Void_Champion
+                            }
+                        }
+                        25 = {
+                            while = {
+                                count = 2
+                                create_ship = {
+                                    name = random
+                                    design = NAME_Lancer
+                                }
+                            }
+                        }
+                        25 = {
+                            while = {
+                                count = 4
+                                create_ship = {
+                                    name = random
+                                    design = NAME_Outrider
+                                }
+                            }
+                        }
+                        25 = {
+                            create_ship = {
+                                design = NAME_Lancer
+                            }
+                            while = {
+                                count = 2
+                                create_ship = {
+                                    name = random
+                                    design = NAME_Outrider
+                                }
+                            }
+                        }
+                    }
+                }
+                set_owner = root
+                set_location = root.capital_scope
+                IF = {
+                    limit = { exists = event_target:new_leader }
+                    set_leader = event_target:new_leader
+                }
+            }
+        }
+    }
+
+    option = {
+        name = mem_dread_pirate.40.a
+    }
+}
+
+# TEST EVENT: Force-trigger a raid
+country_event = {
+    id = mem_dread_pirate.9999
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        always = no
+    }
+
+    immediate = {
+        random_relation = {
+            limit = { 
+                is_country_type = dormant_marauders
+                has_communications = prev
+                NOR = { 
+                    has_country_flag = raid_ongoing
+                    has_country_flag = raid_cooldown
+                }
+            }
+            save_event_target_as = raiding_marauder
+            species = { save_event_target_as = marauder_species }
+        }
+        country_event = { id = marauder.101 }
+    }
+}

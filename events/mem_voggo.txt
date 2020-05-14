@@ -1,0 +1,299 @@
+# Voggo the Great
+# By ViolentBeetle
+
+namespace = mem_voggo
+
+fleet_event = {
+	id = mem_voggo.1
+	title = mem_voggo.1.name
+	desc = mem_voggo.1.desc
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	picture = GFX_evt_ancient_databank
+	show_sound = event_finding_loot
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+    
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+	
+	option = {
+		name = DIG
+		small_artifact_reward = yes
+	}
+}
+
+fleet_event = {
+	id = mem_voggo.2
+	title = mem_voggo.2.name
+	desc = mem_voggo.2.desc
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	picture = GFX_evt_hive_mind
+	show_sound = event_finding_loot
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+    
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+	
+	option = {
+		name = DIG
+	}
+}
+
+fleet_event = {
+	id = mem_voggo.3
+	title = mem_voggo.3.name
+	desc = mem_voggo.3.desc
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	picture = GFX_evt_clones
+	show_sound = event_finding_loot
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+    
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+	
+	option = {
+		name = DIG
+		owner = {
+			IF = {
+				limit = {
+					NOR = {
+						has_technology = tech_genome_mapping
+						AND = {
+							is_machine_empire = yes
+							NOT = { has_valid_civic = civic_machine_assimilator }
+						}
+						is_mechanical_empire = yes
+					}
+				}
+				give_technology = {
+					tech = tech_genome_mapping
+				}
+			}
+			ELSE_IF = {
+				limit = {
+					NOR = {
+						has_technology = tech_cloning
+						AND = {
+							is_machine_empire = yes
+							NOT = { has_valid_civic = civic_machine_assimilator }
+						}
+						is_mechanical_empire = yes
+					}
+				}
+				add_research_option = tech_cloning
+				add_tech_progress = {
+					tech = tech_cloning
+					progress = 0.33
+				}
+			}
+		}
+	}
+}
+
+fleet_event = {
+	id = mem_voggo.4
+	title = mem_voggo.4.name
+	desc = mem_voggo.4.desc
+
+	is_triggered_only = yes
+	archaeology = yes
+
+	picture = GFX_evt_mem_horror_corridor
+	show_sound = event_finding_loot
+
+	immediate = {
+		from = { set_site_progress_locked = yes }
+	}
+    
+	after = { 
+		from = { set_site_progress_locked = no } 
+	}
+	
+	option = {
+		name = ONSCREEN
+		hidden_effect = {
+			owner = {
+				country_event = {
+					id = mem_voggo.5
+				}
+			}
+		}
+
+		trigger = {
+			owner = {
+				NOR = {
+					has_valid_civic = civic_fanatic_purifiers
+					has_valid_civic = civic_machine_terminator
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_voggo.4.pur
+		trigger = {
+			owner = {
+				OR = {
+					has_valid_civic = civic_fanatic_purifiers
+					has_valid_civic = civic_machine_terminator
+				}
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier5unityreward
+				min = @tier5unitymin
+				max = @tier5unitymax
+			}
+		}
+	}
+	option = {
+		name = mem_voggo.4.swarm
+		trigger = {
+			owner = {
+				has_valid_civic = civic_hive_devouring_swarm
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = @tier5unityreward
+				min = @tier5unitymin
+				max = @tier5unitymax
+			}
+		}
+	}
+}
+
+country_event = {
+	id = mem_voggo.5
+	title = mem_voggo.5.name
+	desc = mem_voggo.5.desc
+
+	is_triggered_only = yes
+	diplomatic = yes
+
+	picture_event_data = {
+		portrait = event_target:lord_voggo
+		room = mem_bunker_room
+	}
+
+	immediate = {
+		IF = {
+			limit = {
+				species_portrait = rep6
+			}
+			create_species = {
+				name = Vorkun
+				class = REP
+				portrait = rep11
+				traits = {
+					trait = trait_psionic
+					trait = trait_quick_learners
+				}
+			}
+		}
+		ELSE = {
+			create_species = {
+				name = Vorkun
+				class = REP
+				portrait = rep6
+				traits = {
+					trait = trait_psionic
+					trait = trait_quick_learners
+				}
+			}
+		}
+
+		create_saved_leader = {
+			key = mem_voggo_the_guy
+			name = "Voggo the Great"
+			class = governor
+			species = last_created_species
+			skill = 4
+			gender = male
+			traits = {
+				trait = mem_voggo_trait
+			}
+			set_age = 1044
+			effect = {
+				save_event_target_as = lord_voggo
+				add_ruler_trait = mem_voggo_trait_ruler
+			}
+		}
+	}
+
+	option = {
+		name = mem_voggo.5.a
+		custom_tooltip = mem_voggo.5.a.tooltip
+
+		activate_saved_leader = {
+			key = mem_voggo_the_guy
+		}
+
+		ai_chance = {
+			factor = 100
+			modifier = {
+				factor = 10
+				is_xenophile = yes
+			}
+		}
+	}
+
+	option = {
+		name = mem_voggo.5.b
+		add_resource = {
+			influence = 250
+		}
+
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 100
+				is_xenophobe = yes
+			}
+		}
+	}
+
+	option = {
+		name = mem_voggo.5.c
+		is_dialog_only = yes
+		response_text = mem_voggo.5.c.responce
+
+		ai_chance = {
+			factor = 0
+		}
+	}
+	option = {
+		name = mem_voggo.5.d
+		is_dialog_only = yes
+		response_text = mem_voggo.5.d.responce
+
+		ai_chance = {
+			factor = 0
+		}
+	}
+
+	
+}

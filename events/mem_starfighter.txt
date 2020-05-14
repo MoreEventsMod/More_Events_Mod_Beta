@@ -1,0 +1,268 @@
+# The Last Starfighter
+# By ViolentBeetle
+# Suggested for ripping off by Anon
+
+namespace = mem_starfighter
+
+# Initializing MTTH event
+country_event = {
+	id = mem_starfighter.1
+	hide_window = yes
+
+	mean_time_to_happen = {
+		years = 100
+		# days = 5
+	}
+
+	trigger = {
+		is_country_type = primitive
+		exists = capital_scope
+		OR = {
+			# always = yes
+			has_country_flag = machine_age
+			has_country_flag = atomic_age
+			has_country_flag = early_space_age
+		}
+		capital_scope = {
+			has_observation_outpost = yes
+			observation_outpost = {
+				OR = {
+					has_mission = specimen_collection
+					has_mission = passive_observation
+				}
+			}
+			observation_outpost_owner = {
+				is_ai = no
+				NOT = { has_country_flag = mem_starfighter_offered_quest }
+				is_xenophobe = no
+				is_gestalt = no
+			}
+		}
+	}
+
+	immediate = {
+		save_event_target_as = primitive_civ
+		capital_scope = {
+			observation_outpost_owner = {
+				set_country_flag = mem_starfighter_offered_quest
+				set_country_flag = mem_starfighter_planting_on@root
+				country_event = { id = mem_starfighter.2 }
+			}
+		}
+	}
+}
+
+# Proposing the experiment
+country_event = {
+	id = mem_starfighter.2
+	title = mem_starfighter.2.name
+	desc = mem_starfighter.2.desc
+
+	is_triggered_only = yes
+
+	picture = GFX_evt_satellite_in_orbit
+	location = from.capital_scope
+	show_sound = event_sensor_ping
+
+	option = {
+		name = mem_starfighter.2.a
+
+		add_monthly_resource_mult = {
+			resource = society_research
+			value = @tier3researchreward
+			min = @tier3researchmin
+			max = @tier3researchmax
+		}
+
+		hidden_effect = {
+			from = {
+				random_list = {
+					80 = {
+						country_event = {
+							id = mem_starfighter.3
+							days = 360
+							random = 540
+						}
+					}
+					33 = {}
+				}
+			}
+		}
+	}
+
+	option = {
+		name = NOTIME
+
+		add_resource = {
+			influence = 50
+		}
+	}
+}
+
+# Pingback on the country to decide the outcome and roll. 
+country_event = {
+	id = mem_starfighter.3
+	hide_window = yes
+	is_triggered_only = yes
+
+	trigger = {
+		is_country_type = primitive
+		exists = capital_scope
+		capital_scope = {
+			has_observation_outpost = yes
+			observation_outpost = {
+				OR = {
+					has_mission = specimen_collection
+					has_mission = passive_observation
+				}
+			}
+			observation_outpost_owner = {
+				has_country_flag = mem_starfighter_planting_on@root
+			}
+		}
+	}
+
+	immediate = {
+		save_event_target_as = primitive_civ
+		capital_scope = {
+			save_event_target_as = primitive_planet
+			observation_outpost_owner = {
+				country_event = {
+					id = mem_starfighter.4
+				}
+			}
+		}
+	}
+}
+
+# Quest proposition
+country_event = {
+	id = mem_starfighter.4
+	title = mem_starfighter.4.name
+	desc = {
+		text = mem_starfighter.4.desc.admiral
+		trigger = {
+			has_country_flag = mem_starfighter_admiral
+		}
+	}
+	desc = {
+		text = mem_starfighter.4.desc.general
+		trigger = {
+			has_country_flag = mem_starfighter_general
+		}
+	}
+
+	is_triggered_only = yes
+
+	picture = GFX_evt_synth_sabotage
+	show_sound = event_sensor_ping
+	location = from.capital_scope
+
+	immediate = {
+		# log = "From is [From.GetName]"
+		# log = "From.Species is [From.Species.GetName]"
+		random_list = {
+			50  = {
+				set_country_flag = mem_starfighter_admiral
+				create_saved_leader = {
+					key = mem_starfighter_leader
+					class = admiral
+					species = from.species
+
+					effect = {
+						save_event_target_as = gamer
+						IF = {
+							limit = { is_lithoid = no }
+							set_age = 19
+						}
+						ELSE = {
+							set_age = 30
+						}
+						add_trait = mem_starfighter_admiral_trait
+					}
+				}
+			}
+			50  = {
+				set_country_flag = mem_starfighter_general
+				create_leader = {
+					class = general
+					species = from.species
+
+					effect = {
+						save_event_target_as = gamer
+						IF = {
+							limit = { is_lithoid = no }
+							set_age = 19
+						}
+						ELSE = {
+							set_age = 30
+						}
+						add_trait = mem_starfighter_general_trait
+					}
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_starfighter.4.a
+		from.capital_scope = {
+			enable_special_project = {
+				name = MEM_STARFIGHTER_PROJECT
+				location = THIS
+				owner = ROOT
+			}
+		}
+	}
+
+	option = {
+		name = mem_starfighter.4.b
+		switch = {
+			trigger = has_country_flag
+			mem_starfighter_admiral = {
+				add_modifier = {
+					modifier = mem_starfighter_admiral_modifier
+				}
+			}
+			mem_starfighter_general = {
+				add_modifier = {
+					modifier = mem_starfighter_general_modifier
+				}
+			}
+		}
+	}
+}
+
+# Project completion
+ship_event = {
+	id = mem_starfighter.5
+	title = mem_starfighter.5.name
+	desc = mem_starfighter.5.desc
+
+	is_triggered_only = yes
+
+	location = event_target:primitive_planet
+	show_sound = event_sensor_ping
+	picture = GFX_evt_synth_sabotage
+
+	option = {
+		name = EXCELLENT
+
+		owner = {
+			switch = {
+				trigger = has_country_flag
+				mem_starfighter_admiral = {
+					custom_tooltip = mem_starfighter.5.tooltip.admiral
+				}
+				mem_starfighter_general = {
+					custom_tooltip = mem_starfighter.5.tooltip.general
+				}
+			}
+			hidden_effect = {
+				activate_saved_leader = {
+					key = mem_starfighter_leader
+				}
+			}
+		}
+	}
+}

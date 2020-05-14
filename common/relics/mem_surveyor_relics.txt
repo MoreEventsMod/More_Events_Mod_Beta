@@ -1,0 +1,201 @@
+@activation_cost = 150
+@triumph_duration = 3600
+r_mem_surveyor_personality_core = {
+    activation_duration = @triumph_duration
+    portrait = GFX_relic_mem_surveyor_personality_core
+    sound = event_activating_unknown_technology
+
+    resources = {
+		category = relics
+		# Activation cost
+		cost = {
+			influence = @activation_cost
+		}
+    }
+    
+    ai_weight = {
+        weight = 100
+        modifier = {
+            factor = 0.2
+            NOT = {
+                any_owned_fleet = {
+                    count_ships = {
+                        count > 10
+                    }
+                    NOT = { exists = leader }
+                }
+            }
+        }
+    }
+    
+    triggered_country_modifier = {
+		potential = {
+			always = yes
+        }
+        all_technology_research_speed = 0.1
+    }
+    
+    score = 3000 # Almost as good as great khan
+
+    active_effect = {
+        custom_tooltip = mem_surveyor_personality_core_tooltip
+		hidden_effect = {
+            country_event = { id = mem_surveyor.400 }
+        }
+		custom_tooltip = relic_triumph_cooldown
+		hidden_effect = {
+			add_modifier = {
+				modifier = "relic_activation_cooldown" 
+				days = @triumph_duration
+			}		
+		}
+    }
+    
+    possible = {
+		custom_tooltip = {
+			fail_text = "requires_relic_no_cooldown"
+			NOT = { has_modifier = relic_activation_cooldown }
+        }
+        custom_tooltip = {
+            fail_text = mem_surveyor_cant_have_two_matrices
+            NOT = {
+                any_owned_leader = { has_leader_flag = mem_surveyor_summoned_leader }
+            }
+        }
+        OR = {
+            NOT = { has_policy_flag = ai_outlawed }
+            has_authority = auth_machine_intelligence
+        }
+	}
+}
+
+r_mem_surveyor_mobile_production_matrix = {
+    activation_duration = @triumph_duration
+    portrait = GFX_relic_war_forge # Must replace
+    sound = event_crystal_ship
+
+    resources = {
+		category = relics
+		# Activation cost
+		cost = {
+			influence = @activation_cost
+		}
+        produces = {
+            trigger = {
+                NOT = { has_country_flag = mem_surveyor_activated_matrix }
+            }
+            alloys = 15
+        }
+    }
+
+    ai_weight = {
+        weight = 100
+        modifier = {
+            factor = 0.1
+            resource_income_compare = {
+                resource = alloys
+                value < 25
+            }
+        }
+        modifier = {
+            factor= 0.2
+            resource_stockpile_compare = {
+                resource = alloys
+                value < 500
+            }
+        }
+        modifier = {
+            factor = 2.5
+            is_at_war = yes
+        }
+    }
+
+    triggered_country_modifier = {
+		potential = {
+			always = yes
+        }
+    }
+
+    score = 500
+
+    active_effect = {
+        custom_tooltip = mem_surveyor_production_matrix_effect
+        set_timed_country_flag = {
+            flag = mem_surveyor_activated_matrix
+            days = 1800
+        }
+        hidden_effect = {
+            create_fleet = {
+                # settings = { 
+                #     can_upgrade = no 
+                #     can_change_composition = no
+                #     uses_naval_capacity = no
+                #     can_change_leader = no
+                # }
+                effect = {
+                    set_owner = prev
+                    set_location = prev.capital_scope
+                    while = {
+                        count = 5
+                        create_ship = {
+                            design = NAME_MEM_Surveyor_Support
+                        }
+                    }
+                    while = {
+                        count = 1
+                        create_ship = {
+                            design = NAME_MEM_Surveyor_Escort
+                        }
+                    }
+                    IF = {
+                        limit = { mid_game_years_passed >= 0 }
+                        while = {
+                            count = 5
+                            create_ship = {
+                                design = NAME_MEM_Surveyor_Support
+                            }
+                        }
+                        while = {
+                            count = 1
+                            create_ship = {
+                                design = NAME_MEM_Surveyor_Escort
+                            }
+                        }
+                    }
+                    IF = {
+                        limit = { end_game_years_passed >= 0 }
+                        while = {
+                            count = 5
+                            create_ship = {
+                                design = NAME_MEM_Surveyor_Support
+                            }
+                        }
+                        while = {
+                            count = 1
+                            create_ship = {
+                                design = NAME_MEM_Surveyor_Escort
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        custom_tooltip = relic_triumph_cooldown
+		hidden_effect = {
+			add_modifier = {
+				modifier = "relic_activation_cooldown" 
+				days = @triumph_duration
+			}		
+		}
+    }
+
+    possible = {
+        custom_tooltip = {
+			fail_text = "requires_relic_no_cooldown"
+			NOT = { has_modifier = relic_activation_cooldown }
+        }
+        hidden_trigger = {
+            exists = capital_scope
+        }
+    }
+}
