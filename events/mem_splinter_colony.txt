@@ -1,0 +1,244 @@
+########################
+# Splinter Colony
+# by Malthus
+########################
+
+namespace = mem_splinter_colony
+
+ship_event = {
+	id = mem_splinter_colony.1
+	title = mem_splinter_colony.1.name
+	desc = mem_splinter_colony.1.desc
+	picture = GFX_evt_wormhole
+	show_sound = event_screams
+	location = from
+	is_triggered_only = yes
+	
+	immediate = {
+		from = {
+			save_event_target_as = mem_splinter_colony
+		}
+	}
+	
+	option = {
+		name = mem_splinter_colony.1.a
+		from = {
+			enable_special_project = {
+				name = MEM_SPLINTER_COLONY_PROJECT
+				location = THIS
+				owner = root.owner
+			}
+		}
+		hidden_effect = {
+			#exile leader of science ship
+			fleet = {
+				exile_leader_as = mem_splinter_colony_leader
+			}
+			#remove ship (not destroy)
+			delete_ship = root
+		}
+	}	
+}
+
+#project finished
+country_event = {
+	id = mem_splinter_colony.2
+	hide_window = yes
+	
+	is_triggered_only = yes
+
+	immediate = {
+		random_list = {
+			#found established colony
+			5 = {
+				modifier = {
+					factor = 0
+					#space is owned by another empire OR gestalt_consciousness
+					OR = {
+						event_target:mem_splinter_colony = {
+							OR = {
+								solar_system = {
+									has_owner = yes
+									NOT = {
+										owner = {
+											is_same_value = root
+										}
+									}
+								}
+								habitable_planet = no
+							}
+						}
+						has_ethic = ethic_gestalt_consciousness
+					}
+				}
+				country_event = { id = mem_splinter_colony.3 }
+			}
+			#ancient wreckage found
+			1 = {
+				country_event = { id = mem_splinter_colony.4 }
+			}
+			#science ship reappears during search
+			1 = {
+				country_event = { id = mem_splinter_colony.5 }
+			}
+			#pops evacuated from rudimentary habitats
+			5 = {
+				modifier = {
+					factor = 0
+					#(planet is habitable AND in player/neutral space) OR gestalt_consciousness
+					OR = {
+						event_target:mem_splinter_colony = {
+							habitable_planet = yes
+							solar_system = {
+								OR = {
+									has_owner = no
+									owner = {
+										is_same_value = root
+									}
+								}
+							}
+						}
+						has_ethic = ethic_gestalt_consciousness
+					}
+				}
+				country_event = { id = mem_splinter_colony.6 }
+			}
+		}
+	}
+}
+
+#found established colony
+country_event = {
+	id = mem_splinter_colony.3
+	title = mem_splinter_colony.3.name
+	desc = mem_splinter_colony.3.desc
+	picture = GFX_evt_colony_settlement
+	show_sound = event_radio_chatter
+	location = event_target:mem_splinter_colony
+	is_triggered_only = yes
+	
+	immediate = {
+		#create colony with 5 pops and primitive buildings for basic sustenance
+		event_target:mem_splinter_colony = {
+			create_colony = {
+				owner = root
+			}
+			add_building = building_colony_shelter
+			add_building = building_mem_primitive_factory
+			add_district = district_farming
+			add_district = district_generator
+			add_district = district_mining
+			while = {
+				count = 6
+				create_pop = { species = owner_main_species }
+			}
+		}			
+	}
+	
+	option = {
+		name = mem_splinter_colony.3.a
+	}
+}
+
+#ancient wreckage found
+country_event = {
+	id = mem_splinter_colony.4
+	title = mem_splinter_colony.4.name
+	desc = mem_splinter_colony.4.desc
+	picture = GFX_evt_mem_crashed_ship_cold
+	show_sound = event_scanner
+	location = event_target:mem_splinter_colony
+	is_triggered_only = yes
+
+	after = {
+		#get physics research from ships data core
+		add_monthly_resource_mult = {
+			resource = physics_research
+			value = @tier2researchreward
+			min = @tier2researchmin
+			max = @tier2researchmax
+		}
+	}
+
+	option = {
+		name = mem_splinter_colony.4.a
+		trigger = {
+			NOT = {
+				has_ethic = ethic_gestalt_consciousness
+			}
+		}
+	}
+	option = {
+		name = mem_splinter_colony.4.b
+		trigger = {
+			has_ethic = ethic_gestalt_consciousness
+		}
+	}
+}
+
+#science ship reappears during search
+country_event = {
+	id = mem_splinter_colony.5
+	title = mem_splinter_colony.5.name
+	desc = mem_splinter_colony.5.desc
+	picture = GFX_evt_ship_in_orbit
+	show_sound = event_mystic_reveal
+	location = event_target:mem_splinter_colony
+	is_triggered_only = yes
+
+	immediate = {
+		#spawn "Lost Science Ship" with exiled scientist as leader
+		create_fleet = {
+			effect = {
+				set_owner = root
+
+				create_ship = {
+					name = "NAME_MEM_Lost_Science_Ship"
+					random_existing_design = science
+				}
+
+				set_fleet_stance = evasive
+				set_location = event_target:mem_splinter_colony
+
+				set_leader = mem_splinter_colony_leader
+			}
+		}
+	}
+	
+	option = {
+		name = mem_splinter_colony.5.a
+		#get physics research from ships data core
+		add_monthly_resource_mult = {
+			resource = physics_research
+			value = @tier2researchreward
+			min = @tier2researchmin
+			max = @tier2researchmax
+		}
+	}
+}
+
+#pops evacuated from rudimentary habitats
+country_event = {
+	id = mem_splinter_colony.6
+	title = mem_splinter_colony.6.name
+	desc = mem_splinter_colony.6.desc
+	picture = GFX_evt_outpost
+	show_sound = event_airlock
+	location = event_target:mem_splinter_colony
+	is_triggered_only = yes
+
+	option = {
+		name = mem_splinter_colony.6.a
+		#get 2 pops of owner_main_species on capital
+		#custom_tooltip = cara.4010.a.tooltip
+		custom_tooltip = mem_splinter_colony.6.a.tooltip
+		hidden_effect = {
+			capital_scope = {
+				while = {
+					count = 2
+					create_pop = { species = owner_main_species }
+				}
+			}
+		}
+	}
+}
