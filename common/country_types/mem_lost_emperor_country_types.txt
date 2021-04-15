@@ -12,7 +12,9 @@ mem_azran = {
 		needs_colony = no
 	}
 	modules = {
-		exclusive_diplomacy_module = {} # Nothing is allowed, but we need this for relationships.
+		exclusive_diplomacy_module = {
+			contact_rule = on_action_only
+		} # Nothing is allowed, but we need this for relationships.
 		basic_technology_module = {}
 	}
 }
@@ -23,9 +25,10 @@ mem_neochadanus_ascendant = {
 	scaled_difficulty_bonuses = 1.0
 	sub_title = "NEOCHADANUS_EMPIRE"
 	sub_title_desc = "NEOCHADANUS_EMPIRE_DESC"
+	has_difficulty_bonuses = yes
 	counts_for_victory = yes
 	pop_growth = yes
-	playable = no
+	playable = yes
 	has_pulse_events = yes
 	piracy_risk = yes
 	randomize_ethos = yes
@@ -37,13 +40,13 @@ mem_neochadanus_ascendant = {
 	relations = yes
 	observable = yes
 	can_use_invalid_technology = no
+	can_receive_envoys = yes
 
-	
 	ai = {
 		enabled = yes
 		declare_war = yes
 		min_navy_for_wars = 0.5
-		min_assault_armies_for_wars = 6
+		min_assault_armies_for_wars = @armies_for_declaring_war	
 		colonizer = yes
 		internal_policies = yes
 		modification = yes
@@ -57,45 +60,52 @@ mem_neochadanus_ascendant = {
 			foreign_minister_module
 			interior_minister_module
 		}
-		
+
 		ship_data = {
 			constructor = {
-				min = 2
+				min = 3
 				max = 3
-				system_mult = 0.10
 			}
-			
+
 			science	= {
-				min = 2
+				min = 3
 				max = 3
-				system_mult = 0.15
 			}
-			
+
 			colonizer = {
 				min = 1
 				max = 1
 			}
-			
-			
+
+			juggernaut = {
+				min = 1
+				max = 1
+			}
+
 			colossus = {
 				min = 1
 				max = 1
-			}	
-			
+			}
+
+			star_eater = {
+				min = 1
+				max = 1
+			}
+
 			titan = {
 				min = 1
 				max = 2
-			}			
-			
+			}
+
 			battleship = {
 				fraction = {
 					modifier = {
 						add = 25
 						has_technology = tech_battleships
-					}					
+					}
 				}
 			}
-			
+
 			cruiser = {
 				fraction = {
 					modifier = {
@@ -108,13 +118,13 @@ mem_neochadanus_ascendant = {
 					}
 				}
 			}
-			
+
 			destroyer = {
 				fraction = {
 					modifier = {
 						add = 50
 						has_technology = tech_destroyers
-					}	
+					}
 					modifier = {
 						add = -15
 						has_technology = tech_cruisers
@@ -125,14 +135,14 @@ mem_neochadanus_ascendant = {
 					}
 				}
 			}
-			
+
 			corvette = {
 				fraction = {
 					base = 100
 					modifier = {
 						add = -25
 						has_technology = tech_destroyers
-					}	
+					}
 					modifier = {
 						add = -45
 						has_technology = tech_cruisers
@@ -140,15 +150,54 @@ mem_neochadanus_ascendant = {
 					modifier = {
 						add = -5
 						has_technology = tech_battleships
-					}						
+					}
+				}
+			}
+
+			crisis_cruiser = {
+				fraction = {
+					modifier = {
+						add = 35
+						has_crisis_level = crisis_level_4
+					}
+				}
+			}
+
+			crisis_destroyer = {
+				fraction = {
+					modifier = {
+						add = 50
+						has_crisis_level = crisis_level_3
+					}
+					modifier = {
+						add = -15
+						has_crisis_level = crisis_level_4
+					}
+				}
+			}
+
+			crisis_corvette = {
+				fraction = {
+					modifier = {
+						add = 100
+						has_crisis_level = crisis_level_2
+					}
+					modifier = {
+						add = -25
+						has_crisis_level = crisis_level_3
+					}
+					modifier = {
+						add = -45
+						has_crisis_level = crisis_level_4
+					}
 				}
 			}
 		}
-		
+
 		army_data = {
 			assault_army = {
 				fraction = {
-					factor = 100					
+					factor = 100
 					modifier = {
 						factor = 0
 						OR = {
@@ -165,16 +214,16 @@ mem_neochadanus_ascendant = {
 							AND = {
 								has_ai_personality_behaviour = slaver
 								has_technology = tech_neural_implants
-							}		
+							}
 							AND = {
 								has_ai_personality_behaviour = robot_liberator
 								has_technology = tech_droid_workers
-							}							
+							}
 						}
 					}
 				}
 			}
-			
+
 			slave_army = {
 				fraction = {
 					factor = 100
@@ -194,35 +243,17 @@ mem_neochadanus_ascendant = {
 							NAND = {
 								has_ai_personality_behaviour = slaver
 								has_technology = tech_neural_implants
-							}		
+							}
 							AND = {
 								has_ai_personality_behaviour = robot_liberator
 								has_technology = tech_droid_workers
-							}							
+							}
 						}
 					}
 				}
 			}
-			
+
 			robotic_army = {
-				fraction = {
-					factor = 100
-					modifier = {
-						factor = 0
-						OR = {
-							has_authority = auth_machine_intelligence
-							has_technology = tech_telepathy
-							has_technology = tech_gene_seed_purification	
-							NAND = {
-								has_ai_personality_behaviour = robot_liberator
-								has_technology = tech_droid_workers
-							}							
-						}
-					}
-				}
-			}
-			
-			clone_army = {
 				fraction = {
 					factor = 100
 					modifier = {
@@ -232,18 +263,39 @@ mem_neochadanus_ascendant = {
 							has_technology = tech_telepathy
 							has_technology = tech_gene_seed_purification
 							NAND = {
+								has_ai_personality_behaviour = robot_liberator
+								has_technology = tech_droid_workers
+							}
+						}
+					}
+				}
+			}
+
+			clone_army = {
+				fraction = {
+					factor = 100
+					modifier = {
+						factor = 0
+						OR = {
+							OR = {
+								NOT = { has_authority = auth_machine_intelligence }
+								has_civic = civic_machine_assimilator
+							}
+							has_technology = tech_telepathy
+							has_technology = tech_gene_seed_purification
+							NAND = {
 								OR = {
 									has_ethic = ethic_militarist
 									has_ethic = ethic_fanatic_militarist
 								}
 								has_technology = tech_gene_banks
-							}								
+							}
 						}
 					}
 				}
 			}
-			
-			psionic_army = {			
+
+			psionic_army = {
 				fraction = {
 					factor = 100
 					modifier = {
@@ -251,12 +303,12 @@ mem_neochadanus_ascendant = {
 						OR = {
 							has_authority = auth_machine_intelligence
 							NOT = { has_technology = tech_telepathy }
-							has_technology = tech_gene_seed_purification								
+							has_technology = tech_gene_seed_purification
 						}
 					}
 				}
 			}
-			
+
 			gene_warrior_army = {
 				fraction = {
 					factor = 100
@@ -264,7 +316,7 @@ mem_neochadanus_ascendant = {
 						factor = 0
 						OR = {
 							has_authority = auth_machine_intelligence
-							NOT = { has_technology = tech_gene_seed_purification }			
+							NOT = { has_technology = tech_gene_seed_purification }
 						}
 					}
 				}
@@ -282,7 +334,7 @@ mem_neochadanus_ascendant = {
 					}
 				}
 			}
-	
+
 			machine_assault_2 = {
 				fraction = {
 					factor = 100
@@ -299,7 +351,7 @@ mem_neochadanus_ascendant = {
 					}
 				}
 			}
-	
+
 			machine_assault_3 = {
 				fraction = {
 					factor = 25
@@ -315,38 +367,73 @@ mem_neochadanus_ascendant = {
 		}
 
 	}
-	
+
 	trade_routes_available = {
 		is_gestalt = no
 	}
-	
+
 	modules = {
 		standard_event_module = {}
 		standard_economy_module = {}
 		standard_leader_module = {}
-		standard_diplomacy_module = {}
-		all_technology_module = {}
+		standard_diplomacy_module = { contact_rule = does_first_contact_sites }
+		standard_technology_module = {}
 		standard_trade_routes_module = {}
+		standard_pop_factions_module = {}
 		standard_expansion_module = {}
 		standard_species_rights_module = {}
 	}
-	
+
 	resources = {
 		category = country_base
 		produces = {
 			energy = 50
 			minerals = 50
-			physics_research = 20
-			society_research = 20
-			engineering_research = 20
+			physics_research = 30
+			society_research = 30
+			engineering_research = 30
 			influence = 5
-			unity = 10
-			alloys = 10
-			consumer_goods = 20
-			food = 20
-		}	
+			unity = 15
+			alloys = 15
+		}
+		produces = {
+			trigger = {
+				OR = {
+					is_gestalt = no
+					has_valid_civic = civic_machine_servitor
+				}
+			}
+			consumer_goods = 10
+		}
+		produces = {
+			trigger = {
+				OR = {
+					is_regular_empire = yes
+					is_hive_empire = yes
+				}
+				is_lithoid_empire = no
+			}
+			food = 10
+		}
+		produces = {
+			trigger = {
+				OR = {
+					is_regular_empire = yes
+					is_hive_empire = yes
+				}
+				is_lithoid_empire = yes
+			}
+			minerals = 10
+		}
+		produces = {
+			trigger = {
+				is_machine_empire = yes
+			}
+			energy = 10
+			minerals = 10
+		}
 	}
-	
+
 	# planet scope
 	branch_office_resources = {
 		category = planet_branch_offices
@@ -354,10 +441,6 @@ mem_neochadanus_ascendant = {
 			energy = 1000
 			influence = 50
 		}
-		
-		upkeep = {}
-		
-		produces = {}		
 	}
 }
 
