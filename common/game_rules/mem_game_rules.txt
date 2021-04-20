@@ -1,5 +1,8 @@
 # This is the copy of game rule by hadaev; from Human Fallen Empires.
 
+#This rule is a condition for bombarding planets
+#Root = fleet, potential attacker
+#From = planet, potential target
 can_orbital_bombard = {
 	exists = FROM.OWNER
 	NOT = {
@@ -7,12 +10,14 @@ can_orbital_bombard = {
 			is_ship_size = colossus
 		}
 	}
-	# mod
 	OR = {
 		AND = {
-			exists = ROOT.OWNER
-			exists = FROM.CONTROLLER
-			ROOT.OWNER = { is_hostile = FROM.CONTROLLER }
+			ROOT.OWNER = {
+				NOT = { has_communications = FROM.OWNER }
+			}
+			FROM.OWNER = {
+				NOT = { is_country_type = primitive }
+			}
 		}
 		AND = {
 			ROOT.OWNER = {
@@ -21,8 +26,61 @@ can_orbital_bombard = {
 					has_policy_flag = interference_active
 				}
 			}
-			exists = FROM.OWNER
 			FROM.OWNER = { is_country_type = primitive }
+		}
+		ROOT.OWNER = { is_at_war_with = FROM.CONTROLLER }
+		FROM = { is_planet_class = pc_infested }
+		FROM.CONTROLLER = {
+			OR = {
+				is_country_type = swarm
+				is_country_type = ai_empire
+				is_country_type = cybrex_empire
+				AND = {
+					is_country_type = awakened_marauders
+					ROOT.OWNER = { is_hostile = prev }
+				}
+			}
+		}
+		ROOT.OWNER = {
+			OR = {
+				is_country_type = extradimensional
+				is_country_type = extradimensional_2
+				is_country_type = extradimensional_3
+				is_country_type = swarm
+				is_country_type = ai_empire
+				is_country_type = cybrex_empire
+				is_country_type = dormant_marauders
+				is_country_type = marauder_raiders
+				is_country_type = ruined_marauders
+				is_country_type = gray_goo
+				is_country_type = vol
+				AND = {
+					is_country_type = awakened_marauders
+					FROM.CONTROLLER = { is_hostile = prev }
+				}
+			}
+		}
+		AND = {
+    	    from.controller = {
+    	        is_country_type = faction
+    	        NOT = { is_same_value = root.owner }
+    	    }
+    	    from.owner = {
+    	        is_same_value = root.owner
+    	    }
+		}
+		AND = {
+			exists = ROOT.OWNER
+			exists = FROM.CONTROLLER
+			ROOT.OWNER = {
+				OR = {
+					is_country_type = mem_surveyor_country_red
+					is_country_type = mem_vazurans
+				}
+			}
+			FROM.CONTROLLER = {
+				is_country_type = default
+			}
 		}
 	}
 }
