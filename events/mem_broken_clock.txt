@@ -40,8 +40,8 @@ ship_event = {
     }
 }
 
-@notification_time = 1
-@notification_random = 3599 #Up to 10 years from the start
+@notification_time = 9000
+@notification_random = 23400 #Up to 10 years from the start
 
 @arrival_time = 360 #Change to some actual numbers
 @arrival_random = 3240
@@ -1014,6 +1014,52 @@ country_event = {
                     id = mem_broken_clock.1005
                 }
             }
+            event_target:unwelcome_guests = {
+                country_event = {
+                    id = mem_broken_clock.9001
+                    days = 360
+                    random = 180
+                }
+            }
+        }
+    }
+}
+
+country_event = {
+    id = mem_broken_clock.9001
+    hide_window = yes
+    is_triggered_only = yes
+
+    trigger = {
+        is_at_war = no
+    }
+
+    immediate = {
+        random_neighbor_country = {
+            limit = {
+                is_country_type = default
+            }
+            save_event_target_as = mem_broken_clock_war_target
+        }
+        IF = {
+            limit = {
+                exists = event_target:mem_broken_clock_war_target                 
+            }
+            IF = {
+                limit = {
+                    has_authority = auth_hive_mind
+                }
+                declare_war = {
+                    target = event_target:mem_broken_clock_war_target
+                    attacker_war_goal = wg_absorption
+                }
+            }
+            ELSE = {
+                declare_war = {
+                    target = event_target:mem_broken_clock_war_target
+                    attacker_war_goal = wg_cleansing
+                }
+            }
         }
     }
 }
@@ -1414,7 +1460,7 @@ country_event = {
                 random_system_within_border = {
                     limit = { has_star_flag = mem_broken_clock_system }
                     set_global_flag = mem_broken_clock_system_reverted
-                    save_event_target_as = broken_clock_system
+                    save_global_event_target_as = broken_clock_system
                     star = { change_pc = pc_neutron_star }
                     every_system_planet = {
                         limit = {
