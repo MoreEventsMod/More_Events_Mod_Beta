@@ -504,41 +504,11 @@ planet_event = {
                              }
                             set_owner = event_target:unwelcome_guests
                             set_starbase_size = starbase_starfortress
-                            set_starbase_module = {
-                                slot = 1
-                                module = shipyard
-                            }
-                            set_starbase_module = {
-                                slot = 2
-                                module = shipyard
-                            }
-                            set_starbase_module = {
-                                slot = 3
-                                module = anchorage
-                            }
-                            set_starbase_module = {
-                                slot = 4
-                                module = anchorage
-                            }
-                            set_starbase_module = {
-                                slot = 5
-                                module = gun_battery
-                            }
-                            set_starbase_module = {
-                                slot = 6
-                                module = missile_battery
-                            }
-                            set_starbase_building = {
-                                slot = 1
-                                building = disruption_field                                
-                            }
-                            set_starbase_building = {
-                                slot = 2
-                                building = target_uplink_computer                                
-                            }
-                            set_starbase_building = {
-                                slot = 3
-                                building = defense_grid                                
+                            event_target:unwelcome_guests = {
+                                country_event = {
+                                    id = mem_broken_clock.3003
+                                    days = 1
+                                }
                             }
                             while = {
                                 count = 20
@@ -906,6 +876,7 @@ planet_event = {
                     count = 4
                     create_leader = {
                         class = scientist
+                        species = THIS
                         effect = {
                             add_trait = mem_broken_clock_scientist_trait
                         }
@@ -924,6 +895,7 @@ planet_event = {
                     count = 2
                     create_leader = {
                         class = admiral
+                        species = THIS
                         effect = {
                             add_trait = mem_broken_clock_admiral_trait
                         }
@@ -938,6 +910,7 @@ planet_event = {
                 }
                 create_leader = {
                     class = general
+                    species = THIS
                     effect = {
                         add_trait = mem_broken_clock_general_trait
                     }
@@ -948,6 +921,7 @@ planet_event = {
                 }
                 create_leader = {
                     class = governor
+                    species = THIS
                     effect = {
                         add_trait = mem_broken_clock_governor_trait
                     }
@@ -956,7 +930,8 @@ planet_event = {
                     # set_leader = last_created_leader
                 }
                 # country_event = { id = mem_broken_clock.2000 days = 7 } #Empire will make contact - after all the event targets are set
-                country_event = { id = mem_broken_clock.3000 days = 5400 random = 360 } #15 years, approximately
+                set_timed_country_flag = {flag = mem_broken_clock_dont_delete_yet days = 5400 } #15 years, approximately
+                country_event = { id = mem_broken_clock.3000 days = 1 random = 359 } 
             }
         }
     }
@@ -998,7 +973,7 @@ country_event = {
         hidden_effect = {
             IF = {
                 limit = {
-                    event_target:unwelcome_guests = { has_authority = auth_imperial }
+                    event_target:unwelcome_guests = { is_regular_empire = yes }
                 }
                 country_event = {
                     id = mem_broken_clock.1003
@@ -1435,22 +1410,25 @@ country_event = {
 
     immediate = {
         random_list = {
-            175 = { #5% default currently
+            95 = { #5% default currently
                 country_event = { id = mem_broken_clock.3000 days = 360 }
-                modifier = { #Unlikely to happen if lost control of BC system
-                    factor = 5
-                    NOT = {
-                        any_system_within_border = {
-                            has_star_flag = mem_broken_clock_system
-                        }
-                    }
-                }
                 modifier = {
                     factor = 0
                     has_global_flag = mem_broken_clock_kill_now
                 }
+                # Kill them if they lost all their home planets
+                modifier = {
+                    factor = 0
+                    NOT = {
+                        any_owned_planet = {
+                            solar_system = {
+                                has_star_flag = mem_broken_clock_system
+                            }
+                        }
+                    }
+                }
             }
-            25 = {
+            5 = {
                 every_system_within_border = {
                     set_star_flag = mem_broken_clock_unwelcome_guests_purged
                 }
@@ -1603,6 +1581,32 @@ country_event = {
                     factor = 2.5
                     end_game_years_passed > 10
                 }
+
+                # Can not evict if there's grace period
+                modifier = {
+                    factor = 0
+                    has_country_flag = mem_broken_clock_dont_delete_yet
+                    any_owned_planet = {
+                        solar_system = {
+                            has_star_flag = mem_broken_clock_system
+                        }
+                    }
+                }
+
+                # Can't evict if someone controls their system right now - finish the job or let them retake
+                modifier = {
+                    factor = 0
+                    event_target:mem_broken_clock_system_global_target = {
+                        NAND = {
+                            exists = starbase
+                            starbase = {
+                                owner = {
+                                    is_same_value = root
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -1634,3 +1638,169 @@ country_event = {
     }
 }
 
+#Someone has captured BC planet from Newcomers.
+
+country_event = {
+    id = mem_broken_clock.3002
+    title = mem_broken_clock.3002.name
+    desc = {
+        text = mem_broken_clock.3002.desc.home
+        trigger = {
+            fromfrom = {
+                NOR = {
+                    is_planet_class = pc_ringworld_habitable
+                    is_planet_class = pc_habitat
+                }
+            }
+        }
+    }
+    desc = {
+        text = mem_broken_clock.3002.desc.ring
+        trigger = {
+            fromfrom = {
+                is_planet_class = pc_ringworld_habitable
+            }
+        }
+    }
+    desc = {
+        text = mem_broken_clock.3002.desc.hab
+        trigger = {
+            fromfrom = {
+                is_planet_class = pc_habitat
+            }
+        }
+    }
+
+    picture = GFX_evt_clocks
+    location = fromfrom
+    sound = event_activating_unknown_technology
+
+    trigger = {
+        from = {
+            has_country_flag = mem_broken_clock_newcomers
+        }
+        fromfrom = {
+            solar_system = {
+                has_star_flag = mem_broken_clock_system
+            }
+        }
+    }
+
+    immediate = {
+        fromfrom = {
+            destroy_colony = yes
+            IF = {
+                limit = {
+                    is_planet_class = pc_ringworld_habitable
+                }
+                change_pc = pc_ringworld_habitable_damaged
+            }
+            else_if = {
+                limit = { is_planet_class = pc_habitat }
+                remove_planet = yes
+            }
+            ELSE = {
+                change_pc = pc_shrouded
+            }
+        }
+    }
+
+    option = {
+        name = mem_broken_clock.3002.a
+
+        
+    }
+
+    after = {
+        large_artifact_reward = yes
+
+        add_random_research_option = {
+            add_progress = 0.50
+            area = engineering
+            ignore_prereqs = no
+            fail_effects = {
+                add_monthly_resource_mult = {
+                    resource = engineering_research
+                    value = @tier5researchreward
+                    min = @tier5researchmin
+                    max = @tier5researchmax
+                }
+            }
+        }
+        add_random_research_option = {
+            add_progress = 0.50
+            area = physics
+            ignore_prereqs = no
+            fail_effects = {
+                add_monthly_resource_mult = {
+                    resource = physics_research
+                    value = @tier5researchreward
+                    min = @tier5researchmin
+                    max = @tier5researchmax
+                }
+            }
+        }
+        add_random_research_option = {
+            add_progress = 0.50
+            area = society
+            ignore_prereqs = no
+            fail_effects = {
+                add_monthly_resource_mult = {
+                    resource = society_research
+                    value = @tier5researchreward
+                    min = @tier5researchmin
+                    max = @tier5researchmax
+                }
+            }
+        }
+    }
+
+}
+
+# Event to ensure modules are applied still
+country_event = {
+    id = mem_broken_clock.3003
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        capital_scope.starbase = {
+            set_starbase_module = {
+                slot = 1
+                module = shipyard
+            }
+            set_starbase_module = {
+                slot = 2
+                module = shipyard
+            }
+            set_starbase_module = {
+                slot = 3
+                module = anchorage
+            }
+            set_starbase_module = {
+                slot = 4
+                module = anchorage
+            }
+            set_starbase_module = {
+                slot = 5
+                module = gun_battery
+            }
+            set_starbase_module = {
+                slot = 6
+                module = missile_battery
+            }
+            set_starbase_building = {
+                slot = 1
+                building = disruption_field                                
+            }
+            set_starbase_building = {
+                slot = 2
+                building = target_uplink_computer                                
+            }
+            set_starbase_building = {
+                slot = 3
+                building = defense_grid                                
+            }
+        }
+    }
+}
