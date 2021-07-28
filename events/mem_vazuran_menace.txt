@@ -27,6 +27,7 @@ namespace = mem_vazurans
 # mem_vazurans.51  |Stabilization tech researched and project to stabilize rift set
 # mem_vazurans.52  |Vazuran system spawned
 # mem_vazurans.53  |Player being informed about established connection
+# mem_vazurans.60  |Finding Rift Endpoint
 # mem_vazurans.90  |Decade pulse event to start damper field quest and extermination event
 # mem_vazurans.98  |Test Event for the Rift
 # mem_vazurans.99  |Test Event to show Targets
@@ -119,6 +120,22 @@ event = {
 				}
 				1 = {
 					start_mem_vazuran_menace = yes
+				}
+			}
+		}
+		IF = {
+			limit = {
+				OR = {
+					any_country = {
+						has_origin = origin_mem_fainthearted
+					}
+					has_global_flag = mem_vazurans_disabled
+				}
+			}
+			random_list = {
+				#80 = {} # nothing happens
+				20 = {
+					setup_mem_ruined_vazuran_space = yes
 				}
 			}
 		}
@@ -2307,6 +2324,45 @@ country_event = {
 	
 	option = {
 		name = "GOOD"
+	}
+}
+
+# Finding first active Rift Endpoint
+ship_event = {
+	id = mem_vazurans.60
+	title = mem_vazurans.60.name
+	desc = mem_vazurans.60.desc
+	picture = GFX_evt_mem_rift
+	show_sound = event_radio_chatter
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			NOT = { has_country_flag = mem_encountered_first_vazuran_gateway_endpoint }
+		}
+		FROM = {
+			has_megastructure = mem_vazuran_gateway_endpoint
+		}
+	}
+	
+	immediate = {
+		random_system = {
+			limit = {
+				has_star_flag = mem_vazuran_homesystem
+			}
+			
+		}
+		FROM = { save_event_target_as = mem_vazuran_gateway_endpoint_system }
+		owner = {
+			set_country_flag = mem_encountered_first_vazuran_gateway_endpoint
+			add_seen_bypass_type = mem_vazuran_interdim_gateway
+		}
+	}	
+	
+	option = {
+		name = mem_vazurans.60.a
 	}
 }
 
