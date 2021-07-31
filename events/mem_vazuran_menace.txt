@@ -27,7 +27,8 @@ namespace = mem_vazurans
 # mem_vazurans.51  |Stabilization tech researched and project to stabilize rift set
 # mem_vazurans.52  |Vazuran system spawned
 # mem_vazurans.53  |Player being informed about established connection
-# mem_vazurans.60  |Finding Rift Endpoint
+# mem_vazurans.60  |Finding first active Rift Endpoint
+# mem_vazurans.61  |Finding first ruined Rift Endpoint
 # mem_vazurans.90  |Decade pulse event to start damper field quest and extermination event
 # mem_vazurans.98  |Test Event for the Rift
 # mem_vazurans.99  |Test Event to show Targets
@@ -2246,6 +2247,17 @@ country_event = {
 	is_triggered_only = yes
 	
 	immediate = {
+		every_country = {
+			limit = {
+				NOT = {
+					has_technology = tech_mem_vazuran_rift_travel
+				}
+			}
+			give_technology = {
+				tech = tech_mem_vazuran_rift_travel
+				message = no
+			}
+		}
 		IF = {
 			limit = {
 				NOT = {
@@ -2331,7 +2343,24 @@ country_event = {
 ship_event = {
 	id = mem_vazurans.60
 	title = mem_vazurans.60.name
-	desc = mem_vazurans.60.desc
+	desc = {
+		text = mem_vazurans.60.a.desc
+		trigger = {
+			owner = {
+				NOT = { 
+					has_country_flag = mem_encountered_first_vazuran_gateway_endpoint_ruined
+				}
+			}
+		}
+	}
+	desc = {
+		text = mem_vazurans.60.b.desc
+		trigger = {
+			owner = {
+				has_country_flag = mem_encountered_first_vazuran_gateway_endpoint_ruined
+			}
+		}
+	}
 	picture = GFX_evt_mem_rift
 	show_sound = event_radio_chatter
 	location = FROM
@@ -2348,21 +2377,242 @@ ship_event = {
 	}
 	
 	immediate = {
-		random_system = {
-			limit = {
-				has_star_flag = mem_vazuran_homesystem
-			}
-			
-		}
 		FROM = { save_event_target_as = mem_vazuran_gateway_endpoint_system }
 		owner = {
 			set_country_flag = mem_encountered_first_vazuran_gateway_endpoint
-			add_seen_bypass_type = mem_vazuran_interdim_gateway
+			add_seen_bypass_type = mem_vazuran_interdim_gateway			
 		}
 	}	
 	
 	option = {
 		name = mem_vazurans.60.a
+	}
+}
+
+# Finding first ruined Rift Endpoint
+ship_event = {
+	id = mem_vazurans.61
+	title = mem_vazurans.61.name
+	desc = {
+		text = mem_vazurans.61.a.desc
+		trigger = {
+			owner = {
+				NOT = { 
+					has_country_flag = mem_encountered_first_vazuran_gateway_endpoint
+				}
+			}
+		}
+	}
+	desc = {
+		text = mem_vazurans.61.b.desc
+		trigger = {
+			owner = {
+				has_country_flag = mem_encountered_first_vazuran_gateway_endpoint
+			}
+		}
+	}
+	picture = GFX_evt_mem_rift
+	show_sound = event_radio_chatter
+	location = FROM
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		owner = {
+			NOT = { has_country_flag = mem_encountered_first_vazuran_gateway_endpoint_ruined }
+		}
+		FROM = {
+			has_megastructure = mem_vazuran_gateway_endpoint
+		}
+	}
+	
+	immediate = {
+		FROM = { save_event_target_as = mem_vazuran_gateway_endpoint_system }
+		owner = {
+			set_country_flag = mem_encountered_first_vazuran_gateway_endpoint_ruined
+			add_seen_bypass_type = mem_vazuran_interdim_gateway			
+		}
+	}	
+	
+	option = {
+		name = mem_vazurans.61.a
+	}
+}
+
+# Reaching ruined Vazuran Homesystem
+# A fleet has entered a system
+# Scope = Fleet
+# From = System
+fleet_event = {
+	id = mem_vazurans.62
+	title = mem_vazurans.62.name
+	desc = mem_vazurans.62.desc
+	picture = GFX_evt_mem_vazuran_system
+	show_sound = event_scanner
+	location = From
+
+	is_triggered_only = yes
+
+	trigger = {
+		From = {
+			has_star_flag = mem_vazuran_homesystem_ruined
+		}
+		NOT = {
+			owner = {
+				has_country_flag = mem_vazurans_home_system_visited
+			}
+		}
+	}
+
+	immediate = {
+		owner = {
+			set_country_flag = mem_vazurans_home_system_visited
+		}
+	}
+
+	option = {
+		name = mem_vazurans.62.a
+	}
+}
+
+# Restoring ruined Rift Endpoint
+country_event = {
+	id = mem_vazurans.63
+	title = mem_vazurans.63.name
+	desc = {
+		text = mem_vazurans.63.a.desc
+		trigger = {
+			NOR = {
+				has_country_flag = mem_vazurans_rift_restored
+				has_authority = auth_hive_mind
+				has_authority = auth_machine_intelligence
+			}
+		}		
+	}
+	desc = {
+		text = mem_vazurans.63.b.desc
+		trigger = {
+			has_country_flag = mem_vazurans_rift_restored
+			NOR = {
+				has_authority = auth_hive_mind
+				has_authority = auth_machine_intelligence
+			}
+		}		
+	}
+	desc = {
+		text = mem_vazurans.63.c.desc
+		trigger = {
+			NOT = {
+				has_country_flag = mem_vazurans_rift_restored
+			}
+			has_authority = auth_hive_mind
+		}		
+	}
+	desc = {
+		text = mem_vazurans.63.d.desc
+		trigger = {
+			has_country_flag = mem_vazurans_rift_restored
+			has_authority = auth_hive_mind
+		}		
+	}
+	desc = {
+		text = mem_vazurans.63.e.desc
+		trigger = {
+			NOT = {
+				has_country_flag = mem_vazurans_rift_restored
+			}
+			has_authority = auth_machine_intelligence
+		}		
+	}
+	desc = {
+		text = mem_vazurans.63.f.desc
+		trigger = {
+			has_country_flag = mem_vazurans_rift_restored
+			has_authority = auth_machine_intelligence
+		}		
+	}
+	picture = GFX_evt_mem_rift
+	show_sound = event_radio_chatter
+	location = from
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_country_flag = mem_vazurans_rift_restored
+		from = { save_event_target_as = mem_vazuran_rift_system }
+	}
+	
+	option = {
+		name = mem_vazurans.63.a.name
+		trigger = {
+			NOR = {
+				has_country_flag = mem_vazurans_rift_restored
+				has_authority = auth_hive_mind
+				has_authority = auth_machine_intelligence
+			}
+		}		
+	}
+	option = {
+		name = EXCELLENT
+		trigger = {
+			has_country_flag = mem_vazurans_rift_restored
+			NOR = {
+				has_authority = auth_hive_mind
+				has_authority = auth_machine_intelligence
+			}
+		}		
+	}
+	option = {
+		name = mem_vazurans.63.c.name
+		trigger = {
+			NOT = {
+				has_country_flag = mem_vazurans_rift_restored
+			}
+			has_authority = auth_hive_mind
+		}		
+	}
+	option = {
+		name = mem_vazurans.63.d.name
+		trigger = {
+			has_country_flag = mem_vazurans_rift_restored
+			has_authority = auth_hive_mind
+		}		
+	}
+	option = {
+		name = mem_vazurans.63.e.name
+		trigger = {
+			NOT = {
+				has_country_flag = mem_vazurans_rift_restored
+			}
+			has_authority = auth_machine_intelligence
+		}		
+	}
+	option = {
+		name = mem_vazurans.63.f.name
+		trigger = {
+			has_country_flag = mem_vazurans_rift_restored
+			has_authority = auth_machine_intelligence
+		}		
+	}
+}
+
+# Restoring ruined Star Throne
+country_event = {
+	id = mem_vazurans.64
+	title = mem_vazurans.64.name
+	desc = mem_vazurans.64.desc
+	picture = GFX_evt_mem_rift
+	show_sound = event_radio_chatter
+	location = from
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		from = { save_event_target_as = mem_vazuran_star_throne_system }
+	}
+	
+	option = {
+		name = EXCELLENT
 	}
 }
 
