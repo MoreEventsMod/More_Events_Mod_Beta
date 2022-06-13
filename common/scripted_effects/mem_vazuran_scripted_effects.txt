@@ -128,18 +128,22 @@ create_mem_vazuran_country = {
 		}
 		# Should not attack Enclaves, Guardians, ai empires or the surveyor probe
         every_country = {
-            limit = {
-                OR = {
+			# has_country_flag = ne_country for enclaves from new enclaves mod
+			# has_country_flag = mem_vazurans_neutral is for other mods to use for special countries that should not be harmed
+			limit = {
+				OR = {
 					is_country_type = enclave
 					is_country_type = primitive
 					has_country_flag = mem_surveyor_country
+					has_country_flag = ne_country
+					has_country_flag = mem_vazurans_neutral
 					is_guardian_country = yes
 					AND = {
 						is_country_type = default
 						is_ai = yes
 					}
-                }
-            }
+				}
+			}
             event_target:mem_vazurans_country = {
                 set_faction_hostility = {
                     target = prev
@@ -148,6 +152,40 @@ create_mem_vazuran_country = {
                     set_friendly = yes
                 }
             }
+		}
+	}
+}
+
+#happens in country scope of default empire that has destroyed a raiding fleet
+mem_vazurans_retaliation_dice_roll = {
+	remove_country_flag = mem_vazurans_target_1
+	remove_country_flag = mem_vazurans_target_2
+	remove_country_flag = mem_vazurans_target_3
+	remove_country_flag = mem_vazurans_target_4
+	remove_country_flag = mem_vazurans_target_5
+	#reward event
+	country_event = {
+		id = mem_vazurans.70
+		days = 5
+	}
+	#counts destroyed raiding fleets
+	change_variable = {
+		which = mem_vazuran_fleet_destroyed_counter
+		value = 1
+	}
+	#flags the country for another raid or a retaliation strike with a growing chance dependent on the number of destroyed vazuran fleets
+	random_list = {
+		1 = {}
+		4 = {
+			set_country_flag = mem_vazurans_raid
+		}
+		1 = {
+			modifier = { factor = mem_vazuran_fleet_destroyed_counter }
+			set_country_flag = mem_vazurans_retaliation
+			set_variable = {
+				which = mem_vazuran_fleet_destroyed_counter
+				value = 0
+			}
 		}
 	}
 }
@@ -584,6 +622,7 @@ create_mem_vazuran_retaliation_fleet = {
 		}
 		effect = {
 			set_owner = event_target:mem_vazurans_country
+			set_fleet_flag = mem_vazuran_retaliation_fleet
 			create_ship = {
 				name = random
 				design = "NAME_Vazuran_Cruiser"
@@ -1594,6 +1633,315 @@ setup_mem_ruined_vazuran_space = {
 					}
 				}
 				set_star_flag = mem_vazuran_rift_placement
+			}
+		}
+	}
+}
+
+create_mem_vazuran_fleet = {
+	create_fleet = {
+		name = "Raiders"
+		settings = {
+			spawn_debris = no 
+			is_boss = no
+		}
+		effect = {
+			set_owner = event_target:mem_vazurans_country
+			create_ship = {
+				name = random
+				design = "NAME_Vazuran_Control_Drone"
+				graphical_culture = "mem_ancient_02"
+			}
+			create_ship = {
+				name = random
+				design = "NAME_Vazuran_Combat_Drone"
+				graphical_culture = "mem_ancient_02"
+			}
+			create_ship = {
+				name = random
+				design = "NAME_Vazuran_Combat_Drone"
+				graphical_culture = "mem_ancient_02"
+			}
+			IF = {
+				limit = {
+					years_passed > 35
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Combat_Drone"
+					graphical_culture = "mem_ancient_02"
+				}
+			}
+			IF = {
+				limit = {
+					years_passed > 45
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Combat_Drone"
+					graphical_culture = "mem_ancient_02"
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Control_Drone"
+					graphical_culture = "mem_ancient_02"
+				}
+			}
+			IF = {
+				limit = {
+					years_passed > 55
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Escort"
+					graphical_culture = "mem_ancient_02"
+				}
+			}
+			IF = {
+				limit = {
+					years_passed > 65
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Escort"
+					graphical_culture = "mem_ancient_02"
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Combat_Drone"
+					graphical_culture = "mem_ancient_02"
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Combat_Drone"
+					graphical_culture = "mem_ancient_02"
+				}
+			}
+			IF = {
+				limit = {
+					years_passed > 75
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Control_Drone"
+					graphical_culture = "mem_ancient_02"
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Combat_Drone"
+					graphical_culture = "mem_ancient_02"
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Combat_Drone"
+					graphical_culture = "mem_ancient_02"
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Control_Drone"
+					graphical_culture = "mem_ancient_02"
+				}
+			}
+			IF = {
+				limit = {
+					years_passed > 85
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Cruiser"
+					graphical_culture = "mem_ancient_02"
+				}
+			}
+			IF = {
+				limit = {
+					years_passed > 95
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Escort"
+					graphical_culture = "mem_ancient_02"
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Control_Drone"
+					graphical_culture = "mem_ancient_02"
+				}
+			}
+			IF = {
+				limit = {
+					years_passed > 105
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Cruiser"
+					graphical_culture = "mem_ancient_02"
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Combat_Drone"
+					graphical_culture = "mem_ancient_02"
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Combat_Drone"
+					graphical_culture = "mem_ancient_02"
+				}
+			}
+			IF = {
+				limit = {
+					years_passed > 115
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Escort"
+					graphical_culture = "mem_ancient_02"
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Escort"
+					graphical_culture = "mem_ancient_02"
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Control_Drone"
+					graphical_culture = "mem_ancient_02"
+				}
+			}
+			IF = {
+				limit = {
+					years_passed > 130
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Cruiser"
+					graphical_culture = "mem_ancient_02"
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Escort"
+					graphical_culture = "mem_ancient_02"
+				}
+				
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Escort"
+					graphical_culture = "mem_ancient_02"
+				}
+			}
+			IF = {
+				limit = {
+					years_passed > 150
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Cruiser"
+					graphical_culture = "mem_ancient_02"
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Cruiser"
+					graphical_culture = "mem_ancient_02"
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Combat_Drone"
+					graphical_culture = "mem_ancient_02"
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Combat_Drone"
+					graphical_culture = "mem_ancient_02"
+				}
+			}
+			IF = {
+				limit = {
+					root = {
+						check_variable = {
+							which = mem_vazuran_fleet_destroyed_counter
+							value > 0
+						}
+					}
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Combat_Drone"
+					graphical_culture = "mem_ancient_02"
+				}
+			}
+			IF = {
+				limit = {
+					root = {
+						check_variable = {
+							which = mem_vazuran_fleet_destroyed_counter
+							value > 1
+						}
+					}
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Control_Drone"
+					graphical_culture = "mem_ancient_02"
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Combat_Drone"
+					graphical_culture = "mem_ancient_02"
+				}
+			}
+			IF = {
+				limit = {
+					root = {
+						check_variable = {
+							which = mem_vazuran_fleet_destroyed_counter
+							value > 2
+						}
+					}
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Control_Drone"
+					graphical_culture = "mem_ancient_02"
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Combat_Drone"
+					graphical_culture = "mem_ancient_02"
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Combat_Drone"
+					graphical_culture = "mem_ancient_02"
+				}
+			}
+			IF = {
+				limit = {
+					root = {
+						check_variable = {
+							which = mem_vazuran_fleet_destroyed_counter
+							value > 3
+						}
+					}
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Escort"
+					graphical_culture = "mem_ancient_02"
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Combat_Drone"
+					graphical_culture = "mem_ancient_02"
+				}
+				create_ship = {
+					name = random
+					design = "NAME_Vazuran_Combat_Drone"
+					graphical_culture = "mem_ancient_02"
+				}
+			}
+			set_location = {
+				target = PREV
+				distance = 0
+				angle = random 
 			}
 		}
 	}
