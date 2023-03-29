@@ -13,34 +13,17 @@ namespace = mem_sleepers
 # Happens on planet with obervation post with either passive or active observation
 
 # Sleepers setup (HIDDEN)
-planet_event = {
+situation_event = {
 	id = mem_sleepers.1
 	hide_window = yes
-	
+	is_triggered_only = yes
+
 	trigger = {
-		has_observation_outpost = yes
-		solar_system = {
-			NOR = {
-				has_star_flag = mem_ark_system
-				has_star_flag = mem_crucible_system
-				has_star_flag = mem_wargame_system
-				has_star_flag = old_foes_system
-			}
-		}
-		NOT = {
-			has_global_flag = mem_sleepers
-		}
-		observation_outpost = { 
-			OR = { 
-				has_mission = passive_observation
-				has_mission = specimen_collection
-			}
-		}
-		observation_outpost_owner = {
-			is_ai = no
-		}
+		NOT = { has_global_flag = mem_sleepers }
 		owner = {
+			is_regular_pre_ftl = yes
 			is_country_type = primitive
+			NOT = { current_awareness_level = full }
 			NOT = {
 				has_country_flag = benefactor_empire
 			}
@@ -50,27 +33,35 @@ planet_event = {
 				has_country_flag = late_medieval_age
 				has_country_flag = renaissance_age
 			}
-		}
-	}
-	
-	mean_time_to_happen = {
-		months = 5000
-		#months = 1
-	}
-	
-	immediate = {
-		If = {
-			limit = {
+			capital_scope = {
+				solar_system = {
+					NOR = {
+						has_star_flag = mem_ark_system
+						has_star_flag = mem_crucible_system
+						has_star_flag = mem_wargame_system
+						has_star_flag = old_foes_system
+					}
+				}
+				has_observation_outpost = yes
 				observation_outpost_owner = {
 					is_ai = no
 				}
 			}
-			observation_outpost_owner = {
-				save_event_target_as = mem_sleepers_station_owner
-				country_event = { id = mem_sleepers.2 }
-			}
+		}
+	}
+
+	immediate = {
+		owner.capital_scope = {
+			save_event_target_as = the_planet
 			set_planet_flag = mem_sleepers_planet
 			set_global_flag = mem_sleepers
+		}
+		owner = {
+			save_event_target_as = pre_ftl_country
+		}
+		owner.capital_scope.observation_outpost_owner = {
+			save_event_target_as = mem_sleepers_station_owner
+			country_event = { id = mem_sleepers.2 }
 		}
 	}
 }
@@ -777,7 +768,7 @@ country_event = {
 	title = mem_sleepers.51.name
 	desc = mem_sleepers.51.desc
 	picture = GFX_evt_mem_native_interaction
-	show_sound = event_primitive_civilization
+	show_sound = event_pre_ftl_civilization
 	location = FROMFROMFROMFROM.FROM
 	
 	is_triggered_only = yes
@@ -879,14 +870,7 @@ country_event = {
 						dismantle = yes
 					}
 					owner = {
-						switch = {
-							trigger = has_country_flag
-							bronze_age = { remove_country_flag = bronze_age }
-							iron_age = { remove_country_flag = iron_age }
-							late_medieval_age = { remove_country_flag = late_medieval_age }
-							renaissance_age = { remove_country_flag = renaissance_age }
-						}
-						set_country_flag = early_space_age
+						set_pre_ftl_age_effect = { PRE_FTL_AGE = early_space_age }
 						country_event = { id = mem_sleepers.52 }
 						set_subject_of = {
 							who = root
@@ -922,14 +906,7 @@ country_event = {
 						dismantle = yes
 					}
 					owner = {
-						switch = {
-							trigger = has_country_flag
-							bronze_age = { remove_country_flag = bronze_age }
-							iron_age = { remove_country_flag = iron_age }
-							late_medieval_age = { remove_country_flag = late_medieval_age }
-							renaissance_age = { remove_country_flag = renaissance_age }
-						}
-						set_country_flag = early_space_age
+						set_pre_ftl_age_effect = { PRE_FTL_AGE = early_space_age }
 						country_event = { id = mem_sleepers.52 }				
 					}
 				}
@@ -959,14 +936,7 @@ country_event = {
 						dismantle = yes
 					}
 					owner = {
-						switch = {
-							trigger = has_country_flag
-							bronze_age = { remove_country_flag = bronze_age }
-							iron_age = { remove_country_flag = iron_age }
-							late_medieval_age = { remove_country_flag = late_medieval_age }
-							renaissance_age = { remove_country_flag = renaissance_age }
-						}
-						set_country_flag = early_space_age
+						set_pre_ftl_age_effect = { PRE_FTL_AGE = early_space_age }
 						country_event = { id = mem_sleepers.52 }				
 					}
 				}
@@ -988,59 +958,18 @@ country_event = {
 	is_triggered_only = yes
 	
 	immediate = {
-		remove_country_flag = early_space_age
-		set_country_flag = primitives_can_into_space
-		set_country_type = default
 		change_dominant_species = {
 			species = event_target:mem_sleepers_species
 		}
-		change_country_flag = {
-			icon = {
-				category = "spherical"
-				file = "flag_spherical_1.dds"
+		if = {
+			limit = {
+				has_awareness >= 100
 			}
-			background= {
-				category = "backgrounds"
-				file = "new_dawn.dds"
-			}
-			colors={
-				"green"
-				"black"
-				"null"
-				"null"
-			}
+			set_country_flag = knew_of_aliens
 		}
-		if = {
-			limit = { is_species_class = MAM }
-			set_graphical_culture = mammalian_01
-		}
-		if = {
-			limit = { is_species_class = HUM }
-			set_graphical_culture = mammalian_01
-		}
-		if = {
-			limit = { is_species_class = PLANT }
-			set_graphical_culture = plantoid_01
-		}
-		if = {
-			limit = { is_species_class = REP }
-			set_graphical_culture = reptilian_01
-		}
-		if = {
-			limit = { is_species_class = AVI }
-			set_graphical_culture = avian_01
-		}
-		if = {
-			limit = { is_species_class = ART }
-			set_graphical_culture = arthropoid_01
-		}
-		if = {
-			limit = { is_species_class = MOL }
-			set_graphical_culture = molluscoid_01
-		}
-		if = {
-			limit = { is_species_class = FUN }
-			set_graphical_culture = fungoid_01
+		achieve_ftl_effect = {
+			PRE_FTL = root
+			OWNER = root
 		}
 		#making sure the country has the correct ethics
 		IF = {
@@ -1164,77 +1093,6 @@ country_event = {
 			}
 		}
 		assign_leader = last_created_leader
-		
-		add_resource = {
-			energy = 500
-			minerals = 1000 # enough for a spaceport and then some
-		}
-		add_resource = { influence = 300 }
-		capital_scope = {
-			clear_blockers = yes
-			while = {
-				limit = { 
-					num_pops < 8
-					#free_housing > 0
-				}
-				create_pop = {
-					species = owner
-				}
-			}
-			remove_building = building_primitive_farm
-			remove_building = building_primitive_factory
-			remove_building = building_primitive_capital
-			remove_building = building_urban_dwellings
-			add_district = district_city
-			add_district = district_city
-			add_district = district_city
-			add_district = district_industrial
-			add_district = district_industrial
-			add_district = district_industrial
-			add_district = district_farming
-			add_district = district_farming
-			add_district = district_farming
-			add_district = district_mining
-			add_district = district_mining
-			add_district = district_generator
-			add_district = district_generator
-			add_building = building_capital
-			add_building = building_research_lab_1
-			add_building = building_foundry_1
-			
-			remove_all_armies = yes
-			solar_system = {
-				if = {
-					limit = {
-						NOT = { exists = starbase }
-					}
-					create_starbase = {
-						size = starbase_outpost
-						owner = root
-					}
-				}	
-				else_if = {
-					limit = {
-						starbase = {
-							NOT = { owner = { is_same_value = root } }
-						}
-					}	
-					starbase = {
-						set_owner = root
-					}
-				}
-			}		
-			while = {
-				limit = { num_pops < 20 }
-				create_pop = {
-					species = owner
-				}
-			}		
-		}
-		random_owned_ship = {
-			limit = { is_ship_size = primitive_space_station }
-			fleet = { destroy_fleet = THIS }
-		}
 	}
 }
 
@@ -1500,14 +1358,7 @@ country_event = {
 						dismantle = yes
 					}
 					owner = {
-						switch = {
-							trigger = has_country_flag
-							bronze_age = { remove_country_flag = bronze_age }
-							iron_age = { remove_country_flag = iron_age }
-							late_medieval_age = { remove_country_flag = late_medieval_age }
-							renaissance_age = { remove_country_flag = renaissance_age }
-						}
-						set_country_flag = early_space_age
+						set_pre_ftl_age_effect = { PRE_FTL_AGE = early_space_age }
 						country_event = { id = mem_sleepers.102 }
 						set_subject_of = {
 							who = root
@@ -1563,14 +1414,7 @@ country_event = {
 						dismantle = yes
 					}
 					owner = {
-						switch = {
-							trigger = has_country_flag
-							bronze_age = { remove_country_flag = bronze_age }
-							iron_age = { remove_country_flag = iron_age }
-							late_medieval_age = { remove_country_flag = late_medieval_age }
-							renaissance_age = { remove_country_flag = renaissance_age }
-						}
-						set_country_flag = early_space_age
+						set_pre_ftl_age_effect = { PRE_FTL_AGE = early_space_age }
 						country_event = { id = mem_sleepers.102 }				
 					}
 				}
@@ -1620,14 +1464,7 @@ country_event = {
 						dismantle = yes
 					}
 					owner = {
-						switch = {
-							trigger = has_country_flag
-							bronze_age = { remove_country_flag = bronze_age }
-							iron_age = { remove_country_flag = iron_age }
-							late_medieval_age = { remove_country_flag = late_medieval_age }
-							renaissance_age = { remove_country_flag = renaissance_age }
-						}
-						set_country_flag = early_space_age
+						set_pre_ftl_age_effect = { PRE_FTL_AGE = early_space_age }
 						country_event = { id = mem_sleepers.102 }				
 					}
 				}
@@ -1649,58 +1486,18 @@ country_event = {
 	is_triggered_only = yes
 	
 	immediate = {
-		remove_country_flag = early_space_age
-		set_country_type = default
 		change_dominant_species = {
 			species = event_target:mem_sleepers_species
 		}
-		change_country_flag = {
-			icon = {
-				category = "spherical"
-				file = "flag_spherical_1.dds"
+		if = {
+			limit = {
+				has_awareness >= 100
 			}
-			background= {
-				category = "backgrounds"
-				file = "new_dawn.dds"
-			}
-			colors={
-				"red"
-				"black"
-				"null"
-				"null"
-			}
+			set_country_flag = knew_of_aliens
 		}
-		if = {
-			limit = { is_species_class = MAM }
-			set_graphical_culture = mammalian_01
-		}
-		if = {
-			limit = { is_species_class = HUM }
-			set_graphical_culture = mammalian_01
-		}
-		if = {
-			limit = { is_species_class = PLANT }
-			set_graphical_culture = plantoid_01
-		}
-		if = {
-			limit = { is_species_class = REP }
-			set_graphical_culture = reptilian_01
-		}
-		if = {
-			limit = { is_species_class = AVI }
-			set_graphical_culture = avian_01
-		}
-		if = {
-			limit = { is_species_class = ART }
-			set_graphical_culture = arthropoid_01
-		}
-		if = {
-			limit = { is_species_class = MOL }
-			set_graphical_culture = molluscoid_01
-		}
-		if = {
-			limit = { is_species_class = FUN }
-			set_graphical_culture = fungoid_01
+		achieve_ftl_effect = {
+			PRE_FTL = root
+			OWNER = root
 		}
 		#making sure the country has the correct ethics
 		IF = {
@@ -1822,75 +1619,6 @@ country_event = {
 			}
 		}
 		assign_leader = last_created_leader
-		add_resource = {
-			energy = 500
-			minerals = 1000 # enough for a spaceport and then some
-		}
-		add_resource = { influence = 300 }
-		capital_scope = {
-			clear_blockers = yes
-			while = {
-				limit = { 
-					num_pops < 8
-					#free_housing > 0
-				}
-				create_pop = {
-					species = owner
-				}
-			}
-			remove_building = building_primitive_farm
-			remove_building = building_primitive_factory
-			remove_building = building_primitive_capital
-			remove_building = building_urban_dwellings
-			add_district = district_city
-			add_district = district_city
-			add_district = district_city
-			add_district = district_city
-			add_district = district_farming
-			add_district = district_farming
-			add_district = district_farming
-			add_district = district_mining
-			add_district = district_mining
-			add_district = district_generator
-			add_district = district_generator
-			add_building = building_capital
-			add_building = building_research_lab_1
-			add_building = building_foundry_1
-			add_building = building_factory_1
-			
-			remove_all_armies = yes
-			solar_system = {
-				if = {
-					limit = {
-						NOT = { exists = starbase }
-					}
-					create_starbase = {
-						size = starbase_outpost
-						owner = root
-					}
-				}	
-				else_if = {
-					limit = {
-						starbase = {
-							NOT = { owner = { is_same_value = root } }
-						}
-					}	
-					starbase = {
-						set_owner = root
-					}
-				}
-			}	
-			while = {
-				limit = { num_pops < 20 }
-				create_pop = {
-					species = owner
-				}
-			}			
-		}
-		random_owned_ship = {
-			limit = { is_ship_size = primitive_space_station }
-			fleet = { destroy_fleet = THIS }
-		}
 	}
 }
 
@@ -2097,7 +1825,7 @@ country_event = {
 	title = mem_sleepers.152.name
 	desc = mem_sleepers.152.desc
 	picture = GFX_evt_medieval_alien_civilization
-	show_sound = event_primitive_civilization
+	show_sound = event_pre_ftl_civilization
 	location = FROMFROMFROMFROM.FROM
 	
 	is_triggered_only = yes
@@ -2126,52 +1854,7 @@ country_event = {
 				has_planet_flag = mem_sleepers_planet
 			}
 			owner = {
-				THIS = {
-					save_event_target_as = mem_sleepers_country
-				}
-				IF = {
-					limit = {
-						has_country_flag = bronze_age
-					}
-					remove_country_flag = bronze_age
-				}
-				IF = {
-					limit = {
-						has_country_flag = iron_age
-					}
-					remove_country_flag = iron_age
-				}
-				IF = {
-					limit = {
-						has_country_flag = late_medieval_age
-					}
-					remove_country_flag = late_medieval_age
-				}
-				IF = {
-					limit = {
-						has_country_flag = renaissance_age
-					}
-					remove_country_flag = renaissance_age
-				}	
-				set_country_flag = steam_age
-				set_primitive_age = steam_age
-				home_planet = {
-					remove_building = building_primitive_dwellings
-					add_building = building_primitive_factory
-					create_pop = { species = owner_main_species }
-					create_pop = { species = owner_main_species }
-
-					every_planet_army = { remove_army = yes }
-					while = {
-						count = 3
-						create_army = {
-							name = "Industrial Army"
-							owner = event_target:mem_sleepers_country
-							species = event_target:mem_sleepers_country
-							type = "industrial_army"
-						}
-					}
-				}
+				set_pre_ftl_age_effect = { PRE_FTL_AGE = steam_age }
 			}
 		}
 	}
