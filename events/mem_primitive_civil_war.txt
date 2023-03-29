@@ -13,26 +13,17 @@ namespace = mem_primitive_civil_war
 # Happens on planet with obervation post with either passive or active observation
 
 # Sleepers setup (HIDDEN)
-planet_event = {
+situation_event = {
 	id = mem_primitive_civil_war.1
 	hide_window = yes
-	
+	is_triggered_only = yes
+
 	trigger = {
-		has_observation_outpost = yes
-		NOT = {
-			has_global_flag = mem_primitive_civil_war
-		}
-		observation_outpost = { 
-			OR = { 
-				has_mission = passive_observation
-				has_mission = specimen_collection
-			}
-		}
-		observation_outpost_owner = {
-			is_ai = no
-		}
 		owner = {
-			is_country_type = primitive
+			NOT = {
+				has_global_flag = mem_primitive_civil_war
+			}
+			is_regular_pre_ftl = yes
 			OR = {
 				has_country_flag = late_medieval_age
 			}
@@ -40,34 +31,43 @@ planet_event = {
 				has_ethic = ethic_fanatic_militarist
 				has_ethic = ethic_militarist
 			}
+			has_awareness < 50
+			capital_scope = {
+				has_observation_outpost = yes
+				exists = observation_outpost_owner
+				observation_outpost_owner = { is_ai = no }
+			}
 		}
 	}
-	
-	mean_time_to_happen = {
-		months = 5000
-		#months = 1
-	}
-	
+
 	immediate = {
-		save_global_event_target_as = mem_primitive_civil_war_planet
-		owner = {
-			save_global_event_target_as = mem_primitive_civil_war_planet_owner
-		}
-		If = {
-			limit = {
-				observation_outpost_owner = {
-					is_ai = no
-				}
-			}
-			observation_outpost_owner = {
-				THIS = {
-					save_event_target_as = mem_primitive_civil_war_station_owner
-				}
-				country_event = { id = mem_primitive_civil_war.2 }
-			}
+		owner.capital_scope = {
+			save_event_target_as = mem_primitive_civil_war_planet
 			set_planet_flag = mem_primitive_civil_war_planet
 			set_global_flag = mem_primitive_civil_war
 		}
+		owner = {
+			save_event_target_as = mem_primitive_civil_war_planet_owner
+		}
+		if = {
+			limit = {
+				owner = {
+					capital_scope = {
+						has_observation_outpost = yes
+						exists = observation_outpost_owner
+					}
+				}
+			}
+			owner.capital_scope.observation_outpost_owner = {
+				country_event = { id = mem_primitive_civil_war.2 }
+			}
+		}
+		set_situation_flag = has_ongoing_observation_event_chain
+		owner.capital_scope.observation_outpost = {
+			set_event_locked = yes
+		}
+		# Setting this flag for the duration of the entire event chain
+		# to prevent other observation events from interfering.
 	}
 }
 
@@ -77,7 +77,7 @@ country_event = {
 	title = mem_primitive_civil_war.2.name
 	desc = mem_primitive_civil_war.2.desc
 	picture = GFX_evt_medieval_alien_civilization
-	show_sound = event_primitive_civilization
+	show_sound = event_pre_ftl_civilization
 	location = event_target:mem_primitive_civil_war_planet
 	
 	is_triggered_only = yes
@@ -96,7 +96,7 @@ country_event = {
 	title = mem_primitive_civil_war.3.name
 	desc = mem_primitive_civil_war.3.desc
 	picture = GFX_evt_mem_ancient_tower
-	show_sound = event_primitive_civilization
+	show_sound = event_pre_ftl_civilization
 	location = event_target:mem_primitive_civil_war_planet
 	
 	is_triggered_only = yes
@@ -144,37 +144,31 @@ country_event = {
 	is_triggered_only = yes
 
 	immediate = {
+		if = {
+			limit = {
+				event_target:mem_primitive_civil_war_planet_owner = {
+					NOT = { current_awareness_level = full }
+				}
+			}
+			set_country_flag = society_insights
+			set_predictive_observation_insight = {
+				VALUE = 5
+			}
+		}
 		event_target:mem_primitive_civil_war_planet = {
+			observation_outpost = {
+				set_event_locked = no
+			}
 			owner = {
+				random_situation = {
+					limit = {
+						is_situation_type = pre_ftl_tech_progress_situation
+					}
+					remove_situation_flag = has_ongoing_observation_event_chain
+				}
 				save_event_target_as = mem_primitive_civil_war_country
-				set_timed_country_flag = {
-					flag = recently_advanced
-					days = 2160 #60yrs
-				}
-				remove_country_flag = late_medieval_age
-				set_country_flag = steam_age
-				set_primitive_age = steam_age
-				change_country_flag = {
-					icon = {
-						category = "special"
-						file = "primitive.dds"
-					}
-					background= {
-						category = "backgrounds"
-						file = "new_dawn.dds"
-					}
-					colors={
-						"orange"
-						"red"
-						"null"
-						"null"
-					}
-				}
-				home_planet = {
-					remove_building = building_primitive_dwellings
-					add_building = building_primitive_factory
-					create_pop = { species = owner_main_species }
-					create_pop = { species = owner_main_species }
+				set_pre_ftl_age_effect = { PRE_FTL_AGE = steam_age }
+				capital_scope = {
 					create_pop = { species = owner_main_species }
 					create_pop = { species = owner_main_species }
 				}
@@ -184,6 +178,17 @@ country_event = {
 
 	option = {
 		name = mem_primitive_civil_war.4.a
+		if = {
+			limit = {
+				event_target:mem_primitive_civil_war_planet_owner = {
+					NOT = { current_awareness_level = full }
+				}
+			}
+			add_observation_insight_effect = {
+				VALUE = 5
+				OUTPOST = event_target:mem_primitive_civil_war_planet.observation_outpost 
+			}
+		}
 	}
 }
 
@@ -202,7 +207,7 @@ ship_event = {
 		event_target:mem_primitive_civil_war_planet = {
 			owner = {
 				set_timed_country_flag = {
-					flag = recently_advanced
+					flag = tech_frozen
 					days = 2160 #60yrs
 				}
 			}
@@ -211,7 +216,19 @@ ship_event = {
 
 	option = {
 		name = mem_primitive_civil_war.5.a
+		owner = { add_resource = { influence = 50 } }
 		event_target:mem_primitive_civil_war_planet = {
+			observation_outpost = {
+				set_event_locked = no
+			}
+			owner = {
+				random_situation = {
+					limit = {
+						is_situation_type = pre_ftl_tech_progress_situation
+					}
+					remove_situation_flag = has_ongoing_observation_event_chain
+				}
+			}
 			random_owned_pop = {
 				limit = {
 					NOR = {

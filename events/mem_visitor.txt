@@ -12,64 +12,51 @@ namespace = mem_visitor
 # Happens on planet with obervation post with either passive or active observation
 
 # Event setup (HIDDEN)
-planet_event = {
+situation_event = {
 	id = mem_visitor.1
 	hide_window = yes
-	
+	is_triggered_only = yes
+
 	trigger = {
-		has_observation_outpost = yes
-		NOT = {
-			has_global_flag = mem_visitor
-		}
-			
-			
-		
-		observation_outpost = { 
-			OR = { 
-				has_mission = passive_observation
-				has_mission = specimen_collection
-			}
-		}
-		observation_outpost_owner = {
-			is_ai = no
-			NOT = { has_ethic = ethic_gestalt_consciousness }
-		}
 		owner = {
-			is_country_type = primitive
-			OR = {
-					has_country_flag = stone_age
-					has_country_flag = bronze_age
-					has_country_flag = iron_age
-					has_country_flag = late_medieval_age
-					has_country_flag = renaissance_age
-					has_country_flag = steam_age
-					has_country_flag = industrial_age
-					has_country_flag = machine_age
-					has_country_flag = atomic_age
+			NOT = {
+				has_global_flag = mem_visitor
 			}
-			
-		}
-	}
-	
-	mean_time_to_happen = {
-		months = 5000
-		#months = 1
-	}
-	
-	immediate = {
-		If = {
-			limit = {
+			is_regular_pre_ftl = yes
+			has_awareness < 75
+			capital_scope = {
+				has_observation_outpost = yes
+				exists = observation_outpost_owner
 				observation_outpost_owner = {
 					is_ai = no
+					NOT = { has_ethic = ethic_gestalt_consciousness }
 				}
 			}
-			observation_outpost_owner = {
+		}
+	}
+
+	immediate = {
+		owner.capital_scope = {
+			save_event_target_as = mem_visitor_planet
+			set_planet_flag = mem_visitor_planet
+			set_global_flag = mem_visitor
+		}
+		owner = {
+			save_event_target_as = mem_visitor_planet_owner
+		}
+		if = {
+			limit = {
+				owner = {
+					capital_scope = {
+						has_observation_outpost = yes
+						exists = observation_outpost_owner
+					}
+				}
+			}
+			owner.capital_scope.observation_outpost_owner = {
 				country_event = { id = mem_visitor.2 }
 				set_country_flag = mem_visitor_country
 			}
-			set_planet_flag = mem_visitor_planet
-			set_global_flag = mem_visitor
-			save_global_event_target_as = mem_visitor_planet
 		}
 	}
 }
@@ -341,7 +328,7 @@ country_event = {
 							has_country_flag = atomic_age
 						}
 					}
-					}
+				}
 			}
 			
 			random_list = {
@@ -374,8 +361,6 @@ country_event = {
 	immediate = {
 		set_global_flag = mem_visitor_finished
 	}
-	
-	
 	
 	option = {
 		name = mem_visitor.31a
