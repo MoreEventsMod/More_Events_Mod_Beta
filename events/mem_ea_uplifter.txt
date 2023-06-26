@@ -943,12 +943,95 @@ country_event = {
 				mem_ea_uplifter_second_hello = {text = mem_ea_uplifter.15.desc_02}
 			}
 		}
-	}	
-	diplomatic = yes
-	is_triggered_only = yes
-	picture_event_data = {
-		room = no_video_feed_room
 	}
+	is_triggered_only = yes
+	
+	picture = GFX_leader_recruitment_bg_legendary_beholder
+	event_window_type = leader_recruit
+
+	immediate = {
+		IF = {
+			limit = {
+				NOT = {
+					has_global_flag = mem_ea_uplifter_orila_fired
+				}
+			}
+			set_global_flag = mem_ea_uplifter_orila_fired
+			create_country = {
+				name = "NAME_orila"
+				type = global_event
+				auto_delete = yes
+				flag = {
+					icon = {
+						category = "special"
+						file = "unknown.dds"
+					}
+					background = {
+						category = "backgrounds"
+						file = "00_solid.dds"
+					}
+					colors = {
+						"red"
+						"red"
+						"null"
+						"null"
+					}
+				}
+				effect = {
+					save_event_target_as = mem_ea_uplifter_country
+				}
+			}
+			event_target:mem_ea_uplifter_country = {
+				create_species = {
+					name = "Orila"
+					class = HUM
+					portrait = mem_chada
+					namelist = "PRT1"
+					traits = random
+					effect = {
+						save_event_target_as = mem_orila_species
+					}
+				}
+				create_leader = {
+					species = event_target:mem_orila_species
+					event_leader = yes
+					class = scientist
+					name = "Chap'Lin"
+					skill = 3
+					immortal = yes
+					randomize_traits = no
+					can_manually_change_location = no
+					can_assign_to_council = yes
+					skip_background_generation = yes
+					custom_catch_phrase = mem_ea_uplifter_catchphrase
+#					custom_description = beholder_backstory
+					traits = {
+						add_trait = subclass_scientist_researcher		
+						add_trait = leader_trait_physics_focus			
+						add_trait = leader_trait_legendary_great_teacher
+						add_trait = leader_trait_legendary_ancestors_knowledge
+					}
+					gender = male
+					set_age = 5246
+					hide_age = no
+					effect = {
+						save_global_event_target_as = mem_orila_leader
+						set_leader_flag = legendary_leader
+						set_leader_flag = mem_last_orila_chaplin
+						set_leader_flag = immune_to_negative_traits
+						set_leader_flag = leader_death_events_blocked
+						set_owner = root
+						exile_leader_as = mem_orila_leader
+					}
+				}
+			}
+		}
+	}
+
+	picture_event_data = {
+		portrait = event_target:mem_orila_leader
+	}
+
 	option = {
 		name = mem_ea_uplifter.15.a
 		trigger = { has_country_flag = mem_ea_uplifter_third_hello }
@@ -986,6 +1069,22 @@ country_event = {
 			set_country_flag = mem_ea_uplifter_third_hello
 		}
 	}
+
+	option = {
+		name = DISMISS
+		tag = dismiss_leader
+		trigger = {
+			has_country_flag = NOPE
+		}
+	}
+
+	option = {
+		name = HIRE
+		tag = hire_leader
+		trigger = {
+			has_country_flag = NOPE
+		}
+	}
 }
 
 # Incoming Transmission Question Answer
@@ -1000,12 +1099,16 @@ country_event = {
 				mem_ea_uplifter_forth_hello = {text = mem_ea_uplifter.16.desc_02}
 			}
 		}
-	}	
-	diplomatic = yes
-	is_triggered_only = yes
-	picture_event_data = {
-		room = no_video_feed_room
 	}
+	is_triggered_only = yes
+
+	picture = GFX_leader_recruitment_bg_legendary_beholder
+	event_window_type = leader_recruit
+
+	picture_event_data = {
+		portrait = event_target:mem_orila_leader
+	}
+
 	option = {
 		name = mem_ea_uplifter.16.a
 		trigger = { has_country_flag = mem_ea_uplifter_third_hello }
@@ -1021,6 +1124,22 @@ country_event = {
 		hidden_effect = {
 			remove_country_flag = mem_ea_uplifter_forth_hello
 			country_event = { id = mem_ea_uplifter.17 }
+		}
+	}
+
+	option = {
+		name = DISMISS
+		tag = dismiss_leader
+		trigger = {
+			has_country_flag = NOPE
+		}
+	}
+
+	option = {
+		name = HIRE
+		tag = hire_leader
+		trigger = {
+			has_country_flag = NOPE
 		}
 	}
 }
@@ -1041,11 +1160,15 @@ country_event = {
 			}
 		}
 	}
-	diplomatic = yes
 	is_triggered_only = yes
+
+	picture = GFX_leader_recruitment_bg_legendary_beholder
+	event_window_type = leader_recruit
+
 	picture_event_data = {
-		room = no_video_feed_room
+		portrait = event_target:mem_orila_leader
 	}
+
 	immediate = {
 		if = {
 			limit = {
@@ -1074,7 +1197,6 @@ country_event = {
 			}
 		}
 		end_event_chain = "mem_ea_uplifter_homesystem_chain"
-		response_text = mem_ea_uplifter.17.a.response
 		force_add_civic = civic_mem_the_way
 		hidden_effect = {
 			set_government_cooldown = 0
@@ -1095,7 +1217,25 @@ country_event = {
 				}
 				destroy_ambient_object = this
 			}
-			create_fleet = { name = "The Last Orila" }
+			clone_leader = {
+				target = event_target:mem_orila_leader
+			}
+			last_created_leader = {
+				save_global_event_target_as = mem_orila_leader
+				set_leader_flag = legendary_leader
+				set_leader_flag = mem_last_orila_chaplin
+				set_leader_flag = immune_to_negative_traits
+				set_leader_flag = leader_death_events_blocked
+			}
+			create_fleet = { 
+				name = "The Last Orila"
+				settings = {
+					can_upgrade = no
+					can_change_leader = no
+					can_disband = no
+					spawn_debris = no
+				}
+			}
 			last_created_fleet = {
 				set_owner = Root
 				create_ship = {
@@ -1110,12 +1250,18 @@ country_event = {
 						modifier = mem_last_orila_ship_disengage_buff
 						days = -1
 					}
+
 				}
 				set_location = event_target:mem_ea_uplifter_ship_spawn
 				set_fleet_flag = mem_last_orila_fleet
+				assign_leader = event_target:mem_orila_leader
 			}
 			country_event = { id = mem_last_orila.1 days = 500 random = 375 }
 #			set_country_flag = mem_last_orila_start
+		}
+		set_country_flag = mem_ea_uplifter_a
+		hidden_effect = {
+			country_event = { id = mem_ea_uplifter.18 }
 		}
 	}
 	option = { # This is not our way -- get a country modifier giving + 5 % happiness "We make our own destiny"
@@ -1127,7 +1273,6 @@ country_event = {
 			}
 		}
 		end_event_chain = "mem_ea_uplifter_homesystem_chain"
-		response_text = mem_ea_uplifter.17.b.response
 		add_modifier = {
 			modifier = "mem_ea_forging_own_destiny"
 			days = -1
@@ -1145,6 +1290,10 @@ country_event = {
 				}
 				destroy_ambient_object = this
 			}
+		}
+		set_country_flag = mem_ea_uplifter_b
+		hidden_effect = {
+			country_event = { id = mem_ea_uplifter.18 }
 		}
 	}
 	option = { # We will not change who we are! -- get a country modifier giving + 5 % happiness "We make our own destiny"
@@ -1154,7 +1303,6 @@ country_event = {
 			has_country_flag = mem_ea_uplifter_bad_ethics
 		}
 		end_event_chain = "mem_ea_uplifter_homesystem_chain"
-		response_text = mem_ea_uplifter.17.b.response
 		add_modifier = {
 			modifier = "mem_ea_forging_own_destiny"
 			days = -1
@@ -1173,6 +1321,10 @@ country_event = {
 				destroy_ambient_object = this
 			}
 		}
+		set_country_flag = mem_ea_uplifter_c
+		hidden_effect = {
+			country_event = { id = mem_ea_uplifter.18 }
+		}
 	}
 	option = { # We will accept our destiny" -- get powerful government type, ethics change and a hightech ship
 		name = "mem_ea_uplifter.17.d"
@@ -1181,7 +1333,6 @@ country_event = {
 			has_country_flag = mem_ea_uplifter_bad_ethics
 		}
 		end_event_chain = "mem_ea_uplifter_homesystem_chain"
-		response_text = mem_ea_uplifter.17.d.response
 		hidden_effect = {
 			random_galaxy_planet = {
 				limit = {
@@ -1194,8 +1345,25 @@ country_event = {
 					has_ambient_object_flag = mem_ea_harilla_shield
 				}
 				destroy_ambient_object = this
+			}clone_leader = {
+				target = event_target:mem_orila_leader
 			}
-			create_fleet = { name = "The Last Orila" }
+			last_created_leader = {
+				save_global_event_target_as = mem_orila_leader
+				set_leader_flag = legendary_leader
+				set_leader_flag = mem_last_orila_chaplin
+				set_leader_flag = immune_to_negative_traits
+				set_leader_flag = leader_death_events_blocked
+			}
+			create_fleet = { 
+				name = "The Last Orila"
+				settings = {
+					can_upgrade = no
+					can_change_leader = no
+					can_disband = no
+					spawn_debris = no
+				}
+			}
 			last_created_fleet = {
 				set_owner = Root
 				create_ship = {
@@ -1205,8 +1373,16 @@ country_event = {
 					prefix = no
 					upgradable = no
 				}
+				last_created_ship = {
+					add_modifier = {
+						modifier = mem_last_orila_ship_disengage_buff
+						days = -1
+					}
+
+				}
 				set_location = event_target:mem_ea_uplifter_ship_spawn
 				set_fleet_flag = mem_last_orila_fleet
+				assign_leader = event_target:mem_orila_leader
 			}
 			country_event = { id = mem_last_orila.1 days = 500 random = 375 }
 #			set_country_flag = mem_last_orila_start
@@ -1221,5 +1397,37 @@ country_event = {
 		add_resource = {
 			influence = 250
 		}
+		set_country_flag = mem_ea_uplifter_d
+		hidden_effect = {
+			country_event = { id = mem_ea_uplifter.18 }
+		}
+	}
+}
+
+country_event = {
+	id = mem_ea_uplifter.18
+	title = "mem_ea_uplifter.17.name"
+	desc = {
+		trigger = {
+			switch = {
+				trigger = has_country_flag
+				mem_ea_uplifter_a = { text = mem_ea_uplifter.17.a.response }
+				mem_ea_uplifter_b = { text = mem_ea_uplifter.17.b.response }
+				mem_ea_uplifter_c = { text = mem_ea_uplifter.17.c.response }
+				mem_ea_uplifter_d = { text = mem_ea_uplifter.17.d.response }
+			}
+		}
+	}
+	is_triggered_only = yes
+
+	picture = GFX_leader_recruitment_bg_legendary_beholder
+	event_window_type = leader_recruit
+
+	picture_event_data = {
+		portrait = event_target:mem_orila_leader
+	}
+
+	option = {
+		name = END
 	}
 }
