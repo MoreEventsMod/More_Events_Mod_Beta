@@ -1,0 +1,464 @@
+namespace = mem_orila_primitives
+
+#setup event for primitive systems habitable (5 - uniques) and destroyed (5)
+event = {
+	id = mem_orila_primitives.1
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		every_system = {
+			limit = {
+				has_star_flag = mem_orila_primitive_system
+			}
+			event_target:global_event_country = {
+				change_variable = {
+					which = mem_global_orila_primitive_systems
+					value = 1
+				} 
+			}
+		}
+		while = {
+			limit = {
+				event_target:global_event_country = {
+					check_variable = {
+						which = mem_global_orila_primitive_systems
+						value < 5
+					}
+				}
+				any_system = {
+					has_star_flag = primitive_system
+					is_fe_cluster = no
+					NOT = {
+						has_star_flag = mem_orila_primitive_system
+					}
+				}
+			}
+			random_system = {
+				limit = {
+					has_star_flag = primitive_system
+					is_fe_cluster = no
+					NOT = {
+						has_star_flag = mem_orila_primitive_system
+					}
+				}
+				every_system_planet = {
+					limit = {
+						exists = owner
+						owner = {
+							is_primitive = yes
+						}
+					}
+					add_building = building_mem_planetary_shield_generator_orila
+					set_planet_flag = mem_orila_primitive_world
+				}
+				set_star_flag = mem_orila_primitive_system
+				#set the shield effect
+				random_system_planet = {
+					planet_event = { id = mem_planetary_shields.5 days = 1 }
+				}
+				mem_setup_orila_primitive_system = yes
+				#variable to count how many of these systems actually have been spawned
+				event_target:global_event_country = {
+					change_variable = {
+						which = mem_global_orila_primitive_systems
+						value = 1
+					} 
+				}
+			}
+		}
+		set_variable = {
+			which = mem_global_orila_primitive_systems_destroyed
+			value = 0
+		}
+		while = {
+			limit = {
+				any_system = {
+					is_fe_cluster = no
+					has_planet_class = pc_nuked
+					NOR = {
+						has_star_flag = old_foes_system
+						has_star_flag = ratling_system
+						has_star_flag = empire_cluster
+						has_star_flag = mem_orila_primitive_system
+					}
+				}
+				event_target:global_event_country = {
+					check_variable = {
+						which = mem_global_orila_primitive_systems_destroyed
+						value < 5
+					}
+				}
+			}
+			random_system = {
+				limit = {
+					is_fe_cluster = no
+					has_planet_class = pc_nuked
+					NOR = {
+						has_star_flag = ratling_system
+						has_star_flag = empire_cluster
+						has_star_flag = mem_orila_primitive_system
+					}
+				}				
+				set_star_flag = mem_orila_primitive_system_destroyed
+				random_system_planet = {
+					limit = {
+						is_primary_star = yes
+					}
+					random_list = {
+						40 = {
+							create_ambient_object = {
+								type = mem_orila_spaceport_wreckage_object
+								location = this
+							}
+							last_created_ambient_object = {
+								set_location = {
+									target = prev
+									distance = 20
+									angle = 120
+								}
+								create_ambient_object = {
+									type = small_debris_object
+									entity_offset_height = { min = 5 max = -5 }
+									location = this
+								}
+							}
+						}
+						60 = {
+							create_ambient_object = {
+								type = small_debris_object
+								entity_offset_height = { min = 5 max = -5 }
+								location = this
+							}
+							last_created_ambient_object = {
+								set_location = {
+									target = prev
+									distance = 20
+									angle = 120
+								}							
+							}
+						}
+					}
+				}
+				every_system_planet = {
+					limit = {
+						OR = {
+							is_planet_class = pc_nuked
+							is_planet_class = pc_shattered
+							is_planet_class = pc_broken
+						}
+					}
+					if = {
+						limit = {
+							is_planet_class = pc_nuked
+						}
+						#flag can later be used to spawn digsites or anomalies
+						set_planet_flag = mem_orila_primitive_world_destroyed
+					}
+					random_list = {
+						40 = {
+							create_ambient_object = {
+								type = mem_orila_small_station_wreckage_object
+								location = this
+							}
+							last_created_ambient_object = {
+								set_location = {
+									target = prev
+									distance = 5
+									angle = random
+								}
+								create_ambient_object = {
+									type = small_debris_object
+									entity_offset_height = { min = 5 max = -5 }
+									location = this
+								}
+							}
+						}
+						60 = {
+							create_ambient_object = {
+								type = small_debris_object
+								entity_offset_height = { min = 5 max = -5 }
+								location = this
+							}
+							last_created_ambient_object = {
+								set_location = {
+									target = prev
+									distance = 5
+									angle = random
+								}							
+							}
+						}
+					}
+				}
+				event_target:global_event_country = {
+					change_variable = {
+						which = mem_global_orila_primitive_systems_destroyed
+						value = 1
+					} 
+				}
+			}
+		}
+	}
+}
+
+# Triggers event when each country first sends a ship into the system (once per country)
+# Scope = Ship
+# From = System
+# FromFrom = Country
+# If there is an active presence of guardians, then diplomatic contact follows in the next event
+ship_event = {
+	id = mem_orila_primitives.10
+	title = mem_orila_primitives.10.name
+	desc = mem_orila_primitives.10.desc
+	picture = GFX_evt_mem_placeholder
+	show_sound =  event_ship_bridge
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			has_star_flag = mem_orila_primitive_system
+			NOT = {
+				has_star_flag = mem_orila_primitive_system_destroyed
+			}
+		}
+	}
+
+	option = {
+		name = ONSCREEN
+		hidden_effect = {
+			owner = {
+				country_event = { id = mem_orila_primitives.100 }
+			}
+		}
+	}
+}
+
+# Triggers event when each country first sends a ship into the system (once per country)
+# Scope = Ship
+# From = System
+# FromFrom = Country
+# If there is no active presence of guardians, then story event follows in the next event
+ship_event = {
+	id = mem_orila_primitives.20
+	title = mem_orila_primitives.20.name
+	desc = mem_orila_primitives.20.desc
+	picture = GFX_evt_mem_placeholder
+	show_sound =  event_ship_bridge
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			has_star_flag = mem_orila_primitive_system_destroyed
+		}
+	}
+
+	option = {
+		name = ONSCREEN
+		
+	}
+}
+
+# correctly working AI
+country_event = {
+	id = mem_orila_primitives.100
+	title = mem_orila_primitives.100.name
+	desc = mem_orila_primitives.100.desc
+	
+	is_triggered_only = yes
+	diplomatic = yes
+
+	picture_event_data = {
+		room = mem_orila_room
+		portrait = mem_Orila_holo
+	}
+
+	option = {
+		name = mem_orila_primitives.100.a
+		response_text = mem_orila_primitives.100.desc.a
+		is_dialog_only = yes
+	}
+
+	option = {
+		name = mem_orila_primitives.100.b
+		response_text = mem_orila_primitives.100.desc.b
+		is_dialog_only = yes
+	}
+
+	option = {
+		name = mem_orila_primitives.100.c
+		response_text = mem_orila_primitives.100.desc.c
+		is_dialog_only = yes
+		hidden_effect = {
+			set_country_flag = mem_orila_primitive_system_q100c
+		}
+	}
+
+	option = {
+		name = mem_orila_primitives.100.d
+		response_text = mem_orila_primitives.100.desc.d
+		is_dialog_only = yes
+		trigger = {
+			has_country_flag = mem_orila_primitive_system_q100c
+		}
+		hidden_effect = {
+			remove_country_flag = mem_orila_primitive_system_q100c
+			set_country_flag = mem_orila_primitive_system_q100d
+		}
+	}
+
+	option = {
+		name = mem_orila_primitives.100.e
+		response_text = mem_orila_primitives.100.desc.e
+		is_dialog_only = yes
+		trigger = {
+			has_country_flag = mem_orila_primitive_system_q100d
+			exists = event_target:mem_orila_country
+			NOT = {
+				has_communications = event_target:mem_orila_country
+			}
+		}
+		hidden_effect = {
+			establish_communications = event_target:mem_orila_country
+		}
+	}
+
+	option = {
+		name = mem_orila_primitives.100.e
+		response_text = mem_orila_primitives.100.desc.f
+		is_dialog_only = yes
+		trigger = {
+			has_country_flag = mem_orila_primitive_system_q100d
+			NOT = {
+				exists = event_target:mem_orila_country
+			}
+		}
+	}
+
+	option = {
+		name = mem_orila_primitives.100.g
+		response_text = mem_orila_primitives.100.desc.g
+		hidden_effect = {
+			remove_country_flag = mem_orila_primitive_system_q100c
+		}
+	}
+
+	option = {
+		name = mem_orila_primitives.100.h
+		#response_text = mem_orila_primitives.100.desc.h
+		trigger = {
+			OR = {
+				has_ascension_perk = ap_archaeoengineers
+				has_ascension_perk = ap_enigmatic_engineering
+				has_ascension_perk = ap_technological_ascendancy				
+				has_tradition = tr_subterfuge_finish
+			}
+		}
+		hidden_effect = {
+			remove_country_flag = mem_orila_primitive_system_q100c
+			#make engineering research project at system's sun
+		}
+	}
+}
+
+# malfunctioning AI
+country_event = {
+	id = mem_orila_primitives.110
+	title = mem_orila_primitives.100.name
+	desc = mem_orila_primitives.110.desc
+	
+	is_triggered_only = yes
+	diplomatic = yes
+
+	picture_event_data = {
+		room = mem_orila_room
+		portrait = mem_Orila_holo_red_1
+	}
+
+	option = {
+		name = mem_orila_primitives.110.a
+		response_text = mem_orila_primitives.110.desc.a
+		is_dialog_only = yes
+	}
+
+	option = {
+		name = mem_orila_primitives.100.b
+		response_text = mem_orila_primitives.100.desc.b
+		is_dialog_only = yes
+	}
+
+	option = {
+		name = mem_orila_primitives.100.c
+		response_text = mem_orila_primitives.100.desc.c
+		is_dialog_only = yes
+		hidden_effect = {
+			set_country_flag = mem_orila_primitive_system_q100c
+		}
+	}
+
+	option = {
+		name = mem_orila_primitives.100.d
+		response_text = mem_orila_primitives.100.desc.d
+		is_dialog_only = yes
+		trigger = {
+			has_country_flag = mem_orila_primitive_system_q100c
+		}
+		hidden_effect = {
+			remove_country_flag = mem_orila_primitive_system_q100c
+			set_country_flag = mem_orila_primitive_system_q100d
+		}
+	}
+
+	option = {
+		name = mem_orila_primitives.100.e
+		response_text = mem_orila_primitives.100.desc.e
+		is_dialog_only = yes
+		trigger = {
+			has_country_flag = mem_orila_primitive_system_q100d
+			exists = event_target:mem_orila_country
+			NOT = {
+				has_communications = event_target:mem_orila_country
+			}
+		}
+		hidden_effect = {
+			establish_communications = event_target:mem_orila_country
+		}
+	}
+
+	option = {
+		name = mem_orila_primitives.100.e
+		response_text = mem_orila_primitives.100.desc.f
+		is_dialog_only = yes
+		trigger = {
+			has_country_flag = mem_orila_primitive_system_q100d
+			NOT = {
+				exists = event_target:mem_orila_country
+			}
+		}
+	}
+
+	option = {
+		name = mem_orila_primitives.100.g
+		response_text = mem_orila_primitives.100.desc.g
+		hidden_effect = {
+			remove_country_flag = mem_orila_primitive_system_q100c
+		}
+	}
+
+	option = {
+		name = mem_orila_primitives.100.h
+		#response_text = mem_orila_primitives.100.desc.h
+		trigger = {
+			OR = {
+				has_ascension_perk = ap_archaeoengineers
+				has_ascension_perk = ap_enigmatic_engineering
+				has_ascension_perk = ap_technological_ascendancy				
+				has_tradition = tr_subterfuge_finish
+			}
+		}
+		hidden_effect = {
+			remove_country_flag = mem_orila_primitive_system_q100c
+			#make engineering research project at system's sun
+		}
+	}
+}
