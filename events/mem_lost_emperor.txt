@@ -66,14 +66,14 @@ event = {
 					weights = {
 						base = 1
 						modifier = {
-							mult = 2
+							factor = 2
 							distance = {
 								source = event_target:mem_player.capital_scope
 								max_distance <= 400
 							}
 						}
 						modifier = {
-							mult = 4
+							factor = 4
 							event_target:mem_player = {
 								closest_system = {
 									limit = {
@@ -388,14 +388,14 @@ ship_event = {
 		solar_system.star = {
 			create_country = {
 				type = mem_azran
-				name = "Azran"
+				name = "NAME_Azran"
 				effect = {
 					set_country_flag = mem_azran
 					establish_communications_no_message = root.owner
 				}
 			}
 			create_fleet = {
-				name = "Azran"
+				name = "NAME_Azran"
 
 				settings = {
 					spawn_debris = no
@@ -472,15 +472,25 @@ country_event = {
 
 		hidden_effect = {
 			if = {
-				limit = { NOT = { has_country_flag = mem_azran_special_project } }
-				set_country_flag = mem_azran_special_project
-				country_event = { id = mem_lost_emperor.605 days = 10 }
+				limit = { 
+					NOT = { 
+						FromFrom.controller = {
+							has_country_flag = mem_azran_special_project 
+						}						
+					} 
+				}
+				FromFrom.controller = {
+					set_country_flag = mem_azran_special_project
+					country_event = { id = mem_lost_emperor.605 days = 10 }
+				}				
 			}
 		}
 	}
 	option = { #that's enough of this
 		name = mem_lost_emperor.6.B
-		end_event_chain = mem_lost_emperor_azran_chain
+		FromFrom.controller = {
+			end_event_chain = mem_lost_emperor_azran_chain
+		}		
 	}
 }
 
@@ -573,8 +583,8 @@ country_event = {
 				solar_system = {
 					random_fleet_in_system = {
 						limit = {
-							owner = {
-								is_same_value = root
+							controller = {
+								is_same_value = FromFrom.controller
 							}
 							is_ship_class = shipclass_military
 							#Heck, just in case
@@ -594,7 +604,9 @@ country_event = {
 		end_event_chain = mem_lost_emperor_azran_chain
 		
 		hidden_effect = {
-			country_event = { id = mem_lost_emperor.8 }
+			FromFrom.controller = {
+				country_event = { id = mem_lost_emperor.8 }
+			}			
 		}
 	}
 }
@@ -617,20 +629,6 @@ country_event = {
 	}
 
 	immediate = {
-		create_species = {
-			name = "Immortals"
-			class = random_non_machine
-			immortal = yes
-			pops_can_reproduce = no
-			
-			traits = {
-				trait = trait_psionic
-				trait = trait_cybernetic
-				trait = trait_erudite
-				trait = trait_very_strong
-				trait = trait_venerable
-			}
-		}
 #		create_country = {
 #			type = global_event
 #			species = last_created_species
@@ -849,35 +847,8 @@ country_event = {
 		custom_tooltip = mem_lost_emperor.20.accept.tooltip
 
 		hidden_effect = {
-			create_fleet = {
-				name = "NAME_Other_Science_Ship"
-				effect = {
-					set_owner = root
-					create_ship_design = {
-						design = "NAME_Prototype"
-					}
-					create_ship = {
-						name = "NAME_From_Beyond"
-						design = last_created_design
-						graphical_culture = "extra_dimensional_01"
-						prefix = no
-						upgradable = no
-					}
-					set_location = root.capital_scope
-					save_event_target_as = deleted_ship
-				}
-			}
-			event_target:deleted_ship = {
-				set_leader = mem_neochadanus
-				leader = {
-					save_event_target_as = mem_neochadanus
-					root = {
-						assign_leader = event_target:mem_neochadanus
-					}
-				}
-				delete_fleet = this
-			}
-
+			set_leader = event_target:mem_neochadanus
+			set_male_ruler_title = RT_GOD_EMPEROR
 			set_country_flag = mem_emperor_is_neochadanus
 			set_timed_country_flag = {
 				flag = mem_emperor_is_neochadanus_fifty
@@ -888,7 +859,7 @@ country_event = {
 		if = {
 			limit = {
 				NOT = {
-					has_authority = auth_imperial
+					has_authority = auth_dictatorial
 				}
 			}
 			if = {
@@ -923,7 +894,8 @@ country_event = {
 		is_dialog_only = yes
 
 		trigger = {
-			NOT = {
+			NOR = {
+				has_authority = auth_dictatorial
 				has_authority = auth_imperial
 			}
 		}
@@ -1096,6 +1068,13 @@ country_event = {
 	title = mem_lost_emperor.21.name
 	desc = mem_lost_emperor.21.desc
 	picture = GFX_evt_ship_in_orbit
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadanus
+	}
 	
 	location = event_target:mem_lost_emperor_system
 	
@@ -1112,13 +1091,15 @@ country_event = {
 	is_triggered_only = yes
 	immediate = {
 		change_government = {
-			authority = auth_imperial
+			authority = auth_dictatorial
 			civics = random
 		}
+		set_male_ruler_title = RT_GOD_EMPEROR
+		set_government_cooldown = 0
 		if = {
 			limit = {
 				NOT = {
-					has_authority = auth_imperial
+					has_authority = auth_dictatorial
 				}
 			}
 			country_event = { id = mem_lost_emperor.2001 days = 1 }
@@ -1169,6 +1150,13 @@ fleet_event = {
 	desc = mem_lost_emperor.23.desc
 	picture = GFX_evt_federation_fleet
 	
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadanus
+	}
+
 	location = root
 	
 	is_triggered_only = yes
@@ -1217,6 +1205,13 @@ country_event = {
 	desc = mem_lost_emperor.25.desc
 	picture = GFX_evt_space_station
 	
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadanus
+	}
+
 	location = capital_scope
 
 	is_triggered_only = yes
@@ -1260,6 +1255,13 @@ fleet_event = {
 	desc = mem_lost_emperor.29.desc
 	picture = GFX_evt_federation_fleet
 	
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadanus
+	}
+
 	location = root
 	
 	is_triggered_only = yes
@@ -1284,6 +1286,13 @@ planet_event = {
 	picture = GFX_evt_space_station
 	location = root
 	
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadanus
+	}
+
 	is_triggered_only = yes
 	
 	trigger = {
@@ -1311,11 +1320,11 @@ planet_event = {
 
 		create_country = {
 			#Neochadanus stuff!
-			type = mem_neochadanus_ascendant
+			type = default
 
 			name = mem_neochadanus_country_name
 			
-			authority = auth_imperial
+			authority = auth_dictatorial
 			
 			ethos = {
 				ethic = ethic_authoritarian
@@ -1333,6 +1342,7 @@ planet_event = {
 			
 			effect = {
 				save_event_target_as = mem_neochadanus_ascendant
+				set_country_flag = mem_neochadanus_ascendant
 
 #				mem_create_neochadanus = yes
 				
@@ -1387,16 +1397,12 @@ planet_event = {
 						days = 4800
 					}
 				
-					set_owner = prev
+					set_owner = event_target:mem_neochadanus_ascendant
 					
 					solar_system.starbase = {
-						set_owner = prevprev
+						set_owner = event_target:mem_neochadanus_ascendant
 						set_starbase_size = starbase_citadel
 						
-						set_starbase_module = {
-							slot = 0
-							module = shipyard
-						}
 						set_starbase_module = {
 							slot = 1
 							module = shipyard
@@ -1407,7 +1413,7 @@ planet_event = {
 						}
 						set_starbase_module = {
 							slot = 3
-							module = anchorage
+							module = shipyard
 						}
 						set_starbase_module = {
 							slot = 4
@@ -1415,23 +1421,27 @@ planet_event = {
 						}
 						set_starbase_module = {
 							slot = 5
+							module = anchorage
+						}
+						set_starbase_module = {
+							slot = 6
 							module = missile_battery
 						}
 						
 						set_starbase_building = {
-							slot = 0
+							slot = 1
 							building = crew_quarters
 						}
 						set_starbase_building = {
-							slot = 1
+							slot = 2
 							building = hydroponics_bay
 						}
 						set_starbase_building = {
-							slot = 2
+							slot = 3
 							building = fleet_academy
 						}
 						set_starbase_building = {
-							slot = 3
+							slot = 4
 							building = target_uplink_computer
 						}
 					}
@@ -1442,54 +1452,29 @@ planet_event = {
 					solar_system = {
 						while = {
 							limit = {
+								NOT = {
+									solar_system = {
+										has_star_flag = ring_world_built
+									}
+								}
 								any_system_planet = {
-									NOT = { has_anomaly = yes }
-									NOR = {
-										has_planet_flag = megastructure
-										has_planet_flag = has_megastructure
-										solar_system = {
-											has_star_flag = ring_world_built
-										}
-										is_planet_class = pc_ringworld_habitable
-										is_planet_class = pc_ringworld_habitable_damaged
-										is_planet_class = pc_ringworld_tech
-										is_planet_class = pc_ringworld_tech_damaged
-										is_planet_class = pc_ringworld_seam
-										is_planet_class = pc_ringworld_seam_damaged
-										is_planet_class = pc_habitat
-									}
+									has_anomaly = no
+									is_artificial = no
 									has_orbital_station = no
-									NOR = {
-										is_asteroid = yes
-										is_moon = yes
-									}
+									is_asteroid = no
+									is_moon = no
 									is_star = no
 								}
 							}
 							count = 3
 							
 							random_system_planet = {
-								limit = { #this is the conditions for building a habitat in the habitat file
-									NOT = { has_anomaly = yes }
-									NOR = {
-										has_planet_flag = megastructure
-										has_planet_flag = has_megastructure
-										solar_system = {
-											has_star_flag = ring_world_built
-										}
-										is_planet_class = pc_ringworld_habitable
-										is_planet_class = pc_ringworld_habitable_damaged
-										is_planet_class = pc_ringworld_tech
-										is_planet_class = pc_ringworld_tech_damaged
-										is_planet_class = pc_ringworld_seam
-										is_planet_class = pc_ringworld_seam_damaged
-										is_planet_class = pc_habitat
-									}
+								limit = {
+									has_anomaly = no
+									is_artificial = no
 									has_orbital_station = no
-									NOR = {
-										is_asteroid = yes
-										is_moon = yes
-									}
+									is_asteroid = no
+									is_moon = no
 									is_star = no
 								}
 
@@ -1544,13 +1529,13 @@ planet_event = {
 					every_relation = {
 						limit = {
 							NOT = {
-								is_same_value = prevprev
+								is_same_value = event_target:mem_neochadanus_ascendant
 							}
 						}
-						establish_communications_no_message = prevprev
+						establish_communications_no_message = event_target:mem_neochadanus_ascendant
 						country_event = { id = mem_lost_emperor.31 } #tell them about it
 					}
-					establish_communications_no_message = prev
+					establish_communications_no_message = event_target:mem_neochadanus_ascendant
 				}
 				
 				mem_give_neochadanus_resources = yes
@@ -1665,7 +1650,7 @@ country_event = {
 	}
 
 	trigger = {
-		is_country_type = mem_neochadanus_ascendant
+		has_country_flag = mem_neochadanus_ascendant
 		is_subject = no
 		is_at_war = no
 		NOR = {
@@ -1693,6 +1678,7 @@ country_event = {
 	after = {
 		set_country_flag = mem_neochadanus_ascends
 		every_owned_planet = {
+			destroy_colony = yes
 			remove_planet = yes
 		}
 	}
@@ -1745,6 +1731,13 @@ country_event = {
 	picture = GFX_evt_mem_ancient_robots_project	
 	
 	location = event_target:mem_lost_emperor_system
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadanus
+	}
 	
 	is_triggered_only = yes
 
@@ -1842,6 +1835,13 @@ country_event = {
 	title = mem_lost_emperor.800.name
 	desc = mem_lost_emperor.800.desc
 	picture = GFX_evt_space_funeral
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadanus
+	}
 	
 	is_triggered_only = yes
 	
@@ -1888,7 +1888,7 @@ country_event = {
 			has_leader_flag = mem_neochadanus
 		}
 		NOR = {
-			has_authority = auth_imperial
+			has_authority = auth_dictatorial
 			has_country_flag = mem_just_set_neoch
 		}
 	}
@@ -1902,7 +1902,7 @@ country_event = {
 		exile_leader_as = mem_angry_neochadanus
 
 		create_leader = {
-			class = ruler
+			CLASS = official
 
 			effect = {
 				save_event_target_as = mem_new_ruler
@@ -1919,7 +1919,6 @@ country_event = {
 				}
 			}
 			kill_leader = {
-				type = ruler
 				heir = yes
 				show_notification = no
 			}
@@ -1942,7 +1941,7 @@ country_event = {
 	is_triggered_only = yes
 	
 	trigger = {
-		is_country_type = mem_neochadanus_ascendant
+		has_country_flag = mem_neochadanus_ascendant
 		NOT = {
 			has_country_flag = mem_neochadanus_ascends
 		}
@@ -2003,13 +2002,12 @@ country_event = {
 				exists = ruler
 			}
 			kill_leader = {
-				type = ruler
 				show_notification = no
 			}
 		}
 		create_leader = {
-			class = ruler
-
+			CLASS = official
+			species = root
 			effect = {
 				save_event_target_as = mem_new_ruler
 				exile_leader_as = mem_new_ruler
@@ -2025,7 +2023,6 @@ country_event = {
 				}
 			}
 			kill_leader = {
-				type = ruler
 				heir = yes
 				show_notification = no
 			}
@@ -2033,10 +2030,10 @@ country_event = {
 
 		#refresh the govt
 		change_government = {
-			authority = auth_dictatorial
+			authority = auth_imperial
 		}
 		change_government = {
-			authority = auth_imperial
+			authority = auth_dictatorial
 		}
 
 		set_name = "Mourners of Neochadanus"
@@ -2054,6 +2051,13 @@ country_event = {
 	picture = GFX_evt_space_funeral
 	
 	is_triggered_only = yes
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadanus
+	}
 	
 	option = {
 		name = mem_lost_emperor.803.option
@@ -2182,11 +2186,10 @@ country_event = {
 			save_event_target_as = mem_neochadanus
 		}
 		kill_leader = {
-			type = ruler
 			show_notification = no
 		}
 		create_leader = {
-			class = ruler
+			CLASS = official
 
 			effect = {
 				save_event_target_as = mem_new_ruler
@@ -2203,7 +2206,6 @@ country_event = {
 				}
 			}
 			kill_leader = {
-				type = ruler
 				heir = yes
 				show_notification = no
 			}
@@ -2211,10 +2213,10 @@ country_event = {
 
 		#refresh the govt
 		change_government = {
-			authority = auth_dictatorial
+			authority = auth_imperial
 		}
 		change_government = {
-			authority = auth_imperial
+			authority = auth_dictatorial
 		}
 	}
 
@@ -2235,6 +2237,13 @@ country_event = {
 
 	is_triggered_only = yes
 
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadanus
+	}
+
 	option = {
 		name = mem_lost_emperor.902.option
 	}
@@ -2252,6 +2261,13 @@ country_event = {
 
 	is_triggered_only = yes
 
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadanus
+	}
+
 	immediate = {
 		ruler = {
 			save_event_target_as = mem_angry_neochadanus
@@ -2259,7 +2275,7 @@ country_event = {
 		exile_leader_as = mem_angry_neochadanus
 		
 		create_leader = {
-			class = ruler
+			CLASS = official
 
 			effect = {
 				save_event_target_as = mem_new_ruler
@@ -2276,7 +2292,6 @@ country_event = {
 				}
 			}
 			kill_leader = {
-				type = ruler
 				heir = yes
 				show_notification = no
 			}
@@ -2284,10 +2299,10 @@ country_event = {
 
 		#refresh the govt
 		change_government = {
-			authority = auth_dictatorial
+			authority = auth_imperial
 		}
 		change_government = {
-			authority = auth_imperial
+			authority = auth_dictatorial
 		}
 
 		country_event = { id = mem_lost_emperor.910 days = 135 random = 90 }
@@ -2309,6 +2324,13 @@ country_event = {
 
 	is_triggered_only = yes
 
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadanus
+	}
+
 	option = {
 		name = mem_lost_emperor.910.A
 
@@ -2325,10 +2347,10 @@ country_event = {
 
 			#refresh the govt
 			change_government = {
-				authority = auth_dictatorial
+				authority = auth_imperial
 			}
 			change_government = {
-				authority = auth_imperial
+				authority = auth_dictatorial
 			}
 
 			country_event = { id = mem_lost_emperor.901 days = 3600 }
@@ -2371,6 +2393,13 @@ country_event = {
 	picture = GFX_evt_exploding_planet
 
 	is_triggered_only = yes
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadanus
+	}
 
 	trigger = {
 		num_owned_planets > 1
@@ -2615,6 +2644,13 @@ country_event = {
 	desc = mem_lost_emperor.60.desc
 	picture = GFX_evt_l-gateway
 
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadanus
+	}
+
 	trigger = {
 		has_country_flag = mem_emperor_is_neochadanus
 		ruler = {
@@ -2645,6 +2681,13 @@ country_event = {
 	desc = mem_lost_emperor.61.desc
 	picture = GFX_evt_l-gateway
 
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadanus
+	}
+	
 	trigger = {
 		has_modifier = mem_lost_emperor_fount_of_knowledge_modifier
 		has_event_chain = "l_cluster_chain"
@@ -2663,19 +2706,5 @@ country_event = {
 	option = {
 		name = mem_lost_emperor.61.option
 		generate_lcluster_clue = yes
-	}
-}
-
-first_contact_event = {
-	id = mem_lost_emperor.950
-	is_triggered_only = yes
-	hide_window = yes
-	trigger = {
-		contact_country = {
-			is_country_type = mem_neochadanus_ascendant
-		}
-	}
-	immediate = {
-		set_first_contact_stage = default_stage_1
 	}
 }

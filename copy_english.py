@@ -12,7 +12,7 @@
 import os, sys, getopt
 
 #default to exporting from English to all other languages and not overwriting pre-existing files
-allLanguages = {'l_braz_por', 'l_english', 'l_french', 'l_german', 'l_polish', 'l_russian', 'l_spanish', 'l_simp_chinese'}
+allLanguages = {'l_braz_por', 'l_english', 'l_french', 'l_german', 'l_japanese', 'l_korean', 'l_polish', 'l_russian', 'l_simp_chinese', 'l_spanish'}
 sourceLanguage = 'l_english'
 ignoreLanguages = set([])
 overwrite = False
@@ -48,13 +48,13 @@ for opt, val in options:
 		print('Setting source language to ' + val)
 targetLanguages = allLanguages - ignoreLanguages - set([sourceLanguage])
 
-for filename in os.listdir('localisation')[:]:
-	sourceFile = open('localisation/' + filename, 'r')
+for filename in os.listdir('localisation/english')[:]:
+	sourceFile = open('localisation/english/' + filename, 'r')
 	for target in targetLanguages:
 		newFilename = filename.replace(sourceLanguage, target)
 		if newFilename == filename: continue	#Only copy files that actually contained l_english
-		if os.path.isfile('localisation/' + newFilename) and not overwrite: continue
-		targetFile = open('localisation/' + newFilename, 'w+')
+		if os.path.isfile('localisation/' + target.replace("l_","") + '/' + newFilename) and not overwrite: continue
+		targetFile = open('localisation/' + target.replace("l_","") + '/' + newFilename, 'w+')
 		for line in sourceFile:
 			targetFile.write(line.replace(sourceLanguage + ':', target + ':'))
 		targetFile.close()

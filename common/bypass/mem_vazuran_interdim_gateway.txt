@@ -2,12 +2,14 @@ mem_vazuran_interdim_gateway = {
 	name = GATEWAY_VAZURAN
 	is_pathfind = yes
 	uses_action = no
-	always_active = yes
+	requires_exploration = no
+	extends_sensors = no
+	always_active = no
 	windup_time = 0
 	winddown_time = 0
 	ftl_multiplier = 0			# 0 means instant
-	icon_frame = 25
-	remember_instances = no 	# whether countries remember meeting a specific instance of that type, or if they just remember seeing the type in general
+	icon_frame = 12
+	remember_instances = yes 	# whether countries remember meeting a specific instance of that type, or if they just remember seeing the type in general
 	galactic_map_tooltip_header = GATEWAY_VAZURAN
 	galactic_map_tooltip_desc = GATEWAY_VAZURAN_DESC
 	connection_type = scripted_connection
@@ -15,11 +17,33 @@ mem_vazuran_interdim_gateway = {
 	ftl_ship_effect = "gateway_ftl_ship_effect_entity"
 	ftl_bypass_effect = "gateway_ftl_bypass_effect_entity"
 
+	prerequisites = {
+		tech_mem_vazuran_rift_travel
+	}
+
 	country_can_use = {
-#		custom_tooltip = {
-#			fail_text = LGATE_COUNTRY_CANNOT_USE
-#			has_country_flag = lgates_activated
-#		}
+		custom_tooltip = {
+			fail_text = NATURAL_WORMHOLE_COUNTRY_CANNOT_USE
+			# Wormhole can be used if...
+			OR = {
+				# System has no owner
+				NOT = { exists = from }
+				# System's owner has not closed borders to you
+				from = { 
+					NOT = { has_closed_borders = root }
+				}
+				# System's owner is at war with you
+				from = { is_at_war_with = root }
+				# System's owner is not a proper empire
+				from = {
+					NOR = {
+						is_country_type = default
+						is_country_type = awakened_fallen_empire
+						is_country_type = fallen_empire
+					}
+				}
+			}
+		}
 	}
 	
 	scripted_connection = {

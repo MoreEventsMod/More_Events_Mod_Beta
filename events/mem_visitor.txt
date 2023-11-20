@@ -12,64 +12,55 @@ namespace = mem_visitor
 # Happens on planet with obervation post with either passive or active observation
 
 # Event setup (HIDDEN)
-planet_event = {
+situation_event = {
 	id = mem_visitor.1
 	hide_window = yes
-	
+	is_triggered_only = yes
+
 	trigger = {
-		has_observation_outpost = yes
-		NOT = {
-			has_global_flag = mem_visitor
-		}
-			
-			
-		
-		observation_outpost = { 
-			OR = { 
-				has_mission = passive_observation
-				has_mission = specimen_collection
-			}
-		}
-		observation_outpost_owner = {
-			is_ai = no
-			NOT = { has_ethic = ethic_gestalt_consciousness }
-		}
 		owner = {
-			is_country_type = primitive
-			OR = {
-					has_country_flag = stone_age
-					has_country_flag = bronze_age
-					has_country_flag = iron_age
-					has_country_flag = late_medieval_age
-					has_country_flag = renaissance_age
-					has_country_flag = steam_age
-					has_country_flag = industrial_age
-					has_country_flag = machine_age
-					has_country_flag = atomic_age
+			NOT = {
+				has_global_flag = mem_visitor
 			}
-			
-		}
-	}
-	
-	mean_time_to_happen = {
-		months = 5000
-		#months = 1
-	}
-	
-	immediate = {
-		If = {
-			limit = {
+			is_regular_pre_ftl = yes
+			has_awareness < 75
+			capital_scope = {
+				has_observation_outpost = yes
+				exists = observation_outpost_owner
 				observation_outpost_owner = {
 					is_ai = no
+					is_gestalt = no
 				}
 			}
-			observation_outpost_owner = {
+		}
+	}
+
+	immediate = {
+		set_timed_situation_flag = {
+			flag = has_ongoing_observation_event_chain # too many events, I might miss one if I do it manually
+			months = 12
+		}
+		owner.capital_scope = {
+			save_event_target_as = mem_visitor_planet
+			set_planet_flag = mem_visitor_planet
+			set_global_flag = mem_visitor
+		}
+		owner = {
+			save_event_target_as = mem_visitor_planet_owner
+		}
+		if = {
+			limit = {
+				owner = {
+					capital_scope = {
+						has_observation_outpost = yes
+						exists = observation_outpost_owner
+					}
+				}
+			}
+			owner.capital_scope.observation_outpost_owner = {
 				country_event = { id = mem_visitor.2 }
 				set_country_flag = mem_visitor_country
 			}
-			set_planet_flag = mem_visitor_planet
-			set_global_flag = mem_visitor
-			save_global_event_target_as = mem_visitor_planet
 		}
 	}
 }
@@ -244,13 +235,6 @@ country_event = {
 	}
 	
 	immediate = {
-		random_galaxy_planet = {
-			limit = {
-				has_planet_flag = mem_visitor_planet
-			}
-			
-		}
-		
 		IF = {
 			limit = {
 				event_target:mem_visitor_planet = {
@@ -348,7 +332,7 @@ country_event = {
 							has_country_flag = atomic_age
 						}
 					}
-					}
+				}
 			}
 			
 			random_list = {
@@ -381,8 +365,6 @@ country_event = {
 	immediate = {
 		set_global_flag = mem_visitor_finished
 	}
-	
-	
 	
 	option = {
 		name = mem_visitor.31a
@@ -555,7 +537,7 @@ country_event = {
 					
 					owner = {
 						shift_ethic = "ethic_xenophobe"
-						random_owned_pop = { pop_change_ethic = "ethic_xenophobe" }
+						shift_primitive_pop_ethic = { ETHIC = xenophobe  BONUS = -2 }
 					}
 					
 				}
@@ -573,7 +555,7 @@ country_event = {
 					
 					owner = {
 						shift_ethic = "ethic_militarist"
-						random_owned_pop = { pop_change_ethic = "ethic_militarist" }
+						shift_primitive_pop_ethic = { ETHIC = militarist  BONUS = -2 }
 					}
 					
 				}
@@ -620,7 +602,7 @@ country_event = {
 					
 					owner = {
 						shift_ethic = "ethic_xenophobe"
-						random_owned_pop = { pop_change_ethic = "ethic_xenophobe" }
+						shift_primitive_pop_ethic = { ETHIC = xenophobe  BONUS = -2 }
 					}
 					
 				}
@@ -638,7 +620,7 @@ country_event = {
 					
 					owner = {
 						shift_ethic = "ethic_militarist"
-						random_owned_pop = { pop_change_ethic = "ethic_militarist" }
+						shift_primitive_pop_ethic = { ETHIC = militarist  BONUS = -2 }
 					}
 					
 				}
@@ -730,7 +712,7 @@ country_event = {
 					
 					owner = {
 						shift_ethic = "ethic_xenophobe"
-						random_owned_pop = { pop_change_ethic = "ethic_xenophobe" }
+						shift_primitive_pop_ethic = { ETHIC = xenophobe  BONUS = -2 }
 					}
 					
 				}
@@ -748,7 +730,7 @@ country_event = {
 					
 					owner = {
 						shift_ethic = "ethic_militarist"
-						random_owned_pop = { pop_change_ethic = "ethic_militarist" }
+						shift_primitive_pop_ethic = { ETHIC = militarist  BONUS = -2 }
 					}
 					
 				}
@@ -931,7 +913,7 @@ country_event = {
 		event_target:mem_visitor_planet = {
 			owner = {
 				shift_ethic = "ethic_spiritualist"
-				random_owned_pop = { pop_change_ethic = "ethic_spiritualist" }
+				shift_primitive_pop_ethic = { ETHIC = spiritualist  BONUS = -2 }
 			}
 		}
 		set_global_flag = mem_visitor_finished
@@ -960,15 +942,15 @@ country_event = {
 				random_list = {
 					33 = {
 						shift_ethic = "ethic_militarist"
-						random_owned_pop = { pop_change_ethic = "ethic_militarist" }
+						shift_primitive_pop_ethic = { ETHIC = militarist  BONUS = -2 }
 					}
 					33 = {
 						shift_ethic = "ethic_xenophobe"
-						random_owned_pop = { pop_change_ethic = "ethic_xenophobe" }
+						shift_primitive_pop_ethic = { ETHIC = xenophobe  BONUS = -2 }
 					}
 					33 = {
 						shift_ethic = "ethic_materialist"
-						random_owned_pop = { pop_change_ethic = "ethic_materialist" }
+						shift_primitive_pop_ethic = { ETHIC = materialist  BONUS = -2 }
 					}
 				}
 			}
@@ -1016,7 +998,7 @@ country_event = {
 		event_target:mem_visitor_planet = {
 			owner = {
 				shift_ethic = "ethic_militarist"
-				random_owned_pop = { pop_change_ethic = "ethic_militarist" }
+				shift_primitive_pop_ethic = { ETHIC = militarist  BONUS = -2 }
 				
 				#And then they might nuke themselves
 				
@@ -1028,15 +1010,90 @@ country_event = {
 				10 = {
 					IF = {
 						limit = {
-							OR = {
-								has_country_flag = atomic_age
-								has_country_flag = early_space_age
+							owner = {
+								OR = {
+									has_country_flag = atomic_age
+									has_country_flag = early_space_age
+								}
 							}
 						}
-						planet_event = {
-							id = primitive.130
-							days = 360
-							random = 360
+						owner = {
+							set_country_flag = observation_1400_fired
+							save_event_target_as = pre_ftl_country
+						}
+						save_event_target_as = pre_ftl_planet
+						random_list = {
+							500 = {
+								# Close Call!
+								modifier = {
+									factor = 2
+									owner = {
+										is_pacifist = yes
+									}
+								}
+							}
+							50 = {
+								# Planet Depopulated
+								planet_event = {
+									id = observation.1401
+								}
+								root = {
+									set_situation_flag = has_ongoing_observation_event_chain
+									# Setting this flag for the duration of the entire event chain
+									# to prevent other observation events from interfering.
+								}
+								modifier = {
+									factor = 0.5
+									owner = {
+										is_militarist = no
+									}
+								}
+								modifier = {
+									factor = 0.1
+									has_observation_outpost = no
+								}
+							}
+							50 = {
+								# Planet Uninhabitable
+								planet_event = {
+									id = observation.1403
+								}
+								root = {
+									set_situation_flag = has_ongoing_observation_event_chain
+									# Setting this flag for the duration of the entire event chain
+									# to prevent other observation events from interfering.
+								}
+								modifier = {
+									factor = 0.5
+									owner = {
+										is_militarist = no
+									}
+								}
+								modifier = {
+									factor = 0.1
+									has_observation_outpost = no
+								}
+							}
+							200 = {
+								# Pre-FTLs regress to Stone Age
+								planet_event = {
+									id = observation.1405
+								}
+								root = {
+									set_situation_flag = has_ongoing_observation_event_chain
+									# Setting this flag for the duration of the entire event chain
+									# to prevent other observation events from interfering.
+								}
+							}
+						}
+						if = {
+							limit = {
+								has_observation_outpost = no
+							}
+							set_timed_global_flag = {
+								flag = nuclear_war_pre_ftl_global
+								years = 50
+							}
 						}
 					}
 				}
@@ -1156,7 +1213,7 @@ country_event = {
 		event_target:mem_visitor_planet = {
 			owner = {
 				shift_ethic = "ethic_spiritualist"
-				random_owned_pop = { pop_change_ethic = "ethic_spiritualist" }
+				shift_primitive_pop_ethic = { ETHIC = spiritualist  BONUS = -2 }
 			}
 		}
 	}
@@ -1198,15 +1255,15 @@ country_event = {
 				random_list = {
 					33 = {
 						shift_ethic = "ethic_xenophobe"
-						random_owned_pop = { pop_change_ethic = "ethic_xenophobe" }
+						shift_primitive_pop_ethic = { ETHIC = xenophobe  BONUS = -2 }
 					}
 					33 = {
 						shift_ethic = "ethic_materialist"
-						random_owned_pop = { pop_change_ethic = "ethic_materialist" }
+						shift_primitive_pop_ethic = { ETHIC = materialist  BONUS = -2 }
 					}
 					33 = {
 						shift_ethic = "ethic_militarist"
-						random_owned_pop = { pop_change_ethic = "ethic_militarist" }
+						shift_primitive_pop_ethic = { ETHIC = militarist  BONUS = -2 }
 					}
 				}
 			}
@@ -1283,31 +1340,28 @@ country_event = {
 				random_list = {
 					50 = {
 						shift_ethic = "ethic_xenophile"
-						random_owned_pop = { pop_change_ethic = "ethic_xenophile" }
+						shift_primitive_pop_ethic = { ETHIC = xenophile  BONUS = -2 }
 					}
 					50 = {
 						shift_ethic = "ethic_materialist"
-						random_owned_pop = { pop_change_ethic = "ethic_materialist" }
+						shift_primitive_pop_ethic = { ETHIC = materialist  BONUS = -2 }
 					}
 				}
 				
 				#Here goes bumping primitives one era ahead
-				
-				IF = {
-					limit = {has_country_flag = industrial_age}
-					country_event = {id = primitive.10 days = 360 random = 3600}
-				}
-				IF = {
-					limit = {has_country_flag = machine_age}
-					country_event = {id = primitive.12 days = 360 random = 3600}
-				}
-				IF = {
-					limit = {has_country_flag = atomic_age}
-					country_event = {id = primitive.14 days = 360 random = 3600}
-				}
-				IF = {
-					limit = {has_country_flag = steam_age}
-					country_event = {id = primitive.28 days = 360 random = 3600}
+				if = {
+					limit = {
+						has_country_flag = steam_age
+						has_country_flag = industrial_age
+						has_country_flag = machine_age
+						has_country_flag = atomic_age
+					}
+					random_situation = {
+						limit = {
+							is_situation_type = pre_ftl_tech_progress_situation
+						}
+						add_situation_progress = 960 #50%
+					}
 				}
 			}
 		}
@@ -1505,7 +1559,7 @@ country_event = {
 	option = {
 		name = mem_visitor.72d
 		
-		random_list = {
+		locked_random_list = {
 			50 = {
 				IF = {
 					limit = {
@@ -1677,7 +1731,7 @@ country_event = {
 	option = {
 		name = mem_visitor.72d
 		
-		random_list = {
+		locked_random_list = {
 			50 = {
 				IF = {
 					limit = {

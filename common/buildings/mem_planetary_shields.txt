@@ -109,14 +109,11 @@ building_mem_planetary_shield_generator = {
 				is_planet_class = pc_asteroid
 			}	
 		}
-		NOR = {
-			has_building = "building_mem_planetary_shield_generator_heavy"
-			has_building = "building_mem_planetary_shield_generator_orila"
-		}
 	}
 	
 	allow = {
 		has_upgraded_capital = yes
+		mem_has_shield_building = no
 	}
 	
 	prerequisites = {
@@ -148,6 +145,7 @@ building_mem_planetary_shield_generator_heavy = {
 	icon = "building_mem_heavy_shield_generator"
 	base_buildtime = 600
 	can_build = no
+	planetary_ftl_inhibitor = yes
 	position_priority = 100
 
 	category = army
@@ -162,6 +160,7 @@ building_mem_planetary_shield_generator_heavy = {
 
 	triggered_planet_modifier = {
 		potential = {
+			exists = owner
 			owner = { is_gestalt = no }
 		}
 		modifier = {
@@ -225,20 +224,82 @@ building_mem_planetary_shield_generator_heavy = {
 
 building_mem_planetary_shield_generator_orila = {
 	icon = "building_mem_orila_shield_generator"
-	can_build = no
+#	can_build = no
+	base_cap_amount = 1
 	can_demolish = yes
+	can_be_ruined = no
+	planetary_ftl_inhibitor = yes
 	position_priority = 100
 
 	category = army
 
+	potential = {
+		planet = {
+			NOT = {
+				is_planet_class = pc_asteroid
+			}	
+		}
+		exists = owner
+		owner = {
+			has_country_flag = mem_planetary_shield_generator_orila_can_build
+		}
+	}
+	
+	allow = {
+		mem_has_shield_building = no
+		custom_tooltip = {
+			fail_text = ancrel.10004.failtext #need its own text
+			owner = {
+				check_variable = { 
+					which = "mem_orila_shield_generator_country" 
+					value >= 1 
+				}
+			}
+		}
+	}
+
+	on_queued = {
+		owner = {
+			subtract_variable = { 
+				which = mem_orila_shield_generator_country
+				value = 1
+			}
+		}
+	}
+
+	on_unqueued = {
+		owner = {
+			change_variable = {
+				which = "mem_orila_shield_generator_country"
+				value = 1
+			}			
+		}
+	}
+
+	on_destroy = {
+		owner = {
+			set_country_flag = mem_planetary_shield_generator_orila_can_build
+			change_variable = {
+				which = "mem_orila_shield_generator_country"
+				value = 1
+			}			
+		}
+	}
+
 	resources = {
 		category = planet_buildings
+		cost = {
+			minerals = 500
+		}
 	}
 
 	triggered_planet_modifier = {
 		potential = {
 			exists = owner
-			owner = { is_gestalt = no }
+			owner = { 
+				is_primitive = no
+				is_gestalt = no
+			}
 		}
 		modifier = {
 			job_soldier_add = 1
@@ -247,26 +308,107 @@ building_mem_planetary_shield_generator_orila = {
 	triggered_planet_modifier = {
 		potential = {
 			exists = owner
-			owner = { is_gestalt = yes }
+			owner = {
+				is_primitive = no
+				is_gestalt = yes
+			}
 		}
 		modifier = {
 			job_warrior_drone_add = 1
 		}
 	}
 
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_primitive = no
+				is_regular_empire = yes
+			}
+		}
+		modifier = {
+			job_researcher_add = 2
+		}
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_primitive = no
+				is_hive_empire = yes
+			}
+		}
+		modifier = {
+			job_brain_drone_add = 2
+		}
+	}
+
+	triggered_planet_modifier = {
+		potential = {
+			exists = owner
+			owner = {
+				is_primitive = no
+				is_machine_empire = yes
+			}
+		}
+		modifier = {
+			job_calculator_add = 2
+		}
+	}
+
 	triggered_desc = {
 		trigger = {
 			exists = owner
-			owner = { is_gestalt = yes }
+			owner = {
+				is_primitive = no
+				is_gestalt = yes
+			}
 		}
 		text = job_warrior_drone_effect_desc
 	}
 	triggered_desc = {
 		trigger = {
 			exists = owner
-			owner = { is_gestalt = no }
+			owner = {
+				is_primitive = no
+				is_gestalt = no
+			}
 		}
 		text = job_soldier_effect_desc
+	}
+
+	triggered_desc = {
+		trigger = {
+			exists = owner
+			owner = { 
+				is_primitive = no
+				is_regular_empire = yes
+			}
+		}
+		text = job_researcher_effect_desc
+	}
+
+	triggered_desc = {
+		trigger = {
+			exists = owner
+			owner = {
+				is_primitive = no
+				is_hive_empire = yes
+			}
+		}
+		text = job_brain_drone_effect_desc
+	}
+
+	triggered_desc = {
+		trigger = {
+			exists = owner
+			owner = {
+				is_primitive = no
+				is_machine_empire = yes
+			}
+		}
+		text = job_calculator_effect_desc
 	}
 	
 	planet_modifier = {

@@ -370,42 +370,53 @@
 # }
 
 #Creating fully furnished habitat
-mem_broken_clock_create_habitat = {
-    set_planet_flag = megastructure
-    set_planet_flag = habitat
+mem_broken_clock_create_habitat = {  
     solar_system = {
         spawn_planet = {
             class = "pc_habitat"
-            location = prev
+            location = event_target:target_planet
             orbit_location = yes
-            orbit_angle_offset = 45
+            orbit_angle_offset = 135
             orbit_distance_offset = 9.899
-            size = 8
+            size = 6
             has_ring = no
-        
+    
             init_effect = {
-                set_name = MEM_NAME_broken_clock_habitat_name
-                set_owner = event_target:unwelcome_guests
-                set_planet_flag = advanced_habitat
-                set_planet_flag = advanced_habitat_2
+                set_name = {
+                    key = HABITAT_PLANET_NAME
+                    variable_string = "\\[this.solar_system.GetName]"
+                }
                 set_planet_entity = {
                     entity = "habitat_phase_03_entity"
                     graphical_culture = event_target:unwelcome_guests
                 }
-                set_planet_flag = mining_habitat
-                clear_deposits = yes
+                set_surveyed = {
+                    surveyed = yes
+                    surveyor = event_target:unwelcome_guests
+                }
+                set_all_comms_surveyed = yes
+                clear_blockers = yes
+    
+                set_planet_flag = megastructure
+                set_planet_flag = habitat
+                set_planet_flag = habitat_level_1
+                save_event_target_as = target_habitat
+
+                add_deposit = d_system_resources
+                add_deposit = d_orbital_energy
+                
+                event_target:target_planet = {
+                    set_planet_flag = habitat@PREV
+                }
+                create_colony = {
+                    owner = event_target:unwelcome_guests
+                }
                 while = {
                     count = 2
                     add_district = district_hab_housing
-                    IF = {
-                        limit = { owner = { is_gestalt = yes } }
-                        add_district = district_hab_energy
-                    }
-                    ELSE = {
-                        add_district = district_hab_commercial
-                    }
+                    add_district = district_hab_energy
                     add_district = district_hab_mining
-					add_district = district_hab_industrial
+                    add_district = district_hab_industrial
                 }
                 while = {
                     count = 25
@@ -424,8 +435,86 @@ mem_broken_clock_create_habitat = {
                         add_building = building_precinct_house
                     }
                 }
-				add_building = building_factory_2
+                IF = {
+                    limit = {
+                        owner = { is_gestalt = no }
+                    }
+                    add_building = building_factory_2
+                }            
                 add_building = building_fortress
+                save_event_target_as = target_habitat
+            }
+        }
+        set_star_flag = has_habitat
+        event_target:target_planet = {
+            set_planet_flag = has_megastructure
+    
+            if = {
+                limit = { has_orbital_station = yes }
+                orbital_station = {
+                    dismantle = yes
+                }
+            }
+    
+            create_fleet = {
+                effect = {
+                    set_owner = event_target:unwelcome_guests
+                    create_ship = {
+                        random_existing_design = major_orbital_resource
+                        effect = {
+                            set_disable_at_health = 0.05
+                            set_name = {
+                                key = NAME_MEM_TARGET_ORBITAL
+                                variable_string = "\\[target_planet.GetName]"
+                            }
+                        }
+                    }
+                    save_event_target_as = target_orbital
+                    fleet = {
+                        set_location = {
+                            target = event_target:target_planet
+                        }
+                    }
+                }
+            }
+            event_target:target_orbital = {
+                set_name = {
+                    key = NAME_MEM_TARGET_ORBITAL
+                    variable_string = "\\[target_planet.GetName]"
+                }
+            }
+    
+            set_habitat_planetary_features_effect = yes
+    
+            if = {
+                limit = {
+                    event_target:target_planet = {
+                        has_deposit_for = shipclass_research_station
+                    }
+                }
+                event_target:target_orbital = {
+                    set_fleet_flag = science_orbital
+                }
+            }
+            if = {
+                limit = {
+                    event_target:target_planet = {
+                        has_orbital_mining_deposit = yes
+                    }
+                }
+                event_target:target_orbital = {
+                    set_fleet_flag = mining_orbital
+                }
+            }
+            if = {
+                limit = {
+                    event_target:target_planet = {
+                        has_orbital_energy_deposit = yes
+                    }
+                }
+                event_target:target_orbital = {
+                    set_fleet_flag = energy_orbital
+                }
             }
         }
     }
@@ -449,11 +538,20 @@ mem_broken_clock_kill_invaders = {
         limit = {
             any_owned_planet = {
                 num_pops > 0
+                solar_system = {
+                    NOT = { has_star_flag = mem_broken_clock_system }
+                }
             }
         }
         count = 100
         # log = "Iteration begins"
         random_owned_pop = {
+            limit = {
+                exists = planet
+                planet.solar_system = {
+                    NOT = { has_star_flag = mem_broken_clock_system }
+                }
+            }
             # log = "[This.Species.GetName]"
             species = { save_event_target_as = breakaway_species }
             IF = {
@@ -486,12 +584,12 @@ mem_broken_clock_kill_invaders = {
                     set_owner = event_target:breakaway_country
                     IF = {
                         limit = { 
-                            exists = starbase 
-                            starbase = {
+                            exists = solar_system.starbase 
+                            solar_system.starbase = {
                                 owner = { is_same_value = root }
                             }
                         }
-                        starbase = {
+                        solar_system.starbase = {
                             set_owner = event_target:breakaway_country
                         }
                     }
@@ -557,6 +655,16 @@ mem_broken_clock_kill_invaders = {
                                     tech_akx_worm_3
                                 }
                             }
+                            if = {
+                                limit = {
+                                    event_target:breakaway_species = { is_robotic = yes }
+                                }
+                                # I don't know if they need it, but better safe than sorry
+                                give_technology = { tech = tech_robotic_workers }
+                                give_technology = { tech = tech_droid_workers }
+                                give_technology = { tech = tech_synthetic_workers }
+                                give_technology = { tech = tech_synthetic_leaders }
+                            }
                             # log = "Country: [This.GetName]"
                             save_event_target_as = breakaway_country
                             set_country_flag = mem_broken_clock_breakaways
@@ -581,7 +689,13 @@ mem_broken_clock_kill_invaders = {
                     # log = "[This.GetName]"
                     limit = {
                         any_owned_pop = { 
-                            is_same_species = event_target:breakaway_species
+                            OR = {
+                                is_same_species = event_target:breakaway_species
+                                AND = {
+                                    is_robotic_species = yes
+                                    event_target:breakaway_species = { is_robotic = yes }
+                                }
+                            }
                         }
                     }
                     set_owner = event_target:breakaway_country
@@ -619,7 +733,10 @@ mem_broken_clock_kill_invaders = {
                         food = 200
                     }
                 }
-                add_100_unity_per_year_passed = yes
+                add_resource = {
+                    unity = 100
+                    mult = trigger:years_passed
+                }
                 every_owned_pop = {
                     remove_culture_shock = yes
                 }
@@ -692,11 +809,11 @@ mem_broken_clock_kill_invaders = {
                         set_starbase_size = starbase_starport
                     }
                     set_starbase_module = {
-                        slot = 0
+                        slot = 1
                         module = shipyard
                     }
                     set_starbase_module = {
-						slot = 1
+						slot = 2
 						module = anchorage
 					}
                 }

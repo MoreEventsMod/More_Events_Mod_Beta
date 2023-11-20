@@ -41,14 +41,15 @@ country_event = {
             OR = {
                 is_planet_class = pc_barren
                 is_planet_class = pc_barren_cold
-                is_planet_class = pc_toxic
                 is_planet_class = pc_frozen
+                is_planet_class = pc_toxic
             }
-            has_anomaly = no
             has_owner = no
+            has_anomaly = no
             has_deposit = no
             solar_system = {
-                NOT = {
+                NOR = {
+                    is_bottleneck_system = yes
                     any_system_planet = {
                         OR = {
                             has_owner = yes
@@ -56,9 +57,30 @@ country_event = {
                         }
                     }
                 }
-                is_bottleneck_system = no
             }
         }
+        # any_system_within_border = {
+        #     is_bottleneck_system = no
+        #     NOT = {
+        #         any_system_planet = {
+        #             OR = {
+        #                 has_owner = yes
+        #                 is_colonizable = yes
+        #             }
+        #         }
+        #     }
+        #     any_system_planet = {
+        #         OR = {
+        #             is_planet_class = pc_barren
+        #             is_planet_class = pc_barren_cold
+        #             is_planet_class = pc_toxic
+        #             is_planet_class = pc_frozen
+        #         }
+        #         has_anomaly = no
+        #         has_owner = no
+        #         has_deposit = no
+        #     }
+        # }
     }
 
     immediate = {
@@ -72,19 +94,51 @@ country_event = {
              }
             35 = {
                 set_global_flag = mem_blacksite_happened
+                # random_system_within_border = {
+                #     limit = {
+                #         NOR = {
+                #             any_system_planet = {
+                #                 OR = {
+                #                     has_owner = yes
+                #                     is_colonizable = yes
+                #                 }
+                #             }
+                #         }
+                #         is_bottleneck_system = no
+                #     }
+                #     random_system_planet = {
+                #         limit = {
+                #             OR = {
+                #                 is_planet_class = pc_barren
+                #                 is_planet_class = pc_barren_cold
+                #                 is_planet_class = pc_toxic
+                #                 is_planet_class = pc_frozen
+                #             }
+                #             has_anomaly = no
+                #             has_owner = no
+                #             has_deposit = no
+                #             solar_system = {
+                                
+                #             }
+                #         }
+                #         save_event_target_as = blacksite_planet
+                #         set_planet_flag = mem_blacksite_planet
+                #     }
+                # }
                 random_planet_within_border = {
                     limit = {
                         OR = {
                             is_planet_class = pc_barren
                             is_planet_class = pc_barren_cold
-                            is_planet_class = pc_toxic
                             is_planet_class = pc_frozen
+                            is_planet_class = pc_toxic
                         }
-                        has_anomaly = no
                         has_owner = no
+                        has_anomaly = no
                         has_deposit = no
                         solar_system = {
-                            NOT = {
+                            NOR = {
+                                is_bottleneck_system = yes
                                 any_system_planet = {
                                     OR = {
                                         has_owner = yes
@@ -92,7 +146,6 @@ country_event = {
                                     }
                                 }
                             }
-                            is_bottleneck_system = no
                         }
                     }
                     save_event_target_as = blacksite_planet
@@ -526,8 +579,8 @@ country_event = {
                 class = scientist
                 skill = 5
                 species = event_target:blacksite_fallen_empire.species
-                effect = {
-                    add_trait = mem_blacksite_trait_fallen_empire_scientist
+                traits = {
+                    trait = mem_blacksite_trait_fallen_empire_scientist
                 }
             }
         }
@@ -590,7 +643,7 @@ country_event = {
                 effect = {
                     save_event_target_as = blacksite_recovered_leader
                     set_leader_flag = mem_blacksite_recovered_leader
-                    remove_trait = leader_trait_scientist_psionic
+                    remove_trait = leader_trait_psionic
                 }
             }
         }
@@ -658,7 +711,7 @@ country_event = {
         hidden_effect = {
             create_species = {
 				name = "NAME_AI"
-				class = ROBOT
+				class = MACHINE
 				portrait = random
 				traits = random
 			}
@@ -750,7 +803,7 @@ country_event = {
         custom_tooltip = mem_blacksite.610.a.tooltip
         hidden_effect = {
             event_target:blacksite_recovered_leader = {
-                kill_leader = { type = scientist show_notification = no }
+                kill_leader = { class = scientist show_notification = no }
             }
         }
         event_target:blacksite_fallen_empire = {
@@ -768,7 +821,10 @@ country_event = {
             IF = {
                 limit = {
                     event_target:blacksite_recovered_leader.species = {
-                        is_species_class = ROBOT
+						OR = {
+							is_species_class = ROBOT
+							is_species_class = MACHINE
+						}
                     }
                 }
                 country_event = { id = mem_blacksite.630 days = 1 random = @recovery_random_rogue }
@@ -848,13 +904,7 @@ country_event = {
                                 factor = 0
                                 NOT = {
                                     any_owned_leader = {
-                                        OR = {
-                                            has_trait = leader_trait_admiral_chosen
-                                            has_trait = leader_trait_general_chosen
-                                            has_trait = leader_trait_scientist_chosen
-                                            has_trait = leader_trait_governor_chosen
-                                            has_trait = leader_trait_ruler_chosen
-                                        }
+                                        has_trait = leader_trait_chosen
                                     }
                                 }
                             }
@@ -865,13 +915,7 @@ country_event = {
                                 factor = 0
                                 NOT = {
                                     any_owned_leader = {
-                                        OR = {
-                                            has_trait = leader_trait_admiral_psionic
-                                            has_trait = leader_trait_general_psionic
-                                            has_trait = leader_trait_scientist_psionic
-                                            has_trait = leader_trait_governor_psionic
-                                            has_trait = leader_trait_ruler_psionic
-                                        }
+                                        has_trait = leader_trait_psionic
                                     }
                                 }
                             }
@@ -989,7 +1033,7 @@ country_event = {
             }
         }
         event_target:blacksite_recovered_leader = {
-            kill_leader = { type = scientist show_notification = no }
+            kill_leader = { class = scientist show_notification = no }
         }
     }
 
@@ -1045,7 +1089,7 @@ country_event = {
             days = 1800
         }
         event_target:blacksite_recovered_leader = {
-            kill_leader = { type = scientist show_notification = no }
+            kill_leader = { class = scientist show_notification = no }
         }
     }
 
@@ -1075,18 +1119,12 @@ country_event = {
     immediate = {
         random_owned_leader = {
             limit = {
-                OR = {
-                    has_trait = leader_trait_admiral_chosen
-                    has_trait = leader_trait_general_chosen
-                    has_trait = leader_trait_scientist_chosen
-                    has_trait = leader_trait_governor_chosen
-                    has_trait = leader_trait_ruler_chosen
-                }
+                has_trait = leader_trait_chosen
             }
             save_event_target_as = blacksite_chosen_one
         }
         event_target:blacksite_recovered_leader = {
-            kill_leader = { type = scientist show_notification = no }
+            kill_leader = { class = scientist show_notification = no }
         }
     }
 
@@ -1113,24 +1151,14 @@ country_event = {
     immediate = {
         random_owned_leader = {
             limit = {
-                OR = {
-                    has_trait = leader_trait_admiral_psionic
-                    has_trait = leader_trait_general_psionic
-                    has_trait = leader_trait_scientist_psionic
-                    has_trait = leader_trait_governor_psionic
-                    has_trait = leader_trait_ruler_psionic
-                }
+                has_trait = leader_trait_psionic
             }
-            remove_trait = leader_trait_admiral_psionic
-            remove_trait = leader_trait_general_psionic
-            remove_trait = leader_trait_scientist_psionic
-            remove_trait = leader_trait_governor_psionic
-            remove_trait = leader_trait_ruler_psionic
+            remove_trait = leader_trait_psionic
             add_trait = leader_trait_substance_abuser
             save_event_target_as = blacksite_ravaged_leader
         }
         event_target:blacksite_recovered_leader = {
-            kill_leader = { type = scientist show_notification = no }
+            kill_leader = { class = scientist show_notification = no }
         }
     }
 
@@ -1173,7 +1201,7 @@ country_event = {
 
     immediate = {
         event_target:blacksite_recovered_leader = {
-            kill_leader = { type = scientist show_notification = no }
+            kill_leader = { class = scientist show_notification = no }
         }
     }
 
@@ -1366,7 +1394,7 @@ country_event = {
             }
         }
         event_target:blacksite_recovered_leader = {
-            kill_leader = { type = scientist show_notification = no }
+            kill_leader = { class = scientist show_notification = no }
         }
     }
 
@@ -1422,7 +1450,7 @@ country_event = {
             days = 1800
         }
         event_target:blacksite_recovered_leader = {
-            kill_leader = { type = scientist show_notification = no }
+            kill_leader = { class = scientist show_notification = no }
         }
     }
 
@@ -1487,7 +1515,7 @@ country_event = {
             }
             random_list = {
                 50 = {
-                    kill_leader = { type = scientist show_notification = yes }
+                    kill_leader = { class = scientist show_notification = yes }
                 }
                 50 = {
                     remove_trait = leader_trait_sapient_AI_assistant
@@ -1509,12 +1537,12 @@ country_event = {
             random_list = {
                 66 = {}
                 33 = {
-                    kill_leader = { type = scientist show_notification = yes }
+                    kill_leader = { class = scientist show_notification = yes }
                 }
             }
         }
         event_target:blacksite_recovered_leader = {
-            kill_leader = { type = scientist show_notification = no }
+            kill_leader = { class = scientist show_notification = no }
         }
     }
 
@@ -1551,21 +1579,21 @@ country_event = {
             set_deposit = d_physics_3
             add_deposit = d_engineering_3
             #Setting future deposits
-            solar_system = {
-                every_system_planet = {
-                    limit = {
-                        is_star = no
-                        is_asteroid = no
-                        is_ringworld = no
-                        NOR = { 
-                            is_planet_class = pc_gas_giant 
-                            is_planet_class = pc_shattered
-                            is_planet_class = pc_broken
-                            is_planet_class = pc_shielded
-                        }
-                    }
-                }
-            }
+            # solar_system = {
+            #     every_system_planet = {
+            #         limit = {
+            #             is_star = no
+            #             is_asteroid = no
+            #             is_ringworld = no
+            #             NOR = { 
+            #                 is_planet_class = pc_gas_giant 
+            #                 is_planet_class = pc_shattered
+            #                 is_planet_class = pc_broken
+            #                 is_planet_class = pc_shielded
+            #             }
+            #         }
+            #     }
+            # }
             #Creating nasties
             create_country = {
                 type = mem_blacksite_faction
@@ -1696,11 +1724,11 @@ fleet_event = {
                         clear_deposits = yes
                         if = {
                             limit = { has_mining_station = yes }
-                            random_mining_station = { dismantle = yes }
+                            mining_station = { dismantle = yes }
                         }
                         if = {
                             limit = { has_research_station = yes }
-                            random_research_station = { dismantle = yes }
+                            research_station = { dismantle = yes }
                         }
                         random_list = {
                             25 = {
@@ -1888,9 +1916,9 @@ country_event = {
                 event_target:blacksite_fallen_empire = { has_ethic = ethic_fanatic_xenophile }
             }
             create_saved_leader = {
-                name = "NAME_MEM_Special_Counsel"
+                # name = "NAME_MEM_Special_Counsel"
                 key = mem_blacksite_defector
-                class = general
+                CLASS = commander
                 skill = 3
                 species = event_target:blacksite_fallen_empire.species
                 effect = {
@@ -1904,7 +1932,7 @@ country_event = {
                 event_target:blacksite_fallen_empire = { has_ethic = ethic_fanatic_materialist }
             }
             create_saved_leader = {
-                name = "NAME_MEM_Deputy_Overseer"
+                # name = "NAME_MEM_Deputy_Overseer"
                 key = mem_blacksite_defector
                 class = scientist
                 skill = 3
@@ -1912,7 +1940,7 @@ country_event = {
                 effect = {
                     save_event_target_as = blacksite_defector
                     add_trait = mem_leader_trait_blacksite_deputy_overseer
-                    remove_ruler_trait = leader_trait_ruler_psionic
+                    remove_trait = leader_trait_psionic
                 }
             }
         }
@@ -1921,15 +1949,15 @@ country_event = {
                 event_target:blacksite_fallen_empire = { has_ethic = ethic_fanatic_spiritualist }
             }
             create_saved_leader = {
-                name = "NAME_MEM_High_Inquisitor"
+                # name = "NAME_MEM_High_Inquisitor"
                 key = mem_blacksite_defector
-                class = governor
+                CLASS = official
                 skill = 3
                 species = event_target:blacksite_fallen_empire.species
                 effect = {
                     save_event_target_as = blacksite_defector
                     add_trait = mem_leader_trait_blacksite_high_inquisitor
-                    remove_trait = leader_trait_governor_psionic
+                    remove_trait = leader_trait_psionic
                 }
             }
         }
@@ -2035,7 +2063,7 @@ country_event = {
                 effect = {
                     save_event_target_as = blacksite_recovered_leader
                     set_leader_flag = mem_blacksite_recovered_leader
-                    remove_trait = leader_trait_scientist_psionic
+                    remove_trait = leader_trait_psionic
                 }
             }
         }
@@ -2095,7 +2123,7 @@ country_event = {
         hidden_effect = {
             create_species = {
 				name = "NAME_AI"
-				class = ROBOT
+				class = MACHINE
 				portrait = random
 				traits = random
 			}

@@ -1,0 +1,453 @@
+## Overrides for the planetary shields
+
+namespace = galactic_features
+
+# Mothballed Fleet
+ship_event = {
+	id = galactic_features.301
+	title = "galactic_features.301"
+	desc = "galactic_features.301.desc"
+	picture = GFX_evt_federation_fleet
+	location = FROMFROM
+
+	is_triggered_only = yes
+
+	immediate = {
+		FROMFROM = {
+			random_list = {
+				50 = { change_pc = pc_barren }
+				50 = { change_pc = pc_barren_cold }
+			}
+			reset_planet = yes
+		}
+		#MEM Planetary Shield Override
+		IF = {
+			limit = {
+				NOT = {
+					has_global_flag = mem_planetary_shield_worlds_OFF
+				}
+			}
+			random_country = {
+				country_event = { id = mem_planetary_shields.11 }
+			}
+		}
+	}
+
+	option = {
+		name = "galactic_features.301.a"
+		hidden_effect = {
+			owner = {
+				create_fleet = {
+					effect = {
+						set_owner = root.owner
+						while = {
+							count = 4
+							create_ship = {
+								name = random
+								design = "NAME_Beta"
+								graphical_culture = "fallen_empire_01"
+							}
+						}
+						while = {
+							count = 6
+							create_ship = {
+								name = random
+								design = "NAME_Gamma"
+								graphical_culture = "fallen_empire_01"
+							}
+						}
+						set_location = FROMFROM
+					}
+				}
+			}
+		}
+	}
+}
+
+# Tech Vault
+ship_event = {
+	id = galactic_features.302
+	title = "galactic_features.302"
+	desc = "galactic_features.302.desc"
+	picture = GFX_evt_outpost
+	location = FROMFROM
+
+	is_triggered_only = yes
+
+	immediate = {
+		random_country = {
+			limit = {
+				is_country_type = fallen_empire
+				has_country_flag = fallen_empire_1
+			}
+			save_event_target_as = fallen_empire
+		}
+		FROMFROM = {
+			random_list = {
+				50 = { change_pc = pc_barren }
+				50 = { change_pc = pc_barren_cold }
+			}
+			reset_planet = yes
+		}
+		#MEM Planetary Shield Override
+		IF = {
+			limit = {
+				NOT = {
+					has_global_flag = mem_planetary_shield_worlds_OFF
+				}
+			}
+			random_country = {
+				country_event = { id = mem_planetary_shields.11 }
+			}
+		}
+	}
+
+	option = {
+		name = "galactic_features.302.a"
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier5researchreward
+				min = @tier5researchmin
+			}
+		}
+	}
+}
+
+# Isolated Hut
+ship_event = {
+	id = galactic_features.303
+	title = "galactic_features.303"
+	desc = "galactic_features.303.desc"
+	picture = GFX_evt_alien_planet
+	location = FROMFROM
+
+	is_triggered_only = yes
+
+	immediate = {
+		FROMFROM = {
+			save_event_target_as = shield_planet
+			random_list = {
+				1 = { change_pc = pc_gaia }
+				1 = { change_pc = pc_tropical }
+				1 = { change_pc = pc_arid }
+				1 = { change_pc = pc_continental }
+				1 = { change_pc = pc_ocean }
+				1 = { change_pc = pc_tundra }
+				1 = { change_pc = pc_arctic }
+				1 = { change_pc = pc_alpine }
+				1 = { change_pc = pc_savannah }
+				1 = { change_pc = pc_desert }
+			}
+			reroll_planet = yes
+		}
+		set_global_flag = met_tuborek
+		#MEM Planetary Shield Override
+		IF = {
+			limit = {
+				NOT = {
+					has_global_flag = mem_planetary_shield_worlds_OFF
+				}
+			}
+			random_country = {
+				country_event = { id = mem_planetary_shields.11 }
+			}
+		}
+	}
+
+	option = {
+		name = "galactic_features.303.a"
+		hidden_effect = {
+			create_country = {
+				name = "NAME_Tuborek"
+				type = faction
+				auto_delete = yes
+				flag = {
+					icon = {
+						category = "special"
+						file = "unknown.dds"
+					}
+					background = {
+						category = "backgrounds"
+						file = "00_solid.dds"
+					}
+					colors = {
+						"red"
+						"red"
+						"null"
+						"null"
+					}
+				}
+				effect = {
+					save_event_target_as = tuborek_country
+				}
+			}
+			event_target:tuborek_country = {
+				create_leader = {
+					class = commander
+					species = event_target:fallen_4_species
+					name = NAME_Tuborek
+					skill = 10
+					background_ethic = ethic_xenophobe
+					skip_background_generation = yes
+					custom_description = tuborek_leader_desc
+					custom_catch_phrase = galactic_features.304.c.response
+					hide_age = no
+					randomize_traits = no
+					event_leader = yes	# prevents this leader from leading factions and winning elections
+
+					effect = {
+						set_age = 65
+						save_event_target_as = tuborek_leader
+						set_leader_flag = renowned_leader
+						set_leader_flag = is_in_recruit_window
+						add_trait = subclass_commander_admiral
+						add_trait = leader_trait_master_gunner
+						add_trait = leader_trait_aggressive_2
+						add_trait = leader_trait_wrecker_3
+						add_trait = leader_trait_commanding_presence_3
+						add_trait = leader_trait_resilient_2
+					}
+				}
+			}
+			last_created_leader = {
+				set_owner = root
+				exile_leader_as = tuborek_exiled
+			}
+			owner = {
+				country_event = { id = galactic_features.304 }
+			}
+		}
+	}
+}
+
+# Freedom
+ship_event = {
+	id = galactic_features.305
+	title = "galactic_features.305"
+	desc = {
+		trigger = { owner = { NOT = { has_authority = auth_machine_intelligence } } }
+		text = "galactic_features.305.desc"
+	}
+	desc = {
+		trigger = { owner = { has_authority = auth_machine_intelligence } }
+		text = galactic_features.305.desc.mech
+	}
+	picture = GFX_evt_alien_planet
+	location = FROMFROM
+
+	is_triggered_only = yes
+
+	immediate = {
+		random_country = {
+			limit = {
+				is_country_type = fallen_empire
+				has_country_flag = fallen_empire_1
+			}
+			save_event_target_as = fallen_empire
+		}
+		FROMFROM = {
+			random_list = {
+				50 = { change_pc = pc_barren }
+				50 = { change_pc = pc_barren_cold }
+			}
+			reset_planet = yes
+		}
+		#MEM Planetary Shield Override
+		IF = {
+			limit = {
+				NOT = {
+					has_global_flag = mem_planetary_shield_worlds_OFF
+				}
+			}
+			random_country = {
+				country_event = { id = mem_planetary_shields.11 }
+			}
+		}
+		create_country = {
+			name = "NAME_Old_One"
+			type = cloud
+		}
+		last_created_country = {
+			create_fleet = {
+				name = "NAME_Exiled_One"
+				effect = {
+					set_owner = PREV
+					create_ship = {
+						name = "NAME_XELMAGGUS"
+						design = "NAME_Cloud_Entity"
+					}
+					set_location = FROMFROM
+
+					queue_actions = {
+						repeat = {
+							find_random_system = {
+								trigger = {
+									id = "galactic_features.305.trigger.1001"
+									has_planet_class = "pc_gas_giant"
+									distance = {
+										source = FROMFROM
+										max_distance <= 200
+										min_distance >= 100
+									}
+								}
+								found_system = {
+									move_to = THIS
+								}
+							}
+							find_closest_planet = {
+								trigger = {
+									id = "galactic_features.305.trigger.2001"
+									is_planet_class = "pc_gas_giant"
+								}
+								found_planet = {
+									orbit_planet = THIS
+									wait = {
+										duration = 200
+										random = 150
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			create_fleet = {
+				name = "NAME_Exiled_One"
+				effect = {
+					set_owner = PREV
+					create_ship = {
+						name = "NAME_XILNIAK"
+						design = "NAME_Cloud_Entity"
+					}
+					set_location = FROMFROM
+
+					queue_actions = {
+						repeat = {
+							find_random_system = {
+								trigger = {
+									id = "galactic_features.305.trigger.3001"
+									has_planet_class = "pc_gas_giant"
+									distance = {
+										source = FROMFROMFROM
+										max_distance <= 200
+										min_distance >= 100
+									}
+								}
+								found_system = {
+									move_to = THIS
+								}
+							}
+							find_closest_planet = {
+								trigger = {
+									id = "galactic_features.305.trigger.4001"
+									is_planet_class = "pc_gas_giant"
+								}
+								found_planet = {
+									orbit_planet = THIS
+									wait = {
+										duration = 200
+										random = 150
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			create_fleet = {
+				name = "NAME_Exiled_One"
+				effect = {
+					set_owner = PREV
+					create_ship = {
+						name = "NAME_XADRA"
+						design = "NAME_Cloud_Entity"
+					}
+					set_location = FROMFROM
+
+					queue_actions = {
+						repeat = {
+							find_random_system = {
+								trigger = {
+									id = "galactic_features.305.trigger.5001"
+									has_planet_class = "pc_gas_giant"
+									distance = {
+										source = FROMFROM
+										max_distance <= 200
+										min_distance >= 100
+									}
+								}
+								found_system = {
+									move_to = THIS
+								}
+							}
+							find_closest_planet = {
+								trigger = {
+									id = "galactic_features.305.trigger.6001"
+									is_planet_class = "pc_gas_giant"
+								}
+								found_planet = {
+									orbit_planet = THIS
+									wait = {
+										duration = 200
+										random = 150
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			create_fleet = {
+				name = "NAME_Exiled_One"
+				effect = {
+					set_owner = PREV
+					create_ship = {
+						name = "NAME_XUNIA"
+						design = "NAME_Cloud_Entity"
+					}
+					set_location = FROMFROM
+
+					queue_actions = {
+						repeat = {
+							find_random_system = {
+								trigger = {
+									id = "galactic_features.305.trigger.7001"
+									has_planet_class = "pc_gas_giant"
+									distance = {
+										source = FROMFROM
+										max_distance <= 200
+										min_distance >= 100
+									}
+								}
+								found_system = {
+									move_to = THIS
+								}
+							}
+							find_closest_planet = {
+								trigger = {
+									id = "galactic_features.305.trigger.8001"
+									is_planet_class = "pc_gas_giant"
+								}
+								found_planet = {
+									orbit_planet = THIS
+									wait = {
+										duration = 200
+										random = 150
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	option = {
+		name = "galactic_features.305.a"
+	}
+}

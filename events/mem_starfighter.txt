@@ -5,50 +5,49 @@
 namespace = mem_starfighter
 
 # Initializing MTTH event
-country_event = {
+situation_event = {
 	id = mem_starfighter.1
 	hide_window = yes
-
-	mean_time_to_happen = {
-		years = 100
-		# days = 5
-	}
+	is_triggered_only = yes
 
 	trigger = {
-		is_country_type = primitive
-		exists = capital_scope
-		OR = {
-			# always = yes
-			has_country_flag = machine_age
-			has_country_flag = atomic_age
-			has_country_flag = early_space_age
-		}
-		capital_scope = {
-			has_observation_outpost = yes
-			observation_outpost = {
-				OR = {
-					has_mission = specimen_collection
-					has_mission = passive_observation
-				}
+		owner = {
+			is_regular_pre_ftl = yes
+			current_awareness_level < high
+			OR = {
+				has_pre_ftl_age = machine_age
+				has_pre_ftl_age = atomic_age
+				has_pre_ftl_age = early_space_age
+#				has_pre_ftl_age = mem_lunar_age
 			}
-			observation_outpost_owner = {
-				is_ai = no
-				NOT = { has_country_flag = mem_starfighter_offered_quest }
-				is_xenophobe = no
-				is_gestalt = no
+			capital_scope = {
+				has_observation_outpost = yes
+				observation_outpost_owner = {
+					is_ai = no
+					NOT = { has_country_flag = mem_starfighter_offered_quest }
+					NOT = { has_policy_flag = interference_not_allowed }
+					is_xenophobe = no
+					is_gestalt = no
+				}
 			}
 		}
 	}
 
 	immediate = {
-		save_event_target_as = primitive_civ
-		capital_scope = {
-			observation_outpost_owner = {
-				set_country_flag = mem_starfighter_offered_quest
-				set_country_flag = mem_starfighter_planting_on@root
-				country_event = { id = mem_starfighter.2 }
-			}
+		owner.capital_scope = {
+			save_event_target_as = the_planet
 		}
+		owner = {
+			save_event_target_as = primitive_civ
+		}
+		owner.capital_scope.observation_outpost_owner = {
+			set_country_flag = mem_starfighter_offered_quest
+			set_country_flag = mem_starfighter_planting_on@root
+			country_event = { id = mem_starfighter.2 }
+		}
+		set_situation_flag = has_ongoing_observation_event_chain
+		# Setting this flag for the duration of the entire event chain
+		# to prevent other observation events from interfering.
 	}
 }
 
@@ -75,7 +74,7 @@ country_event = {
 		}
 
 		hidden_effect = {
-			from = {
+			event_target:primitive_civ = {
 				random_list = {
 					80 = {
 						country_event = {
@@ -84,7 +83,14 @@ country_event = {
 							random = 540
 						}
 					}
-					33 = {}
+					33 = {
+						random_situation = {
+							limit = {
+								is_situation_type = pre_ftl_tech_progress_situation
+							}
+							remove_situation_flag = has_ongoing_observation_event_chain
+						}
+					}
 				}
 			}
 		}
@@ -96,6 +102,16 @@ country_event = {
 		add_resource = {
 			influence = 50
 		}
+		hidden_effect = {
+			event_target:primitive_civ = {
+				random_situation = {
+					limit = {
+						is_situation_type = pre_ftl_tech_progress_situation
+					}
+					remove_situation_flag = has_ongoing_observation_event_chain
+				}
+			}
+		}
 	}
 }
 
@@ -105,31 +121,34 @@ country_event = {
 	hide_window = yes
 	is_triggered_only = yes
 
-	trigger = {
-		is_country_type = primitive
-		exists = capital_scope
-		capital_scope = {
-			has_observation_outpost = yes
-			observation_outpost = {
-				OR = {
-					has_mission = specimen_collection
-					has_mission = passive_observation
-				}
-			}
-			observation_outpost_owner = {
-				has_country_flag = mem_starfighter_planting_on@root
-			}
-		}
-	}
-
 	immediate = {
 		save_event_target_as = primitive_civ
-		capital_scope = {
-			save_event_target_as = primitive_planet
-			observation_outpost_owner = {
-				country_event = {
-					id = mem_starfighter.4
+		if = {
+			limit = {
+				is_regular_pre_ftl = yes
+				capital_scope = {
+					has_observation_outpost = yes
+					observation_outpost_owner = {
+						has_country_flag = mem_starfighter_planting_on@root
+						NOT = { has_policy_flag = interference_not_allowed }
+					}
 				}
+			}
+			capital_scope = {
+				save_event_target_as = primitive_planet
+				observation_outpost_owner = {
+					country_event = {
+						id = mem_starfighter.4
+					}
+				}
+			}
+		}
+		else = {
+			random_situation = {
+				limit = {
+					is_situation_type = pre_ftl_tech_progress_situation
+				}
+				remove_situation_flag = has_ongoing_observation_event_chain
 			}
 		}
 	}
@@ -161,12 +180,12 @@ country_event = {
 	immediate = {
 		# log = "From is [From.GetName]"
 		# log = "From.Species is [From.Species.GetName]"
-		random_list = {
-			50  = {
+#		random_list = {
+#			50  = {
 				set_country_flag = mem_starfighter_admiral
 				create_saved_leader = {
 					key = mem_starfighter_leader
-					class = admiral
+					CLASS = commander
 					species = from.species
 
 					effect = {
@@ -181,25 +200,37 @@ country_event = {
 						add_trait = mem_starfighter_admiral_trait
 					}
 				}
-			}
-			50  = {
-				set_country_flag = mem_starfighter_general
-				create_leader = {
-					class = general
-					species = from.species
-
-					effect = {
-						save_event_target_as = gamer
-						IF = {
-							limit = { is_lithoid = no }
-							set_age = 19
-						}
-						ELSE = {
-							set_age = 30
-						}
-						add_trait = mem_starfighter_general_trait
-					}
+#			}
+#			50  = {
+#				set_country_flag = mem_starfighter_general
+#				create_saved_leader = {
+#					key = mem_starfighter_leader
+#					CLASS = commander
+#					species = from.species
+#
+#					effect = {
+#						save_event_target_as = gamer
+#						IF = {
+#							limit = { is_lithoid = no }
+#							set_age = 19
+#						}
+#						ELSE = {
+#							set_age = 30
+#						}
+#						add_trait = mem_starfighter_general_trait
+#					}
+#				}
+#			}
+#		}
+		if = {
+			limit = {
+				from = {
+					NOT = { current_awareness_level = full }
 				}
+			}
+			set_country_flag = engineering_insights
+			set_predictive_observation_insight = {
+				VALUE = 10
 			}
 		}
 	}
@@ -228,6 +259,30 @@ country_event = {
 				add_modifier = {
 					modifier = mem_starfighter_general_modifier
 				}
+			}
+		}
+		hidden_effect = {
+			event_target:primitive_civ = {
+				random_situation = {
+					limit = {
+						is_situation_type = pre_ftl_tech_progress_situation
+					}
+					remove_situation_flag = has_ongoing_observation_event_chain
+				}
+			}
+		}
+	}
+	
+	after = {
+		if = {
+			limit = {
+				from = {
+					NOT = { current_awareness_level = full }
+				}
+			}
+			add_observation_insight_effect = {
+				VALUE = 10
+				OUTPOST = from.capital_scope.observation_outpost 
 			}
 		}
 	}
@@ -261,6 +316,17 @@ ship_event = {
 			hidden_effect = {
 				activate_saved_leader = {
 					key = mem_starfighter_leader
+				}
+			}
+		}
+		
+		hidden_effect = {
+			event_target:primitive_civ = {
+				random_situation = {
+					limit = {
+						is_situation_type = pre_ftl_tech_progress_situation
+					}
+					remove_situation_flag = has_ongoing_observation_event_chain
 				}
 			}
 		}
