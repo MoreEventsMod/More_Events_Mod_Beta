@@ -961,7 +961,7 @@ planet_event = {
 	after = {
 		destroy_situation = from
 		owner = {
-			set_country_flag = mem_amoeba_sample
+			set_country_flag = mem_giant_amoeba_sample
 		}
 		remove_planet_flag = colony_event
 	}
@@ -1138,7 +1138,7 @@ planet_event = {
 	after = {
 		destroy_situation = from
 		owner = {
-			set_country_flag = mem_amoeba_sample
+			set_country_flag = mem_giant_amoeba_sample
 		}
 		change_pc = pc_gaia
 	}
@@ -1158,6 +1158,17 @@ country_event = {
 	show_sound = event_ship_bridge
 	is_triggered_only = yes
 
+	trigger = {
+		has_technology = tech_mem_toxic_gaiaforming
+		NOT = {
+			has_country_flag = mem_toxic_gaiaforming
+		}
+	}
+
+	immediate = {
+		set_country_flag = mem_toxic_gaiaforming
+	}
+
 	option = {
 		name = ACKNOWLEDGED
 		add_relic = r_mem_amoeba_sample
@@ -1165,20 +1176,40 @@ country_event = {
 }
 
 #situation finished, planet changed to gaia
-planet_event = {
+country_event = {
 	id = mem_space_monster_attacks.21
 	title = mem_space_monster_attacks.21.name
 	desc = mem_space_monster_attacks.21.desc
-	location = this
+	location = event_target:mem_toxic_gaiaforming_target
 	picture = GFX_evt_gaia
 	show_sound = event_ship_bridge
 	is_triggered_only = yes
 
 	immediate = {
-		change_pc = pc_gaia
+		random_system_within_border = {
+			limit = {
+				any_system_planet = {
+					has_planet_flag = mem_toxic_gaiaforming
+				}
+			}
+			random_system_planet = {
+				limit = {
+					has_planet_flag = mem_toxic_gaiaforming
+				}
+				change_pc = pc_gaia
+				if = {
+					limit = {
+						has_modifier = toxic_terraforming_candidate 
+					}
+					remove_modifier = toxic_terraforming_candidate
+				}
+				save_event_target_as = mem_toxic_gaiaforming_target
+			}
+		}		
 	}
 
 	option = {
 		name = ACKNOWLEDGED
+		destroy_situation = from
 	}
 }
