@@ -12,6 +12,26 @@ namespace = mem_lost_emperor
 @MEM_major_neoch_reward = 24
 @MEM_minor_neoch_reward = 6
 
+# Use this on game start
+country_event = {
+	id = mem_lost_emperor.1111
+	is_test_event = yes
+	hide_window = yes
+
+	immediate = {
+		capital_scope.solar_system = {
+			random_neighbor_system = {
+				set_star_flag = mem_lost_emperor_anomaly
+				star = {
+					add_anomaly = {
+						category = mem_lost_emperor_category
+					}
+				}
+			}
+		}
+	}
+}
+
 
 #on_game_start
 event = {
@@ -223,6 +243,7 @@ ship_event = {
 	title = mem_lost_emperor.2.name
 	desc = mem_lost_emperor.2.desc
 	picture = GFX_evt_enigmatic_cache
+	event_chain = mem_lost_emperor_azran_chain
 	
 	location = root
 
@@ -255,6 +276,7 @@ ship_event = {
 	title = mem_lost_emperor.3.name
 	desc = mem_lost_emperor.3.desc
 	picture = GFX_evt_exploding_ship
+	event_chain = mem_lost_emperor_azran_chain
 	
 	location = root
 
@@ -379,6 +401,7 @@ ship_event = {
 		text = mem_lost_emperor.5.desc.again
 	}
 	picture = GFX_evt_unknown_ships
+	event_chain = mem_lost_emperor_azran_chain
 	
 	location = root
 
@@ -435,6 +458,7 @@ country_event = {
 	title = mem_lost_emperor.6.name
 	desc = mem_lost_emperor.6.desc
 	picture = GFX_evt_exploding_ship
+	event_chain = mem_lost_emperor_azran_chain
 	
 	location = fromfromfrom.solar_system
 
@@ -500,6 +524,7 @@ country_event = {
 	title = mem_lost_emperor.605.name
 	desc = mem_lost_emperor.605.desc
 	picture = GFX_evt_unidentified_monster
+	event_chain = mem_lost_emperor_azran_chain
 
 	is_triggered_only = yes
 
@@ -518,6 +543,7 @@ country_event = {
 	title = mem_lost_emperor.606.name
 	desc = mem_lost_emperor.606.desc
 	picture = GFX_evt_unidentified_monster
+	event_chain = mem_lost_emperor_azran_chain
 
 	is_triggered_only = yes
 
@@ -554,6 +580,7 @@ country_event = {
 	title = mem_lost_emperor.7.name
 	desc = mem_lost_emperor.7.desc
 	picture = GFX_evt_exploding_ship
+	event_chain = mem_lost_emperor_azran_chain
 	
 	location = event_target:mem_lost_emperor_system
 
@@ -1344,6 +1371,35 @@ planet_event = {
 				save_event_target_as = mem_neochadanus_ascendant
 				set_country_flag = mem_neochadanus_ascendant
 
+				if = {
+					limit = {
+						any_country = {
+							OR = {
+								is_country_type = fallen_empire
+								is_country_type = awakened_fallen_empire
+							}
+						}
+					}
+					random_country = {
+						limit = {
+							OR = {
+								is_country_type = fallen_empire
+								is_country_type = awakened_fallen_empire
+							}
+						}
+						prev = {
+							copy_techs_from = {
+								target = prev
+							}
+						}
+					}
+				}
+				else = {
+					copy_techs_from = {
+						target = root.owner
+					}
+				}
+
 #				mem_create_neochadanus = yes
 				
 				create_fleet = {
@@ -1376,8 +1432,6 @@ planet_event = {
 					delete_fleet = this
 				}
 
-
-				
 				add_modifier = { #ethics pull and unrest annihilated
 					modifier = mem_neochadanus_setup_boost
 					days = 4800
@@ -1390,14 +1444,18 @@ planet_event = {
 								is_planet_class = pc_city
 							}
 						}
-						change_planet_size = 3
+						change_planet_size = 5
 					}
-					add_modifier = { #these are too dangerous to not limit to one planet
-						modifier = mem_neochadanus_setup_boost_planet
-						days = 4800
+
+					solar_system = {
+						every_system_planet = {
+							limit = {
+								is_colony = yes
+								owner = { is_same_value = root.owner }
+							}
+							set_owner = event_target:mem_neochadanus_ascendant
+						}
 					}
-				
-					set_owner = event_target:mem_neochadanus_ascendant
 					
 					solar_system.starbase = {
 						set_owner = event_target:mem_neochadanus_ascendant
@@ -1417,15 +1475,15 @@ planet_event = {
 						}
 						set_starbase_module = {
 							slot = 4
-							module = anchorage
+							module = shipyard
 						}
 						set_starbase_module = {
 							slot = 5
-							module = anchorage
+							module = shipyard
 						}
 						set_starbase_module = {
 							slot = 6
-							module = missile_battery
+							module = shipyard
 						}
 						
 						set_starbase_building = {
@@ -1442,7 +1500,7 @@ planet_event = {
 						}
 						set_starbase_building = {
 							slot = 4
-							building = target_uplink_computer
+							building = titan_yards
 						}
 					}
 
@@ -1450,11 +1508,14 @@ planet_event = {
 
 					#Give them some habitats, because why not
 					solar_system = {
-						while = {
+						if = {
 							limit = {
 								NOT = {
 									solar_system = {
-										has_star_flag = ring_world_built
+										OR = {
+											has_star_flag = ring_world_built
+											has_star_flag = has_habitat
+										}
 									}
 								}
 								any_system_planet = {
@@ -1466,7 +1527,7 @@ planet_event = {
 									is_star = no
 								}
 							}
-							count = 3
+							set_star_flag = has_habitat
 							
 							random_system_planet = {
 								limit = {
@@ -1492,7 +1553,6 @@ planet_event = {
 										has_ring = no
 										
 										init_effect = {
-											set_name = "HABITAT_PLANET_NAME"
 											set_planet_entity = {
 												entity = "orbital_habitat_entity"
 												graphical_culture = event_target:mem_neochadanus_ascendant
@@ -1515,6 +1575,17 @@ planet_event = {
 											}
 											set_planet_flag = megastructure
 											set_planet_flag = habitat
+
+											create_colony = {
+												owner = event_target:mem_neochadanus_ascendant
+											}
+											set_name = NEOCHADANUS_HABITAT
+											while = {
+												count = 5
+												create_pop = {
+													species = owner_main_species
+												}
+											}
 										}
 									}
 								}

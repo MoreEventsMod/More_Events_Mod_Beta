@@ -17,7 +17,10 @@ planet_event = {
 	}
 	trigger = {
 		NOR = {
-			has_global_flag = mem_space_monster_attacks_crystal
+			AND = {
+				has_global_flag = mem_space_monster_attacks_crystal
+				has_global_flag = mem_space_monster_attacks_amoeba
+			}
 			has_planet_flag = mem_space_monster_attacks_nope
 			has_planet_flag = colony_event
 		}
@@ -38,15 +41,42 @@ planet_event = {
 	
 	immediate = {
 		random_list = {
-			50 = {
+			50 = { # Nothing will happen on that colony, but it may on another one
 				set_planet_flag = mem_space_monster_attacks_nope
 			}
-			30 = {
-				set_global_flag = mem_space_monster_attacks_crystal
+			30 = { # One of the two outcomes will be prevented for the rest of the game
+				random_list = {
+					50 = {
+						modifier = {
+							has_global_flag = mem_space_monster_attacks_crystal
+							factor = 0
+						}
+						set_global_flag = mem_space_monster_attacks_crystal
+					}
+					50 = {
+						modifier = {
+							has_global_flag = mem_space_monster_attacks_amoeba
+							factor = 0
+						}
+						set_global_flag = mem_space_monster_attacks_amoeba
+					}
+				}
 			}
-			10 = {
+			10 = { # Crystal event happens
+				modifier = {
+					has_global_flag = mem_space_monster_attacks_crystal
+					factor = 0
+				}
 				set_global_flag = mem_space_monster_attacks_crystal
 				planet_event = { id = mem_space_monster_attacks.1 }
+			}
+			10 = { # Amoeba event happens
+				modifier = {
+					has_global_flag = mem_space_monster_attacks_amoeba
+					factor = 0
+				}
+				set_global_flag = mem_space_monster_attacks_amoeba
+				planet_event = { id = mem_space_monster_attacks.11 }
 			}
 		}
 	}
@@ -75,7 +105,8 @@ planet_event = {
 	is_triggered_only = yes
 	
 	immediate = {
-		set_planet_flag = mem_space_monster_attack_target
+		set_planet_flag = mem_space_monster_attack_target_crystal
+		set_planet_flag = colony_event
 		solar_system  = {
 			random_system_planet = {
 				limit = { is_star = yes }
@@ -121,7 +152,7 @@ planet_event = {
 								find_closest_planet = {
 									trigger = {
 										id = mem_space_monster_attacks_crystal.1
-										has_planet_flag = mem_space_monster_attack_target
+										has_planet_flag = mem_space_monster_attack_target_crystal
 									}
 									found_planet = {
 										orbit_planet = this
@@ -132,7 +163,7 @@ planet_event = {
 											id = mem_space_monster_attacks_crystal.2
 											random_galaxy_planet = { 
 												limit = {
-													has_planet_flag = mem_space_monster_attack_target
+													has_planet_flag = mem_space_monster_attack_target_crystal
 												}
 												planet_event = { id = mem_space_monster_attacks.2 }
 											}
@@ -256,6 +287,12 @@ country_event = {
 	}
 	
 	immediate = {
+		random_galaxy_planet = {
+			limit = {
+				has_planet_flag = mem_space_monster_attack_target_crystal
+			}
+			remove_planet_flag = colony_event
+		}
 		FromFrom.controller.capital_scope = { save_event_target_as = pc_home }
 	}
 	
@@ -441,59 +478,6 @@ planet_event = {
 			}
 		}
 	}
-	
-#	option = {
-#		name = mem_space_monster_attacks.6.a
-#		custom_tooltip = mem_space_monster_attacks.6.a.tooltip
-#		owner = {
-#			set_country_flag = mem_crystal_fields
-#		}
-#		set_planet_flag = mem_crystal_field_damage
-#		hidden_effect = {
-#			IF = {
-#				limit = {
-#					NOT ={
-#						has_modifier = bleak_planet
-#					}
-#				}
-#				planet_event = { id = mem_space_monster_attacks.7 days = 1620 random = 360 }
-#			}
-#		}
-#		add_deposit = d_mem_crystals_mining
-#	}
-#	option = {
-#		name = mem_space_monster_attacks.6.b
-#		custom_tooltip = mem_space_monster_attacks.6.b.tooltip
-#		owner = {
-#			set_country_flag = mem_crystal_fields
-#		}
-#		set_planet_flag = mem_crystal_field_damage
-#		hidden_effect = {
-#			IF = {
-#				limit = {
-#					NOT ={
-#						has_modifier = bleak_planet
-#					}
-#				}
-#				planet_event = { id = mem_space_monster_attacks.7 days = 1620 random = 360 }
-#			}
-#		}
-#		add_deposit = d_mem_crystals_science
-#	}
-#	option = {
-#		name = mem_space_monster_attacks.6.c
-#		custom_tooltip = mem_space_monster_attacks.6.c.tooltip
-#		add_modifier = {
-#			modifier = mem_crystal_removal
-#			days = 1800
-#		}
-#		owner = {
-#			set_country_flag = mem_crystal_fields
-#		}	
-#		hidden_effect = {
-#			planet_event = { id = mem_space_monster_attacks.8 days = 1800 }
-#		}
-#	}
 }
 
 # planet turns bleak
@@ -544,7 +528,7 @@ planet_event = {
 	option = {
 		name = mem_space_monster_attacks.7.a
 		trigger = {
-			has_planet_flag = mem_space_monster_attack_target
+			has_planet_flag = mem_space_monster_attack_target_crystal
 			NOT = {
 				owner = { has_ethic = ethic_gestalt_consciousness }
 			}
@@ -553,7 +537,7 @@ planet_event = {
 	option = {
 		name = mem_space_monster_attacks.7.b
 		trigger = {
-			has_planet_flag = mem_space_monster_attack_target
+			has_planet_flag = mem_space_monster_attack_target_crystal
 			owner = { has_ethic = ethic_gestalt_consciousness }
 		}
 	}
@@ -561,7 +545,7 @@ planet_event = {
 		name = mem_space_monster_attacks.7.c
 		trigger = {
 			NOT = {
-				has_planet_flag = mem_space_monster_attack_target
+				has_planet_flag = mem_space_monster_attack_target_crystal
 			}
 		}
 	}
@@ -572,7 +556,7 @@ planet_event = {
 	id = mem_space_monster_attacks.8
 	title = mem_space_monster_attacks.8.name
 	desc = mem_space_monster_attacks.8.desc
-	picture = GFX_evt_burning_settlement
+	picture = GFX_evt_colony_settlement
 	show_sound = event_yellow_alert
 	location = this
 	is_triggered_only = yes
@@ -582,6 +566,7 @@ planet_event = {
 		owner = {
 			set_country_flag = mem_crystal_fields
 		}
+		remove_planet_flag = colony_event
 	}
 	
 	option = {
@@ -673,6 +658,7 @@ planet_event = {
 		owner = {
 			set_country_flag = mem_crystal_fields
 		}
+		remove_planet_flag = colony_event
 	}
 
 	option = {
@@ -692,5 +678,538 @@ planet_event = {
 				}
 			}
 		}		
+	}
+}
+
+#Amoeba appears
+planet_event = {
+	id = mem_space_monster_attacks.11
+	title = mem_space_monster_attacks.11.name
+	desc = {
+		text = mem_space_monster_attacks.11.desc
+		trigger = {
+			NOT = {
+				owner = { has_ethic = ethic_gestalt_consciousness }
+			}
+		}
+	}
+	desc = {
+		text = mem_space_monster_attacks.11.desc.gestalt
+		trigger = {
+			owner = { has_ethic = ethic_gestalt_consciousness }
+		}
+	}
+	picture = GFX_evt_mem_amoeba
+	show_sound = event_yellow_alert
+	location = event_target:mem_space_monster_attacks_amoeba
+	is_triggered_only = yes
+	
+	immediate = {
+		set_planet_flag = mem_space_monster_attack_target_amoeba
+		set_planet_flag = colony_event
+		solar_system  = {
+			random_system_planet = {
+				limit = { is_star = yes }
+				create_ambient_object = {
+					type = "mem_dummy_object"
+					location = THIS
+				}
+				last_created_ambient_object = {
+					set_location = {
+						target = prev
+						distance = 250
+						angle = random
+					}
+					set_ambient_object_flag = mem_space_monster_attacks_amoeba_dummy
+					save_event_target_as = mem_space_monster_attacks_amoeba_spawn
+				}
+				create_amoeba_country = yes
+				event_target:amoeba_country = {
+					create_fleet = {
+						name = "NAME_Amoeba"
+						settings = {
+							spawn_debris = no
+						}
+						effect = {
+							add_modifier = { modifier = "amoeba_speed_boost" days = -1 }
+							add_modifier = { modifier = "evolved_weapon_boost" days = -1 }
+							add_modifier = { modifier = "evolved_firing_rate" days = -1 }
+							add_modifier = { modifier = "evolved_evasion" days = -1 }
+						}
+					}
+					last_created_fleet = {
+						save_event_target_as = mem_space_monster_attacks_amoeba
+						set_owner = prev
+						create_ship = {
+							name = "NAME_MEM_Old_One"
+							#design = "NAME_Large_Space_Organism_Orange"
+							design = "NAME_Adopted_Amoeba_Centenarian"
+						}
+						set_location = {
+							target = event_target:mem_space_monster_attacks_amoeba_spawn
+							distance = 250
+							angle = random
+						}
+						set_fleet_stance = passive
+						set_aggro_range_measure_from = self
+						set_aggro_range = 0
+						set_fleet_flag = mem_space_monster_attacks_amoeba
+						queue_actions = {
+							repeat = {
+								find_closest_planet = {
+									trigger = {
+										id = mem_space_monster_attacks_amoeba.1
+										has_planet_flag = mem_space_monster_attack_target_amoeba
+									}
+									found_planet = {
+										orbit_planet = this
+										effect = {
+											id = mem_space_monster_attacks_amoeba.2
+											random_galaxy_planet = { 
+												limit = {
+													has_planet_flag = mem_space_monster_attack_target_amoeba
+												}
+												planet_event = { id = mem_space_monster_attacks.12 }
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}	
+	option = {
+		name = mem_space_monster_attacks.11.a
+	}
+}
+
+#Amoeba crashed on planet
+planet_event = {
+	id = mem_space_monster_attacks.12
+	title = mem_space_monster_attacks.12.name
+	desc = mem_space_monster_attacks.12.desc
+	picture = GFX_evt_burning_settlement
+	show_sound = event_yellow_alert
+	location = this
+	is_triggered_only = yes
+	
+	immediate = {
+		random_country = {
+			limit = {
+				any_owned_fleet = {
+					has_fleet_flag = mem_space_monster_attacks_amoeba
+				}
+			}
+			random_owned_fleet = {
+				limit = {
+					has_fleet_flag = mem_space_monster_attacks_amoeba
+				}
+				clear_fleet_actions = this
+				queue_actions = {
+					repeat = {
+						effect = {
+							id = mem_space_monster_attacks_amoeba.3
+							delete_fleet  = this
+						}
+					}
+				}
+			}
+		}
+		add_planet_devastation = 70
+		planet_event = { id = mem_space_monster_attacks.15 days = 165 random = 30 }
+	}
+
+	after = {
+		add_deposit = d_mem_amoeba_corpse
+	}
+	
+	option = {
+		name = UNDERSTOOD
+	}
+}
+
+#Amoeba has been destroyed before reaching the colony
+# This = owner of fleet 1 (combatant)
+# From = owner of fleet 2 (destroyed)
+# FromFrom = fleet 1
+# FromFromFrom = fleet 2
+country_event = {
+	id = mem_space_monster_attacks.13
+	title = mem_space_monster_attacks.13.name
+	desc = mem_space_monster_attacks.13.desc
+	picture = GFX_evt_mem_amoeba
+	show_sound = event_ship_bridge
+	location = FromFrom
+	is_triggered_only = yes
+	
+	trigger = {
+		is_ai = no
+		FROMFROMFROM = {
+			has_fleet_flag = mem_space_monster_attacks_amoeba
+		}
+	}
+	
+	immediate = {
+		random_galaxy_planet = {
+			limit = {
+				has_planet_flag = mem_space_monster_attack_target_amoeba
+			}
+			remove_planet_flag = colony_event
+		}
+		FromFrom.controller.capital_scope = { save_event_target_as = pc_home }
+	}
+	
+	after = {
+		add_monthly_resource_mult = {
+			resource = minerals
+			value = @tier3materialreward
+			min = @tier3materialmin
+			max = @tier3materialmax
+		}
+		add_monthly_resource_mult = {
+			resource = exotic_gases
+			value = @tier2materialreward
+			min = @tier2materialmin
+			max = @tier2materialmax
+		}
+		enable_special_project = {
+			name = MEM_SPACE_MONSTER_ATTACKS_AMOEBA_STUDY
+			location = event_target:pc_home
+			owner = FromFrom.controller
+		}
+	}
+
+	option = {
+		name = EXCELLENT
+	}
+}
+
+#Project finished
+country_event = {
+	id = mem_space_monster_attacks.14
+	title = mem_space_monster_attacks.14.name
+	desc = mem_space_monster_attacks.14.desc
+	picture = GFX_evt_mem_amoeba
+	show_sound = event_default
+	is_triggered_only = yes
+	
+	option = {
+		name = UNDERSTOOD
+		IF = {
+			limit = {
+				NOT = {
+					has_technology = tech_regenerative_hull_tissue
+				}
+			}
+			add_research_option = tech_regenerative_hull_tissue
+			add_tech_progress = {
+				tech = tech_regenerative_hull_tissue
+				progress = 0.30
+			}
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+		}
+		ELSE = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier4researchreward
+				min = @tier4researchmin
+				max = @tier4researchmax
+			}
+		}
+	}
+}
+
+#Amoeba corpse infestations spreads, what now?
+planet_event = {
+	id = mem_space_monster_attacks.15
+	title = mem_space_monster_attacks.15.name
+	desc = mem_space_monster_attacks.15.desc
+	picture = GFX_evt_infested
+	show_sound = event_yellow_alert
+	location = this
+	is_triggered_only = yes
+
+	option = {
+		name = WORRYING
+		owner = {
+			start_situation = {
+				type = situation_mem_spacemonster_attacks_amoeba
+				target = root
+			}
+		}
+	}
+}
+
+#Amoeba corpse removed
+planet_event = {
+	id = mem_space_monster_attacks.16
+	title = mem_space_monster_attacks.16.name
+	desc = mem_space_monster_attacks.16.desc
+	picture = GFX_evt_colony_settlement
+	show_sound = event_yellow_alert
+	location = this
+	is_triggered_only = yes
+
+	after = {
+		destroy_situation = from
+		owner = {
+			set_country_flag = mem_giant_amoeba_sample
+		}
+		remove_planet_flag = colony_event
+	}
+	
+	option = {
+		name = EXCELLENT
+		owner = {
+			add_monthly_resource_mult = {
+				resource = exotic_gases
+				value = @tier3materialreward
+				min = @tier3materialmin
+				max = @tier3materialmax
+			}
+		}
+	}
+}
+
+#situation stage 2 reached
+planet_event = {
+	id = mem_space_monster_attacks.17
+	title = mem_space_monster_attacks.17.name
+	desc = {
+		text = mem_space_monster_attacks.17.desc.a
+		trigger = {
+			owner = {
+				any_situation = {
+					current_situation_approach = approach_mem_spacemonster_attacks_amoeba_embrace
+				}
+			}
+		}
+	}
+	desc = {
+		text = mem_space_monster_attacks.17.desc.b
+		trigger = {
+			owner = {
+				any_situation = {
+					current_situation_approach = approach_mem_spacemonster_attacks_amoeba_stall
+				}
+			}
+		}
+	}
+	location = this
+	picture = GFX_evt_infested
+	show_sound = event_ship_bridge
+	is_triggered_only = yes
+
+	option = {
+		name = WORRYING
+	}
+}
+
+#situation stage 3 reached
+planet_event = {
+	id = mem_space_monster_attacks.18
+	title = mem_space_monster_attacks.18.name
+	desc = mem_space_monster_attacks.18.desc
+	desc = {
+		text = mem_space_monster_attacks.18.desc
+		trigger = {
+			owner = {
+				NOT = {
+					is_species_class = MACHINE
+				}
+			}
+		}
+	}
+	desc = {
+		text = mem_space_monster_attacks.18.desc.machine
+		trigger = {
+			owner = {
+				is_species_class = MACHINE
+			}
+		}
+	}
+	location = this
+	picture = GFX_evt_infested
+	show_sound = event_ship_bridge
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = {
+				owner = {
+					any_situation = {
+						current_situation_approach = approach_mem_spacemonster_attacks_amoeba_embrace
+					}
+				}
+			}
+			while = {
+				count = 3
+				if = {
+					limit = {
+						any_owned_pop = {
+							NOR = {
+								is_species_class = LITHOID
+								is_species_class = TOX
+								is_species_class = ROBOT
+								is_species_class = MACHINE
+								has_pop_flag = mem_amoeba_kill
+							}
+						}
+					}
+					random_owned_pop = {
+						limit = {
+							NOR = {
+								is_species_class = LITHOID
+								is_species_class = TOX
+								is_species_class = ROBOT
+								is_species_class = MACHINE
+								has_pop_flag = mem_amoeba_kill
+							}
+						}
+						set_pop_flag = mem_amoeba_kill
+					}
+				}				
+			}
+			If = {
+				limit = {
+					NOT = {
+						any_owned_pop = {							
+							Not = {
+								has_pop_flag = mem_amoeba_kill
+							}
+						}
+					}
+				}
+				random_owned_pop = {
+					remove_pop_flag = mem_amoeba_kill
+				}
+			}
+		}
+		Else_if = {
+			limit = {
+				num_pops > 1
+			}
+			random_owned_pop = {
+				limit = {
+					NOR = {
+						is_species_class = LITHOID
+						is_species_class = TOX
+						is_species_class = ROBOT
+						is_species_class = MACHINE
+						has_pop_flag = mem_amoeba_kill
+					}
+				}
+				set_pop_flag = mem_amoeba_kill
+			}
+		}
+	}
+
+	option = {
+		name = TERRIBLE
+		every_owned_pop = {
+			limit = {
+				has_pop_flag = mem_amoeba_kill
+			}
+			kill_pop = yes
+		}
+		add_deposit = d_dangerous_wildlife_blocker
+		add_deposit = d_dangerous_wildlife_blocker
+	}
+}
+
+#situation finished, planet changed to gaia
+planet_event = {
+	id = mem_space_monster_attacks.19
+	title = mem_space_monster_attacks.19.name
+	desc = mem_space_monster_attacks.19.desc
+	location = this
+	picture = GFX_evt_gaia
+	show_sound = event_ship_bridge
+	is_triggered_only = yes
+
+	after = {
+		destroy_situation = from
+		owner = {
+			set_country_flag = mem_giant_amoeba_sample
+		}
+		change_pc = pc_gaia
+	}
+
+	option = {
+		name = ACKNOWLEDGED
+	}
+}
+
+#Amoeba sample research finished
+country_event = {
+	id = mem_space_monster_attacks.20
+	title = mem_space_monster_attacks.20.name
+	desc = mem_space_monster_attacks.20.desc
+	location = this
+	picture = GFX_evt_gaia
+	show_sound = event_ship_bridge
+	is_triggered_only = yes
+
+	trigger = {
+		has_technology = tech_mem_toxic_gaiaforming
+		NOT = {
+			has_country_flag = mem_toxic_gaiaforming
+		}
+	}
+
+	immediate = {
+		set_country_flag = mem_toxic_gaiaforming
+	}
+
+	option = {
+		name = ACKNOWLEDGED
+		add_relic = r_mem_amoeba_sample
+	}
+}
+
+#situation finished, planet changed to gaia
+country_event = {
+	id = mem_space_monster_attacks.21
+	title = mem_space_monster_attacks.21.name
+	desc = mem_space_monster_attacks.21.desc
+	location = event_target:mem_toxic_gaiaforming_target
+	picture = GFX_evt_gaia
+	show_sound = event_ship_bridge
+	is_triggered_only = yes
+
+	immediate = {
+		random_system_within_border = {
+			limit = {
+				any_system_planet = {
+					has_planet_flag = mem_toxic_gaiaforming
+				}
+			}
+			random_system_planet = {
+				limit = {
+					has_planet_flag = mem_toxic_gaiaforming
+				}
+				change_pc = pc_gaia
+				if = {
+					limit = {
+						has_modifier = toxic_terraforming_candidate 
+					}
+					remove_modifier = toxic_terraforming_candidate
+				}
+				save_event_target_as = mem_toxic_gaiaforming_target
+			}
+		}		
+	}
+
+	option = {
+		name = ACKNOWLEDGED
+		destroy_situation = from
 	}
 }
