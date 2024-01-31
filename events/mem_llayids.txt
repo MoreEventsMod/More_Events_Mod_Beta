@@ -210,11 +210,11 @@ ship_event = {
 	}
 	picture = GFX_evt_space_debris
 	location = event_target:mem_llayid_planet
+	event_chain = mem_llayids_chain
 
 	is_triggered_only = yes
 
 	immediate = {
-		owner = { end_event_chain = mem_llayids_chain }
 		event_target:mem_llayid_planet = {
 			clear_deposits = yes
 		}
@@ -228,6 +228,7 @@ ship_event = {
 		}
 		small_artifact_reward = yes
 		owner = {
+			end_event_chain = mem_llayids_chain
 			add_monthly_resource_mult = {
 				resource = society_research
 				value = 4
@@ -361,16 +362,16 @@ planet_event = {
 	title = mem_llayids.15.name
 	desc = mem_llayids.15.desc
 	picture = GFX_evt_enigmatic_cache
+	event_chain = mem_llayids_chain
 
 	is_triggered_only = yes
 	
 	immediate = {
 		owner = {
 			remove_country_flag = mem_llayid_investigate
-			end_event_chain = mem_llayids_chain
 		}
 		event_target:mem_llayid_planet = {
-			clear_deposits = ye
+			clear_deposits = yes
 		}
 	}
 
@@ -378,9 +379,20 @@ planet_event = {
 		name = FASCINATING
 
 		event_target:mem_llayid_planet = {
-			set_deposit = d_society_6
+			# done this way so it doesn't overwrite minor artifact deposits
+			hidden_effect = {
+				if = {
+					limit = { NOT = { has_deposit_for = shipclass_research_station } }
+					set_deposit = d_society_6
+				}
+				else = {
+					add_deposit = d_society_2 #+4 from earlier event
+				}
+			}
+			tooltip = { set_deposit = d_society_6 }
 		}
-		owner = {
+		owner = {			
+			end_event_chain = mem_llayids_chain
 			add_monthly_resource_mult = {
 				resource = society_research
 				value = 24

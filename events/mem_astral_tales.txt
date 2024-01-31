@@ -1,0 +1,482 @@
+namespace = mem_astral_tales
+
+#by Malthus
+
+#started by 5-year pulse so should not be bad for performance when checking this once every 5 years...
+event = {
+	id = mem_astral_tales.1
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		any_country = {
+			is_ai = no
+			is_country_type = default
+			NOR = {
+				has_civic = civic_fanatic_purifiers
+				has_authority = auth_hive_mind
+				has_authority = auth_machine_intelligence
+			}
+			any_country = {
+				has_country_flag = shroudwalker_enclave_country
+				has_communications = prev				
+			}
+		}
+		NOT = {
+			has_global_flag = mem_astral_tales_fired
+		}
+	}
+
+	immediate = {
+		set_global_flag = mem_astral_tales_fired
+		random_list = {
+			9 = {}
+			1 = {
+				random_country = {
+					limit = {
+						is_ai = no
+						is_country_type = default
+						NOR = {
+							has_civic = civic_fanatic_purifiers
+							has_civic = civic_hive_devouring_swarm
+							has_civic = civic_machine_terminator
+						}
+						any_country = {
+							has_country_flag = shroudwalker_enclave_country
+							has_communications = prev				
+						}
+					}
+					country_event = {
+						id = mem_astral_tales.2
+						days = 1
+						random = 1800
+					}
+				}
+			}
+		}
+	}
+}
+
+#inbetween step to make sure the shroudwalkers still exist - would be stupid to claim they sent a messenger otherwise
+country_event = {
+	id = mem_astral_tales.2
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		if = {
+			limit = {
+				any_country = {
+					has_country_flag = shroudwalker_enclave_country
+					has_communications = prev				
+				}
+			}
+			country_event = {
+				id = mem_astral_tales.3
+			}
+		}
+	}
+}
+
+#Messenger from the Shroudwalkers arrives
+country_event = {
+	id = mem_astral_tales.3
+	title = mem_astral_tales.3.name
+	desc = mem_astral_tales.3.desc
+	picture = GFX_evt_throne_room
+	is_triggered_only = yes
+
+	event_window_type = leader_story
+
+	picture_event_data = {
+		portrait = root.ruler
+		room = root
+	}
+	
+	#hear him out
+	option = {
+		name = mem_astral_tales.3.a
+		hidden_effect = {
+			country_event = {
+				id = mem_astral_tales.4
+			}
+		}
+	}
+
+	#call security
+	option = {
+		name = mem_astral_tales.3.b
+		add_resource = {
+			influence = 50
+		}
+	}
+}
+
+#diplo screen, messenger gives package to country ruler
+country_event = {
+	id = mem_astral_tales.4
+	title = mem_astral_tales.4.name
+	desc = {
+		trigger = { 
+			switch = { 
+				trigger = has_country_flag 
+				mem_astral_tales_4_c = {text = mem_astral_tales.4.c.response}
+				default = {text = mem_astral_tales.4.desc}
+			}
+		}
+	}
+	is_triggered_only = yes
+
+	diplomatic = yes
+	
+	picture_event_data = {
+		planet_background = capital_scope
+		graphical_culture = root
+		city_level = capital_scope
+		room = root
+		portrait = event_target:mem_shroudwalker_species
+	}
+
+	immediate = {
+		random_country = {
+			limit = {
+				has_country_flag = shroudwalker_enclave_country
+			}
+			save_event_target_as = mem_shroudwalker_country
+			owner_main_species = {
+				save_event_target_as = mem_shroudwalker_species
+			}
+		}
+	}
+
+	#how did you get here?
+	option = {
+		name = mem_astral_tales.4.a
+		response_text = mem_astral_tales.4.a.response
+		is_dialog_only = yes
+		trigger = {
+			NOT = {
+				has_country_flag = mem_astral_tales_4_c
+			}
+		}
+	}
+	#who are you?
+	option = {
+		name = mem_astral_tales.4.b
+		response_text = mem_astral_tales.4.b.response
+		is_dialog_only = yes
+		trigger = {
+			NOT = {
+				has_country_flag = mem_astral_tales_4_c
+			}
+		}
+	}
+	#why are you here? - puts down cube
+	option = {
+		name = mem_astral_tales.4.c
+		trigger = {
+			NOT = {
+				has_country_flag = mem_astral_tales_4_c
+			}
+		}
+		hidden_effect = {
+			set_country_flag = mem_astral_tales_4_c
+			country_event = {
+				id = mem_astral_tales.4
+			}
+		}
+	}
+	#what is the cube?
+	option = {
+		name = mem_astral_tales.4.d
+		trigger = {
+			has_country_flag = mem_astral_tales_4_c
+		}
+		hidden_effect = {
+			country_event = {
+				id = mem_astral_tales.5
+			}
+		}
+	}
+}
+
+#cube activates shows hologram (without displays)
+country_event = {
+	id = mem_astral_tales.5
+	title = mem_astral_tales.5.name
+	desc = {
+		trigger = { 
+			switch = { 
+				trigger = has_country_flag 
+				mem_ea_uplifter_a = {text = mem_astral_tales.5.desc_02}
+				mem_ea_uplifter_b = {text = mem_astral_tales.5.desc_02}
+				mem_ea_uplifter_c = {text = mem_astral_tales.5.desc_02}
+				mem_ea_uplifter_d = {text = mem_astral_tales.5.desc_02}
+				default = {text = mem_astral_tales.5.desc_01}
+			}
+		}
+	}
+	is_triggered_only = yes
+
+	diplomatic = yes
+	
+	picture_event_data = {
+		planet_background = capital_scope
+		graphical_culture = root
+		city_level = capital_scope
+		room = root
+		portrait = mem_Orila_holo_red_1
+	}
+
+	#Are you Chap'Lin?
+	option = {
+		name = mem_astral_tales.5.a
+		trigger = {
+			OR = {
+				has_country_flag = mem_ea_uplifter_a
+				has_country_flag = mem_ea_uplifter_b
+				has_country_flag = mem_ea_uplifter_c
+				has_country_flag = mem_ea_uplifter_d
+			}
+		}
+	}
+	#Who or what are you?
+	option = {
+		name = mem_astral_tales.5.b
+		trigger = {
+			NOR = {
+				has_country_flag = mem_ea_uplifter_a
+				has_country_flag = mem_ea_uplifter_b
+				has_country_flag = mem_ea_uplifter_c
+				has_country_flag = mem_ea_uplifter_d
+			}
+		}
+	}
+	after = {
+		hidden_effect = {
+			country_event = {
+				id = mem_astral_tales.6
+			}
+		}		
+	}
+}
+
+#Traveler introduces himself
+country_event = {
+	id = mem_astral_tales.6
+	title = mem_astral_tales.5.name
+	desc = {
+		trigger = { 
+			switch = { 
+				trigger = has_country_flag
+				mem_astral_tales_6_a = {text = mem_astral_tales.6.desc_03}
+				mem_ea_uplifter_a = {text = mem_astral_tales.6.desc_02}
+				mem_ea_uplifter_b = {text = mem_astral_tales.6.desc_02}
+				mem_ea_uplifter_c = {text = mem_astral_tales.6.desc_02}
+				mem_ea_uplifter_d = {text = mem_astral_tales.6.desc_02}
+				default = {text = mem_astral_tales.6.desc_01}
+			}
+		}
+	}
+	is_triggered_only = yes
+
+	diplomatic = yes
+	
+	picture_event_data = {
+		planet_background = capital_scope
+		graphical_culture = root
+		city_level = capital_scope
+		room = root
+		portrait = mem_Orila_holo_red_1
+	}
+
+	#Is that a threat?
+	option = {
+		name = mem_astral_tales.6.a
+		trigger = {
+			NOT = {
+				has_country_flag = mem_astral_tales_6_a
+			}
+		}
+		hidden_effect = {
+			set_country_flag = mem_astral_tales_6_a
+			country_event = {
+				id = mem_astral_tales.6
+			}
+		}
+	}
+
+	#What is your field of expertise then?
+	option = {
+		name = mem_astral_tales.6.b
+		trigger = {
+			NOT = {
+				has_country_flag = mem_astral_tales_6_a
+			}
+		}
+		hidden_effect = {
+			country_event = {
+				id = mem_astral_tales.7
+			}
+		}
+	}
+
+	#What do you mean, you had this conversation a thousand times?
+	option = {
+		name = mem_astral_tales.6.c
+		trigger = {
+			has_country_flag = mem_astral_tales_6_a
+		}
+		hidden_effect = {
+			country_event = {
+				id = mem_astral_tales.7
+			}
+		}
+	}
+}
+
+#Traveler talks about his journey (displays active)
+country_event = {
+	id = mem_astral_tales.7
+	title = mem_astral_tales.5.name
+	desc = {
+		trigger = { 
+			switch = { 
+				trigger = has_country_flag
+				mem_astral_tales_7_b = {text = mem_astral_tales.7.desc_03}
+				mem_astral_tales_7_a = {text = mem_astral_tales.7.desc_02}
+				default = {text = mem_astral_tales.7.desc_01}
+			}
+		}
+	}
+	is_triggered_only = yes
+
+	diplomatic = yes
+	
+	picture_event_data = {
+		planet_background = capital_scope
+		graphical_culture = root
+		city_level = capital_scope
+		room = root
+		portrait = mem_Orila_holo_red_2
+	}
+
+	option = {
+		name = mem_astral_tales.7.a
+		trigger = {
+			NOT = {
+				has_country_flag = mem_astral_tales_7_a
+			}
+		}
+		hidden_effect = {
+			set_country_flag = mem_astral_tales_7_a
+			country_event = {
+				id = mem_astral_tales.7
+			}
+		}
+	}
+
+	option = {
+		name = mem_astral_tales.7.b
+		trigger = {
+			has_country_flag = mem_astral_tales_7_a
+			NOT = {
+				has_country_flag = mem_astral_tales_7_b
+			}
+		}
+		hidden_effect = {
+			set_country_flag = mem_astral_tales_7_b
+			country_event = {
+				id = mem_astral_tales.7
+			}
+		}
+	}
+
+	option = {
+		name = mem_astral_tales.7.c
+		trigger = {
+			has_country_flag = mem_astral_tales_7_b
+		}
+		hidden_effect = {
+			set_country_flag = mem_astral_tales_7_c
+			country_event = {
+				id = mem_astral_tales.8
+			}
+		}
+	}
+
+	option = {
+		name = mem_astral_tales.7.d
+		trigger = {
+			has_country_flag = mem_astral_tales_7_b
+		}
+		hidden_effect = {
+			set_country_flag = mem_astral_tales_7_d
+			country_event = {
+				id = mem_astral_tales.8
+			}
+		}
+	}
+}
+
+country_event = {
+	id = mem_astral_tales.8
+	title = mem_astral_tales.5.name
+	desc = {
+		trigger = { 
+			switch = { 
+				trigger = has_country_flag
+				mem_astral_tales_7_d = {text = mem_astral_tales.8.desc_02}
+				mem_astral_tales_7_c = {text = mem_astral_tales.8.desc_01}
+			}
+		}
+	}
+	is_triggered_only = yes
+
+	diplomatic = yes
+	
+	picture_event_data = {
+		planet_background = capital_scope
+		graphical_culture = root
+		city_level = capital_scope
+		room = root
+		portrait = mem_Orila_holo_red_2
+	}
+
+	option = {
+		name = mem_astral_tales.8.a
+		trigger = {
+			has_country_flag = mem_astral_tales_7_c
+		}
+		if = {
+			limit = {
+				ruler = {
+					NOT = {
+						has_trait_tier1or2 = {
+							TRAIT = leader_trait_substance_abuser
+						}
+					}
+				}
+			}
+			random_list = {
+				33 = {
+					ruler = {
+						add_trait = leader_trait_substance_abuser
+					}
+				}
+				66 = {}
+			}
+		}
+		add_modifier = { modifier = mem_astral_tales_otherworldly_knowledge }
+	}
+
+	option = {
+		name = mem_astral_tales.8.b
+		trigger = {
+			has_country_flag = mem_astral_tales_7_d
+		}
+		add_modifier = { modifier = mem_astral_tales_otherworldly_knowledge }
+	}
+}

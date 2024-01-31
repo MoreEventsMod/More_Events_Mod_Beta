@@ -1,0 +1,216 @@
+@entity_x = -20
+@entity_y = -20
+
+mem_vazuran_gateway = {
+	entity = "mem_vazuran_wormhole_station_entity"
+	construction_entity = "mem_vazuran_wormhole_station_entity"
+	portrait = "GFX_megastructure_construction_background"
+	place_entity_on_planet_plane = no
+	show_galactic_map_icon = no
+	show_in_outliner = no
+	
+	potential = {
+		always = no
+	}
+
+	on_build_complete = {
+		activate_gateway = fromfrom
+	}
+
+	#construction_blocks_others = no
+
+	bypass_type = mem_vazuran_interdim_gateway
+}
+
+mem_vazuran_gateway_nexus = {
+	entity = "mem_vazuran_gateway_entity"
+	construction_entity = "mem_vazuran_gateway_entity"
+	portrait = "GFX_megastructure_construction_background"
+	place_entity_on_planet_plane = no
+	show_galactic_map_icon = no
+	show_in_outliner = no
+	
+	potential = {
+		always = no
+	}
+
+	on_build_complete = {
+		activate_gateway = fromfrom
+	}
+
+	#construction_blocks_others = no
+
+	bypass_type = mem_vazuran_interdim_gateway
+}
+
+# Vazuran Gateway Endpoint
+mem_vazuran_gateway_endpoint = {
+	entity = "mem_vazuran_gateway_endpoint_entity"
+	construction_entity = "mem_vazuran_gateway_endpoint_entity"
+	portrait = "GFX_megastructure_construction_background"
+	place_entity_on_planet_plane = no
+	show_galactic_map_icon = no
+	build_outside_gravity_well = yes
+	show_in_outliner = no
+	
+	potential = {
+		has_technology = tech_mem_vazuran_rift_stabilization
+	}
+
+	possible = {
+		custom_tooltip = {
+			fail_text = "requires_technology_mem_vazuran_rift_stabilization"
+			from = { has_technology = tech_mem_vazuran_rift_stabilization }
+		}
+	}
+	upgrade_from = {
+		mem_vazuran_gateway_endpoint_ruined
+	}
+	build_time = 720
+	resources = {
+		category = megastructures
+		cost = {
+			alloys = 2500
+			energy = 6000
+		}
+	}
+	#construction_blocks_others = no
+	#construction_blocked_by_others = no
+
+	bypass_type = mem_vazuran_interdim_gateway
+
+	on_build_complete = {
+		activate_gateway = fromfrom
+		solar_system = {
+			set_star_flag = mem_vazuran_portal
+		}
+		fromfrom = {
+			create_ambient_object = {
+				type = mem_vazuran_wormhole_big_object
+			}
+			last_created_ambient_object = {
+				set_ambient_object_flag = mem_vazuran_gateway_endpoint_wormhole
+			}
+		}
+		if = {
+			limit = { exists = from }
+			from = {
+				country_event = { id = mem_vazurans.63 }
+			}
+		}
+	}
+}
+
+# Ruined Vazuran Gateway Endpoint
+mem_vazuran_gateway_endpoint_ruined = {
+	entity = "mem_vazuran_gateway_endpoint_ruined_entity"
+	portrait = "GFX_megastructure_construction_background"
+
+	bypass_type = mem_vazuran_interdim_gateway
+	show_galactic_map_icon = no
+	build_outside_gravity_well = yes
+
+	potential = {
+		always = no
+	}
+}
+
+# Ruined Star Throne
+mem_vazuran_habitat_ruined = {
+	entity = "mem_vazuran_megastructure_headquarter_ruined_ambient_entity"
+	portrait = "GFX_megastructure_construction_background"
+	show_in_outliner = no
+
+	place_entity_on_planet_plane = no
+	entity_offset = { x = @entity_x y = @entity_y }
+
+	potential = {
+		always = no
+	}
+}
+
+# Restored Star Throne
+mem_vazuran_habitat = {
+	entity = ""
+	construction_entity = "mem_vazuran_habitat_01_entity"
+	portrait = "GFX_megastructure_construction_background"
+	place_entity_on_planet_plane = no
+	entity_offset = { x = @entity_x y = @entity_y }
+	show_in_outliner = no
+
+	build_time = 3600
+	resources = {
+		category = megastructures
+		cost = {
+			alloys = 10000
+		}
+	}
+	
+	upgrade_from = {
+		mem_vazuran_habitat_ruined
+	}
+
+	possible = {
+		from = { 
+			has_technology = tech_mega_engineering
+		}
+		custom_tooltip = {
+			fail_text = "requires_surveyed_system"
+			NOT = {
+				any_system_planet = {
+					is_surveyed = {
+						who = prev.from
+						status = no
+					}
+				}
+			}
+		}
+	}
+
+	ai_weight = {
+		weight = 300
+		modifier = {
+			weight = 0
+			from = { is_country_type = fallen_empire }
+		}
+	}
+
+	on_build_start = {
+	}
+
+	on_build_complete = {
+		every_system_ambient_object = {
+			limit = {
+				has_ambient_object_flag = mem_star_throne_debris
+			}
+			destroy_ambient_object = this
+		}
+		spawn_planet = {
+			class = "pc_mem_vazuran_habitat"
+			location = fromfrom.planet
+			orbit_location = yes
+			orbit_angle_offset = 45
+			orbit_distance_offset = 25
+			init_effect = {
+				set_name = "NAME_Star_Throne"
+				set_surveyed = {
+					surveyed = yes
+					surveyor = FROM
+				}
+				set_all_comms_surveyed = yes
+				clear_blockers = yes
+				trigger_megastructure_icon = yes
+				set_planet_flag = megastructure
+				set_planet_flag = habitat
+				set_planet_flag = advanced_habitat
+				set_planet_flag = advanced_habitat_2
+				set_planet_flag = colony_event
+			}
+		}
+		remove_megastructure = fromfrom
+		from = {
+			set_country_flag = has_built_or_repaired_megastructure
+			country_event = { id = mem_vazurans.64 }
+		}
+	}
+}

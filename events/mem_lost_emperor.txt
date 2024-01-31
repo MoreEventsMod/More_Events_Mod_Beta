@@ -12,6 +12,26 @@ namespace = mem_lost_emperor
 @MEM_major_neoch_reward = 24
 @MEM_minor_neoch_reward = 6
 
+# Use this on game start
+country_event = {
+	id = mem_lost_emperor.1111
+	is_test_event = yes
+	hide_window = yes
+
+	immediate = {
+		capital_scope.solar_system = {
+			random_neighbor_system = {
+				set_star_flag = mem_lost_emperor_anomaly
+				star = {
+					add_anomaly = {
+						category = mem_lost_emperor_category
+					}
+				}
+			}
+		}
+	}
+}
+
 
 #on_game_start
 event = {
@@ -66,14 +86,14 @@ event = {
 					weights = {
 						base = 1
 						modifier = {
-							mult = 2
+							factor = 2
 							distance = {
 								source = event_target:mem_player.capital_scope
 								max_distance <= 400
 							}
 						}
 						modifier = {
-							mult = 4
+							factor = 4
 							event_target:mem_player = {
 								closest_system = {
 									limit = {
@@ -223,6 +243,7 @@ ship_event = {
 	title = mem_lost_emperor.2.name
 	desc = mem_lost_emperor.2.desc
 	picture = GFX_evt_enigmatic_cache
+	event_chain = mem_lost_emperor_azran_chain
 	
 	location = root
 
@@ -255,6 +276,7 @@ ship_event = {
 	title = mem_lost_emperor.3.name
 	desc = mem_lost_emperor.3.desc
 	picture = GFX_evt_exploding_ship
+	event_chain = mem_lost_emperor_azran_chain
 	
 	location = root
 
@@ -379,6 +401,7 @@ ship_event = {
 		text = mem_lost_emperor.5.desc.again
 	}
 	picture = GFX_evt_unknown_ships
+	event_chain = mem_lost_emperor_azran_chain
 	
 	location = root
 
@@ -388,14 +411,14 @@ ship_event = {
 		solar_system.star = {
 			create_country = {
 				type = mem_azran
-				name = "Azran"
+				name = "NAME_Azran"
 				effect = {
 					set_country_flag = mem_azran
 					establish_communications_no_message = root.owner
 				}
 			}
 			create_fleet = {
-				name = "Azran"
+				name = "NAME_Azran"
 
 				settings = {
 					spawn_debris = no
@@ -435,6 +458,7 @@ country_event = {
 	title = mem_lost_emperor.6.name
 	desc = mem_lost_emperor.6.desc
 	picture = GFX_evt_exploding_ship
+	event_chain = mem_lost_emperor_azran_chain
 	
 	location = fromfromfrom.solar_system
 
@@ -472,15 +496,25 @@ country_event = {
 
 		hidden_effect = {
 			if = {
-				limit = { NOT = { has_country_flag = mem_azran_special_project } }
-				set_country_flag = mem_azran_special_project
-				country_event = { id = mem_lost_emperor.605 days = 10 }
+				limit = { 
+					NOT = { 
+						FromFrom.controller = {
+							has_country_flag = mem_azran_special_project 
+						}						
+					} 
+				}
+				FromFrom.controller = {
+					set_country_flag = mem_azran_special_project
+					country_event = { id = mem_lost_emperor.605 days = 10 }
+				}				
 			}
 		}
 	}
 	option = { #that's enough of this
 		name = mem_lost_emperor.6.B
-		end_event_chain = mem_lost_emperor_azran_chain
+		FromFrom.controller = {
+			end_event_chain = mem_lost_emperor_azran_chain
+		}		
 	}
 }
 
@@ -490,6 +524,7 @@ country_event = {
 	title = mem_lost_emperor.605.name
 	desc = mem_lost_emperor.605.desc
 	picture = GFX_evt_unidentified_monster
+	event_chain = mem_lost_emperor_azran_chain
 
 	is_triggered_only = yes
 
@@ -508,6 +543,7 @@ country_event = {
 	title = mem_lost_emperor.606.name
 	desc = mem_lost_emperor.606.desc
 	picture = GFX_evt_unidentified_monster
+	event_chain = mem_lost_emperor_azran_chain
 
 	is_triggered_only = yes
 
@@ -544,6 +580,7 @@ country_event = {
 	title = mem_lost_emperor.7.name
 	desc = mem_lost_emperor.7.desc
 	picture = GFX_evt_exploding_ship
+	event_chain = mem_lost_emperor_azran_chain
 	
 	location = event_target:mem_lost_emperor_system
 
@@ -573,8 +610,8 @@ country_event = {
 				solar_system = {
 					random_fleet_in_system = {
 						limit = {
-							owner = {
-								is_same_value = root
+							controller = {
+								is_same_value = FromFrom.controller
 							}
 							is_ship_class = shipclass_military
 							#Heck, just in case
@@ -594,13 +631,15 @@ country_event = {
 		end_event_chain = mem_lost_emperor_azran_chain
 		
 		hidden_effect = {
-			country_event = { id = mem_lost_emperor.8 }
+			FromFrom.controller = {
+				country_event = { id = mem_lost_emperor.8 }
+			}			
 		}
 	}
 }
 
 
-#Establish comms with Neochadanus
+#Establish comms with Neochadamus
 country_event = {
 	id = mem_lost_emperor.8
 	title = mem_lost_emperor.8.name
@@ -613,24 +652,10 @@ country_event = {
 
 	picture_event_data = {
 		room = ethic_spaceship_room
-		portrait = event_target:mem_neochadanus
+		portrait = event_target:mem_neochadamus
 	}
 
 	immediate = {
-		create_species = {
-			name = "Immortals"
-			class = random_non_machine
-			immortal = yes
-			pops_can_reproduce = no
-			
-			traits = {
-				trait = trait_psionic
-				trait = trait_cybernetic
-				trait = trait_erudite
-				trait = trait_very_strong
-				trait = trait_venerable
-			}
-		}
 #		create_country = {
 #			type = global_event
 #			species = last_created_species
@@ -639,7 +664,7 @@ country_event = {
 #				save_event_target_as = mem_neoch_global_event
 #			}
 #		}
-		mem_create_neochadanus = yes
+		mem_create_neochadamus = yes
 	}
 
 	option = {
@@ -664,7 +689,7 @@ country_event = {
 
 	picture_event_data = {
 		room = ethic_spaceship_room
-		portrait = event_target:mem_neochadanus
+		portrait = event_target:mem_neochadamus
 	}
 
 	option = { #You are insane
@@ -696,7 +721,7 @@ country_event = {
 
 	picture_event_data = {
 		room = ethic_spaceship_room
-		portrait = event_target:mem_neochadanus
+		portrait = event_target:mem_neochadamus
 	}
 
 	option = { #This convo is over
@@ -704,7 +729,7 @@ country_event = {
 		
 		hidden_effect = {
 			set_timed_country_flag = {
-				flag = mem_scorned_neochadanus
+				flag = mem_scorned_neochadamus
 				days = 5				
 			}
 			country_event = { id = mem_lost_emperor.20 }
@@ -732,7 +757,7 @@ country_event = {
 
 	picture_event_data = {
 		room = ethic_spaceship_room
-		portrait = event_target:mem_neochadanus
+		portrait = event_target:mem_neochadamus
 	}
 
 	option = {
@@ -756,7 +781,7 @@ country_event = {
 
 	picture_event_data = {
 		room = ethic_spaceship_room
-		portrait = event_target:mem_neochadanus
+		portrait = event_target:mem_neochadamus
 	}
 
 	option = {
@@ -780,7 +805,7 @@ country_event = {
 
 	picture_event_data = {
 		room = ethic_spaceship_room
-		portrait = event_target:mem_neochadanus
+		portrait = event_target:mem_neochadamus
 	}
 
 	option = {
@@ -804,7 +829,7 @@ country_event = {
 
 	picture_event_data = {
 		room = ethic_spaceship_room
-		portrait = event_target:mem_neochadanus
+		portrait = event_target:mem_neochadamus
 	}
 
 	option = {
@@ -822,14 +847,14 @@ country_event = {
 	desc = {
 		trigger = {
 			NOT = {
-				has_country_flag = mem_scorned_neochadanus
+				has_country_flag = mem_scorned_neochadamus
 			}
 		}
 		text = mem_lost_emperor.20.desc
 	}
 	desc = {
 		trigger = {
-			has_country_flag = mem_scorned_neochadanus
+			has_country_flag = mem_scorned_neochadamus
 		}
 		text = mem_lost_emperor.20.desc.scorned
 	}
@@ -841,7 +866,7 @@ country_event = {
 
 	picture_event_data = {
 		room = ethic_spaceship_room
-		portrait = event_target:mem_neochadanus
+		portrait = event_target:mem_neochadamus
 	}
 
 	option = {
@@ -849,38 +874,11 @@ country_event = {
 		custom_tooltip = mem_lost_emperor.20.accept.tooltip
 
 		hidden_effect = {
-			create_fleet = {
-				name = "NAME_Other_Science_Ship"
-				effect = {
-					set_owner = root
-					create_ship_design = {
-						design = "NAME_Prototype"
-					}
-					create_ship = {
-						name = "NAME_From_Beyond"
-						design = last_created_design
-						graphical_culture = "extra_dimensional_01"
-						prefix = no
-						upgradable = no
-					}
-					set_location = root.capital_scope
-					save_event_target_as = deleted_ship
-				}
-			}
-			event_target:deleted_ship = {
-				set_leader = mem_neochadanus
-				leader = {
-					save_event_target_as = mem_neochadanus
-					root = {
-						assign_leader = event_target:mem_neochadanus
-					}
-				}
-				delete_fleet = this
-			}
-
-			set_country_flag = mem_emperor_is_neochadanus
+			set_leader = event_target:mem_neochadamus
+			set_male_ruler_title = RT_GOD_EMPEROR
+			set_country_flag = mem_emperor_is_neochadamus
 			set_timed_country_flag = {
-				flag = mem_emperor_is_neochadanus_fifty
+				flag = mem_emperor_is_neochadamus_fifty
 				years = 50
 			}
 		}
@@ -888,7 +886,7 @@ country_event = {
 		if = {
 			limit = {
 				NOT = {
-					has_authority = auth_imperial
+					has_authority = auth_dictatorial
 				}
 			}
 			if = {
@@ -923,7 +921,8 @@ country_event = {
 		is_dialog_only = yes
 
 		trigger = {
-			NOT = {
+			NOR = {
+				has_authority = auth_dictatorial
 				has_authority = auth_imperial
 			}
 		}
@@ -936,7 +935,7 @@ country_event = {
 		hidden_effect = {
 			country_event = { id = mem_lost_emperor.21 days = 1 }
 			event_target:mem_azran_vanquisher_fleet = {
-				set_fleet_flag = mem_neochadanus_carrying_fleet
+				set_fleet_flag = mem_neochadamus_carrying_fleet
 			}
 		}
 
@@ -998,7 +997,7 @@ country_event = {
 		}
 
 		hidden_effect = {
-			save_event_target_as = mem_neochadanus_victim_country
+			save_event_target_as = mem_neochadamus_victim_country
 			
 			if = {
 				limit = {
@@ -1075,7 +1074,7 @@ country_event = {
 			}
 
 			set_timed_country_flag = {
-				flag = mem_neochadanus_not_scorned
+				flag = mem_neochadamus_not_scorned
 				days = 360
 			}
 		}
@@ -1096,6 +1095,13 @@ country_event = {
 	title = mem_lost_emperor.21.name
 	desc = mem_lost_emperor.21.desc
 	picture = GFX_evt_ship_in_orbit
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadamus
+	}
 	
 	location = event_target:mem_lost_emperor_system
 	
@@ -1112,13 +1118,15 @@ country_event = {
 	is_triggered_only = yes
 	immediate = {
 		change_government = {
-			authority = auth_imperial
+			authority = auth_dictatorial
 			civics = random
 		}
+		set_male_ruler_title = RT_GOD_EMPEROR
+		set_government_cooldown = 0
 		if = {
 			limit = {
 				NOT = {
-					has_authority = auth_imperial
+					has_authority = auth_dictatorial
 				}
 			}
 			country_event = { id = mem_lost_emperor.2001 days = 1 }
@@ -1138,7 +1146,7 @@ fleet_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		has_fleet_flag = mem_neochadanus_carrying_fleet
+		has_fleet_flag = mem_neochadamus_carrying_fleet
 		
 		owner = {
 			num_owned_planets > 1
@@ -1169,13 +1177,20 @@ fleet_event = {
 	desc = mem_lost_emperor.23.desc
 	picture = GFX_evt_federation_fleet
 	
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadamus
+	}
+
 	location = root
 	
 	is_triggered_only = yes
 	
 	immediate = {
-		mem_neochadanus_seizes_ship_and_flees = yes
-		remove_fleet_flag = mem_neochadanus_carrying_fleet
+		mem_neochadamus_seizes_ship_and_flees = yes
+		remove_fleet_flag = mem_neochadamus_carrying_fleet
 	}
 	
 	option = {
@@ -1198,7 +1213,7 @@ fleet_event = {
 	location = root
 
 	trigger = {
-		has_fleet_flag = mem_neochadanus_carrying_fleet
+		has_fleet_flag = mem_neochadamus_carrying_fleet
 		solar_system = {
 			is_same_value = root.owner.capital_scope.solar_system
 		}
@@ -1217,6 +1232,13 @@ country_event = {
 	desc = mem_lost_emperor.25.desc
 	picture = GFX_evt_space_station
 	
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadamus
+	}
+
 	location = capital_scope
 
 	is_triggered_only = yes
@@ -1226,13 +1248,13 @@ country_event = {
 			solar_system = {
 				is_same_value = root.capital_scope.solar_system
 			}
-			has_fleet_flag = mem_neochadanus_carrying_fleet
+			has_fleet_flag = mem_neochadamus_carrying_fleet
 		}
 	}
 
 	immediate = {
 		from = {
-			remove_fleet_flag = mem_neochadanus_carrying_fleet
+			remove_fleet_flag = mem_neochadamus_carrying_fleet
 		}
 	}
 
@@ -1260,12 +1282,19 @@ fleet_event = {
 	desc = mem_lost_emperor.29.desc
 	picture = GFX_evt_federation_fleet
 	
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadamus
+	}
+
 	location = root
 	
 	is_triggered_only = yes
 	
 	immediate = {
-		mem_neochadanus_seizes_ship_and_flees = yes
+		mem_neochadamus_seizes_ship_and_flees = yes
 	}
 	
 	option = {
@@ -1275,7 +1304,7 @@ fleet_event = {
 }
 
 
-##### Neochadanus Escaped, seized a planet 
+##### Neochadamus Escaped, seized a planet 
 
 planet_event = {
 	id = mem_lost_emperor.30
@@ -1284,13 +1313,20 @@ planet_event = {
 	picture = GFX_evt_space_station
 	location = root
 	
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadamus
+	}
+
 	is_triggered_only = yes
 	
 	trigger = {
 		has_owner = yes
 		exists = owner
 		owner = {
-			is_same_value = event_target:mem_neochadanus_victim_country
+			is_same_value = event_target:mem_neochadamus_victim_country
 		}
 	}
 	
@@ -1310,12 +1346,12 @@ planet_event = {
 		}
 
 		create_country = {
-			#Neochadanus stuff!
-			type = mem_neochadanus_ascendant
+			#Neochadamus stuff!
+			type = default
 
-			name = mem_neochadanus_country_name
+			name = mem_neochadamus_country_name
 			
-			authority = auth_imperial
+			authority = auth_dictatorial
 			
 			ethos = {
 				ethic = ethic_authoritarian
@@ -1324,22 +1360,52 @@ planet_event = {
 			}
 			
 			civics = {
-				civic = mem_neochadanus_civic_1
-				civic = mem_neochadanus_civic_2
-				civic = mem_neochadanus_civic_3
+				civic = mem_neochadamus_civic_1
+				civic = mem_neochadamus_civic_2
+				civic = mem_neochadamus_civic_3
 			}
 
 			species = event_target:mem_neoch_releaser_species
 			
 			effect = {
-				save_event_target_as = mem_neochadanus_ascendant
+				save_event_target_as = mem_neochadamus_ascendant
+				set_country_flag = mem_neochadamus_ascendant
 
-#				mem_create_neochadanus = yes
+				if = {
+					limit = {
+						any_country = {
+							OR = {
+								is_country_type = fallen_empire
+								is_country_type = awakened_fallen_empire
+							}
+						}
+					}
+					random_country = {
+						limit = {
+							OR = {
+								is_country_type = fallen_empire
+								is_country_type = awakened_fallen_empire
+							}
+						}
+						prev = {
+							copy_techs_from = {
+								target = prev
+							}
+						}
+					}
+				}
+				else = {
+					copy_techs_from = {
+						target = root.owner
+					}
+				}
+
+#				mem_create_neochadamus = yes
 				
 				create_fleet = {
 					name = "NAME_Other_Science_Ship"
 					effect = {
-						set_owner = event_target:mem_neochadanus_ascendant
+						set_owner = event_target:mem_neochadamus_ascendant
 						create_ship_design = {
 							design = "NAME_Prototype"
 						}
@@ -1355,21 +1421,19 @@ planet_event = {
 					}
 				}
 				event_target:deleted_ship = {
-					set_leader = mem_neochadanus
+					set_leader = mem_neochadamus
 					leader = {
-						save_event_target_as = mem_neochadanus
+						save_event_target_as = mem_neochadamus
 						unassign_leader = this
 					}
-					event_target:mem_neochadanus_ascendant = {
-						assign_leader = event_target:mem_neochadanus
+					event_target:mem_neochadamus_ascendant = {
+						assign_leader = event_target:mem_neochadamus
 					}
 					delete_fleet = this
 				}
 
-
-				
 				add_modifier = { #ethics pull and unrest annihilated
-					modifier = mem_neochadanus_setup_boost
+					modifier = mem_neochadamus_setup_boost
 					days = 4800
 				}
 				
@@ -1380,24 +1444,24 @@ planet_event = {
 								is_planet_class = pc_city
 							}
 						}
-						change_planet_size = 3
+						change_planet_size = 5
 					}
-					add_modifier = { #these are too dangerous to not limit to one planet
-						modifier = mem_neochadanus_setup_boost_planet
-						days = 4800
+
+					solar_system = {
+						every_system_planet = {
+							limit = {
+								is_colony = yes
+								owner = { is_same_value = root.owner }
+							}
+							set_owner = event_target:mem_neochadamus_ascendant
+						}
 					}
-				
-					set_owner = prev
 					
 					solar_system.starbase = {
-						set_owner = prevprev
+						set_owner = event_target:mem_neochadamus_ascendant
 						set_starbase_size = starbase_citadel
 						
 						set_starbase_module = {
-							slot = 0
-							module = shipyard
-						}
-						set_starbase_module = {
 							slot = 1
 							module = shipyard
 						}
@@ -1407,32 +1471,36 @@ planet_event = {
 						}
 						set_starbase_module = {
 							slot = 3
-							module = anchorage
+							module = shipyard
 						}
 						set_starbase_module = {
 							slot = 4
-							module = anchorage
+							module = shipyard
 						}
 						set_starbase_module = {
 							slot = 5
-							module = missile_battery
+							module = shipyard
+						}
+						set_starbase_module = {
+							slot = 6
+							module = shipyard
 						}
 						
 						set_starbase_building = {
-							slot = 0
+							slot = 1
 							building = crew_quarters
 						}
 						set_starbase_building = {
-							slot = 1
+							slot = 2
 							building = hydroponics_bay
 						}
 						set_starbase_building = {
-							slot = 2
+							slot = 3
 							building = fleet_academy
 						}
 						set_starbase_building = {
-							slot = 3
-							building = target_uplink_computer
+							slot = 4
+							building = titan_yards
 						}
 					}
 
@@ -1440,56 +1508,34 @@ planet_event = {
 
 					#Give them some habitats, because why not
 					solar_system = {
-						while = {
+						if = {
 							limit = {
-								any_system_planet = {
-									NOT = { has_anomaly = yes }
-									NOR = {
-										has_planet_flag = megastructure
-										has_planet_flag = has_megastructure
-										solar_system = {
+								NOT = {
+									solar_system = {
+										OR = {
 											has_star_flag = ring_world_built
+											has_star_flag = has_habitat
 										}
-										is_planet_class = pc_ringworld_habitable
-										is_planet_class = pc_ringworld_habitable_damaged
-										is_planet_class = pc_ringworld_tech
-										is_planet_class = pc_ringworld_tech_damaged
-										is_planet_class = pc_ringworld_seam
-										is_planet_class = pc_ringworld_seam_damaged
-										is_planet_class = pc_habitat
 									}
+								}
+								any_system_planet = {
+									has_anomaly = no
+									is_artificial = no
 									has_orbital_station = no
-									NOR = {
-										is_asteroid = yes
-										is_moon = yes
-									}
+									is_asteroid = no
+									is_moon = no
 									is_star = no
 								}
 							}
-							count = 3
+							set_star_flag = has_habitat
 							
 							random_system_planet = {
-								limit = { #this is the conditions for building a habitat in the habitat file
-									NOT = { has_anomaly = yes }
-									NOR = {
-										has_planet_flag = megastructure
-										has_planet_flag = has_megastructure
-										solar_system = {
-											has_star_flag = ring_world_built
-										}
-										is_planet_class = pc_ringworld_habitable
-										is_planet_class = pc_ringworld_habitable_damaged
-										is_planet_class = pc_ringworld_tech
-										is_planet_class = pc_ringworld_tech_damaged
-										is_planet_class = pc_ringworld_seam
-										is_planet_class = pc_ringworld_seam_damaged
-										is_planet_class = pc_habitat
-									}
+								limit = {
+									has_anomaly = no
+									is_artificial = no
 									has_orbital_station = no
-									NOR = {
-										is_asteroid = yes
-										is_moon = yes
-									}
+									is_asteroid = no
+									is_moon = no
 									is_star = no
 								}
 
@@ -1507,14 +1553,13 @@ planet_event = {
 										has_ring = no
 										
 										init_effect = {
-											set_name = "HABITAT_PLANET_NAME"
 											set_planet_entity = {
 												entity = "orbital_habitat_entity"
-												graphical_culture = event_target:mem_neochadanus_ascendant
+												graphical_culture = event_target:mem_neochadamus_ascendant
 											}
 											set_surveyed = {
 												surveyed = yes
-												surveyor = event_target:mem_neochadanus_ascendant
+												surveyor = event_target:mem_neochadamus_ascendant
 											}
 											set_all_comms_surveyed = yes
 											clear_blockers = yes
@@ -1530,6 +1575,17 @@ planet_event = {
 											}
 											set_planet_flag = megastructure
 											set_planet_flag = habitat
+
+											create_colony = {
+												owner = event_target:mem_neochadamus_ascendant
+											}
+											set_name = NEOCHADAMUS_HABITAT
+											while = {
+												count = 5
+												create_pop = {
+													species = owner_main_species
+												}
+											}
 										}
 									}
 								}
@@ -1540,37 +1596,37 @@ planet_event = {
 					}
 				}
 				
-				event_target:mem_neochadanus_victim_country = {
+				event_target:mem_neochadamus_victim_country = {
 					every_relation = {
 						limit = {
 							NOT = {
-								is_same_value = prevprev
+								is_same_value = event_target:mem_neochadamus_ascendant
 							}
 						}
-						establish_communications_no_message = prevprev
+						establish_communications_no_message = event_target:mem_neochadamus_ascendant
 						country_event = { id = mem_lost_emperor.31 } #tell them about it
 					}
-					establish_communications_no_message = prev
+					establish_communications_no_message = event_target:mem_neochadamus_ascendant
 				}
 				
-				mem_give_neochadanus_resources = yes
+				mem_give_neochadamus_resources = yes
 				
 				set_timed_country_flag = {
-					flag = mem_neochadanus_ascendant_timer
+					flag = mem_neochadamus_ascendant_timer
 					years = 50
 				}
 				
 				if = {
 					limit = {
 						NOT = {
-							event_target:mem_neochadanus_victim_country = {
-								has_country_flag = mem_neochadanus_not_scorned
+							event_target:mem_neochadamus_victim_country = {
+								has_country_flag = mem_neochadamus_not_scorned
 							}
 						}
 					}
 					add_opinion_modifier = {
-						who = event_target:mem_neochadanus_victim_country
-						modifier = mem_neochadanus_scorned
+						who = event_target:mem_neochadamus_victim_country
+						modifier = mem_neochadamus_scorned
 					}
 				}
 				
@@ -1579,12 +1635,12 @@ planet_event = {
 					
 					closest_system = {
 						limit = {
-							is_owned_by = event_target:mem_neochadanus_victim_country
+							is_owned_by = event_target:mem_neochadamus_victim_country
 							has_owner = no
 						}
 						max_steps = 1
 						starbase = {
-							set_owner = event_target:mem_neochadanus_ascendant
+							set_owner = event_target:mem_neochadamus_ascendant
 						}
 					}
 				}
@@ -1598,13 +1654,13 @@ planet_event = {
 		hidden_effect = {
 			solar_system = {
 				add_claims = {
-					who = event_target:mem_neochadanus_victim_country
+					who = event_target:mem_neochadamus_victim_country
 				}
 			}
 		}
-		event_target:mem_neochadanus_victim_country = {
+		event_target:mem_neochadamus_victim_country = {
 			declare_war = {
-				target = event_target:mem_neochadanus_ascendant
+				target = event_target:mem_neochadamus_ascendant
 				attacker_war_goal = wg_conquest
 			}
 		}
@@ -1641,11 +1697,11 @@ country_event = {
 #	diplomatic = yes
 #
 #	picture_event_data = {
-#		portrait = event_target:mem_neochadanus_ascendant
-#		planet_background = event_target:mem_neochadanus_ascendant
-#		graphical_culture = event_target:mem_neochadanus_ascendant
-#		city_level = event_target:mem_neochadanus_ascendant
-#		room = event_target:mem_neochadanus_ascendant.ruler
+#		portrait = event_target:mem_neochadamus_ascendant
+#		planet_background = event_target:mem_neochadamus_ascendant
+#		graphical_culture = event_target:mem_neochadamus_ascendant
+#		city_level = event_target:mem_neochadamus_ascendant
+#		room = event_target:mem_neochadamus_ascendant.ruler
 #	}
 
 	hide_window = yes
@@ -1665,11 +1721,11 @@ country_event = {
 	}
 
 	trigger = {
-		is_country_type = mem_neochadanus_ascendant
+		has_country_flag = mem_neochadamus_ascendant
 		is_subject = no
 		is_at_war = no
 		NOR = {
-			has_country_flag = mem_neochadanus_ascendant_timer
+			has_country_flag = mem_neochadamus_ascendant_timer
 			any_neighbor_country = {
 				OR = {
 					is_country_type = extradimensional
@@ -1684,15 +1740,16 @@ country_event = {
 	
 	immediate = {
 		ruler = {
-			save_event_target_as = mem_neochadanus
+			save_event_target_as = mem_neochadamus
 		}
 		every_relation = {
 			country_event = { id = mem_lost_emperor.39 }
 		}
 	}
 	after = {
-		set_country_flag = mem_neochadanus_ascends
+		set_country_flag = mem_neochadamus_ascends
 		every_owned_planet = {
+			destroy_colony = yes
 			remove_planet = yes
 		}
 	}
@@ -1709,7 +1766,7 @@ country_event = {
 	diplomatic = yes
 
 	picture_event_data = {
-		portrait = event_target:mem_neochadanus
+		portrait = event_target:mem_neochadamus
 		planet_background = from
 		graphical_culture = from
 		city_level = from
@@ -1745,6 +1802,13 @@ country_event = {
 	picture = GFX_evt_mem_ancient_robots_project	
 	
 	location = event_target:mem_lost_emperor_system
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadamus
+	}
 	
 	is_triggered_only = yes
 
@@ -1842,18 +1906,25 @@ country_event = {
 	title = mem_lost_emperor.800.name
 	desc = mem_lost_emperor.800.desc
 	picture = GFX_evt_space_funeral
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadamus
+	}
 	
 	is_triggered_only = yes
 	
 	trigger = {
-		has_country_flag = mem_emperor_is_neochadanus
+		has_country_flag = mem_emperor_is_neochadamus
 		from = {
-			has_leader_flag = mem_neochadanus
+			has_leader_flag = mem_neochadamus
 		}
 	}
 	
 	immediate = {
-		remove_country_flag = mem_emperor_is_neochadanus
+		remove_country_flag = mem_emperor_is_neochadamus
 	}
 	
 	option = {
@@ -1871,7 +1942,7 @@ country_event = {
 	diplomatic = yes
 
 	picture_event_data = {
-		portrait = event_target:mem_angry_neochadanus
+		portrait = event_target:mem_angry_neochadamus
 		planet_background = root
 		graphical_culture = root
 		city_level = root
@@ -1883,26 +1954,26 @@ country_event = {
 	}
 	
 	trigger = {
-		has_country_flag = mem_emperor_is_neochadanus
+		has_country_flag = mem_emperor_is_neochadamus
 		ruler = {
-			has_leader_flag = mem_neochadanus
+			has_leader_flag = mem_neochadamus
 		}
 		NOR = {
-			has_authority = auth_imperial
+			has_authority = auth_dictatorial
 			has_country_flag = mem_just_set_neoch
 		}
 	}
 	
 	immediate = {
 		ruler = {
-			save_event_target_as = mem_angry_neochadanus
+			save_event_target_as = mem_angry_neochadamus
 		}
-		remove_country_flag = mem_emperor_is_neochadanus
+		remove_country_flag = mem_emperor_is_neochadamus
 
-		exile_leader_as = mem_angry_neochadanus
+		exile_leader_as = mem_angry_neochadamus
 
 		create_leader = {
-			class = ruler
+			CLASS = official
 
 			effect = {
 				save_event_target_as = mem_new_ruler
@@ -1915,11 +1986,10 @@ country_event = {
 			limit = {
 				exists = heir
 				heir = {
-					is_same_species = event_target:mem_angry_neochadanus.species
+					is_same_species = event_target:mem_angry_neochadamus.species
 				}
 			}
 			kill_leader = {
-				type = ruler
 				heir = yes
 				show_notification = no
 			}
@@ -1935,16 +2005,16 @@ country_event = {
 }
 
 
-#Fallback in case is Neochadanus' Ascendancy and dies for some reason
+#Fallback in case is Neochadamus' Ascendancy and dies for some reason
 country_event = {
 	id = mem_lost_emperor.802
 	hide_window = yes
 	is_triggered_only = yes
 	
 	trigger = {
-		is_country_type = mem_neochadanus_ascendant
+		has_country_flag = mem_neochadamus_ascendant
 		NOT = {
-			has_country_flag = mem_neochadanus_ascends
+			has_country_flag = mem_neochadamus_ascends
 		}
 	}
 	
@@ -2003,13 +2073,12 @@ country_event = {
 				exists = ruler
 			}
 			kill_leader = {
-				type = ruler
 				show_notification = no
 			}
 		}
 		create_leader = {
-			class = ruler
-
+			CLASS = official
+			species = root
 			effect = {
 				save_event_target_as = mem_new_ruler
 				exile_leader_as = mem_new_ruler
@@ -2025,7 +2094,6 @@ country_event = {
 				}
 			}
 			kill_leader = {
-				type = ruler
 				heir = yes
 				show_notification = no
 			}
@@ -2033,13 +2101,13 @@ country_event = {
 
 		#refresh the govt
 		change_government = {
-			authority = auth_dictatorial
-		}
-		change_government = {
 			authority = auth_imperial
 		}
+		change_government = {
+			authority = auth_dictatorial
+		}
 
-		set_name = "Mourners of Neochadanus"
+		set_name = "Mourners of Neochadamus"
 
 		every_relation = {
 			country_event = { id = mem_lost_emperor.803 }
@@ -2054,13 +2122,20 @@ country_event = {
 	picture = GFX_evt_space_funeral
 	
 	is_triggered_only = yes
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadamus
+	}
 	
 	option = {
 		name = mem_lost_emperor.803.option
 	}
 }
 
-#50 years at least after you get Neochadanus
+#50 years at least after you get Neochadamus
 country_event = {
 	id = mem_lost_emperor.900
 	title = mem_lost_emperor.900.name
@@ -2070,7 +2145,7 @@ country_event = {
 
 	picture_event_data = {
 		room = root.ruler
-		portrait = event_target:mem_neochadanus
+		portrait = event_target:mem_neochadamus
 		planet_background = root
 		graphical_culture = root
 		city_level = root
@@ -2081,13 +2156,13 @@ country_event = {
 	}
 
 	trigger = {
-		has_country_flag = mem_emperor_is_neochadanus
+		has_country_flag = mem_emperor_is_neochadamus
 		ruler = {
-			has_leader_flag = mem_neochadanus
+			has_leader_flag = mem_neochadamus
 		}
 		NOR = {
 			has_modifier = mem_lost_emperor_paying_for_ascension
-			has_country_flag = mem_emperor_is_neochadanus_fifty
+			has_country_flag = mem_emperor_is_neochadamus_fifty
 			has_country_flag = mem_neoch_decision
 			any_country = {
 				OR = {
@@ -2116,7 +2191,7 @@ country_event = {
 			days = 360
 		}
 		ruler = {
-			save_event_target_as = mem_neochadanus
+			save_event_target_as = mem_neochadamus
 		}
 	}
 	
@@ -2143,7 +2218,7 @@ country_event = {
 		custom_tooltip = mem_lost_emperor.900.B.tooltip
 
 		hidden_effect = {
-			remove_country_flag = mem_emperor_is_neochadanus
+			remove_country_flag = mem_emperor_is_neochadamus
 			country_event = { id =  mem_lost_emperor.903 days = 180 random = 30 }
 		}
 
@@ -2161,7 +2236,7 @@ country_event = {
 
 	picture_event_data = {
 		room = root.ruler
-		portrait = event_target:mem_neochadanus
+		portrait = event_target:mem_neochadamus
 		planet_background = root
 		graphical_culture = root
 		city_level = root
@@ -2170,23 +2245,22 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
-		has_country_flag = mem_emperor_is_neochadanus
+		has_country_flag = mem_emperor_is_neochadamus
 		ruler = {
-			has_leader_flag = mem_neochadanus
+			has_leader_flag = mem_neochadamus
 		}
 	}
 	
 	immediate = {
-		remove_country_flag = mem_emperor_is_neochadanus
+		remove_country_flag = mem_emperor_is_neochadamus
 		ruler = {
-			save_event_target_as = mem_neochadanus
+			save_event_target_as = mem_neochadamus
 		}
 		kill_leader = {
-			type = ruler
 			show_notification = no
 		}
 		create_leader = {
-			class = ruler
+			CLASS = official
 
 			effect = {
 				save_event_target_as = mem_new_ruler
@@ -2199,11 +2273,10 @@ country_event = {
 			limit = {
 				exists = heir
 				heir = {
-					is_same_species = event_target:mem_neochadanus.species
+					is_same_species = event_target:mem_neochadamus.species
 				}
 			}
 			kill_leader = {
-				type = ruler
 				heir = yes
 				show_notification = no
 			}
@@ -2211,10 +2284,10 @@ country_event = {
 
 		#refresh the govt
 		change_government = {
-			authority = auth_dictatorial
+			authority = auth_imperial
 		}
 		change_government = {
-			authority = auth_imperial
+			authority = auth_dictatorial
 		}
 	}
 
@@ -2235,15 +2308,22 @@ country_event = {
 
 	is_triggered_only = yes
 
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadamus
+	}
+
 	option = {
 		name = mem_lost_emperor.902.option
 	}
 }
 
 
-#Angry Neochadanus subchain
+#Angry Neochadamus subchain
 
-#Neochadanus disappears
+#Neochadamus disappears
 country_event = {
 	id = mem_lost_emperor.903
 	title = mem_lost_emperor.903.name
@@ -2252,14 +2332,21 @@ country_event = {
 
 	is_triggered_only = yes
 
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadamus
+	}
+
 	immediate = {
 		ruler = {
-			save_event_target_as = mem_angry_neochadanus
+			save_event_target_as = mem_angry_neochadamus
 		}
-		exile_leader_as = mem_angry_neochadanus
+		exile_leader_as = mem_angry_neochadamus
 		
 		create_leader = {
-			class = ruler
+			CLASS = official
 
 			effect = {
 				save_event_target_as = mem_new_ruler
@@ -2272,11 +2359,10 @@ country_event = {
 			limit = {
 				exists = heir
 				heir = {
-					is_same_species = event_target:mem_angry_neochadanus.species
+					is_same_species = event_target:mem_angry_neochadamus.species
 				}
 			}
 			kill_leader = {
-				type = ruler
 				heir = yes
 				show_notification = no
 			}
@@ -2284,10 +2370,10 @@ country_event = {
 
 		#refresh the govt
 		change_government = {
-			authority = auth_dictatorial
+			authority = auth_imperial
 		}
 		change_government = {
-			authority = auth_imperial
+			authority = auth_dictatorial
 		}
 
 		country_event = { id = mem_lost_emperor.910 days = 135 random = 90 }
@@ -2299,7 +2385,7 @@ country_event = {
 	}
 }
 
-#910 will let you reverse it incl. turn back to imperial authority. He is exiled as mem_angry_neochadanus
+#910 will let you reverse it incl. turn back to imperial authority. He is exiled as mem_angry_neochadamus
 
 country_event = {
 	id = mem_lost_emperor.910
@@ -2308,6 +2394,13 @@ country_event = {
 	picture = GFX_evt_news_room
 
 	is_triggered_only = yes
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadamus
+	}
 
 	option = {
 		name = mem_lost_emperor.910.A
@@ -2320,15 +2413,15 @@ country_event = {
 		}
 
 		hidden_effect = {
-			set_leader = mem_angry_neochadanus
-			set_country_flag = mem_emperor_is_neochadanus
+			set_leader = mem_angry_neochadamus
+			set_country_flag = mem_emperor_is_neochadamus
 
 			#refresh the govt
 			change_government = {
-				authority = auth_dictatorial
+				authority = auth_imperial
 			}
 			change_government = {
-				authority = auth_imperial
+				authority = auth_dictatorial
 			}
 
 			country_event = { id = mem_lost_emperor.901 days = 3600 }
@@ -2371,6 +2464,13 @@ country_event = {
 	picture = GFX_evt_exploding_planet
 
 	is_triggered_only = yes
+
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadamus
+	}
 
 	trigger = {
 		num_owned_planets > 1
@@ -2615,13 +2715,20 @@ country_event = {
 	desc = mem_lost_emperor.60.desc
 	picture = GFX_evt_l-gateway
 
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadamus
+	}
+
 	trigger = {
-		has_country_flag = mem_emperor_is_neochadanus
+		has_country_flag = mem_emperor_is_neochadamus
 		ruler = {
-			has_leader_flag = mem_neochadanus
+			has_leader_flag = mem_neochadamus
 		}
 		has_event_chain = "l_cluster_chain"
-		NOT = { has_country_flag = mem_neochadanus_clue }
+		NOT = { has_country_flag = mem_neochadamus_clue }
 		NOT = { has_country_flag = completed_lcluster_chain }
 	}
 
@@ -2630,7 +2737,7 @@ country_event = {
 	}
 
 	immediate = {
-		set_country_flag = mem_neochadanus_clue
+		set_country_flag = mem_neochadamus_clue
 	}
 
 	option = {
@@ -2645,10 +2752,17 @@ country_event = {
 	desc = mem_lost_emperor.61.desc
 	picture = GFX_evt_l-gateway
 
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_legendary_beholder"
+
+	picture_event_data = {
+		portrait = event_target:mem_neochadamus
+	}
+	
 	trigger = {
 		has_modifier = mem_lost_emperor_fount_of_knowledge_modifier
 		has_event_chain = "l_cluster_chain"
-		NOT = { has_country_flag = mem_neochadanus_clue }
+		NOT = { has_country_flag = mem_neochadamus_clue }
 		NOT = { has_country_flag = completed_lcluster_chain }
 	}
 
@@ -2657,25 +2771,11 @@ country_event = {
 	}
 
 	immediate = {
-		set_country_flag = mem_neochadanus_clue
+		set_country_flag = mem_neochadamus_clue
 	}
 
 	option = {
 		name = mem_lost_emperor.61.option
 		generate_lcluster_clue = yes
-	}
-}
-
-first_contact_event = {
-	id = mem_lost_emperor.950
-	is_triggered_only = yes
-	hide_window = yes
-	trigger = {
-		contact_country = {
-			is_country_type = mem_neochadanus_ascendant
-		}
-	}
-	immediate = {
-		set_first_contact_stage = default_stage_1
 	}
 }

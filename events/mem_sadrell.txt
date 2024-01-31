@@ -16,7 +16,7 @@ event = {
     immediate = {
         # Spawning the for essentials; if any are missing.
         random_list = { # Determining the future
-            70 = {
+            35 = {
                 random_list = {
                     80 = { set_global_flag = mem_sadrell_will_return }
                     20 = {
@@ -29,8 +29,8 @@ event = {
                 }
             }
             # 0 = { set_global_flag = mem_sadrell_will_desert } # Likely will not be implemented due to similarity with message
-            15 = { set_global_flag = mem_sadrell_will_send_message }
-            15 = { set_global_flag = mem_sadrell_nothing_will_happen }
+            30 = { set_global_flag = mem_sadrell_will_send_message }
+            35 = { set_global_flag = mem_sadrell_nothing_will_happen }
         }
         # random_list = {
         #     33 = {
@@ -192,10 +192,9 @@ event = {
                     type = mem_sadrell_gateway_active
                     orbit_angle = 0
                     orbit_distance = 60
-                }
-                random_system_megastructure = {
-                    limit = { is_megastructure_type = mem_sadrell_gateway_active }
-                    activate_gateway = this
+					init_effect = {
+						activate_gateway = this
+					}
                 }
             }            
         }
@@ -580,6 +579,13 @@ country_event = {
                 factor = 2
                 is_xenophile = yes
             }
+            modifier = {
+                factor = 0
+                exists = capital_scope
+                capital_scope.solar_system = {
+                    has_star_flag = mem_sadrell_home_cluster
+                }
+            }
         }
     }
 
@@ -661,6 +667,13 @@ country_event = {
                 factor = 1.75
                 is_authoritarian = yes
             }
+            modifier = {
+                factor = 0
+                exists = capital_scope
+                capital_scope.solar_system = {
+                    has_star_flag = mem_sadrell_home_cluster
+                }
+            }
         }
     }
 
@@ -680,7 +693,7 @@ country_event = {
                 OR = {
                     has_authority = auth_machine_intelligence
                     has_federation = yes
-                    has_non_swapped_tradition = tr_diplomacy_the_federation
+                    has_active_tradition = tr_diplomacy_the_federation
                     NOT = { is_country_type = default }
                 }
             }
@@ -689,7 +702,7 @@ country_event = {
                 OR = {
                     NOT = { has_authority = auth_machine_intelligence }
                     has_federation = yes
-                    has_swapped_tradition = tr_versatility_universal_compatibility
+                    has_active_tradition = tr_versatility_universal_compatibility
                     NOT = { is_country_type = default }
                 }
             }
@@ -721,6 +734,13 @@ country_event = {
                 factor = 0.5
                 is_spiritualist = yes
             }
+            modifier = {
+                factor = 0
+                exists = capital_scope
+                capital_scope.solar_system = {
+                    has_star_flag = mem_sadrell_home_cluster
+                }
+            }
         }
     }
 
@@ -749,6 +769,13 @@ country_event = {
             modifier = {
                 factor = 0.75
                 is_spiritualist = yes
+            }
+            modifier = {
+                factor = 0
+                exists = capital_scope
+                capital_scope.solar_system = {
+                    has_star_flag = mem_sadrell_home_cluster
+                }
             }
         }
     }
@@ -1037,9 +1064,11 @@ country_event = {
                             is_same_value = root
                             AND = {
                                 exists = overlord
-                                OR = {
-                                    is_subject_type = vassal
-                                    is_subject_type = protectorate
+                                any_agreement = {
+                                    OR = {
+                                        agreement_preset = preset_vassal
+                                        agreement_preset = preset_protectorate
+                                    }
                                 }
                                 overlord = {
                                     is_same_value = root
@@ -1196,7 +1225,7 @@ country_event = {
             set_name = "Sadrell Exiles"
             set_subject_of = {
 				who = root
-				subject_type = vassal
+				preset = preset_vassal
 			}
         }
         mem_sadrell_create_sadrell_colonies = yes
@@ -1338,7 +1367,7 @@ country_event = {
             set_name = "Sadrell Exiles"
             join_alliance = {
                 who = root
-                name = "[gate_system.GetName] Accord"
+                name = "Accord"
                 override_requirements = yes
             }
         }
@@ -1414,6 +1443,12 @@ country_event = {
                         }
                     }
                 }
+            }
+        }
+        alliance = {
+            set_name = {
+                key = "NAME_mem_sadrell_alliance"
+                variable_string = "[gate_system.GetName]"
             }
         }
     }
@@ -1648,9 +1683,36 @@ country_event = {
     }
 }
 
-# Vote tallying
+# Vote tallying gatekeeper
 country_event = {
     id = mem_sadrell.122
+    hide_window = yes
+    is_triggered_only = yes
+
+    immediate = {
+        IF = {
+            limit = {
+                NOR = {
+                    any_country = {
+                        has_country_flag = mem_sadrell_vote_pending
+                        NOR = {
+                            has_country_flag = mem_sadrell_vote_yes
+                            has_country_flag = mem_sadrell_vote_abstain
+                            has_country_flag = mem_sadrell_vote_no
+                        }
+                    }
+                    has_country_flag = mem_sadrell_votes_tallied
+                }
+            }
+            set_country_flag = mem_sadrell_votes_tallied
+            country_event = { id = mem_sadrell.1221 }
+        }
+    }
+}
+
+# Vote tallying
+country_event = {
+    id = mem_sadrell.1221
     title = mem_sadrell.122.name
     desc = mem_sadrell.122.desc
 
@@ -1660,17 +1722,7 @@ country_event = {
     show_sound = event_factions
 
     trigger = {
-        NOR = {
-            any_country = {
-                has_country_flag = mem_sadrell_vote_pending
-                NOR = {
-                    has_country_flag = mem_sadrell_vote_yes
-                    has_country_flag = mem_sadrell_vote_abstain
-                    has_country_flag = mem_sadrell_vote_no
-                }
-            }
-            has_country_flag = mem_sadrell_votes_tallied
-        }
+        # NOT = { has_country_flag = mem_sadrell_votes_tallied }
     }
 
     immediate = {
@@ -2123,9 +2175,9 @@ planet_event = {
             OR = {
                 has_country_flag = mem_sadrell_country_regular
                 has_country_flag = mem_sadrell_assimilator_country
-                any_owned_ship = {
-                    is_ship_size = mem_sadrell_void_home
-                }
+            }
+            any_owned_ship = {
+                is_ship_size = mem_sadrell_void_home
             }
         }
         num_pops > 0
@@ -2181,8 +2233,8 @@ planet_event = {
     immediate = {
         set_global_flag = mem_sadrell_situation_resolved
         create_species = {
-            name = Archivist
-            adjective = Archivist
+            name = NAME_MEM_Archivist
+            adjective = NAME_MEM_Archivist
             plural = Archivists
             class = MACHINE
             portrait = random
@@ -2342,6 +2394,15 @@ country_event = {
 		city_level = event_target:desert_colony
     }
 
+    immediate = {
+        random_galaxy_planet = {
+            limit = {
+                has_planet_flag = mem_sadrell_desert_colony
+            }
+            save_event_target_as = desert_colony
+        }
+    }
+
     option = {
         name = mem_sadrell.202.a
         trigger = {
@@ -2462,12 +2523,18 @@ planet_event = {
                 }
             }
         }
-        event_target:desert_colony = {
+        random_galaxy_planet = {
+            limit = {
+                has_planet_flag = mem_sadrell_desert_colony
+            }
             change_pc = pc_nuked
             reroll_planet = yes
             set_planet_flag = primitives_nuked_themselves
         }
-        event_target:tundra_colony = {
+        random_galaxy_planet = {
+            limit = {
+                has_planet_flag = mem_sadrell_tundra_colony
+            }
             change_pc = pc_nuked
             reroll_planet = yes
             set_planet_flag = primitives_nuked_themselves

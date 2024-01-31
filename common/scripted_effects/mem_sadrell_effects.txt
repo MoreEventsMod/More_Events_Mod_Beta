@@ -7,10 +7,9 @@ mem_sadrell_generate_cluster = {
                 type = mem_sadrell_gateway_active
                 orbit_angle = 0
                 orbit_distance = 60
-            }
-            random_system_megastructure = {
-                limit = { is_megastructure_type = mem_sadrell_gateway_active }
-                activate_gateway = this
+				init_effect = {
+					activate_gateway = this
+				}
             }
         }            
     }
@@ -24,7 +23,10 @@ mem_sadrell_generate_cluster = {
 			initializer = mem_sadrell_1_0
 			hyperlane = no
         }
-        event_target:system_0 = {
+        random_system = {
+            limit = {
+                has_star_flag = mem_sadrell_1_0
+            }
             spawn_system = {
                 min_distance >= 15
                 max_distance <= 25
@@ -65,7 +67,43 @@ mem_sadrell_generate_cluster = {
     set_spawn_system_batch = end
 }
 
-mem_sadrell_redraw_hyperlanes = {
+mem_sadrell_redraw_hyperlanes = {    
+    random_system = {
+        limit = {
+            has_star_flag = mem_sadrell_1_0
+        }
+        save_event_target_as = system_0
+    }
+    random_system = {
+        limit = {
+            has_star_flag = mem_sadrell_1_1
+        }
+        save_event_target_as = system_1
+    }
+    random_system = {
+        limit = {
+            has_star_flag = mem_sadrell_1_2
+        }
+        save_event_target_as = system_2
+    }
+    random_system = {
+        limit = {
+            has_star_flag = mem_sadrell_1_3
+        }
+        save_event_target_as = system_3
+    }
+    random_system = {
+        limit = {
+            has_star_flag = mem_sadrell_1_4
+        }
+        save_event_target_as = system_4
+    }
+    random_system = {
+        limit = {
+            has_star_flag = mem_sadrell_1_5
+        }
+        save_event_target_as = system_5
+    }
     set_spawn_system_batch = begin
     every_system = {
         limit = { has_star_flag = mem_sadrell_extant_cluster }
@@ -124,11 +162,6 @@ mem_sadrell_redraw_hyperlanes = {
         from = event_target:system_0
         to = event_target:system_3
     }
-    event_target:system_0 = {
-        random_system_megastructure = {
-            activate_gateway = this
-        }
-    }
     set_spawn_system_batch = end
 }
 
@@ -138,9 +171,22 @@ mem_sadrell_create_sadrell_colonies = {
         IF = {
             limit = { is_gestalt = no }
             create_built_robot_species = yes
+            if = {
+                limit = {
+                    NOT = {
+                        exists = event_target:robot_species
+                    }
+                }
+                last_created_species = {
+                    save_event_target_as = robot_species
+                }
+            }
         }
     }
-    event_target:desert_colony = {
+    random_galaxy_planet = {
+        limit = {
+            has_planet_flag = mem_sadrell_desert_colony
+        }
         set_owner = event_target:newcomer_country
         set_name = "New Sadrellon"
         clear_blockers = yes
@@ -237,7 +283,10 @@ mem_sadrell_create_sadrell_colonies = {
         add_building = building_fortress
         set_capital = yes
     }
-    event_target:tundra_colony = {
+    random_galaxy_planet = {
+        limit = {
+            has_planet_flag = mem_sadrell_tundra_colony
+        }
         set_owner = event_target:newcomer_country
         clear_blockers = yes
         # while = {
@@ -300,6 +349,7 @@ mem_sadrell_create_sadrell_colonies = {
                     IF = {
                         limit = {
                             owner = { has_authority = auth_machine_intelligence }
+                            exists = event_target:robot_species
                         }
                         create_pop = {
                             species = event_target:robot_species
@@ -491,24 +541,24 @@ mem_sadrell_create_sadrell_colonies = {
             volatile_motes = 1000
             exotic_gases = 1000
         }
-        add_100_unity_per_year_passed = yes
+        add_resource = {
+            unity = 100
+            mult = trigger:years_passed
+        }
         while = {
-            count = 2
+            count = 3
             create_leader = {
-                class = admiral
+                class = commander
             }
         }
         create_leader = {
-            class = governor
+            class = official
         }
         while = {
             count = 3
             create_leader = {
                 class = scientist
             }
-        }
-        create_leader = {
-            class = general
         }
         country_event = { id = game_start.9 }
     }

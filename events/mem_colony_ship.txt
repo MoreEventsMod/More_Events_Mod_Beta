@@ -25,15 +25,9 @@ country_event = {
 			any_system_planet = {
 				is_colonizable = yes
 				OR = {
-					is_planet_class = pc_arid
-					is_planet_class = pc_desert
-					is_planet_class = pc_savannah
-					is_planet_class = pc_continental
-					is_planet_class = pc_ocean
-					is_planet_class = pc_tropical
-					is_planet_class = pc_tundra
-					is_planet_class = pc_arctic
-					is_planet_class = pc_alpine
+					is_wet = yes
+					is_dry = yes
+					is_cold = yes
 				}
 				NOR = {
 					exists = owner
@@ -77,15 +71,9 @@ country_event = {
 				any_system_planet = {
 					is_colonizable = yes
 					OR = {
-						is_planet_class = pc_arid
-						is_planet_class = pc_desert
-						is_planet_class = pc_savannah
-						is_planet_class = pc_continental
-						is_planet_class = pc_ocean
-						is_planet_class = pc_tropical
-						is_planet_class = pc_tundra
-						is_planet_class = pc_arctic
-						is_planet_class = pc_alpine
+						is_wet = yes
+						is_dry = yes
+						is_cold = yes
 					}
 					NOR = {
 						exists = owner
@@ -98,15 +86,9 @@ country_event = {
 				limit = {
 					is_colonizable = yes
 					OR = {
-						is_planet_class = pc_arid
-						is_planet_class = pc_desert
-						is_planet_class = pc_savannah
-						is_planet_class = pc_continental
-						is_planet_class = pc_ocean
-						is_planet_class = pc_tropical
-						is_planet_class = pc_tundra
-						is_planet_class = pc_arctic
-						is_planet_class = pc_alpine
+						is_wet = yes
+						is_dry = yes
+						is_cold = yes
 					}
 					NOR = {
 						exists = owner
@@ -415,18 +397,23 @@ planet_event = {
 		}
 		last_created_country = { 
 			save_event_target_as = landed_country 
-			set_primitive_age = mem_recently_colonized_age
+			set_pre_ftl_age = atomic_age
+			set_country_flag = atomic_age
 			set_country_flag = mem_colony_ship_recently_colonized
 			set_country_flag = mem_use_custom_primitive_buildings
+			set_country_flag = tech_frozen # upgraded manually
+			set_country_flag = observation_1400_fired # won't nuke themselves
 			IF = { #I'm a lazy bastard and don't want no purifier primitives
 				limit = { has_ethic = ethic_fanatic_xenophobe }
 				shift_ethic = ethic_xenophile
 			}
+			set_awareness = 50
 		}
 		every_country = {
 			limit = {
+				is_country_type = default
 				event_target:the_planet = {
-					is_surveyed = { who = prev status = yes }
+					is_in_sensor_range_of_country = prev
 				}
 			}
 			establish_communications_no_message = event_target:landed_country
@@ -449,6 +436,7 @@ planet_event = {
 			species = root.owner
 			type = "industrial_army"
 		}
+		add_modifier = { modifier = mem_recently_colonized_age days = 11700 }
 		planet_event = { id = mem_colony_ship.9 days = 900 }
 		planet_event = { id = mem_colony_ship.9 days = 1800 }
 		planet_event = { id = mem_colony_ship.9 days = 2700 }
@@ -471,7 +459,7 @@ country_event = {
 	
 	option = {
 		name = mem_colony_ship.8.a
-		
+		allow = { NOT = { has_policy_flag = interference_not_allowed } }
 		hidden_effect = {
 			country_event = { id = mem_colony_ship.10 }
 		}
@@ -623,6 +611,7 @@ country_event = {
 		hidden_effect = {
 			event_target:the_planet = {
 				set_owner = root
+				remove_modifier = mem_recently_colonized_age
 			}
 		}
 	}
@@ -640,7 +629,7 @@ country_event = {
 				set_country_type = default
 				set_subject_of = {
 					who = root
-					subject_type = protectorate
+					preset = preset_protectorate
 				}
 				add_resource = {
 					influence = 300
@@ -659,6 +648,21 @@ country_event = {
 					}
 					starbase = {
 						set_owner = event_target:landed_country
+						IF = {
+							limit = {
+								has_starbase_size = starbase_outpost
+							}
+							set_starbase_size = starbase_starport
+						}
+						IF = {
+							limit = {
+								NOT = { has_starbase_module = shipyard }
+							}
+							set_starbase_module = {
+								slot = 1
+								module = shipyard
+							}
+						}
 					}						
 				}
 				every_system_planet = {
@@ -667,6 +671,30 @@ country_event = {
 						owner = { is_same_value = root }
 					}
 					set_owner = event_target:landed_country			
+				}
+			}
+			event_target:the_planet = {
+				remove_modifier = mem_recently_colonized_age
+				add_district = district_city
+				add_district = district_industrial
+				add_district = district_generator
+				add_district = district_mining
+				If = {
+					limit = {
+						event_target:landed_country = {
+							is_lithoid = yes
+						}
+					}
+					add_district = district_mining
+				}
+				else = {
+					add_district = district_farming
+				}
+				while = {
+					count = 8
+					create_pop = {
+						species = event_target:landed_country
+					}
 				}
 			}
 		}
@@ -685,7 +713,7 @@ country_event = {
 				set_country_type = default
 				set_subject_of = {
 					who = root
-					subject_type = tributary
+					preset = preset_tributary
 				}
 				add_resource = {
 					influence = 300
@@ -711,7 +739,8 @@ country_event = {
 						exists = owner
 						owner = { is_same_value = root }
 					}
-					set_owner = event_target:landed_country			
+					set_owner = event_target:landed_country
+					remove_modifier = mem_recently_colonized_age
 				}
 			}
 		}
@@ -735,6 +764,7 @@ country_event = {
 			event_target:the_planet = {
 				set_owner = root
 				create_pop = { species = root }
+				remove_modifier = mem_recently_colonized_age
 			}
 		}
 	}
@@ -744,6 +774,9 @@ country_event = {
 		custom_tooltip = mem_colony_ship.10.e.tooltip
 		add_resource = {
 			influence = 100
+		}
+		event_target:the_planet = {
+			owner = { set_awareness = 100 }
 		}
 	}
 }
@@ -767,12 +800,14 @@ planet_event = {
 			count = 8
 			create_pop = { species = owner }
 		}
-		create_primitive_blockers = yes
+		create_pre_ftl_blockers = yes
 		owner = {
+			remove_country_flag = atomic_age
 			remove_country_flag = mem_colony_ship_recently_colonized
 			set_country_flag = early_space_age
 			remove_country_flag = mem_use_custom_primitive_buildings
-			set_primitive_age = early_space_age
+			set_pre_ftl_age = early_space_age
+			remove_country_flag = tech_frozen
 		}
 		remove_all_armies = yes
 		remove_all_buildings = yes
@@ -782,15 +817,7 @@ planet_event = {
 		add_building = building_primitive_power_plant
 		add_building = building_primitive_capital
 		add_building = building_urban_dwellings
-		while = {
-			count = 4
-			create_army = {
-				name = "NAME_Post-Atomic_Army"
-				owner = root.owner
-				species = root.owner
-				type = "postatomic_army"
-			}
-		}
+		remove_modifier = mem_recently_colonized_age
 		owner = { 
 			change_government = {
 				civics = {

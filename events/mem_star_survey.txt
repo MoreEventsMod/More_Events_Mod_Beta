@@ -24,6 +24,7 @@ country_event = {
 	}
 	picture = GFX_evt_star_chart
 	show_sound = event_laboratory_sound
+	event_chain = "mem_star_survey_chain"
 	trigger = {
 		is_ai = no
 		NOT = { has_country_flag = paul_star_survey }
@@ -37,16 +38,16 @@ country_event = {
 	immediate = {
 		set_country_flag = paul_star_survey
 		set_country_flag = had_star
+		begin_event_chain = {
+			event_chain = "mem_star_survey_chain"
+			target = root
+		}
 	}
 
 	option = {
 		name = "mem_star_survey.1.a"
 		trigger = {
 			NOT = { has_ethic = ethic_gestalt_consciousness }
-		}
-		begin_event_chain = {
-			event_chain = "mem_star_survey_chain"
-			target = root
 		}
 		hidden_effect = {
 			capital_scope = {
@@ -160,13 +161,15 @@ country_event = {
 		name = "mem_star_survey.1.b"
 		trigger = {
 			NOT = { has_ethic = ethic_gestalt_consciousness }
-		}
-		
+		}		
 		add_monthly_resource_mult = {
 			resource = influence
 			value = @tier1influencereward
 			min = @tier1influencemin
 			max = @tier1influencemax
+		}
+		hidden_effect = {
+			end_event_chain = "mem_star_survey_chain"
 		}
 	}
 
@@ -174,10 +177,6 @@ country_event = {
 		name = "mem_star_survey.1.a.gest"
 		trigger = {
 			has_ethic = ethic_gestalt_consciousness
-		}
-		begin_event_chain = {
-			event_chain = "mem_star_survey_chain"
-			target = root
 		}
 		hidden_effect = {
 			capital_scope = {
@@ -287,13 +286,15 @@ country_event = {
 		name = "mem_star_survey.1.b.gest"
 		trigger = {
 			has_ethic = ethic_gestalt_consciousness
-		}
-		
+		}		
 		add_monthly_resource_mult = {
 			resource = influence
 			value = @tier1influencereward
 			min = @tier1influencemin
 			max = @tier1influencemax
+		}		
+		hidden_effect = {
+			end_event_chain = "mem_star_survey_chain"
 		}
 	}
 }
@@ -305,7 +306,7 @@ ship_event = {
 	desc = "mem_star_survey.2.desc"
 	picture = GFX_evt_star_white
 	show_sound = event_laboratory_sound
-
+	event_chain = "mem_star_survey_chain"
 	
 	is_triggered_only = yes
 	
@@ -335,9 +336,9 @@ ship_event = {
 			}
 			add_monthly_resource_mult = {
 				resource = physics_research
-				value = 5
-				min = 50
-				max = 100
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
 			}
 		}
 		
@@ -352,7 +353,8 @@ ship_event = {
 	desc = "mem_star_survey.3.desc"
 	picture = GFX_evt_star_yellow
 	show_sound = event_laboratory_sound
-	
+	event_chain = "mem_star_survey_chain"
+
 	is_triggered_only = yes
 	
 	
@@ -366,15 +368,15 @@ ship_event = {
 			}
 			add_monthly_resource_mult = {
 				resource = society_research
-				value = 5
-				min = 40
-				max = 100
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
 			}
 			add_monthly_resource_mult = {
 				resource = physics_research
-				value = 8
-				min = 80
-				max = 160
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
 			}
 		}
 		
@@ -389,7 +391,8 @@ ship_event = {
 	desc = "mem_star_survey.4.desc"
 	picture = GFX_evt_physics_research
 	show_sound = event_laboratory_sound
-	
+	event_chain = "mem_star_survey_chain"
+
 	is_triggered_only = yes
 	
 	
@@ -407,9 +410,9 @@ ship_event = {
 				}
 				add_monthly_resource_mult = {
 					resource = physics_research
-					value = 8
-					min = 80
-					max = 160
+					value = @tier1researchreward
+					min = @tier1researchmin
+					max = @tier1researchmax
 				}
 			}
 			ELSE_IF = {
@@ -439,7 +442,8 @@ ship_event = {
 	desc = "mem_star_survey.5.desc"
 	picture = GFX_evt_physics_research
 	show_sound = event_laboratory_sound
-	
+	event_chain = "mem_star_survey_chain"
+
 	is_triggered_only = yes
 	
 	
@@ -452,10 +456,40 @@ ship_event = {
 				amount = 1 
 			}
 		}
-		leader = {
-			add_trait = leader_trait_expertise_particles
+		IF = {
+			limit = {
+				owner = {
+					has_ethic = ethic_gestalt_consciousness
+				}
+			}
+			IF = {
+				limit = {
+					leader = {
+						NOR = {
+							has_trait = leader_trait_meticulous
+							has_trait = leader_trait_meticulous_2
+						}
+					}
+				}
+				leader = {
+					add_trait = leader_trait_meticulous
+				}
+			}
 		}
-		
+		ELSE_IF = {
+			limit = {
+				leader = {
+					NOR = {
+						has_trait = leader_trait_expertise_particles
+						has_trait = leader_trait_expertise_particles_2
+						has_trait = leader_trait_expertise_particles_3
+					}
+				}
+			}
+			leader = {
+				add_trait = leader_trait_expertise_particles
+			}
+		}
 	}
 	
 }
@@ -480,6 +514,7 @@ country_event = {
 			}
 		}
 	}
+	event_chain = "mem_star_survey_chain"
 	
 	trigger = {
 		has_completed_event_chain_counter = {
@@ -509,9 +544,9 @@ country_event = {
 		root = {
 			add_monthly_resource_mult = {
 				resource = physics_research
-				value = 12
-				min = 90
-				max = 250
+				value = @tier1researchreward
+				min = @tier1researchmin
+				max = @tier1researchmax
 			}
 		}
 	}

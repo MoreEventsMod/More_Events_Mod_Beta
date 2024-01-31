@@ -13,66 +13,59 @@ namespace = mem_sleepers
 # Happens on planet with obervation post with either passive or active observation
 
 # Sleepers setup (HIDDEN)
-planet_event = {
+situation_event = {
 	id = mem_sleepers.1
 	hide_window = yes
-	
+	is_triggered_only = yes
+
 	trigger = {
-		has_observation_outpost = yes
-		solar_system = {
-			NOR = {
-				has_star_flag = mem_ark_system
-				has_star_flag = mem_crucible_system
-				has_star_flag = mem_wargame_system
-				has_star_flag = old_foes_system
-			}
-		}
-		NOT = {
-			has_global_flag = mem_sleepers
-		}
-		observation_outpost = { 
-			OR = { 
-				has_mission = passive_observation
-				has_mission = specimen_collection
-				has_mission = native_indoctrination
-			}
-		}
-		observation_outpost_owner = {
-			is_ai = no
-		}
+		NOT = { has_global_flag = mem_sleepers }
 		owner = {
-			is_country_type = primitive
+			is_regular_pre_ftl = yes
+			NOT = { current_awareness_level = full }
 			NOT = {
 				has_country_flag = benefactor_empire
 			}
 			OR = {
-				has_country_flag = bronze_age
-				has_country_flag = iron_age
-				has_country_flag = late_medieval_age
-				has_country_flag = renaissance_age
+				has_pre_ftl_age = bronze_age
+				has_pre_ftl_age = iron_age
+				has_pre_ftl_age = late_medieval_age
+				has_pre_ftl_age = renaissance_age
+			}
+			capital_scope = {
+				solar_system = {
+					NOR = {
+						has_star_flag = mem_ark_system
+						has_star_flag = mem_crucible_system
+						has_star_flag = mem_wargame_system
+						has_star_flag = old_foes_system
+					}
+				}
+				has_observation_outpost = yes
+				observation_outpost_owner = {
+					is_ai = no
+					is_gestalt = no
+				}
 			}
 		}
 	}
-	
-	mean_time_to_happen = {
-		months = 5000
-		#months = 1
-	}
-	
+
 	immediate = {
-		If = {
-			limit = {
-				observation_outpost_owner = {
-					is_ai = no
-				}
-			}
-			observation_outpost_owner = {
-				save_event_target_as = mem_sleepers_station_owner
-				country_event = { id = mem_sleepers.2 }
-			}
+		owner.capital_scope = {
+			save_event_target_as = the_planet
 			set_planet_flag = mem_sleepers_planet
 			set_global_flag = mem_sleepers
 		}
+		owner = {
+			save_event_target_as = pre_ftl_country
+		}
+		owner.capital_scope.observation_outpost_owner = {
+			save_event_target_as = mem_sleepers_station_owner
+			country_event = { id = mem_sleepers.2 }
+		}
+		set_situation_flag = has_ongoing_observation_event_chain
+		# Setting this flag for the duration of the entire event chain
+		# to prevent other observation events from interfering.
 	}
 }
 
@@ -120,6 +113,12 @@ country_event = {
 	is_triggered_only = yes
 
 	immediate = {
+		random_situation = {
+			limit = {
+				is_situation_type = pre_ftl_tech_progress_situation
+			}
+			remove_situation_flag = has_ongoing_observation_event_chain
+		}
 		random_system_within_border = {
 			limit = {
 				any_system_planet = {
@@ -499,7 +498,7 @@ country_event = {
 		}
 		FROM = {
 			fleet = {
-				kill_leader = { type = scientist show_notification = no}
+				kill_leader = { class = scientist show_notification = no}
 			}
 		}
 	}
@@ -658,7 +657,7 @@ country_event = {
 	immediate = {
 		FROMFROMFROMFROM = {
 			create_species = {
-				name = "Ozari"
+				name = "NAME_Ozari"
 				class = random_non_machine
 				portrait = random
 				homeworld = THIS
@@ -669,8 +668,8 @@ country_event = {
 				}
 			}
 			create_country = {
-				name = "Ozari Remnants"
-				species = last_created
+				name = "NAME_Ozari_Remnants"
+				species = last_created_species
 				type = adversary
 				ethos = {
 					ethic = ethic_xenophile
@@ -778,7 +777,7 @@ country_event = {
 	title = mem_sleepers.51.name
 	desc = mem_sleepers.51.desc
 	picture = GFX_evt_mem_native_interaction
-	show_sound = event_primitive_civilization
+	show_sound = event_pre_ftl_civilization
 	location = FROMFROMFROMFROM.FROM
 	
 	is_triggered_only = yes
@@ -794,6 +793,7 @@ country_event = {
 				limit = {
 					has_planet_flag = mem_sleepers_planet
 				}
+				save_event_target_as = sleepers_planet
 				owner = {
 					IF = {
 						limit = {
@@ -839,24 +839,14 @@ country_event = {
 		name = mem_sleepers.51.a
 		custom_tooltip = mem_sleepers.51.a.tooltip
 		hidden_effect = {
-			random_system_within_border = {
-				limit = {
-					any_system_planet = {
-						has_planet_flag = mem_sleepers_planet
-					}
+			event_target:sleepers_planet = {
+				observation_outpost = {
+					dismantle = yes
 				}
-				random_system_planet = {
-					limit = {
-						has_planet_flag = mem_sleepers_planet
-					}
-					observation_outpost = {
-						dismantle = yes
-					}
-					set_owner = ROOT
-					every_planet_army = {
-						remove_army = yes
-					}
+				every_planet_army = {
+					remove_army = yes
 				}
+				set_owner = ROOT
 			}
 		}
 	}
@@ -866,33 +856,20 @@ country_event = {
 		name = mem_sleepers.51.b
 		custom_tooltip = mem_sleepers.51.b.tooltip
 		hidden_effect = {
-			random_system_within_border = {
-				limit = {
-					any_system_planet = {
-						has_planet_flag = mem_sleepers_planet
-					}
+			event_target:sleepers_planet = {
+				observation_outpost = {
+					dismantle = yes
 				}
-				random_system_planet = {
-					limit = {
-						has_planet_flag = mem_sleepers_planet
+				owner = {
+					set_pre_ftl_age_effect = { PRE_FTL_AGE = early_space_age }
+					country_event = { id = mem_sleepers.52 }
+					country_event = { id = mem_sleepers.5201 days = 3 }
+					event_target:sleepers_planet.solar_system.starbase = {
+						set_owner = prev
 					}
-					observation_outpost = {
-						dismantle = yes
-					}
-					owner = {
-						switch = {
-							trigger = has_country_flag
-							bronze_age = { remove_country_flag = bronze_age }
-							iron_age = { remove_country_flag = iron_age }
-							late_medieval_age = { remove_country_flag = late_medieval_age }
-							renaissance_age = { remove_country_flag = renaissance_age }
-						}
-						set_country_flag = early_space_age
-						country_event = { id = mem_sleepers.52 }
-						set_subject_of = {
-							who = root
-							subject_type = protectorate
-						}					
+					set_subject_of = {
+						who = root
+						preset = preset_protectorate
 					}
 				}
 			}
@@ -909,29 +886,16 @@ country_event = {
 		}
 		custom_tooltip = mem_sleepers.51.c.tooltip
 		hidden_effect = {
-			random_system_within_border = {
-				limit = {
-					any_system_planet = {
-						has_planet_flag = mem_sleepers_planet
-					}
+			event_target:sleepers_planet = {
+				observation_outpost = {
+					dismantle = yes
 				}
-				random_system_planet = {
-					limit = {
-						has_planet_flag = mem_sleepers_planet
-					}
-					observation_outpost = {
-						dismantle = yes
-					}
-					owner = {
-						switch = {
-							trigger = has_country_flag
-							bronze_age = { remove_country_flag = bronze_age }
-							iron_age = { remove_country_flag = iron_age }
-							late_medieval_age = { remove_country_flag = late_medieval_age }
-							renaissance_age = { remove_country_flag = renaissance_age }
-						}
-						set_country_flag = early_space_age
-						country_event = { id = mem_sleepers.52 }				
+				owner = {
+					set_pre_ftl_age_effect = { PRE_FTL_AGE = early_space_age }
+					country_event = { id = mem_sleepers.52 }
+					country_event = { id = mem_sleepers.5201 days = 3 }
+					event_target:sleepers_planet.solar_system.starbase = {
+						set_owner = prev
 					}
 				}
 			}
@@ -946,30 +910,69 @@ country_event = {
 		}
 		custom_tooltip = mem_sleepers.51.c.tooltip
 		hidden_effect = {
-			random_system_within_border = {
-				limit = {
-					any_system_planet = {
-						has_planet_flag = mem_sleepers_planet
+			event_target:sleepers_planet = {
+				observation_outpost = {
+					dismantle = yes
+				}
+				owner = {
+					set_pre_ftl_age_effect = { PRE_FTL_AGE = early_space_age }
+					country_event = { id = mem_sleepers.52 }
+					country_event = { id = mem_sleepers.5201 days = 3 }
+					event_target:sleepers_planet.solar_system.starbase = {
+						set_owner = prev
 					}
 				}
-				random_system_planet = {
-					limit = {
-						has_planet_flag = mem_sleepers_planet
-					}
-					observation_outpost = {
-						dismantle = yes
-					}
-					owner = {
-						switch = {
-							trigger = has_country_flag
-							bronze_age = { remove_country_flag = bronze_age }
-							iron_age = { remove_country_flag = iron_age }
-							late_medieval_age = { remove_country_flag = late_medieval_age }
-							renaissance_age = { remove_country_flag = renaissance_age }
-						}
-						set_country_flag = early_space_age
-						country_event = { id = mem_sleepers.52 }				
-					}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = mem_sleepers.5201
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		establish_communications_no_message = from
+		If = {
+			limit = {
+				NOR = {
+					has_ethic= ethic_xenophobe
+					has_ethic= ethic_fanatic_xenophobe
+				}				
+			}
+			set_empire_flag = {
+				icon = {
+					category = "spherical"
+					file = "flag_spherical_1.dds"
+				}
+				background= {
+					category = "backgrounds"
+					file = "new_dawn.dds"
+				}
+				colors={
+					"green"
+					"black"
+					"null"
+					"null"
+				}
+			}
+		}
+		else = {
+			set_empire_flag = {
+				icon = {
+					category = "spherical"
+					file = "flag_spherical_1.dds"
+				}
+				background= {
+					category = "backgrounds"
+					file = "new_dawn.dds"
+				}
+				colors={
+					"red"
+					"black"
+					"null"
+					"null"
 				}
 			}
 		}
@@ -989,59 +992,18 @@ country_event = {
 	is_triggered_only = yes
 	
 	immediate = {
-		remove_country_flag = early_space_age
-		set_country_flag = primitives_can_into_space
-		set_country_type = default
 		change_dominant_species = {
 			species = event_target:mem_sleepers_species
 		}
-		change_country_flag = {
-			icon = {
-				category = "spherical"
-				file = "flag_spherical_1.dds"
+		if = {
+			limit = {
+				has_awareness >= 100
 			}
-			background= {
-				category = "backgrounds"
-				file = "new_dawn.dds"
-			}
-			colors={
-				"green"
-				"black"
-				"null"
-				"null"
-			}
+			set_country_flag = knew_of_aliens
 		}
-		if = {
-			limit = { is_species_class = MAM }
-			set_graphical_culture = mammalian_01
-		}
-		if = {
-			limit = { is_species_class = HUM }
-			set_graphical_culture = mammalian_01
-		}
-		if = {
-			limit = { is_species_class = PLANT }
-			set_graphical_culture = plantoid_01
-		}
-		if = {
-			limit = { is_species_class = REP }
-			set_graphical_culture = reptilian_01
-		}
-		if = {
-			limit = { is_species_class = AVI }
-			set_graphical_culture = avian_01
-		}
-		if = {
-			limit = { is_species_class = ART }
-			set_graphical_culture = arthropoid_01
-		}
-		if = {
-			limit = { is_species_class = MOL }
-			set_graphical_culture = molluscoid_01
-		}
-		if = {
-			limit = { is_species_class = FUN }
-			set_graphical_culture = fungoid_01
+		achieve_ftl_effect = {
+			PRE_FTL = root
+			OWNER = root
 		}
 		#making sure the country has the correct ethics
 		IF = {
@@ -1155,87 +1117,16 @@ country_event = {
 		}
 		set_name = "Ozari Commonwealth"
 		create_leader = {
-			class = ruler
+			CLASS = official
 			species = owner_main_species
 			name = random
 			skill = 1
 			traits = {
-				add_trait = trait_ruler_champion_of_the_people
-				add_trait = trait_ruler_fertility_preacher
+				trait = trait_ruler_champion_of_the_people
+				trait = trait_ruler_fertility_preacher
 			}
 		}
 		assign_leader = last_created_leader
-		
-		add_resource = {
-			energy = 500
-			minerals = 1000 # enough for a spaceport and then some
-		}
-		add_resource = { influence = 300 }
-		capital_scope = {
-			clear_blockers = yes
-			while = {
-				limit = { 
-					num_pops < 8
-					#free_housing > 0
-				}
-				create_pop = {
-					species = owner
-				}
-			}
-			remove_building = building_primitive_farm
-			remove_building = building_primitive_factory
-			remove_building = building_primitive_capital
-			remove_building = building_urban_dwellings
-			add_district = district_city
-			add_district = district_city
-			add_district = district_city
-			add_district = district_industrial
-			add_district = district_industrial
-			add_district = district_industrial
-			add_district = district_farming
-			add_district = district_farming
-			add_district = district_farming
-			add_district = district_mining
-			add_district = district_mining
-			add_district = district_generator
-			add_district = district_generator
-			add_building = building_capital
-			add_building = building_research_lab_1
-			add_building = building_foundry_1
-			
-			remove_all_armies = yes
-			solar_system = {
-				if = {
-					limit = {
-						NOT = { exists = starbase }
-					}
-					create_starbase = {
-						size = starbase_outpost
-						owner = root
-					}
-				}	
-				else_if = {
-					limit = {
-						starbase = {
-							NOT = { owner = { is_same_value = root } }
-						}
-					}	
-					starbase = {
-						set_owner = root
-					}
-				}
-			}		
-			while = {
-				limit = { num_pops < 20 }
-				create_pop = {
-					species = owner
-				}
-			}		
-		}
-		random_owned_ship = {
-			limit = { is_ship_size = primitive_space_station }
-			fleet = { destroy_fleet = THIS }
-		}
 	}
 }
 
@@ -1273,7 +1164,7 @@ country_event = {
 	immediate = {
 		FROMFROMFROMFROM = {
 			create_species = {
-				name = "Ozari"
+				name = "NAME_Ozari"
 				class = random_non_machine
 				portrait = random
 				homeworld = THIS
@@ -1284,8 +1175,8 @@ country_event = {
 				}
 			}
 			create_country = {
-				name = "Ozari Remnants"
-				species = last_created
+				name = "NAME_Ozari_Remnants"
+				species = last_created_species
 				type = adversary
 				ethos = {
 					ethic = ethic_fanatic_xenophobe
@@ -1319,13 +1210,16 @@ country_event = {
 				save_event_target_as = mem_sleepers_country
 				owner_species = { save_event_target_as = mem_sleepers_species }
 			}
-			create_pop = { 
-				species = event_target:mem_sleepers_country
-				ethos = event_target:mem_sleepers_country
-			}
-			last_created_pop = {
-				set_pop_flag = mem_sleepers_ozari
-			}
+			while = {
+				count = 5
+				create_pop = { 
+					species = event_target:mem_sleepers_country
+					ethos = event_target:mem_sleepers_country
+				}
+				last_created_pop = {
+					set_pop_flag = mem_sleepers_ozari
+				}
+			}			
 		}
 		country_event = { id = mem_sleepers.101 days = 60 }
 	}
@@ -1351,6 +1245,22 @@ country_event = {
 	location = FROMFROMFROMFROM.FROM
 	
 	is_triggered_only = yes
+
+	immediate = {
+		random_system_within_border = {
+			limit = {
+				any_system_planet = {
+					has_planet_flag = mem_sleepers_planet
+				}
+			}
+			random_system_planet = {
+				limit = {
+					has_planet_flag = mem_sleepers_planet
+				}
+				save_event_target_as = sleepers_planet
+			}
+		}
+	}
 	
 	#integrate them peacefully
 	option = {
@@ -1364,45 +1274,23 @@ country_event = {
 		}
 		custom_tooltip = mem_sleepers.101.a.tooltip
 		hidden_effect = {	
-			random_system_within_border = {
-				limit = {
-					any_system_planet = {
-						has_planet_flag = mem_sleepers_planet
-					}
-				}
-				random_system_planet = {
+			event_target:sleepers_planet = {
+				every_owned_pop = {
 					limit = {
-						has_planet_flag = mem_sleepers_planet
-					}
-					every_owned_pop = {
-						limit = {
-							NOT = {
-								has_pop_flag = mem_sleepers_ozari
-							}
+						NOT = {
+							has_pop_flag = mem_sleepers_ozari
 						}
-						kill_pop = yes
 					}
+					kill_pop = yes
 				}
-			}
-			random_system_within_border = {
-				limit = {
-					any_system_planet = {
-						has_planet_flag = mem_sleepers_planet
-					}
+				observation_outpost = {
+					dismantle = yes
 				}
-				random_system_planet = {
-					limit = {
-						has_planet_flag = mem_sleepers_planet
-					}
-					observation_outpost = {
-						dismantle = yes
-					}
-					set_owner = ROOT
-					every_planet_army = {
-						remove_army = yes
-					}
+				every_planet_army = {
+					remove_army = yes
 				}
-			}
+				set_owner = ROOT
+			}			
 		}
 	}
 	
@@ -1413,46 +1301,24 @@ country_event = {
 			has_ethic = ethic_fanatic_xenophobe
 		}
 		custom_tooltip = mem_sleepers.101.a.tooltip
-		hidden_effect = {
-			random_system_within_border = {
-				limit = {
-					any_system_planet = {
-						has_planet_flag = mem_sleepers_planet
-					}
-				}
-				random_system_planet = {
+		hidden_effect = {	
+			event_target:sleepers_planet = {
+				every_owned_pop = {
 					limit = {
-						has_planet_flag = mem_sleepers_planet
-					}
-					every_owned_pop = {
-						limit = {
-							NOT = {
-								has_pop_flag = mem_sleepers_ozari
-							}
+						NOT = {
+							has_pop_flag = mem_sleepers_ozari
 						}
-						kill_pop = yes
 					}
+					kill_pop = yes
 				}
-			}
-			random_system_within_border = {
-				limit = {
-					any_system_planet = {
-						has_planet_flag = mem_sleepers_planet
-					}
+				observation_outpost = {
+					dismantle = yes
 				}
-				random_system_planet = {
-					limit = {
-						has_planet_flag = mem_sleepers_planet
-					}
-					observation_outpost = {
-						dismantle = yes
-					}
-					set_owner = ROOT
-					every_planet_army = {
-						remove_army = yes
-					}
+				every_planet_army = {
+					remove_army = yes
 				}
-			}
+				set_owner = ROOT
+			}			
 		}
 	}
 	
@@ -1466,57 +1332,32 @@ country_event = {
 			}
 		}
 		custom_tooltip = mem_sleepers.101.b.tooltip
-		hidden_effect = {
-			random_system_within_border = {
-				limit = {
-					any_system_planet = {
-						has_planet_flag = mem_sleepers_planet
-					}
-				}
-				random_system_planet = {
+		hidden_effect = {	
+			event_target:sleepers_planet = {
+				every_owned_pop = {
 					limit = {
-						has_planet_flag = mem_sleepers_planet
-					}
-					every_owned_pop = {
-						limit = {
-							NOT = {
-								has_pop_flag = mem_sleepers_ozari
-							}
+						NOT = {
+							has_pop_flag = mem_sleepers_ozari
 						}
-						kill_pop = yes
 					}
+					kill_pop = yes
 				}
-			}
-			random_system_within_border = {
-				limit = {
-					any_system_planet = {
-						has_planet_flag = mem_sleepers_planet
-					}
+				observation_outpost = {
+					dismantle = yes
 				}
-				random_system_planet = {
-					limit = {
-						has_planet_flag = mem_sleepers_planet
+				owner = {
+					set_pre_ftl_age_effect = { PRE_FTL_AGE = early_space_age }
+					country_event = { id = mem_sleepers.102 }
+					country_event = { id = mem_sleepers.5201 days = 3 }
+					event_target:sleepers_planet.solar_system.starbase = {
+						set_owner = prev
 					}
-					observation_outpost = {
-						dismantle = yes
-					}
-					owner = {
-						switch = {
-							trigger = has_country_flag
-							bronze_age = { remove_country_flag = bronze_age }
-							iron_age = { remove_country_flag = iron_age }
-							late_medieval_age = { remove_country_flag = late_medieval_age }
-							renaissance_age = { remove_country_flag = renaissance_age }
-						}
-						set_country_flag = early_space_age
-						country_event = { id = mem_sleepers.102 }
-						set_subject_of = {
-							who = root
-							subject_type = protectorate
-						}					
-					}
+					set_subject_of = {
+						who = root
+						preset = preset_protectorate
+					}					
 				}
-			}
+			}			
 		}
 	}
 	
@@ -1530,49 +1371,24 @@ country_event = {
 		}
 		custom_tooltip = mem_sleepers.51.c.tooltip
 		hidden_effect = {
-			random_system_within_border = {
-				limit = {
-					any_system_planet = {
-						has_planet_flag = mem_sleepers_planet
-					}
-				}
-				random_system_planet = {
+			event_target:sleepers_planet = {
+				every_owned_pop = {
 					limit = {
-						has_planet_flag = mem_sleepers_planet
-					}
-					every_owned_pop = {
-						limit = {
-							NOT = {
-								has_pop_flag = mem_sleepers_ozari
-							}
+						NOT = {
+							has_pop_flag = mem_sleepers_ozari
 						}
-						kill_pop = yes
 					}
+					kill_pop = yes
 				}
-			}
-			random_system_within_border = {
-				limit = {
-					any_system_planet = {
-						has_planet_flag = mem_sleepers_planet
-					}
+				observation_outpost = {
+					dismantle = yes
 				}
-				random_system_planet = {
-					limit = {
-						has_planet_flag = mem_sleepers_planet
-					}
-					observation_outpost = {
-						dismantle = yes
-					}
-					owner = {
-						switch = {
-							trigger = has_country_flag
-							bronze_age = { remove_country_flag = bronze_age }
-							iron_age = { remove_country_flag = iron_age }
-							late_medieval_age = { remove_country_flag = late_medieval_age }
-							renaissance_age = { remove_country_flag = renaissance_age }
-						}
-						set_country_flag = early_space_age
-						country_event = { id = mem_sleepers.102 }				
+				owner = {
+					set_pre_ftl_age_effect = { PRE_FTL_AGE = early_space_age }
+					country_event = { id = mem_sleepers.102 }
+					country_event = { id = mem_sleepers.5201 days = 3 }
+					event_target:sleepers_planet.solar_system.starbase = {
+						set_owner = prev
 					}
 				}
 			}
@@ -1587,49 +1403,24 @@ country_event = {
 		}
 		custom_tooltip = mem_sleepers.51.c.tooltip
 		hidden_effect = {
-			random_system_within_border = {
-				limit = {
-					any_system_planet = {
-						has_planet_flag = mem_sleepers_planet
-					}
-				}
-				random_system_planet = {
+			event_target:sleepers_planet = {
+				every_owned_pop = {
 					limit = {
-						has_planet_flag = mem_sleepers_planet
-					}
-					every_owned_pop = {
-						limit = {
-							NOT = {
-								has_pop_flag = mem_sleepers_ozari
-							}
+						NOT = {
+							has_pop_flag = mem_sleepers_ozari
 						}
-						kill_pop = yes
 					}
+					kill_pop = yes
 				}
-			}
-			random_system_within_border = {
-				limit = {
-					any_system_planet = {
-						has_planet_flag = mem_sleepers_planet
-					}
+				observation_outpost = {
+					dismantle = yes
 				}
-				random_system_planet = {
-					limit = {
-						has_planet_flag = mem_sleepers_planet
-					}
-					observation_outpost = {
-						dismantle = yes
-					}
-					owner = {
-						switch = {
-							trigger = has_country_flag
-							bronze_age = { remove_country_flag = bronze_age }
-							iron_age = { remove_country_flag = iron_age }
-							late_medieval_age = { remove_country_flag = late_medieval_age }
-							renaissance_age = { remove_country_flag = renaissance_age }
-						}
-						set_country_flag = early_space_age
-						country_event = { id = mem_sleepers.102 }				
+				owner = {
+					set_pre_ftl_age_effect = { PRE_FTL_AGE = early_space_age }
+					country_event = { id = mem_sleepers.102 }
+					country_event = { id = mem_sleepers.5201 days = 3 }
+					event_target:sleepers_planet.solar_system.starbase = {
+						set_owner = prev
 					}
 				}
 			}
@@ -1650,58 +1441,18 @@ country_event = {
 	is_triggered_only = yes
 	
 	immediate = {
-		remove_country_flag = early_space_age
-		set_country_type = default
 		change_dominant_species = {
 			species = event_target:mem_sleepers_species
 		}
-		change_country_flag = {
-			icon = {
-				category = "spherical"
-				file = "flag_spherical_1.dds"
+		if = {
+			limit = {
+				has_awareness >= 100
 			}
-			background= {
-				category = "backgrounds"
-				file = "new_dawn.dds"
-			}
-			colors={
-				"red"
-				"black"
-				"null"
-				"null"
-			}
+			set_country_flag = knew_of_aliens
 		}
-		if = {
-			limit = { is_species_class = MAM }
-			set_graphical_culture = mammalian_01
-		}
-		if = {
-			limit = { is_species_class = HUM }
-			set_graphical_culture = mammalian_01
-		}
-		if = {
-			limit = { is_species_class = PLANT }
-			set_graphical_culture = plantoid_01
-		}
-		if = {
-			limit = { is_species_class = REP }
-			set_graphical_culture = reptilian_01
-		}
-		if = {
-			limit = { is_species_class = AVI }
-			set_graphical_culture = avian_01
-		}
-		if = {
-			limit = { is_species_class = ART }
-			set_graphical_culture = arthropoid_01
-		}
-		if = {
-			limit = { is_species_class = MOL }
-			set_graphical_culture = molluscoid_01
-		}
-		if = {
-			limit = { is_species_class = FUN }
-			set_graphical_culture = fungoid_01
+		achieve_ftl_effect = {
+			PRE_FTL = root
+			OWNER = root
 		}
 		#making sure the country has the correct ethics
 		IF = {
@@ -1813,85 +1564,16 @@ country_event = {
 		}
 		set_name = "Ozari Dominion"
 		create_leader = {
-			class = ruler
+			CLASS = commander
 			species = owner_main_species
 			name = random
 			skill = 1
 			traits = {
-				add_trait = trait_ruler_warlike
-				add_trait = trait_ruler_industrialist
+				trait = trait_ruler_warlike
+				trait = trait_ruler_industrialist
 			}
 		}
 		assign_leader = last_created_leader
-		add_resource = {
-			energy = 500
-			minerals = 1000 # enough for a spaceport and then some
-		}
-		add_resource = { influence = 300 }
-		capital_scope = {
-			clear_blockers = yes
-			while = {
-				limit = { 
-					num_pops < 8
-					#free_housing > 0
-				}
-				create_pop = {
-					species = owner
-				}
-			}
-			remove_building = building_primitive_farm
-			remove_building = building_primitive_factory
-			remove_building = building_primitive_capital
-			remove_building = building_urban_dwellings
-			add_district = district_city
-			add_district = district_city
-			add_district = district_city
-			add_district = district_city
-			add_district = district_farming
-			add_district = district_farming
-			add_district = district_farming
-			add_district = district_mining
-			add_district = district_mining
-			add_district = district_generator
-			add_district = district_generator
-			add_building = building_capital
-			add_building = building_research_lab_1
-			add_building = building_foundry_1
-			add_building = building_factory_1
-			
-			remove_all_armies = yes
-			solar_system = {
-				if = {
-					limit = {
-						NOT = { exists = starbase }
-					}
-					create_starbase = {
-						size = starbase_outpost
-						owner = root
-					}
-				}	
-				else_if = {
-					limit = {
-						starbase = {
-							NOT = { owner = { is_same_value = root } }
-						}
-					}	
-					starbase = {
-						set_owner = root
-					}
-				}
-			}	
-			while = {
-				limit = { num_pops < 20 }
-				create_pop = {
-					species = owner
-				}
-			}			
-		}
-		random_owned_ship = {
-			limit = { is_ship_size = primitive_space_station }
-			fleet = { destroy_fleet = THIS }
-		}
 	}
 }
 
@@ -1928,7 +1610,7 @@ country_event = {
 	immediate = {
 		FROMFROMFROMFROM = {
 			create_species = {
-				name = "Ozari"
+				name = "NAME_Ozari"
 				class = random_non_machine
 				portrait = random
 				homeworld = THIS
@@ -1939,8 +1621,8 @@ country_event = {
 				}
 			}
 			create_country = {
-				name = "Ozari Remnants"
-				species = last_created
+				name = "NAME_Ozari_Remnants"
+				species = last_created_species
 				type = adversary
 				ethos = {
 					ethic = ethic_xenophile
@@ -1992,7 +1674,7 @@ country_event = {
 			days = -1
 		}
 		hidden_effect = {
-			country_event = { id = mem_sleepers.151 days = 14400 random = 3600 } # should be days = 14400 random = 3600
+			country_event = { id = mem_sleepers.151 days = 12600 random = 3600 }
 		}
 	}
 	
@@ -2003,7 +1685,7 @@ country_event = {
 			influence = 75
 		}
 		hidden_effect = {
-			country_event = { id = mem_sleepers.152 days = 1800 random = 200 } # should be days = 1800 random = 200
+			country_event = { id = mem_sleepers.152 days = 1700 random = 200 }
 		}
 	}
 	
@@ -2098,7 +1780,7 @@ country_event = {
 	title = mem_sleepers.152.name
 	desc = mem_sleepers.152.desc
 	picture = GFX_evt_medieval_alien_civilization
-	show_sound = event_primitive_civilization
+	show_sound = event_pre_ftl_civilization
 	location = FROMFROMFROMFROM.FROM
 	
 	is_triggered_only = yes
@@ -2127,52 +1809,7 @@ country_event = {
 				has_planet_flag = mem_sleepers_planet
 			}
 			owner = {
-				THIS = {
-					save_event_target_as = mem_sleepers_country
-				}
-				IF = {
-					limit = {
-						has_country_flag = bronze_age
-					}
-					remove_country_flag = bronze_age
-				}
-				IF = {
-					limit = {
-						has_country_flag = iron_age
-					}
-					remove_country_flag = iron_age
-				}
-				IF = {
-					limit = {
-						has_country_flag = late_medieval_age
-					}
-					remove_country_flag = late_medieval_age
-				}
-				IF = {
-					limit = {
-						has_country_flag = renaissance_age
-					}
-					remove_country_flag = renaissance_age
-				}	
-				set_country_flag = steam_age
-				set_primitive_age = steam_age
-				home_planet = {
-					remove_building = building_primitive_dwellings
-					add_building = building_primitive_factory
-					create_pop = { species = owner_main_species }
-					create_pop = { species = owner_main_species }
-
-					every_planet_army = { remove_army = yes }
-					while = {
-						count = 3
-						create_army = {
-							name = "Industrial Army"
-							owner = event_target:mem_sleepers_country
-							species = event_target:mem_sleepers_country
-							type = "industrial_army"
-						}
-					}
-				}
+				set_pre_ftl_age_effect = { PRE_FTL_AGE = steam_age }
 			}
 		}
 	}
@@ -2215,7 +1852,7 @@ country_event = {
 	immediate = {
 		FROMFROMFROMFROM = {
 			create_species = {
-				name = "Ozari"
+				name = "NAME_Ozari"
 				class = random_non_machine
 				portrait = random
 				homeworld = THIS
@@ -2226,8 +1863,8 @@ country_event = {
 				}
 			}
 			create_country = {
-				name = "Ozari Remnant"
-				species = last_created
+				name = "NAME_Ozari_Remnants"
+				species = last_created_species
 				type = adversary
 				ethos = {
 					ethic = ethic_xenophile
@@ -2280,8 +1917,8 @@ country_event = {
 			name = random
 			skill = 5
 			traits = {
-				add_trait = leader_trait_expertise_biology
-				add_trait = mem_leader_trait_last_ozari
+				trait = leader_trait_expertise_biology
+				trait = mem_leader_trait_last_ozari
 			}
 		}
 	}
