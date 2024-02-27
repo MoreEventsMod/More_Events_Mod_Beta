@@ -11,68 +11,60 @@
 namespace = mem_lunar_gate
 
 # This event is used to trigger the "real" event.
-planet_event = {
+country_event = {
 	id = mem_lunar_gate.1
-	hide_window = yes		
+	hide_window = yes
+	
+	is_triggered_only = yes
 	
 	trigger = {
-		has_owner = yes
-		
-		NOR = {
-			has_planet_flag = mem_lunar_gate_checked
-			has_planet_flag = colony_event
+		NOT = {
 			has_global_flag = mem_lunar_gate_happened
 		}
-		
-		num_pops > 15
-		is_homeworld = no
-		is_capital = no
-		is_moon = no
-		has_moon = yes
-		any_moon = {
-			uninhabitable_regular_planet = yes
-		}
-		
-		
-		exists = owner
-		owner = {
-			is_country_type = default
-			NOT = { has_ethic = ethic_gestalt_consciousness } #would need some rewriting to fit them
-			NOT = {
-				has_country_flag = mem_lunar_gate
+		is_ai = no
+		NOT = { has_ethic = ethic_gestalt_consciousness } #would need some rewriting to fit them
+		any_owned_planet = {
+			has_moon = yes
+			any_moon = {
+				uninhabitable_regular_planet = yes
 			}
+			NOT = {
+				has_planet_flag = colony_event
+			}
+			is_homeworld = no
+			is_capital = no
+			num_pops > 15
 		}
 	}
 	
-	mean_time_to_happen = { months = 24 }
-	
-	immediate = { 
-		set_planet_flag = mem_lunar_gate_checked
+	immediate = {
 		
 		random_list = { # values are subject to change
-			10 = { # goes to real start of event
-				planet_event = { id = mem_lunar_gate.2 }
-				owner = {
-					set_country_flag = mem_lunar_gate
-				}
-				modifier = {
-					factor = 1.5
-					owner = { is_ai = no }
-				}
-				modifier = {
-					factor = 0.5
-					owner = { is_ai = yes }
-				}
+			10 = { # goes to real start of event		
+				set_global_flag = mem_lunar_gate_happened
+				random_owned_planet = {
+					limit = {
+						has_moon = yes
+						any_moon = {
+							uninhabitable_regular_planet = yes
+						}
+						NOT = {
+							has_planet_flag = colony_event
+						}
+						is_homeworld = no
+						is_capital = no
+						num_pops > 15
+					}
+					planet_event = {
+						id = mem_lunar_gate.2
+						days = 1
+						random = 355
+					}
+				}				
 			}
 			
 			20 = { # this prevents the event from firing ever
-				owner = {
-					set_country_flag = mem_lunar_gate 
-				}
-				modifier = {
-					factor = 6
-					owner = { is_ai = yes }
-				}
+				set_global_flag = mem_lunar_gate_happened
 			}
 			
 			70 = {} # this does nothing, it just means next time, you have a new chance
@@ -92,8 +84,6 @@ planet_event = {
 	
 	immediate = {
 		save_event_target_as = mem_lunar_gate_planet
-		
-		set_global_flag = mem_lunar_gate_happened
 
 		owner = {
 			set_country_flag = colony_event

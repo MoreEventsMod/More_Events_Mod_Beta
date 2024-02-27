@@ -3,72 +3,62 @@
 
 namespace = mem_synthetic_sun
 
-@MTTH = 5000
-@MTTHAI = 1000
-
 #Gatekeeper to spare the game unnecessary evaluation and to prevent this event from always triggering
 
-planet_event = {
+country_event = {
 	id = mem_synthetic_sun.999
 	hide_window = yes
 	
-	mean_time_to_happen = {
-		months = @MTTH
-	}
+	is_triggered_only = yes
 	
 	trigger = {
+		is_ai = no
 		NOT = { has_global_flag = mem_synthetic_sun }
-		NOT = { has_planet_flag = colony_event }
-		exists = owner
-		owner = {
-			OR = {
-				is_ai = no
-				is_country_type = default
+		any_owned_planet = {			
+			has_moon = yes
+			any_moon = {
+				OR = {
+					is_planet_class = pc_barren
+					is_planet_class = pc_barren_cold
+				}
 			}
-		}
-		num_pops > 3
-		is_capital = no
-		has_moon = yes
-		NOT = {
-			any_moon = { has_owner = yes }
-		}
-		any_moon = {
-			OR = {
-				is_planet_class = pc_barren
-				is_planet_class = pc_barren_cold
-			}
-		}
-		OR = {
-			is_planet_class = "pc_desert"
-			is_planet_class = "pc_tropical"
-			is_planet_class = "pc_arid"
-			is_planet_class = "pc_ocean"
-			is_planet_class = "pc_tundra"
-			is_planet_class = "pc_arctic"
-			is_planet_class = "pc_continental"
-			is_planet_class = "pc_alpine"
-			is_planet_class = "pc_savannah"
+			habitable_planet_not_urban = yes
+			is_capital = no
+			NOT = { has_planet_flag = colony_event }
+			num_pops > 3
 		}
 	}
 	
 	immediate = {
 		random_list = {
-			30 = {
+			100 = { # try again
+			}
+			3 = { # start event
 				set_global_flag = mem_synthetic_sun
-				set_planet_flag = colony_event
-				planet_event = { id = mem_synthetic_sun.1 }
-				modifier = {
-					factor = 0.1
-					owner = { is_ai = yes }
+				random_owned_planet = {
+					limit = {
+						has_moon = yes
+						any_moon = {
+							OR = {
+								is_planet_class = pc_barren
+								is_planet_class = pc_barren_cold
+							}
+						}
+						habitable_planet_not_urban = yes
+						is_capital = no
+						NOT = { has_planet_flag = colony_event }
+						num_pops > 3
+					}
+					set_planet_flag = colony_event
+					planet_event = {
+						id = mem_synthetic_sun.1
+						days = 1
+						random = 355
+					}
 				}
 			}
-			70 = {
-				IF = {
-					limit = {
-						owner = { is_ai = no }
-					}
-					set_global_flag = mem_synthetic_sun
-				}
+			2 = { # block for playthrough
+				set_global_flag = mem_synthetic_sun
 			}
 		}
 	}
