@@ -1,0 +1,3946 @@
+# By Malthus
+
+namespace = mem_descended
+
+#test event
+country_event = {
+	id = mem_descended.1000
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		capital_star = {
+			solar_system = {
+				test_spawn_neochadamus = yes
+			}
+		}
+	}
+}
+
+############################################################################################################
+# Story Events
+############################################################################################################
+# mem_descended.1   | Player-controlled fleet reaches the system for the first time
+# mem_descended.2   | Incoming signal from hostile fleet
+# mem_descended.3	| Greeted by colorless formless
+# mem_descended.4	| Colorless fleet has been destroyed
+# mem_descended.5   | Player empire which destroyed colorless fleet gets invitation
+# mem_descended.6   | Diplo Event: Greeted by primitive
+# mem_descended.7   | Diplo Event: Introduction of Chada as golden bug
+# mem_descended.8   | Recruitment Event 1 Introduction
+# mem_descended.9   | Recruitment Event 2 Decision
+# mem_descended.10  | Recruitment Event 3 Refusal
+# mem_descended.11  | Info Event about impending invasion
+# mem_descended.12  | Diplo Event: It's time for Ascension, everybody raise your hands and send your power
+# mem_descended.50  | Faith Militant fleet arrives - Transmission
+# mem_descended.51  | Diplo Event: Faith Militant fleet proclamation
+# mem_descended.52  | Hired Faith Militant fleet arrives - Transmission
+# mem_descended.60  | Colorless fleet arrives - Transmission
+# mem_descended.61  | Diplo Event: Threatened by colorless formless
+############################################################################################################
+# Flavor Events
+############################################################################################################
+# mem_descended.100	| Randomlist for Flavor Events fired by yearly pulse
+# mem_descended.101	| Event  1: In His Likeness
+# mem_descended.102	| Event  2: Empire-Wide Celebrations
+# mem_descended.103	| Event  3: A Mysterious Construction
+# mem_descended.104	| Event  4: Insights From Beyond
+# mem_descended.105	| Event  5: A Raging Storm
+# mem_descended.106	| Event  6: Alien Sky
+# mem_descended.107	| Event  7: Reactor Overload
+# mem_descended.108	| Event  8: Unexpected Supernova
+# mem_descended.109	| Event  9: Dark Desires
+# mem_descended.110 | Event 10: Accidental Xeno-Compatibility
+# mem_descended.111 | Event 11: The Perfect Pet
+# mem_descended.112 | Event 12: Cleaning Day
+# mem_descended.113 | Event 13: A Perfect Mess
+# mem_descended.114 | Event 14: Pilgrimage and Piracy
+# mem_descended.115 | Event 15: Heretical Machines
+############################################################################################################
+# Mechanical Events
+############################################################################################################
+# mem_descended.200 | Monthly Event Chain Counter increase
+# mem_descended.201 | Event Chain Counter increase for Ascension Perk picked
+# mem_descended.202 | Event Chain Counter increase for Tradition picked
+# mem_descended.203 | Event to spawn new Faith Militant fleet fired by yearly pulse
+# mem_descended.204 | Event to spawn new colorless fleet fired by yearly pulse
+# mem_descended.205 | In case of unexpected leader death, clean up event chain and project no message
+############################################################################################################
+# Meeting with Chada (Started with Special Project bound to event chain)
+############################################################################################################
+# mem_descended.300 | Diplo Event: Meeting with Chada - Main selection
+# mem_descended.301 | Diplo Event: Meeting with Chada - Change his appearance
+# mem_descended.302 | Diplo Event: Meeting with Chada - Faith Militant Recruitment
+# mem_descended.303 | Diplo Event: Meeting with Chada - Repeat some of the recruitment questions
+# mem_descended.304 | Diplo Event: Meeting with Chada - Ask about help against colorless
+############################################################################################################
+
+# Player-controlled fleet reaches the system for the first time
+# A fleet has entered a system | See also: on_fleet_auto_move_arrival
+# Scope = Fleet
+# From = System
+fleet_event = {
+	id = mem_descended.1
+	title = mem_descended.1.name
+	desc = mem_descended.1.desc
+	location = from
+	picture = GFX_evt_a_rift_in_space
+	show_sound = event_ship_bridge
+
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			has_star_flag = mem_descended_system
+		}
+		controller = {
+			is_ai = no
+			NOT = {
+				has_country_flag = mem_descended_system_found
+			}			
+		}
+	}
+
+	immediate = {
+		controller = {
+			set_country_flag = mem_descended_system_found
+		}
+	}
+
+	option = {
+		name = PECULIAR
+		controller = {
+			if = { # leads to communication with gray unbidden
+				limit = {
+					root = {
+						solar_system = {
+							any_fleet_in_system = {
+								controller = {
+									is_same_empire = event_target:mem_descended_colorless
+								}
+							}
+						}
+					}
+				}
+				country_event = { id = mem_descended.2 days = 1 }
+			}
+		}
+	}
+}
+
+# Incoming signal from hostile fleet
+country_event = {
+	id = mem_descended.2
+	title = TRANSMISSION
+	desc = mem_descended.2.desc
+	location = event_target:mem_descended_system
+	picture = GFX_evt_a_rift_in_space
+	show_sound = event_ship_bridge
+
+	is_triggered_only = yes
+
+	immediate = {
+		random_system = {
+			limit = {
+				has_star_flag = mem_descended_system
+			}
+			save_event_target_as = mem_descended_system
+		}
+	}
+	option = {
+		name = ONSCREEN
+		hidden_effect = {
+			country_event = {
+				id = mem_descended.3
+			}
+		}
+	}
+
+	option = {
+		name = BATTLESTATIONS
+		trigger = {
+			is_pacifist = no
+		}
+	}
+}
+
+# Greeted by colorless formless
+country_event = {
+	id = mem_descended.3
+	title = TRANSMISSION
+	desc = mem_descended.3.desc
+
+	diplomatic = yes
+
+	is_triggered_only = yes
+
+	picture_event_data = {
+		room = extradimensional_blue_room
+		portrait = mem_exd6
+	}
+
+	option = {
+		name = mem_descended.3.a
+		response_text = mem_descended.3.a.response
+		trigger = {
+			NOR = {
+				is_militarist = yes
+				is_xenophobe = yes
+			}
+		}
+	}
+
+	option = {
+		name = mem_descended.3.b
+		response_text = mem_descended.3.b.response
+		trigger = {
+			OR = {
+				is_militarist = yes
+				is_xenophobe = yes
+			}
+		}
+	}
+}
+
+# This = owner of fleet 1 (destroyed)
+# From = owner of fleet 2 (combatant)
+# FromFrom = fleet 1
+# FromFromFrom = fleet 2
+country_event = {
+	id = mem_descended.4
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = {
+			has_global_flag = mem_descended_invitation
+		}
+		has_country_flag = mem_descended_colorless
+	}
+
+	immediate = {
+		if = { # If an AI empire destroys the fleet, a new one is spawned - tough luck being and AI
+			limit = {
+				FromFromFrom = {
+					controller = {
+						is_ai = yes						
+					}
+				}
+			}
+			FromFromFrom = {
+				solar_system = {
+					random_system_planet = {
+						limit = {
+							has_planet_flag = mem_descended_luminous_flame
+						}
+						mem_spawn_extradim_fleet = yes
+					}
+				}
+			}
+		}
+		else = { # Whichever player-empire is the first to destroy a colorless fleet, gets the invitation
+			set_global_flag = mem_descended_invitation
+			FromFromFrom = {
+				controller = {
+					country_event = {
+						id = mem_descended.5
+					}
+				}
+			}
+		}
+	}
+}
+
+# Invitation received after fleet destroyed
+country_event = {
+	id = mem_descended.5
+	title = mem_descended.5.name
+	desc = mem_descended.5.desc
+	picture = GFX_evt_a_rift_in_space
+	show_sound = event_ship_explosion
+	location = event_target:mem_descended_system
+
+	is_triggered_only = yes
+
+	immediate = {
+		random_system = {
+			limit = {
+				has_star_flag = mem_descended_system
+			}
+			save_event_target_as = mem_descended_system
+		}
+	}
+
+	option = {
+		name = CURIOUS
+		random_galaxy_planet = {
+			limit = {
+				has_planet_flag = mem_descended_heart_of_ascension
+			}
+			enable_special_project = {
+				name = MEM_DESCENDED_AUDIENCE_PROJECT
+				location = this
+				owner = root
+			}
+		}
+	}
+}
+
+# Diplo Event: Greeted by primitive
+country_event = {
+	id = mem_descended.6
+	title = mem_descended.6.name
+	desc = mem_descended.6.desc
+
+	is_triggered_only = yes
+
+	diplomatic = yes
+	
+	picture_event_data = {
+		planet_background = event_target:mem_descended_heart_of_ascension
+		graphical_culture = preindustrial_01
+		city_level = event_target:mem_descended_heart_of_ascension
+		room = gilded_room
+		portrait = art1
+	}
+
+	immediate = {
+		random_galaxy_planet = {
+			limit = {
+				has_planet_flag = mem_descended_heart_of_ascension
+			}
+			save_event_target_as = mem_descended_heart_of_ascension
+			owner = {
+				owner_main_species = {
+					save_event_target_as = mem_descended_native_species
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_descended.6.a
+		country_event = {
+			id = mem_descended.7
+		}
+	}
+}
+
+# Diplo Event: Introduction of Chada as golden bug
+country_event = {
+	id = mem_descended.7
+	title = mem_descended.6.name
+	desc = mem_descended.7.desc
+	
+	is_triggered_only = yes
+
+	diplomatic = yes
+	
+	picture_event_data = {
+		planet_background = event_target:mem_descended_heart_of_ascension
+		graphical_culture = preindustrial_01
+		city_level = event_target:mem_descended_heart_of_ascension
+		room = gilded_room
+		portrait = mem_art1
+	}
+
+	immediate = {
+		random_galaxy_planet = {
+			limit = {
+				has_planet_flag = mem_descended_heart_of_ascension
+			}
+			save_event_target_as = mem_descended_heart_of_ascension
+		}
+	}
+
+	option = {
+		name = mem_descended.7.a
+		hidden_effect = {
+			set_country_flag = mem_descended_first_hello
+			country_event = {
+				id = mem_descended.8
+			}
+		}		
+	}
+}
+
+# Chada Recruitment Screen 1
+country_event = {
+	id = mem_descended.8
+	title = mem_descended.8.name
+	desc = {
+		trigger = { 
+			switch = { 
+				trigger = has_country_flag 
+				mem_descended_first_hello = {text = mem_descended.8.desc_01} 
+				mem_descended_second_hello = {text = mem_descended.8.desc_02}
+			}
+		}
+	}
+	show_sound = event_default
+	is_triggered_only = yes
+	
+	picture = GFX_mem_leader_recruitment_bg_neochadamus
+	event_window_type = leader_recruit
+
+	immediate = {
+		IF = {
+			limit = {
+				NOT = {
+					has_global_flag = mem_descended_neochadamus_fired
+				}
+			}
+			set_global_flag = mem_descended_neochadamus_fired
+			create_country = {
+				name = RANDOM
+				type = global_event
+				auto_delete = yes
+				flag = {
+					icon = {
+						category = "special"
+						file = "unknown.dds"
+					}
+					background = {
+						category = "backgrounds"
+						file = "00_solid.dds"
+					}
+					colors = {
+						"red"
+						"red"
+						"null"
+						"null"
+					}
+				}
+				effect = {
+					save_event_target_as = mem_descended_country
+				}
+			}
+			event_target:mem_descended_country = {
+				create_species = {
+					name = "NAME_Chadorian"
+					plural = "NAME_Chadorians"
+					class = HUM
+					portrait = mem_exd5_leader
+					namelist = "PRT1"
+					traits = random
+					effect = {
+						save_event_target_as = mem_descended_species
+					}
+				}
+				if = {
+					limit = {
+						root = {
+							is_gestalt = no
+						}
+					}
+					create_leader = {
+						species = event_target:mem_descended_species
+						event_leader = yes
+						class = official
+						name = "NAME_Ascendant_Neochadamus"
+						skill = 3
+						randomize_traits = no
+						can_manually_change_location = no
+						can_assign_to_council = yes
+						skip_background_generation = yes
+						custom_catch_phrase = mem_descended_catchphrase
+						custom_description = mem_descended_backstory
+						traits = {
+							add_trait = subclass_official_economy_councilor
+							add_trait = leader_trait_bureaucrat_2
+							add_trait = leader_trait_legendary_mem_descended_ascendant
+						}
+						gender = male
+						hide_age = yes
+						background_job = noble
+						background_ethic = ethic_authoritarian
+					}
+				}
+				else = {
+					create_leader = {
+						species = event_target:mem_descended_species
+						event_leader = yes
+						class = official
+						name = "NAME_Ascendant_Neochadamus"
+						skill = 3
+						randomize_traits = no
+						can_manually_change_location = no
+						can_assign_to_council = no
+						skip_background_generation = yes
+						custom_catch_phrase = mem_descended_catchphrase
+						custom_description = mem_descended_backstory
+						traits = {
+							add_trait = subclass_official_governor
+							add_trait = leader_trait_bureaucrat_2
+							add_trait = leader_trait_legendary_mem_descended_ascendant
+						}
+						gender = male
+						hide_age = yes
+						background_job = noble
+						background_ethic = ethic_authoritarian
+					}
+				}
+				last_created_leader = {
+					save_global_event_target_as = mem_descended_leader
+					set_leader_flag = cannot_be_ruler
+					set_leader_flag = legendary_leader
+					set_leader_flag = mem_descended_leader
+					set_leader_flag = immune_to_negative_traits
+					set_leader_flag = leader_death_events_blocked
+					set_owner = root
+					exile_leader_as = mem_descended_leader
+				}
+			}
+		}
+	}
+
+	picture_event_data = {
+		portrait = event_target:mem_descended_leader
+	}
+
+	option = {
+		name = mem_descended.8.a
+		response_text = mem_descended.8.a.response
+		is_dialog_only = yes
+	}
+	option = {
+		name = mem_descended.8.b
+		response_text = mem_descended.8.b.response
+		is_dialog_only = yes
+	}
+	option = {
+		name = mem_descended.8.c
+		response_text = mem_descended.8.c.response
+		is_dialog_only = yes
+	}
+	option = {
+		name = mem_descended.8.d
+		response_text = mem_descended.8.d.response
+		is_dialog_only = yes
+	}
+	option = {
+		name = mem_descended.8.e
+		trigger = {
+			NOT = {
+				has_country_flag = mem_descended_second_hello
+			}
+		}
+		hidden_effect = {
+			country_event = { id = mem_descended.9 }
+			set_country_flag = mem_descended_second_hello
+			set_country_flag = mem_descended_third_hello
+			remove_country_flag = mem_descended_first_hello
+		}
+	}
+
+	option = {
+		name = mem_descended.8.f
+		trigger = {
+			has_country_flag = mem_descended_second_hello
+		}
+		hidden_effect = {
+			country_event = { id = mem_descended.9 }
+			if = {
+				limit = {
+					NOT = {
+						has_country_flag = mem_descended_fourth_hello
+					}
+				}
+				set_country_flag = mem_descended_fourth_hello
+			}
+			remove_country_flag = mem_descended_third_hello
+		}
+	}
+
+	option = {
+		name = DISMISS
+		tag = dismiss_leader
+		allow = { always = no }
+	}
+
+	option = {
+		name = HIRE
+		tag = hire_leader
+		allow = { always = no }
+	}
+}
+
+# Chada Recruitment Screen 2
+country_event = {
+	id = mem_descended.9
+	title = mem_descended.8.name
+	desc = {
+		trigger = { 
+			switch = { 
+				trigger = has_country_flag 
+				mem_descended_third_hello = {text = mem_descended.9.desc_01} 
+				mem_descended_fourth_hello = {text = mem_descended.9.desc_02}
+			}
+		}
+	}
+	show_sound = event_default
+	is_triggered_only = yes
+	
+	picture = GFX_mem_leader_recruitment_bg_neochadamus
+	event_window_type = leader_recruit
+
+	picture_event_data = {
+		portrait = event_target:mem_descended_leader
+	}
+
+	option = {
+		name = mem_descended.9.a
+		hidden_effect = {
+			country_event = {
+				id = mem_descended.8
+			}
+		}
+	}
+
+	option = {
+		name = YES
+		hidden_effect = {
+			mem_descended_neochadamus_recruitment = yes
+		}
+	}
+
+	option = {
+		name = YES
+		hidden_effect = {
+			mem_descended_neochadamus_recruitment = yes
+		}
+	}
+
+	option = {
+		name = YES
+		hidden_effect = {
+			mem_descended_neochadamus_recruitment = yes
+		}
+	}
+
+	option = {
+		name = YES
+		hidden_effect = {
+			mem_descended_neochadamus_recruitment = yes
+		}
+	}
+
+	option = {
+		name = YES
+		hidden_effect = {
+			mem_descended_neochadamus_recruitment = yes
+		}
+	}
+
+	option = {
+		name = mem_descended.9.b
+		hidden_effect = {
+			country_event = {
+				id = mem_descended.10
+			}
+		}
+	}
+
+	option = {
+		name = DISMISS
+		tag = dismiss_leader
+		allow = { always = no }
+	}
+
+	option = {
+		name = HIRE
+		tag = hire_leader
+		allow = { always = no }
+	}
+}
+
+# Chada Recruitment Screen 3 Refusal 
+country_event = {
+	id = mem_descended.10
+	title = mem_descended.8.name
+	desc = mem_descended.10.desc
+	show_sound = event_default
+	is_triggered_only = yes
+	
+	picture = GFX_mem_leader_recruitment_bg_neochadamus
+	event_window_type = leader_recruit
+
+	picture_event_data = {
+		portrait = event_target:mem_descended_leader
+	}
+
+	option = {
+		name = mem_descended.10.a
+		hidden_effect = {
+			country_event = {
+				id = mem_descended.9
+			}
+		}
+	}
+
+	option = {
+		name = LEAVE
+		hidden_effect = {
+			random_galaxy_planet = {
+				limit = {
+					has_planet_flag = mem_descended_heart_of_ascension
+				}
+				remove_deposit = mem_d_ascension_throne
+				destroy_colony = yes
+				change_pc = pc_shrouded
+			}
+		}
+	}
+
+	option = {
+		name = DISMISS
+		tag = dismiss_leader
+		allow = { always = no }
+	}
+
+	option = {
+		name = HIRE
+		tag = hire_leader
+		allow = { always = no }
+	}
+}
+
+# Info Event about impending invasion
+country_event = {
+	id = mem_descended.11
+	title = mem_descended.11.name
+	desc = mem_descended.11.desc
+	location = event_target:mem_descended_system
+	picture = GFX_evt_a_rift_in_space
+
+	event_chain = mem_descended_chain
+
+	is_triggered_only = yes
+
+	immediate = {
+		random_system = {
+			limit = {
+				has_star_flag = mem_descended_system
+			}
+			save_event_target_as = mem_descended_system
+		}
+		# Just for show. They go pooooooooof in the next event
+		
+		random_galaxy_planet = {
+			limit = {
+				has_planet_flag = mem_descended_luminous_flame
+			}
+			while = {
+				count = 10
+				mem_spawn_extradim_fleet = yes
+			}
+		}
+	}
+
+	option = {
+		name = TERRIBLE
+		hidden_effect = {
+			country_event = {
+				id = mem_descended.12
+				days = 5
+			}
+		}
+	}
+}
+
+# Diplo Event: Ascension
+country_event = {
+	id = mem_descended.12
+	title = mem_descended.12.name
+	desc = mem_descended.12.desc
+
+	is_triggered_only = yes
+
+	diplomatic = yes
+	
+	picture_event_data = {
+		planet_background = event_target:mem_descended_heart_of_ascension
+		graphical_culture = preindustrial_01
+		city_level = event_target:mem_descended_heart_of_ascension
+		room = gilded_room
+		portrait = mem_exd5
+	}
+
+	immediate = {
+		random_galaxy_planet = {
+			limit = {
+				has_planet_flag = mem_descended_heart_of_ascension
+			}
+			save_event_target_as = mem_descended_heart_of_ascension
+		}
+		# With a snap of a finger
+		event_target:mem_descended_colorless = {
+			every_owned_fleet = {
+				delete_dimensional_fleet = this
+			}
+		}
+		random_galaxy_planet = {
+			limit = {
+				has_planet_flag = mem_descended_luminous_flame
+			}
+			create_ambient_object = {
+				type = "extradimensional_1"
+				location = this
+			}
+			last_created_ambient_object = {
+				set_ambient_object_flag = mem_descended_rift_closed
+			}
+			every_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_descended_rift_open
+				}
+				destroy_ambient_object = this
+			}
+		}
+	}
+
+	option = {
+		name = mem_descended.12.a
+		event_target:mem_descended_heart_of_ascension = {
+			remove_deposit = mem_d_ascension_throne
+			add_deposit = mem_d_ascension_throne_after
+		}
+		event_target:mem_descended_leader = {
+			remove_trait = leader_trait_legendary_mem_descended_ascendant
+			add_trait = leader_trait_legendary_mem_descended_aspect
+			set_name = NAME_Avatar_Neochadamus
+		}
+		add_event_chain_counter = {
+			event_chain = mem_descended_chain
+			counter = mem_descended_ascension_complete
+			amount = 1
+		}
+		set_country_flag = mem_descended_ascension_complete
+	}
+}
+
+# Faith Militant fleet arrives - Transmission
+country_event = {
+	id = mem_descended.50
+	title = mem_descended.50.name
+	desc = mem_descended.50.desc
+	picture = GFX_evt_fallen_empire_awakes
+	show_sound = event_ship_bridge
+	location = event_target:mem_descended_system
+
+	event_chain = mem_descended_chain
+
+	is_triggered_only = yes
+
+	immediate = {
+		random_system = {
+			limit = {
+				has_star_flag = mem_descended_system
+			}
+			save_event_target_as = mem_descended_system
+		}
+		mem_descended_spawn_faith_militant_fleet = yes
+	}
+
+	option = {
+		name = ONSCREEN
+		hidden_effect = {
+			country_event = {
+				id = mem_descended.51
+			}
+		}
+	}
+}
+
+# Diplo Event: Faith Militant fleet proclamation
+country_event = {
+	id = mem_descended.51
+	title = mem_descended.51.name
+	desc = {
+		trigger = { 
+			switch = { 
+				trigger = has_country_flag 
+				mem_descended_faith_militant_greeting_1 = {text = mem_descended.51.desc_01} 
+				mem_descended_faith_militant_greeting_2 = {text = mem_descended.51.desc_02}
+				mem_descended_faith_militant_greeting_3 = {text = mem_descended.51.desc_03}
+				mem_descended_faith_militant_greeting_4 = {text = mem_descended.51.desc_04}
+				mem_descended_faith_militant_greeting_5 = {text = mem_descended.51.desc_05}
+			}
+		}
+	}
+
+	is_triggered_only = yes
+
+	diplomatic = yes
+	
+	picture_event_data = {
+		room = mem_fallen_empire_teal_room
+		portrait = event_target:mem_faith_militant_leader_exile
+	}
+
+	immediate = {
+		random_list = {
+			1 = {
+				set_country_flag = mem_descended_faith_militant_greeting_1
+			}
+			1 = {
+				set_country_flag = mem_descended_faith_militant_greeting_2
+			}
+			1 = {
+				set_country_flag = mem_descended_faith_militant_greeting_3
+			}
+			1 = {
+				set_country_flag = mem_descended_faith_militant_greeting_4
+			}
+			1 = {
+				set_country_flag = mem_descended_faith_militant_greeting_5
+			}
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = mem_descended_faith_militant_met
+				}
+			}
+			set_country_flag = mem_descended_faith_militant_met
+		}
+	}
+
+	after = {
+		if = {
+			limit = {
+				has_country_flag = mem_descended_faith_militant_greeting_1
+			}
+			remove_country_flag = mem_descended_faith_militant_greeting_1
+		}
+		if = {
+			limit = {
+				has_country_flag = mem_descended_faith_militant_greeting_2
+			}
+			remove_country_flag = mem_descended_faith_militant_greeting_2
+		}
+		if = {
+			limit = {
+				has_country_flag = mem_descended_faith_militant_greeting_3
+			}
+			remove_country_flag = mem_descended_faith_militant_greeting_3
+		}
+		if = {
+			limit = {
+				has_country_flag = mem_descended_faith_militant_greeting_4
+			}
+			remove_country_flag = mem_descended_faith_militant_greeting_4
+		}
+		if = {
+			limit = {
+				has_country_flag = mem_descended_faith_militant_greeting_5
+			}
+			remove_country_flag = mem_descended_faith_militant_greeting_5
+		}
+	}
+
+	option = {
+		name = SPLENDID
+		hidden_effect = {
+			if = {
+				limit = {
+					event_target:mem_descended_faith_militant = {
+						any_owned_fleet = {
+							NOR = {
+								has_fleet_flag = mem_faith_militant_fleet_1
+								has_fleet_flag = mem_faith_militant_fleet_2
+								has_fleet_flag = mem_faith_militant_fleet_3
+							}
+						}
+					}
+				}
+				event_target:mem_descended_faith_militant = {
+					random_owned_fleet = {
+						limit = {
+							NOR = {
+								has_fleet_flag = mem_faith_militant_fleet_1
+								has_fleet_flag = mem_faith_militant_fleet_2
+								has_fleet_flag = mem_faith_militant_fleet_3
+							}
+						}
+						set_owner = root
+					}
+				}
+			}
+		}
+	}
+}
+
+# Hired Faith Militant fleet arrives - Transmission
+country_event = {
+	id = mem_descended.52
+	title = mem_descended.50.name
+	desc = mem_descended.52.desc
+	picture = GFX_evt_fallen_empire_awakes
+	show_sound = event_ship_bridge
+	location = event_target:mem_descended_system
+
+	event_chain = mem_descended_chain
+
+	is_triggered_only = yes
+
+	immediate = {
+		random_system = {
+			limit = {
+				has_star_flag = mem_descended_system
+			}
+			save_event_target_as = mem_descended_system
+		}
+		mem_descended_create_faith_militant_country = yes
+		mem_descended_create_faith_militant_fleet = yes
+	}
+
+	option = {
+		name = ONSCREEN
+		hidden_effect = {
+			country_event = {
+				id = mem_descended.51
+			}
+		}
+	}
+}
+
+# Colorless fleet arrives - Transmission
+country_event = {
+	id = mem_descended.60
+	title = mem_descended.60.name
+	desc = mem_descended.60.desc
+	picture = GFX_evt_a_rift_in_space
+	show_sound = event_ship_bridge
+	location = event_target:mem_descended_system
+
+	event_chain = mem_descended_chain
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = {
+			has_country_flag = mem_descended_ascension_complete
+		}
+	}
+
+	immediate = {
+		random_system = {
+			limit = {
+				has_star_flag = mem_descended_system
+			}
+			save_event_target_as = mem_descended_system
+		}
+		random_galaxy_planet = {
+			limit = {
+				has_planet_flag = mem_descended_luminous_flame
+			}
+			if = {
+				limit = {
+					event_target:mem_descended_system = {
+						any_fleet_in_system = {
+							has_fleet_flag = mem_faith_militant_fleet_1
+						}
+					}
+				}
+				mem_spawn_extradim_fleet = yes
+			}
+			if = {
+				limit = {
+					event_target:mem_descended_system = {
+						any_fleet_in_system = {
+							has_fleet_flag = mem_faith_militant_fleet_2
+						}
+					}
+				}
+				mem_spawn_extradim_fleet = yes
+			}
+			if = {
+				limit = {
+					event_target:mem_descended_system = {
+						any_fleet_in_system = {
+							has_fleet_flag = mem_faith_militant_fleet_3
+						}
+					}
+				}
+				mem_spawn_extradim_fleet = yes
+			}
+			mem_spawn_extradim_fleet = yes
+			random_list = {
+				2 = {
+					mem_spawn_extradim_fleet = yes
+				}
+				3 = {
+	
+				}
+			}
+		}		
+	}
+
+	option = {
+		name = ONSCREEN
+		hidden_effect = {
+			country_event = {
+				id = mem_descended.61
+			}
+		}
+	}	
+
+	option = {
+		name = BATTLESTATIONS
+		trigger = {
+			OR = {
+				is_militarist = yes
+				is_xenophobe = yes
+			}
+		}
+	}
+
+	option = {
+		name = NOTIME
+		trigger = {
+			NOR = {
+				is_militarist = yes
+				is_xenophobe = yes
+			}
+		}		
+	}
+}
+
+# Threatened by colorless formless
+country_event = {
+	id = mem_descended.61
+	title = TRANSMISSION
+	desc = {
+		trigger = { 
+			switch = { 
+				trigger = has_country_flag 
+				mem_descended_colorless_greeting_1 = {text = mem_descended.61.desc_01} 
+				mem_descended_colorless_greeting_2 = {text = mem_descended.61.desc_02}
+				mem_descended_colorless_greeting_3 = {text = mem_descended.61.desc_03}
+				mem_descended_colorless_greeting_4 = {text = mem_descended.61.desc_04}
+				mem_descended_colorless_greeting_5 = {text = mem_descended.61.desc_05}
+			}
+		}
+	}
+
+	diplomatic = yes
+
+	is_triggered_only = yes
+
+	picture_event_data = {
+		room = extradimensional_blue_room
+		portrait = mem_exd6
+	}
+
+	immediate = {
+		random_list = {
+			1 = {
+				set_country_flag = mem_descended_colorless_greeting_1
+			}
+			1 = {
+				set_country_flag = mem_descended_colorless_greeting_2
+			}
+			1 = {
+				set_country_flag = mem_descended_colorless_greeting_3
+			}
+			1 = {
+				set_country_flag = mem_descended_colorless_greeting_4
+			}
+			1 = {
+				set_country_flag = mem_descended_colorless_greeting_5
+			}
+		}
+	}
+
+	after = {
+		if = {
+			limit = {
+				has_country_flag = mem_descended_colorless_greeting_1
+			}
+			remove_country_flag = mem_descended_colorless_greeting_1
+		}
+		if = {
+			limit = {
+				has_country_flag = mem_descended_colorless_greeting_2
+			}
+			remove_country_flag = mem_descended_colorless_greeting_2
+		}
+		if = {
+			limit = {
+				has_country_flag = mem_descended_colorless_greeting_3
+			}
+			remove_country_flag = mem_descended_colorless_greeting_3
+		}
+		if = {
+			limit = {
+				has_country_flag = mem_descended_colorless_greeting_4
+			}
+			remove_country_flag = mem_descended_colorless_greeting_4
+		}
+		if = {
+			limit = {
+				has_country_flag = mem_descended_colorless_greeting_5
+			}
+			remove_country_flag = mem_descended_colorless_greeting_5
+		}
+	}
+
+	option = {
+		name = mem_descended.61.a
+		response_text = mem_descended.61.a.response
+	}
+}
+
+# Randomlist for Flavor Events fired by yearly pulse
+country_event = {
+	id = mem_descended.100
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_country_flag = mem_descended_flavor_active
+		NOT = {
+			has_country_flag = mem_descended_flavor_pause
+		}
+	}
+
+	immediate = {
+		random_list = {
+			1 = { # Event 1: In His Likeness
+				modifier = {
+					OR = {
+						has_country_flag = mem_descended_flavor_1
+						NOT = {
+							any_system_within_border = {
+								any_system_planet = {
+									OR = {
+										is_planet_class = pc_barren
+										is_planet_class = pc_barren_cold
+									}
+									OR = {
+										has_orbital_mining_deposit = yes
+										has_orbital_energy_deposit = yes
+										has_deposit = no
+									}
+								}
+							}
+						}
+					}					
+					factor = 0
+				}
+				set_country_flag = mem_descended_flavor_1
+				country_event = {
+					id = mem_descended.101
+					days = 1
+					random = 359
+				}
+				mem_flavor_pause = yes
+			}
+			1 = { # Event 2: Empire-Wide Celebrations
+				modifier = {
+					OR = {
+						is_gestalt = yes
+						has_country_flag = mem_descended_flavor_2
+					}					
+					factor = 0
+				}
+				set_timed_country_flag = {
+					flag = mem_descended_flavor_2
+					years = 30
+				}
+				country_event = {
+					id = mem_descended.102
+					days = 1
+					random = 359
+				}
+				mem_flavor_pause = yes
+			}
+			1 = { # Event 3: A Mysterious Construction
+				modifier = {
+					has_country_flag = mem_descended_flavor_3
+					factor = 0
+				}
+				set_timed_country_flag = {
+					flag = mem_descended_flavor_3
+					years = 50
+				}
+				country_event = {
+					id = mem_descended.103
+					days = 1
+					random = 359
+				}
+				mem_flavor_pause = yes
+			}
+			1 = { # Event 4: Insights From Beyond
+				modifier = {
+					OR = {
+						has_country_flag = mem_descended_flavor_4
+						NOT = {
+							has_event_chain = l_cluster_chain
+						}
+						AND = {
+							has_event_chain = l_cluster_chain
+							has_completed_event_chain_counter = {
+								event_chain = l_cluster_chain
+								counter = clues
+							}
+						}						
+					}
+					factor = 0
+				}
+				set_timed_country_flag = {
+					flag = mem_descended_flavor_4
+					years = 30
+				}
+				country_event = {
+					id = mem_descended.104
+					days = 1
+					random = 359
+				}
+				mem_flavor_pause = yes
+			}
+			1 = { # Event 5: A Raging Storm
+				modifier = {
+					OR = {
+						has_country_flag = mem_descended_flavor_5
+						NOT = {
+							any_owned_planet = {
+								has_designation = col_generator
+								NOT = {
+									has_modifier = hazardous_weather
+								}
+							}
+						}
+					}					
+					factor = 0
+				}
+				set_country_flag = mem_descended_flavor_5
+				country_event = {
+					id = mem_descended.105
+					days = 1
+					random = 359
+				}
+				mem_flavor_pause = yes
+			}
+			1 = { # Event 6: Alien Sky
+				modifier = {
+					has_country_flag = mem_descended_flavor_6
+					factor = 0
+				}
+				set_country_flag = mem_descended_flavor_6
+				country_event = {
+					id = mem_descended.106
+					days = 1
+					random = 359
+				}
+				mem_flavor_pause = yes
+			}
+			1 = { # Event 7: Reactor Overload
+				modifier = {
+					has_country_flag = mem_descended_flavor_7
+					factor = 0
+				}
+				set_country_flag = mem_descended_flavor_7
+				country_event = {
+					id = mem_descended.107
+					days = 1
+					random = 359
+				}
+				mem_flavor_pause = yes
+			}
+			1 = { # Event 8: Unexpected Supernova
+				modifier = {
+					OR = {
+						has_country_flag = mem_descended_flavor_8
+						NOT = {
+							any_system_within_border = {
+								NOR = {
+									any_system_megastructure = {
+										exists = this	
+									}
+									any_system_planet = {
+										OR = {
+											exists = archaeological_site
+											is_a_habitable_planet_megastructure = yes
+											habitable_planet = yes
+										}						
+									}
+								}
+							}
+						}						
+					}
+					factor = 0
+				}
+				set_country_flag = mem_descended_flavor_8
+				country_event = {
+					id = mem_descended.108
+					days = 1
+					random = 359
+				}
+				mem_flavor_pause = yes
+			}
+			1 = { # Event 9: Dark Desires
+				modifier = {
+					OR = {
+						AND = {
+							OR = {
+								has_technology = tech_dark_matter_deflector
+								has_tech_option = tech_dark_matter_deflector
+							}
+							OR = {
+								has_technology = tech_dark_matter_power_core
+								has_tech_option = tech_dark_matter_power_core
+							}
+							OR = {
+								has_technology = tech_dark_matter_propulsion
+								has_tech_option = tech_dark_matter_propulsion
+							}
+							OR = {
+								has_technology = tech_dark_matter_detection
+								has_tech_option = tech_dark_matter_detection
+							}
+							OR = {
+								has_technology = tech_cloaking_dark_matter
+								has_tech_option = tech_cloaking_dark_matter
+								NOT = {
+									host_has_dlc = "First Contact Story Pack"
+								}
+							}
+						}
+						NOT = {
+							has_country_flag = mem_descended_flavor_8
+						}
+						has_country_flag = mem_descended_flavor_9
+					}
+					factor = 0
+				}
+				set_timed_country_flag = {
+					flag = mem_descended_flavor_9
+					years = 50
+				}
+				country_event = {
+					id = mem_descended.109
+					days = 1
+					random = 359
+				}
+				mem_flavor_pause = yes
+			}
+			1 = { # Event 10: Accidental Xeno-Compatibility
+				modifier = {
+					has_country_flag = mem_descended_flavor_10
+					factor = 0
+				}
+				set_country_flag = mem_descended_flavor_10
+				country_event = {
+					id = mem_descended.110
+					days = 1
+					random = 359
+				}
+				mem_flavor_pause = yes
+			}
+			1 = { # Event 11: The Perfect Pet
+				modifier = {
+					OR = {
+						NOT = {
+							host_has_dlc = "Galactic Paragons"							
+						}
+						is_machine_empire = yes
+						NOT = {
+							any_owned_leader = {
+								NAND = {
+									owner = { is_gestalt = yes }
+									OR = {
+										is_councilor = yes
+										has_leader_flag = restored_node
+									}
+								}
+								NOT = {
+									has_trait = leader_trait_emotional_support_pet
+								}							
+							}
+						}					
+						has_country_flag = mem_descended_flavor_11
+					}					
+					factor = 0
+				}
+				set_country_flag = mem_descended_flavor_11
+				country_event = {
+					id = mem_descended.111
+					days = 1
+					random = 359
+				}
+				mem_flavor_pause = yes
+			}
+			1 = { # Event 12: Cleaning Day
+				modifier = {
+					OR = {
+						NOT = {
+							any_owned_planet = {
+								is_a_habitable_planet_megastructure = no
+								is_moon = no						
+							}
+						}					
+						has_country_flag = mem_descended_flavor_12
+					}					
+					factor = 0
+				}
+				set_country_flag = mem_descended_flavor_12
+				country_event = {
+					id = mem_descended.112
+					days = 1
+					random = 359
+				}
+				mem_flavor_pause = yes
+			}
+			1 = { # Event 13: A Perfect Mess
+				modifier = {
+					OR = {
+						has_country_flag = mem_descended_flavor_13
+						NOT = {
+							any_owned_planet = {
+								NOR = {
+									has_planet_flag = mem_descended_heart_of_ascension
+									has_modifier = natural_beauty
+								}
+								habitable_planet_not_urban = yes
+							}
+						}
+					}
+					factor = 0
+				}
+				set_country_flag = mem_descended_flavor_13
+				country_event = {
+					id = mem_descended.113
+					days = 1
+					random = 359
+				}
+				mem_flavor_pause = yes
+			}
+			1 = { # Event 14: Pilgrimage and Piracy
+				modifier = {
+					OR = {
+						has_country_flag = mem_descended_flavor_14
+						is_gestalt = yes
+						NOT = {
+							any_system_within_border = {
+								any_system_planet = {
+									has_modifier = mem_descended_his_likeness
+								}
+							}
+						}
+						NOT = {
+							has_country_flag = mem_descended_flavor_1
+						}
+					}
+					factor = 0
+				}
+				set_country_flag = mem_descended_flavor_14
+				country_event = {
+					id = mem_descended.114
+					days = 1
+					random = 359
+				}
+				mem_flavor_pause = yes
+			}
+			1 = { # Event 15: Heretical Machines
+				modifier = {
+					OR = {
+						has_country_flag = mem_descended_flavor_15
+						is_gestalt = no
+						NOT = {
+							any_system_within_border = {
+								any_system_planet = {
+									has_modifier = mem_descended_his_likeness
+								}
+							}
+						}
+						NOT = {
+							has_country_flag = mem_descended_flavor_1
+						}
+					}
+					factor = 0
+				}
+				set_country_flag = mem_descended_flavor_15
+				country_event = {
+					id = mem_descended.115
+					days = 1
+					random = 359
+				}
+				mem_flavor_pause = yes
+			}
+			30 = { # Nothing happens at a 2/3 chance so 2 are subtracted for every outcome that has factor 0 to keep the balance
+				modifier = { # if 1 is disabled
+					OR = {
+						has_country_flag = mem_descended_flavor_1
+						NOT = {
+							any_system_within_border = {
+								any_system_planet = {
+									OR = {
+										is_planet_class = pc_barren
+										is_planet_class = pc_barren_cold
+									}
+									OR = {
+										has_orbital_mining_deposit = yes
+										has_orbital_energy_deposit = yes
+										has_deposit = no
+									}
+								}
+							}
+						}
+					}
+					subtract = 2
+				}
+				modifier = { # if 2 is disabled
+					OR = {
+						is_gestalt = yes
+						has_country_flag = mem_descended_flavor_2
+					}
+					subtract = 2
+				}
+				modifier = { # if 3 is disabled
+					has_country_flag = mem_descended_flavor_3
+					subtract = 2
+				}
+				modifier = { # if 4 is disabled
+					OR = {
+						has_country_flag = mem_descended_flavor_4
+						NOT = {
+							has_event_chain = l_cluster_chain
+						}
+						AND = {
+							has_event_chain = l_cluster_chain
+							has_completed_event_chain_counter = {
+								event_chain = l_cluster_chain
+								counter = clues
+							}
+						}						
+					}
+					subtract = 2
+				}
+				modifier = { # if 5 is disabled
+					OR = {
+						has_country_flag = mem_descended_flavor_5
+						NOT = {
+							any_owned_planet = {
+								has_designation = col_generator
+								NOT = {
+									has_modifier = hazardous_weather
+								}
+							}
+						}
+					}
+					subtract = 2
+				}
+				modifier = { # if 6 is disabled
+					has_country_flag = mem_descended_flavor_6
+					subtract = 2
+				}
+				modifier = { # if 7 is disabled
+					has_country_flag = mem_descended_flavor_7
+					subtract = 2
+				}
+				modifier = { # if 8 is disabled
+					OR = {
+						has_country_flag = mem_descended_flavor_8
+						NOT = {
+							any_system_within_border = {
+								NOR = {
+									any_system_megastructure = {
+										exists = this	
+									}
+									any_system_planet = {
+										OR = {
+											exists = archaeological_site
+											is_a_habitable_planet_megastructure = yes
+											habitable_planet = yes
+										}						
+									}
+								}
+							}
+						}
+					}
+					subtract = 2
+				}
+				modifier = { # if 9 is disabled
+					OR = {
+						AND = {
+							OR = {
+								has_technology = tech_dark_matter_deflector
+								has_tech_option = tech_dark_matter_deflector
+							}
+							OR = {
+								has_technology = tech_dark_matter_power_core
+								has_tech_option = tech_dark_matter_power_core
+							}
+							OR = {
+								has_technology = tech_dark_matter_propulsion
+								has_tech_option = tech_dark_matter_propulsion
+							}
+							OR = {
+								has_technology = tech_dark_matter_detection
+								has_tech_option = tech_dark_matter_detection
+							}
+							OR = {
+								has_technology = tech_cloaking_dark_matter
+								has_tech_option = tech_cloaking_dark_matter
+								NOT = {
+									host_has_dlc = "First Contact Story Pack"
+								}
+							}
+						}
+						NOT = {
+							has_country_flag = mem_descended_flavor_8
+						}
+						has_country_flag = mem_descended_flavor_9
+					}
+					subtract = 2
+				}
+				modifier = { # if 10 is disabled
+					has_country_flag = mem_descended_flavor_10
+					subtract = 2
+				}
+				modifier = { # if 11 is disabled
+					OR = {
+						NOT = {
+							host_has_dlc = "Galactic Paragons"							
+						}
+						is_machine_empire = yes
+						NOT = {
+							any_owned_leader = {
+								NAND = {
+									owner = { is_gestalt = yes }
+									OR = {
+										is_councilor = yes
+										has_leader_flag = restored_node
+									}
+								}
+								NOT = {
+									has_trait = leader_trait_emotional_support_pet
+								}							
+							}
+						}					
+						has_country_flag = mem_descended_flavor_11
+					}
+					subtract = 2
+				}
+				modifier = { # if 12 is disabled
+					OR = {
+						NOT = {
+							any_owned_planet = {
+								is_a_habitable_planet_megastructure = no
+								is_moon = no						
+							}
+						}					
+						has_country_flag = mem_descended_flavor_12
+					}	
+					subtract = 2
+				}
+				modifier = { # if 13 is disabled
+					OR = {
+						has_country_flag = mem_descended_flavor_13
+						NOT = {
+							any_owned_planet = {
+								NOR = {
+									has_planet_flag = mem_descended_heart_of_ascension
+									has_modifier = natural_beauty
+								}
+								habitable_planet_not_urban = yes
+							}
+						}
+					}	
+					subtract = 2
+				}
+				modifier = { # if 14 is disabled
+					OR = {
+						has_country_flag = mem_descended_flavor_14
+						is_gestalt = yes
+						NOT = {
+							any_system_within_border = {
+								any_system_planet = {
+									has_modifier = mem_descended_his_likeness
+								}
+							}
+						}
+						NOT = {
+							has_country_flag = mem_descended_flavor_1
+						}
+					}	
+					subtract = 2
+				}
+				modifier = { # if 15 is disabled
+					OR = {
+						has_country_flag = mem_descended_flavor_15
+						is_gestalt = no
+						NOT = {
+							any_system_within_border = {
+								any_system_planet = {
+									has_modifier = mem_descended_his_likeness
+								}
+							}
+						}
+						NOT = {
+							has_country_flag = mem_descended_flavor_1
+						}
+					}
+					subtract = 2
+				}
+				modifier = { # lower the event chance after ascension to 1/7 instead of 1/3  (this assumes the other modifiers are applied first and the factor is multiplied with the reduced base number, otherwise this outcome will be more likely than intended - not the worst thing that could happen though, as the ascension basically closes the story)
+					has_completed_event_chain_counter = {
+						event_chain = mem_descended_chain
+						counter = mem_descended_ascension_progress
+					}
+					factor = 3
+				}
+			}
+		}
+	}
+}
+
+# Event 1: In His Likeness
+country_event = {
+	id = mem_descended.101
+	title = mem_descended.101.name
+	desc = mem_descended.101.desc
+	picture = GFX_evt_warm_barren
+	show_sound = event_mystic_reveal
+	location = event_target:mem_descended_flavor_planet
+
+	event_chain = mem_descended_chain
+
+	is_triggered_only = yes
+
+	immediate = {
+		add_event_chain_counter = {
+			event_chain = mem_descended_chain
+			counter = mem_descended_antics
+			amount = 1
+		}
+		random_system_within_border = {
+			limit = {
+				any_system_planet = {
+					OR = {
+						is_planet_class = pc_barren
+						is_planet_class = pc_barren_cold
+					}
+					OR = {
+						has_orbital_mining_deposit = yes
+						has_orbital_energy_deposit = yes
+						has_deposit = no
+					}
+				}
+			}
+			random_system_planet = {
+				limit = {
+					OR = {
+						is_planet_class = pc_barren
+						is_planet_class = pc_barren_cold
+					}
+					OR = {
+						has_orbital_mining_deposit = yes
+						has_orbital_energy_deposit = yes
+						has_deposit = no
+					}
+				}
+				save_event_target_as = mem_descended_flavor_planet
+				solar_system = {
+					save_event_target_as = mem_descended_flavor_system
+				}
+			}
+		}
+	}
+
+	option = {
+		name = SPLENDID
+		event_target:mem_descended_flavor_planet = {
+			set_planet_name = NAME_The_Ascendant
+			add_modifier = {
+				modifier = mem_descended_his_likeness
+				days = -1
+			}
+			add_deposit = d_alloys_2
+			add_deposit = d_energy_5
+		}
+	}
+}
+
+# Event 2: Empire-Wide Celebrations
+country_event = {
+	id = mem_descended.102
+	title = mem_descended.102.name
+	desc = mem_descended.102.desc
+	picture = GFX_evt_crisis_defeated
+	show_sound = event_celebration
+
+	event_chain = mem_descended_chain
+
+	is_triggered_only = yes
+
+	immediate = {
+		add_event_chain_counter = {
+			event_chain = mem_descended_chain
+			counter = mem_descended_antics
+			amount = 1
+		}
+		every_owned_planet = {
+			add_modifier = {
+				modifier = mem_descended_lowered_output
+				days = 60
+			}
+		}
+	}
+
+	option = {
+		name = mem_descended.102.a
+		add_modifier = {
+			modifier = mem_descended_celebrations
+			days = 360
+		}
+	}
+}
+
+# Event 3: A Mysterious Construction
+country_event = {
+	id = mem_descended.103
+	title = mem_descended.103.name
+	desc = mem_descended.103.desc
+	picture = GFX_evt_grand_speech
+	show_sound = event_administrative_work
+	location = event_target:mem_descended_flavor_planet
+
+	event_chain = mem_descended_chain
+
+	is_triggered_only = yes
+
+	immediate = {
+		add_event_chain_counter = {
+			event_chain = mem_descended_chain
+			counter = mem_descended_antics
+			amount = 1
+		}
+		random_owned_planet = {
+			limit = {
+				free_building_slots > 0
+			}
+			save_event_target_as = mem_descended_flavor_planet
+		}
+	}
+
+	option = {
+		name = EXCELLENT
+		event_target:mem_descended_flavor_planet = {
+			locked_random_list = {
+				1 = {
+					modifier = {
+						factor = 0
+						country_uses_consumer_goods = no
+					}
+					add_building = building_affluence_center
+					root = {
+						set_country_flag = affluence_center_can_build
+					}				
+				}
+				1 = {
+					modifier = {
+						factor = 0
+						country_uses_food = no
+					}
+					add_building = building_nourishment_center
+					root = {
+						set_country_flag = nourishment_center_can_build
+					}				
+				}
+				1 = {
+					add_building = building_dimensional_fabricator
+					root = {
+						set_country_flag = dimensional_fabricator_can_build
+					}
+				}
+				1 = {
+					add_building = building_class_4_singularity
+					root = {
+						set_country_flag = class_4_singularity_can_build
+					}
+				}
+				1 = {
+					add_building = building_nano_forge
+					root = {
+						set_country_flag = nano_forge_can_build
+					}
+				}
+			}
+		}
+	}
+}
+
+# Event 4: Insights From Beyond
+country_event = {
+	id = mem_descended.104
+	title = mem_descended.104.name
+	desc = mem_descended.104.desc
+	picture = GFX_evt_l-gateway
+	show_sound = event_mystic_reveal_light
+
+	event_chain = mem_descended_chain
+
+	is_triggered_only = yes
+
+	immediate = {
+		add_event_chain_counter = {
+			event_chain = mem_descended_chain
+			counter = mem_descended_antics
+			amount = 1
+		}
+	}
+
+	option = {
+		name = FASCINATING
+		generate_lcluster_clue = yes
+	}
+}
+
+# Event 5: A Raging Storm
+country_event = {
+	id = mem_descended.105
+	title = mem_descended.105.name
+	desc = mem_descended.105.desc
+	picture = GFX_evt_astral_rift_windswept_planet
+	show_sound = event_wind_ruins
+	location = event_target:mem_descended_flavor_planet
+
+	event_chain = mem_descended_chain
+
+	is_triggered_only = yes
+
+	immediate = {
+		add_event_chain_counter = {
+			event_chain = mem_descended_chain
+			counter = mem_descended_antics
+			amount = 1
+		}
+		random_owned_planet = {
+			limit = {
+				has_designation = col_generator
+				NOT = {
+					has_modifier = hazardous_weather
+				}
+			}
+			save_event_target_as = mem_descended_flavor_planet
+		}
+	}
+
+	option = {
+		name = mem_descended.105.a
+		event_target:mem_descended_flavor_planet = {
+			add_modifier = {
+				modifier = hazardous_weather
+				days = -1
+			}
+		}
+	}
+}
+
+# Event 6: Alien Sky
+country_event = {
+	id = mem_descended.106
+	title = mem_descended.106.name
+	desc = mem_descended.106.desc
+	picture = GFX_evt_slingshot_stars
+	show_sound = event_celebration
+	location = event_target:mem_descended_flavor_planet
+
+	event_chain = mem_descended_chain
+
+	is_triggered_only = yes
+
+	immediate = {
+		add_event_chain_counter = {
+			event_chain = mem_descended_chain
+			counter = mem_descended_antics
+			amount = 1
+		}
+		random_owned_planet = {
+			save_event_target_as = mem_descended_flavor_planet
+		}
+	}
+
+	option = {
+		name = CURIOUS
+		event_target:mem_descended_flavor_planet = {
+			add_modifier = {
+				modifier = mem_descended_colorful_sky
+				days = 1800
+			}
+		}
+	}
+}
+
+# Event 7: Reactor Overload
+country_event = {
+	id = mem_descended.107
+	title = mem_descended.107.name
+	desc = mem_descended.107.desc
+	picture = GFX_evt_large_explosion
+	show_sound = event_red_alert
+	location = event_target:mem_descended_flavor_system
+
+	event_chain = mem_descended_chain
+
+	is_triggered_only = yes
+
+	immediate = {
+		add_event_chain_counter = {
+			event_chain = mem_descended_chain
+			counter = mem_descended_antics
+			amount = 1
+		}
+		random_owned_starbase = {
+			limit = {
+				NOT = {
+					has_starbase_size = starbase_outpost
+				}
+			}
+			solar_system = {
+				save_event_target_as = mem_descended_flavor_system
+				random_fleet_in_system = {
+					limit = {
+						is_ship_class = shipclass_starbase
+					}
+					destroy_fleet = this
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_descended.107.a
+	}
+}
+
+# Event 8: Unexpected Supernova
+country_event = {
+	id = mem_descended.108
+	title = mem_descended.108.name
+	desc = mem_descended.108.desc
+	picture = GFX_evt_supernova
+	show_sound = event_red_alert
+	location = event_target:mem_descended_flavor_system
+
+	event_chain = mem_descended_chain
+
+	is_triggered_only = yes
+
+	immediate = {
+		add_event_chain_counter = {
+			event_chain = mem_descended_chain
+			counter = mem_descended_antics
+			amount = 1
+		}
+		random_system_within_border	= {
+			limit = {
+				NOR = {
+					any_system_megastructure = {
+						exists = this	
+					}
+					any_system_planet = {
+						OR = {
+							exists = archaeological_site
+							is_a_habitable_planet_megastructure = yes
+							habitable_planet = yes
+						}						
+					}
+				}
+			}
+			save_event_target_as = mem_descended_flavor_system
+			destroy_star_system = yes
+			random_system_planet = {
+				limit = {
+					is_planet_class = pc_black_hole
+				}
+				set_deposit = d_dark_matter_deposit_2
+			}
+		}
+	}
+
+	after = {
+		if = {
+			limit = {
+				NOT = {
+					has_tech_option = tech_mine_dark_matter
+				}
+			}
+			add_research_option = tech_mine_dark_matter
+		}
+	}
+
+	option = {
+		name = mem_descended.108.a
+		trigger = {
+			is_gestalt = no
+		}		
+	}
+	option = {
+		name = INTENSIFIES
+		trigger = {
+			is_gestalt = yes
+		}		
+	}
+}
+
+# Event 9: Dark Desires
+country_event = {
+	id = mem_descended.109
+	title = mem_descended.109.name
+	desc = mem_descended.109.desc
+	picture = GFX_evt_physics_research
+	show_sound = event_default
+
+	event_chain = mem_descended_chain
+
+	is_triggered_only = yes
+
+	immediate = {
+		add_event_chain_counter = {
+			event_chain = mem_descended_chain
+			counter = mem_descended_antics
+			amount = 1
+		}
+	}
+
+	option = {
+		name = mem_descended.109.a
+		trigger = {
+			NOR = {
+				has_technology = tech_dark_matter_deflector
+				has_tech_option = tech_dark_matter_deflector
+			}
+		}
+		add_research_option = tech_dark_matter_deflector
+	}
+	option = {
+		name = mem_descended.109.b
+		trigger = {
+			NOR = {
+				has_technology = tech_dark_matter_power_core
+				has_tech_option = tech_dark_matter_power_core
+			}
+		}
+		add_research_option = tech_dark_matter_power_core	
+	}
+	option = {
+		name = mem_descended.109.c
+		trigger = {
+			NOR = {
+				has_technology = tech_dark_matter_propulsion
+				has_tech_option = tech_dark_matter_propulsion
+			}
+		}
+		add_research_option = tech_dark_matter_propulsion
+	}
+	option = {
+		name = mem_descended.109.d
+		trigger = {
+			NOR = {
+				has_technology = tech_dark_matter_detection
+				has_tech_option = tech_dark_matter_detection
+			}
+		}
+		add_research_option = tech_dark_matter_detection	
+	}
+	option = {
+		name = mem_descended.109.e
+		trigger = {
+			host_has_dlc = "First Contact Story Pack"
+			NOR = {
+				has_technology = tech_cloaking_dark_matter
+				has_tech_option = tech_cloaking_dark_matter
+			}
+		}
+		add_research_option = tech_cloaking_dark_matter	
+	}
+}
+
+# Event 10: Accidental Xeno-Compatibility
+country_event = {
+	id = mem_descended.110
+	title = mem_descended.110.name
+	desc = mem_descended.110.desc
+	picture = GFX_evt_slingshot_stars
+	show_sound = event_air_raid_siren
+	location = event_target:mem_descended_flavor_planet
+
+	event_chain = mem_descended_chain
+
+	is_triggered_only = yes
+
+	immediate = {
+		add_event_chain_counter = {
+			event_chain = mem_descended_chain
+			counter = mem_descended_antics
+			amount = 1
+		}
+		random_owned_planet = {
+			save_event_target_as = mem_descended_flavor_planet
+			# Thank you, Terraforming Accident
+			create_country = {
+				name = "NAME_Deformed_Creatures"
+				type = faction
+				effect = {
+					establish_communications_no_message = root.owner
+				}
+			}
+			create_army = {
+				name = "NAME_Deformed_Creatures"
+				owner = last_created_country
+				type = "mutant_army"
+			}
+			create_army = {
+				name = "NAME_Twisted_Beasts"
+				owner = last_created_country
+				type = "mutant_army"
+			}
+			create_army = {
+				name = "NAME_Mutated_Horrors"
+				owner = last_created_country
+				type = "mutant_army"
+			}
+		}
+	}
+
+	option = {
+		name = TERRIBLE
+		event_target:mem_descended_flavor_planet = {
+			add_blocker = {
+				type = d_dangerous_wildlife_blocker
+			}
+		}
+	}
+}
+
+# Event 11: The Perfect Pet
+country_event = {
+	id = mem_descended.111
+	title = mem_descended.111.name
+	desc = mem_descended.111.desc
+	picture = GFX_evt_throne_room
+	show_sound = event_conversation
+
+	event_chain = mem_descended_chain
+
+	is_triggered_only = yes
+
+	immediate = {
+		add_event_chain_counter = {
+			event_chain = mem_descended_chain
+			counter = mem_descended_antics
+			amount = 1
+		}
+		random_owned_leader = {
+			limit = {
+				NAND = {
+					owner = { is_gestalt = yes }
+					OR = {
+						is_councilor = yes
+						has_leader_flag = restored_node
+					}
+				}
+				NOT = {
+					has_trait = leader_trait_emotional_support_pet
+				}
+			}
+			save_event_target_as = mem_descended_flavor_target_leader
+		}
+	}
+
+	option = {
+		name = INTRIGUING
+		event_target:mem_descended_flavor_target_leader = {
+			add_trait = leader_trait_emotional_support_pet
+		}
+	}
+}
+
+# Event 12: Cleaning Day
+country_event = {
+	id = mem_descended.112
+	title = mem_descended.112.name
+	desc = mem_descended.112.desc
+	picture = GFX_evt_friendly_enlightenment
+	show_sound = event_conversation
+	location = event_target:mem_descended_flavor_system
+
+	event_chain = mem_descended_chain
+
+	is_triggered_only = yes
+
+	immediate = {
+		add_event_chain_counter = {
+			event_chain = mem_descended_chain
+			counter = mem_descended_antics
+			amount = 1
+		}
+		capital_scope = {
+			solar_system = {
+				if = {
+					limit = {
+						root = {
+							capital_scope = {
+								habitable_structure = no
+								is_moon = no
+							}
+						}
+					}
+					root.capital_scope = {
+						save_event_target_as = mem_descended_flavor_planet
+					}
+					save_event_target_as = mem_descended_flavor_system
+					spawn_planet = {
+						class = pc_barren
+						location = root.capital_scope
+						orbit_angle_offset = 120
+						size = 13
+						init_effect = {
+							add_modifier = {
+								modifier = terraforming_candidate
+								days = -1
+							}
+							set_planet_flag = colony_event
+							prevent_anomaly = yes
+							set_name = "NAME_Refurbished_Rock"
+						}
+					}
+					spawn_planet = {
+						class = pc_barren
+						location = root.capital_scope
+						orbit_angle_offset = 240
+						size = 15
+						init_effect = {
+							add_modifier = {
+								modifier = terraforming_candidate
+								days = -1
+							}
+							set_planet_flag = colony_event
+							prevent_anomaly = yes
+							set_name = "NAME_Reshaped_Boulder"
+						}
+					}
+				}
+				else = {
+					root = {
+						random_owned_planet = {
+							limit = {
+								habitable_structure = no
+								is_moon = no
+							}
+							save_event_target_as = mem_descended_flavor_planet
+							solar_system = {
+								save_event_target_as = mem_descended_flavor_system
+								spawn_planet = {
+									class = pc_barren
+									location = prev
+									orbit_angle_offset = 120
+									size = 13
+									init_effect = {
+										add_modifier = {
+											modifier = terraforming_candidate
+											days = -1
+										}
+										set_planet_flag = colony_event
+										prevent_anomaly = yes
+										set_name = "NAME_Refurbished_Rock"
+									}
+								}
+								spawn_planet = {
+									class = pc_barren
+									location = prev
+									orbit_angle_offset = 240
+									size = 15
+									init_effect = {
+										add_modifier = {
+											modifier = terraforming_candidate
+											days = -1
+										}
+										set_planet_flag = colony_event
+										prevent_anomaly = yes
+										set_name = "NAME_Reshaped_Boulder"
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		random_system_within_border = {
+			limit = {
+				has_star_flag = mem_descended_system
+			}
+			every_system_planet = {
+				limit = {
+					is_planet_class = pc_shrouded
+				}
+				remove_planet = yes
+			}
+		}
+	}
+
+	option = {
+		name = INCREDIBLE
+	}
+}
+
+# Event 13: A Perfect Mess
+country_event = {
+	id = mem_descended.113
+	title = mem_descended.113.name
+	desc = mem_descended.113.desc
+	picture = {
+		trigger = {
+			event_target:mem_descended_flavor_planet = { 
+				is_wet = yes
+			}
+		}
+		picture = GFX_evt_alien_nature
+	}
+	picture = {
+		trigger = {
+			event_target:mem_descended_flavor_planet = {
+				is_dry = yes
+			}
+		}
+		picture = GFX_evt_landing_ship
+	}
+	picture = {
+		trigger = {
+			event_target:mem_descended_flavor_planet = {
+				is_cold = yes
+			}
+		}
+		picture = GFX_evt_arctic
+	}
+	picture = {
+		trigger = {
+			event_target:mem_descended_flavor_planet = {
+				is_planet_class = pc_gaia
+			}
+		}
+		picture = GFX_evt_gaia
+	}
+	show_sound = event_default
+	location = event_target:mem_descended_flavor_planet
+
+	event_chain = mem_descended_chain
+
+	is_triggered_only = yes
+
+	immediate = {
+		add_event_chain_counter = {
+			event_chain = mem_descended_chain
+			counter = mem_descended_antics
+			amount = 1
+		}
+		random_owned_planet = {
+			limit = {
+				NOR = {
+					has_planet_flag = mem_descended_heart_of_ascension
+					has_modifier = natural_beauty
+				}
+				habitable_planet_not_urban = yes
+			}
+			save_event_target_as = mem_descended_flavor_planet
+		}
+	}
+
+	option = {
+		name = CURIOUS
+		event_target:mem_descended_flavor_planet = {
+			add_modifier = {
+				modifier = natural_beauty
+				days = -1
+			}
+		}
+	}
+}
+
+# Event 14: Pilgrimage and Piracy
+country_event = {
+	id = mem_descended.114
+	title = mem_descended.114.name
+	desc = mem_descended.114.desc
+	picture = GFX_evt_pirates_attacking_cargo
+	show_sound = event_space_battle
+	location = event_target:mem_descended_flavor_planet
+
+	event_chain = mem_descended_chain
+
+	is_triggered_only = yes
+
+	immediate = {
+		add_event_chain_counter = {
+			event_chain = mem_descended_chain
+			counter = mem_descended_antics
+			amount = 1
+		}
+		random_system_within_border = {
+			limit = {
+				any_system_planet = {
+					has_modifier = mem_descended_his_likeness
+				}
+			}
+			random_system_planet = {
+				limit = {
+					has_deposit = no
+				}
+				save_event_target_as = mem_descended_flavor_planet
+				solar_system = {
+					save_event_target_as = mem_descended_flavor_system
+				}
+			}
+			random_system_planet = {
+				limit = {
+					is_star = yes
+				}
+				create_country = {
+					name = NAME_Pirates
+					type = faction
+					name_list = PRT1
+					auto_delete = yes
+					effect = {
+						set_faction_hostility = { set_hostile = yes }
+						establish_communications_no_message = root
+						create_fleet = {
+							name = "NAME_Pirates"
+							effect = {
+								set_owner = PREV
+								while = {
+									count = 6
+									create_ship = {
+										name = random
+										design = "NAME_Outrider"
+										graphical_culture = "pirate_01"
+									}
+								}
+								while = {
+									count = 4
+									create_ship = {
+										name = random
+										design = "NAME_Lancer"
+										graphical_culture = "pirate_01"
+									}
+								}
+								while = {
+									count = 2
+									create_ship = {
+										name = random
+										design = "NAME_Void_Champion"
+										graphical_culture = "pirate_01"
+									}
+								}
+								create_ship = {
+									name = random
+									design = "NAME_Ancestral_Glory"
+									graphical_culture = "pirate_01"
+								}
+								set_location = prevprev
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	option = {
+		name = MAKE_IT_SO
+		event_target:mem_descended_flavor_planet = {
+			add_deposit = d_trade_value_6
+		}
+	}
+}
+
+# Event 15: Heretical Machines
+country_event = {
+	id = mem_descended.115
+	title = mem_descended.115.name
+	desc = mem_descended.115.desc
+	picture = GFX_evt_mining_station
+	show_sound = event_space_battle
+	location = event_target:mem_descended_flavor_planet
+
+	event_chain = mem_descended_chain
+
+	is_triggered_only = yes
+
+	immediate = {
+		add_event_chain_counter = {
+			event_chain = mem_descended_chain
+			counter = mem_descended_antics
+			amount = 1
+		}
+		random_system_within_border = {
+			limit = {
+				any_system_planet = {
+					has_modifier = mem_descended_his_likeness
+				}
+			}
+			random_system_planet = {
+				limit = {
+					has_deposit = no
+				}
+				save_event_target_as = mem_descended_flavor_planet
+				solar_system = {
+					save_event_target_as = mem_descended_flavor_system
+				}
+			}
+			random_system_planet = {
+				limit = {
+					is_star = yes
+				}
+				create_drone_country = yes
+				event_target:drone_country = {
+					save_event_target_as = mining_drones
+					set_graphical_culture = ancient_drone_01
+					create_fleet = {
+						name = "NAME_Ancient_Mining_Drones"
+						effect = {
+							set_owner = event_target:drone_country
+							while = {
+								count = 24
+								create_ship = {
+									name = "NAME_Ancient_Mining_Drone"
+									design = "NAME_Ancient_Mining_Drone"
+								}
+							}
+							while = {
+								count = 16
+								create_ship = {
+									name = "NAME_Ancient_Combat_Drone"
+									design = "NAME_Ancient_Combat_Drone"
+								}
+							}
+							while = {
+								count = 12
+								create_ship = {
+									name = "NAME_Ancient_Destroyer"
+									design = "NAME_Ancient_Destroyer"
+								}
+							}				
+							set_location = prevprevprev
+						}
+					}
+				}
+			}
+		}
+	}
+
+	option = {
+		name = DISCONCERTING
+		event_target:mem_descended_flavor_planet = {
+			add_deposit = d_vast_unity_deposit
+			add_deposit = d_vast_unity_deposit
+		}
+	}
+}
+
+# Monthly Event Chain Counter increase
+country_event = {
+	id = mem_descended.200
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_event_chain = mem_descended_chain
+		NOT = {
+			has_completed_event_chain_counter = {
+				event_chain = mem_descended_chain
+				counter = mem_descended_ascension_progress
+			}
+		}
+	}
+
+	immediate = {
+		export_trigger_value_to_variable = {
+			trigger = num_assigned_jobs
+			parameters = {
+				job = priest	
+			}
+			variable = mem_num_priest_jobs
+		}
+		export_trigger_value_to_variable = {
+			trigger = num_assigned_jobs
+			parameters = {
+				job = death_priest	
+			}
+			variable = mem_num_death_priest_jobs
+		}
+		export_trigger_value_to_variable = {
+			trigger = num_assigned_jobs
+			parameters = {
+				job = telepath	
+			}
+			variable = mem_num_telepath_jobs
+		}
+		export_trigger_value_to_variable = {
+			trigger = num_assigned_jobs
+			parameters = {
+				job = culture_worker	
+			}
+			variable = mem_num_culture_worker_jobs
+		}
+		export_trigger_value_to_variable = {
+			trigger = num_assigned_jobs
+			parameters = {
+				job = bureaucrat	
+			}
+			variable = mem_num_bureaucrat_jobs
+		}
+		export_trigger_value_to_variable = {
+			trigger = num_assigned_jobs
+			parameters = {
+				job = unifier	
+			}
+			variable = mem_num_unifier_jobs
+		}
+		export_trigger_value_to_variable = {
+			trigger = num_assigned_jobs
+			parameters = {
+				job = manager	
+			}
+			variable = mem_num_manager_jobs
+		}
+		export_trigger_value_to_variable = {
+			trigger = num_assigned_jobs
+			parameters = {
+				job = steward	
+			}
+			variable = mem_num_steward_jobs
+		}
+		export_trigger_value_to_variable = {
+			trigger = num_assigned_jobs
+			parameters = {
+				job = death_chronicler	
+			}
+			variable = mem_num_death_chronicler_jobs
+		}
+		export_trigger_value_to_variable = {
+			trigger = num_assigned_jobs
+			parameters = {
+				job = knight	
+			}
+			variable = mem_num_knight_jobs
+		}
+		export_trigger_value_to_variable = {
+			trigger = num_assigned_jobs
+			parameters = {
+				job = high_priest	
+			}
+			variable = mem_num_high_priest_jobs
+		}
+		export_trigger_value_to_variable = {
+			trigger = num_assigned_jobs
+			parameters = {
+				job = politician	
+			}
+			variable = mem_num_politician_jobs
+		}
+		export_trigger_value_to_variable = {
+			trigger = num_assigned_jobs
+			parameters = {
+				job = noble	
+			}
+			variable = mem_num_noble_jobs
+		}
+		export_trigger_value_to_variable = {
+			trigger = num_assigned_jobs
+			parameters = {
+				job = executive	
+			}
+			variable = mem_num_executive_jobs
+		}
+		export_trigger_value_to_variable = {
+			trigger = num_assigned_jobs
+			parameters = {
+				job = knight_commander	
+			}
+			variable = mem_num_knight_commander_jobs
+		}
+		export_trigger_value_to_variable = {
+			trigger = num_assigned_jobs
+			parameters = {
+				job = coordinator	
+			}
+			variable = mem_num_coordinator_jobs
+		}
+		export_trigger_value_to_variable = {
+			trigger = num_assigned_jobs
+			parameters = {
+				job = evaluator	
+			}
+			variable = mem_num_evaluator_jobs
+		}
+		export_trigger_value_to_variable = {
+			trigger = num_assigned_jobs
+			parameters = {
+				job = synapse_drone	
+			}
+			variable = mem_num_synapse_drone_jobs
+		}
+		export_trigger_value_to_variable = {
+			trigger = num_assigned_jobs
+			parameters = {
+				job = chronicle_drone	
+			}
+			variable = mem_num_chronicle_drone_jobs
+		}
+		set_variable = {
+			which = mem_num_unity_jobs
+			value = mem_num_priest_jobs
+		}
+		change_variable = {
+			which = mem_num_unity_jobs
+			value = mem_num_death_priest_jobs
+		}
+		change_variable = {
+			which = mem_num_unity_jobs
+			value = mem_num_telepath_jobs
+		}
+		change_variable = {
+			which = mem_num_unity_jobs
+			value = mem_num_culture_worker_jobs
+		}
+		change_variable = {
+			which = mem_num_unity_jobs
+			value = mem_num_bureaucrat_jobs
+		}
+		change_variable = {
+			which = mem_num_unity_jobs
+			value = mem_num_unifier_jobs
+		}
+		change_variable = {
+			which = mem_num_unity_jobs
+			value = mem_num_manager_jobs
+		}
+		change_variable = {
+			which = mem_num_unity_jobs
+			value = mem_num_steward_jobs
+		}
+		change_variable = {
+			which = mem_num_unity_jobs
+			value = mem_num_death_chronicler_jobs
+		}
+		change_variable = {
+			which = mem_num_unity_jobs
+			value = mem_num_knight_jobs
+		}
+		change_variable = {
+			which = mem_num_unity_jobs
+			value = mem_num_high_priest_jobs
+		}
+		change_variable = {
+			which = mem_num_unity_jobs
+			value = mem_num_politician_jobs
+		}
+		change_variable = {
+			which = mem_num_unity_jobs
+			value = mem_num_noble_jobs
+		}
+		change_variable = {
+			which = mem_num_unity_jobs
+			value = mem_num_executive_jobs
+		}
+		change_variable = {
+			which = mem_num_unity_jobs
+			value = mem_num_knight_commander_jobs
+		}
+		change_variable = {
+			which = mem_num_unity_jobs
+			value = mem_num_coordinator_jobs
+		}
+		change_variable = {
+			which = mem_num_unity_jobs
+			value = mem_num_evaluator_jobs
+		}
+		change_variable = {
+			which = mem_num_unity_jobs
+			value = mem_num_synapse_drone_jobs
+		}
+		change_variable = {
+			which = mem_num_unity_jobs
+			value = mem_num_chronicle_drone_jobs
+		}
+		add_event_chain_counter = {
+			event_chain = mem_descended_chain
+			counter = mem_descended_ascension_progress
+			amount = mem_num_unity_jobs
+		}
+		if = {
+			limit = {
+				has_completed_event_chain_counter = {
+					event_chain = mem_descended_chain
+					counter = mem_descended_ascension_progress
+				}
+			}
+			country_event = { # GoTo Ascension
+				id = mem_descended.11
+			}
+		}
+	}
+}
+
+# Event Chain Counter increase for Ascension Perk
+# Executed when a country picks an ascension perk
+# THIS = country
+country_event = {
+	id = mem_descended.201
+	hide_window = yes
+	
+	is_triggered_only = yes
+
+	trigger = {
+		has_event_chain = mem_descended_chain
+		NOT = {
+			has_completed_event_chain_counter = {
+				event_chain = mem_descended_chain
+				counter = mem_descended_ascension_progress
+			}		
+		}
+	}
+
+	immediate = {
+		add_event_chain_counter = {
+			event_chain = mem_descended_chain
+			counter = mem_descended_ascension_progress
+			amount = 1000
+		}
+		if = {
+			limit = {
+				has_completed_event_chain_counter = {
+					event_chain = mem_descended_chain
+					counter = mem_descended_ascension_progress
+				}
+			}
+			country_event = { # GoTo Ascension
+				id = mem_descended.11
+			}
+		}
+	}
+}
+
+# Event Chain Counter increase for Tradition
+# Executed when a country picks any tradition (including starters and finishers)
+# THIS = country
+country_event = {
+	id = mem_descended.202
+	hide_window = yes
+	
+	is_triggered_only = yes
+
+	trigger = {
+		has_event_chain = mem_descended_chain
+		NOT = {
+			has_completed_event_chain_counter = {
+				event_chain = mem_descended_chain
+				counter = mem_descended_ascension_progress
+			}		
+		}
+	}
+
+	immediate = {
+		add_event_chain_counter = {
+			event_chain = mem_descended_chain
+			counter = mem_descended_ascension_progress
+			amount = 100
+		}
+		if = {
+			limit = {
+				has_completed_event_chain_counter = {
+					event_chain = mem_descended_chain
+					counter = mem_descended_ascension_progress
+				}
+			}
+			country_event = { # GoTo Ascension
+				id = mem_descended.11
+			}
+		}
+	}
+}
+
+# Event to spawn new Faith Militant fleet fired by yearly pulse
+country_event = {
+	id = mem_descended.203
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_event_chain = mem_descended_chain
+		NOR = {
+			has_completed_event_chain_counter = {
+				event_chain = mem_descended_chain
+				counter = mem_descended_ascension_progress
+			}
+			has_country_flag = mem_descended_faith_militant_pause
+		}
+	}
+
+	immediate = {
+		random_list = {
+			1 = {
+				modifier = {
+					exists =  event_target:mem_descended_faith_militant
+					event_target:mem_descended_faith_militant = {
+						any_owned_fleet = {
+							has_fleet_flag = mem_faith_militant_fleet_1
+						}
+						any_owned_fleet = {
+							has_fleet_flag = mem_faith_militant_fleet_2
+						}
+						any_owned_fleet = {
+							has_fleet_flag = mem_faith_militant_fleet_3
+						}
+					}
+					factor = 0
+				}
+				set_timed_country_flag = {
+					flag = mem_descended_faith_militant_pause
+					years = 8
+				}
+				country_event = {
+					id = mem_descended.50
+					days = 1
+					random = 358
+				}
+			}
+			4 = {
+
+			}
+		}
+	}
+}
+
+# Event to spawn new colorless fleet fired by yearly pulse
+country_event = {
+	id = mem_descended.204
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_event_chain = mem_descended_chain
+		NOR = {
+			has_completed_event_chain_counter = {
+				event_chain = mem_descended_chain
+				counter = mem_descended_ascension_progress
+			}
+			has_country_flag = mem_descended_colorless_pause
+		}
+	}
+	immediate = {
+		random_list = {
+			1 = {
+				set_timed_country_flag = {
+					flag = mem_descended_colorless_pause
+					years = 12
+				}
+				country_event = {
+					id = mem_descended.60
+					days = 1
+					random = 358
+				}
+			}
+			5 = {
+
+			}
+		}
+	}
+}
+
+# In case of unexpected leader death, clean up event chain and project no message
+# Executed as a leader has died
+# This = Country
+# From = Leader
+country_event = {
+	id = mem_descended.205
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		From = {
+			has_leader_flag = mem_descended_leader
+		}
+	}
+
+	immediate = {
+		abort_special_project = {
+			type = MEM_DESCENDED_MEETING_PROJECT
+		}
+		end_event_chain = mem_descended_chain
+	}
+}
+
+# Diplo Event: Meeting with Chada - Main selection
+country_event = {
+	id = mem_descended.300
+	title = mem_descended.300.name
+	desc = {
+		trigger = { 
+			switch = { 
+				trigger = has_country_flag 
+				mem_descended_first_hello = {text = mem_descended.300.desc_01} 
+				mem_descended_second_hello = {text = mem_descended.300.desc_02}
+			}
+		}
+	}
+
+	is_triggered_only = yes
+
+	diplomatic = yes
+	
+	picture_event_data = {
+		planet_background = event_target:mem_descended_heart_of_ascension
+		graphical_culture = root
+		city_level = event_target:mem_descended_heart_of_ascension
+		room = gilded_room
+		portrait = event_target:mem_descended_leader
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = mem_descended_second_hello
+				}
+			}
+			set_country_flag = mem_descended_first_hello
+		}
+		random_galaxy_planet = {
+			limit = {
+				has_planet_flag = mem_descended_heart_of_ascension
+			}
+			save_event_target_as = mem_descended_heart_of_ascension
+		}
+		if = {
+			limit = {
+				has_country_flag = mem_descended_ascension_complete
+			}
+			set_variable = {
+				which = mem_shield_boost_cost_variable
+				value = 30
+			}
+			multiply_variable = {
+				which = mem_shield_boost_cost_variable
+				value = trigger:max_naval_capacity
+			}
+			round_variable_to_closest = {
+				which = mem_shield_boost_cost_variable
+				value = 100
+			}
+			set_variable = {
+				which = mem_shield_boost_cost_variable_neg
+				value = mem_shield_boost_cost_variable
+			}
+			multiply_variable = {
+				which = mem_shield_boost_cost_variable_neg
+				value = -1
+			}
+		}
+	}
+
+	option = { # Appearance change
+		name = mem_descended.300.a
+		hidden_effect = {
+			country_event = {
+				id = mem_descended.301
+			}
+			if = {
+				limit = {
+					has_country_flag = mem_descended_first_hello
+				}
+				remove_country_flag = mem_descended_first_hello
+				set_country_flag = mem_descended_second_hello
+			}
+		}
+	}
+
+	option = { # Faith Militant Recruitment
+		name = mem_descended.300.b
+		trigger = {
+			has_country_flag = mem_descended_faith_militant_met
+		}
+		hidden_effect = {
+			country_event = {
+				id = mem_descended.302
+			}
+			if = {
+				limit = {
+					has_country_flag = mem_descended_first_hello
+				}
+				remove_country_flag = mem_descended_first_hello
+				set_country_flag = mem_descended_second_hello
+			}
+		}
+	}
+
+	option = { # Repeat recruitment questions
+		name = mem_descended.300.c
+		hidden_effect = {
+			country_event = {
+				id = mem_descended.303
+			}
+			if = {
+				limit = {
+					has_country_flag = mem_descended_first_hello
+				}
+				remove_country_flag = mem_descended_first_hello
+				set_country_flag = mem_descended_second_hello
+			}
+		}
+	}
+
+	option = { # Ask about help against colorless
+		name = mem_descended.300.d
+		trigger = { # Makes no sense to have this after the rift is closed
+			NOT = {
+				has_country_flag = mem_descended_ascension_complete
+			}
+		}
+		hidden_effect = {
+			country_event = {
+				id = mem_descended.304
+			}
+			if = {
+				limit = {
+					has_country_flag = mem_descended_first_hello
+				}
+				remove_country_flag = mem_descended_first_hello
+				set_country_flag = mem_descended_second_hello
+			}
+		}
+	}
+
+	option = { # Get temporary shield boost
+		name = mem_descended.304.d
+		trigger = { # If you haven't asked before, you get the option now
+			has_country_flag = mem_descended_ascension_complete
+		}
+		allow = {
+			resource_stockpile_compare = { resource = unity value >= mem_shield_boost_cost_variable }
+			NOT = {
+				has_modifier = mem_descended_recently_shield_boosted
+			}
+		}
+		add_resource = { 
+			unity = 1
+			mult = mem_shield_boost_cost_variable_neg
+		}
+		add_modifier = {
+			modifier = mem_descended_recently_shield_boosted
+			years = 2
+		}
+		is_dialog_only = yes
+		response_text = mem_descended.304.d.response
+	}
+
+	option = {
+		name = GOODBYE
+		hidden_effect = {
+			if = {
+				limit = {
+					has_country_flag = mem_descended_first_hello
+				}
+				remove_country_flag = mem_descended_first_hello
+			}
+			if = {
+				limit = {
+					has_country_flag = mem_descended_second_hello
+				}
+				remove_country_flag = mem_descended_second_hello
+			}
+		}
+	}
+}
+
+# Diplo Event: Meeting with Chada - Change his appearance
+country_event = {
+	id = mem_descended.301
+	title = mem_descended.300.name
+	desc = mem_descended.301.desc
+	is_triggered_only = yes
+
+	diplomatic = yes
+	
+	picture_event_data = {
+		planet_background = event_target:mem_descended_heart_of_ascension
+		graphical_culture = root
+		city_level = event_target:mem_descended_heart_of_ascension
+		room = gilded_room
+		portrait = event_target:mem_descended_leader
+	}
+
+	immediate = {
+		random_galaxy_planet = {
+			limit = {
+				has_planet_flag = mem_descended_heart_of_ascension
+			}
+			save_event_target_as = mem_descended_heart_of_ascension
+		}
+	}
+
+	option = { # Golden Bug
+		name = mem_descended.301.a
+		is_dialog_only = yes
+		response_text = mem_descended.301.a.response
+		hidden_effect = {
+			event_target:mem_descended_leader = {
+				change_leader_portrait = mem_art1
+			}
+		}		
+	}
+
+	option = { # Formless
+		name = mem_descended.301.b
+		is_dialog_only = yes
+		response_text = mem_descended.301.a.response
+		hidden_effect = {
+			event_target:mem_descended_leader = {
+				change_leader_portrait = mem_exd5_leader
+			}
+		}		
+	}
+
+	option = { # Original
+		name = mem_descended.301.c
+		is_dialog_only = yes
+		response_text = mem_descended.301.c.response
+		hidden_effect = {
+			event_target:mem_descended_leader = {
+				change_leader_portrait = mem_chada
+			}
+		}
+	}
+
+	option = { # Trailer Emperor
+		name = mem_descended.301.r
+		is_dialog_only = yes
+		response_text = mem_descended.301.r.response
+		hidden_effect = {
+			event_target:mem_descended_leader = {
+				change_leader_portrait = mem_Alexei
+			}
+		}
+	}
+
+	option = { # Like us
+		name = mem_descended.301.z
+		is_dialog_only = yes
+		response_text = mem_descended.301.a.response
+		hidden_effect = {
+			mem_descended_random_species = yes
+			event_target:mem_descended_leader = {
+				change_leader_portrait = root.owner_main_species
+			}
+		}		
+	}
+
+	option = { # Random
+		name = mem_descended.301.d
+		is_dialog_only = yes
+		response_text = mem_descended.301.a.response
+		hidden_effect = {
+			mem_descended_random_species = yes
+			event_target:mem_descended_leader = {
+				change_leader_portrait = event_target:mem_descended_species
+			}
+		}		
+	}
+
+	option = { # Humanoid
+		name = mem_descended.301.e
+		is_dialog_only = yes
+		response_text = mem_descended.301.a.response
+		hidden_effect = {
+			mem_descended_humanoid_species = yes
+			event_target:mem_descended_leader = {
+				change_leader_portrait = event_target:mem_descended_species
+			}
+		}		
+	}
+
+	option = { # Mammalian
+		name = mem_descended.301.f
+		is_dialog_only = yes
+		response_text = mem_descended.301.a.response
+		hidden_effect = {
+			mem_descended_mammalian_species = yes
+			event_target:mem_descended_leader = {
+				change_leader_portrait = event_target:mem_descended_species
+			}
+		}		
+	}
+
+	option = { # Reptilian
+		name = mem_descended.301.g
+		is_dialog_only = yes
+		response_text = mem_descended.301.a.response
+		hidden_effect = {
+			mem_descended_reptilian_species = yes
+			event_target:mem_descended_leader = {
+				change_leader_portrait = event_target:mem_descended_species
+			}
+		}		
+	}
+
+	option = { # Avian
+		name = mem_descended.301.h
+		is_dialog_only = yes
+		response_text = mem_descended.301.a.response
+		hidden_effect = {
+			mem_descended_avian_species = yes
+			event_target:mem_descended_leader = {
+				change_leader_portrait = event_target:mem_descended_species
+			}
+		}		
+	}
+
+	option = { # Arthropoid
+		name = mem_descended.301.i
+		is_dialog_only = yes
+		response_text = mem_descended.301.a.response
+		hidden_effect = {
+			mem_descended_arthropoid_species = yes
+			event_target:mem_descended_leader = {
+				change_leader_portrait = event_target:mem_descended_species
+			}
+		}		
+	}
+
+	option = { # Moluscoid
+		name = mem_descended.301.j
+		is_dialog_only = yes
+		response_text = mem_descended.301.a.response
+		hidden_effect = {
+			mem_descended_moluscoid_species = yes
+			event_target:mem_descended_leader = {
+				change_leader_portrait = event_target:mem_descended_species
+			}
+		}		
+	}
+
+	option = { # Fungoid
+		name = mem_descended.301.k
+		is_dialog_only = yes
+		response_text = mem_descended.301.a.response
+		hidden_effect = {
+			mem_descended_fungoid_species = yes
+			event_target:mem_descended_leader = {
+				change_leader_portrait = event_target:mem_descended_species
+			}
+		}		
+	}
+
+	option = { # Plantoid
+		name = mem_descended.301.l
+		is_dialog_only = yes
+		response_text = mem_descended.301.a.response
+		trigger = {
+			host_has_dlc = "Plantoids Species Pack"
+		}
+		hidden_effect = {
+			mem_descended_plantoid_species = yes
+			event_target:mem_descended_leader = {
+				change_leader_portrait = event_target:mem_descended_species
+			}
+		}		
+	}
+
+	option = { # Lithoid
+		name = mem_descended.301.m
+		is_dialog_only = yes
+		response_text = mem_descended.301.a.response
+		trigger = {
+			host_has_dlc = "Lithoids Species Pack"
+		}
+		hidden_effect = {
+			mem_descended_lithoid_species = yes
+			event_target:mem_descended_leader = {
+				change_leader_portrait = event_target:mem_descended_species
+			}
+		}		
+	}
+
+	option = { # Necroid
+		name = mem_descended.301.n
+		is_dialog_only = yes
+		response_text = mem_descended.301.a.response
+		trigger = {
+			host_has_dlc = "Necroids Species Pack"
+		}
+		hidden_effect = {
+			mem_descended_necroid_species = yes
+			event_target:mem_descended_leader = {
+				change_leader_portrait = event_target:mem_descended_species
+			}
+		}		
+	}
+
+	option = { # Aquatic
+		name = mem_descended.301.o
+		is_dialog_only = yes
+		response_text = mem_descended.301.a.response
+		trigger = {
+			host_has_dlc = "Aquatics Species Pack"
+		}
+		hidden_effect = {
+			mem_descended_aquatic_species = yes
+			event_target:mem_descended_leader = {
+				change_leader_portrait = event_target:mem_descended_species
+			}
+		}		
+	}
+
+	option = { # Toxoid
+		name = mem_descended.301.p
+		is_dialog_only = yes
+		response_text = mem_descended.301.a.response
+		trigger = {
+			host_has_dlc = "Toxoids Species Pack"
+		}
+		hidden_effect = {
+			mem_descended_toxoid_species = yes
+			event_target:mem_descended_leader = {
+				change_leader_portrait = event_target:mem_descended_species
+			}
+		}		
+	}
+
+	option = { # Robot
+		name = mem_descended.301.q
+		is_dialog_only = yes
+		response_text = mem_descended.301.a.response
+		hidden_effect = {
+			mem_descended_robotic_species = yes
+			event_target:mem_descended_leader = {
+				change_leader_portrait = event_target:mem_descended_species
+			}
+		}		
+	}
+
+	option = {
+		name = BACK
+		hidden_effect = {
+			country_event = {
+				id = mem_descended.300
+			}
+		}
+	}
+}
+
+# Diplo Event: Meeting with Chada - Faith Militant Recruitment
+country_event = {
+	id = mem_descended.302
+	title = mem_descended.300.name
+	desc = mem_descended.302.desc
+	is_triggered_only = yes
+
+	diplomatic = yes
+	
+	picture_event_data = {
+		planet_background = event_target:mem_descended_heart_of_ascension
+		graphical_culture = root
+		city_level = event_target:mem_descended_heart_of_ascension
+		room = gilded_room
+		portrait = event_target:mem_descended_leader
+	}
+
+	immediate = {
+		random_galaxy_planet = {
+			limit = {
+				has_planet_flag = mem_descended_heart_of_ascension
+			}
+			save_event_target_as = mem_descended_heart_of_ascension
+		}
+		set_variable = {
+			which = mem_faith_militant_cost_variable
+			value = value:mem_faith_militant_cost
+		}
+		multiply_variable = {
+			which = mem_faith_militant_cost_variable
+			value = -1
+		}
+	}
+
+	option = { # Bit of lore about them
+		name = mem_descended.302.a
+		is_dialog_only = yes
+		response_text = mem_descended.302.a.response		
+	}
+
+	option = { # Can we hire them?
+		name = mem_descended.302.b
+		allow = {
+			resource_stockpile_compare = { resource = unity value >= value:mem_faith_militant_cost }
+			NOT = {
+				has_modifier = mem_descended_recently_recruited
+			}
+		}
+		add_resource = { 
+			unity = 1
+			mult = mem_faith_militant_cost_variable
+		}
+		add_modifier = {
+			modifier = mem_descended_recently_recruited
+			years = 10
+		}
+		is_dialog_only = yes
+		response_text = mem_descended.302.b.response
+		hidden_effect = {
+			country_event = {
+				id = mem_descended.52
+				days = 120
+				random = 60
+			}
+		}
+	}
+
+	option = {
+		name = BACK
+		hidden_effect = {
+			country_event = {
+				id = mem_descended.300
+			}
+		}
+	}
+}
+
+# Diplo Event: Meeting with Chada - Repeat some of the recruitment questions
+country_event = {
+	id = mem_descended.303
+	title = mem_descended.300.name
+	desc = mem_descended.303.desc
+	is_triggered_only = yes
+
+	diplomatic = yes
+	
+	picture_event_data = {
+		planet_background = event_target:mem_descended_heart_of_ascension
+		graphical_culture = root
+		city_level = event_target:mem_descended_heart_of_ascension
+		room = gilded_room
+		portrait = event_target:mem_descended_leader
+	}
+
+	immediate = {
+		random_galaxy_planet = {
+			limit = {
+				has_planet_flag = mem_descended_heart_of_ascension
+			}
+			save_event_target_as = mem_descended_heart_of_ascension
+		}
+	}
+
+	option = { # True form?
+		name = mem_descended.303.a
+		is_dialog_only = yes
+		response_text = mem_descended.8.a.response		
+	}
+
+	option = { # Where are you from?
+		name = mem_descended.8.b
+		is_dialog_only = yes
+		response_text = mem_descended.8.b.response		
+	}
+
+	option = { # Did you create this system?
+		name = mem_descended.8.c
+		is_dialog_only = yes
+		response_text = mem_descended.8.c.response
+	}
+
+	option = { # Why were the colorless here?
+		name = mem_descended.8.d
+		is_dialog_only = yes
+		response_text = mem_descended.8.d.response
+	}
+
+	option = {
+		name = BACK
+		hidden_effect = {
+			country_event = {
+				id = mem_descended.300
+			}
+		}
+	}
+}
+
+# Diplo Event: Meeting with Chada - Ask about help against colorless
+country_event = {
+	id = mem_descended.304
+	title = mem_descended.300.name
+	desc = {
+		trigger = {
+			switch = {
+				trigger = has_country_flag				
+				mem_descended_third_hello = { text = mem_descended.304.desc }
+				mem_descended_fourth_hello = { text = mem_descended.304.b.response }
+				mem_descended_fifth_hello = { text = mem_descended.304.c.response }
+			}
+		}
+		
+	}
+	is_triggered_only = yes
+
+	diplomatic = yes
+	
+	picture_event_data = {
+		planet_background = event_target:mem_descended_heart_of_ascension
+		graphical_culture = root
+		city_level = event_target:mem_descended_heart_of_ascension
+		room = gilded_room
+		portrait = event_target:mem_descended_leader
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				NOR = {
+					has_country_flag = mem_descended_fourth_hello
+					has_country_flag = mem_descended_fifth_hello
+				}
+			}
+			set_country_flag = mem_descended_third_hello
+		}
+		random_galaxy_planet = {
+			limit = {
+				has_planet_flag = mem_descended_heart_of_ascension
+			}
+			save_event_target_as = mem_descended_heart_of_ascension
+		}
+		set_variable = {
+			which = mem_shield_boost_cost_variable
+			value = 30
+		}
+		multiply_variable = {
+			which = mem_shield_boost_cost_variable
+			value = trigger:max_naval_capacity
+		}
+		round_variable_to_closest = {
+			which = mem_shield_boost_cost_variable
+			value = 100
+		}
+		set_variable = {
+			which = mem_shield_boost_cost_variable_neg
+			value = mem_shield_boost_cost_variable
+		}
+		multiply_variable = {
+			which = mem_shield_boost_cost_variable_neg
+			value = -1
+		}
+	}
+
+	option = { # Can you give us any advice how to fight them?
+		name = mem_descended.304.a
+		is_dialog_only = yes
+		response_text = mem_descended.304.a.response		
+	}
+
+	option = { # Can you help us in any way?
+		name = mem_descended.304.b
+		trigger = {
+			NOT = {
+				has_country_flag = mem_descended_faith_militant_met
+			}
+		}
+		hidden_effect = {
+			if = {
+				limit = {
+					NOT = {
+						has_country_flag = mem_descended_shield_boost
+					}
+				}
+				set_country_flag = mem_descended_shield_boost
+			}
+			remove_country_flag = mem_descended_third_hello
+			set_country_flag = mem_descended_fourth_hello
+			country_event = {
+				id = mem_descended.304
+			}
+		}	
+	}
+
+	option = { # Can you help us in any way?
+		name = mem_descended.304.b
+		trigger = {
+			has_country_flag = mem_descended_faith_militant_met
+		}		
+		hidden_effect = {
+			if = {
+				limit = {
+					NOT = {
+						has_country_flag = mem_descended_shield_boost
+					}
+				}
+				set_country_flag = mem_descended_shield_boost
+			}
+			remove_country_flag = mem_descended_third_hello
+			set_country_flag = mem_descended_fifth_hello
+			country_event = {
+				id = mem_descended.304
+			}
+		}
+	}
+
+	option = { # Get temporary shield boost
+		name = mem_descended.304.d
+		trigger = {
+			has_country_flag = mem_descended_shield_boost
+		}
+		allow = {
+			resource_stockpile_compare = { resource = unity value >= mem_shield_boost_cost_variable }
+			NOT = {
+				has_modifier = mem_descended_recently_shield_boosted
+			}
+		}
+		add_resource = { 
+			unity = 1
+			mult = mem_shield_boost_cost_variable_neg
+		}
+		add_modifier = {
+			modifier = mem_descended_recently_shield_boosted
+			years = 2
+		}
+		is_dialog_only = yes
+		response_text = mem_descended.304.d.response
+	}
+
+	option = {
+		name = BACK
+		hidden_effect = {
+			if = {
+				limit = {
+					has_country_flag = mem_descended_third_hello
+				}
+				remove_country_flag = mem_descended_third_hello
+			}
+			if = {
+				limit = {
+					has_country_flag = mem_descended_fourth_hello
+				}
+				remove_country_flag = mem_descended_fourth_hello
+			}
+			if = {
+				limit = {
+					has_country_flag = mem_descended_fifth_hello
+				}
+				remove_country_flag = mem_descended_fifth_hello
+			}
+			country_event = {
+				id = mem_descended.300
+			}
+		}
+	}
+}

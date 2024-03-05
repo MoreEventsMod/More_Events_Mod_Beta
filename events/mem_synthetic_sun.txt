@@ -3,72 +3,62 @@
 
 namespace = mem_synthetic_sun
 
-@MTTH = 5000
-@MTTHAI = 1000
-
 #Gatekeeper to spare the game unnecessary evaluation and to prevent this event from always triggering
 
-planet_event = {
+country_event = {
 	id = mem_synthetic_sun.999
 	hide_window = yes
 	
-	mean_time_to_happen = {
-		months = @MTTH
-	}
+	is_triggered_only = yes
 	
 	trigger = {
+		is_ai = no
 		NOT = { has_global_flag = mem_synthetic_sun }
-		NOT = { has_planet_flag = colony_event }
-		exists = owner
-		owner = {
-			OR = {
-				is_ai = no
-				is_country_type = default
+		any_owned_planet = {			
+			has_moon = yes
+			any_moon = {
+				OR = {
+					is_planet_class = pc_barren
+					is_planet_class = pc_barren_cold
+				}
 			}
-		}
-		num_pops > 3
-		is_capital = no
-		has_moon = yes
-		NOT = {
-			any_moon = { has_owner = yes }
-		}
-		any_moon = {
-			OR = {
-				is_planet_class = pc_barren
-				is_planet_class = pc_barren_cold
-			}
-		}
-		OR = {
-			is_planet_class = "pc_desert"
-			is_planet_class = "pc_tropical"
-			is_planet_class = "pc_arid"
-			is_planet_class = "pc_ocean"
-			is_planet_class = "pc_tundra"
-			is_planet_class = "pc_arctic"
-			is_planet_class = "pc_continental"
-			is_planet_class = "pc_alpine"
-			is_planet_class = "pc_savannah"
+			habitable_planet_not_urban = yes
+			is_capital = no
+			NOT = { has_planet_flag = colony_event }
+			num_pops > 3
 		}
 	}
 	
 	immediate = {
 		random_list = {
-			30 = {
+			100 = { # try again
+			}
+			3 = { # start event
 				set_global_flag = mem_synthetic_sun
-				set_planet_flag = colony_event
-				planet_event = { id = mem_synthetic_sun.1 }
-				modifier = {
-					factor = 0.1
-					owner = { is_ai = yes }
+				random_owned_planet = {
+					limit = {
+						has_moon = yes
+						any_moon = {
+							OR = {
+								is_planet_class = pc_barren
+								is_planet_class = pc_barren_cold
+							}
+						}
+						habitable_planet_not_urban = yes
+						is_capital = no
+						NOT = { has_planet_flag = colony_event }
+						num_pops > 3
+					}
+					set_planet_flag = colony_event
+					planet_event = {
+						id = mem_synthetic_sun.1
+						days = 1
+						random = 355
+					}
 				}
 			}
-			70 = {
-				IF = {
-					limit = {
-						owner = { is_ai = no }
-					}
-					set_global_flag = mem_synthetic_sun
-				}
+			2 = { # block for playthrough
+				set_global_flag = mem_synthetic_sun
 			}
 		}
 	}
@@ -87,7 +77,7 @@ planet_event = {
 	is_triggered_only = yes
 	
 	immediate = {
-		save_event_target_as = the_planet
+		save_global_event_target_as = the_planet
 		random_moon = {
 			limit = {
 				OR = {
@@ -95,7 +85,7 @@ planet_event = {
 					is_planet_class = pc_barren_cold
 				}
 			}
-			save_event_target_as = the_moon
+			save_global_event_target_as = the_moon
 		}
 	}
 	
@@ -240,6 +230,7 @@ planet_event = {
 	hide_window = yes
 	
 	immediate = {
+		clear_global_event_target = the_planet
 		random_list = {
 			60 = { planet_event = { id = mem_synthetic_sun.6 } } #Synthetic sun works
 			10 = { planet_event = { id = mem_synthetic_sun.9 } } #Synthetic sun of death
@@ -274,7 +265,9 @@ planet_event = {
 			days = -1
 		}
 		random_list = {
-			50 = { }
+			50 = {
+				clear_global_event_target = the_moon
+			}
 			40 = { 
 				planet_event = { id = mem_synthetic_sun.7 days = 30 } 
 			}
@@ -343,6 +336,7 @@ planet_event = {
 	}
 	
 	immediate = {
+		clear_global_event_target = the_moon
 		remove_modifier = mem_synthetic_sun_modifier
 		IF = {
 			limit = {
@@ -392,6 +386,10 @@ planet_event = {
 	trigger = {
 		NOT = { is_planet_class = pc_gaia }
 	}
+
+	immediate = {
+		clear_global_event_target = the_moon
+	}
 	
 	is_triggered_only = yes
 	
@@ -421,6 +419,7 @@ planet_event = {
 			add_deposit = d_energy_3
 			prevent_anomaly = yes
 		}
+		clear_global_event_target = the_moon
 		add_modifier = {
 			modifier = mem_synthetic_sun_radiation
 			days = -1
@@ -463,6 +462,7 @@ planet_event = {
 			add_deposit = d_energy_3
 			prevent_anomaly = yes
 		}
+		clear_global_event_target = the_moon
 		destroy_colony = yes
 		change_pc = pc_molten
 		#set_planet_entity = { entity = "barren_planet_01_destroyed_entity" }
@@ -501,6 +501,7 @@ planet_event = {
 			add_deposit = d_physics_3
 			prevent_anomaly = yes
 		}
+		clear_global_event_target = the_moon
 		add_modifier = {
 			modifier = mem_synthetic_sun_rain
 			days = 360
