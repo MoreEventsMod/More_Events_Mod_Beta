@@ -1,0 +1,1567 @@
+namespace = mem_eden_protocol
+
+############################################################################################################
+# E.D.E.N. Protocol Origin
+############################################################################################################
+# mem_eden_protocol.1   |	Gamestart setup
+# mem_eden_protocol.2   |	Yearly Pulse event for seeding and terraforming
+# mem_eden_protocol.3   |	Notification for standard terraforming
+# mem_eden_protocol.4   |	Notification for gaia terraforming
+# mem_eden_protocol.5   |	Notification for primitive seeding
+############################################################################################################
+# Situation Events
+############################################################################################################
+# mem_eden_protocol.100 |	Test Event to quickly progress the situation
+# mem_eden_protocol.101 |	Directive: E.D.E.N. Protocol Adjustment
+# mem_eden_protocol.102 |	Directive: E.D.E.N. Protocol Improvment
+# mem_eden_protocol.103 |	Incoming Signals Detected - Arc site uncovered
+# mem_eden_protocol.104 |	Directive: E.D.E.N. Protocol Iteration
+# mem_eden_protocol.105 |	Directive: Error - 3 Choices how to change empire
+############################################################################################################
+# Mechanical Events
+############################################################################################################
+# mem_eden_protocol.106 |	Primitives being invaded by taking assimilator option
+# mem_eden_protocol.107 |	Planet turned into primitive civ by bombardment
+############################################################################################################
+# Arc Site Events
+############################################################################################################
+# mem_eden_protocol.111 |	Stage 1
+# mem_eden_protocol.112 |	Stage 2
+# mem_eden_protocol.113 |	Stage 3
+# mem_eden_protocol.114 |	Stage 4 End Opens Message
+# mem_eden_protocol.115 |	Message Event with hologram
+############################################################################################################
+# Mechanical Events
+############################################################################################################
+# mem_eden_protocol.121 |	Get biotrophies from primitives as servitor
+# mem_eden_protocol.122 |	Somebody invaded primitives or otherwise destroyed them. We disapprove...
+############################################################################################################
+
+# fired at gamestart to setup the habitat
+country_event = {
+	id = mem_eden_protocol.1
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		has_origin = origin_mem_eden_protocol
+	}
+	immediate = {
+		set_global_flag = origin_mem_eden_protocol_exists_somewhere
+		leader = {
+			add_trait_no_notify = leader_trait_legendary_mem_eden_protocol
+		}
+		give_technology = {
+			tech = tech_terrestrial_sculpting
+			message = no
+		}
+		save_global_event_target_as = mem_eden_protocol_country
+		set_country_flag = encountered_first_primitive
+		set_policy = {
+			policy = interference
+			option = interference_subtle
+		}
+		set_policy_cooldown = interference
+		set_policy = {
+			policy = enlightenment
+			option = enlightenment_not_allowed
+		}
+		set_policy_cooldown = enlightenment
+		start_situation = {
+			type = situation_mem_eden_protocol_protocolswill
+		}
+		begin_event_chain = {
+			event_chain = mem_eden_protocol_chain
+		}
+		capital_scope = {
+			remove_all_buildings = yes
+			remove_all_districts = yes
+			add_district = district_hab_mining
+			add_district = district_hab_energy
+			add_district = district_hab_energy
+			add_district = district_hab_science
+			add_district = district_hab_industrial
+			add_district = district_hab_housing
+			add_district = district_hab_housing
+			add_building = building_hab_major_capital
+			add_building = building_machine_assembly_plant
+			add_building = building_mem_eden_protocol_terraformer_1
+			add_building = building_mem_eden_protocol_seeder_1
+			set_variable = {
+				which = mem_eden_protocol_caretaker_variable
+				value = 1
+			}
+			while = {
+				count = 2
+				closest_system = {
+					limit = {
+						OR = {
+							has_star_flag = neighbor_t1_first_colony
+							has_star_flag = neighbor_t2_second_colony
+						}
+						NOT = {
+							any_system_planet = {
+								has_planet_flag = mem_eden_protocol_terraforming_candidate
+							}
+						}
+					}
+					random_system_planet = {
+						limit = {
+							has_planet_flag = prescripted_ideal
+						}
+						clear_deposits = yes
+						change_pc = pc_barren
+						add_modifier = {
+							modifier = terraforming_candidate
+						}
+						set_planet_flag = mem_eden_protocol_terraforming_candidate
+					}
+					if = {
+						limit = {
+							NOT = {
+								any_system_planet = {
+									has_planet_flag = mem_eden_protocol_terraforming_candidate
+								}
+							}
+						}
+						random_system_planet = {
+							limit = {
+								is_star = no
+								planet_size > 8
+								planet_size < 26
+							}
+							clear_deposits = yes
+							clear_planet_modifiers = yes
+							change_pc = pc_barren
+							add_modifier = {
+								modifier = terraforming_candidate
+							}
+							set_planet_flag = mem_eden_protocol_terraforming_candidate
+						}
+					}
+				}
+			}
+			solar_system = {
+				random_system_planet = {
+					limit = {
+						exists = owner
+						owner = {
+							is_country_type = primitive
+						}
+					}
+					owner = {
+						establish_communications_no_message = root
+					}
+				}
+				starbase = {
+					remove_starbase_building = {
+						building = hydroponics_bay
+					}
+					set_starbase_building = {
+						slot = 1
+						building = crew_quarters
+					}
+				}
+			}
+			#	solar_system = {
+			#		random_system_planet = {
+			#			limit = {
+			#				exists = owner
+			#				owner = {
+			#					is_country_type = primitive
+			#				}
+			#			}
+			#			# I fail to find a way to spawn an observation station
+			#		}
+			#	}
+		}
+		country_event = {
+			id = mem_eden_protocol.2
+		}
+	}
+}
+
+#yearly pulse event
+country_event = {
+	id = mem_eden_protocol.2
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		has_origin = origin_mem_eden_protocol
+	}
+	immediate = {
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = mem_eden_protocol_became_assimilator
+				}
+			}
+			set_policy_cooldown = interference
+			set_policy_cooldown = enlightenment
+		}
+		if = {
+			limit = {
+				has_country_flag = found_presapients
+				NOT = {
+					has_country_flag = mem_eden_protocol_pre_sapient
+				}
+			}
+			set_country_flag = mem_eden_protocol_pre_sapient
+			set_policy = {
+				policy = pre_sapients
+				option = pre_sapients_protect
+			}
+		}
+		set_variable = {
+			which = mem_eden_protocol_cared_primitives_number_country
+			value = 0
+		}
+		every_owned_planet = {
+			limit = {
+				is_planet_class = pc_habitat
+			}
+			if = {
+				limit = {
+					owner = {
+						NOT = {
+							has_country_flag = mem_eden_protocol_seeding_pause
+						}
+					}
+					OR = {
+						has_building = building_mem_eden_protocol_seeder_1
+						has_building = building_mem_eden_protocol_seeder_2
+						has_building = building_mem_eden_protocol_seeder_3
+					}
+					solar_system = {
+						any_system_planet = {
+							habitable_planet_not_urban = yes
+							NOT = {
+								exists = owner
+							}
+						}
+					}
+				}
+				random_list = {
+					80 = {
+					}
+					20 = {
+						solar_system = {
+							random_system_planet = {
+								limit = {
+									habitable_planet_not_urban = yes
+									NOT = {
+										exists = owner
+									}
+								}
+								save_event_target_as = mem_eden_protocol_seeding_target
+							}
+						}
+						owner = {
+							set_timed_country_flag = {
+								flag = mem_eden_protocol_seeding_pause
+								years = 2
+							}
+							country_event = {
+								id = mem_eden_protocol.5
+								days = 1
+								random = 358
+							}
+						}
+					}
+				}
+				reroll_random = yes
+			}
+			if = {
+				limit = {
+					OR = {
+						has_building = building_mem_eden_protocol_seeder_1
+						has_building = building_mem_eden_protocol_seeder_2
+						has_building = building_mem_eden_protocol_seeder_3
+					}
+					solar_system = {
+						any_system_planet = {
+							exists = owner
+							owner = {
+								is_country_type = primitive
+								OR = {
+									has_country_flag = machine_age
+									has_country_flag = atomic_age
+									has_country_flag = early_space_age
+								}
+							}
+						}
+					}
+				}
+				solar_system = {
+					every_system_planet = {
+						limit = {
+							exists = owner
+							owner = {
+								is_country_type = primitive
+								OR = {
+									has_country_flag = machine_age
+									has_country_flag = atomic_age
+									has_country_flag = early_space_age
+								}
+							}
+						}
+						owner = {
+							random_situation = {
+								limit = {
+									is_situation_type = pre_ftl_tech_progress_situation
+								}
+								set_situation_flag = tech_frozen
+							}
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						is_variable_set = mem_eden_protocol_terraforming_progress
+					}					
+				}
+				set_variable = {
+					which = mem_eden_protocol_terraforming_progress
+					value = 0
+				}
+			}
+			if = {
+				limit = {
+					# owner = {
+					# 	NOT = {
+					# 		has_country_flag = mem_eden_protocol_terraforming_pause
+					# 	}
+					# }
+					OR = {
+						has_building = building_mem_eden_protocol_terraformer_1
+						has_building = building_mem_eden_protocol_terraformer_2
+					}
+					solar_system = {
+						any_system_planet = {
+							OR = {
+								has_modifier = terraforming_candidate
+								is_planet_class = pc_nuked
+							}
+							OR = {
+								NOT = {
+									exists = owner
+								}
+								owner = {
+									is_country_type = primitive
+								}
+							}
+						}
+					}
+				}
+				random_list = {
+					60 = {
+					}
+					1 = {
+						modifier = {
+							check_variable = {
+								which = mem_eden_protocol_terraforming_progress
+								value > 0
+							}
+							factor = mem_eden_protocol_terraforming_progress
+						}
+						modifier = {
+							check_variable = {
+								which = mem_eden_protocol_terraforming_progress
+								value < 1
+							}
+							factor = 0
+						}
+						set_variable = {
+							which = mem_eden_protocol_terraforming_progress
+							value = -1
+						}
+						solar_system = {
+							random_system_planet = {
+								limit = {
+									OR = {
+										has_modifier = terraforming_candidate
+										AND = {
+											is_planet_class = pc_nuked
+											NOT = {
+												exists = owner
+											}
+										}										
+									}
+									OR = {
+										NOT = {
+											exists = owner
+										}
+										owner = {
+											is_country_type = primitive
+										}
+									}
+								}
+								set_planet_flag = mem_eden_protocol_terraforming_target
+							}
+						}
+						owner = {
+							# set_timed_country_flag = {
+							# 	flag = mem_eden_protocol_terraforming_pause
+							# 	years = 3
+							# }
+							country_event = {
+								id = mem_eden_protocol.3
+								days = 1
+								random = 358
+							}
+						}
+					}
+				}
+				reroll_random = yes
+			}
+			if = {
+				limit = {
+					# owner = {
+					# 	NOT = {
+					# 		has_country_flag = mem_eden_protocol_terraforming_pause
+					# 	}
+					# }
+					has_building = building_mem_eden_protocol_terraformer_2
+					solar_system = {
+						any_system_planet = {
+							OR = {
+								has_modifier = toxic_terraforming_candidate
+								has_modifier = frozen_terraforming_candidate
+							}
+						}
+					}
+				}
+				random_list = {
+					60 = {
+					}
+					1 = {
+						modifier = {
+							check_variable = {
+								which = mem_eden_protocol_terraforming_progress
+								value > 0
+							}
+							factor = mem_eden_protocol_terraforming_progress
+						}
+						modifier = {
+							check_variable = {
+								which = mem_eden_protocol_terraforming_progress
+								value < 1
+							}
+							factor = 0
+						}
+						set_variable = {
+							which = mem_eden_protocol_terraforming_progress
+							value = -1
+						}
+						solar_system = {
+							random_system_planet = {
+								limit = {
+									OR = {
+										has_modifier = toxic_terraforming_candidate
+										has_modifier = frozen_terraforming_candidate
+									}
+								}
+								set_planet_flag = mem_eden_protocol_terraforming_target
+							}
+						}
+						owner = {
+							# set_timed_country_flag = {
+							# 	flag = mem_eden_protocol_terraforming_pause
+							# 	years = 3
+							# }
+							country_event = {
+								id = mem_eden_protocol.3
+								days = 1
+								random = 358
+							}
+						}
+					}
+				}
+				reroll_random = yes
+			}
+			if = {
+				limit = {
+					# owner = {
+					# 	NOT = {
+					# 		has_country_flag = mem_eden_protocol_terraforming_pause
+					# 	}
+					# }
+					has_building = building_mem_eden_protocol_terraformer_2
+					solar_system = {
+						any_system_planet = {
+							habitable_planet_not_urban = yes
+							NOT = {
+								is_planet_class = pc_gaia
+							}
+							OR = {
+								NOT = {
+									exists = owner
+								}
+								owner = {
+									is_country_type = primitive
+								}
+							}
+						}
+					}
+				}
+				random_list = {
+					80 = {
+					}
+					1 = {
+						modifier = {
+							check_variable = {
+								which = mem_eden_protocol_terraforming_progress
+								value > 0
+							}
+							factor = mem_eden_protocol_terraforming_progress
+						}
+						modifier = {
+							check_variable = {
+								which = mem_eden_protocol_terraforming_progress
+								value < 1
+							}
+							factor = 0
+						}
+						set_variable = {
+							which = mem_eden_protocol_terraforming_progress
+							value = -1
+						}
+						solar_system = {
+							random_system_planet = {
+								limit = {
+									habitable_planet_not_urban = yes
+									NOT = {
+										is_planet_class = pc_gaia
+									}
+									OR = {
+										NOT = {
+											exists = owner
+										}
+										owner = {
+											is_country_type = primitive
+										}
+									}
+								}
+								set_planet_flag = mem_eden_protocol_terraforming_target_gaia
+							}
+						}
+						owner = {
+							# set_timed_country_flag = {
+							# 	flag = mem_eden_protocol_terraforming_pause
+							# 	years = 3
+							# }
+							country_event = {
+								id = mem_eden_protocol.4
+								days = 1
+								random = 358
+							}
+						}
+					}
+				}
+				reroll_random = yes
+			}
+			# increase terraforming variable by 1 ( if terraforming has happened, the outcome will be 0 ), if there is a valid planet for terraforming
+			if = {
+				limit = {
+					OR = {
+						has_active_building = building_mem_eden_protocol_terraformer_1
+						has_active_building = building_mem_eden_protocol_terraformer_2
+					}
+					solar_system = {
+						any_system_planet = {
+							OR = {
+								NOT = {
+									exists = owner
+								}
+								AND = {
+									exists = owner
+									owner = {
+										is_country_type = primitive
+									}
+								}
+							}
+							OR = {
+								AND = {
+									# back to check on habitat for this condition
+									prevprev = {
+										has_building = building_mem_eden_protocol_terraformer_2
+									}
+									OR = {
+										has_modifier = frozen_terraforming_candidate
+										has_modifier = toxic_terraforming_candidate
+										habitable_planet_not_urban = yes
+									}
+								}
+								has_modifier = terraforming_candidate
+								AND = {
+									is_planet_class = pc_nuked
+									NOT = {
+										exists = owner
+									}									
+								}
+							}
+						}
+					}
+				}
+				change_variable = {
+					which = mem_eden_protocol_terraforming_progress
+					value = 1
+				}
+			}
+			# if there is no valid target progress is reset to 0
+			else = {
+				set_variable = {
+					which = mem_eden_protocol_terraforming_progress
+					value = 0
+				}
+			}
+			save_event_target_as = mem_eden_protocol_habitat
+			set_variable = {
+				which = mem_eden_protocol_caretaker_variable
+				value = 0
+			}
+			solar_system = {
+				every_system_colony = {
+					limit = {
+						exists = owner
+						owner = {
+							is_country_type = primitive
+						}
+					}
+					event_target:mem_eden_protocol_habitat = {
+						change_variable = {
+							which = mem_eden_protocol_caretaker_variable
+							value = 1
+						}
+					}
+				}
+			}
+			owner = {
+				change_variable = {
+					which = mem_eden_protocol_cared_primitives_number_country
+					value = event_target:mem_eden_protocol_habitat.mem_eden_protocol_caretaker_variable
+				}
+			}
+		}
+		if = {
+			limit = {
+				check_variable = {
+					which = mem_eden_protocol_cared_primitives_number_country
+					value > 25
+				}
+			}
+			set_variable = {
+				which = mem_eden_protocol_cared_primitives_number_country
+				value = 25
+			}
+		}
+	}
+}
+
+# Terraforming
+country_event = {
+	id = mem_eden_protocol.3
+	title = mem_eden_protocol.3.name
+	desc = mem_eden_protocol.3.desc
+	picture = {
+		trigger = {
+			event_target:mem_eden_protocol_terraforming_target = {
+				is_wet = yes
+			}
+		}
+		picture = GFX_evt_alien_nature
+	}
+	picture = {
+		trigger = {
+			event_target:mem_eden_protocol_terraforming_target = {
+				is_dry = yes
+			}
+		}
+		picture = GFX_evt_landing_ship
+	}
+	picture = {
+		trigger = {
+			event_target:mem_eden_protocol_terraforming_target = {
+				is_cold = yes
+			}
+		}
+		picture = GFX_evt_arctic
+	}
+	show_sound = event_alien_nature
+	location = event_target:mem_eden_protocol_terraforming_target
+	is_triggered_only = yes
+	immediate = {
+		random_planet_within_border = {
+			limit = {
+				has_planet_flag = mem_eden_protocol_terraforming_target
+			}
+			save_event_target_as = mem_eden_protocol_terraforming_target
+			remove_planet_flag = mem_eden_protocol_terraforming_target
+		}
+		event_target:mem_eden_protocol_terraforming_target = {
+			if = {
+				limit = {
+					is_planet_class = pc_nuked
+				}
+				set_timed_planet_flag = {
+					flag = mem_was_nuked
+					days = 10
+				}
+			}
+			change_pc = rl_habitable_normal
+			reroll_planet = yes
+			if = {
+				limit = {
+					has_planet_flag = mem_was_nuked
+				}
+				add_blocker = {
+					type = d_dangerous_wildlife_blocker
+				}
+				add_blocker = {
+					type = d_dangerous_wildlife_blocker
+				}
+				add_blocker = {
+					type = d_dangerous_wildlife_blocker
+				}
+				add_blocker = {
+					type = d_dangerous_wildlife_blocker
+				}
+				add_blocker = {
+					type = d_active_volcano
+				}
+				add_blocker = {
+					type = d_active_volcano
+				}
+				add_blocker = {
+					type = d_active_volcano
+				}
+				add_blocker = {
+					type = d_mountain_range
+				}
+				add_blocker = {
+					type = d_mountain_range
+				}
+			}
+			else = {
+				add_blocker = {
+					type = d_dangerous_wildlife_blocker
+				}
+				add_blocker = {
+					type = d_active_volcano
+				}
+				add_blocker = {
+					type = d_active_volcano
+				}
+				add_blocker = {
+					type = d_active_volcano
+				}
+				add_blocker = {
+					type = d_active_volcano
+				}
+				add_blocker = {
+					type = d_mountain_range
+				}
+				add_blocker = {
+					type = d_mountain_range
+				}
+				add_blocker = {
+					type = d_mountain_range
+				}
+				add_blocker = {
+					type = d_mountain_range
+				}
+			}
+			if = {
+				limit = {
+					has_modifier = terraforming_candidate
+				}
+				remove_modifier = terraforming_candidate
+			}
+			if = {
+				limit = {
+					has_modifier = toxic_terraforming_candidate
+				}
+				remove_modifier = toxic_terraforming_candidate
+			}
+			if = {
+				limit = {
+					has_modifier = frozen_terraforming_candidate
+				}
+				remove_modifier = frozen_terraforming_candidate
+			}
+		}
+	}
+	option = {
+		name = EXCELLENT
+	}
+}
+
+# Gaia Transformation
+country_event = {
+	id = mem_eden_protocol.4
+	title = mem_eden_protocol.4.name
+	desc = mem_eden_protocol.4.desc
+	picture = GFX_evt_animal_wildlife
+	show_sound = event_alien_nature
+	location = event_target:mem_eden_protocol_terraforming_target
+	is_triggered_only = yes
+	immediate = {
+		random_planet_within_border = {
+			limit = {
+				has_planet_flag = mem_eden_protocol_terraforming_target_gaia
+			}
+			save_event_target_as = mem_eden_protocol_terraforming_target
+			remove_planet_flag = mem_eden_protocol_terraforming_target_gaia
+		}
+		event_target:mem_eden_protocol_terraforming_target = {
+			change_pc = pc_gaia
+			reroll_planet = yes
+		}
+	}
+	option = {
+		name = EXCELLENT
+	}
+}
+
+# Primitive Civ has been seeded
+# maybe just hide windo and give notification use icon:message_gardeners_seed_planted.dds
+country_event = {
+	id = mem_eden_protocol.5
+	title = mem_eden_protocol.5.name
+	desc = mem_eden_protocol.5.desc
+	picture = GFX_evt_alien_cavemen
+	show_sound = event_pre_ftl_civilization
+	location = event_target:mem_eden_protocol_seeding_target
+	is_triggered_only = yes
+	immediate = {
+		event_target:mem_eden_protocol_seeding_target = {
+			generate_very_early_pre_ftls_on_planet = yes
+			owner = {
+				establish_communications_no_message = root
+			}			
+		}
+	}
+	option = {
+		name = EXCELLENT
+	}
+}
+
+## situation events 
+
+# dummy event for fast situation
+situation_event = {
+	id = mem_eden_protocol.100
+	title = mem_eden_protocol.101.name
+	picture = GFX_evt_habitat
+	is_triggered_only = yes
+	desc = mem_eden_protocol.101.desc
+	event_chain = mem_eden_protocol_chain
+	trigger = {
+		always = yes
+	}
+	option = {
+		name = mem_eden_protocol.101.a
+		add_situation_progress = 1000
+	}
+	option = {
+		name = mem_eden_protocol.101.a
+		add_situation_progress = 2000
+	}
+	option = {
+		name = mem_eden_protocol.101.a
+		add_situation_progress = 3000
+	}
+	option = {
+		name = mem_eden_protocol.101.a
+		add_situation_progress = 4000
+	}
+	option = {
+		name = mem_eden_protocol.101.a
+		add_situation_progress = 5000
+	}
+}
+
+# first choice
+situation_event = {
+	id = mem_eden_protocol.101
+	title = mem_eden_protocol.101.name
+	picture = GFX_evt_sapient_AI
+	show_sound = event_ai_started
+	is_triggered_only = yes
+	desc = mem_eden_protocol.101.desc
+	trigger = {
+		always = yes
+	}
+	event_chain = mem_eden_protocol_chain
+	option = {
+		# habitat building slots
+		name = mem_eden_protocol.101.a
+		owner = {
+			add_modifier = {
+				modifier = mem_eden_protocol_habitat_building_slots
+			}
+		}
+	}
+	option = {
+		# habitat housing
+		name = mem_eden_protocol.101.b
+		owner = {
+			add_modifier = {
+				modifier = mem_eden_protocol_habitat_housing
+			}
+		}
+	}
+	option = {
+		# unity
+		name = mem_eden_protocol.101.c
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = 12
+			}
+		}
+	}
+}
+
+# second choice
+situation_event = {
+	id = mem_eden_protocol.102
+	title = mem_eden_protocol.102.name
+	picture = GFX_evt_robot_assembly_plant
+	show_sound = event_ai_started
+	is_triggered_only = yes
+	desc = mem_eden_protocol.102.desc
+	trigger = {
+		always = yes
+	}
+	event_chain = mem_eden_protocol_chain
+	option = {
+		# habitat district slots
+		name = mem_eden_protocol.102.a
+		owner = {
+			add_modifier = {
+				modifier = mem_eden_protocol_habitat_districts
+			}
+		}
+	}
+	option = {
+		# habitat jobs per district
+		name = mem_eden_protocol.102.b
+		owner = {
+			add_modifier = {
+				modifier = mem_eden_protocol_habitat_jobs
+			}
+		}
+	}
+	option = {
+		name = mem_eden_protocol.102.c
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = 18
+			}
+		}
+	}
+}
+
+
+# third event / arcsite
+situation_event = {
+	id = mem_eden_protocol.103
+	title = mem_eden_protocol.103.name
+	picture = GFX_evt_communication_event
+	is_triggered_only = yes
+	desc = mem_eden_protocol.103.desc
+	trigger = {
+		always = yes
+	}
+	option = {
+		# uncover arc site
+		name = mem_eden_protocol.103.a
+		owner = {
+			home_planet = {
+				solar_system = {
+					random_system_planet = {
+						limit = {
+							has_planet_flag = mem_eden_protocol_old_homeworld
+						}
+						create_archaeological_site = mem_eden_protocol_devolve_relic_digsite
+					}
+				}
+			}
+		}
+	}
+}
+
+# third choice
+situation_event = {
+	id = mem_eden_protocol.104
+	title = mem_eden_protocol.104.name
+	picture = GFX_evt_habitat
+	show_sound = event_robo
+	is_triggered_only = yes
+	desc = mem_eden_protocol.104.desc
+	trigger = {
+		always = yes
+	}
+	event_chain = mem_eden_protocol_chain
+	option = {
+		# flat empire size from caretakers
+		name = mem_eden_protocol.104.a
+		owner = {
+			custom_tooltip = mem_eden_protocol.104.a.tt
+			hidden_effect = {
+				set_country_flag = mem_eden_protocol_empire_size_per_job
+			}
+		}
+	}
+	option = {
+		# research speed
+		name = mem_eden_protocol.104.b
+		owner = {
+			add_modifier = {
+				modifier = mem_eden_protocol_research
+			}
+		}
+	}
+}
+
+# final choice
+situation_event = {
+	id = mem_eden_protocol.105
+	title = mem_eden_protocol.105.name
+	picture = GFX_evt_synth_organic_relations
+	show_sound = event_red_alert
+	is_triggered_only = yes
+	desc = mem_eden_protocol.105.desc
+	trigger = {
+		always = yes
+	}
+	event_chain = mem_eden_protocol_chain
+	option = {
+		# stay caretaker
+		name = mem_eden_protocol.105.a
+		owner = {
+			add_modifier = {
+				modifier = mem_eden_protocol_civic_point
+			}
+			custom_tooltip = mem_eden_protocol.105.a.tt			# unlock gaia forming and final building tier, pre ftl boost unity, get full machine world bonus from building
+			hidden_effect = {				
+				# gives acces to caretaker tier 3 and terraformer tier 2
+				set_country_flag = mem_eden_protocol_stayed_caretaker
+			}
+		}
+	}
+	option = {
+		# become rouge servitor
+		name = mem_eden_protocol.105.b
+		owner = {
+			add_modifier = {
+				modifier = mem_eden_protocol_civic_point
+			}			
+			custom_tooltip = mem_eden_protocol.105.b.tt			# periodic pops, caretaker produce consumer goods
+			hidden_effect = {
+				force_add_civic = civic_machine_servitor
+				set_country_flag = mem_eden_protocol_became_servitor
+			}
+		}
+	}
+	option = {
+		# become assimilator
+		name = mem_eden_protocol.105.c
+		owner = {
+			add_modifier = {
+				modifier = mem_eden_protocol_civic_point
+			}			
+			custom_tooltip = mem_eden_protocol.105.c.tt			# caretaker boost cybernetic pops, building can be build everywhere, invade all pre-ftl
+			set_policy = {
+				policy = interference
+				option = interference_aggressive
+			}
+			set_policy_cooldown = interference
+			hidden_effect = {
+				force_add_civic = civic_machine_assimilator
+				set_country_flag = mem_eden_protocol_became_assimilator
+				every_owned_planet = {
+					limit = {
+						OR = {
+							has_building = building_mem_eden_protocol_seeder_1
+							has_building = building_mem_eden_protocol_seeder_2
+							has_building = building_mem_eden_protocol_seeder_3
+							#has_building = building_mem_eden_protocol_terraformer_1
+						}
+					}
+					if = {
+						limit = {
+							has_building = building_mem_eden_protocol_seeder_1
+						}
+						remove_building = building_mem_eden_protocol_seeder_1
+						add_building = building_mem_eden_protocol_da_organicbooster_1
+					}
+					else_if = {
+						limit = {
+							has_building = building_mem_eden_protocol_seeder_2
+						}
+						remove_building = building_mem_eden_protocol_seeder_2
+						add_building = building_mem_eden_protocol_da_organicbooster_2
+					}
+					#if = {
+					#	limit = {
+					#		has_building = building_mem_eden_protocol_terraformer_1
+					#	}
+					#	remove_building = building_mem_eden_protocol_terraformer_1
+					#}
+				}
+				every_pre_ftl_within_border = {
+					establish_communications = root.owner
+					set_country_flag = pre_ftl_being_invaded
+					save_event_target_as = contact_empire
+					set_country_flag = first_contact_completed@root.owner
+					set_awareness = 100
+					root.owner = {
+						set_country_flag = first_contact_completed@event_target:contact_empire
+						country_event = {
+							id = action.2
+						}
+					}
+					set_hostile = root.owner
+					country_event = {
+						#invade little later, immediate wont trigger ground combat
+						id = mem_eden_protocol.106
+						days = 30
+					}
+					#capital_scope = {
+					#	while = {
+					#		count = 3
+					#		create_army = {
+					#			name = random
+					#			owner = root.owner
+					#			species = root.owner_main_species
+					#			type = "machine_assault_2"
+					#		}
+					#	}
+					#}
+				}
+			}
+		}
+	}
+	after = {
+		destroy_situation = this
+	}
+}
+
+country_event = {
+	# invade them
+	id = mem_eden_protocol.106
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		capital_scope = {
+			while = {
+				count = 3
+				create_army = {
+					name = random
+					owner = this.solar_system.owner
+					species = this.solar_system.owner.owner_main_species
+					type = "machine_assault_2"
+				}
+			}
+		}
+	}
+}
+
+# create pre-ftl via bombing | Fired by on_planet_bombarded
+# This = Planet
+# From = Bombarder
+planet_event = {
+	id = mem_eden_protocol.107
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		has_orbital_bombardment_stance = mem_eden_protocol_devolve
+		planet_devastation = 100
+		NOT = {
+			owner = {
+				is_country_type = primitive
+			}
+		}
+	}
+	immediate = {
+		# this is so scuffed but works xd, edit: this gets even worse the longer i think about it
+		if = {
+			limit = {
+				root.owner = {
+					is_hive_empire = yes
+				}
+			}
+			create_pre_ftl_hive_empire = yes
+		}
+		else = {
+			create_pre_ftl_empire = yes
+		}
+		last_created_country = {
+			establish_communications = root.owner
+			establish_communications = from
+			set_pre_ftl_age = industrial_age
+			if = {
+				limit = {
+					NOT = {
+						any_situation = {
+							is_situation_type = pre_ftl_tech_progress_situation
+						}
+					}
+				}
+				start_situation = {
+					type = pre_ftl_tech_progress_situation
+				}
+			}
+			random_situation = {
+				limit = {
+					is_situation_type = pre_ftl_tech_progress_situation
+				}
+				set_situation_flag = tech_frozen
+			}
+			root = {
+				set_owner = prev
+				add_building = building_mem_eden_protocol_scrap_miner_base
+			}
+			random_owned_pop = {
+				limit = {
+					can_think = yes
+				}
+				owner = {
+					change_dominant_species = {
+						species = PREV
+					}
+				}
+			}
+		}
+		from = {
+			create_message = {
+				type = MESSAGE_MEM_MADE_PRIMITIVE
+				localization = MESSAGE_MEM_MADE_PRIMITIVE
+				days = 30
+				target = root
+				#variable = {
+				#	type = name
+				#	localization = PLANET
+				#	scope = this
+				#}
+			}
+		}
+	}
+}
+
+# devolve_relic arc site events
+fleet_event = {
+	id = mem_eden_protocol.111
+	title = mem_eden_protocol.111.name
+	desc = mem_eden_protocol.111.desc
+	picture = GFX_evt_toxic
+	show_sound = event_dig_site
+	archaeology = yes
+	is_triggered_only = yes
+	immediate = {
+		from = {
+			set_site_progress_locked = yes
+		}
+	}
+	after = {
+		from = {
+			set_site_progress_locked = no
+		}
+	}
+	option = {
+		name = mem_eden_protocol.111.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+		}
+	}
+}
+
+fleet_event = {
+	id = mem_eden_protocol.112
+	title = mem_eden_protocol.112.name
+	desc = mem_eden_protocol.112.desc
+	picture = GFX_evt_underground_civilization
+	show_sound = event_dig_site
+	archaeology = yes
+	is_triggered_only = yes
+	immediate = {
+		from = {
+			set_site_progress_locked = yes
+		}
+	}
+	after = {
+		from = {
+			set_site_progress_locked = no
+		}
+	}
+	option = {
+		name = mem_eden_protocol.112.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+		}
+	}
+}
+
+fleet_event = {
+	id = mem_eden_protocol.113
+	title = mem_eden_protocol.113.name
+	desc = mem_eden_protocol.113.desc
+	picture = GFX_evt_underground_city
+	show_sound = event_dig_site
+	archaeology = yes
+	is_triggered_only = yes
+	immediate = {
+		from = {
+			set_site_progress_locked = yes
+		}
+	}
+	after = {
+		from = {
+			set_site_progress_locked = no
+		}
+	}
+	option = {
+		name = mem_eden_protocol.113.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = @tier3researchreward
+				min = @tier3researchmin
+				max = @tier3researchmax
+			}
+		}
+	}
+}
+
+fleet_event = {
+	id = mem_eden_protocol.114
+	title = mem_eden_protocol.114.name
+	desc = mem_eden_protocol.114.desc
+	picture = GFX_evt_glitchy_matrix
+	show_sound = event_dig_site
+	archaeology = yes
+	is_triggered_only = yes
+	immediate = {
+		from = {
+			set_site_progress_locked = yes
+		}
+	}
+	after = {
+		from = {
+			set_site_progress_locked = no
+		}
+	}
+	option = {
+		name = mem_eden_protocol.114.a
+		owner = {
+			country_event = {
+				id = mem_eden_protocol.115
+			}
+		}
+	}
+}
+
+
+country_event = {
+	id = mem_eden_protocol.115
+	title = mem_eden_protocol.115.name
+	desc = mem_eden_protocol.115.desc
+	picture = GFX_evt_toxic
+	show_sound = event_first_contact_toxoid
+	is_triggered_only = yes
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_renowned"
+	picture_event_data = {
+		portrait = event_target:mem_eden_protocol_killhim
+	}
+	immediate = {
+		hidden_effect = {
+			create_country = {
+				name = "NAME_Unknown"
+				type = global_event
+				auto_delete = yes
+				flag = {
+					icon = {
+						category = "special"
+						file = "unknown.dds"
+					}
+					background = {
+						category = "backgrounds"
+						file = "00_solid.dds"
+					}
+					colors = {
+						"red"
+						"red"
+						"null"
+						"null"
+					}
+				}
+				effect = {
+					save_event_target_as = mem_eden_protocol_country
+				}
+			}
+			event_target:mem_eden_protocol_country = {
+				create_species = {
+					name = "NAME_Unknown"
+					class = PARAGON
+					portrait = mem_eden_protocol_leader
+					namelist = "PRT1"
+					traits = {
+						trait = trait_decadent
+					}
+					effect = {
+						save_event_target_as = mem_eden_protocol_species
+					}
+				}
+				create_leader = {
+					species = event_target:mem_eden_protocol_species
+					event_leader = yes
+					class = scientist
+					name = "NAME_mem_eden_protocol_species"
+					skill = 1
+					randomize_traits = no
+					skip_background_generation = yes
+					background_ethic = ethic_authoritarian
+					#custom_catch_phrase = 
+					#custom_description = 
+					#can_manually_change_location = 
+					traits = {
+					}
+					gender = male
+					set_age = 10
+					immortal = yes
+					effect = {
+						save_event_target_as = mem_eden_protocol_killhim
+					}
+					#change_leader_portrait = mem_eden_protocol_sol_leader
+				}
+			}
+			if = {
+				limit = {
+					exists = event_target:sol_system_earth
+					event_target:sol_system_earth = {
+						has_planet_flag = mem_eden_protocol_old_homeworld
+					}
+				}
+				last_created_leader = {
+					change_leader_portrait = mem_eden_protocol_sol_leader
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_eden_protocol.115.a
+		add_relic = r_mem_eden_protocol_devolve_relic
+	}
+	after = {
+		hidden_effect = {
+			event_target:mem_eden_protocol_killhim = {
+				kill_leader = {
+					show_notification = no
+				}
+			}
+		}
+	}
+}
+
+# on_colony_10_year_pulse
+# on action get primitive to pamper
+planet_event = {
+	id = mem_eden_protocol.121
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		OR = {
+			has_building = building_mem_eden_protocol_seeder_1
+			has_building = building_mem_eden_protocol_seeder_2
+		}
+		exists = owner
+		owner = {
+			has_origin = origin_mem_eden_protocol
+			has_valid_civic = civic_machine_servitor
+		}
+		solar_system = {
+			any_system_planet = {
+				exists = owner
+				owner = {
+					is_country_type = primitive
+				}
+			}
+		}
+	}
+	immediate = {
+		solar_system = {
+			random_system_planet = {
+				limit = {
+					exists = owner
+					owner = {
+						is_country_type = primitive
+					}
+				}
+				owner = {
+					random_owned_pop = {
+						save_event_target_as = mem_primitive_target
+					}
+				}
+			}
+		}
+		create_pop = {
+			species = event_target:mem_primitive_target
+		}
+		create_message = {
+			type = MESSAGE_MEM_GOT_PRIMITIVE
+			localization = MESSAGE_MEM_GOT_PRIMITIVE
+			days = 30
+			target = this
+			variable = {
+				type = name
+				localization = PLANET
+				scope = this
+			}
+		}
+	}
+}
+
+#This = destroyed country
+#From = optional, destroyer (country)
+# when somebody invades or destroys otherwise eden protocol will get mad, yes even assimilator
+country_event = {
+	id = mem_eden_protocol.122
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		is_country_type = primitive		
+		NOT = {	
+			from = {
+				has_origin = origin_mem_eden_protocol	
+			}					
+		}
+		has_global_flag = origin_mem_eden_protocol_exists_somewhere
+	}
+	immediate = {
+		
+		every_country = {
+			limit = {
+				has_origin = origin_mem_eden_protocol
+			}
+			add_opinion_modifier = {
+				modifier = mem_eden_protocol_destroyed_primitives
+				who = root.from
+			}
+		}
+	}
+}
