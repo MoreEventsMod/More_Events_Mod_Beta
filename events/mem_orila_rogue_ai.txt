@@ -29,6 +29,8 @@ country_event = {
 					"null"
 				}
 			}
+			create_ship_design = { design = "NAME_Marauder_Starbase" }
+			add_ship_design = last_created_design
 			save_global_event_target_as = mem_orila_rogue_ai_country
 			every_country = {
 				limit = {
@@ -45,84 +47,38 @@ country_event = {
 					target = event_target:mem_orila_rogue_ai_country
 				}
 			}
-			
+			random_owned_starbase = {
+				solar_system = {
+					set_star_flag = mem_orila_rogue_ai_system
+				}
+			}
 		}
 	}
 }
 
-# Rogue AI Actions (cost resources, lowering the counter)
-# 1. Send Mining Flotilla		| Establishes Drone Mining Station
-# 2. Send Transport Flotilla	| Moves between Drone Mining Stations and HQ to simulate transport of ressources; reaching HQ raises resource counter
-# 3. Send Defense Flotilla		| Patroles in systems with Drone Mining Stations
-# 4. Send Attack Fleet			| Clears random bordersystem within 3 jumps from HQ then returns to HQ to replenish forces and get cooldown for next attack
-# 5. Send Reclamation Fleet		| Reestablishes control over a lost system and keep guard there
-# 6. Send Retaliation Fleet		| Attacks empire that has attacked them before
-
-namespace = mem_orila_rogue_ai_mining
-
-# Ancient Mining Drone Expansion Fleet: Early- to Mid-Game
-# Early to Mid-game, unclaimed systems only. Via on_decade_pulse.
 country_event = {
-	id = mem_orila_rogue_ai_mining.1
+	id = mem_orila_rogue_ai.2000
 	hide_window = yes
+
 	is_triggered_only = yes
 
 	immediate = {
-		while = {
-			count = 2
-			#Pick a drone-occupied system
-			random_system_within_border = { #there is only one
-				save_event_target_as = mem_orila_rogue_ai_mining_expansion_starting_system
-				starbase = {
-					save_event_target_as = mem_orila_rogue_ai_mining_expansion_starting_base
-				}
+		#Pick drone-occupied home system
+		random_system_within_border = {
+			limit = {
+				has_star_flag = mem_orila_rogue_ai_system
 			}
-			#Pick another, unoccupied system
-			if = {
-				limit = {
-					any_system = {
-						distance = {
-							source = event_target:mem_orila_rogue_ai_mining_expansion_starting_system
-							use_bypasses = no
-							min_jumps = 0
-							max_jumps = 3
-						}
-						NOR = { 
-							AND = {
-								exists = starbase
-								starbase = {
-									owner ={
-										NOT = {
-											is_same_value = root
-										}
-									}
-								}
-							}
-							has_star_flag = guardian
-							any_ship_in_system = {
-								is_ship_size = mining_station
-								owner = {
-									is_same_value = root
-								}
-							}
-						}
-					}
-				}
-				event_target:mem_orila_rogue_ai_mining_expansion_starting_system = {
-					closest_system = {
-						limit = {
-							NOR = {
-								AND = {
-									exists = starbase
-									starbase = {
-										owner ={
-											NOT = {
-												is_same_value = root
-											}
-										}
-									}
-								}
-								has_star_flag = guardian
+			save_event_target_as = mem_orila_rogue_ai_starting_system
+			starbase = {
+				save_event_target_as = mem_orila_rogue_ai_starting_base
+			}
+		}
+		random_list = {
+			1 = {	# 1. Send Mining Flotilla
+				modifier = {
+					NOT = {
+						any_system_within_border = {
+							NOT = {
 								any_ship_in_system = {
 									is_ship_size = mining_station
 									owner = {
@@ -131,57 +87,143 @@ country_event = {
 								}
 							}
 						}
-						use_bypasses = no
-						min_steps = 0
-						max_steps = 3
-						random_system_planet = {
-							limit = {
-								is_star = no
+					}
+					factor = 0
+				}
+				country_event = {
+					id = mem_orila_rogue_ai_mining.1
+				}
+				#Resourcepool change TODO
+			}
+			1 = {	# 2. Send Outpost Flotilla
+				modifier = {
+					NOT = {
+						any_system = {
+							distance = {
+								source = event_target:mem_orila_rogue_ai_starting_system
+								use_bypasses = no
+								min_jumps = 0
+								max_jumps = 3
 							}
-							save_event_target_as = mem_orila_rogue_ai_mining_expansion_destination_planet
-							set_timed_planet_flag = {
-								flag = mem_orila_rogue_ai_mining_expansion_destination_planet
-								years = 5
+							NOT = {
+								exists = starbase
+							}
+							any_neighbor_system = {
+								exists = starbase
+								starbase = {
+									owner = {
+										is_same_value = root
+									}
+								}
+							}
+							NOR = { 
+								has_star_flag = guardian
+								has_star_flag = hostile_system
 							}
 						}
-						
+					}
+					factor = 0
+				}
+				country_event = {
+					id = mem_orila_rogue_ai_outpost.1
+				}
+				#Resourcepool change TODO
+			}
+			1 = {	# 3. Send Transport Flotilla
+			modifier = {
+				NOT = {
+					any_system_within_border = {
+						any_ship_in_system = {
+							is_ship_size = mining_station
+							owner = {
+								is_same_value = root
+							}
+						}
 					}
 				}
+				count_owned_fleet = {
+					has_fleet_flag = mem_orila_rogue_ai_transport_fleet
+					count = 3
+				}
+				factor = 0
 			}
-			#Send out a fleet
-			event_target:mining_drone_expansion_starting_system = {
-				mem_create_orila_rogue_ai_mining_expansion_fleet = yes
+			country_event = {
+				id = mem_orila_rogue_ai_transport.1
+			}
+			#Resourcepool change TODO
 			}
 		}
 	}
 }
 
+# Rogue AI Actions (cost resources, lowering the counter)
+# 1. Send Mining Flotilla		| Establishes Drone Mining Station
+# 2. Send Outpost Flotilla		| Establishes Starbase in neighboring unoccupied system
+# 3. Send Transport Flotilla	| Moves between Drone Mining Stations and HQ to simulate transport of ressources; reaching HQ raises resource counter
+# 4. Send Defense Flotilla		| Patroles in systems with Drone Mining Stations
+# 5. Send Attack Fleet			| Clears random bordersystem within 3 jumps from HQ then returns to HQ to replenish forces and get cooldown for next attack
+# 6. Send Reclamation Fleet		| Reestablishes control over a lost system and keep guard there
+# 7. Send Retaliation Fleet		| Attacks empire that has attacked them before
+
+namespace = mem_orila_rogue_ai_mining
+
+# Ancient Mining Drone Expansion Fleet
+country_event = {
+	id = mem_orila_rogue_ai_mining.1
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		#Pick drone-occupied home system
+		random_system_within_border = {
+			limit = {
+				has_star_flag = mem_orila_rogue_ai_system
+			}
+			starbase = {
+				save_event_target_as = mem_orila_rogue_ai_starting_base
+			}
+		}
+		#Pick another, unmined system
+		random_system_within_border = {
+			limit = {						
+				NOT = {							
+					any_ship_in_system = {
+						is_ship_size = mining_station
+						owner = {
+							is_same_value = root
+						}
+					}
+				}
+			}
+			random_system_planet = {
+				limit = {
+					is_star = no
+				}
+				save_event_target_as = mem_orila_rogue_ai_mining_expansion_destination_planet
+				set_timed_planet_flag = {
+					flag = mem_orila_rogue_ai_mining_expansion_destination_planet
+					years = 5
+				}
+			}
+		}
+		#Send out a fleet
+		mem_create_orila_rogue_ai_mining_expansion_fleet = yes
+	}
+}
+
 # Mining Flotilla arrives at destination
-# Via on_fleet_auto_move_arrival | from = fleet; fromfrom = planet
 planet_event = {
 	id = mem_orila_rogue_ai_mining.2
 	hide_window = yes
 	is_triggered_only = yes
 
-	trigger = {
-		has_country_flag = mining_drone_expansion_country #Global
-		from = { has_fleet_flag = mining_drone_expansion_fleet }
-		exists = event_target:drone_country #Global
-	}
-
 	immediate = {
-		from.solar_system = {
-			random_system_planet = {
-				limit = {
-					has_planet_flag = mining_drone_expansion_base 
-				}
-				save_event_target_as = mining_drone_expansion_base
-			}
-		}
+		#In case it doesn't exist
+		create_drone_country = yes
 		create_fleet = {
 			name = "NAME_Mining_Corps"
 			effect = {
-				set_owner = event_target:drone_country
+				set_owner = event_target:mem_orila_rogue_ai_country
 				while = {
 					count = 6
 					create_ship = {
@@ -190,7 +232,142 @@ planet_event = {
 					}
 				}
 				set_location = {
-					target = event_target:mining_drone_expansion_base
+					target = root
+					distance = 20
+					angle = 20
+				}
+				set_formation_scale = 2
+				set_fleet_stance = aggressive
+				set_aggro_range_measure_from = return_point
+				set_aggro_range = 200
+				queue_actions = {
+					repeat	= {
+						find_closest_fleet = {
+							trigger = {
+								id = mem_orila_rogue_ai_mining_action.1
+								is_ship_size = starbase_marauder
+							}
+							found_fleet = {
+								move_to = this
+							}
+						}
+						wait = {
+							duration = 10
+						}
+						find_closest_fleet = {
+							trigger = {
+								id = mem_orila_rogue_ai_mining_action.2
+								is_ship_size = mining_station
+							}
+							found_fleet = {
+								move_to = this
+							}
+						}
+						wait = {
+							duration = 60
+						}
+					}
+				}
+			}
+		}
+		remove_planet_flag = mem_orila_rogue_ai_mining_expansion_destination_planet
+		create_mining_station = {
+			owner = event_target:drone_country
+		}
+		last_created_fleet = {
+			set_owner = event_target:mem_orila_rogue_ai_country
+		}
+		solar_system = {
+			random_fleet_in_system = {
+				limit = {
+					has_fleet_flag = mem_orila_rogue_ai_mining_expansion_fleet
+				}
+				delete_fleet = this
+			}
+		}
+	}
+}
+
+namespace = mem_orila_rogue_ai_outpost
+
+# Ancient Mining Drone Outpost Fleet
+country_event = {
+	id = mem_orila_rogue_ai_outpost.1
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		#Pick drone-occupied home system
+		random_system_within_border = {
+			limit = {
+				has_star_flag = mem_orila_rogue_ai_system
+			}
+			save_event_target_as = mem_orila_rogue_ai_starting_system
+			starbase = {
+				save_event_target_as = mem_orila_rogue_ai_starting_base
+			}
+		}
+		#Pick another, unoccupied system
+		event_target:mem_orila_rogue_ai_starting_system = {
+			closest_system = {
+				limit = {
+					NOT = {
+						exists = starbase
+					}						
+					NOR = {
+						has_star_flag = guardian
+						has_star_flag = hostile_system
+					}
+				}
+				use_bypasses = no
+				min_steps = 0
+				max_steps = 3
+				random_system_planet = {
+					limit = {
+						is_star = yes
+					}
+					save_event_target_as = mem_orila_rogue_ai_outpost_destination_planet
+					set_timed_planet_flag = {
+						flag = mem_orila_rogue_ai_outpost_destination_planet
+						years = 5
+					}
+				}
+			}
+		}
+		#Send out a fleet
+		mem_create_orila_rogue_ai_outpost_fleet = yes
+	}
+}
+
+# Outpost Flotilla arrives at destination
+planet_event = {
+	id = mem_orila_rogue_ai_outpost.2
+	hide_window = yes
+	is_triggered_only = yes
+
+	immediate = {
+		#In case it doesn't exist
+		create_drone_country = yes
+		create_fleet = {
+			name = "NAME_Asset_Protection_Corps"
+			effect = {
+				set_owner = event_target:mem_orila_rogue_ai_country
+				while = {
+					count = 6
+					create_ship = {
+						name = ""
+						design = "NAME_Ancient_Combat_Drone"
+					}
+				}
+				while = {
+					count = 2
+					create_ship = {
+						name = ""
+						design = "NAME_Ancient_Destroyer"
+					}
+				}
+				set_location = {
+					target = root
 					distance = 20
 					angle = 20
 				}
@@ -200,15 +377,28 @@ planet_event = {
 				set_aggro_range = 200
 			}
 		}
-		event_target:mining_drone_expansion_base = {
-			remove_planet_flag = mining_drone_expansion_base
-			create_mining_station = { 
-				#graphical_culture = ancient_drone_01
-				owner = event_target:drone_country
+		remove_planet_flag = mem_orila_rogue_ai_outpost_destination_planet
+		solar_system = {
+			random_fleet_in_system = {
+				limit = {
+					has_fleet_flag = mem_orila_rogue_ai_outpost_fleet
+				}
+				delete_fleet = this
 			}
 		}
-		from = {
-			destroy_fleet = this
+		event_target:mem_orila_rogue_ai_country = {
+			set_graphical_culture = pirate_01
+		}			
+		solar_system = {
+			create_starbase = {
+				size = "starbase_marauder"
+				owner = event_target:mem_orila_rogue_ai_country
+			}
 		}
+		event_target:mem_orila_rogue_ai_country = {
+			set_graphical_culture = mem_ancient_01
+		}		
 	}
 }
+
+namespace = mem_orila_rogue_ai_transport
