@@ -96,3 +96,96 @@ mem_create_orila_rogue_ai_outpost_fleet = {
 		}
 	}
 }
+
+mem_create_orila_rogue_ai_transport_fleet_test = {
+	create_fleet = {
+		name = "NAME_Mining_Drone_Transport_Fleet"
+		effect = {
+			set_owner = event_target:mem_orila_rogue_ai_country
+			set_fleet_stance = passive
+			while = {
+				count = 3
+				create_ship = {
+					name = ""
+					design = "NAME_Ancient_Mining_Expansion_Barge"
+				}
+			}
+			while = {
+				count = 4
+				create_ship = {
+					name = ""
+					design = "NAME_Ancient_Combat_Drone"
+				}
+			}
+			set_location = {
+				target = event_target:mem_orila_rogue_ai_starting_base
+				distance = 25
+				angle = random
+			}
+			set_fleet_flag = mem_orila_rogue_ai_transport_fleet
+			queue_actions = {
+				repeat = {
+					wait = {
+						duration = 20
+						random = 10
+					}
+					find_closest_fleet = {
+						trigger = {
+							id = mem_orila_rogue_ai_transport_fleet_trigger_1
+							is_ship_size = starbase_marauder
+							NOT = {
+								has_fleet_flag = mem_orila_rogue_ai_transport_fleet_target
+							}
+						}
+						found_fleet = {
+							move_to = this
+							effect = {
+								id = mem_orila_rogue_ai_transport_fleet_effect_1
+								set_timed_fleet_flag = {
+									flag = mem_orila_rogue_ai_transport_fleet_target
+									years = 2
+								}
+							}							
+						}
+					}
+					wait = {
+						duration = 20
+						random = 10
+					}
+					find_closest_fleet = {
+						trigger = {
+							id = mem_orila_rogue_ai_transport_fleet_trigger_2
+							is_ship_size = starbase_marauder
+						}
+						found_fleet = {
+							effect = {
+								id = mem_orila_rogue_ai_transport_fleet_effect_2
+								change_variable = {
+									which = x
+									value = x
+								}
+							}							
+						}
+					}
+				}
+				
+				move_to = event_target:mem_orila_rogue_ai_outpost_destination_planet
+				wait = {
+					duration = 20
+					random = 10
+				}
+				effect = {
+					id = mem_orila_rogue_ai_outpost_fleet.1
+					solar_system = {
+						random_system_planet = { 
+							limit = {
+								has_planet_flag = mem_orila_rogue_ai_outpost_destination_planet
+							}
+							planet_event = { id = mem_orila_rogue_ai_outpost.2 }
+						}
+					}
+				}
+			}
+		}
+	}
+}
