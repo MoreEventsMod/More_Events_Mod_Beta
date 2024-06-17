@@ -97,7 +97,7 @@ mem_create_orila_rogue_ai_outpost_fleet = {
 	}
 }
 
-mem_create_orila_rogue_ai_transport_fleet_test = {
+mem_create_orila_rogue_ai_transport_fleet = {
 	create_fleet = {
 		name = "NAME_Mining_Drone_Transport_Fleet"
 		effect = {
@@ -129,60 +129,457 @@ mem_create_orila_rogue_ai_transport_fleet_test = {
 						duration = 20
 						random = 10
 					}
+					#Find system where ressources are waiting and go there
 					find_closest_fleet = {
 						trigger = {
-							id = mem_orila_rogue_ai_transport_fleet_trigger_1
+							id = mem_orila_rogue_ai_transport_trigger_1
 							is_ship_size = starbase_marauder
 							NOT = {
 								has_fleet_flag = mem_orila_rogue_ai_transport_fleet_target
 							}
+							check_variable = {
+								which = mem_orila_rogue_ai_resource
+								value >= 200
+							}
 						}
 						found_fleet = {
-							move_to = this
 							effect = {
-								id = mem_orila_rogue_ai_transport_fleet_effect_1
+								id = mem_orila_rogue_ai_transport_effect_1
 								set_timed_fleet_flag = {
 									flag = mem_orila_rogue_ai_transport_fleet_target
-									years = 2
-								}
-							}							
+									years = 1
+								}								
+							}
+							move_to = this						
 						}
 					}
 					wait = {
 						duration = 20
 						random = 10
 					}
-					find_closest_fleet = {
-						trigger = {
-							id = mem_orila_rogue_ai_transport_fleet_trigger_2
-							is_ship_size = starbase_marauder
-						}
-						found_fleet = {
-							effect = {
-								id = mem_orila_rogue_ai_transport_fleet_effect_2
-								change_variable = {
-									which = x
-									value = x
+					#Remove ressources from station variable
+					effect = {
+						id = mem_orila_rogue_ai_transport_effect.2						
+						if = {
+							limit = {
+								solar_system = {
+									NOT = {
+										has_star_flag = mem_orila_rogue_ai_system										
+									}
+									any_fleet_in_system = {
+										is_ship_size = starbase_marauder
+										owner = {
+											is_same_value = event_target:mem_orila_rogue_ai_country
+										}
+										check_variable = {
+											which = mem_orila_rogue_ai_resource
+											value >= 200
+										}
+									}
 								}
-							}							
+							}
+							solar_system = {
+								random_fleet_in_system = {
+									limit = {
+										is_ship_size = starbase_marauder
+										owner = {
+											is_same_value = event_target:mem_orila_rogue_ai_country
+										}
+									}
+									change_variable = {
+										which = mem_orila_rogue_ai_resource
+										value = -200
+									}
+								}
+							}
+							set_fleet_flag = mem_orila_rogue_ai_transport_fleet_resources_loaded
 						}
 					}
+					#Go back to home system
+					find_closest_system = {
+						trigger = {
+							id = mem_orila_rogue_ai_transport_trigger.2
+							has_star_flag = mem_orila_rogue_ai_system
+						}
+						found_system = {
+							move_to = this
+						}
+					}
+					wait = {
+						duration = 30
+					}
+					#Add resources to country variable
+					effect = {
+						id = mem_orila_rogue_ai_transport_effect.3
+						if = {
+							limit = {
+								solar_system = {
+									has_star_flag = mem_orila_rogue_ai_system
+								}
+								has_fleet_flag = mem_orila_rogue_ai_transport_fleet_resources_loaded
+							}
+							event_target:mem_orila_rogue_ai_country = {
+								change_variable = {
+									which = mem_orila_rogue_ai_resource
+									value = 200
+								}
+							}
+							remove_fleet_flag = mem_orila_rogue_ai_transport_fleet_resources_loaded
+						}						
+					}
 				}
-				
-				move_to = event_target:mem_orila_rogue_ai_outpost_destination_planet
+			}
+		}
+	}
+}
+
+mem_create_orila_rogue_ai_defense_fleet = {
+	create_fleet = {
+		name = "NAME_Mining_Drone_Defense_Fleet"
+		effect = {
+			set_owner = event_target:mem_orila_rogue_ai_country
+			set_fleet_stance = aggressive
+			while = {
+				count = 3
+				create_ship = {
+					name = ""
+					design = "NAME_Ancient_Destroyer"
+				}
+			}
+			while = {
+				count = 6
+				create_ship = {
+					name = ""
+					design = "NAME_Ancient_Combat_Drone"
+				}
+			}
+			set_location = {
+				target = event_target:mem_orila_rogue_ai_starting_base
+				distance = 25
+				angle = random
+			}
+			set_fleet_flag = mem_orila_rogue_ai_defense_fleet
+			queue_actions = {
 				wait = {
 					duration = 20
 					random = 10
 				}
-				effect = {
-					id = mem_orila_rogue_ai_outpost_fleet.1
-					solar_system = {
-						random_system_planet = { 
-							limit = {
-								has_planet_flag = mem_orila_rogue_ai_outpost_destination_planet
+				#Find system where no defense fleet is present
+				find_closest_system = {
+					trigger = {
+						id = mem_orila_rogue_ai_defense_trigger.1
+						NOT = {
+							any_fleet_in_system = {
+								has_fleet_flag = mem_orila_rogue_ai_defense_fleet
 							}
-							planet_event = { id = mem_orila_rogue_ai_outpost.2 }
 						}
+					}
+					found_system = {
+						move_to = this						
+					}
+				}
+				wait = {
+					duration = 20
+					random = 10
+				}
+				#start to patrol the system
+				repeat = {
+					find_random_planet = {
+						trigger = {
+							id = mem_orila_rogue_ai_defense_trigger.2
+							solar_system = {
+								is_same_value = prevprev.solar_system
+							}
+							is_moon = no
+						}
+						found_planet = {
+							move_to = this
+						}
+					}
+					wait = {
+						duration = 5
+						random = 10
+					}
+				}
+			}
+		}
+	}
+}
+
+mem_create_orila_rogue_ai_attack_fleet = {
+	create_fleet = {
+		name = "NAME_Mining_Drone_Attack_Fleet"
+		effect = {
+			set_owner = event_target:mem_orila_rogue_ai_country
+			set_fleet_stance = aggressive
+			while = {
+				count = 6
+				create_ship = {
+					name = ""
+					design = "NAME_Ancient_Destroyer"
+				}
+			}
+			while = {
+				count = 18
+				create_ship = {
+					name = ""
+					design = "NAME_Ancient_Combat_Drone"
+				}
+			}
+			set_location = {
+				target = event_target:mem_orila_rogue_ai_starting_base
+				distance = 25
+				angle = random
+			}
+			set_fleet_flag = mem_orila_rogue_ai_attack_fleet
+			queue_actions = {
+				#marks this fleet as already in action
+				effect = {
+					id = mem_orila_rogue_ai_attack_fleet_effect.1
+					set_fleet_flag = mem_orila_rogue_ai_attack_fleet_active
+				}
+				#find target system for attack
+				find_closest_system = {
+					trigger = {
+						id = mem_orila_rogue_ai_attack_fleet_trigger.1
+						distance = {
+							source = event_target:mem_orila_rogue_ai_starting_system
+							use_bypasses = no
+							min_jumps = 0
+							max_jumps = 4
+						}
+						NOT = {
+							has_star_flag = mem_orila_rogue_ai_attack_fleet_target
+						}
+						any_neighbor_system = {
+							exists = starbase
+							starbase = {
+								owner = {
+									is_same_value = root
+								}
+							}
+						}
+						any_fleet_in_system = {
+							controller = {
+								is_hostile_to = event_target:mem_orila_rogue_ai_country
+							}								
+						}
+					}
+					found_system = {
+						effect = {
+							id = mem_orila_rogue_ai_attack_fleet_effect.2
+							set_timed_star_flag = {
+								flag = mem_orila_rogue_ai_attack_fleet_target
+								days = 90
+							}
+						}
+						move_to = this
+					}
+				}
+			}
+		}
+	}
+}
+
+mem_create_orila_rogue_ai_reclamation_fleet = {
+	create_fleet = {
+		name = "NAME_Mining_Drone_Reclamation_Fleet"
+		effect = {
+			set_owner = event_target:mem_orila_rogue_ai_country
+			set_fleet_stance = aggressive
+			while = {
+				count = 6
+				create_ship = {
+					name = ""
+					design = "NAME_Ancient_Destroyer"
+				}
+			}
+			while = {
+				count = 18
+				create_ship = {
+					name = ""
+					design = "NAME_Ancient_Combat_Drone"
+				}
+			}
+			create_ship = {
+				name = ""
+				design = "NAME_Ancient_Mining_Expansion_Barge"
+			}
+			while = {
+				count = 4
+				create_ship = {
+					name = ""
+					design = "NAME_Ancient_Mining_Expansion_Drone"
+				}
+			}
+			set_location = {
+				target = event_target:mem_orila_rogue_ai_starting_base
+				distance = 25
+				angle = random
+			}
+			set_fleet_flag = mem_orila_rogue_ai_reclamation_fleet
+			queue_actions = {
+				#find target system for reclamation
+				find_closest_system = {
+					trigger = {
+						id = mem_orila_rogue_ai_reclamation_fleet_trigger.1
+						distance = {
+							source = event_target:mem_orila_rogue_ai_starting_system
+							use_bypasses = no
+							min_jumps = 0
+							max_jumps = 3
+						}
+						NOT = {
+							has_star_flag = mem_orila_rogue_ai_reclamation_target
+						}
+					}
+					found_system = {
+						effect = {
+							id = mem_orila_rogue_ai_attack_fleet_effect.2
+							remove_star_flag = mem_orila_rogue_ai_reclamation_target
+							set_star_flag = mem_orila_rogue_ai_reclamation_fleet_target
+						}
+						move_to = this
+					}
+				}
+				wait = {
+					duration = 5
+					random = 10
+				}
+				effect = {
+					id = mem_orila_rogue_ai_reclamation_fleet_effect.1
+					owner = {
+						country_event = {
+							id = mem_orila_rogue_ai_offense.5
+						}
+					}
+					
+				}
+			}
+		}
+	}
+}
+
+mem_create_orila_rogue_ai_reclamation_defense_fleet = {
+	create_fleet = {
+		name = "NAME_Mining_Drone_Defense_Fleet"
+		effect = {
+			set_owner = event_target:mem_orila_rogue_ai_country
+			set_fleet_stance = aggressive
+			while = {
+				count = 3
+				create_ship = {
+					name = ""
+					design = "NAME_Ancient_Destroyer"
+				}
+			}
+			while = {
+				count = 6
+				create_ship = {
+					name = ""
+					design = "NAME_Ancient_Combat_Drone"
+				}
+			}
+			set_location = {
+				target = event_target:mem_orila_rogue_ai_starting_base
+				distance = 25
+				angle = random
+			}
+			set_fleet_flag = mem_orila_rogue_ai_defense_fleet
+			queue_actions = {
+				#start to patrol the system
+				repeat = {
+					find_random_planet = {
+						trigger = {
+							id = mem_orila_rogue_ai_reclamation_defense_trigger.1
+							solar_system = {
+								is_same_value = prevprev.solar_system
+							}
+							is_moon = no
+						}
+						found_planet = {
+							move_to = this
+						}
+					}
+					wait = {
+						duration = 5
+						random = 10
+					}
+				}
+			}
+		}
+	}
+}
+
+#TODO
+mem_create_orila_rogue_ai_retaliation_fleet = {
+	create_fleet = {
+		name = "NAME_Mining_Drone_Retaliation_Fleet"
+		effect = {
+			set_owner = event_target:mem_orila_rogue_ai_country
+			set_fleet_stance = aggressive
+			while = {
+				count = 9
+				create_ship = {
+					name = ""
+					design = "NAME_Ancient_Destroyer"
+				}
+			}
+			while = {
+				count = 24
+				create_ship = {
+					name = ""
+					design = "NAME_Ancient_Combat_Drone"
+				}
+			}
+			set_location = {
+				target = event_target:mem_orila_rogue_ai_starting_base
+				distance = 25
+				angle = random
+			}
+			set_fleet_flag = mem_orila_rogue_ai_retaliation_fleet
+			queue_actions = {
+				#marks this fleet as already in action
+				effect = {
+					id = mem_orila_rogue_ai_retaliation_fleet_effect.1
+					set_fleet_flag = mem_orila_rogue_ai_retaliation_fleet_active
+				}
+				#find target system for retaliation
+				find_closest_system = {
+					trigger = {
+						id = mem_orila_rogue_ai_retaliation_fleet_trigger.1
+						distance = {
+							source = event_target:mem_orila_rogue_ai_starting_system
+							use_bypasses = no
+							min_jumps = 0
+							max_jumps = 4
+						}
+						NOT = {
+							has_star_flag = mem_orila_rogue_ai_attack_fleet_target
+						}
+						any_neighbor_system = {
+							exists = starbase
+							starbase = {
+								owner = {
+									is_same_value = root
+								}
+							}
+						}
+						any_fleet_in_system = {
+							controller = {
+								is_hostile_to = event_target:mem_orila_rogue_ai_country
+							}								
+						}
+					}
+					found_system = {
+						effect = {
+							id = mem_orila_rogue_ai_retaliation_fleet_effect.2
+							set_timed_star_flag = {
+								flag = mem_orila_rogue_ai_attack_fleet_target
+								days = 90
+							}
+						}
+						move_to = this
 					}
 				}
 			}
