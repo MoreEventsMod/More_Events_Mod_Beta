@@ -1,0 +1,1136 @@
+namespace = mem_czar_alexei
+
+# Test Events
+
+country_event = {
+	id = mem_czar_alexei.1000
+	title = mem_placeholder
+	desc = {
+		trigger = { 
+			switch = { 
+				trigger = has_country_flag 
+				mem_descended_first_hello = {text = mem_descended.8.desc_01} 
+				mem_descended_second_hello = {text = mem_descended.8.desc_02}
+			}
+		}
+	}
+	show_sound = event_default
+	is_triggered_only = yes
+	
+	picture = GFX_leader_recruitment_bg_renowned
+	event_window_type = leader_recruit
+
+	immediate = {
+		IF = {
+			limit = {
+				NOT = {
+					has_global_flag = mem_descended_neochadamus_fired
+				}
+			}
+			set_global_flag = mem_descended_neochadamus_fired
+			create_country = {
+				name = RANDOM
+				type = global_event
+				auto_delete = yes
+				flag = {
+					icon = {
+						category = "special"
+						file = "unknown.dds"
+					}
+					background = {
+						category = "backgrounds"
+						file = "00_solid.dds"
+					}
+					colors = {
+						"red"
+						"red"
+						"null"
+						"null"
+					}
+				}
+				effect = {
+					save_event_target_as = mem_czar_alexei_country
+				}
+			}
+			event_target:mem_czar_alexei_country = {
+				create_species = {
+					name = "NAME_Terran"
+					plural = "NAME_Terrans"
+					class = HUM
+					portrait = mem_Alexei
+					namelist = "PRT1"
+					traits = random
+					effect = {
+						save_event_target_as = mem_czar_alexei_species
+					}
+				}
+				create_leader = {
+					species = event_target:mem_czar_alexei_species
+					event_leader = yes
+					class = official
+					name = "NAME_Czar_Alexei_Korolev"
+					skill = 3
+					randomize_traits = no
+					can_manually_change_location = no
+					can_assign_to_council = yes
+					skip_background_generation = yes
+					custom_catch_phrase = mem_czar_alexei_catchphrase
+					custom_description = mem_czar_alexei_backstory
+					traits = {
+						add_trait = subclass_official_economy_councilor
+						add_trait = leader_trait_bureaucrat_2
+						#add_trait = leader_trait_legendary_mem_descended_ascendant
+					}
+					gender = male
+					hide_age = yes
+					background_job = noble
+					background_ethic = ethic_authoritarian
+				}
+				last_created_leader = {
+					save_global_event_target_as = mem_czar_alexei_leader
+					set_leader_flag = legendary_leader
+					set_leader_flag = mem_czar_alexei_leader
+					set_leader_flag = immune_to_negative_traits
+					set_leader_flag = leader_death_events_blocked
+					set_owner = root
+					exile_leader_as = mem_czar_alexei_leader
+				}
+			}
+		}
+	}
+
+	picture_event_data = {
+		portrait = event_target:mem_czar_alexei_leader
+	}
+
+	option = {
+		name = mem_descended.8.a
+		response_text = mem_descended.8.a.response
+		is_dialog_only = yes
+	}
+	option = {
+		name = mem_descended.8.b
+		response_text = mem_descended.8.b.response
+		is_dialog_only = yes
+	}
+	option = {
+		name = mem_descended.8.c
+		response_text = mem_descended.8.c.response
+		is_dialog_only = yes
+	}
+	option = {
+		name = mem_descended.8.d
+		response_text = mem_descended.8.d.response
+		is_dialog_only = yes
+	}
+	option = {
+		name = mem_descended.8.e
+		trigger = {
+			NOT = {
+				has_country_flag = mem_descended_second_hello
+			}
+		}
+		hidden_effect = {
+			country_event = { id = mem_descended.9 }
+			set_country_flag = mem_descended_second_hello
+			set_country_flag = mem_descended_third_hello
+			remove_country_flag = mem_descended_first_hello
+		}
+	}
+
+	option = {
+		name = mem_descended.8.f
+		trigger = {
+			has_country_flag = mem_descended_second_hello
+		}
+		hidden_effect = {
+			country_event = { id = mem_descended.9 }
+			if = {
+				limit = {
+					NOT = {
+						has_country_flag = mem_descended_fourth_hello
+					}
+				}
+				set_country_flag = mem_descended_fourth_hello
+			}
+			remove_country_flag = mem_descended_third_hello
+		}
+	}
+
+	option = {
+		name = DISMISS
+		tag = dismiss_leader
+		allow = { always = no }
+	}
+
+	option = {
+		name = HIRE
+		tag = hire_leader
+		allow = { always = no }
+	}
+}
+
+country_event = {
+	id = mem_czar_alexei.1001
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	immediate = {
+		add_relic = r_mem_czar_alexei_sword
+	}
+}
+
+############################################################################################################
+# Astral Rift Events
+############################################################################################################
+# mem_czar_alexei.1		| Stage 1		Arrival in Orbit				Leads to 2/3
+# mem_czar_alexei.2		| Stage 1.5		Scanning the Rifts				Leads to 3
+# mem_czar_alexei.3		| Stage 2		Crashlanding					Leads to 4/5/6/7
+# mem_czar_alexei.4		| Stage 2.5		Repair is Futile				Leads to 5/6/7
+# mem_czar_alexei.5		| Stage 3A		Meeting the Czar				Leads to 8/9/10
+# mem_czar_alexei.6		| Stage 3B		At the Signal					Leads to 11/12/13
+# mem_czar_alexei.7		| Stage 3C		At the Crashsite				Leads to 11/12/13/14
+# mem_czar_alexei.8		| Stage 4A1		Get the Czar					End 
+# mem_czar_alexei.9		| Stage 4A2		Death in Battle					End 
+# mem_czar_alexei.10	| Stage 4A3		Get the Sword					End 
+# mem_czar_alexei.11	| Stage 4B1		Team dies						End
+# mem_czar_alexei.12	| Stage 4B2		Get the Czar					End
+# mem_czar_alexei.13	| Stage 4B3		Get the Sword					End
+# mem_czar_alexei.14	| Stage 4C		Flee with Sphere				End
+############################################################################################################
+# Recruitment Events
+############################################################################################################
+# mem_czar_alexei.15	| Recruitment Screen 1
+# mem_czar_alexei.16	| Recruitment Screen 2
+
+# Beginning of Astral Rift
+# Stage 1
+# Arrival in Orbit
+astral_rift_event = {
+	id = mem_czar_alexei.1
+	title = mem_czar_alexei.1.name
+	desc = mem_czar_alexei.1.desc
+	picture = GFX_evt_situation_the_seal
+	show_sound = ap_rift_event_0_astral_wonder
+	difficulty = @astral_rift_initial_difficulty
+	astral_rift = yes
+	is_triggered_only = yes
+
+	immediate = {
+		set_global_flag = astral_rift_mem_czar_alexei_spawned
+	}
+
+	option = {
+		name = mem_czar_alexei.1.a
+		set_next_astral_rift_event = { id = mem_czar_alexei.2 }
+		set_astral_rift_flag = mem_czar_alexei_rift_1_a
+	}
+	option = {
+		name = mem_czar_alexei.1.b
+		set_next_astral_rift_event = { id = mem_czar_alexei.3 }
+		set_astral_rift_flag = mem_czar_alexei_rift_1_b
+	}
+}
+
+# Stage 1.5
+# Scanning the Rifts
+astral_rift_event = {
+	id = mem_czar_alexei.2
+	title = mem_czar_alexei.2.name
+	desc = mem_czar_alexei.2.desc
+	picture = GFX_evt_situation_the_seal
+	show_sound = ap_rift_event_0_astral_wonder
+	difficulty = @astral_rift_initial_difficulty
+	astral_rift = yes
+	is_triggered_only = yes
+
+	option = {
+		name = mem_czar_alexei.2.a
+		set_next_astral_rift_event = { id = mem_czar_alexei.3 }
+		set_astral_rift_flag = mem_czar_alexei_rift_2_wasted_time
+	}
+}
+
+# Stage 2
+# Crashlanding
+astral_rift_event = {
+	id = mem_czar_alexei.3
+	title = mem_czar_alexei.3.name
+	desc = {
+		trigger = {
+			switch = {
+				trigger = has_astral_rift_flag
+				mem_czar_alexei_rift_1_a = { text = mem_czar_alexei.3.desc.a }
+				mem_czar_alexei_rift_1_b = { text = mem_czar_alexei.3.desc.b }
+			}
+		}
+	}
+	picture = GFX_evt_situation_the_seal
+	show_sound = ap_rift_event_0_astral_wonder
+	difficulty = @astral_rift_initial_difficulty
+	astral_rift = yes
+	is_triggered_only = yes
+
+	option = {
+		name = mem_czar_alexei.3.a
+		hidden_effect = {
+			random_list = {
+				4 = {
+					set_next_astral_rift_event = { id = mem_czar_alexei.6 }
+				}
+				6 = {
+					set_next_astral_rift_event = { id = mem_czar_alexei.5 }
+					set_astral_rift_flag = mem_czar_alexei_rift_3_a
+				}
+			}
+		}		
+	}
+	option = {
+		name = mem_czar_alexei.3.b
+		hidden_effect = {
+			random_list = {
+				9 = {
+					set_next_astral_rift_event = { id = mem_czar_alexei.7 }
+				}
+				1 = {
+					set_next_astral_rift_event = { id = mem_czar_alexei.5 }
+					set_astral_rift_flag = mem_czar_alexei_rift_3_b
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_czar_alexei.3.c
+		hidden_effect = {
+			random_list = {
+				7 = {
+					set_next_astral_rift_event = { id = mem_czar_alexei.4 }
+					set_astral_rift_flag = mem_czar_alexei_rift_3_wasted_time
+				}
+				3 = {
+					set_next_astral_rift_event = { id = mem_czar_alexei.5 }
+					set_astral_rift_flag = mem_czar_alexei_rift_3_c
+				}
+			}
+		}
+	}
+}
+
+# Stage 2.5
+# Repair is Futile
+astral_rift_event = {
+	id = mem_czar_alexei.4
+	title = mem_czar_alexei.4.name
+	desc = mem_czar_alexei.4.desc
+	picture = GFX_evt_situation_the_seal
+	show_sound = ap_rift_event_0_astral_wonder
+	difficulty = @astral_rift_initial_difficulty
+	astral_rift = yes
+	is_triggered_only = yes
+
+	option = {
+		name = mem_czar_alexei.3.a
+		hidden_effect = {
+			random_list = {
+				4 = {
+					set_next_astral_rift_event = { id = mem_czar_alexei.6 }
+				}
+				6 = {
+					set_next_astral_rift_event = { id = mem_czar_alexei.5 }
+					set_astral_rift_flag = mem_czar_alexei_rift_3_a
+				}
+			}
+		}		
+	}
+	option = {
+		name = mem_czar_alexei.3.b
+		hidden_effect = {
+			random_list = {
+				9 = {
+					set_next_astral_rift_event = { id = mem_czar_alexei.7 }
+				}
+				1 = {
+					set_next_astral_rift_event = { id = mem_czar_alexei.5 }
+					set_astral_rift_flag = mem_czar_alexei_rift_3_b
+				}
+			}
+		}
+	}
+}
+
+# Stage 3A
+# Meeting the Czar
+# Unexpected Encounter
+astral_rift_event = {
+	id = mem_czar_alexei.5
+	title = mem_czar_alexei.5.name
+	desc = {
+		trigger = {
+			switch = {
+				trigger = has_astral_rift_flag
+				mem_czar_alexei_rift_3_a = { text = mem_czar_alexei.5.desc.a }
+				mem_czar_alexei_rift_3_b = { text = mem_czar_alexei.5.desc.b }
+				mem_czar_alexei_rift_3_c = { text = mem_czar_alexei.5.desc.c }
+			}
+		}
+	}
+	picture = GFX_evt_astral_rift_tower_invitation
+	show_sound = ap_rift_event_0_astral_wonder
+	difficulty = @astral_rift_initial_difficulty
+	astral_rift = yes
+	is_triggered_only = yes
+
+	option = { # Cooperate
+		name = mem_czar_alexei.5.a
+		hidden_effect = {
+			random_list = {
+				8 = {
+					set_next_astral_rift_event = { id = mem_czar_alexei.8 }
+				}
+				2 = {
+					set_next_astral_rift_event = { id = mem_czar_alexei.9 }
+					set_astral_rift_flag = mem_czar_alexei_rift_5_a
+				}
+			}
+		}		
+	}
+	option = { # Betray
+		name = mem_czar_alexei.5.b
+		hidden_effect = {
+			random_list = {
+				7 = {
+					set_next_astral_rift_event = { id = mem_czar_alexei.10 }
+				}
+				3 = {
+					set_next_astral_rift_event = { id = mem_czar_alexei.9 }
+					set_astral_rift_flag = mem_czar_alexei_rift_5_b
+				}
+			}
+		}
+	}
+}
+
+# Stage 3B
+# At the Signal
+astral_rift_event = {
+	id = mem_czar_alexei.6
+	title = mem_czar_alexei.6.name
+	desc = mem_czar_alexei.6.desc
+	picture = GFX_evt_mem_wreckage_shelter
+	show_sound = ap_rift_event_0_astral_wonder
+	difficulty = @astral_rift_initial_difficulty
+	astral_rift = yes
+	is_triggered_only = yes
+
+	option = { # flee
+		name = mem_czar_alexei.6.a
+		hidden_effect = {
+			set_astral_rift_flag = mem_czar_alexei_rift_6_a
+			set_next_astral_rift_event = { id = mem_czar_alexei.11 }
+		}		
+	}
+	option = { # fight
+		name = mem_czar_alexei.6.b
+		hidden_effect = {
+			set_astral_rift_flag = mem_czar_alexei_rift_6_b
+			random_list = {
+				9 = {
+					set_next_astral_rift_event = { id = mem_czar_alexei.12 }
+				}
+				1 = {
+					set_next_astral_rift_event = { id = mem_czar_alexei.11 }
+				}
+			}
+		}
+	}
+	option = { # barricade
+		name = mem_czar_alexei.6.c
+		hidden_effect = {
+			set_astral_rift_flag = mem_czar_alexei_rift_6_c
+			random_list = {
+				7 = {
+					set_next_astral_rift_event = { id = mem_czar_alexei.13 }
+				}
+				3 = {
+					set_next_astral_rift_event = { id = mem_czar_alexei.11 }					
+				}
+			}
+		}
+	}
+}
+
+# Stage 3C
+# At the Crashsite
+astral_rift_event = {
+	id = mem_czar_alexei.7
+	title = mem_czar_alexei.7.name
+	desc = mem_czar_alexei.7.desc
+	picture = GFX_evt_derelict_interior
+	show_sound = ap_rift_event_0_astral_wonder
+	difficulty = @astral_rift_initial_difficulty
+	astral_rift = yes
+	is_triggered_only = yes
+
+	immediate = {
+		explorer = {
+			set_country_flag = mem_czar_alexei_rift_7_wasted_time
+		}		
+	}
+
+	option = { # fight
+		name = mem_czar_alexei.7.a
+		hidden_effect = {
+			set_astral_rift_flag = mem_czar_alexei_rift_7_a
+			random_list = {
+				5 = {
+					set_next_astral_rift_event = { id = mem_czar_alexei.12 }
+				}
+				2 = {
+					set_next_astral_rift_event = { id = mem_czar_alexei.11 }
+				}
+				3 = {
+					set_next_astral_rift_event = { id = mem_czar_alexei.13 }
+				}
+			}
+		}
+	}
+
+	option = { # flee
+		name = mem_czar_alexei.7.b
+		hidden_effect = {
+			set_next_astral_rift_event = { id = mem_czar_alexei.14 }
+		}		
+	}
+}
+
+# Stage 4A1
+# Get the Czar
+astral_rift_event = {
+	id = mem_czar_alexei.8
+	title = mem_czar_alexei.8.name
+	desc = mem_czar_alexei.8.desc
+	picture = GFX_evt_mem_victory
+	show_sound = ap_rift_event_0_astral_wonder
+	difficulty = @astral_rift_initial_difficulty
+	astral_rift = yes
+	is_triggered_only = yes
+
+	option = {
+		name = mem_czar_alexei.8.a
+		explorer = {
+			set_country_flag = mem_czar_alexei_first_hello
+			country_event = { id = mem_czar_alexei.15 }
+		}
+		finish_astral_rift = yes
+	}
+}
+
+# Stage 4A2
+# Death in Battle
+astral_rift_event = {
+	id = mem_czar_alexei.9
+	title = mem_czar_alexei.9.name
+	desc = mem_czar_alexei.9.desc
+	picture = GFX_evt_surrender
+	show_sound = ap_rift_event_0_astral_wonder
+	difficulty = @astral_rift_initial_difficulty
+	astral_rift = yes
+	is_triggered_only = yes
+
+	option = {
+		name = mem_czar_alexei.9.a
+		fleet = {
+			kill_leader = {
+				show_notification = yes
+			}
+		}
+		finish_astral_rift = yes
+	}
+}
+
+# Stage 4A3
+# Get the Sword
+astral_rift_event = {
+	id = mem_czar_alexei.10
+	title = mem_czar_alexei.10.name
+	desc = mem_czar_alexei.10.desc
+	picture = GFX_evt_mem_victory
+	show_sound = ap_rift_event_0_astral_wonder
+	difficulty = @astral_rift_initial_difficulty
+	astral_rift = yes
+	is_triggered_only = yes
+
+	option = {
+		name = mem_czar_alexei.10.a
+		explorer = {
+			add_relic = r_mem_czar_alexei_sword
+		}
+		finish_astral_rift = yes
+	}
+}
+
+# Stage 4B1
+# Team dies
+astral_rift_event = {
+	id = mem_czar_alexei.11
+	title = mem_czar_alexei.11.name
+	desc = {
+		trigger = {
+			switch = {
+				trigger = has_astral_rift_flag
+				mem_czar_alexei_rift_6_a = { text = mem_czar_alexei.11.desc.a }
+				mem_czar_alexei_rift_6_b = { text = mem_czar_alexei.11.desc.b }
+				mem_czar_alexei_rift_6_c = { text = mem_czar_alexei.11.desc.c }
+				mem_czar_alexei_rift_7_a = { text = mem_czar_alexei.11.desc.d }
+			}
+		}
+	}
+	picture = GFX_evt_surrender
+	show_sound = ap_rift_event_0_astral_wonder
+	difficulty = @astral_rift_initial_difficulty
+	astral_rift = yes
+	is_triggered_only = yes
+
+	option = {
+		name = TERRIBLE
+		fleet = {
+			kill_leader = {
+				show_notification = yes
+			}
+		}
+		finish_astral_rift = yes
+	}
+}
+
+# Stage 4B2
+# Get the Czar
+astral_rift_event = {
+	id = mem_czar_alexei.12
+	title = mem_czar_alexei.12.name
+	desc = {
+		trigger = {
+			switch = {
+				trigger = has_astral_rift_flag
+				mem_czar_alexei_rift_6_b = { text = mem_czar_alexei.12.desc.a }
+				mem_czar_alexei_rift_7_a = { text = mem_czar_alexei.12.desc.b }
+			}
+		}
+	}
+	picture = GFX_evt_mem_victory
+	show_sound = ap_rift_event_0_astral_wonder
+	difficulty = @astral_rift_initial_difficulty
+	astral_rift = yes
+	is_triggered_only = yes
+
+	option = {
+		name = mem_czar_alexei.12.a
+		explorer = {
+			if = {
+				limit = {
+					has_country_flag = mem_czar_alexei_rift_7_wasted_time
+				}
+				locked_random_list = {
+					1 = {
+						modifier = {
+							OR = {
+								has_technology = tech_dark_matter_deflector
+								has_tech_option = tech_dark_matter_deflector
+							}
+							factor = 0
+						}
+						add_research_option = tech_dark_matter_deflector
+						add_tech_progress = {
+							tech = tech_dark_matter_deflector
+							progress = 0.10
+						}
+					}
+					1 = {
+						modifier = {
+							OR = {
+								has_technology = tech_dark_matter_detection
+								has_tech_option = tech_dark_matter_detection
+							}
+							factor = 0
+						}
+						add_research_option = tech_dark_matter_detection
+						add_tech_progress = {
+							tech = tech_dark_matter_detection
+							progress = 0.10
+						}
+					}
+					1 = {
+						modifier = {
+							OR = {
+								has_technology = tech_dark_matter_power_core
+								has_tech_option = tech_dark_matter_power_core
+							}
+							factor = 0
+						}
+						add_research_option = tech_dark_matter_power_core
+						add_tech_progress = {
+							tech = tech_dark_matter_power_core
+							progress = 0.10
+						}
+					}
+					1 = {
+						modifier = {
+							OR = {
+								has_technology = tech_dark_matter_propulsion
+								has_tech_option = tech_dark_matter_propulsion
+							}
+							factor = 0
+						}
+						add_research_option = tech_dark_matter_propulsion
+						add_tech_progress = {
+							tech = tech_dark_matter_propulsion
+							progress = 0.10
+						}
+					}
+					1 = {
+						modifier = {
+							OR = {
+								has_technology = tech_cloaking_dark_matter
+								has_tech_option = tech_cloaking_dark_matter
+							}
+							factor = 0
+						}
+						add_research_option = tech_cloaking_dark_matter
+						add_tech_progress = {
+							tech = tech_cloaking_dark_matter
+							progress = 0.10
+						}
+					}
+				}
+			}
+			set_country_flag = mem_czar_alexei_first_hello
+			hidden_effect = {
+				country_event = { id = mem_czar_alexei.15 }
+			}			
+		}
+		finish_astral_rift = yes
+	}
+}
+
+# Stage 4B3
+# Get the Sword
+astral_rift_event = {
+	id = mem_czar_alexei.13
+	title = mem_czar_alexei.13.name
+	desc = {
+		trigger = {
+			switch = {
+				trigger = has_astral_rift_flag
+				mem_czar_alexei_rift_6_c = { text = mem_czar_alexei.13.desc.a }
+				mem_czar_alexei_rift_7_a = { text = mem_czar_alexei.13.desc.b }
+			}
+		}
+	}
+	picture = GFX_evt_mem_victory
+	show_sound = ap_rift_event_0_astral_wonder
+	difficulty = @astral_rift_initial_difficulty
+	astral_rift = yes
+	is_triggered_only = yes
+
+	option = {
+		name = mem_czar_alexei.10.a
+		explorer = {
+			if = {
+				limit = {
+					has_country_flag = mem_czar_alexei_rift_7_wasted_time
+				}
+				locked_random_list = {
+					1 = {
+						modifier = {
+							OR = {
+								has_technology = tech_dark_matter_deflector
+								has_tech_option = tech_dark_matter_deflector
+							}
+							factor = 0
+						}
+						add_research_option = tech_dark_matter_deflector
+						add_tech_progress = {
+							tech = tech_dark_matter_deflector
+							progress = 0.10
+						}
+					}
+					1 = {
+						modifier = {
+							OR = {
+								has_technology = tech_dark_matter_detection
+								has_tech_option = tech_dark_matter_detection
+							}
+							factor = 0
+						}
+						add_research_option = tech_dark_matter_detection
+						add_tech_progress = {
+							tech = tech_dark_matter_detection
+							progress = 0.10
+						}
+					}
+					1 = {
+						modifier = {
+							OR = {
+								has_technology = tech_dark_matter_power_core
+								has_tech_option = tech_dark_matter_power_core
+							}
+							factor = 0
+						}
+						add_research_option = tech_dark_matter_power_core
+						add_tech_progress = {
+							tech = tech_dark_matter_power_core
+							progress = 0.10
+						}
+					}
+					1 = {
+						modifier = {
+							OR = {
+								has_technology = tech_dark_matter_propulsion
+								has_tech_option = tech_dark_matter_propulsion
+							}
+							factor = 0
+						}
+						add_research_option = tech_dark_matter_propulsion
+						add_tech_progress = {
+							tech = tech_dark_matter_propulsion
+							progress = 0.10
+						}
+					}
+					1 = {
+						modifier = {
+							OR = {
+								has_technology = tech_cloaking_dark_matter
+								has_tech_option = tech_cloaking_dark_matter
+							}
+							factor = 0
+						}
+						add_research_option = tech_cloaking_dark_matter
+						add_tech_progress = {
+							tech = tech_cloaking_dark_matter
+							progress = 0.10
+						}
+					}
+				}
+			}
+			add_relic = r_mem_czar_alexei_sword
+		}
+		finish_astral_rift = yes
+	}
+}
+
+# Stage 4C
+# Flee with Sphere
+astral_rift_event = {
+	id = mem_czar_alexei.14
+	title = mem_czar_alexei.14.name
+	desc = mem_czar_alexei.14.desc
+	picture = GFX_evt_astral_rift_riftworld
+	show_sound = ap_rift_event_0_astral_wonder
+	difficulty = @astral_rift_initial_difficulty
+	astral_rift = yes
+	is_triggered_only = yes
+
+	option = {
+		name = mem_czar_alexei.14.a
+		explorer = {
+			if = {
+				limit = {
+					has_country_flag = mem_czar_alexei_rift_7_wasted_time
+				}
+				locked_random_list = {
+					1 = {
+						modifier = {
+							OR = {
+								has_technology = tech_dark_matter_deflector
+								has_tech_option = tech_dark_matter_deflector
+							}
+							factor = 0
+						}
+						add_research_option = tech_dark_matter_deflector
+						add_tech_progress = {
+							tech = tech_dark_matter_deflector
+							progress = 0.10
+						}
+					}
+					1 = {
+						modifier = {
+							OR = {
+								has_technology = tech_dark_matter_detection
+								has_tech_option = tech_dark_matter_detection
+							}
+							factor = 0
+						}
+						add_research_option = tech_dark_matter_detection
+						add_tech_progress = {
+							tech = tech_dark_matter_detection
+							progress = 0.10
+						}
+					}
+					1 = {
+						modifier = {
+							OR = {
+								has_technology = tech_dark_matter_power_core
+								has_tech_option = tech_dark_matter_power_core
+							}
+							factor = 0
+						}
+						add_research_option = tech_dark_matter_power_core
+						add_tech_progress = {
+							tech = tech_dark_matter_power_core
+							progress = 0.10
+						}
+					}
+					1 = {
+						modifier = {
+							OR = {
+								has_technology = tech_dark_matter_propulsion
+								has_tech_option = tech_dark_matter_propulsion
+							}
+							factor = 0
+						}
+						add_research_option = tech_dark_matter_propulsion
+						add_tech_progress = {
+							tech = tech_dark_matter_propulsion
+							progress = 0.10
+						}
+					}
+					1 = {
+						modifier = {
+							OR = {
+								has_technology = tech_cloaking_dark_matter
+								has_tech_option = tech_cloaking_dark_matter
+							}
+							factor = 0
+						}
+						add_research_option = tech_cloaking_dark_matter
+						add_tech_progress = {
+							tech = tech_cloaking_dark_matter
+							progress = 0.10
+						}
+					}
+				}
+			}
+		}
+		finish_astral_rift = yes
+	}
+}
+
+# Recruitment Screen 1
+country_event = {
+	id = mem_czar_alexei.15
+	title = mem_placeholder
+	desc = {
+		trigger = { 
+			switch = { 
+				trigger = has_country_flag 
+				mem_czar_alexei_first_hello = {text = mem_czar_alexei.15.desc_01} 
+				mem_czar_alexei_second_hello = {text = mem_czar_alexei.15.desc_02}
+			}
+		}
+	}
+	show_sound = event_default
+	is_triggered_only = yes
+	
+	picture = GFX_leader_recruitment_bg_renowned
+	event_window_type = leader_recruit
+
+	immediate = {
+		IF = {
+			limit = {
+				NOT = {
+					has_global_flag = mem_czar_alexei_fired
+				}
+			}
+			set_global_flag = mem_czar_alexei_fired
+			create_country = {
+				name = RANDOM
+				type = global_event
+				auto_delete = yes
+				flag = {
+					icon = {
+						category = "special"
+						file = "unknown.dds"
+					}
+					background = {
+						category = "backgrounds"
+						file = "00_solid.dds"
+					}
+					colors = {
+						"red"
+						"red"
+						"null"
+						"null"
+					}
+				}
+				effect = {
+					save_event_target_as = mem_czar_alexei_country
+				}
+			}
+			event_target:mem_czar_alexei_country = {
+				create_species = {
+					name = "NAME_Terran"
+					plural = "NAME_Terrans"
+					class = HUM
+					portrait = mem_Alexei
+					namelist = "PRT1"
+					traits = random
+					effect = {
+						save_event_target_as = mem_czar_alexei_species
+					}
+				}
+				create_leader = {
+					species = event_target:mem_czar_alexei_species
+					event_leader = yes
+					class = commander
+					name = "NAME_Czar_Alexei_Korolev"
+					skill = 5
+					randomize_traits = no
+					can_assign_to_council = yes
+					skip_background_generation = yes
+					custom_catch_phrase = mem_czar_alexei_catchphrase
+					custom_description = mem_czar_alexei_backstory
+					traits = {
+						add_trait = subclass_official_economy_councilor
+						add_trait = leader_trait_bureaucrat_2
+						add_trait = leader_trait_legendary_mem_manifest_destiny
+					}
+					gender = male
+					hide_age = yes
+					background_job = noble
+					background_ethic = ethic_authoritarian
+				}
+				last_created_leader = {
+					save_global_event_target_as = mem_czar_alexei_leader
+					set_leader_flag = legendary_leader
+					set_leader_flag = mem_czar_alexei_leader
+					set_leader_flag = immune_to_negative_traits
+					set_leader_flag = leader_death_events_blocked
+					set_owner = root
+					exile_leader_as = mem_czar_alexei_leader
+				}
+			}
+		}
+	}
+
+	picture_event_data = {
+		portrait = event_target:mem_czar_alexei_leader
+	}
+
+	option = {
+		name = mem_czar_alexei.15.a
+		response_text = mem_czar_alexei.15.a.response
+		is_dialog_only = yes
+	}
+	option = {
+		name = mem_czar_alexei.15.b
+		response_text = mem_czar_alexei.15.b.response
+		is_dialog_only = yes
+	}
+	option = {
+		name = mem_czar_alexei.15.c
+		response_text = mem_czar_alexei.15.c.response
+		is_dialog_only = yes
+	}
+	option = {
+		name = mem_czar_alexei.15.d
+		trigger = {
+			NOT = {
+				has_country_flag = mem_czar_alexei_second_hello
+			}
+		}
+		hidden_effect = {
+			country_event = { id = mem_czar_alexei.16 }
+			set_country_flag = mem_czar_alexei_second_hello
+			set_country_flag = mem_czar_alexei_third_hello
+			remove_country_flag = mem_czar_alexei_first_hello
+		}
+	}
+	option = {
+		name = mem_czar_alexei.15.e
+		trigger = {
+			has_country_flag = mem_czar_alexei_second_hello
+		}
+		hidden_effect = {
+			country_event = { id = mem_czar_alexei.16 }
+			if = {
+				limit = {
+					NOT = {
+						has_country_flag = mem_czar_alexei_fourth_hello
+					}
+				}
+				set_country_flag = mem_czar_alexei_fourth_hello
+			}
+			remove_country_flag = mem_czar_alexei_third_hello
+		}
+	}
+
+	option = {
+		name = DISMISS
+		tag = dismiss_leader
+		allow = { always = no }
+	}
+
+	option = {
+		name = HIRE
+		tag = hire_leader
+		allow = { always = no }
+	}
+}
+
+# Recruitment Screen 2
+country_event = {
+	id = mem_czar_alexei.16
+	title = mem_placeholder
+	desc = {
+		trigger = { 
+			switch = { 
+				trigger = has_country_flag 
+				mem_czar_alexei_third_hello = {text = mem_czar_alexei.16.desc_01} 
+				mem_czar_alexei_fourth_hello = {text = mem_czar_alexei.16.desc_02}
+			}
+		}
+	}
+	show_sound = event_default
+	is_triggered_only = yes
+	
+	picture = GFX_leader_recruitment_bg_renowned
+	event_window_type = leader_recruit
+
+	picture_event_data = {
+		portrait = event_target:mem_czar_alexei_leader
+	}
+
+	option = {
+		name = mem_czar_alexei.16.a
+		hidden_effect = {
+			country_event = { id = mem_czar_alexei.15 }
+		}
+	}
+
+	option = {
+		name = DISMISS
+		tag = dismiss_leader
+		hidden_effect = {
+			event_target:mem_czar_alexei_leader = {
+				kill_leader = { show_notification = no }
+			}
+		}
+	}
+
+	option = {
+		name = HIRE
+		allow = {
+			NOR = {
+				has_ethic = ethic_gestalt_consciousness
+				has_civic = civic_fanatic_purifiers
+			}
+		}		
+		custom_tooltip = mem_czar_alexei.16.hire.tooltip
+		tag = hire_leader
+		hidden_effect = {
+			hire_event_leader_effect = {
+				LEADER = mem_czar_alexei_leader
+			}
+		}
+	}
+}
