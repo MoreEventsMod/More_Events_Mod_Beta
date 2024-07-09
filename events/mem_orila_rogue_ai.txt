@@ -32,6 +32,27 @@ country_event = {
 			create_ship_design = { design = "NAME_Marauder_Starbase" }
 			add_ship_design = last_created_design
 			save_global_event_target_as = mem_orila_rogue_ai_country
+			set_country_flag = mem_orila_rogue_ai_country
+			set_variable = {
+				which = mem_orila_rogue_ai_resource
+				value = 0
+			}
+			set_variable = {
+				which = mem_orila_rogue_ai_resource_economy
+				value = 0
+			}
+			set_variable = {
+				which = mem_orila_rogue_ai_resource_defense
+				value = 0
+			}
+			set_variable = {
+				which = mem_orila_rogue_ai_resource_offense
+				value = 0
+			}
+			set_variable = {
+				which = mem_orila_rogue_ai_resource_leviathan
+				value = 0
+			}
 			every_country = {
 				limit = {
 					OR = {
@@ -61,6 +82,10 @@ country_event = {
 	hide_window = yes
 
 	is_triggered_only = yes
+
+	trigger = {
+		has_country_flag = mem_orila_rogue_ai_country
+	}
 
 	immediate = {		
 		#Pick drone-occupied home system
@@ -245,7 +270,7 @@ country_event = {
 					modifier = { #Budget too high
 						check_variable = {
 							which = mem_orila_rogue_ai_resource_offense
-							value >= 1000
+							value >= 1500
 						}
 						factor = 0
 					}
@@ -316,177 +341,330 @@ country_event = {
 				value = -200
 			}
 		}
-		random_list = {
-			1 = {	# 1. Send Mining Flotilla
-				modifier = {
+		#Department actions
+		#Economic
+		if = {
+			limit = {
+				check_variable = {
+					which = mem_orila_rogue_ai_resource_economy
+					value >= 200
+				}
+				count_owned_fleet = {
+					count > 0
+					limit = {
+						has_fleet_flag = mem_orila_rogue_ai_transport_fleet
+					}
+				}
+				any_system_within_border = {
 					NOT = {
-						any_system_within_border = {
+						any_ship_in_system = {
+							is_ship_size = mining_station
+							owner = {
+								is_same_value = root
+							}
+						}
+					}
+				}
+			}
+			# 1. Send Mining Flotilla
+			country_event = {
+				id = mem_orila_rogue_ai_mining.1
+			}
+			change_variable = {
+				which = mem_orila_rogue_ai_resource_economy
+				value = -200
+			}
+		}
+		else = {
+			random_list = {
+				100 = { # 2. Send Outpost Flotilla
+					modifier = {
+						OR = {
+							check_variable = {
+								which = mem_orila_rogue_ai_resource_economy
+								value < 300
+							}
 							NOT = {
-								any_ship_in_system = {
-									is_ship_size = mining_station
-									owner = {
-										is_same_value = root
+								any_system = {
+									distance = {
+										source = event_target:mem_orila_rogue_ai_starting_system
+										use_bypasses = no
+										min_jumps = 0
+										max_jumps = 3
+									}
+									NOT = {
+										exists = starbase
+									}
+									any_neighbor_system = {
+										exists = starbase
+										starbase = {
+											owner = {
+												is_same_value = root
+											}
+										}
+									}
+									NOR = { 
+										has_star_flag = guardian
+										has_star_flag = hostile_system
 									}
 								}
 							}
 						}
+						factor = 0
 					}
-					factor = 0
+					country_event = {
+						id = mem_orila_rogue_ai_outpost.1
+					}
+					change_variable = {
+						which = mem_orila_rogue_ai_resource_economy
+						value = -300
+					}
 				}
-				country_event = {
-					id = mem_orila_rogue_ai_mining.1
-				}
-				#Resourcepool change TODO
-			}
-			1 = {	# 2. Send Outpost Flotilla
-				modifier = {
-					NOT = {
-						any_system = {
-							distance = {
-								source = event_target:mem_orila_rogue_ai_starting_system
-								use_bypasses = no
-								min_jumps = 0
-								max_jumps = 3
+				100 = { # 3. Send Transport Flotilla
+					modifier = {
+						OR = {
+							check_variable = {
+								which = mem_orila_rogue_ai_resource_economy
+								value < 200
 							}
-							NOT = {
-								exists = starbase
-							}
-							any_neighbor_system = {
-								exists = starbase
-								starbase = {
-									owner = {
-										is_same_value = root
-									}
+							count_owned_fleet = {
+								count >= 3
+								limit = {
+									has_fleet_flag = mem_orila_rogue_ai_transport_fleet
 								}
 							}
-							NOR = { 
-								has_star_flag = guardian
-								has_star_flag = hostile_system
+						}						
+						factor = 0
+					}
+					modifier = {
+						count_owned_fleet = {
+							count >= 1
+							limit = {
+								has_fleet_flag = mem_orila_rogue_ai_transport_fleet
+							}
+						}
+						factor = 0.5
+					}
+					modifier = {
+						count_owned_fleet = {
+							count >= 2
+							limit = {
+								has_fleet_flag = mem_orila_rogue_ai_transport_fleet
+							}
+						}
+						factor = 0.5
+					}
+					country_event = {
+						id = mem_orila_rogue_ai_transport.1
+					}
+					change_variable = {
+						which = mem_orila_rogue_ai_resource_economy
+						value = -200
+					}
+				}
+			}
+		}
+		#Defense
+		if = {
+			limit = {
+				check_variable = {
+					which = mem_orila_rogue_ai_resource_defense
+					value >= 300
+				}
+				any_system_within_border = {
+					NOT = {
+						any_fleet_in_system = {
+							has_fleet_flag = mem_orila_rogue_ai_defense_fleet
+						}
+					}
+				}
+			}
+			# 4. Send Defense Fleet
+			country_event = {
+				id = mem_orila_rogue_ai_defense.1
+			}
+			change_variable = {
+				which = mem_orila_rogue_ai_resource_defense
+				value = -300
+			}
+		}
+		#Offense
+		if = {
+			limit = {
+				check_variable = {
+					which = mem_orila_rogue_ai_resource_offense
+					value >= 600
+				}
+				any_system_within_border = {
+					any_neighbor_system = {
+						has_star_flag = mem_orila_rogue_ai_reclamation_target
+					}
+				}
+			}
+			# 6. Send Reclamation Fleet
+			country_event = {
+				id = mem_orila_rogue_ai_offense.4
+			}
+			change_variable = {
+				which = mem_orila_rogue_ai_resource_offense
+				value = -600
+			}
+		}
+		else_if = {
+			limit = {
+				check_variable = {
+					which = mem_orila_rogue_ai_resource_offense
+					value >= 450
+				}
+				count_owned_fleet = {
+					count < 2
+					limit = {
+						has_fleet_flag = mem_orila_rogue_ai_attack_fleet
+					}
+				}
+				any_system = {
+					distance = {
+						source = event_target:mem_orila_rogue_ai_starting_system
+						use_bypasses = no
+						min_jumps = 0
+						max_jumps = 4
+					}
+					any_neighbor_system = {
+						exists = starbase
+						starbase = {
+							owner = {
+								is_same_value = root
 							}
 						}
 					}
-					factor = 0
+					any_fleet_in_system = {
+						controller = {
+							is_hostile_to = event_target:mem_orila_rogue_ai_country
+						}								
+					}
 				}
-				country_event = {
-					id = mem_orila_rogue_ai_outpost.1
-				}
-				#Resourcepool change TODO
 			}
-			1 = {	# 3. Send Transport Flotilla
-				modifier = {
+			# 5. Send Attack Fleet
+			country_event = {
+				id = mem_orila_rogue_ai_offense.1
+			}
+			change_variable = {
+				which = mem_orila_rogue_ai_resource_offense
+				value = -450
+			}
+		}
+		else_if = {
+			limit = {
+				check_variable = {
+					which = mem_orila_rogue_ai_resource_offense
+					value >= 1000
+				}
+				NOT = {
+					any_owned_fleet = {
+						has_fleet_flag = mem_orila_rogue_ai_retaliation_fleet
+					}
+				}
+				any_country = {
+					has_country_flag = mem_orila_rogue_ai_retaliation_target
+					any_system_within_border = {
+						is_neighbor_of = root
+					}
+				}
+			}
+			# 7. Send Retaliation Fleet
+			country_event = {
+				id = mem_orila_rogue_ai_offense.6
+			}
+			change_variable = {
+				which = mem_orila_rogue_ai_resource_offense
+				value = -1000
+			}
+		}
+
+		#Giving jobs to existing fleets
+		#Retaliation Fleet
+		if = {
+			limit = {
+				any_owned_fleet = {
+					has_fleet_flag = mem_orila_rogue_ai_retaliation_fleet
 					NOT = {
-						any_system_within_border = {
-							any_ship_in_system = {
-								is_ship_size = mining_station
+						has_fleet_flag = mem_orila_rogue_ai_retaliation_fleet_active
+					}
+				}
+				any_country = {
+					has_country_flag = mem_orila_rogue_ai_retaliation_target
+					any_system_within_border = {
+						is_neighbor_of = root
+					}
+				}
+			}
+			#Remove the old fleet
+			random_owned_fleet = {
+				limit = {
+					has_fleet_flag = mem_orila_rogue_ai_retaliation_fleet
+					NOT = {
+						has_fleet_flag = mem_orila_rogue_ai_retaliation_fleet_active
+					}
+				}
+				delete_fleet = this
+			}
+			#Create Retaliation Fleet
+			country_event = {
+				id = mem_orila_rogue_ai_offense.6
+			}	
+		}
+		#Attack Fleet
+		while = {
+			count = 3
+			if = {
+				limit = {
+					any_owned_fleet = {
+						has_fleet_flag = mem_orila_rogue_ai_attack_fleet
+						NOT = {
+							has_fleet_flag = mem_orila_rogue_ai_attack_fleet_active
+						}
+					}
+					any_system = {
+						distance = {
+							source = event_target:mem_orila_rogue_ai_starting_system
+							use_bypasses = no
+							min_jumps = 0
+							max_jumps = 4
+						}
+						NOT = {
+							has_star_flag = mem_orila_rogue_ai_attack_fleet_target
+						}
+						any_neighbor_system = {
+							exists = starbase
+							starbase = {
 								owner = {
 									is_same_value = root
 								}
 							}
 						}
-					}
-					count_owned_fleet = {
-						count >= 3
-						limit = {
-							has_fleet_flag = mem_orila_rogue_ai_transport_fleet
+						any_fleet_in_system = {
+							controller = {
+								is_hostile_to = event_target:mem_orila_rogue_ai_country
+							}								
 						}
 					}
-					factor = 0
 				}
-				country_event = {
-					id = mem_orila_rogue_ai_transport.1
-				}
-				#Resourcepool change TODO
-			}
-			1 = {	# 4. Send Defense Fleet
-				modifier = {
-					NOT = {
-						any_system_within_border = {
-							NOT = {
-								any_fleet_in_system = {
-									has_fleet_flag = mem_orila_rogue_ai_defense_fleet
-								}
-							}
+				#Remove the old fleet
+				random_owned_fleet = {
+					limit = {
+						has_fleet_flag = mem_orila_rogue_ai_attack_fleet
+						NOT = {
+							has_fleet_flag = mem_orila_rogue_ai_attack_fleet_active
 						}
 					}
-					factor = 0
+					delete_fleet = this
 				}
-				country_event = {
-					id = mem_orila_rogue_ai_defense.1
-				}
-				#Resourcepool change TODO
-			}
-			1 = {	# 5. Send Attack Fleet
-				modifier = {
-					NOT = {
-						any_system = {
-							distance = {
-								source = event_target:mem_orila_rogue_ai_starting_system
-								use_bypasses = no
-								min_jumps = 0
-								max_jumps = 4
-							}
-							any_neighbor_system = {
-								exists = starbase
-								starbase = {
-									owner = {
-										is_same_value = root
-									}
-								}
-							}
-							any_fleet_in_system = {
-								controller = {
-									is_hostile_to = event_target:mem_orila_rogue_ai_country
-								}								
-							}
-						}
-					}
-					factor = 0
-				}
+				#Create Attack Fleet
 				country_event = {
 					id = mem_orila_rogue_ai_offense.1
 				}
-				#Resourcepool change TODO
 			}
-			1 = {	# 6. Send Reclamation Fleet
-				modifier = {
-					NOT = {
-						any_system_within_border = {
-							any_neighbor_system = {
-								has_star_flag = mem_orila_rogue_ai_reclamation_target
-							}
-						}
-					}
-					factor = 0
-				}
-				country_event = {
-					id = mem_orila_rogue_ai_offense.4
-				}
-				#Resourcepool change TODO
-			}
-			1 = {	# 7. Send Retaliation Fleet
-				modifier = {
-					NOT = {
-						any_country = {
-							has_country_flag = mem_orila_rogue_ai_retaliation_target
-							any_system_within_border = {
-								is_neighbor_of = root
-							}
-						}
-					}
-					factor = 0
-				}
-				modifier = {					
-					any_owned_fleet = {
-						has_fleet_flag = mem_orila_rogue_ai_retaliation_fleet
-					}
-					factor = 0
-				}
-				country_event = {
-					id = mem_orila_rogue_ai_offense.6
-				}
-				#Resourcepool change TODO
-			}
-		}
+		}		
 	}
 }
 
@@ -552,6 +730,41 @@ planet_event = {
 	is_triggered_only = yes
 
 	immediate = {
+		solar_system = {
+			if = {
+				limit = {
+					any_system_planet = {
+						has_planet_flag = mem_orila_rogue_ai_mining_checkpoint_1
+					}
+				}
+				random_system_planet = {
+					limit = {
+						has_planet_flag = mem_orila_rogue_ai_mining_checkpoint_1
+					}
+					remove_planet_flag = mem_orila_rogue_ai_mining_checkpoint_1
+				}
+			}
+			if = {
+				limit = {
+					any_system_planet = {
+						has_planet_flag = mem_orila_rogue_ai_mining_checkpoint_2
+					}
+				}
+				random_system_planet = {
+					limit = {
+						has_planet_flag = mem_orila_rogue_ai_mining_checkpoint_2
+					}
+					remove_planet_flag = mem_orila_rogue_ai_mining_checkpoint_2
+				}
+			}
+			random_system_planet = {
+				limit = {
+					is_star = yes
+				}
+				set_planet_flag = mem_orila_rogue_ai_mining_checkpoint_2
+			}
+		}
+		set_planet_flag = mem_orila_rogue_ai_mining_checkpoint_1
 		#In case it doesn't exist
 		create_drone_country = yes
 		create_fleet = {
@@ -562,7 +775,7 @@ planet_event = {
 					count = 6
 					create_ship = {
 						name = ""
-						design = "NAME_Ancient_Mining_Drone"
+						design = "NAME_Modified_Mining_Drone"
 					}
 				}
 				set_location = {
@@ -576,24 +789,24 @@ planet_event = {
 				set_aggro_range = 200
 				queue_actions = {
 					repeat	= {
-						find_closest_fleet = {
+						find_closest_planet = {
 							trigger = {
 								id = mem_orila_rogue_ai_mining_action.1
-								is_ship_size = starbase_marauder
+								has_planet_flag = mem_orila_rogue_ai_mining_checkpoint_1								
 							}
-							found_fleet = {
+							found_planet = {
 								move_to = this
 							}
 						}
 						wait = {
 							duration = 10
 						}
-						find_closest_fleet = {
+						find_closest_planet = {
 							trigger = {
 								id = mem_orila_rogue_ai_mining_action.2
-								is_ship_size = mining_station
+								has_planet_flag = mem_orila_rogue_ai_mining_checkpoint_2
 							}
-							found_fleet = {
+							found_planet = {
 								move_to = this
 							}
 						}
@@ -646,7 +859,7 @@ country_event = {
 			closest_system = {
 				limit = {
 					NOT = {
-						exists = starbase
+						exists = space_owner
 					}						
 					NOR = {
 						has_star_flag = guardian
@@ -660,14 +873,10 @@ country_event = {
 					limit = {
 						is_star = yes
 					}
-					save_event_target_as = mem_orila_rogue_ai_outpost_destination_planet
-					set_timed_planet_flag = {
-						flag = mem_orila_rogue_ai_outpost_destination_planet
-						years = 5
-					}
+					set_planet_flag =mem_orila_rogue_ai_outpost_destination_planet
 				}
 			}
-		}
+		}	
 		#Send out a fleet
 		mem_create_orila_rogue_ai_outpost_fleet = yes
 	}
@@ -690,14 +899,14 @@ planet_event = {
 					count = 6
 					create_ship = {
 						name = ""
-						design = "NAME_Ancient_Combat_Drone"
+						design = "NAME_Modified_Combat_Drone"
 					}
 				}
 				while = {
 					count = 2
 					create_ship = {
 						name = ""
-						design = "NAME_Ancient_Destroyer"
+						design = "NAME_Modified_Destroyer_Drone"
 					}
 				}
 				set_location = {
@@ -712,6 +921,7 @@ planet_event = {
 			}
 		}
 		remove_planet_flag = mem_orila_rogue_ai_outpost_destination_planet
+		remove_planet_flag = mem_orila_rogue_ai_outpost_destination_planet_targeted
 		solar_system = {
 			random_fleet_in_system = {
 				limit = {
@@ -840,7 +1050,7 @@ country_event = {
 					random = 10
 				}
 				effect = {
-					id = mem_orila_rogue_ai_attack_fleet_effect.3
+					id = mem_orila_rogue_ai_attack_fleet_effect.4
 					owner = {
 						country_event = {
 							id = mem_orila_rogue_ai_offense.1
@@ -998,14 +1208,14 @@ country_event = {
 					count = 6
 					create_ship = {
 						name = ""
-						design = "NAME_Ancient_Combat_Drone"
+						design = "NAME_Modified_Combat_Drone"
 					}
 				}
 				while = {
 					count = 2
 					create_ship = {
 						name = ""
-						design = "NAME_Ancient_Destroyer"
+						design = "NAME_Modified_Destroyer_Drone"
 					}
 				}
 				set_location = {
