@@ -14,24 +14,27 @@ event = {
     }
 
     immediate = {
-        # Spawning the for essentials; if any are missing.
-        random_list = { # Determining the future
-            35 = {
-                random_list = {
-                    80 = { set_global_flag = mem_sadrell_will_return }
-                    20 = {
-                        set_global_flag = mem_sadrell_will_return_ass
-                        modifier = {
-                            factor = 0
-                            NOT = { host_has_dlc = "Synthetic Dawn Story Pack" }
-                        }
-                    }
-                }
-            }
-            # 0 = { set_global_flag = mem_sadrell_will_desert } # Likely will not be implemented due to similarity with message
-            30 = { set_global_flag = mem_sadrell_will_send_message }
-            35 = { set_global_flag = mem_sadrell_nothing_will_happen }
-        }
+        # Spawning the four essentials; if any are missing.
+
+        #MOVE to Gate Opening
+        # random_list = { # Determining the future
+        #     35 = {
+        #         random_list = {
+        #             80 = { set_global_flag = mem_sadrell_will_return }
+        #             20 = {
+        #                 set_global_flag = mem_sadrell_will_return_ass
+        #                 modifier = {
+        #                     factor = 0
+        #                     NOT = { host_has_dlc = "Synthetic Dawn Story Pack" }
+        #                 }
+        #             }
+        #         }
+        #     }
+        #     # 0 = { set_global_flag = mem_sadrell_will_desert } # Likely will not be implemented due to similarity with message
+        #     30 = { set_global_flag = mem_sadrell_will_send_message }
+        #     35 = { set_global_flag = mem_sadrell_nothing_will_happen }
+        # }
+
         # random_list = {
         #     33 = {
         #         set_timed_global_flag = { flag = mem_sadrell_delay_flag days = 27000 }
@@ -178,6 +181,7 @@ ship_event = {
 }
 
 # Spawn Sadrell cluster. Either call it or copy it later
+# This is a test event and not called from anywhere
 event = {
     id = mem_sadrell.3
     hide_window = yes
@@ -213,10 +217,13 @@ country_event = {
     trigger = {
         # log = "Trying to trigger .4"
         is_country_type = global_event
+        NOT = { has_global_flag = mem_sadrell_nothing_will_happen }
         has_global_flag = mem_sadrell_cluster_spawned
         has_global_flag = mem_sadrell_someone_encountered_the_gate
-        NOT = { has_global_flag = mem_sadrell_nothing_will_happen }
-        mid_game_years_passed >= 10
+        OR = {
+            mid_game_years_passed >= 10
+            has_global_flag = mem_sadrell_activated_by_option
+        }        
         NOR = {
             # has_global_flag = mem_sadrell_delay_flag
             has_global_flag = mem_sadrell_situation_resolved
@@ -228,6 +235,25 @@ country_event = {
     }
 
     immediate = {
+        # Decide what, if anything happens
+        random_list = { # Determining the future
+            35 = {
+                random_list = {
+                    80 = { set_global_flag = mem_sadrell_will_return }
+                    20 = {
+                        set_global_flag = mem_sadrell_will_return_ass
+                        modifier = {
+                            factor = 0
+                            NOT = { host_has_dlc = "Synthetic Dawn Story Pack" }
+                        }
+                    }
+                }
+            }
+            # 0 = { set_global_flag = mem_sadrell_will_desert } # Likely will not be implemented due to similarity with message
+            30 = { set_global_flag = mem_sadrell_will_send_message }
+            35 = { set_global_flag = mem_sadrell_nothing_will_happen }
+        }
+
         # log = ".4 triggered"
         random_system = {
             limit = { has_star_flag = mem_sadrell_gate_system }
@@ -446,6 +472,49 @@ country_event = {
 
     immediate = {
         establish_communications_no_message = event_target:newcomer_country
+        #Take over Gate system
+        random_system = {
+            limit = { has_star_flag = mem_sadrell_gate_system }
+            set_star_flag = mem_sadrell_system_flip
+            starbase = {
+                set_owner = event_target:newcomer_country
+            }
+            every_system_planet = {
+                limit = {
+                    exists = owner
+                    owner = { is_same_value = root }
+                }
+                set_owner = event_target:newcomer_country
+                set_planet_flag = mem_sadrell_moved_in
+                while = {
+                    count = 10
+                    IF = {
+                        limit = {
+                            free_housing > 1
+                        }
+                        create_pop = {
+                            species = event_target:mem_sadrell_species
+                        }
+                    }
+                    ELSE_IF = {
+                        limit = {
+                            any_owned_pop = {
+                                NOT = { is_same_species = event_target:mem_sadrell_species }
+                            }
+                        }
+                        random_owned_pop = {
+                            limit = { 
+                                NOT = { is_same_species = event_target:mem_sadrell_species } 
+                            }
+                            kill_pop = yes
+                        }
+                        create_pop = {
+                            species = event_target:mem_sadrell_species
+                        }
+                    }
+                }
+            }
+        }
     }
 
     option = {
@@ -2350,6 +2419,56 @@ planet_event = {
                 }
             }
             country_event = { id = mem_sadrell.201 }
+        }
+        #Take over Gate system
+        random_system = {
+            limit = { has_star_flag = mem_sadrell_gate_system }
+            set_star_flag = mem_sadrell_system_flip
+            if = {
+                limit = {
+                    exists = starbase
+                }
+                starbase = {
+                    set_owner = event_target:newcomer_country
+                }
+            }
+            every_system_planet = {
+                limit = {
+                    exists = owner
+                    owner = {
+                        is_country_type = default
+                    }
+                }
+                set_owner = event_target:newcomer_country
+                set_planet_flag = mem_sadrell_moved_in
+                while = {
+                    count = 10
+                    IF = {
+                        limit = {
+                            free_housing > 1
+                        }
+                        create_pop = {
+                            species = event_target:mem_sadrell_species
+                        }
+                    }
+                    ELSE_IF = {
+                        limit = {
+                            any_owned_pop = {
+                                NOT = { is_same_species = event_target:mem_sadrell_species }
+                            }
+                        }
+                        random_owned_pop = {
+                            limit = { 
+                                NOT = { is_same_species = event_target:mem_sadrell_species } 
+                            }
+                            kill_pop = yes
+                        }
+                        create_pop = {
+                            species = event_target:mem_sadrell_species
+                        }
+                    }
+                }
+            }
         }
     }
 }
