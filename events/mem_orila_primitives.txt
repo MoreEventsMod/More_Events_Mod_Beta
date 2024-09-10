@@ -1,6 +1,7 @@
 namespace = mem_orila_primitives
 
 #setup event for primitive systems habitable (5 - uniques) and destroyed (5)
+# this event will not be fired. the effect is called in mem_vazurans.1 to make use of its system modifications
 event = {
 	id = mem_orila_primitives.1
 	hide_window = yes
@@ -8,199 +9,7 @@ event = {
 	is_triggered_only = yes
 
 	immediate = {
-		every_system = {
-			limit = {
-				has_star_flag = mem_orila_primitive_system
-			}
-			event_target:global_event_country = {
-				change_variable = {
-					which = mem_global_orila_primitive_systems
-					value = 1
-				} 
-			}
-		}
-		while = {
-			limit = {
-				event_target:global_event_country = {
-					check_variable = {
-						which = mem_global_orila_primitive_systems
-						value < 5
-					}
-				}
-				any_system = {
-					has_star_flag = primitive_system
-					is_fe_cluster = no
-					NOT = {
-						has_star_flag = mem_orila_primitive_system
-					}
-				}
-			}
-			random_system = {
-				limit = {
-					has_star_flag = primitive_system
-					is_fe_cluster = no
-					NOT = {
-						has_star_flag = mem_orila_primitive_system
-					}
-				}
-				every_system_planet = {
-					limit = {
-						exists = owner
-						owner = {
-							is_primitive = yes
-						}
-					}
-					add_building = building_mem_planetary_shield_generator_orila
-					set_planet_flag = mem_orila_primitive_world
-				}
-				set_star_flag = mem_orila_primitive_system
-				#set the shield effect
-				random_system_planet = {
-					planet_event = { id = mem_planetary_shields.5 days = 1 }
-				}
-				mem_setup_orila_primitive_system = yes
-				#variable to count how many of these systems actually have been spawned
-				event_target:global_event_country = {
-					change_variable = {
-						which = mem_global_orila_primitive_systems
-						value = 1
-					} 
-				}
-			}
-		}
-		event_target:global_event_country = {
-			set_variable = {
-				which = mem_global_orila_primitive_systems_destroyed
-				value = 0
-			}
-		}
-		while = {
-			limit = {
-				any_system = {
-					is_fe_cluster = no
-					has_planet_class = pc_nuked
-					NOR = {
-						has_star_flag = old_foes_system
-						has_star_flag = ratling_system
-						has_star_flag = empire_cluster
-						has_star_flag = mem_orila_primitive_system
-					}
-				}
-				event_target:global_event_country = {
-					check_variable = {
-						which = mem_global_orila_primitive_systems_destroyed
-						value < 5
-					}
-				}
-			}
-			random_system = {
-				limit = {
-					is_fe_cluster = no
-					has_planet_class = pc_nuked
-					NOR = {
-						has_star_flag = ratling_system
-						has_star_flag = empire_cluster
-						has_star_flag = mem_orila_primitive_system
-					}
-				}				
-				set_star_flag = mem_orila_primitive_system_destroyed
-				random_system_planet = {
-					limit = {
-						is_primary_star = yes
-					}
-					random_list = {
-						40 = {
-							create_ambient_object = {
-								type = mem_orila_spaceport_wreckage_object
-								location = this
-							}
-							last_created_ambient_object = {
-								set_location = {
-									target = prev
-									distance = 20
-									angle = 120
-								}
-								create_ambient_object = {
-									type = small_debris_object
-									entity_offset_height = { min = 5 max = -5 }
-									location = this
-								}
-							}
-						}
-						60 = {
-							create_ambient_object = {
-								type = small_debris_object
-								entity_offset_height = { min = 5 max = -5 }
-								location = this
-							}
-							last_created_ambient_object = {
-								set_location = {
-									target = prev
-									distance = 20
-									angle = 120
-								}							
-							}
-						}
-					}
-				}
-				every_system_planet = {
-					limit = {
-						OR = {
-							is_planet_class = pc_nuked
-							is_planet_class = pc_shattered
-							is_planet_class = pc_broken
-						}
-					}
-					if = {
-						limit = {
-							is_planet_class = pc_nuked
-						}
-						#flag can later be used to spawn digsites or anomalies
-						set_planet_flag = mem_orila_primitive_world_destroyed
-					}
-					random_list = {
-						40 = {
-							create_ambient_object = {
-								type = mem_orila_small_station_wreckage_object
-								location = this
-							}
-							last_created_ambient_object = {
-								set_location = {
-									target = prev
-									distance = 5
-									angle = random
-								}
-								create_ambient_object = {
-									type = small_debris_object
-									entity_offset_height = { min = 5 max = -5 }
-									location = this
-								}
-							}
-						}
-						60 = {
-							create_ambient_object = {
-								type = small_debris_object
-								entity_offset_height = { min = 5 max = -5 }
-								location = this
-							}
-							last_created_ambient_object = {
-								set_location = {
-									target = prev
-									distance = 5
-									angle = random
-								}							
-							}
-						}
-					}
-				}
-				event_target:global_event_country = {
-					change_variable = {
-						which = mem_global_orila_primitive_systems_destroyed
-						value = 1
-					} 
-				}
-			}
-		}
+		mem_gamestart_orila_primitive_setup = yes
 	}
 }
 
@@ -244,8 +53,59 @@ ship_event = {
 ship_event = {
 	id = mem_orila_primitives.20
 	title = mem_orila_primitives.20.name
-	desc = mem_orila_primitives.20.desc
-	picture = GFX_evt_mem_placeholder
+	desc = { # haven't seen anything vazuran related so far
+		text = mem_orila_primitives.20a.desc
+		trigger = {
+			exists = controller
+			controller = {
+				NOT = {
+					has_country_flag = mem_vazuran_destroyed_planet_found
+				}
+			}
+			from = {
+				has_star_flag = mem_vazuran_destroyed_planet_system
+			}
+		}
+	}
+	desc = { # only seen another destroyed planet so far
+		text = mem_orila_primitives.20b.desc
+		trigger = {
+			exists = controller
+			controller = {
+				NOT = {
+					has_country_flag = mem_vazurans_met
+				}
+				has_country_flag = mem_vazuran_destroyed_planet_found
+			}
+			from = {
+				has_star_flag = mem_vazuran_destroyed_planet_system
+			}
+		}
+	}
+	desc = { # already met the vazurans and seen a destroyed planet
+		text = mem_orila_primitives.20c.desc
+		trigger = {
+			exists = controller
+			controller = {
+				has_country_flag = mem_vazurans_met
+				has_country_flag = mem_vazuran_destroyed_planet_found
+			}
+			from = {
+				has_star_flag = mem_vazuran_destroyed_planet_system
+			}
+		}
+	}
+	desc = { # system not related to vazurans
+		text = mem_orila_primitives.20d.desc
+		trigger = {
+			from = {
+				NOT = {
+					has_star_flag = mem_vazuran_destroyed_planet_system
+				}			
+			}
+		}
+	}
+	picture = GFX_evt_ruined_system
 	show_sound =  event_ship_bridge
 	is_triggered_only = yes
 
@@ -256,8 +116,55 @@ ship_event = {
 	}
 
 	option = {
-		name = ONSCREEN
-		
+		name = WORRYING
+		trigger = {
+			from = {
+				has_star_flag = mem_vazuran_destroyed_planet_system
+			}
+			controller = {
+				NOT = {
+					has_country_flag = mem_vazuran_destroyed_planet_found
+				}
+			}
+		}
+		solar_system = {
+			random_system_planet = {
+				limit = {
+					has_planet_flag = mem_vazuran_destroyed_planet
+				}
+				enable_special_project = {
+					name = MEM_VAZURANS_BROKEN_PLANET_INVESTIGATION
+					location = this
+					owner = root.controller
+				}
+			}
+		}
+		controller = {
+			set_country_flag = mem_vazuran_destroyed_planet_found
+		}
+	}
+
+	option = {
+		name = WORRYING
+		trigger = {
+			from = {
+				has_star_flag = mem_vazuran_destroyed_planet_system
+			}
+			controller = {
+				has_country_flag = mem_vazuran_destroyed_planet_found
+			}
+		}
+	}
+
+	option = {
+		name = INTERESTING
+		trigger = {
+			from = {
+				NOT = {
+					has_star_flag = mem_vazuran_destroyed_planet_system
+				}				
+			}
+		}
 	}
 }
 
