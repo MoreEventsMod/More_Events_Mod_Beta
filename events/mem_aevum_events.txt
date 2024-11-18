@@ -1,0 +1,3066 @@
+namespace = mem_aevum
+###########
+# 
+# made by:
+# tr33
+#
+###########
+############################################################################################################
+# Setup Events
+############################################################################################################
+# mem_aevum.0   	|	Gamestart setup/ allowed check/ 10% he spawns
+# mem_aevum.999  	|	hidden setup event for testing use mem_aevum.998 for options
+# mem_aevum.998  	|	quick setup / test event / give access to various stuff
+############################################################################################################
+# Story / pre- recruitment events
+############################################################################################################
+# mem_aevum.1   	|	Surveyed planet with Aevum on it, only first one 
+# mem_aevum.2   	|	Entered special system and get notified
+# mem_aevum.5   	|	First quest completed. Made lightshow. Want another?
+# mem_aevum.4   	|	Second quest? Wait 20 years situation
+# mem_aevum.6   	|	On ground combat win. Invaded planet and killed aevum
+# mem_aevum.7   	|	Notify player about invasion and curse his capitel
+# mem_aevum.9   	|	Situation event. Wait another 10 years
+# mem_aevum.10   	|	Second quest complete. get third quest. Situation finished
+# mem_aevum.11   	|	Third quest complete. Built megastructure. Recruitment screen.
+############################################################################################################
+# Story / side quests
+############################################################################################################
+# mem_aevum.3   	|	Hidden event, begins event chain
+# mem_aevum.12   	|	Logic for new messages, on special project complete
+# mem_aevum.13   	|	Message 1
+# mem_aevum.14   	|	Message 2
+# mem_aevum.15   	|	Message 3
+# mem_aevum.16   	|	Message 4, call him?
+# mem_aevum.17   	|	Begins signal event chain 
+# mem_aevum.18   	|	Decrypted all messages and ask him about it
+# mem_aevum.19   	|	Random leaders comes back from the future
+# mem_aevum.20   	|	Random leader has to go back to continue time loop
+# mem_aevum.21   	|	wanna talk with strange vessel appraochiing ( contains random leader)
+############################################################################################################
+# After recruitment random leader events
+############################################################################################################
+# mem_aevum.101   	|	yearly de-aging of aevum
+# mem_aevum.106   	|	death notification / oblivion copypasta
+# mem_aevum.115   	|	leader event, planet he governs or any other gets timesickness
+# mem_aevum.117   	|	leader event, are you upgrading megastructure? why not give aevum some time of it
+# mem_aevum.116   	|	leader event, planets population has born a new generation in mere seconds
+# mem_aevum.118   	|	leader event, skip time of a situation, aevum can skip it
+# mem_aevum.119   	|	leader event, relic on cooldown? aevum can remove it
+# mem_aevum.113   	|	logic for leader events
+# mem_aevum.114   	|	leader event, random leader had argument and got forcefully aged by aevum
+# mem_aevum.111   	|	on leader fired, check if it was aevum, then what?, not active
+# mem_aevum.112   	|	on relic gained and activated, add age to all with hoursglass trait
+# mem_aevum.200   	|	on aged, new powers 
+# mem_aevum.201   	|	on aged, final tier
+namespace = mem_aevum
+event = {
+	id = mem_aevum.0
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		random_list = {
+			90 = {
+			}
+			10 = {
+				#if = {
+				#	limit = {
+				#		always = yes
+				#	}
+				#	set_global_flag = mem_aevum_allowed
+				#}
+				random_system = {
+					limit = {
+						NOT = {
+							has_owner = yes
+						}
+					}
+					spawn_mem_aevum = yes
+				}
+			}
+		}
+	}
+}
+
+# test setup event
+country_event = {
+	id = mem_aevum.999
+	hide_window = yes
+	#title = mem_aevum.1.name
+	#desc = mem_aevum.1.desc
+	#show_sound = event_conversation
+	#location = event_target:mem_aevum_primitive_rewind_world
+	is_triggered_only = yes
+	diplomatic_title = BLANK_STRING
+	immediate = {
+		if = {
+			limit = {
+				NOT = {
+					has_global_flag = mem_aevum_system_spawned
+				}
+			}
+			capital_scope = {
+				solar_system = {
+					spawn_mem_aevum = yes
+				}
+			}
+		}
+		#event_target:mem_aevum_primitive_rewind_world = {
+		#	remove_planet_flag = mem_aevum_first_timer
+		#}
+	}
+	#diplomatic = yes
+	#picture_event_data = {
+	#	portrait = GFX_mem_aevum_time_lord
+	#	room = pre_ftl_victorian_room
+	#	planet_background = pc_continental
+	#}
+	#
+	after = {
+	}
+	#found weird signal
+}
+
+country_event = {
+	id = mem_aevum.998
+	title = mem_aevum.2.name
+	desc = mem_aevum.2.desc
+	#show_sound = evn_inhabited_solar_system_03
+	location = event_target:mem_aevum_primitive_rewind_world
+	is_triggered_only = yes
+	#diplomatic_title = BLANK_STRING
+	trigger = {
+	}
+	immediate = {
+	}
+	#diplomatic = yes
+	picture = GFX_evt_clocks
+	option = {
+		allow = {
+			NOT = {
+				has_global_flag = mem_aevum_system_spawned
+			}
+		}
+		name = STRANGE
+		capital_scope = {
+			solar_system = {
+				spawn_mem_aevum = yes
+			}
+		}
+	}
+	option = {
+		name = STRANGE
+		allow = {
+			any_situation = {
+				is_situation_type = mem_aevum_sit_wait_20years
+			}
+		}
+		random_situation = {
+			limit = {
+				this = {
+					is_situation_type = mem_aevum_sit_wait_20years
+				}
+			}
+			add_situation_progress = 240
+		}
+	}
+	option = {
+		name = STRANGE
+		#hidden_effect = {
+		owner = {
+			set_country_flag = mem_aevum_allowedtogettemple
+		}
+		#}
+		this.owner = {
+			add_tech_progress = {
+				tech = mem_aevum_unlock_chronopalace
+				progress = 1.11
+			}
+		}
+	}
+	option = {
+		name = STRANGE
+		this.owner = {
+			add_relic = r_mem_aevum_houglass
+			give_specimen = {
+				key = mem_aevum_beard
+			}
+		}
+	}
+	option = {
+		name = STRANGE
+		this.owner = {
+			country_event = {
+				id = mem_aevum.11
+			}
+		}
+	}
+	option = {
+		name = STRANGE
+		every_owned_leader = {
+			limit = {
+				has_trait = mem_aevum_leader_trait_legendary_houtglasskeeper
+			}
+			set_age = 300
+			mem_aevum_setportrait = yes
+		}
+	}
+	option = {
+		name = STRANGE
+		every_owned_leader = {
+			limit = {
+				has_trait = mem_aevum_leader_trait_legendary_houtglasskeeper
+			}
+			set_age = 600
+			mem_aevum_setportrait = yes
+		}
+	}
+	option = {
+		name = STRANGE
+		every_owned_leader = {
+			limit = {
+				has_trait = mem_aevum_leader_trait_legendary_houtglasskeeper
+			}
+			set_age = 1000
+			mem_aevum_setportrait = yes
+		}
+	}
+	option = {
+		name = STRANGE
+		every_owned_leader = {
+			limit = {
+				has_trait = mem_aevum_leader_trait_legendary_houtglasskeeper
+			}
+			set_age = 2000
+			mem_aevum_setportrait = yes
+		}
+	}
+}
+
+# surveyed planet
+# this = ship | from = tplanet
+ship_event = {
+	id = mem_aevum.1
+	title = mem_aevum.1.name
+	desc = mem_aevum.1.desc
+	show_sound = event_conversation
+	location = event_target:mem_aevum_primitive_rewind_world
+	is_triggered_only = yes
+	diplomatic_title = BLANK_STRING
+	trigger = {
+		from = {
+			has_planet_flag = mem_aevum_first_timer
+			#has_planet_flag = mem_aevum_primitive_rewind_world
+		}
+	}
+	immediate = {
+		from = {
+			remove_planet_flag = mem_aevum_first_timer
+		}
+		owner = {
+			set_variable = {
+				which = mem_aevum_aevum_start_age
+				value = 276
+			}
+		}
+	}
+	diplomatic = yes
+	picture_event_data = {
+		portrait = GFX_mem_aevum_time_lord_stage3
+		room = pre_ftl_victorian_room
+		planet_background = pc_continental
+	}
+	option = {
+		# who are you		
+		name = mem_aevum.1.a
+		is_dialog_only = yes
+		response_text = mem_aevum.1.a.response
+	}
+	option = {
+		# Have we already met		
+		name = mem_aevum.1.b
+		is_dialog_only = yes
+		response_text = mem_aevum.1.b.response
+	}	
+	option = {
+		# What is this system
+		name = mem_aevum.1.c
+		response_text = mem_aevum.1.c.response
+		is_dialog_only = yes
+	}
+	option = {
+		# You would make a fine slave
+		allow = {
+			this.owner = {
+				OR = {
+					has_ethic = ethic_authoritarian
+					has_ethic = ethic_fanatic_authoritarian
+					has_ethic = ethic_fanatic_xenophobe
+					has_ethic = ethic_fanatic_xenophobe
+				}
+			}
+		}
+		name = mem_aevum.1.g
+		response_text = mem_aevum.1.g.response		# Can a slave do this?
+		is_dialog_only = yes
+		this.owner = {
+			add_resource = {
+				sr_zro = 100
+			}
+		}
+	}
+	option = {
+		# are you a shroud entity?
+		name = mem_aevum.1.f
+		allow = {
+			this.owner = {
+				OR = {
+					has_ethic = ethic_spiritualist
+					has_ethic = ethic_fanatic_spiritualist
+					has_technology = tech_psionic_theory
+				}
+			}
+		}
+		response_text = mem_aevum.1.f.response
+		is_dialog_only = yes
+		if = {
+			limit = {
+				Not = {
+					this.owner = {
+						has_country_flag = mem_aevum_askedtoomuch
+					}
+				}
+			}
+			this.owner = {
+				add_monthly_resource_mult = {
+					resource = society_research
+					value = 3
+				}
+				hidden_effect = {
+					set_country_flag = mem_aevum_askedtoomuch
+				}
+			}
+		}
+	}
+	option = {
+		# do his bidding make a light show in orbit
+		name = mem_aevum.1.d
+		#response_text = mem_aevum.1.d.response
+		#is_dialog_only = yes
+		#hidden_effect = {
+		enable_special_project = {
+			name = mem_aevum_make_lightshow
+			owner = this.owner
+			location = from
+		}
+		#}
+	}
+	option = {
+		# hell nah invade him
+		name = mem_aevum.1.e
+		allow = {
+			this.owner = {
+				has_policy_flag = interference_aggressive
+			}
+		}
+		#response_text = mem_aevum.1.d.response
+		#is_dialog_only = yes
+		#hidden_effect = {
+		this.owner = {
+			begin_event_chain = {
+				event_chain = mem_aevum_invade_thisguy
+				target = event_target:mem_aevum_primitive_rewind_world
+			}
+		}
+		#}
+	}
+	option = {
+		# purge!
+		name = mem_aevum.1.g
+		allow = {
+			this.owner = {
+				OR = {
+					is_homicidal = yes
+				}
+			}
+		}
+		exclusive_trigger = {
+			this.owner = {
+				OR = {
+					is_homicidal = yes
+				}
+			}
+		}
+		#response_text = mem_aevum.1.g.response
+		#is_dialog_only = yes
+		this.owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = 24
+			}
+			add_relic = r_mem_aevum_houglass
+		}
+	}
+	option = {
+		# ai ez cheat
+		name = mem_aevum.1.e
+		trigger = {
+			this.owner = {
+				is_ai = yes
+			}
+		}
+		#response_text = mem_aevum.1.d.response
+		#is_dialog_only = yes
+		#hidden_effect = {
+		this.owner = {
+			country_event = {
+				id = mem_aevum.11
+			}
+			random_owned_starbase = {
+				solar_system = {
+					random_system_planet = {
+						limit = {
+							is_star = yes
+						}
+						save_event_target_as = mem_aevum_system_star
+					}
+					spawn_megastructure = {
+						type = mem_aevum_mega_chronomancer_palace
+						planet = event_target:mem_aevum_system_star
+						orbit_angle = 225
+						orbit_distance = 30
+					}
+				}
+			}
+		}
+		ai_chance = {
+			factor = 100
+		}
+		#}
+	}
+	after = {
+		hidden_effect = {
+			if = {
+				limit = {
+					owner = {
+						is_ai = no
+					}
+				}
+				owner = {
+					country_event = {
+						id = mem_aevum.21
+						days = 90
+					}
+				}
+			}
+			this.owner = {
+				if = {
+					limit = {
+						NOT = {
+							is_homicidal = yes
+						}
+					}
+					country_event = {
+						id = mem_aevum.3
+						days = 30
+					}
+				}
+			}
+			this.owner = {
+				if = {
+					limit = {
+						has_country_flag = mem_aevum_askedtoomuch
+					}
+					remove_country_flag = mem_aevum_askedtoomuch
+				}
+			}
+		}
+	}
+	#found weird signal
+}
+
+# Entered system for first time 
+# Scope = Ship
+# From = System
+# FromFrom = Country
+ship_event = {
+	id = mem_aevum.2
+	title = mem_aevum.2.name
+	desc = mem_aevum.2.desc
+	#show_sound = evn_inhabited_solar_system_03
+	location = event_target:mem_aevum_primitive_rewind_world
+	is_triggered_only = yes
+	#diplomatic_title = BLANK_STRING
+	trigger = {
+		from = {
+			any_system_planet = {
+				has_planet_flag = mem_aevum_primitive_rewind_world
+			}
+		}
+	}
+	immediate = {
+	}
+	#diplomatic = yes
+	picture = GFX_evt_clocks
+	option = {
+		name = STRANGE
+		this.owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = 2
+			}
+		}
+	}
+}
+
+# this = country | from = tplanet
+country_event = {
+	id = mem_aevum.5
+	title = mem_aevum.5.name
+	desc = mem_aevum.5.desc
+	show_sound = event_conversation
+	location = event_target:mem_aevum_primitive_rewind_world
+	is_triggered_only = yes
+	diplomatic_title = BLANK_STRING
+	diplomatic = yes
+	picture_event_data = {
+		portrait = GFX_mem_aevum_time_lord_stage3
+		room = pre_ftl_victorian_room
+		planet_background = pc_continental
+	}
+	option = {
+		# give us reward
+		name = mem_aevum.5.a
+		is_dialog_only = yes
+		response_text = mem_aevum.5.a.response		# all in time
+	}
+	option = {
+		# why do u live among primitives
+		name = mem_aevum.5.b
+		is_dialog_only = yes
+		response_text = mem_aevum.5.b.response		# chosen of god idk
+	}
+	option = {
+		# hope it was worth disturbing the prmitives
+		allow = {
+			this = {
+				OR = {
+					has_policy_flag = interference_not_allowed
+					has_policy_flag = interference_subtle
+				}
+			}
+		}
+		name = mem_aevum.5.e
+		is_dialog_only = yes
+		response_text = mem_aevum.5.e.response		# they know already
+		hidden_effect = {
+			random_pre_ftl_within_border = {
+				limit = {
+					capital_scope = {
+						has_planet_flag = mem_aevum_primitive_rewind_world
+					}
+				}
+				set_awareness = 100
+			}
+		}
+	}
+	option = {
+		# whats next
+		name = mem_aevum.5.d
+		#response_text = mem_aevum.1.d.response
+		#is_dialog_only = yes
+		hidden_effect = {
+			country_event = {
+				id = mem_aevum.4
+			}
+		}
+	}
+}
+
+# this = country | from = tplanet
+country_event = {
+	id = mem_aevum.4
+	title = mem_aevum.4.name
+	desc = mem_aevum.4.desc
+	show_sound = event_conversation
+	location = event_target:mem_aevum_primitive_rewind_world
+	is_triggered_only = yes
+	diplomatic_title = BLANK_STRING
+	diplomatic = yes
+	picture_event_data = {
+		portrait = GFX_mem_aevum_time_lord_stage3
+		room = pre_ftl_victorian_room
+		planet_background = pc_continental
+	}
+	option = {
+		# why u have hair
+		name = mem_aevum.4.b
+		is_dialog_only = yes
+		response_text = mem_aevum.4.b.response		# why not?
+	}
+	option = {
+		# you have played enough xeno
+		name = mem_aevum.4.e
+		trigger = {
+			NOT = {
+				has_country_flag = mem_aevum_askedtoomuch
+			}
+		}
+		allow = {
+			OR = {
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_fanatic_xenophobe
+				has_ethic = ethic_gestalt_consciousness
+			}
+		}
+		custom_tooltip = mem_aevum_will_age_aevum
+		is_dialog_only = yes
+		response_text = mem_aevum.4.e.response		# no
+		hidden_effect = {
+			change_variable = {
+				which = mem_aevum_aevum_start_age
+				value = 20
+			}
+			set_country_flag = mem_aevum_askedtoomuch
+		}
+	}
+	option = {
+		# ok lets wait
+		name = mem_aevum.4.a
+		#hidden_effect = {
+		start_situation = {
+			type = mem_aevum_sit_wait_20years			#wait 20 years
+		}
+		random_situation = {
+			limit = {
+				is_situation_type = mem_aevum_sit_wait_20years
+			}
+			set_situation_approach = mem_aevum_letswait_approach
+			# select randomly when this is gonna happen
+			hidden_effect = {
+				situation_event = {
+					id = mem_aevum.9
+					days = 3600
+					random = 3500
+				}
+			}
+		}
+		#}
+	}
+	option = {
+		# hell nah invade him
+		name = mem_aevum.4.d
+		allow = {
+			has_policy_flag = interference_aggressive
+		}
+		#response_text = mem_aevum.1.d.response
+		#is_dialog_only = yes
+		#hidden_effect = {
+		begin_event_chain = {
+			event_chain = mem_aevum_invade_thisguy
+			target = event_target:mem_aevum_primitive_rewind_world
+		}
+		#}
+	}
+	after = {
+		if = {
+			limit = {
+				has_country_flag = mem_aevum_askedtoomuch
+			}
+			remove_country_flag = mem_aevum_askedtoomuch
+		}
+	}
+}
+
+# This = country, lead attacker
+# From = country, planet owner
+# FromFrom = planet
+country_event = {
+	id = mem_aevum.6
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		fromfrom = {
+			has_planet_flag = mem_aevum_time_lordishere
+		}
+	}
+	immediate = {
+		fromfrom = {
+			remove_planet_flag = mem_aevum_time_lordishere
+		}
+		this = {
+			country_event = {
+				id = mem_aevum.7
+			}
+		}
+	}
+}
+
+# this = country 
+country_event = {
+	id = mem_aevum.7
+	title = mem_aevum.7.name
+	desc = mem_aevum.7.desc
+	show_sound = event_conversation
+	location = event_target:mem_aevum_primitive_rewind_world
+	is_triggered_only = yes
+	diplomatic_title = BLANK_STRING
+	diplomatic = yes
+	picture_event_data = {
+		portrait = GFX_mem_aevum_time_lord_stage3
+		room = pre_ftl_victorian_room
+		planet_background = pc_continental
+		#graphical_culture = prim
+	}
+	option = {
+		# oh no
+		name = mem_aevum.7.a
+		#response_text = mem_aevum.1.d.response
+		#is_dialog_only = yes
+		this = {
+			add_relic = r_mem_aevum_houglass
+			give_specimen = {
+				key = mem_aevum_beard
+			}
+			capital_scope = {
+				add_modifier = {
+					modifier = mem_aevum_cursedworld
+					days = 1800
+				}
+			}
+			if = {
+				limit = {
+					has_event_chain = mem_aevum_invade_thisguy
+				}
+				end_event_chain = mem_aevum_invade_thisguy
+			}
+			mem_aevum_endallevents = yes
+		}
+		hidden_effect = {
+			set_variable = {
+				which = mem_aevum_death_age
+				value = this.mem_aevum_aevum_start_age
+			}
+			set_global_flag = mem_aevum_time_lorddied
+			set_global_flag = mem_aevum_stage1
+		}
+	}
+}
+
+# this = situation 
+situation_event = {
+	id = mem_aevum.9
+	title = mem_aevum.9.name
+	desc = mem_aevum.9.desc
+	show_sound = event_conversation
+	location = this.target
+	is_triggered_only = yes
+	diplomatic_title = BLANK_STRING
+	diplomatic = yes
+	picture_event_data = {
+		portrait = GFX_mem_aevum_time_lord_stage3
+		room = pre_ftl_victorian_room
+		planet_background = pc_continental
+	}
+	trigger = {
+		this = {
+			exists = this
+		}
+	}
+	option = {
+		# oh no
+		name = mem_aevum.9.a
+		#response_text = mem_aevum.1.d.response
+		#is_dialog_only = yes
+		custom_tooltip = mem_aevum_will_age_aevum
+		this = {
+			add_situation_progress = -60
+		}
+		hidden_effect = {
+			change_variable = {
+				which = mem_aevum_aevum_start_age
+				value = 60
+			}
+		}
+	}
+	option = {
+		# time waits for no one
+		name = mem_aevum.9.c
+		allow = {
+			this.owner = {
+				ruler = {
+					is_immortal = no
+				}
+			}
+		}
+		this = {
+			add_situation_progress = -2
+		}
+	}
+	option = {
+		# time is money
+		name = mem_aevum.9.d
+		allow = {
+			this.owner = {
+				has_authority = auth_corporate
+				resource_stockpile_compare = {
+					resource = energy
+					value > 3600
+				}
+			}
+		}
+		this = {
+			add_situation_progress = 12
+			owner = {
+				add_resource = {
+					energy = -3600
+				}
+			}
+		}
+	}
+	option = {
+		# ah hell no
+		name = mem_aevum.9.b
+		#response_text = mem_aevum.1.d.response
+		#is_dialog_only = yes
+		allow = {
+			owner = {
+				has_policy_flag = interference_aggressive
+			}
+		}
+		abort_situation = this
+		#hidden_effect = {
+		owner = {
+			begin_event_chain = {
+				event_chain = mem_aevum_invade_thisguy
+				target = event_target:mem_aevum_primitive_rewind_world
+			}
+		}
+		#}
+	}
+}
+
+# this = situation 
+situation_event = {
+	id = mem_aevum.10
+	title = mem_aevum.10.name
+	desc = mem_aevum.10.desc
+	show_sound = event_conversation
+	location = event_target:mem_aevum_primitive_rewind_world
+	is_triggered_only = yes
+	diplomatic_title = BLANK_STRING
+	diplomatic = yes
+	picture_event_data = {
+		portrait = GFX_mem_aevum_time_lord_stage3
+		room = pre_ftl_victorian_room
+		planet_background = pc_continental
+	}
+	option = {
+		# oh no
+		name = mem_aevum.10.a
+		#custom_tooltip = mem_aevum_unlock_temple
+		#response_text = mem_aevum.1.d.response
+		#is_dialog_only = yes
+		abort_situation = this
+		hidden_effect = {
+			owner = {
+				set_country_flag = mem_aevum_allowedtogettemple
+			}
+		}
+		begin_event_chain = {
+			event_chain = mem_aevum_buildtemple
+		}
+		this.owner = {
+			give_technology = {
+				tech = mem_aevum_unlock_chronopalace
+				message = yes
+			}
+			#add_tech_progress = {
+			#	tech = mem_aevum_unlock_chronopalace
+			#	progress = 1
+			#}
+		}
+	}
+	option = {
+		# make it worth it!
+		name = mem_aevum.10.c
+		#custom_tooltip = mem_aevum_unlock_temple
+		response_text = mem_aevum.10.c.response
+		is_dialog_only = yes
+		#abort_situation = this
+		trigger = {
+			NOT = {
+				owner = {
+					has_country_flag = mem_aevum_askedtoomuch
+				}
+			}
+		}
+		allow = {
+			owner = {
+				resource_stockpile_compare = {
+					resource = influence
+					value > 100
+				}
+			}
+		}
+		this.owner = {
+			add_tech_progress = {
+				tech = tech_mine_zro
+				progress = 0.1
+			}
+			add_tech_progress = {
+				tech = tech_mine_dark_matter
+				progress = 0.1
+			}
+			add_resource = {
+				influence = -100
+			}
+			hidden_effect = {
+				set_country_flag = mem_aevum_askedtoomuch
+			}
+		}
+	}
+	option = {
+		# is this really necessary?
+		name = mem_aevum.10.d
+		response_text = mem_aevum.10.d.response
+		is_dialog_only = yes
+	}
+	option = {
+		# meatbags
+		name = mem_aevum.10.e
+		#custom_tooltip = mem_aevum_unlock_temple
+		response_text = mem_aevum.10.e.response		# try it?
+		is_dialog_only = yes
+		#abort_situation = this
+		trigger = {
+			owner = {
+				NOT = {
+					has_country_flag = mem_aevum_askedtoomuch2
+				}
+			}
+		}
+		allow = {
+			owner = {
+				OR = {
+					is_lithoid = yes
+					is_machine_empire = yes
+				}
+			}
+		}
+		this.owner = {
+			add_resource = {
+				food = 100
+			}
+			hidden_effect = {
+				set_country_flag = mem_aevum_askedtoomuch2
+			}
+		}
+	}
+	option = {
+		# ah hell no
+		name = mem_aevum.9.b
+		allow = {
+			owner = {
+				has_policy_flag = interference_aggressive
+			}
+		}
+		abort_situation = this
+		#hidden_effect = {
+		owner = {
+			begin_event_chain = {
+				event_chain = mem_aevum_invade_thisguy
+				target = event_target:mem_aevum_primitive_rewind_world
+			}
+		}
+		#}
+	}
+	after = {
+		hidden_effect = {
+			owner = {
+				if = {
+					limit = {
+						has_country_flag = mem_aevum_askedtoomuch
+					}
+					remove_country_flag = mem_aevum_askedtoomuch
+				}
+				if = {
+					limit = {
+						has_country_flag = mem_aevum_askedtoomuch2
+					}
+					remove_country_flag = mem_aevum_askedtoomuch2
+				}
+			}
+		}
+	}
+}
+
+# here are too many options  to show all
+# this = country 
+country_event = {
+	id = mem_aevum.11
+	title = mem_aevum.11.name
+	desc = mem_aevum.11.desc
+	show_sound = event_celebration
+	#location = event_target:mem_aevum_primitive_rewind_world
+	trigger = {
+		#has_event_chain = mem_aevum_buildtemple
+	}
+	is_triggered_only = yes
+	event_window_type = leader_recruit
+	picture_event_data = {
+		portrait = event_target:mem_aevum_time_lord
+		room = pre_ftl_victorian_room
+	}
+	picture = GFX_leader_recruitment_bg_mem_aevum_timelord
+	immediate = {
+		hidden_effect = {
+			#mem_aevum_endallevents = yes
+			create_country = {
+				name = "NAME_Unknown"
+				type = global_event
+				#auto_delete = yes
+				flag = {
+					icon = {
+						category = "special"
+						file = "unknown.dds"
+					}
+					background = {
+						category = "backgrounds"
+						file = "00_solid.dds"
+					}
+					colors = {
+						"red"
+						"red"
+						"null"
+						"null"
+					}
+				}
+				effect = {
+					save_event_target_as = mem_aevum_country
+				}
+			}
+			event_target:mem_aevum_country = {
+				create_species = {
+					name = "NAME_Unknown"
+					class = PARAGON
+					portrait = GFX_mem_aevum_time_lord_stage2
+					namelist = "PRT1"
+					traits = {
+						trait = trait_decadent
+						trait = trait_talented
+						trait = trait_thrifty
+						#trait = trait_weak
+						#trait = trait_plantoid_budding
+					}
+					effect = {
+						save_event_target_as = mem_aevum_species
+					}
+				}
+				create_leader = {
+					species = event_target:mem_aevum_species
+					event_leader = yes
+					class = scientist
+					name = "NAME_mem_aevum_time_lord"
+					skill = 1
+					randomize_traits = no
+					skip_background_generation = yes
+					background_ethic = ethic_authoritarian
+					custom_catch_phrase = mem_aevum_time_lord_catchphrase
+					custom_description = mem_aevum_time_lord_backstory
+					can_manually_change_location = yes
+					gender = male
+					set_age = 137
+					immortal = yes
+					effect = {
+						save_global_event_target_as = mem_aevum_time_lord
+						set_leader_flag = legendary_leader
+						set_leader_flag = mem_aevum_time_lord
+						#set_owner = root
+						#exile_leader_as = mem_aevum_time_lord
+					}
+				}
+				event_target:mem_aevum_time_lord = {
+					add_skill = 6
+					remove_all_traits = yes
+					add_trait = mem_aevum_leader_trait_legendary_timeskipper
+					add_trait = mem_aevum_leader_trait_legendary_houtglasskeeper
+					add_trait = leader_trait_lavish_lifestyle_2
+					add_trait = leader_trait_adaptable_2
+					add_trait = subclass_scientist_governor
+					#add_trait = leader_trait_great_researcher
+					while = {
+						count = root.mem_aevum_aevum_start_age
+						add_age = 1
+					}
+					root = {
+						clear_variable = mem_aevum_aevum_start_age
+					}
+				}
+				mem_aevum_setportrait = yes
+			}
+		}
+	}
+	option = {
+		name = mem_aevum.11.a
+		is_dialog_only = yes
+		response_text = mem_aevum.11.a.response
+	}
+	option = {
+		trigger = {
+			has_completed_event_chain_counter = {
+				event_chain = mem_aevum_decoded_messages_chain
+				counter = mem_aevum_decoded_messages2
+			}
+		}
+		name = mem_aevum.11.b
+		is_dialog_only = yes
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = mem_aevum_claimed1
+				}
+			}
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = 5
+			}
+			set_country_flag = mem_aevum_claimed1
+		}
+		response_text = mem_aevum.11.b.response
+	}
+	option = {
+		#
+		trigger = {
+			has_completed_event_chain_counter = {
+				event_chain = mem_aevum_decoded_messages_chain
+				counter = mem_aevum_decoded_messages3
+			}
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = mem_aevum_claimed2
+				}
+			}
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = 5
+			}
+			set_country_flag = mem_aevum_claimed2
+		}
+		name = mem_aevum.11.c
+		response_text = mem_aevum.11.c.response
+		is_dialog_only = yes
+	}
+	option = {
+		# 
+		trigger = {
+			has_completed_event_chain_counter = {
+				event_chain = mem_aevum_decoded_messages_chain
+				counter = mem_aevum_decoded_messages4
+			}
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = mem_aevum_claimed3
+				}
+			}
+			add_monthly_resource_mult = {
+				resource = unity
+				value = 12
+			}
+			set_country_flag = mem_aevum_claimed3
+		}
+		name = mem_aevum.11.d
+		response_text = mem_aevum.11.d.response
+		is_dialog_only = yes
+	}
+	option = {
+		# is the hourglass made from lithoids?
+		trigger = {
+			OR = {
+				is_lithoid = yes
+				has_ethic = ethic_xenophile
+				has_ethic = ethic_fanatic_xenophile
+			}
+		}
+		name = mem_aevum.11.e
+		response_text = mem_aevum.11.e.response		#non got harmed in the process
+		is_dialog_only = yes
+	}
+	option = {
+		# about time
+		allow = {
+			always = yes
+		}
+		name = mem_aevum.11.f
+		response_text = mem_aevum.11.f.response		# now you get it
+		is_dialog_only = yes
+		play_sound = cute_molluscoid_starfish_greetings
+	}
+	option = {
+		# have you shaved?
+		name = mem_aevum.11.j
+		response_text = mem_aevum.11.j.response		# how could you tell?
+		is_dialog_only = yes
+		trigger = {
+			event_target:mem_aevum_time_lord = {
+				leader_age < 100
+			}
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = mem_aevum_askedtoomuch2
+				}
+			}
+			add_monthly_resource_mult = {
+				resource = unity
+				value = 4
+			}
+			add_modifier = {
+				modifier = mem_aevum_confused_leadership
+				days = 60
+			}
+			hidden_effect = {
+				set_country_flag = mem_aevum_askedtoomuch2
+			}
+		}
+	}
+	option = {
+		# lets shave you
+		trigger = {
+			OR = {
+				has_ethic = ethic_militarist
+				has_ethic = ethic_fanatic_militarist
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_fanatic_xenophobe
+			}
+			event_target:mem_aevum_time_lord = {
+				leader_age > 150
+			}
+		}
+		name = mem_aevum.11.g
+		response_text = mem_aevum.11.g.response		# you shouldnt 
+		is_dialog_only = yes
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 3
+		}
+		event_target:mem_aevum_time_lord = {
+			add_age = -100
+			hidden_effect = {
+				mem_aevum_setportrait = yes
+			}
+		}
+	}
+	option = {
+		# become more liek us
+		trigger = {
+			or = {
+				has_civic = civic_machine_assimilator
+				has_tradition = tr_cybernetics_adopt
+			}
+			event_target:mem_aevum_time_lord = {
+				NOT = {
+					has_trait = leader_trait_cyborg
+				}
+			}
+		}
+		name = mem_aevum.11.h
+		response_text = mem_aevum.11.h.response		# sure
+		is_dialog_only = yes
+		add_monthly_resource_mult = {
+			resource = society_research
+			value = 3
+		}
+		event_target:mem_aevum_time_lord = {
+			add_trait = leader_trait_cyborg
+		}
+	}
+	option = {
+		# can u be more resourceful?
+		trigger = {
+			event_target:mem_aevum_time_lord = {
+				has_trait = leader_trait_lavish_lifestyle_2
+			}
+		}
+		allow = {
+			NOR = {
+				has_authority = auth_corporate
+				has_ethic = ethic_materialist
+				has_ethic = ethic_fanatic_materialist
+			}
+		}
+		name = mem_aevum.11.i
+		response_text = mem_aevum.11.i.response		# bru
+		is_dialog_only = yes
+		event_target:mem_aevum_time_lord = {
+			add_age = -20
+			hidden_effect = {
+				mem_aevum_setportrait = yes
+			}
+			remove_trait = leader_trait_lavish_lifestyle_2
+			add_trait = leader_trait_lavish_lifestyle
+		}
+	}
+	option = {
+		# HIRE
+		name = HIRE
+		tag = hire_leader
+		#custom_tooltip = mem_aevum.11.b.custom_tooltip		
+		sound = cute_molluscoid_starfish_greetings
+		mem_aevum_endallevents = yes
+		hidden_effect = {
+			remove_country_flag = mem_aevum_claimed1
+			remove_country_flag = mem_aevum_claimed2
+			remove_country_flag = mem_aevum_claimed3
+		}
+		event_target:mem_aevum_time_lord = {
+			set_owner = root
+		}
+		add_relic = r_mem_aevum_houglass
+		ai_chance = {
+			factor = 100
+		}
+	}
+	option = {
+		# DISMISS
+		sound = event_airlock
+		name = DISMISS
+		tag = dismiss_leader
+		#add_relic = r_mem_aevum_houglass
+		hidden_effect = {
+			event_target:mem_aevum_time_lord = {
+				save_global_event_target_as = mem_aevum_time_lord
+				kill_leader = {
+					show_notification = no
+				}
+			}
+		}
+		mem_aevum_endallevents = yes
+		hidden_effect = {
+			remove_country_flag = mem_aevum_claimed1
+			remove_country_flag = mem_aevum_claimed2
+			remove_country_flag = mem_aevum_claimed3
+		}
+	}
+	after = {
+		#	mem_aevum_endallevents = yes
+		#	remove_country_flag = mem_aevum_claimed1
+		#	remove_country_flag = mem_aevum_claimed2
+		#	remove_country_flag = mem_aevum_claimed3
+		hidden_effect = {
+			event_target:mem_aevum_country = {
+				destroy_country = yes
+				set_global_flag = mem_aevum_stage1
+			}
+			remove_country_flag = mem_aevum_askedtoomuch2
+		}
+	}
+}
+
+# This = country
+# logic for new messages
+country_event = {
+	id = mem_aevum.3
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		#NOT = {
+		#has_completed_event_chain = mem_aevum_decoded_messages_chain
+		#}
+	}
+	immediate = {
+		if = {
+			limit = {
+				NOT = {
+					has_event_chain = mem_aevum_decoded_messages_chain
+				}
+			}
+			country_event = {
+				id = mem_aevum.17
+			}
+		}
+	}
+}
+
+# This = country
+# logic for messages
+country_event = {
+	id = mem_aevum.12
+	hide_window = yes
+	#desc = {
+	#	trigger = { has_country_flag = flag_azaryn_option_hesitate }
+	#	text = paragon.226.desc_no # switched places with desc_yes below, as they are mixed up in loc
+	#}
+	#
+	is_triggered_only = yes
+	trigger = {
+		NOT = {
+			has_completed_event_chain_counter = {
+				event_chain = mem_aevum_decoded_messages_chain
+				counter = mem_aevum_decoded_messages4
+			}
+		}
+	}
+	immediate = {
+		if = {
+			limit = {
+				NOT = {
+					has_completed_event_chain_counter = {
+						event_chain = mem_aevum_decoded_messages_chain
+						counter = mem_aevum_decoded_messages
+					}
+				}
+			}
+			country_event = {
+				id = mem_aevum.13
+			}
+			add_event_chain_counter = {
+				event_chain = mem_aevum_decoded_messages_chain
+				counter = mem_aevum_decoded_messages
+				amount = 1
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = {
+					has_completed_event_chain_counter = {
+						event_chain = mem_aevum_decoded_messages_chain
+						counter = mem_aevum_decoded_messages2
+					}
+				}
+			}
+			country_event = {
+				id = mem_aevum.14
+			}
+			add_event_chain_counter = {
+				event_chain = mem_aevum_decoded_messages_chain
+				counter = mem_aevum_decoded_messages2
+				amount = 1
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = {
+					has_completed_event_chain_counter = {
+						event_chain = mem_aevum_decoded_messages_chain
+						counter = mem_aevum_decoded_messages3
+					}
+				}
+			}
+			country_event = {
+				id = mem_aevum.15
+			}
+			add_event_chain_counter = {
+				event_chain = mem_aevum_decoded_messages_chain
+				counter = mem_aevum_decoded_messages3
+				amount = 1
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = {
+					has_completed_event_chain_counter = {
+						event_chain = mem_aevum_decoded_messages_chain
+						counter = mem_aevum_decoded_messages4
+					}
+				}
+			}
+			country_event = {
+				id = mem_aevum.16
+			}
+			add_event_chain_counter = {
+				event_chain = mem_aevum_decoded_messages_chain
+				counter = mem_aevum_decoded_messages4
+				amount = 1
+			}
+			#end_event_chain = mem_aevum_decoded_messages_chain
+		}
+	}
+}
+
+country_event = {
+	id = mem_aevum.16
+	title = "mem_aevum.16.name"
+	desc = "mem_aevum.16.desc"
+	picture = GFX_evt_enlightenment_failure
+	show_sound = event_coronation
+	location = event_target:mem_aevum_primitive_rewind_world
+	#trackable = yes
+	is_triggered_only = yes
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_renowned"
+	picture_event_data = {
+		portrait = event_target:mem_aevum_killhim
+	}
+	immediate = {
+		hidden_effect = {
+			create_country = {
+				name = "NAME_Unknown"
+				type = global_event
+				auto_delete = yes
+				flag = {
+					icon = {
+						category = "special"
+						file = "unknown.dds"
+					}
+					background = {
+						category = "backgrounds"
+						file = "00_solid.dds"
+					}
+					colors = {
+						"red"
+						"red"
+						"null"
+						"null"
+					}
+				}
+				effect = {
+					save_event_target_as = mem_aevum_country
+				}
+			}
+			event_target:mem_aevum_country = {
+				create_species = {
+					name = "NAME_Unknown"
+					class = PARAGON
+					portrait = GFX_mem_aevum_time_lord_hologram
+					namelist = "PRT1"
+					traits = {
+						trait = trait_decadent
+						trait = trait_talented
+						trait = trait_thrifty
+						#trait = trait_weak
+						#trait = trait_plantoid_budding
+					}
+					effect = {
+						save_event_target_as = mem_aevum_species
+					}
+				}
+				create_leader = {
+					species = event_target:mem_aevum_species
+					event_leader = yes
+					class = scientist
+					name = "NAME_mem_aevum_time_lord_hologram"
+					skill = 1
+					randomize_traits = no
+					skip_background_generation = yes
+					background_ethic = ethic_authoritarian
+					custom_catch_phrase = mem_aevum_time_lord_catchphrase
+					custom_description = mem_aevum_time_lord_backstory
+					can_manually_change_location = yes
+					traits = {
+					}
+					gender = male
+					set_age = 137
+					immortal = yes
+					effect = {
+						save_event_target_as = mem_aevum_killhim
+						#set_leader_flag = mem_aevum_killhim
+						#set_leader_flag = mem_aevum_time_lord
+						#set_owner = root
+						#exile_leader_as = mem_aevum_time_lord
+					}
+				}
+				last_created_leader = {
+					add_skill_without_trait_selection = 7
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_aevum.16.a
+		add_monthly_resource_mult = {
+			resource = physics_research
+			value = 4
+		}
+		#end_event_chain = mem_aevum_decoded_messages_chain
+		hidden_effect = {
+			event_target:mem_aevum_killhim = {
+				kill_leader = {
+					show_notification = no
+				}
+			}
+		}
+	}
+	option = {
+		#lets call him
+		name = mem_aevum.16.b
+		hidden_effect = {
+			country_event = {
+				id = mem_aevum.18
+			}
+			event_target:mem_aevum_killhim = {
+				kill_leader = {
+					show_notification = no
+				}
+			}
+		}
+		#end_event_chain = mem_aevum_decoded_messages_chain
+	}
+}
+
+country_event = {
+	id = mem_aevum.13
+	title = "mem_aevum.13.name"
+	desc = "mem_aevum.13.desc"
+	picture = GFX_evt_alien_hieroglyphics
+	show_sound = event_conversation
+	location = event_target:mem_aevum_primitive_rewind_world
+	#trackable = yes
+	is_triggered_only = yes
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_renowned"
+	picture_event_data = {
+		portrait = event_target:mem_aevum_killhim
+	}
+	immediate = {
+		hidden_effect = {
+			create_country = {
+				name = "NAME_Unknown"
+				type = global_event
+				auto_delete = yes
+				flag = {
+					icon = {
+						category = "special"
+						file = "unknown.dds"
+					}
+					background = {
+						category = "backgrounds"
+						file = "00_solid.dds"
+					}
+					colors = {
+						"red"
+						"red"
+						"null"
+						"null"
+					}
+				}
+				effect = {
+					save_event_target_as = mem_aevum_country
+				}
+			}
+			event_target:mem_aevum_country = {
+				create_species = {
+					name = "NAME_Unknown"
+					class = PARAGON
+					portrait = GFX_mem_aevum_time_lord_hologram
+					namelist = "PRT1"
+					traits = {
+						trait = trait_decadent
+						trait = trait_talented
+						trait = trait_thrifty
+						#trait = trait_weak
+						#trait = trait_plantoid_budding
+					}
+					effect = {
+						save_event_target_as = mem_aevum_species
+					}
+				}
+				create_leader = {
+					species = event_target:mem_aevum_species
+					event_leader = yes
+					class = scientist
+					name = "NAME_mem_aevum_time_lord_hologram"
+					skill = 1
+					randomize_traits = no
+					skip_background_generation = yes
+					background_ethic = ethic_authoritarian
+					custom_catch_phrase = mem_aevum_time_lord_catchphrase
+					custom_description = mem_aevum_time_lord_backstory
+					can_manually_change_location = yes
+					traits = {
+					}
+					gender = male
+					set_age = 137
+					immortal = yes
+					effect = {
+						save_event_target_as = mem_aevum_killhim
+						#set_leader_flag = mem_aevum_killhim
+						#set_leader_flag = mem_aevum_time_lord
+						#set_owner = root
+						#exile_leader_as = mem_aevum_time_lord
+					}
+				}
+				last_created_leader = {
+					add_skill_without_trait_selection = 7
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_aevum.13.a
+		event_target:mem_aevum_primitive_rewind_world = {
+			this.solar_system = {
+				random_system_planet = {
+					enable_special_project = {
+						name = mem_aevum_decode_message
+						location = this
+					}
+				}
+			}
+		}
+		add_monthly_resource_mult = {
+			resource = physics_research
+			value = 4
+		}
+		hidden_effect = {
+			event_target:mem_aevum_killhim = {
+				kill_leader = {
+					show_notification = no
+				}
+			}
+		}
+	}
+	#option = {
+	#	name = mem_aevum.16.b
+	#}
+}
+
+country_event = {
+	id = mem_aevum.14
+	title = "mem_aevum.14.name"
+	desc = "mem_aevum.14.desc"
+	picture = GFX_evt_unidentified_monster
+	show_sound = event_air_raid_siren
+	location = event_target:mem_aevum_primitive_rewind_world
+	#trackable = yes
+	is_triggered_only = yes
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_renowned"
+	picture_event_data = {
+		portrait = event_target:mem_aevum_killhim
+	}
+	immediate = {
+		hidden_effect = {
+			create_country = {
+				name = "NAME_Unknown"
+				type = global_event
+				auto_delete = yes
+				flag = {
+					icon = {
+						category = "special"
+						file = "unknown.dds"
+					}
+					background = {
+						category = "backgrounds"
+						file = "00_solid.dds"
+					}
+					colors = {
+						"red"
+						"red"
+						"null"
+						"null"
+					}
+				}
+				effect = {
+					save_event_target_as = mem_aevum_country
+				}
+			}
+			event_target:mem_aevum_country = {
+				create_species = {
+					name = "NAME_Unknown"
+					class = PARAGON
+					portrait = GFX_mem_aevum_time_lord_hologram
+					namelist = "PRT1"
+					traits = {
+						trait = trait_decadent
+						trait = trait_talented
+						trait = trait_thrifty
+						#trait = trait_weak
+						#trait = trait_plantoid_budding
+					}
+					effect = {
+						save_event_target_as = mem_aevum_species
+					}
+				}
+				create_leader = {
+					species = event_target:mem_aevum_species
+					event_leader = yes
+					class = scientist
+					name = "NAME_mem_aevum_time_lord_hologram"
+					skill = 1
+					randomize_traits = no
+					skip_background_generation = yes
+					background_ethic = ethic_authoritarian
+					custom_catch_phrase = mem_aevum_time_lord_catchphrase
+					custom_description = mem_aevum_time_lord_backstory
+					can_manually_change_location = yes
+					traits = {
+					}
+					gender = male
+					set_age = 137
+					immortal = yes
+					effect = {
+						save_event_target_as = mem_aevum_killhim
+						#set_leader_flag = mem_aevum_killhim
+						#set_leader_flag = mem_aevum_time_lord
+						#set_owner = root
+						#exile_leader_as = mem_aevum_time_lord
+					}
+				}
+				last_created_leader = {
+					add_skill_without_trait_selection = 7
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_aevum.14.a
+		event_target:mem_aevum_primitive_rewind_world = {
+			this.solar_system = {
+				random_system_planet = {
+					enable_special_project = {
+						name = mem_aevum_decode_message
+						location = this
+					}
+				}
+			}
+		}
+		add_monthly_resource_mult = {
+			resource = physics_research
+			value = 4
+		}
+		hidden_effect = {
+			event_target:mem_aevum_killhim = {
+				kill_leader = {
+					show_notification = no
+				}
+			}
+		}
+	}
+	#option = {
+	#	name = mem_aevum.16.b
+	#}
+}
+
+country_event = {
+	id = mem_aevum.15
+	title = "mem_aevum.15.name"
+	desc = "mem_aevum.15.desc"
+	picture = GFX_evt_exploding_ship
+	show_sound = event_airlock
+	location = event_target:mem_aevum_primitive_rewind_world
+	#trackable = yes
+	is_triggered_only = yes
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_renowned"
+	picture_event_data = {
+		portrait = event_target:mem_aevum_killhim
+	}
+	immediate = {
+		hidden_effect = {
+			create_country = {
+				name = "NAME_Unknown"
+				type = global_event
+				auto_delete = yes
+				flag = {
+					icon = {
+						category = "special"
+						file = "unknown.dds"
+					}
+					background = {
+						category = "backgrounds"
+						file = "00_solid.dds"
+					}
+					colors = {
+						"red"
+						"red"
+						"null"
+						"null"
+					}
+				}
+				effect = {
+					save_event_target_as = mem_aevum_country
+				}
+			}
+			event_target:mem_aevum_country = {
+				create_species = {
+					name = "NAME_Unknown"
+					class = PARAGON
+					portrait = GFX_mem_aevum_time_lord_hologram
+					namelist = "PRT1"
+					traits = {
+						trait = trait_decadent
+						trait = trait_talented
+						trait = trait_thrifty
+						#trait = trait_weak
+						#trait = trait_plantoid_budding
+					}
+					effect = {
+						save_event_target_as = mem_aevum_species
+					}
+				}
+				create_leader = {
+					species = event_target:mem_aevum_species
+					event_leader = yes
+					class = scientist
+					name = "NAME_mem_aevum_time_lord_hologram"
+					skill = 1
+					randomize_traits = no
+					skip_background_generation = yes
+					background_ethic = ethic_authoritarian
+					custom_catch_phrase = mem_aevum_time_lord_catchphrase
+					custom_description = mem_aevum_time_lord_backstory
+					can_manually_change_location = yes
+					traits = {
+					}
+					gender = male
+					set_age = 137
+					immortal = yes
+					effect = {
+						save_event_target_as = mem_aevum_killhim
+						#set_leader_flag = mem_aevum_killhim
+						#set_leader_flag = mem_aevum_time_lord
+						#set_owner = root
+						#exile_leader_as = mem_aevum_time_lord
+					}
+				}
+				last_created_leader = {
+					add_skill_without_trait_selection = 7
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_aevum.15.a
+		event_target:mem_aevum_primitive_rewind_world = {
+			this.solar_system = {
+				random_system_planet = {
+					enable_special_project = {
+						name = mem_aevum_decode_message
+						location = this
+					}
+				}
+			}
+		}
+		add_monthly_resource_mult = {
+			resource = physics_research
+			value = 4
+		}
+		hidden_effect = {
+			event_target:mem_aevum_killhim = {
+				kill_leader = {
+					show_notification = no
+				}
+			}
+		}
+	}
+}
+
+#found weird signal
+country_event = {
+	id = mem_aevum.17
+	title = "mem_aevum.17.name"
+	desc = "mem_aevum.17.desc"
+	picture = GFX_evt_clocks
+	show_sound = event_encrypted_comms
+	location = event_target:mem_aevum_primitive_rewind_world
+	#trackable = yes
+	is_triggered_only = yes
+	immediate = {
+	}
+	option = {
+		name = mem_aevum.17.a
+		begin_event_chain = {
+			event_chain = mem_aevum_decoded_messages_chain
+		}
+		#hidden_effect = {
+		event_target:mem_aevum_primitive_rewind_world = {
+			this.solar_system = {
+				random_system_planet = {
+					enable_special_project = {
+						name = mem_aevum_decode_message
+						location = this
+					}
+				}
+			}
+		}
+		#}
+		add_monthly_resource_mult = {
+			resource = physics_research
+			value = 10
+		}
+	}
+	option = {
+		name = mem_aevum.17.b
+		add_resource = {
+			influence = 100
+		}
+	}
+}
+
+# this = country 
+country_event = {
+	id = mem_aevum.18
+	title = mem_aevum.18.name
+	desc = mem_aevum.18.desc
+	show_sound = event_conversation
+	location = event_target:mem_aevum_primitive_rewind_world
+	is_triggered_only = yes
+	diplomatic_title = BLANK_STRING
+	diplomatic = yes
+	picture_event_data = {
+		portrait = GFX_mem_aevum_time_lord_stage2
+		room = pre_ftl_victorian_room
+		planet_background = pc_continental
+	}
+	option = {
+		# alhright
+		name = mem_aevum.18.a
+		#response_text = mem_aevum.1.d.response
+		#is_dialog_only = yes
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 10
+		}
+	}
+	option = {
+		# chosen by god, skip everything else
+		name = mem_aevum.18.c
+		#response_text = mem_aevum.1.d.response
+		#is_dialog_only = yes
+		allow = {
+			OR = {
+				has_ethic = ethic_fanatic_spiritualist
+				has_ethic = ethic_spiritualist
+			}
+		}
+		add_resource = {
+			influence = 100
+		}
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 10
+		}
+	}
+	option = {
+		# cant we skip your pointsless quest?
+		name = mem_aevum.18.d
+		trigger = {
+			any_situation = {
+				is_situation_type = mem_aevum_sit_wait_20years
+			}
+		}
+		random_situation = {
+			limit = {
+				is_situation_type = mem_aevum_sit_wait_20years
+			}
+			add_situation_progress = 120
+		}
+	}
+}
+
+# get random leader 
+# this = country 
+country_event = {
+	id = mem_aevum.19
+	title = mem_aevum.19.name
+	desc = mem_aevum.19.desc
+	trigger = {
+		this = {
+			any_owned_leader = {
+				is_ruler = no
+				leader_class = scientist
+				#exists = yes
+			}
+		}
+	}
+	show_sound = event_encrypted_comms
+	#location = event_target:mem_aevum_primitive_rewind_world
+	is_triggered_only = yes
+	event_window_type = leader_recruit
+	picture_event_data = {
+		portrait = event_target:mem_aevum_future_leader
+		#room = pre_ftl_victorian_room
+	}
+	picture = GFX_leader_recruitment_bg_renowned
+	immediate = {
+		hidden_effect = {
+			this = {
+				random_owned_leader = {
+					limit = {
+						is_ruler = no
+						leader_class = scientist
+						if = {
+							limit = {
+								is_gestalt = yes
+							}
+							is_councilor = no
+						}
+					}
+					save_event_target_as = mem_aevum_future_leader
+					set_leader_flag = mem_aevum_has_to_go
+				}
+			}
+			clone_leader = {
+				target = event_target:mem_aevum_future_leader
+			}
+			last_created_leader = {
+				add_age = 10
+				add_skill = 3
+				save_event_target_as = mem_aevum_future_leader
+				exile_leader_as = mem_aevum_future_leader
+			}
+			country_event = {
+				id = mem_aevum.20
+				days = 3600
+			}
+		}
+	}
+	option = {
+		# who are you, really?
+		#trigger = {
+		#	NOT = { has_country_flag = flag_azaryn_what_is_astrocreation }
+		#}
+		name = mem_aevum.19.a
+		is_dialog_only = yes
+		response_text = mem_aevum.19.a.response
+	}
+	option = {
+		# what was your mission
+		name = mem_aevum.19.b
+		is_dialog_only = yes
+		response_text = mem_aevum.19.b.response
+	}
+	option = {
+		# this.leader already in our empire
+		name = mem_aevum.19.c
+		response_text = mem_aevum.19.c.response
+		is_dialog_only = yes
+	}
+	option = {
+		# is this a mistake?
+		name = mem_aevum.19.d
+		response_text = mem_aevum.19.d.response
+		is_dialog_only = yes
+	}
+	option = {
+		# HIRE
+		name = mem_aevum.19.welcomeback
+		tag = hire_leader
+		#custom_tooltip = mem_aevum.11.b.custom_tooltip		# Azaryn joins
+		sound = event_announcement
+		#hidden_effect = {
+		this = {
+			#set_leader = mem_aevum_future_leader
+			clone_leader = {
+				target = event_target:mem_aevum_future_leader
+			}
+			last_created_leader = {
+				set_owner = root
+			}
+		}
+	}
+	option = {
+		# DISMISS
+		sound = event_airlock
+		name = DISMISS
+		tag = dismiss_leader
+		hidden_effect = {
+			event_target:mem_aevum_future_leader = {
+				#save_global_event_target_as = mem_aevum_time_lord
+				kill_leader = {
+					show_notification = no
+				}
+			}
+		}
+	}
+}
+
+# leader has to go
+country_event = {
+	id = mem_aevum.20
+	title = mem_aevum.20.name
+	desc = mem_aevum.20.desc
+	picture = GFX_evt_astral_rift_tower_invitation
+	show_sound = event_default
+	is_triggered_only = yes
+	fire_only_once = yes
+	trigger = {
+		any_owned_leader = {
+			AND = {
+				is_ruler = no
+				leader_class = scientist
+			}
+		}
+	}
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_renowned"
+	picture_event_data = {
+		portrait = event_target:mem_aevum_future_leader2
+	}
+	immediate = {
+		random_owned_leader = {
+			limit = {
+				is_ruler = no
+				#is_councilor = no
+				leader_class = scientist
+				has_leader_flag = mem_aevum_has_to_go
+			}
+			save_event_target_as = mem_aevum_future_leader2
+		}
+	}
+	option = {
+		name = mem_aevum.20.a
+		custom_tooltip = mem_aevum.20.tt
+		hidden_effect = {
+			event_target:mem_aevum_future_leader2 = {
+				kill_leader = {
+					show_notification = no
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_aevum.20.b
+		capital_scope = {
+			add_modifier = {
+				modifier = mem_aevum_cursedworld
+				days = 360
+			}
+		}
+	}
+}
+
+country_event = {
+	id = mem_aevum.21
+	title = "mem_aevum.21.name"
+	desc = "mem_aevum.21.desc"
+	picture = GFX_evt_ship_under_attack
+	show_sound = event_alien_signal
+	#location = event_target:mem_aevum_primitive_rewind_world
+	#trackable = yes
+	is_triggered_only = yes
+	immediate = {
+	}
+	option = {
+		name = mem_aevum.21.a
+		hidden_effect = {
+			country_event = {
+				id = mem_aevum.19
+			}
+		}
+	}
+	option = {
+		name = mem_aevum.21.b
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 2
+		}
+	}
+}
+
+# deage aevum, keep
+event = {
+	id = mem_aevum.101
+	hide_window = yes
+	#location = from.capital_scope
+	trigger = {
+		exists = event_target:mem_aevum_time_lord
+		#has_any_megastructure = yes
+		has_global_flag = mem_aevum_system_spawned
+		exists = event_target:mem_aevum_time_lord.owner
+		#NOT = {
+		#	has_global_flag = mem_aevum_time_lorddiedfr
+		#}
+	}
+	is_triggered_only = yes
+	immediate = {
+		event_target:mem_aevum_time_lord = {
+			if = {
+				limit = {
+					check_variable_arithmetic = {
+						which = this.trigger:leader_age
+						#mult = 100				
+						value >= 3
+					}
+				}
+				add_age = -2
+				mem_aevum_setportrait = yes
+			}
+			else = {
+				#set_global_flag = mem_aevum_time_lorddiedfr
+				root = {
+					country_event = {
+						id = mem_aevum.106
+					}
+				}
+			}
+		}
+	}
+}
+
+# on leader death
+#notification event that he died
+country_event = {
+	id = mem_aevum.106
+	title = "mem_aevum.106.name"
+	desc = "mem_aevum.106.desc"
+	picture = GFX_evt_zro_4
+	show_sound = par_notification_leader_death
+	#location = from.capital_scope
+	is_triggered_only = yes
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_mem_aevum_timelord"
+	picture_event_data = {
+		portrait = event_target:mem_aevum_time_lord
+	}
+	trigger = {
+		has_global_flag = mem_aevum_system_spawned
+		from = {
+			has_leader_flag = mem_aevum_time_lord
+		}
+		#has_country_flag = 
+	}
+	option = {
+		name = mem_aevum.106.a
+		give_specimen = {
+			key = mem_aevum_beard
+		}
+		#event_target:mem_aevum_time_lord = {
+		#	kill_leader = {
+		#		show_notification = yes
+		#	}
+		#}
+	}
+}
+
+# random event
+leader_event = {
+	id = mem_aevum.115
+	title = mem_aevum.115.name
+	desc = mem_aevum.115.desc
+	picture = GFX_evt_tradestation_interior
+	show_sound = cute_molluscoid_starfish_greetings
+	is_triggered_only = yes
+	#fire_only_once = yes
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_mem_aevum_timelord"
+	picture_event_data = {
+		portrait = root
+	}
+	immediate = {
+		if = {
+			limit = {
+				exists = planet
+			}
+			planet = {
+				save_event_target_as = planet_governed
+			}
+		}
+		else = {
+			owner.capital_scope = {
+				save_event_target_as = planet_governed
+			}
+		}
+	}
+	option = {
+		name = mem_aevum.115.a
+		event_target:planet_governed = {
+			add_modifier = {
+				modifier = mem_aevum_cursedworld
+				years = 5
+			}
+		}
+		this = {
+			add_age = 20
+			hidden_effect = {
+				mem_aevum_setportrait = yes
+			}
+		}
+	}
+	option = {
+		name = mem_aevum.115.b
+		allow = {
+			owner = {
+				resource_stockpile_compare = {
+					resource = influence
+					value > 20
+				}
+			}
+		}
+		owner = {
+			add_resource = {
+				influence = -20
+			}
+		}
+	}
+	option = {
+		name = mem_aevum.115.c
+		allow = {
+			this = {
+				leader_age > 210
+			}
+		}
+		event_target:planet_governed = {
+			add_modifier = {
+				modifier = mem_aevum_blessedworld
+				years = 5
+			}
+		}
+		this = {
+			add_age = -200
+			hidden_effect = {
+				mem_aevum_setportrait = yes
+			}
+		}
+	}
+}
+
+# 
+# random event, rapidly aging population 
+leader_event = {
+	id = mem_aevum.116
+	title = mem_aevum.116.name
+	desc = mem_aevum.116.desc
+	picture = GFX_evt_robot_assembly_plant
+	show_sound = cute_molluscoid_starfish_greetings
+	is_triggered_only = yes
+	#fire_only_once = yes
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_mem_aevum_timelord"
+	picture_event_data = {
+		portrait = root
+	}
+	immediate = {
+		if = {
+			limit = {
+				exists = planet
+			}
+			planet = {
+				save_event_target_as = planet_governed
+			}
+		}
+		else = {
+			owner.capital_scope = {
+				save_event_target_as = planet_governed
+			}
+		}
+		event_target:planet_governed = {
+			random_owned_pop_species = {
+				save_event_target_as = species_governed
+			}
+		}
+	}
+	option = {
+		name = mem_aevum.116.a
+		event_target:planet_governed = {
+			add_modifier = {
+				modifier = mem_aevum_slowgrowing
+				years = 5
+			}
+		}
+		this = {
+			add_age = 20
+			hidden_effect = {
+				mem_aevum_setportrait = yes
+			}
+		}
+	}
+	option = {
+		name = mem_aevum.116.b
+		allow = {
+			owner = {
+				resource_stockpile_compare = {
+					resource = influence
+					value > 100
+				}
+			}
+		}
+		owner = {
+			add_resource = {
+				influence = -100
+			}
+		}
+	}
+	option = {
+		name = mem_aevum.116.c
+		allow = {
+			this = {
+				leader_age > 210
+			}
+		}
+		event_target:planet_governed = {
+			create_pop = {
+				species = event_target:species_governed
+				count = 3
+			}
+		}
+		this = {
+			add_age = -200
+			hidden_effect = {
+				mem_aevum_setportrait = yes
+			}
+		}
+	}
+}
+
+# random event, another mega halting
+leader_event = {
+	id = mem_aevum.117
+	title = mem_aevum.117.name
+	desc = mem_aevum.117.desc
+	picture = GFX_evt_ruined_system
+	show_sound = cute_molluscoid_starfish_greetings
+	is_triggered_only = yes
+	#fire_only_once = yes
+	trigger = {
+		owner = {
+			any_owned_megastructure = {
+				is_upgrading = yes
+			}
+		}
+	}
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_mem_aevum_timelord"
+	picture_event_data = {
+		portrait = root
+	}
+	immediate = {
+		owner = {
+			random_owned_megastructure = {
+				limit = {
+					is_upgrading = yes
+				}
+				save_event_target_as = mem_aevum_nomegaforu
+			}
+		}
+	}
+	option = {
+		name = mem_aevum.117.a
+		event_target:mem_aevum_nomegaforu = {
+			set_halted = 720
+		}
+		this = {
+			add_age = 100
+			hidden_effect = {
+				mem_aevum_setportrait = yes
+			}
+		}
+	}
+	option = {
+		name = mem_aevum.117.b
+		allow = {
+			owner = {
+				resource_stockpile_compare = {
+					resource = influence
+					value > 20
+				}
+			}
+		}
+		owner = {
+			add_resource = {
+				influence = -20
+			}
+		}
+	}
+}
+
+# random event, skip situation ... this is dangerous
+leader_event = {
+	id = mem_aevum.118
+	title = mem_aevum.118.name
+	desc = mem_aevum.118.desc
+	picture = GFX_evt_surreal_visions
+	show_sound = cute_molluscoid_starfish_greetings
+	is_triggered_only = yes
+	#fire_only_once = yes
+	trigger = {
+		owner = {
+			count_situation = {
+				count > 0
+			}
+		}
+	}
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_mem_aevum_timelord"
+	picture_event_data = {
+		portrait = root
+	}
+	immediate = {
+		owner = {
+			random_situation = {
+				save_event_target_as = mem_aevum_situationlmao
+			}
+		}
+	}
+	option = {
+		name = mem_aevum.118.a
+		event_target:mem_aevum_situationlmao = {
+			add_situation_progress = 30
+		}
+	}
+	option = {
+		# i hope this breaks a lot :)
+		name = mem_aevum.118.b
+		allow = {
+			event_target:mem_aevum_situationlmao = {
+				situation_progress > 30
+			}
+		}
+		event_target:mem_aevum_situationlmao = {
+			add_situation_progress = -30
+		}
+	}
+}
+
+# TODO  maybe just proc them once?
+# Fires from on_decade_pulse_country
+# random event list
+event = {
+	id = mem_aevum.113
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		#has_paragon_dlc = yes
+		has_global_flag = mem_aevum_system_spawned
+		exists = event_target:mem_aevum_time_lord
+		#has_relic = r_mem_aevum_houglass
+		#exists = event_target:mem_aevum_time_lord.owner
+	}
+	immediate = {
+		event_target:mem_aevum_time_lord = {
+			random_list = {
+				# age leader
+				10 = {
+					leader_event = {
+						id = mem_aevum.114
+						days = 1
+						random = 900
+					}
+				}
+				# production up
+				5 = {
+					leader_event = {
+						id = mem_aevum.115
+						days = 1
+						random = 900
+					}
+				}
+				# speed growth 
+				5 = {
+					leader_event = {
+						id = mem_aevum.116
+						days = 1
+						random = 900
+					}
+				}
+				# disable megastructure
+				10 = {
+					leader_event = {
+						id = mem_aevum.117
+						days = 1
+						random = 900
+					}
+					modifier = {
+						owner = {
+							NOT = {
+								any_owned_megastructure = {
+									is_upgrading = yes
+								}
+							}
+						}
+						factor = 0
+					}
+				}
+				# situation speed 
+				5 = {
+					leader_event = {
+						id = mem_aevum.118
+						days = 1
+						random = 900
+					}
+					modifier = {
+						owner = {
+							NOT = {
+								count_situation = {
+									count >= 1
+								}
+							}
+						}
+						factor = 0
+					}
+				}
+				# reset relic cooldown 
+				5 = {
+					leader_event = {
+						id = mem_aevum.119
+						days = 1
+						random = 900
+					}
+					modifier = {
+						owner = {
+							NOT = {
+								has_modifier = relic_activation_cooldown
+							}
+						}
+						factor = 0
+					}
+				}
+				160 = {
+				}
+			}
+		}
+	}
+}
+
+# age leader
+# random event
+leader_event = {
+	id = mem_aevum.114
+	title = mem_aevum.114.name
+	desc = mem_aevum.114.desc
+	picture = GFX_evt_smear_campaign
+	show_sound = event_default
+	is_triggered_only = yes
+	#fire_only_once = yes
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_mem_aevum_timelord"
+	picture_event_data = {
+		portrait = root
+	}
+	trigger = {
+		exists = event_target:mem_aevum_bullyhim
+	}
+	immediate = {
+		owner = {
+			random_owned_leader = {
+				limit = {
+					leader_age > 10
+				}
+				save_event_target_as = mem_aevum_bullyhim
+			}
+		}
+	}
+	option = {
+		name = mem_aevum.114.a
+		event_target:mem_aevum_bullyhim = {
+			add_age = 40
+		}
+	}
+	option = {
+		name = mem_aevum.114.b
+		allow = {
+			owner = {
+				resource_stockpile_compare = {
+					resource = influence
+					value > 100
+				}
+			}
+		}
+		owner = {
+			add_resource = {
+				influence = -100
+			}
+		}
+	}
+}
+
+# resest relic cooldown
+leader_event = {
+	id = mem_aevum.119
+	title = mem_aevum.119.name
+	desc = mem_aevum.119.desc
+	picture = GFX_evt_analyzing_artifacts
+	show_sound = event_default
+	is_triggered_only = yes
+	#fire_only_once = yes
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_mem_aevum_timelord"
+	picture_event_data = {
+		portrait = root
+	}
+	#trigger = {
+	#	event_target:mem_aevum_time_lord = {
+	#		leader_age > 200
+	#	}
+	#}
+	option = {
+		name = mem_aevum.119.a
+		allow = {
+			event_target:mem_aevum_time_lord = {
+				leader_age > 220
+			}
+		}
+		event_target:mem_aevum_time_lord = {
+			add_age = -200
+			hidden_effect = {
+				mem_aevum_setportrait = yes
+			}
+		}
+		owner = {
+			remove_modifier = relic_activation_cooldown
+		}
+	}
+	option = {
+		name = mem_aevum.119.b
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = 3
+			}
+		}
+	}
+}
+
+# return timelord, unused but cant bring myself to delete it
+# he comes back after dead and you can recruit him again
+country_event = {
+	id = mem_aevum.110
+	title = "mem_aevum.110.name"
+	desc = "mem_aevum.110.desc"
+	picture = GFX_evt_ringworld
+	show_sound = event_conversation
+	location = from.capital_scope
+	trigger = {
+		exists = event_target:mem_aevum_time_lord
+		#has_any_megastructure = yes
+		has_global_flag = mem_aevum_system_spawned
+	}
+	is_triggered_only = yes
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_mem_aevum_timelord"
+	picture_event_data = {
+		portrait = event_target:mem_aevum_time_lord
+	}
+	# returns leader
+	option = {
+		name = mem_aevum.110.a
+		ai_chance = {
+			factor = 10
+		}
+		#mem_aevum_time_lord_exile
+		hidden_effect = {
+			create_country = {
+				name = "NAME_Unknown"
+				type = global_event
+				auto_delete = yes
+				flag = {
+					icon = {
+						category = "special"
+						file = "unknown.dds"
+					}
+					background = {
+						category = "backgrounds"
+						file = "00_solid.dds"
+					}
+					colors = {
+						"red"
+						"red"
+						"null"
+						"null"
+					}
+				}
+				effect = {
+					save_event_target_as = mem_aevum_country
+				}
+			}
+			event_target:mem_aevum_country = {
+				create_species = {
+					name = "NAME_Unknown"
+					class = PARAGON
+					portrait = GFX_mem_aevum_time_lord
+					namelist = "PRT1"
+					traits = {
+						trait = trait_decadent
+						trait = trait_talented
+						trait = trait_thrifty
+						#trait = trait_weak
+						#trait = trait_plantoid_budding
+					}
+					effect = {
+						save_event_target_as = mem_aevum_species
+					}
+				}
+				create_leader = {
+					species = event_target:mem_aevum_species
+					event_leader = yes
+					class = scientist
+					name = "NAME_mem_aevum_time_lord"
+					skill = 1
+					randomize_traits = no
+					skip_background_generation = yes
+					background_ethic = ethic_authoritarian
+					custom_catch_phrase = mem_aevum_time_lord_catchphrase
+					custom_description = mem_aevum_time_lord_backstory
+					can_manually_change_location = yes
+					#traits = {
+					#	trait = mem_aevum_leader_trait_legendary_timeskipper
+					#trait = leader_trait_xeno_cataloger
+					#trait = leader_trait_educator
+					#	trait = leader_trait_lavish_lifestyle_2
+					#	trait = leader_trait_adaptable_2
+					#	trait = subclass_scientist_councilor
+					#}
+					gender = male
+					set_age = 137
+					immortal = yes
+					effect = {
+						save_global_event_target_as = mem_aevum_time_lord
+						set_leader_flag = legendary_leader
+						set_leader_flag = mem_aevum_time_lord
+						set_owner = root
+						exile_leader_as = mem_aevum_time_lord
+					}
+				}
+				last_created_leader = {
+					add_skill_without_trait_selection = 6
+					#set_variable = {
+					#	which = mem_aevum_leader_lifespan
+					##	value = 137
+					#}
+					remove_all_traits = yes
+					add_trait = mem_aevum_leader_trait_legendary_timeskipper
+					add_trait = mem_aevum_leader_trait_legendary_houtglasskeeper
+					add_trait = leader_trait_lavish_lifestyle_2
+					add_trait = leader_trait_adaptable_2
+					add_trait = subclass_scientist_governor
+					#add_trait = leader_trait_great_researcher
+					set_owner = root
+				}
+			}
+		}
+		last_created_leader = {
+			set_owner = root
+		}
+		remove_global_flag = mem_aevum_time_lorddied
+	}
+}
+
+# check if aevum was fired, unused
+country_event = {
+	id = mem_aevum.111
+	hide_window = yes
+	trigger = {
+		has_global_flag = mem_aevum_system_spawned
+		from = {
+			has_trait = mem_aevum_leader_trait_legendary_timeskipper
+		}
+	}
+	is_triggered_only = yes
+	immediate = {
+		set_global_flag = mem_aevum_time_lorddiedfr
+	}
+}
+
+# give aevum age
+country_event = {
+	id = mem_aevum.112
+	hide_window = yes
+	trigger = {
+		any_owned_leader = {
+			has_trait = mem_aevum_leader_trait_legendary_houtglasskeeper
+		}
+	}
+	is_triggered_only = yes
+	immediate = {
+		random_owned_leader = {
+			limit = {
+				has_trait = mem_aevum_leader_trait_legendary_houtglasskeeper
+			}
+			add_age = 50
+			hidden_effect = {
+				mem_aevum_setportrait = yes
+			}
+		}
+		create_message = {
+			type = mem_aevum_hourglass_tick
+			localization = mem_aevum_aevum_got_stronger_from_relics
+			days = 30
+		}
+	}
+}
+
+#
+# ascended his trait
+leader_event = {
+	id = mem_aevum.200
+	title = mem_aevum.200.name
+	desc = mem_aevum.200.desc
+	picture = GFX_evt_psionics
+	show_sound = event_default
+	is_triggered_only = yes
+	#fire_only_once = yes
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_mem_aevum_timelord"
+	picture_event_data = {
+		portrait = root
+	}
+	immediate = {
+	}
+	option = {
+		trigger = {
+			has_trait = mem_aevum_leader_trait_legendary_timeskipper
+		}
+		name = FASCINATING
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = 6
+			}
+		}
+	}
+	# double so one shows the trait when selecting , other for debug
+	option = {
+		trigger = {
+			NOT = {
+				has_trait = mem_aevum_leader_trait_legendary_timeskipper
+			}
+		}
+		name = DISTURBING
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = 6
+			}
+		}
+	}
+}
+
+# final level
+leader_event = {
+	id = mem_aevum.201
+	title = mem_aevum.201.name
+	desc = mem_aevum.201.desc
+	picture = GFX_evt_zro_2
+	show_sound = event_default
+	is_triggered_only = yes
+	#fire_only_once = yes
+	event_window_type = leader_story
+	event_picture_background = "GFX_leader_recruitment_bg_mem_aevum_timelord"
+	picture_event_data = {
+		portrait = root
+	}
+	immediate = {
+	}
+	option = {
+		trigger = {
+			has_trait = mem_aevum_leader_trait_legendary_timeskipper
+		}
+		name = DISTURBING
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = 36
+			}
+		}
+	}
+	option = {
+		trigger = {
+			NOT = {
+				has_trait = mem_aevum_leader_trait_legendary_timeskipper
+			}
+		}
+		name = DISTURBING
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = 36
+			}
+		}
+	}
+}

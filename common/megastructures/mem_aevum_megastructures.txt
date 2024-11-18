@@ -1,0 +1,179 @@
+# aevums palace
+mem_aevum_mega_chronomancer_palace = {
+	entity = "mem_aevum_psi_core_entity_stage_1"	# thx wamo
+	show_galactic_map_icon = yes
+	construction_entity = "construction_platform_entity"
+	portrait = "GFX_mem_aevum_mega_chronomancer_palace"
+	place_entity_on_planet_plane = no
+	show_in_outliner = no
+	entity_offset = {
+		x = -27
+		y = -27
+	}
+	scales_with_planet = no
+	build_time = 3600
+	resources = {
+		category = megastructures
+		cost = {
+			minerals = 5000
+			alloys = 1000
+			#unity = 2500
+			#influence = 100
+		}
+		upkeep = {
+			energy = 40
+		}
+		produces = {
+			trigger = {
+				host_has_dlc = "Ancient Relics Story Pack"
+			}
+			sr_zro = 2
+		}
+	}
+	#prerequisites = { 
+	#"tech_interstellar_assembly"
+	# }
+	potential = {
+		has_technology = mem_aevum_unlock_chronopalace
+		NOT = {
+			has_country_flag = mem_aevum_has_built_chronopalace
+		}
+	}
+	possible = {
+		exists = starbase
+		custom_tooltip = {
+			fail_text = "requires_inside_border"
+			is_inside_border = from
+		}
+		#custom_tooltip = {
+		#	fail_text = "requires_no_existing_megastructure"
+		#	has_no_non_gate_megastructure = yes
+		#}
+		custom_tooltip = {
+			fail_text = "requires_surveyed_system"
+			NOT = {
+				any_system_planet = {
+					is_surveyed = {
+						who = prev.from
+						status = no
+					}
+				}
+			}
+		}
+		#custom_tooltip = {
+		#	fail_text = "requires_capital_system"
+		#	from.capital_scope.solar_system = { is_same_value = root }
+		#}
+	}
+	placement_rules = {
+		planet_possible = {
+			custom_tooltip = {
+				fail_text = "requires_survey_not_habitable"
+				is_surveyed = {
+					# prevent leaking habitability information
+					who = prev.from
+					status = yes
+				}
+				colonizable_planet = no
+			}
+			custom_tooltip = {
+				fail_text = "requires_no_anomaly"
+				NOT = {
+					has_anomaly = yes
+				}
+			}
+			#custom_tooltip = {
+			#	fail_text = "requires_not_minor_planetary_body"
+			#	NOR = {
+			#		is_asteroid = yes
+			#		is_moon = yes
+			#	}
+			#}
+			custom_tooltip = {
+				fail_text = "requires_not_star"
+				is_star = no
+			}
+			custom_tooltip = {
+				fail_text = "requires_not_astral_scar"
+				is_astral_scar =  no
+			}
+			custom_tooltip = {
+				fail_text = "requires_not_ring_world"
+				is_ringworld = no
+			}
+		}
+	}
+	# root = system
+	# from = country
+	ai_weight = {
+		factor = 100
+		#modifier = {
+		#	factor = 0.1
+		#	starbase = { NOT = { has_starbase_size >= starbase_starfortress } }
+		#}
+		modifier = {
+			factor = 0.1
+			any_neighbor_system = {
+				exists = owner
+				NOT = {
+					owner = {
+						is_same_value = from
+					}
+				}
+			}
+		}
+	}
+	country_modifier = {
+		planet_building_build_speed_mult = 0.2
+	}
+	on_build_start = {
+	}
+	on_build_cancel = {
+	}
+	on_build_complete = {
+		from = {
+			set_country_flag = mem_aevum_has_built_chronopalace
+			if = {
+				limit = {
+					has_event_chain = mem_aevum_buildtemple
+				}
+				country_event = {
+					id = mem_aevum.11
+				}
+			}
+		}
+		add_modifier = {
+			modifier = mem_aevum_ship_frozen
+		}
+		create_ambient_object = {
+			type = "turbulent_nebula_2"
+			entity_offset_height = -5 # Set to spawn far below the planets
+			location = this
+		}
+		last_created_ambient_object = {
+			set_location = {
+				target = prev
+				distance = 0
+				angle = random
+			}
+		}
+		create_nebula = {
+			radius = 1
+			name = "mem_aevum_stasis_nabula"
+			
+		}
+		every_system_planet = {
+			random_list = {
+				50 = {
+					add_deposit = d_zro_deposit_1
+				}
+				25 = {
+					add_deposit = d_zro_deposit_2
+				}
+				5 = {
+					add_deposit = d_zro_deposit_3
+				}
+			}
+		}
+	}
+}
