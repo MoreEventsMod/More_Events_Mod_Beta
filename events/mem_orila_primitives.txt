@@ -13,6 +13,48 @@ event = {
 	}
 }
 
+# Triggers when trying to open the diplomacy view for countries with custom diplomacy.
+# Country scope
+# This = target country (player)
+# From = source country
+country_event = {
+	id = mem_orila_primitives.2
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			is_country_type = mem_ancient_protectors
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				from = {
+					has_country_flag = mem_es_system_ai_country
+				}
+			}
+			country_event = {
+				id = mem_orila_primitives_magnus.2
+			}
+		}
+		else_if = {
+			limit = {
+				from = {
+					has_country_flag = mem_orila_rogue_ai_country
+				}
+			}
+		}
+		else = {
+			country_event = {
+				id = mem_orila_primitives.100
+			}
+		}
+	}
+}
+
 # Triggers event when each country first sends a ship into the system (once per country)
 # Scope = Ship
 # From = System
@@ -29,8 +71,14 @@ ship_event = {
 	trigger = {
 		from = {
 			has_star_flag = mem_orila_primitive_system
-			NOT = {
+			NOR = {
 				has_star_flag = mem_orila_primitive_system_destroyed
+				has_star_flag = mem_es_system
+			}
+			any_fleet_in_system = {
+				owner = {
+					is_country_type = mem_ancient_protectors
+				}
 			}
 		}
 	}
@@ -38,7 +86,7 @@ ship_event = {
 	option = {
 		name = ONSCREEN
 		hidden_effect = {
-			owner = {
+			controller = {
 				country_event = { id = mem_orila_primitives.100 }
 			}
 		}
@@ -178,7 +226,7 @@ country_event = {
 	diplomatic = yes
 
 	picture_event_data = {
-		room = mem_orila_room
+		room = mem_orila_ai_1_room
 		portrait = mem_Orila_holo
 	}
 
@@ -486,14 +534,211 @@ country_event = {
 
 namespace = mem_orila_primitives_magnus
 
+# Triggers event when each country first sends a ship into the system (once per country)
+# Scope = Ship
+# From = System
+# FromFrom = Country
+ship_event = {
+	id = mem_orila_primitives_magnus.1
+	title = mem_orila_primitives_magnus.1.name
+	desc = { # ai station does not exist
+		text = mem_orila_primitives_magnus.1.desc.a
+		trigger = {
+			exists = controller
+			controller = {
+				NOT = {
+					has_country_flag = mem_es_system_ai
+				}
+			}
+		}
+	}
+	desc = { # ai station exists
+		text = mem_orila_primitives_magnus.1.desc.b
+		trigger = {
+			exists = controller
+			controller = {
+				has_country_flag = mem_es_system_ai
+			}
+		}
+	}
+	picture = GFX_evt_cosmic_storms_shroud_storm
+	show_sound = event_ship_bridge
+	is_triggered_only = yes
+
+	trigger = {
+		from = {
+			has_star_flag = mem_es_system
+		}
+		controller = {
+			is_ai = no
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				from = {
+					any_fleet_in_system = {
+						owner = {
+							is_country_type = mem_ancient_protectors
+						}
+					}
+				}
+			}
+			controller = {
+				set_country_flag = mem_es_system_ai
+			}
+		}
+	}
+
+	option = {
+		name = mem_orila_primitives_magnus.1.a
+		trigger = {
+			controller = {
+				NOT = {
+					has_country_flag = mem_es_system_ai
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_orila_primitives_magnus.1.b
+		trigger = {
+			controller = {
+				has_country_flag = mem_es_system_ai
+			}
+		}
+		hidden_effect = {
+			controller = {
+				country_event = { id = mem_orila_primitives_magnus.2 }
+			}
+		}
+	}
+}
+
+# correctly working AI
+country_event = {
+	id = mem_orila_primitives_magnus.2
+	title = mem_orila_primitives.100.name
+	desc = mem_orila_primitives.100.desc
+	
+	is_triggered_only = yes
+	diplomatic = yes
+
+	picture_event_data = {
+		room = mem_orila_ai_2_room
+		portrait = mem_Orila_holo
+	}
+
+	# Treaty?
+	option = {
+		name = mem_orila_primitives.100.a
+		response_text = mem_orila_primitives.100.desc.a
+		is_dialog_only = yes
+	}
+
+	# Senate?
+	option = {
+		name = mem_orila_primitives.100.b
+		response_text = mem_orila_primitives.100.desc.b
+		is_dialog_only = yes
+	}
+
+	# Builders?
+	option = {
+		name = mem_orila_primitives.100.c
+		response_text = mem_orila_primitives.100.desc.c
+		is_dialog_only = yes
+		hidden_effect = {
+			set_country_flag = mem_orila_primitive_system_q100c
+		}
+	}
+
+	# Council?
+	option = {
+		name = mem_orila_primitives.100.d
+		response_text = mem_orila_primitives.100.desc.d
+		is_dialog_only = yes
+		trigger = {
+			has_country_flag = mem_orila_primitive_system_q100c
+		}
+		hidden_effect = {
+			remove_country_flag = mem_orila_primitive_system_q100c
+			set_country_flag = mem_orila_primitive_system_q100d
+		}
+	}
+
+	# Contact? 1
+	option = {
+		name = mem_orila_primitives.100.e
+		response_text = mem_orila_primitives.100.desc.e
+		is_dialog_only = yes
+		trigger = {
+			has_country_flag = mem_orila_primitive_system_q100d
+			exists = event_target:mem_orila_country
+			NOT = {
+				has_communications = event_target:mem_orila_country
+			}
+		}
+		hidden_effect = {
+			establish_communications = event_target:mem_orila_country
+		}
+	}
+
+	# Contact? 2
+	option = {
+		name = mem_orila_primitives.100.e
+		response_text = mem_orila_primitives.100.desc.f
+		is_dialog_only = yes
+		trigger = {
+			has_country_flag = mem_orila_primitive_system_q100d
+			NOT = {
+				exists = event_target:mem_orila_country
+			}
+		}
+	}
+
+	# Bye
+	option = {
+		name = mem_orila_primitives.100.g
+		response_text = mem_orila_primitives.100.desc.g
+		hidden_effect = {
+			remove_country_flag = mem_orila_primitive_system_q100c
+		}
+	}
+
+	# Hack
+	option = {
+		name = mem_orila_primitives.100.h
+		#response_text = mem_orila_primitives.100.desc.h
+		trigger = {
+			OR = {
+				has_ascension_perk = ap_archaeoengineers
+				has_ascension_perk = ap_enigmatic_engineering
+				has_ascension_perk = ap_technological_ascendancy				
+				has_tradition = tr_subterfuge_finish
+			}
+		}
+		hidden_effect = {
+			remove_country_flag = mem_orila_primitive_system_q100c
+			#make engineering research project at system's sun
+		}
+	}
+
+	# What can you tell us about this system?
+	option = {
+		name = mem_orila_primitives.100.i
+		response_text = mem_orila_primitives.100.desc.i
+		is_dialog_only = yes
+	}
+}
+
 #test spawn event on primitive planet
 country_event = {
-	id = mem_orila_primitives_magnus.1
+	id = mem_orila_primitives_magnus.100
 	hide_window = yes
 
 	is_triggered_only = yes
-
-	specimen = mem_laser_rifle
 
 	immediate = {
 		add_relic = r_mem_dark_heart
