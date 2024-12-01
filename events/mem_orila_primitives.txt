@@ -30,6 +30,9 @@ country_event = {
 	}
 
 	immediate = {
+		from = {
+			save_event_target_as = mem_ancient_protector_country_diplomacy
+		}
 		if = {
 			limit = {
 				from = {
@@ -86,8 +89,30 @@ ship_event = {
 	option = {
 		name = ONSCREEN
 		hidden_effect = {
+			from = {
+				random_fleet_in_system = {
+					limit = {
+						owner = {
+							is_country_type = mem_ancient_protectors
+						}						
+					}
+					owner = {
+						save_event_target_as = mem_ancient_protector_country_diplomacy
+					}
+				}
+			}
 			controller = {
-				country_event = { id = mem_orila_primitives.100 }
+				establish_communications_no_message = event_target:mem_ancient_protector_country_diplomacy
+			}			 
+			if = {
+				limit = {
+					controller = {
+						is_ai = no
+					}
+				}
+				controller = {
+					country_event = { id = mem_orila_primitives.100 }
+				}
 			}
 		}
 	}
@@ -220,7 +245,20 @@ ship_event = {
 country_event = {
 	id = mem_orila_primitives.100
 	title = mem_orila_primitives.100.name
-	desc = mem_orila_primitives.100.desc
+	desc = {
+		text = mem_orila_primitives.100.desc
+		trigger = {
+			NOT = {
+				has_country_flag = mem_orila_country_gone
+			}
+		}
+	}
+	desc = {
+		text = mem_orila_primitives.100.desc.f
+		trigger = {
+			has_country_flag = mem_orila_country_gone
+		}
+	}
 	
 	is_triggered_only = yes
 	diplomatic = yes
@@ -249,9 +287,6 @@ country_event = {
 		name = mem_orila_primitives.100.c
 		response_text = mem_orila_primitives.100.desc.c
 		is_dialog_only = yes
-		hidden_effect = {
-			set_country_flag = mem_orila_primitive_system_q100c
-		}
 	}
 
 	# Council?
@@ -259,13 +294,6 @@ country_event = {
 		name = mem_orila_primitives.100.d
 		response_text = mem_orila_primitives.100.desc.d
 		is_dialog_only = yes
-		trigger = {
-			has_country_flag = mem_orila_primitive_system_q100c
-		}
-		hidden_effect = {
-			remove_country_flag = mem_orila_primitive_system_q100c
-			set_country_flag = mem_orila_primitive_system_q100d
-		}
 	}
 
 	# Contact? 1
@@ -274,7 +302,6 @@ country_event = {
 		response_text = mem_orila_primitives.100.desc.e
 		is_dialog_only = yes
 		trigger = {
-			has_country_flag = mem_orila_primitive_system_q100d
 			exists = event_target:mem_orila_country
 			NOT = {
 				has_communications = event_target:mem_orila_country
@@ -288,22 +315,16 @@ country_event = {
 	# Contact? 2
 	option = {
 		name = mem_orila_primitives.100.e
-		response_text = mem_orila_primitives.100.desc.f
-		is_dialog_only = yes
 		trigger = {
-			has_country_flag = mem_orila_primitive_system_q100d
 			NOT = {
 				exists = event_target:mem_orila_country
 			}
 		}
-	}
-
-	# Bye
-	option = {
-		name = mem_orila_primitives.100.g
-		response_text = mem_orila_primitives.100.desc.g
 		hidden_effect = {
-			remove_country_flag = mem_orila_primitive_system_q100c
+			set_country_flag = mem_orila_country_gone
+			country_event = {
+				id = mem_orila_primitives_magnus.2
+			}
 		}
 	}
 
@@ -320,8 +341,37 @@ country_event = {
 			}
 		}
 		hidden_effect = {
-			remove_country_flag = mem_orila_primitive_system_q100c
 			#make engineering research project at system's sun
+		}
+	}
+
+	# EDEN Protocol JOIN
+	option = {
+		name = mem_orila_primitives.100.i
+		response_text = mem_orila_primitives.100.desc.i
+		trigger = {
+			has_country_flag = mem_orila_country_gone
+		}
+		hidden_effect = {
+			event_target:mem_ancient_protector_country_diplomacy = {
+				every_owned_starbase = {
+					set_owner = root
+				}
+				set_faction_hostility = {
+					set_neutral = no
+					set_friendly = yes
+					target = root
+				}
+			}
+		}
+	}
+
+	# Bye
+	option = {
+		name = mem_orila_primitives.100.g
+		response_text = mem_orila_primitives.100.desc.g
+		hidden_effect = {
+			remove_country_flag = mem_orila_country_gone
 		}
 	}
 }
@@ -589,6 +639,18 @@ ship_event = {
 			controller = {
 				set_country_flag = mem_es_system_ai
 			}
+			from = {
+				random_fleet_in_system = {
+					limit = {
+						owner = {
+							is_country_type = mem_ancient_protectors
+						}						
+					}
+					owner = {
+						save_event_target_as = mem_ancient_protector_country_diplomacy
+					}
+				}
+			}
 		}
 	}
 
@@ -621,8 +683,21 @@ ship_event = {
 country_event = {
 	id = mem_orila_primitives_magnus.2
 	title = mem_orila_primitives.100.name
-	desc = mem_orila_primitives.100.desc
-	
+	desc = {
+		text = mem_orila_primitives.100.desc
+		trigger = {
+			NOT = {
+				has_country_flag = mem_orila_country_gone
+			}
+		}
+	}
+	desc = {
+		text = mem_orila_primitives.100.desc.f
+		trigger = {
+			has_country_flag = mem_orila_country_gone
+		}
+	}
+
 	is_triggered_only = yes
 	diplomatic = yes
 
@@ -650,9 +725,6 @@ country_event = {
 		name = mem_orila_primitives.100.c
 		response_text = mem_orila_primitives.100.desc.c
 		is_dialog_only = yes
-		hidden_effect = {
-			set_country_flag = mem_orila_primitive_system_q100c
-		}
 	}
 
 	# Council?
@@ -660,13 +732,6 @@ country_event = {
 		name = mem_orila_primitives.100.d
 		response_text = mem_orila_primitives.100.desc.d
 		is_dialog_only = yes
-		trigger = {
-			has_country_flag = mem_orila_primitive_system_q100c
-		}
-		hidden_effect = {
-			remove_country_flag = mem_orila_primitive_system_q100c
-			set_country_flag = mem_orila_primitive_system_q100d
-		}
 	}
 
 	# Contact? 1
@@ -675,7 +740,6 @@ country_event = {
 		response_text = mem_orila_primitives.100.desc.e
 		is_dialog_only = yes
 		trigger = {
-			has_country_flag = mem_orila_primitive_system_q100d
 			exists = event_target:mem_orila_country
 			NOT = {
 				has_communications = event_target:mem_orila_country
@@ -689,22 +753,16 @@ country_event = {
 	# Contact? 2
 	option = {
 		name = mem_orila_primitives.100.e
-		response_text = mem_orila_primitives.100.desc.f
-		is_dialog_only = yes
 		trigger = {
-			has_country_flag = mem_orila_primitive_system_q100d
 			NOT = {
 				exists = event_target:mem_orila_country
 			}
 		}
-	}
-
-	# Bye
-	option = {
-		name = mem_orila_primitives.100.g
-		response_text = mem_orila_primitives.100.desc.g
 		hidden_effect = {
-			remove_country_flag = mem_orila_primitive_system_q100c
+			set_country_flag = mem_orila_country_gone
+			country_event = {
+				id = mem_orila_primitives_magnus.2
+			}
 		}
 	}
 
@@ -721,7 +779,6 @@ country_event = {
 			}
 		}
 		hidden_effect = {
-			remove_country_flag = mem_orila_primitive_system_q100c
 			#make engineering research project at system's sun
 		}
 	}
@@ -731,6 +788,43 @@ country_event = {
 		name = mem_orila_primitives_magnus.2.a
 		response_text = mem_orila_primitives_magnus.2.desc.a
 		is_dialog_only = yes
+	}
+
+	# What happened to the station?
+	option = {
+		name = mem_orila_primitives_magnus.2.b
+		response_text = mem_orila_primitives_magnus.2.desc.b
+		is_dialog_only = yes
+	}
+
+	# EDEN Protocol JOIN
+	option = {
+		name = mem_orila_primitives.100.i
+		response_text = mem_orila_primitives.100.desc.i
+		trigger = {
+			has_country_flag = mem_orila_country_gone
+		}
+		hidden_effect = {
+			event_target:mem_ancient_protector_country_diplomacy = {
+				every_owned_starbase = {
+					set_owner = root
+				}
+				set_faction_hostility = {
+					set_neutral = no
+					set_friendly = yes
+					target = root
+				}
+			}
+		}
+	}
+
+	# Bye
+	option = {
+		name = mem_orila_primitives.100.g
+		response_text = mem_orila_primitives.100.desc.g
+		hidden_effect = {
+			remove_country_flag = mem_orila_country_gone
+		}
 	}
 }
 
