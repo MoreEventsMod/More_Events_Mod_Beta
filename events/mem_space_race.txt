@@ -3,18 +3,74 @@
 
 namespace = mem_space_race
 
-#Initializaton event
+# mem_space_race.1		|	Initializaton event started by resolution and ten year pulse afterwards
+# mem_space_race.2		|	Invitation received
+# mem_space_race.3		|	Checking for completion of a poll - restarts itself if there are still countries who have not made a decision
+# mem_space_race.4		|	Info to host that space race will take place as enough empires have accepted
+# mem_space_race.5		|	Info to host that space race will be canceled as too few empires have accepted
+# mem_space_race.6		|	Choosing a focus area (shields, armor, propulsion)
+# mem_space_race.8		|	Host is informed the race will start soon
+# mem_space_race.80		|	Hidden Event to check if everyone has made there choice and is so go on
+# mem_space_race.9		|	selfrepeating event to kick out participants one by one until the winner is decided
+# mem_space_race.10		|	Notification for country dropping out below third place
+# mem_space_race.11		|	Notification for country dropping out at third place
+# mem_space_race.12		|	Processing end of race and starting celebration events for winners and other participants
+# mem_space_race.13		|	Celebration as first place
+# mem_space_race.14		|	Celebration as second place
+# mem_space_race.15		|	Celebration as third place
+# mem_space_race.16		|	Celebration as other participant
+# mem_space_race.20		|	Info to countries which had accepted, that the race has been canceled
+# mem_space_race.21		|	Info to host that the space race was canceled due to him being at war
+# mem_space_race.22		|	Info to other participants that the space race was canceled due to host being at war
+# mem_space_race.23		|	Decade pulse to start new space race after the first has ended
+
+
+#Initializaton event started by resolution and ten year pulse afterwards
 country_event = {
 	id = mem_space_race.1
 	title = mem_space_race.1.name
-	desc = mem_space_race.1.desc
-	
+	desc = {
+		trigger = {
+			NOT = {
+				has_global_flag = mem_first_space_race_done
+			}
+		}
+		text = mem_space_race.1.desc
+	}
+	desc = {
+		trigger = {
+			has_global_flag = mem_first_space_race_done
+		}
+		text = mem_space_race.1.desc.2
+	}
 	picture = GFX_evt_alien_propaganda
 	
 	is_triggered_only = yes
+
+	trigger = {
+		NOT = {
+			has_global_flag = mem_space_race_happened
+		}
+	}
 	
 	immediate = {
-		set_global_flag = mem_space_race_happened
+		#Clearing targets for later rounds
+		if = {
+			limit = {
+				exists = event_target:mem_space_race_host
+			}
+			clear_global_event_target = mem_space_race_host
+		}
+		if = {
+			limit = {
+				exists = event_target:mem_space_race_host_declined
+			}
+			clear_global_event_target = mem_space_race_host_declined
+		}
+		set_timed_global_flag = {
+			flag = mem_space_race_happened
+			years = 8
+		}
 		log = "[Root.GetName]: Space Race proposed"
 	}
 	
@@ -39,17 +95,26 @@ country_event = {
 			}
 		}
 		hidden_effect = {
-			set_country_flag = mem_space_race_accepted
-			set_country_flag = mem_space_race_host
+			set_timed_country_flag = {
+				flag = mem_space_race_accepted
+				years = 8
+			}
+			set_timed_country_flag = {
+				flag = mem_space_race_host
+				years = 8
+			}
 			save_global_event_target_as = mem_space_race_host
 			every_country = {
 				limit = {
 					is_country_type = default
-					has_communications = root
+					is_galactic_community_member = yes
 					NOT = { is_same_value = root }
 					is_at_war = no
 				}
-				set_country_flag = mem_space_race_considering
+				set_timed_country_flag = {
+					flag = mem_space_race_considering
+					years = 8
+				}
 				country_event = { id = mem_space_race.2 days = 30}
 			}
 			event_target:global_event_country = {
@@ -65,8 +130,12 @@ country_event = {
 	option = {
 		name = mem_space_race.1.b
 		log = "Declined"
-		ai_chance = { factor = 1 }		
-		set_country_flag = mem_space_race_declined
+		ai_chance = { factor = 1 }
+		set_timed_country_flag = {
+			flag = mem_space_race_declined
+			years = 8
+		}
+		save_global_event_target_as = mem_space_race_host_declined
 		hidden_effect = {
 			IF = {
 				limit = {
@@ -79,6 +148,7 @@ country_event = {
 							limit = {
 								is_country_type = default
 								is_homicidal = no
+								is_galactic_community_member = yes
 							}
 							count >= 5
 						}
@@ -94,6 +164,7 @@ country_event = {
 							limit = {
 								is_country_type = default
 								is_homicidal = no
+								is_galactic_community_member = yes
 							}
 							count >= 5
 						}
@@ -102,14 +173,7 @@ country_event = {
 				}
 			}
 			ELSE = {
-				remove_global_flag = mem_space_race_happened
-				set_timed_global_flag = {
-					flag = mem_space_race_happened
-					days = 3600
-				}
-				every_country = {
-					remove_country_flag = mem_space_race_declined
-				}
+				# fire event telling about how the event was canceled
 			}	
 		}		
 	}
@@ -119,8 +183,20 @@ country_event = {
 country_event = {
 	id = mem_space_race.2
 	title = mem_space_race.2.name
-	desc = mem_space_race.2.desc
-	
+	desc = {
+		trigger = {
+			NOT = {
+				has_global_flag = mem_first_space_race_done
+			}
+		}
+		text = mem_space_race.2.desc
+	}
+	desc = {
+		trigger = {
+			has_global_flag = mem_first_space_race_done
+		}
+		text = mem_space_race.2.desc.2
+	}
 	diplomatic = yes
 	
 	picture_event_data = {
@@ -165,12 +241,14 @@ country_event = {
 				}
 			}
 			modifier = {
-				factor = 0.1
+				factor = 0.5
 				is_xenophobe = yes
 			}
 		}
-		
-		set_country_flag = mem_space_race_accepted
+		set_timed_country_flag = {
+			flag = mem_space_race_accepted
+			years = 8
+		}
 		add_modifier = {
 			modifier = mem_space_race_participant
 			days = -1
@@ -212,7 +290,7 @@ country_event = {
 				}
 			}
 			modifier = {
-				factor = 2
+				factor = 1.5
 				OR = {
 					is_xenophobe = yes
 					has_ethic = ethic_gestalt_consciousness
@@ -277,8 +355,10 @@ country_event = {
 	immediate = {
 		IF = {
 			limit = {
-				NOR = {
-					any_country = { has_country_flag = mem_space_race_considering }
+				NOT = {
+					any_country = {
+						has_country_flag = mem_space_race_considering
+					}
 				}
 			}
 			IF = { #Checking if we have at least 5 participants
@@ -298,8 +378,6 @@ country_event = {
 						has_country_flag = mem_space_race_accepted
 					}
 					country_event = { id = mem_space_race.6 days = 30 }
-					#country_event = { id = mem_space_race.7 days = 30 } #Polling to remove those who would go to war in the mean time
-					#country_event = { id = mem_space_race.22 days = 90 } #will only fire if the race has been canceled because the host is going to war
 				}
 			}
 			ELSE = { 
@@ -360,6 +438,7 @@ country_event = {
 }
 
 @base_score = 1
+@bonus_score = 2
 @unfocus_score = 3
 @spread_score = 4 
 @focus_score = 6 
@@ -379,7 +458,21 @@ country_event = {
 	}
 	
 	immediate = {
-		#handing out base score for shields
+		# ensuring the variables are reset in later races
+		set_variable = {
+			which = mem_space_race_shields
+			value = 0
+		}
+		set_variable = {
+			which = mem_space_race_thrust
+			value = 0
+		}
+		set_variable = {
+			which = mem_space_race_armor
+			value = 0
+		}
+
+		#handing out base and bonus score for shields
 		IF = {
 			limit = { has_technology = tech_shields_1 }
 			change_variable = { which = mem_space_race_shields value = @base_score }
@@ -400,9 +493,40 @@ country_event = {
 			limit = { has_technology = tech_shields_5 }
 			change_variable = { which = mem_space_race_shields value = @base_score }
 		}
+		IF = {
+			limit = { has_technology = tech_shield_hardeners_1 }
+			change_variable = { which = mem_space_race_shields value = @base_score }
+		}
+		IF = {
+			limit = { has_technology = tech_shield_hardeners_2 }
+			change_variable = { which = mem_space_race_shields value = @base_score }
+		}
+		IF = {
+			limit = { has_technology = tech_shield_rechargers_1 }
+			change_variable = { which = mem_space_race_shields value = @base_score }
+		}
+		IF = {
+			limit = { has_technology = tech_archaeoshield }
+			change_variable = { which = mem_space_race_shields value = @bonus_score }
+		}		
+		IF = {
+			limit = { has_technology = tech_dark_matter_deflector }
+			change_variable = { which = mem_space_race_shields value = @bonus_score }
+		}
+		IF = {
+			limit = { has_technology = tech_psionic_shield }
+			change_variable = { which = mem_space_race_shields value = @bonus_score }
+		}
+		IF = {
+			limit = { has_technology = tech_mem_lex_shield }
+			change_variable = { which = mem_space_race_shields value = @bonus_score }
+		}
+		IF = {
+			limit = { has_technology = tech_mem_lex_shield_repair }
+			change_variable = { which = mem_space_race_shields value = @bonus_score }
+		}
 		
 		#For thrusters
-		change_variable = { which = mem_space_race_thrust value = @base_score } #Only 4 levels are available, so one is free
 		IF = {
 			limit = { has_technology = tech_thrusters_1 }
 			change_variable = { which = mem_space_race_thrust value = @base_score }
@@ -418,6 +542,26 @@ country_event = {
 		IF = {
 			limit = { has_technology = tech_thrusters_4 }
 			change_variable = { which = mem_space_race_thrust value = @base_score }
+		}
+		IF = {
+			limit = { has_technology = tech_thrusters_bio_integration }
+			change_variable = { which = mem_space_race_thrust value = @base_score }
+		}
+		IF = {
+			limit = { has_technology = tech_afterburners_1 }
+			change_variable = { which = mem_space_race_thrust value = @base_score }
+		}
+		IF = {
+			limit = { has_technology = tech_afterburners_2 }
+			change_variable = { which = mem_space_race_thrust value = @base_score }
+		}
+		IF = {
+			limit = { has_technology = tech_dark_matter_propulsion }
+			change_variable = { which = mem_space_race_thrust value = @bonus_score }
+		}
+		IF = {
+			limit = { has_technology = tech_mem_lex_thruster }
+			change_variable = { which = mem_space_race_thrust value = @bonus_score }
 		}
 		
 		#For armour
@@ -440,6 +584,38 @@ country_event = {
 		IF = {
 			limit = { has_technology = tech_ship_armor_5 }
 			change_variable = { which = mem_space_race_armor value = @base_score }
+		}
+		IF = {
+			limit = { has_technology = tech_armor_hardeners_1 }
+			change_variable = { which = mem_space_race_armor value = @base_score }
+		}
+		IF = {
+			limit = { has_technology = tech_armor_hardeners_2 }
+			change_variable = { which = mem_space_race_armor value = @base_score }
+		}
+		IF = {
+			limit = { has_technology = tech_archaeoarmor }
+			change_variable = { which = mem_space_race_armor value = @bonus_score }
+		}
+		IF = {
+			limit = { has_technology = tech_dragon_armor }
+			change_variable = { which = mem_space_race_armor value = @bonus_score }
+		}
+		IF = {
+			limit = { has_technology = tech_crystal_armor_1 }
+			change_variable = { which = mem_space_race_armor value = @bonus_score }
+		}
+		IF = {
+			limit = { has_technology = tech_crystal_armor_2 }
+			change_variable = { which = mem_space_race_armor value = @bonus_score }
+		}
+		IF = {
+			limit = { has_technology = tech_mem_lex_armor }
+			change_variable = { which = mem_space_race_armor value = @bonus_score }
+		}
+		IF = {
+			limit = { has_technology = tech_mem_vazuran_xentronium_armor }
+			change_variable = { which = mem_space_race_armor value = @bonus_score }
 		}
 	}
 	
@@ -492,8 +668,11 @@ country_event = {
 	}
 	
 	after = { 
-		remove_country_flag = mem_space_race_accepted 
-		set_country_flag = mem_space_race_participating
+		remove_country_flag = mem_space_race_accepted
+		set_timed_country_flag = {
+			flag = mem_space_race_participating
+			years = 8
+		}
 		hidden_effect = {
 			IF = {
 				limit = {
@@ -509,40 +688,40 @@ country_event = {
 }
 
 #We can't go to race, we are at war
-country_event = {
-	id = mem_space_race.7
-	title = mem_space_race.7.name
-	desc = mem_space_race.7.desc
+# country_event = {
+# 	id = mem_space_race.7
+# 	title = mem_space_race.7.name
+# 	desc = mem_space_race.7.desc
 	
-	picture = GFX_evt_alien_propaganda
+# 	picture = GFX_evt_alien_propaganda
 	
-	is_triggered_only  = yes
+# 	is_triggered_only  = yes
 	
-	trigger = {
-		is_at_war = yes
-	}
+# 	trigger = {
+# 		is_at_war = yes
+# 	}
 	
-	immediate = {
-		remove_country_flag = mem_space_race_accepted
-	}
+# 	immediate = {
+# 		remove_country_flag = mem_space_race_accepted
+# 	}
 	
-	option = {
-		name = UNFORTUNATE
-	}
+# 	option = {
+# 		name = UNFORTUNATE
+# 	}
 	
-	after = {
-		IF = {
-			limit = { 
-				has_country_flag = mem_space_race_host 
-			}
-			set_global_flag = mem_space_race_cancelled
-			remove_modifier = mem_space_race_host
-		}
-		ELSE = {
-			remove_modifier = mem_space_race_participant
-		}
-	}
-}
+# 	after = {
+# 		IF = {
+# 			limit = { 
+# 				has_country_flag = mem_space_race_host 
+# 			}
+# 			set_global_flag = mem_space_race_cancelled
+# 			remove_modifier = mem_space_race_host
+# 		}
+# 		ELSE = {
+# 			remove_modifier = mem_space_race_participant
+# 		}
+# 	}
+# }
 
 #host is informed that the race will be starting
 country_event = {
@@ -567,6 +746,10 @@ country_event = {
 	is_triggered_only = yes
 
 	immediate = {
+		set_variable = {
+			which = mem_space_race_count_participants	
+			value = 0
+		}
 		IF = {
 			limit = {
 				NOT = {
@@ -602,94 +785,165 @@ country_event = {
 	is_triggered_only = yes
 	
 	trigger = {
-		NOT = { has_global_flag = mem_space_race_cancelled }
+		NOT = {
+			has_global_flag = mem_space_race_cancelled
+		}
 	}
 	
 	immediate = {
+		#decide race type
 		random_list = {
 			33 = {
-				set_timed_country_flag = { flag = mem_space_race_shield_race days = 1 }
+				set_timed_country_flag = {
+					flag = mem_space_race_shield_race
+					days = 1
+				}
 				# log = "It's a shield race"
 			}
 			33 = {
-				set_timed_country_flag = { flag = mem_space_race_thrust_race days = 1 }
+				set_timed_country_flag = {
+					flag = mem_space_race_thrust_race
+					days = 1
+				}
 				# log = "It's a thrust race"
 			}
 			33 = {
-				set_timed_country_flag = { flag = mem_space_race_armor_race days = 1 }
+				set_timed_country_flag = {
+					flag = mem_space_race_armor_race
+					days = 1
+				}
 				# log = "It's an armor race"
 			}
 		}
+		#chip away at numbers until one country drops out
 		while = {
 			count = 1000
 			limit = { 
-				NOT = { has_country_flag = mem_space_race_done_round } 
-				any_country = { has_country_flag = mem_space_race_participating }
+				NOT = {
+					has_country_flag = mem_space_race_done_round
+				} 
+				any_country = {
+					has_country_flag = mem_space_race_participating
+				}
 			}
 			random_country = {
-				limit = { has_country_flag = mem_space_race_participating }
+				limit = {
+					has_country_flag = mem_space_race_participating
+				}
+				reroll_random = yes
 				random_list = {
 					1 = {
-						change_variable = { which = mem_space_race_shields value = -1 }
+						change_variable = {
+							which = mem_space_race_shields
+							value = -1
+						}
 						# log = "[This.GetName]: SH: [This.mem_space_race_shields]"
 						IF = {
 							limit = { 
-								prev = { has_country_flag = mem_space_race_shield_race }
-								check_variable = { which = mem_space_race_shields value < 1 }
+								prev = {
+									has_country_flag = mem_space_race_shield_race
+								}
+								check_variable = {
+									which = mem_space_race_shields
+									value < 1
+								}
 							}
 							save_event_target_as = eliminated
-							prev = { set_timed_country_flag = { flag = mem_space_race_done_round days = 1 } }
-						}
-						
+							prev = {
+								set_timed_country_flag = {
+									flag = mem_space_race_done_round
+									days = 1
+								}
+							}
+						}						
 						modifier = {
 							factor = 2
-							prev = { has_country_flag = mem_space_race_shield_race }
+							prev = {
+								has_country_flag = mem_space_race_shield_race
+							}
 						}
 						modifier = {
 							factor = 0
-							check_variable = { which = mem_space_race_shields value < 1 }
+							check_variable = {
+								which = mem_space_race_shields
+								value < 1
+							}
 						}
 					}
 					1 = {
-						change_variable = { which = mem_space_race_thrust value = -1 }
+						change_variable = {
+							which = mem_space_race_thrust
+							value = -1
+						}
 						# log = "[This.GetName]: TR: [This.mem_space_race_thrust]"
 						IF = {
 							limit = { 
-								prev = { has_country_flag = mem_space_race_thrust_race }
-								check_variable = { which = mem_space_race_thrust value < 1 }
+								prev = {
+									has_country_flag = mem_space_race_thrust_race
+								}
+								check_variable = {
+									which = mem_space_race_thrust
+									value < 1
+								}
 							}
 							save_event_target_as = eliminated
-							prev = { set_timed_country_flag = { flag = mem_space_race_done_round days = 1 } }
-						}
-						
+							prev = {
+								set_timed_country_flag = {
+									flag = mem_space_race_done_round
+									days = 1
+								}
+							}
+						}						
 						modifier = {
 							factor = 2
-							prev = { has_country_flag = mem_space_race_thrust_race }
+							prev = {
+								has_country_flag = mem_space_race_thrust_race
+							}
 						}
 						modifier = {
 							factor = 0
-							check_variable = { which = mem_space_race_thrust value < 1 }
+							check_variable = {
+								which = mem_space_race_thrust
+								value < 1
+							}
 						}
 					}
 					1 = {
-						change_variable = { which = mem_space_race_armor value = -1 }
+						change_variable = {
+							which = mem_space_race_armor
+							value = -1
+						}
 						# log = "[This.GetName]: AM: [This.mem_space_race_armor]"
 						IF = {
 							limit = { 
-								prev = { has_country_flag = mem_space_race_armor_race }
-								check_variable = { which = mem_space_race_armor value < 1 }
+								prev = {
+									has_country_flag = mem_space_race_armor_race
+								}
+								check_variable = {
+									which = mem_space_race_armor
+									value < 1
+								}
 							}
 							save_event_target_as = eliminated
-							prev = { set_timed_country_flag = { flag = mem_space_race_done_round days = 1 } }
-						}
-						
+							prev = {
+								set_timed_country_flag = {
+									flag = mem_space_race_done_round
+									days = 1
+								}
+							}
+						}						
 						modifier = {
 							factor = 2
-							prev = { has_country_flag = mem_space_race_armor_race }
+							prev = {
+								has_country_flag = mem_space_race_armor_race
+							}
 						}
 						modifier = {
 							factor = 0
-							check_variable = { which = mem_space_race_armor value < 1 }
+							check_variable = {
+								which = mem_space_race_armor
+								value < 1
+							}
 						}
 					}
 				}
@@ -700,60 +954,93 @@ country_event = {
 			}
 			IF = {
 				limit = {
-					check_variable = { which = mem_space_race_sudden_death_counter value > 999 }
+					check_variable = {
+						which = mem_space_race_sudden_death_counter
+						value > 999
+					}
 				}
 				random_country = {
-					limit = { has_country_flag = mem_space_race_participating }					
+					limit = {
+						has_country_flag = mem_space_race_participating
+					}					
 					save_event_target_as = eliminated
-					prev = { set_timed_country_flag = { flag = mem_space_race_done_round days = 1 } }
+					prev = {
+						set_timed_country_flag = {
+							flag = mem_space_race_done_round
+							days = 1
+						}
+					}
 					# log = "[eliminated.GetName] is killed off by sudden death"
 				}
 			}
 		}
-		set_variable = { which = mem_space_race_sudden_death_counter value = 0 }
+		set_variable = {
+			which = mem_space_race_sudden_death_counter
+			value = 0
+		}
 		IF = {
 			limit = {
 				count_country = {
-					limit = { has_country_flag = mem_space_race_participating }
+					limit = {
+						has_country_flag = mem_space_race_participating
+					}
 					count > 3
 				}
 			}
 			event_target:eliminated = {		
 				country_event = { id = mem_space_race.10 }
 				remove_country_flag = mem_space_race_participating
-				set_country_flag = mem_space_race_former_participant
+				set_timed_country_flag = {
+					flag = mem_space_race_former_participant
+					years = 5
+				}
 			}
 		}
 		ELSE_IF = {
 			limit = {
 				count_country = {
-					limit = { has_country_flag = mem_space_race_participating }
+					limit = {
+						has_country_flag = mem_space_race_participating
+					}
 					count = 3
 				}
 			}
 			event_target:eliminated = {
-				save_event_target_as = third_place
+				save_global_event_target_as = third_place
 				country_event = { id = mem_space_race.11 }
 				remove_country_flag = mem_space_race_participating
-				set_country_flag = mem_space_race_former_participant
+				set_timed_country_flag = {
+					flag = mem_space_race_former_participant
+					years = 5
+				}
 			}
 		}
 		ELSE = {
 			event_target:eliminated = {
-				save_event_target_as = second_place
+				save_global_event_target_as = second_place
 				remove_country_flag = mem_space_race_participating
-				set_country_flag = mem_space_race_former_participant
+				set_timed_country_flag = {
+					flag = mem_space_race_former_participant
+					years = 5
+				}
 			}
 			random_country = {
-				limit = { has_country_flag = mem_space_race_participating }
+				limit = {
+					has_country_flag = mem_space_race_participating
+				}
 				remove_country_flag = mem_space_race_participating
-				set_country_flag = mem_space_race_former_participant
-				save_event_target_as = first_place
+				set_timed_country_flag = {
+					flag = mem_space_race_former_participant
+					years = 5
+				}
+				save_global_event_target_as = first_place
 			}
 			country_event = { id = mem_space_race.12 }
 		}
 		every_country = {
-			limit = { has_country_flag = mem_space_race_participating }
+			limit = {
+				has_country_flag = mem_space_race_participating
+			}
 			change_variable = {
 				which = mem_space_race_shields
 				value = @rebound
@@ -771,14 +1058,17 @@ country_event = {
 			which = mem_space_race_count_participants
 			value = -1
 		}
+		#go again as long as there are still at least 2 participants left
 		IF = {
 			limit = {
 				count_country = {
-					limit = { has_country_flag = mem_space_race_participating }
-					count > 0
+					limit = {
+						has_country_flag = mem_space_race_participating
+					}
+					count > 1
 				}
 			}
-			country_event = { id = mem_space_race.9 days = 3 }# random = 3 }
+			country_event = { id = mem_space_race.9 days = 3 }
 		}
 		# log = "[eliminated.GetName] is out. [Root.mem_space_race_count_participants] are still racing"
 	}
@@ -817,7 +1107,9 @@ country_event = {
 	
 	after = {
 		IF = {
-			limit = { has_modifier = mem_space_race_participant }
+			limit = {
+				has_modifier = mem_space_race_participant
+			}
 			remove_modifier = mem_space_race_participant
 		}
 	}
@@ -856,7 +1148,9 @@ country_event = {
 	
 	after = {
 		IF = {
-			limit = { has_modifier = mem_space_race_participant }
+			limit = {
+				has_modifier = mem_space_race_participant
+			}
 			remove_modifier = mem_space_race_participant
 		}
 	}
@@ -868,16 +1162,31 @@ country_event = {
 	hide_window = yes
 	is_triggered_only = yes
 	
-	immediate = {
-		remove_modifier = mem_space_race_host
-		set_global_flag = mem_space_race_ended
+	immediate = {	
+		set_timed_global_flag = {
+			flag = mem_space_race_ended
+			years = 8
+		}
 		event_target:third_place = { country_event = { id = mem_space_race.15 days = 3 } }
 		event_target:second_place = { country_event = { id = mem_space_race.14 days = 3 } }
 		event_target:first_place = { country_event = { id = mem_space_race.13 days = 3 } }
 		every_country = {
 			limit = {
 				has_country_flag = mem_space_race_former_participant
-				NOT = { is_same_value = event_target:mem_space_race_host }
+				NOR = {
+					is_same_value = event_target:third_place
+					is_same_value = event_target:second_place
+					is_same_value = event_target:first_place
+				}
+			}
+			country_event = { id = mem_space_race.16 days = 3 }
+		}
+		every_country = {
+			limit = {
+				has_country_flag = mem_space_race_former_participant
+				NOT = {
+					is_same_value = event_target:mem_space_race_host
+				}
 			}
 			event_target:mem_space_race_host = {
 				add_intel = {
@@ -892,25 +1201,18 @@ country_event = {
 			every_country = {
 				limit = {
 					has_country_flag = mem_space_race_former_participant
-					NOT = { is_same_value = event_target:mem_space_race_host }
-					NOT = { is_same_value = prev }
+					NOT = {
+						is_same_value = event_target:mem_space_race_host
+					}
+					NOT = {
+						is_same_value = prev
+					}
 				}
 				add_intel = {
 					who = prev
 					amount = 10
 				}
 			}
-		}
-		every_country = {
-			limit = {
-				has_country_flag = mem_space_race_former_participant
-				NOR = {
-					is_same_value = event_target:third_place
-					is_same_value = event_target:second_place
-					is_same_value = event_target:first_place
-				}
-			}
-			country_event = { id = mem_space_race.16 days = 3 }
 		}
 	}
 }
@@ -963,6 +1265,8 @@ country_event = {
 		trigger = {
 			has_authority = auth_machine_intelligence
 		}
+
+		ai_chance = { factor = 1 }
 	}
 	
 	option = {
@@ -1014,12 +1318,17 @@ country_event = {
 		}
 
 		IF = {
-			limit = { has_modifier = mem_space_race_participant }
+			limit = {
+				has_modifier = mem_space_race_participant
+			}
 			remove_modifier = mem_space_race_participant
 		}
 		IF = {
-			limit = { has_modifier = mem_space_race_host }
+			limit = {
+				has_modifier = mem_space_race_host
+			}
 			remove_modifier = mem_space_race_host
+			remove_country_flag = mem_space_race_host
 		}
 		custom_tooltip = mem_space_race_gain_intel
 	}
@@ -1084,6 +1393,8 @@ country_event = {
 				has_ethic = ethic_fanatic_militarist
 			}
 		}
+
+		ai_chance = { factor = 1 }
 	}
 	
 	after = {
@@ -1108,12 +1419,17 @@ country_event = {
 			max = @tier1researchmax
 		}
 		IF = {
-			limit = { has_modifier = mem_space_race_participant }
+			limit = {
+				has_modifier = mem_space_race_participant
+			}
 			remove_modifier = mem_space_race_participant
 		}
 		IF = {
-			limit = { has_modifier = mem_space_race_host }
+			limit = {
+				has_modifier = mem_space_race_host
+			}
 			remove_modifier = mem_space_race_host
+			remove_country_flag = mem_space_race_host
 		}
 		custom_tooltip = mem_space_race_gain_intel
 	}
@@ -1192,12 +1508,17 @@ country_event = {
 			max = @tier1researchmax
 		}
 		IF = {
-			limit = { has_modifier = mem_space_race_participant }
+			limit = {
+				has_modifier = mem_space_race_participant
+			}
 			remove_modifier = mem_space_race_participant
 		}
 		IF = {
-			limit = { has_modifier = mem_space_race_host }
+			limit = {
+				has_modifier = mem_space_race_host
+			}
 			remove_modifier = mem_space_race_host
+			remove_country_flag = mem_space_race_host
 		}
 		custom_tooltip = mem_space_race_gain_intel
 	}
@@ -1280,12 +1601,17 @@ country_event = {
 			max = @tier1researchmax
 		}
 		IF = {
-			limit = { has_modifier = mem_space_race_participant }
+			limit = {
+				has_modifier = mem_space_race_participant
+			}
 			remove_modifier = mem_space_race_participant
 		}
 		IF = {
-			limit = { has_modifier = mem_space_race_host }
+			limit = {
+				has_modifier = mem_space_race_host
+			}
 			remove_modifier = mem_space_race_host
+			remove_country_flag = mem_space_race_host
 		}
 		custom_tooltip = mem_space_race_gain_intel
 	}
@@ -1330,7 +1656,11 @@ country_event = {
 	}
 	
 	immediate = {
-		set_global_flag = mem_space_race_cancelled
+		set_timed_global_flag = {
+			flag = mem_space_race_cancelled
+			years = 8
+		}		
+		set_global_flag = mem_first_space_race_done
 		every_country = {
 			limit = {
 				OR = {
@@ -1358,10 +1688,6 @@ country_event = {
 	picture = GFX_evt_alien_propaganda
 	
 	is_triggered_only = yes
-
-	trigger = {
-		has_global_flag = mem_space_race_cancelled
-	}
 	
 	immediate = {
 		remove_country_flag = mem_space_race_participating
@@ -1372,8 +1698,49 @@ country_event = {
 		name = mem_space_race.22.a
 		
 		IF = {
-			limit = { has_modifier = mem_space_race_participant }
+			limit = {
+				has_modifier = mem_space_race_participant
+			}
 			remove_modifier = mem_space_race_participant
+		}
+	}
+}
+
+# decade pulse to start new race after the first one has finished
+country_event = {
+	id = mem_space_race.23
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_global_flag = mem_first_space_race_done
+		NOR = {
+			has_global_flag = mem_space_race_cancelled
+			has_global_flag = mem_space_race_ended
+		}
+		is_country_type = global_event
+		count_country = {
+			count > 4
+			limit = {
+				is_galactic_community_member = yes
+				is_homicidal = no
+			}
+		}
+	}
+
+	immediate = {
+		random_country = {
+			limit = {
+				is_country_type = default
+				is_galactic_community_member = yes
+				is_homicidal = no
+			}
+			country_event = {
+				id = mem_space_race.1
+				days = 30
+				random = 60
+			}
 		}
 	}
 }
@@ -1389,6 +1756,9 @@ event = {
 			remove_modifier = mem_space_race_host
 			remove_modifier = mem_space_race_participant
 		}
-		set_global_flag = mem_space_race_cancelled
+		set_timed_global_flag = {
+			flag = mem_space_race_cancelled
+			years = 8
+		}
 	}
 }
