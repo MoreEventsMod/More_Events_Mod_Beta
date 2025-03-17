@@ -38,6 +38,8 @@ namespace = mem_surveyor
 # mem_surveyor.116	|	Probe gives away deposit
 # mem_surveyor.120	|	Custom diplomacy mainmenu
 # mem_surveyor.121	|	Custom diplomacy submenu - Talk about Probe
+# mem_surveyor.122	|	Custom diplomacy submenu - Earn Trust
+# mem_surveyor.123	|	Custom diplomacy submenu - Galactic Curiosities
 #####################################################################################################################
 # Probe flips to Berserker
 #####################################################################################################################
@@ -2202,6 +2204,102 @@ country_event = {
 			}
 		}
 	}
+	option = {
+		name = BACK
+		default_hide_option = yes
+		hidden_effect = {
+			country_event = {
+				id = mem_surveyor.120
+			}
+		}		
+	}
+}
+
+# Custom diplomacy submenu - Galactic Curiosities
+country_event = {
+	id = mem_surveyor.123
+	title = MEM_SURVEYOR_PROBE_HEADER
+	# Picks one of these descs at random	TODO - Add some more
+	desc = mem_surveyor.123.desc.1
+	is_triggered_only = yes
+	diplomatic = yes
+	custom_gui = "enclave_curator_window"
+	custom_gui_option = "enclave_curator_option"
+	picture_event_data = {
+		room = mem_surveyor_green_room
+		portrait = event_target:mem_surveyor_country
+	}
+
+	immediate = {
+		# Set costs based on empire size
+		# Base of 500 Energy
+		set_variable = {
+			which = mem_surveyor_curio_cost
+			value = 500
+		}
+		# +1% per Empire Size (same scaling as Edicts)
+		# Ergo, 1000 Energy at 100 Empire Size
+		multiply_variable = {
+			which = mem_surveyor_curio_cost
+			value = value:edict_size_effect
+		}
+		# refund value
+		set_variable = {
+			which = mem_surveyor_curio_refund
+			value = value:mem_surveyor_curio_cost
+		}
+		multiply_variable = {
+			which = mem_surveyor_curio_refund
+			value = -1
+		}
+	}
+
+	# Point us to something interesting
+	option = {
+		name = mem_surveyor.123.a
+		custom_tooltip = mem_surveyor.123.a.tt
+		is_dialog_only = yes
+		response_text = mem_surveyor.123.a.answer	# TODO scripted loc for alternative response text in case of refund
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|mem_surveyor_curio_cost|
+		}
+		hidden_effect = {
+			if = {
+				limit = {
+					NOT = {
+						has_country_flag = mem_surveyor_curio_soldout
+					}
+				}
+				random_list = {
+					# TODO every entry is only valid, if system not previously entered by root (how to check that?)
+					# TODO entry gives temporary flag mem_surveyor_curio_given
+				}
+			}
+			# If a curio location was handed out, remove the flag, otherwise refund and add a permanent flag used for the scripted loc and prevent further random_list cycles in the future
+			if = {
+				limit = {
+					has_country_flag = mem_surveyor_curio_given
+				}
+				remove_country_flag = mem_surveyor_curio_given
+			}
+			else = {
+				if = {
+					limit = {
+						NOT = {
+							has_country_flag = mem_surveyor_curio_soldout
+						}
+					}
+					set_country_flag = mem_surveyor_curio_soldout
+				}				
+				add_resource = {
+					energy = value:mem_surveyor_curio_refund 
+				}
+			}
+		}
+	}
+
 	option = {
 		name = BACK
 		default_hide_option = yes
