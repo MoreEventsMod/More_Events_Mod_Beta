@@ -41,6 +41,7 @@ namespace = mem_surveyor
 # mem_surveyor.121	|	Custom diplomacy submenu - Talk about Probe
 # mem_surveyor.122	|	Custom diplomacy submenu - Earn Trust
 # mem_surveyor.123	|	Custom diplomacy submenu - Galactic Curiosities
+# mem_surveyor.124	|	Survey Reevaluation
 #####################################################################################################################
 # Probe flips to Berserker
 #####################################################################################################################
@@ -557,6 +558,9 @@ country_event = {
 		}
 		NOT = {
 			has_country_flag = mem_surveyor_spotted_probe
+		}
+		NOT = {
+			has_origin = origin_mem_ceaseless_gaze
 		}
 	}
 	picture = GFX_evt_unknown_ships
@@ -1541,6 +1545,15 @@ country_event = {
 	}
 	option = {
 		name = mem_surveyor.111.a
+		custom_tooltip = opinion10
+		hidden_effect = {
+			event_target:mem_surveyor_country = {
+				add_trust = {
+					who = root
+					amount = 10
+				}
+			}
+		}
 	}
 }
 
@@ -1612,6 +1625,14 @@ country_event = {
 	option = {
 		name = mem_surveyor.112.a
 		custom_tooltip = mem_surveyor.112.a.tooltip
+		hidden_effect = {
+			event_target:mem_surveyor_country = {
+				add_trust = {
+					who = root
+					amount = 10
+				}
+			}
+		}
 	}
 }
 
@@ -1649,6 +1670,15 @@ country_event = {
 			min = @tier4researchmin
 			max = @tier4researchmax
 		}
+		custom_tooltip = opinion10
+		hidden_effect = {
+			event_target:mem_surveyor_country = {
+				add_trust = {
+					who = root
+					amount = 10
+				}
+			}
+		}
 	}
 }
 
@@ -1674,7 +1704,7 @@ country_event = {
 	}
 	option = {
 		name = mem_surveyor.114.a
-		random_list = {
+		locked_random_list = {
 			4 = {
 				give_technology = {
 					tech = tech_lasers_2
@@ -1703,6 +1733,15 @@ country_event = {
 				}
 			}
 		}
+		custom_tooltip = opinion10
+		hidden_effect = {
+			event_target:mem_surveyor_country = {
+				add_trust = {
+					who = root
+					amount = 10
+				}
+			}
+		}
 	}
 }
 
@@ -1725,6 +1764,15 @@ country_event = {
 		add_modifier = {
 			modifier = mem_surveyor_star_data
 			days = 1800
+		}
+		custom_tooltip = opinion10
+		hidden_effect = {
+			event_target:mem_surveyor_country = {
+				add_trust = {
+					who = root
+					amount = 10
+				}
+			}
 		}
 	}
 }
@@ -1762,25 +1810,31 @@ country_event = {
 	}
 	option = {
 		name = mem_surveyor.116.a
-		custom_tooltip = mem_surveyor.116.tooltip
+		event_target:target_planet = {
+			locked_random_list = {
+				1 = {
+					add_deposit = d_energy_3
+				}
+				1 = {
+					add_deposit = d_minerals_3
+				}
+				1 = {
+					add_deposit = d_society_3
+				}
+				1 = {
+					add_deposit = d_physics_3
+				}
+				1 = {
+					add_deposit = d_engineering_3
+				}
+			}
+		}
+		custom_tooltip = opinion10
 		hidden_effect = {
-			event_target:target_planet = {
-				random_list = {
-					1 = {
-						add_deposit = d_energy_3
-					}
-					1 = {
-						add_deposit = d_minerals_3
-					}
-					1 = {
-						add_deposit = d_society_3
-					}
-					1 = {
-						add_deposit = d_physics_3
-					}
-					1 = {
-						add_deposit = d_engineering_3
-					}
+			event_target:mem_surveyor_country = {
+				add_trust = {
+					who = root
+					amount = 10
 				}
 			}
 		}
@@ -1983,6 +2037,18 @@ country_event = {
 			which = mem_surveyor_reevaluation_cost
 			value = value:edict_size_effect
 		}
+
+		if = {
+			limit = {
+				NOT = {
+					is_variable_set = mem_surveyor_reevaluation_planet
+				}
+			}
+			set_variable = {
+				which = mem_surveyor_reevaluation_planet
+				value = 0
+			}
+		}
 	}
 
 	# About the Probe
@@ -2035,7 +2101,6 @@ country_event = {
 		custom_tooltip = opinion10
 		hidden_effect = {
 			set_country_flag = mem_surveyor_insight_obtained
-			#country_event = { id = leviathans.504 } # Post-sale Thanks		TODO
 			#country_event = { id = leviathans.509 days = 3600 } # Renew	TODO
 			event_target:mem_surveyor_country = {
 				add_trust = {
@@ -2062,13 +2127,40 @@ country_event = {
 					}
 				}
 			}
+			custom_tooltip = {
+				fail_text = mem_surveyor_reevaluation
+				NOT = {
+					has_country_flag = mem_surveyor_reevaluation
+				}
+			}
 		}
 		inline_script = {
 			script = events/resource_cost_with_allow
 			RESOURCE = energy
 			AMOUNT = value:curator_purchase_cost|COST|mem_surveyor_reevaluation_cost|
+		}		
+		hidden_effect = {
+			set_timed_country_flag = {
+				flag = mem_surveyor_reevaluation
+				days = 3600
+			}
+			country_event = { id = mem_surveyor.124 days = 120 random = 60 }
+
+			# Chance for additional deposits
+			random_list = {
+				80 = { country_event = { id = mem_surveyor.124 days = 720 random = 360 } }
+				20 = {}
+			}
+
+			random_list = {
+				50 = { country_event = { id = mem_surveyor.124 days = 1440 random = 360 } }
+				50 = {}
+			}
+			
+			#country_event = { id = leviathans.509 days = 3600 } # Renew	TODO
 		}
-		# TODO ADD THE EFFECT
+		is_dialog_only = yes
+		response_text = mem_surveyor.120.e.response
 	}
 	
 	option = {
@@ -2132,6 +2224,21 @@ country_event = {
 			has_origin = origin_mem_ceaseless_gaze
 		}
 	}
+	# Why do you look like a space whale?
+	option = {
+		name = mem_surveyor.121.e
+		is_dialog_only = yes
+		response_text = mem_surveyor.121.e.answer
+		trigger = {
+			OR = {
+				has_established_contact = event_target:crystal_country
+				has_established_contact = event_target:crystal_splitter_country
+				has_established_contact = event_target:tiyanki_country
+				has_established_contact = event_target:tiyanki_garrison_country
+			}
+		}
+	}
+
 	option = {
 		name = BACK
 		default_hide_option = yes
@@ -2473,6 +2580,445 @@ country_event = {
 				id = mem_surveyor.120
 			}
 		}		
+	}
+}
+
+# Survey Reevaluation
+country_event = {
+	id = mem_surveyor.124
+	title = MEM_SURVEYOR_PROBE_HEADER
+	# Picks one of these descs at random	TODO - Add some more as this will popup often
+	desc = mem_surveyor.124.desc.1
+	is_triggered_only = yes
+	diplomatic = yes
+	custom_gui = "enclave_curator_window"
+	custom_gui_option = "enclave_curator_option"
+	picture_event_data = {
+		room = mem_surveyor_green_room
+		portrait = event_target:mem_surveyor_country
+	}
+	location = event_target:chosen_planet
+	trigger = {
+		FROM = {
+			is_country_type = mem_surveyor_country_green
+		}
+		NOT = {
+			has_country_flag = mem_surveyor_diplomacy_engaged
+		}
+		has_country_flag = mem_surveyor_attacked_surveyor
+	}
+	immediate = {
+		# Choose a target planet and give it a flag for the two special outcomes
+		random_list = {
+			# Add a normal deposite somewhere
+			# can happen unlimited
+			85 = {
+				random_planet_within_border = {
+					limit = {
+						habitable_planet = no
+						is_artificial = no
+						NOR = {
+							is_planet_class = pc_ringworld_habitable_damaged
+							is_planet_class = pc_ringworld_tech_damaged
+							is_planet_class = pc_ringworld_tech
+							is_planet_class = pc_ringworld_seam
+							is_planet_class = pc_ringworld_seam_damaged
+							is_planet_class = pc_astral_scar
+						}
+						NOT = {
+							any_fleet_in_orbit = {
+								OR = {
+									is_ship_size = major_orbital_generic
+									is_ship_size = minor_orbital_generic
+									is_ship_size = major_orbital_knights
+								}
+							}
+						}
+						# check that the random list won't come up empty
+						OR = {
+							energy_candidate = yes
+							mineral_candidate = yes
+							research_candidate = yes
+							alloy_candidate = yes
+							exotic_gas_candidate = yes
+							rare_crystal_candidate = yes
+							volatile_motes_candidate = yes
+							ROOT = { is_gestalt = no }
+						}
+					}
+					save_event_target_as = chosen_planet
+				}
+			}
+			# Add a planetary feature somewhere
+			# each planet can only get one additional feature
+			10 = {
+				modifier = {
+					check_variable = {
+						which = mem_surveyor_reevaluation_planet
+						value = 3
+					}
+					add = 5
+				}
+				modifier = {
+					NOT = {
+						any_planet_within_border = {
+							OR = {
+								is_colonizable = yes
+								is_colony = yes
+							}
+							is_artificial = no
+							NOT = {
+								has_planet_flag = mem_surveyor_reevaluation
+							}
+						}						
+					}
+					factor = 0
+				}
+				random_planet_within_border = {
+					limit = {
+						OR = {
+							is_colonizable = yes
+							is_colony = yes
+						}
+						is_artificial = no
+						NOT = {
+							has_planet_flag = mem_surveyor_reevaluation
+						}
+					}
+					save_event_target_as = chosen_planet
+					set_planet_flag = mem_surveyor_reevaluation
+				}
+			}
+			# Add terraforming modifier to applicable planet
+			5 = {
+				modifier = {
+					check_variable = {
+						which = mem_surveyor_reevaluation_planet
+						value = 3
+					}
+					factor = 0
+				}
+				modifier = {
+					NOT = {
+						any_planet_within_border = {
+							OR = {
+								is_planet_class = pc_barren
+								is_planet_class = pc_barren_cold
+							}
+							NOT = {
+								has_modifier = terraforming_candidate
+							}
+							planet_size > 10
+							planet_size <= 25
+						}
+					}
+				}
+				change_variable = {
+					which = mem_surveyor_reevaluation_planet
+					value = 1
+				}
+				random_planet_within_border = {
+					limit = {
+						OR = {
+							is_planet_class = pc_barren
+							is_planet_class = pc_barren_cold
+						}
+						NOT = {
+							has_modifier = terraforming_candidate
+						}
+						planet_size > 10
+						planet_size <= 25
+					}
+					save_event_target_as = chosen_planet
+					set_planet_flag = mem_surveyor_reevaluation
+				}
+			}
+		}
+	}
+	option = {
+		name = Great
+		event_target:chosen_planet = {
+			# normal planet deposits
+			if = {
+				limit = {
+					NOT = {
+						has_planet_flag = mem_surveyor_reevaluation
+					}
+				}
+				locked_random_list = {
+
+					# Energy
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { energy_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_energy_5 }
+						surveyor_update_orbital_effect = yes
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { energy_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_energy_7 }
+						surveyor_update_orbital_effect = yes
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { energy_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_energy_9 }
+						surveyor_update_orbital_effect = yes
+					}
+		
+					# Minerals
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { mineral_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_minerals_5 }
+						surveyor_update_orbital_effect = yes
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { mineral_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_minerals_7 }
+						surveyor_update_orbital_effect = yes
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { mineral_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_minerals_9 }
+						surveyor_update_orbital_effect = yes
+					}
+		
+					# Physics
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { research_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_physics_5 }
+						surveyor_update_orbital_effect = yes
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { research_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_physics_7 }
+						surveyor_update_orbital_effect = yes
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { research_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_physics_9 }
+						surveyor_update_orbital_effect = yes
+					}
+		
+					# Society
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { research_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_society_5 }
+						surveyor_update_orbital_effect = yes
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { research_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_society_7 }
+						surveyor_update_orbital_effect = yes
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { research_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_society_9 }
+						surveyor_update_orbital_effect = yes
+					}
+		
+					# Engineering
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { research_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_engineering_5 }
+						surveyor_update_orbital_effect = yes
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { research_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_engineering_7 }
+						surveyor_update_orbital_effect = yes
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { research_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_engineering_9 }
+						surveyor_update_orbital_effect = yes
+					}
+		
+					# Trade
+					10 = {
+						modifier = {
+							factor = 0
+							is_gestalt = yes
+						}
+						event_target:chosen_planet = { add_deposit = d_trade_value_5 }
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							is_gestalt = yes
+						}
+						event_target:chosen_planet = { add_deposit = d_trade_value_7 }
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							is_gestalt = yes
+						}
+						event_target:chosen_planet = { add_deposit = d_trade_value_9 }
+					}
+		
+					# Alloys
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { alloy_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_alloys_3 }
+						surveyor_update_orbital_effect = yes
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { alloy_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_alloys_4 }
+						surveyor_update_orbital_effect = yes
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { alloy_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_alloys_5 }
+						surveyor_update_orbital_effect = yes
+					}
+		
+					# Exotic Gas
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { exotic_gas_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_exotic_gases_1 }
+						surveyor_update_orbital_effect = yes
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { exotic_gas_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_exotic_gases_2 }
+						surveyor_update_orbital_effect = yes
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { exotic_gas_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_exotic_gases_3 }
+						surveyor_update_orbital_effect = yes
+					}
+		
+					# Rare Crystals
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { rare_crystal_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_rare_crystals_1 }
+						surveyor_update_orbital_effect = yes
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { rare_crystal_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_rare_crystals_2 }
+						surveyor_update_orbital_effect = yes
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { rare_crystal_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_rare_crystals_3 }
+						surveyor_update_orbital_effect = yes
+					}
+		
+					# Volatile Motes
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { volatile_motes_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_volatile_motes_1 }
+						surveyor_update_orbital_effect = yes
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { volatile_motes_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_volatile_motes_2 }
+						surveyor_update_orbital_effect = yes
+					}
+					10 = {
+						modifier = {
+							factor = 0
+							event_target:chosen_planet = { volatile_motes_candidate = no }
+						}
+						event_target:chosen_planet = { add_deposit = d_volatile_motes_3 }
+						surveyor_update_orbital_effect = yes
+					}
+				}
+			}
+			# habitable planet features	TODO
+			else_if = {
+				limit = {
+					habitable_planet = yes
+				}
+				# Add planet features
+			}
+			# 
+			else = {
+				add_modifier = {
+					modifier = terraforming_candidate
+				}
+			}
+		}
 	}
 }
 
