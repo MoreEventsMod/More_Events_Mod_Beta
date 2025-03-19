@@ -2101,7 +2101,8 @@ country_event = {
 		custom_tooltip = opinion10
 		hidden_effect = {
 			set_country_flag = mem_surveyor_insight_obtained
-			#country_event = { id = leviathans.509 days = 3600 } # Renew	TODO
+			# Ask to renew the deal
+			country_event = { id = mem_surveyor.125 days = 3600 }
 			event_target:mem_surveyor_country = {
 				add_trust = {
 					who = root
@@ -2157,7 +2158,8 @@ country_event = {
 				50 = {}
 			}
 			
-			#country_event = { id = leviathans.509 days = 3600 } # Renew	TODO
+			# Ask to renew the deal
+			country_event = { id = mem_surveyor.126 days = 3600 }
 		}
 		is_dialog_only = yes
 		response_text = mem_surveyor.120.e.response
@@ -2410,7 +2412,21 @@ country_event = {
 	id = mem_surveyor.123
 	title = MEM_SURVEYOR_PROBE_HEADER
 	# Picks one of these descs at random	TODO - Add some more
-	desc = mem_surveyor.123.desc.1
+	desc = {
+		trigger = {
+			NOT = {
+				has_country_flag = mem_surveryor_curio_response				
+			}
+		}
+		text = mem_surveyor.123.desc.1
+	}
+	# Curio response
+	desc = {
+		trigger = {
+			has_country_flag = mem_surveryor_curio_response
+		}
+		text = mem_surveyor.123.a.answer
+	}
 	is_triggered_only = yes
 	diplomatic = yes
 	custom_gui = "enclave_curator_window"
@@ -2442,15 +2458,38 @@ country_event = {
 			which = mem_surveyor_curio_refund
 			value = -1
 		}
+
+		# I want to have multiple different positive answers for the curio handout so I need a little trick for the scripted loc
+		remove_country_flag = mem_surveyor_curio_pos_1
+		remove_country_flag = mem_surveyor_curio_pos_2
+		remove_country_flag = mem_surveyor_curio_pos_3
+		random_list = {
+			1 = {
+				set_country_flag = mem_surveyor_curio_pos_1
+			}
+			1 = {
+				set_country_flag = mem_surveyor_curio_pos_2
+			}
+			1 = {
+				set_country_flag = mem_surveyor_curio_pos_3
+			}
+		}
 	}
 
 	# Point us to something interesting
 	option = {
 		name = mem_surveyor.123.a
 		custom_tooltip = mem_surveyor.123.a.tt
-		is_dialog_only = yes
-		response_text = mem_surveyor.123.a.answer	# TODO scripted loc for alternative response text in case of refund
-		allow = {			
+		allow = {
+			custom_tooltip = {
+				fail_text = mem_surveyor.123.a.opinion
+				event_target:mem_surveyor_country = {
+					trust = {
+						who = root
+						value >= 25
+					}
+				}
+			}
 			custom_tooltip = {
 				fail_text = mem_surveyor_curio_soldout
 				NOT = {
@@ -2463,7 +2502,15 @@ country_event = {
 			RESOURCE = energy
 			AMOUNT = value:curator_purchase_cost|COST|mem_surveyor_curio_cost|
 		}
+		custom_tooltip = opinion5
 		hidden_effect = {
+			event_target:mem_surveyor_country = {
+				add_trust = {
+					who = root
+					amount = 5
+				}
+			}
+			set_country_flag = mem_surveryor_curio_response
 			if = {
 				limit = {
 					any_system = {
@@ -2568,7 +2615,104 @@ country_event = {
 					energy = 1
 					mult = mem_surveyor_curio_refund 
 				}
-			}			
+			}	
+			country_event = {
+				id = mem_surveyor.123
+			}		
+		}
+	}
+
+	# Buy Precursor Insights
+	option = {
+		name = mem_surveyor.123.b
+		custom_tooltip = mem_surveyor.123.b.tt
+		is_dialog_only = yes
+		response_text = mem_surveyor.123.b.answer
+		trigger = {
+			OR = {
+				AND = {
+					has_event_chain = "vultaum_chain"
+					NOT = {
+						has_completed_event_chain_counter = {
+							event_chain = vultaum_chain
+							counter = vultaum_artifacts
+						}
+					}
+				}
+				AND = {
+					has_event_chain = "yuht_chain"
+					NOT = {
+						has_completed_event_chain_counter = {
+							event_chain = yuht_chain
+							counter = yuht_artifacts
+						}
+					}
+				}
+				AND = {
+					has_event_chain = "first_league_chain"
+					NOT = {
+						has_completed_event_chain_counter = {
+							event_chain = first_league_chain
+							counter = first_league_artifacts
+						}
+					}
+				}
+				AND = {
+					has_event_chain = "irassian_chain"
+					NOT = {
+						has_completed_event_chain_counter = {
+							event_chain = irassian_chain
+							counter = irassian_artifacts
+						}
+					}
+				}
+				AND = {
+					has_event_chain = "cybrex_chain"
+					NOT = {
+						has_completed_event_chain_counter = {
+							event_chain = cybrex_chain
+							counter = cybrex_artifacts
+						}
+					}
+				}
+			}
+		}
+		allow = {
+			custom_tooltip = {
+				fail_text = mem_surveyor.123.a.opinion
+				event_target:mem_surveyor_country = {
+					trust = {
+						who = root
+						value >= 25
+					}
+				}
+			}
+			custom_tooltip = {
+				fail_text = mem_surveyor_curio_soldout
+				NOT = {
+					has_country_flag = mem_surveyor_precursor_insight
+				}
+			}
+		}
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|mem_surveyor_curio_cost|
+		}
+		# This vanilla effect adds one to the player's precursor counter
+		collector_surrenders_artifact = yes
+		custom_tooltip = opinion5
+		hidden_effect = {
+			set_timed_country_flag = {
+				flag = mem_surveyor_precursor_insight
+				days = 1800
+			}
+			event_target:mem_surveyor_country = {
+				add_trust = {
+					who = root
+					amount = 5
+				}
+			}
 		}
 	}
 
@@ -2576,6 +2720,7 @@ country_event = {
 		name = BACK
 		default_hide_option = yes
 		hidden_effect = {
+			remove_country_flag = mem_surveryor_curio_response
 			country_event = {
 				id = mem_surveyor.120
 			}
@@ -2587,8 +2732,12 @@ country_event = {
 country_event = {
 	id = mem_surveyor.124
 	title = MEM_SURVEYOR_PROBE_HEADER
-	# Picks one of these descs at random	TODO - Add some more as this will popup often
+	# Picks one of these descs at random	TODO - Add some more as this will popup often 		TODO - ADD MOOOOOORE
 	desc = mem_surveyor.124.desc.1
+	desc = mem_surveyor.124.desc.2
+	desc = mem_surveyor.124.desc.3
+	desc = mem_surveyor.124.desc.4
+	desc = mem_surveyor.124.desc.5
 	is_triggered_only = yes
 	diplomatic = yes
 	custom_gui = "enclave_curator_window"
@@ -3005,20 +3154,230 @@ country_event = {
 					}
 				}
 			}
-			# habitable planet features	TODO
+			# habitable planet features
 			else_if = {
 				limit = {
 					habitable_planet = yes
 				}
 				# Add planet features
+				locked_random_list = {
+					# Mineral districts
+					10 = {
+						add_deposit = d_ore_rich_caverns
+					}
+					10 = {
+						add_deposit = d_rich_mountain
+					}
+
+					# Agricultural districts
+					10 = {
+						add_deposit = d_fungal_caves
+					}
+					10 = {
+						add_deposit = d_black_soil
+					}
+
+					# Energy
+					20 = {
+						add_deposit = d_betharian_deposit
+					}
+					
+					# Motes
+					10 = {
+						add_deposit = d_dust_caverns
+					}
+					
+					# Gasses
+					10 = {
+						add_deposit = d_bubbling_swamp
+					}
+					
+					# Crystals
+					10 = {
+						add_deposit = d_crystalline_caverns
+					}			
+
+					# Special
+					10 = {
+						add_deposit = d_alien_pets_deposit
+					}
+				}
 			}
-			# 
+			# Terraforming Candidate
 			else = {
 				add_modifier = {
 					modifier = terraforming_candidate
 				}
 			}
 		}
+	}
+}
+
+# Renew Survey Buff
+country_event = {
+	id = mem_surveyor.125
+	title = MEM_SURVEYOR_PROBE_HEADER
+	# Picks one of these descs at random	TODO - Add some more
+	desc = mem_surveyor.125.desc_1
+	is_triggered_only = yes
+	diplomatic = yes
+	custom_gui = "enclave_curator_window"
+	custom_gui_option = "enclave_curator_option"
+	picture_event_data = {
+		room = mem_surveyor_green_room
+		portrait = event_target:mem_surveyor_country
+	}
+	trigger = {
+		FROM = {
+			is_country_type = mem_surveyor_country_green
+		}
+		NOT = {
+			has_country_flag = mem_surveyor_diplomacy_engaged
+		}
+		has_country_flag = mem_surveyor_attacked_surveyor
+	}
+	immediate = {
+		# Set costs based on empire size
+		# Base of 250 Energy
+		set_variable = {
+			which = mem_surveyor_insight_cost
+			value = 250
+		}
+		# +1% per Empire Size (same scaling as Edicts)
+		# Ergo, 500 Energy at 100 Empire Size
+		multiply_variable = {
+			which = mem_surveyor_insight_cost
+			value = value:edict_size_effect
+		}
+	}
+
+	# Survey Buff
+	option = {
+		name = mem_surveyor.125.a
+		allow = {
+			NOT = {
+				has_modifier = mem_surveyor_survey_buff
+			}
+		}
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|mem_surveyor_insight_cost|
+		}
+		add_modifier = {
+			modifier = mem_surveyor_survey_buff
+			days = 3600
+		}
+		custom_tooltip = opinion10
+		hidden_effect = {
+			set_country_flag = mem_surveyor_insight_obtained
+			# Ask to renew the deal
+			country_event = { id = mem_surveyor.125 days = 3600 }
+			event_target:mem_surveyor_country = {
+				add_trust = {
+					who = root
+					amount = 10
+				}
+			}
+		}
+	}
+
+	option = {
+		name = mem_surveyor.125.b
+		default_hide_option = yes
+	}
+}
+
+# Renew Survey Buff
+country_event = {
+	id = mem_surveyor.126
+	title = MEM_SURVEYOR_PROBE_HEADER
+	# Picks one of these descs at random	TODO - Add some more
+	desc = mem_surveyor.125.desc_1
+	is_triggered_only = yes
+	diplomatic = yes
+	custom_gui = "enclave_curator_window"
+	custom_gui_option = "enclave_curator_option"
+	picture_event_data = {
+		room = mem_surveyor_green_room
+		portrait = event_target:mem_surveyor_country
+	}
+	trigger = {
+		FROM = {
+			is_country_type = mem_surveyor_country_green
+		}
+		NOT = {
+			has_country_flag = mem_surveyor_diplomacy_engaged
+		}
+		has_country_flag = mem_surveyor_attacked_surveyor
+	}
+	immediate = {
+		# Set costs based on empire size
+		# Base of 1000 Energy
+		set_variable = {
+			which = mem_surveyor_reevaluation_cost
+			value = 1000
+		}
+		# +1% per Empire Size (same scaling as Edicts)
+		# Ergo, 2000 Energy at 100 Empire Size
+		multiply_variable = {
+			which = mem_surveyor_reevaluation_cost
+			value = value:edict_size_effect
+		}
+	}
+
+	# Survey Reevaluation
+	option = {
+		name = mem_surveyor.125.a
+		custom_tooltip = mem_surveyor.120.e.tt
+		allow = {
+			custom_tooltip = {
+				fail_text = mem_surveyor.120.e.opinion
+				event_target:mem_surveyor_country = {
+					trust = {
+						who = root
+						value >= 50
+					}
+				}
+			}
+			custom_tooltip = {
+				fail_text = mem_surveyor_reevaluation
+				NOT = {
+					has_country_flag = mem_surveyor_reevaluation
+				}
+			}
+		}
+		inline_script = {
+			script = events/resource_cost_with_allow
+			RESOURCE = energy
+			AMOUNT = value:curator_purchase_cost|COST|mem_surveyor_reevaluation_cost|
+		}		
+		hidden_effect = {
+			set_timed_country_flag = {
+				flag = mem_surveyor_reevaluation
+				days = 3600
+			}
+			country_event = { id = mem_surveyor.124 days = 120 random = 60 }
+
+			# Chance for additional deposits
+			random_list = {
+				80 = { country_event = { id = mem_surveyor.124 days = 720 random = 360 } }
+				20 = {}
+			}
+
+			random_list = {
+				50 = { country_event = { id = mem_surveyor.124 days = 1440 random = 360 } }
+				50 = {}
+			}
+			
+			# Ask to renew the deal
+			country_event = { id = mem_surveyor.126 days = 3600 }
+		}
+	}
+
+	option = {
+		name = mem_surveyor.125.b
+		default_hide_option = yes
 	}
 }
 
@@ -6716,7 +7075,7 @@ country_event = {
 		random_owned_fleet = {
 			set_name = "NAME_MEM_Surveyor_Sentinel"
 			#set_mia = mia_emergency_ftl # this does not work
-			destroy_fleet = this
+			delete_fleet = this
 			# queue_actions = {
 			# 	wait = {
 			# 		duration = 10
