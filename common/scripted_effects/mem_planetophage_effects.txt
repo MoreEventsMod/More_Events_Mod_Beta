@@ -1,0 +1,122 @@
+mem_planetophage_create_deposit = {
+	clear_deposits = yes
+	random_list = {
+		1 = {
+			add_deposit = d_minerals_4
+		}
+		1 = {
+			add_deposit = d_minerals_5
+		}
+		1 = {
+			add_deposit = d_minerals_6
+		}		
+		1 = {
+			add_deposit = d_minerals_7
+		}				
+		1 = {
+			add_deposit = d_minerals_10
+		}
+		1 = {
+			add_deposit = d_energy_4
+		}
+		1 = {
+			add_deposit = d_energy_5
+		}
+		1 = {
+			add_deposit = d_energy_6
+		}		
+		1 = {
+			add_deposit = d_energy_7
+		}				
+		1 = {
+			add_deposit = d_energy_10
+		}
+		1 = {
+			add_deposit = d_volatile_motes_1
+		}
+		1 = {
+			add_deposit = d_volatile_motes_2
+		}
+		1 = {
+			add_deposit = d_exotic_gases_1
+		}
+		1 = {
+			add_deposit = d_exotic_gases_2
+		}
+		1 = {
+			add_deposit = d_rare_crystals_1
+		}
+		1 = {
+			add_deposit = d_rare_crystals_2
+		}
+	}
+}
+
+
+mem_planetophage_createateplanet = {
+	set_planet_size = 0
+	create_ambient_object = {
+		type = medium_debris_02_object
+		location = this
+		use_3d_location = yes
+	}
+	# does not work like that
+	# set_planet_size = 3
+	# set_planet_entity = {
+	# 	entity = "medium_debris_02_object"
+	# }
+	mem_planetophage_create_deposit = yes
+}
+
+mem_planetophage_queue_another_victim_planet = {
+	clear_orders = yes
+		clear_fleet_actions = THIS		# Colossus fleet scope	
+		queue_actions = {
+			find_closest_planet = {
+				trigger = {
+					id = "mem_planetophage_100a"
+					#is_same_value = event_target:killtarget
+					AND = {
+						planet_size >= 5
+						OR = {
+							habitable_planet = yes
+							can_have_mineral_deposits = yes
+							can_have_volatile_motes_deposit = yes
+							can_have_rare_crystals_deposits = yes
+							can_have_exotic_gases_deposits = yes
+						}
+					}
+				}
+				found_planet = {
+					move_to = this
+					orbit_planet = this
+					destroy_planet = {
+						target = this
+					}
+				}
+				# move to another system
+				failed = {
+					find_closest_system = {
+						trigger = {
+							id = "mem_planetophage_100b"
+							any_system_planet = {
+								AND = {
+									planet_size >= 5
+									OR = {
+										habitable_planet = yes
+										can_have_mineral_deposits = yes
+										can_have_volatile_motes_deposit = yes
+										can_have_rare_crystals_deposits = yes
+										can_have_exotic_gases_deposits = yes
+									}
+								}
+							}
+						}
+						found_system = {
+							move_to = this
+						}
+					}
+				}
+			}
+		}
+}

@@ -1,0 +1,253 @@
+########################
+# planet sucker leviathan
+# Code by tree
+########################
+namespace = mem_planetophage
+country_event = {
+	id = mem_planetophage.999
+	is_triggered_only = yes
+	#hide_window = yes
+	title = mem_planetophage.200.name
+	desc = mem_planetophage.200.desc
+	picture = GFX_evt_exploding_planet
+	immediate = {
+		
+	}
+	option = {
+		name = WEIRD
+		create_fleet = {
+			name = "NAME_MEM_planetophage_ship"
+			settings = {
+				spawn_debris = no
+				#is_boss = yes
+			}
+			effect = {
+				set_owner = root
+				create_ship = {
+					name = "NAME_MEM_planetophage_ship"
+					design = "NAME_MEM_planetophage"
+					# effect = {
+					# 	set_ship_flag = stellarite_ship
+					# 	save_global_event_target_as = stellarite
+					# }
+				}
+				set_location = root.capital_star
+				set_fleet_stance = aggressive
+				set_aggro_range_measure_from = self
+				set_aggro_range = 100
+				fleet_event = {
+					id = mem_planetophage.100
+					days = 10
+				}
+			}
+		}
+	}
+	option = {
+		name = WEIRD
+		capital_scope = {
+			spawn_system = {
+				initializer = mem_planetophage_system
+				max_jumps = 0
+				max_distance = 10
+			}
+		}
+	}
+	option = {
+		name = WEIRD
+		random_owned_ship = {
+			ship_event = {
+				id = mem_planetophage.1
+				scopes = {
+					from = root.capital_star
+				}
+			}
+		}
+		# capital_star = {
+		# 	add_anomaly = {
+		# 		category = mem_planetophage_category
+		# 	}
+		# }
+	}
+}
+
+
+# anomaly event spawn the big un
+# ROOT = ship scope
+# FROM = planet scope
+ship_event = {
+	id = mem_planetophage.1
+	title = mem_planetophage.1.name
+	desc = mem_planetophage.1.desc
+	picture = GFX_evt_exploding_planet
+	show_sound = event_air_raid_siren
+	is_triggered_only = yes
+	immediate = {
+		root.owner = {
+			#set_country_flag = guardians_stellarite_encountered
+			country_event = {
+				id = story.8
+				days = 15
+			}
+			root.solar_system = {
+				random_system_planet = {
+					limit = {
+						has_planet_flag = mem_planetophage_broken_planet
+					}
+					create_country = {
+						name = "NAME_MEM_planetophage_country"
+						type = guardian
+						flag = {
+							icon = {
+								category = "lithoid"
+								file = "lithoid_03.dds"
+							}
+							background = {
+								category = "backgrounds"
+								file = "00_solid.dds"
+							}
+							colors = {
+								"black"
+								"black"
+								"null"
+								"null"
+							}
+						}
+						auto_delete = no
+					}
+					last_created_country = {
+						save_global_event_target_as = mem_planetophage_country
+						set_country_flag = mem_planetophage_country
+						create_fleet = {
+							name = "NAME_MEM_planetophage_ship"
+							settings = {
+								spawn_debris = no
+								is_boss = yes
+							}
+							effect = {
+								set_owner = event_target:mem_planetophage_country
+								create_ship = {
+									name = "NAME_MEM_planetophage_ship"
+									design = "NAME_MEM_planetophage"
+									# effect = {
+									# 	set_ship_flag = stellarite_ship
+									# 	save_global_event_target_as = stellarite
+									# }
+								}
+								set_location = prevprev
+								set_fleet_stance = aggressive
+								set_aggro_range_measure_from = self
+								set_aggro_range = 100
+								mem_planetophage_queue_another_victim_planet = yes
+								# fleet_event = {
+								# 	id = mem_planetophage.100
+								# 	days = 10
+								# }
+							}
+						}
+					}
+				}
+			}
+			establish_communications_no_message = event_target:mem_planetophage_country
+		}
+		from = {
+			remove_planet = yes
+			#change_pc = pc_broken
+			#set_planet_size = 2
+		}
+	}
+	option = {
+		name = BATTLESTATIONS
+	}
+}
+
+# main logic for seeking new planets
+fleet_event = {
+	id = mem_planetophage.100
+	is_triggered_only = yes
+	hide_window = yes
+	immediate = {
+		mem_planetophage_queue_another_victim_planet = yes
+	}
+}
+
+# planet got eaten
+planet_event = {
+	id = mem_planetophage.105
+	is_triggered_only = yes
+	hide_window = yes
+	immediate = {
+		# while = {
+		# 	count = 3
+		# 	mem_planetophage_create_deposit = yes
+		# }
+		change_pc = pc_broken
+		mem_planetophage_createateplanet = yes
+		from = {
+			fleet_event = {
+				id = mem_planetophage.100
+				#days = 10
+			}
+		}
+	}
+}
+
+# you destroyed it, ye
+# This = owner of fleet 1 (combatant)
+# From = owner of fleet 2 (destroyed)
+# FromFrom = fleet 1
+# FromFromFrom = fleet 2
+country_event = {
+	id = mem_planetophage.200
+	is_triggered_only = yes
+	title = mem_planetophage.200.name
+	desc = mem_planetophage.200.desc
+	picture = GFX_evt_exploding_planet
+	show_sound = event_air_raid_siren
+	trigger = {
+		is_regular_empire = yes
+		from = {
+			is_guardian_country = yes
+			has_country_flag = mem_planetophage_country
+			NOT = {
+				has_country_flag = mem_planetophage_country_defeated_first_time
+			}
+		}
+	}
+	immediate = {
+		from = {
+			set_country_flag = mem_planetophage_country_defeated_first_time
+		}
+	}
+	option = {
+		name = mem_planetophage.200.a		# restore it and let it eat your worlds
+	}
+	option = {
+		name = mem_planetophage.200.b		# machine world
+		custom_tooltip = mem_planetophage.200.b.tt
+		hidden_effect = {
+			fromfromfrom = {
+				solar_system = {
+					spawn_planet = {
+						class = pc_machine
+						location = prev
+						orbit_location = no
+						orbit_angle_offset = 5
+						orbit_distance_offset = -4
+						size = 18		# make it based on what it sucked, only hostile version counts towards this counts!
+						has_ring = no
+						init_effect = {
+							set_name = "Wandering Eater"
+							set_planet_entity = {
+								entity = "gaia_planet" # ship entity
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_planetophage.200.c		# tech and research and resources
+		
+	}
+}
