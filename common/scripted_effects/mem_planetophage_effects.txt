@@ -9,27 +9,27 @@ mem_planetophage_create_deposit = {
 		}
 		1 = {
 			add_deposit = d_minerals_6
-		}		
+		}
 		1 = {
 			add_deposit = d_minerals_7
-		}				
+		}
 		1 = {
 			add_deposit = d_minerals_10
 		}
 		1 = {
-			add_deposit = d_energy_4
+			add_deposit = d_alloys_4
 		}
 		1 = {
-			add_deposit = d_energy_5
+			add_deposit = d_alloys_5
 		}
 		1 = {
-			add_deposit = d_energy_6
-		}		
+			add_deposit = d_alloys_2
+		}
 		1 = {
-			add_deposit = d_energy_7
-		}				
+			add_deposit = d_alloys_3
+		}
 		1 = {
-			add_deposit = d_energy_10
+			add_deposit = d_alloys_10
 		}
 		1 = {
 			add_deposit = d_volatile_motes_1
@@ -52,7 +52,6 @@ mem_planetophage_create_deposit = {
 	}
 }
 
-
 mem_planetophage_createateplanet = {
 	set_planet_size = 0
 	create_ambient_object = {
@@ -65,12 +64,21 @@ mem_planetophage_createateplanet = {
 	# set_planet_entity = {
 	# 	entity = "medium_debris_02_object"
 	# }
-	mem_planetophage_create_deposit = yes
+	#mem_planetophage_create_deposit = yes
 }
 
 mem_planetophage_queue_another_victim_planet = {
 	clear_orders = yes
-		clear_fleet_actions = THIS		# Colossus fleet scope	
+	clear_fleet_actions = THIS	# Colossus fleet scope	
+	if = {
+		limit = {
+			owner = {
+				has_country_flag = mem_planetophage_country_defeated_first_time
+			}
+		}
+		# friendly now 
+	}
+	else = {
 		queue_actions = {
 			find_closest_planet = {
 				trigger = {
@@ -114,9 +122,45 @@ mem_planetophage_queue_another_victim_planet = {
 						}
 						found_system = {
 							move_to = this
+							find_closest_planet = {
+								trigger = {
+									id = "mem_planetophage_100c"
+									#is_same_value = event_target:killtarget
+									AND = {
+										planet_size >= 5
+										OR = {
+											habitable_planet = yes
+											can_have_mineral_deposits = yes
+											can_have_volatile_motes_deposit = yes
+											can_have_rare_crystals_deposits = yes
+											can_have_exotic_gases_deposits = yes
+										}
+									}
+								}
+								found_planet = {
+									move_to = this
+									orbit_planet = this
+									destroy_planet = {
+										target = this
+									}
+								}
+							}
 						}
 					}
 				}
 			}
 		}
+	}
+}
+
+# ship modifier
+mem_planetophage_ateplanetandgetbuffed = {
+	change_variable = {
+		which = mem_planetophage_ateplanet_counter
+		value = $AMOUNT$
+	}
+	add_modifier = {
+		modifier = mem_planetophage_ateplanet_counter
+		mult = mem_planetophage_ateplanet_counter
+	}
 }
