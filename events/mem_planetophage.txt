@@ -1,7 +1,18 @@
 ########################
 # planet sucker leviathan
-# Code by tree
+# Code by tr33
 ########################
+#####################################################################################################################
+# events 
+#####################################################################################################################
+# mem_planetophage.999	|	debug event
+# mem_planetophage.1	|	anomaly initial: press the button?
+# mem_planetophage.5	|	follow up: you screwed up
+# mem_planetophage.100	|	target a new planet
+# mem_planetophage.105	|	planet got eaten
+# mem_planetophage.200	|	on defeat: what you wanna do?
+# mem_planetophage.210	|	repaired it
+
 namespace = mem_planetophage
 country_event = {
 	id = mem_planetophage.999
@@ -52,29 +63,8 @@ country_event = {
 			}
 		}
 	}
-	option = {
-		name = FASCINATING
-		random_owned_ship = {
-			ship_event = {
-				id = mem_planetophage.1
-				scopes = {
-					from = root.capital_star
-				}
-			}
-		}
-		# capital_star = {
-		# 	add_anomaly = {
-		# 		category = mem_planetophage_category
-		# 	}
-		# }
-	}
-	option = {
-		name = FASCINATING
-		enable_special_project = {
-			name = MEM_PLANETOPHAGE_RESTORE
-			location = capital_scope
-		}
-	}
+	
+	
 	option = {
 		name = FASCINATING
 		capital_scope.solar_system = {
@@ -97,8 +87,8 @@ ship_event = {
 	id = mem_planetophage.1
 	title = mem_planetophage.1.name
 	desc = mem_planetophage.1.desc
-	picture = GFX_evt_exploding_planet
-	show_sound = event_air_raid_siren
+	picture = GFX_evt_contingency_planet
+	show_sound = event_machinery
 	location = this
 	is_triggered_only = yes
 	immediate = {
@@ -110,6 +100,7 @@ ship_event = {
 			remove_modifier = mem_planetophage_disabled_powergrid
 			save_global_event_target_as = mem_planetophage_planet
 		}
+		
 		hidden_effect = {
 			owner = {
 				country_event = {
@@ -137,8 +128,8 @@ country_event = {
 	id = mem_planetophage.5
 	title = mem_planetophage.5.name
 	desc = mem_planetophage.5.desc
-	picture = GFX_evt_exploding_planet
-	show_sound = event_air_raid_siren
+	picture = GFX_evt_astral_rift_tiny_planet
+	show_sound = event_machinery
 	location = event_target:mem_planetophage_planet
 	is_triggered_only = yes
 	immediate = {
@@ -322,8 +313,8 @@ country_event = {
 	is_triggered_only = yes
 	title = mem_planetophage.200.name
 	desc = mem_planetophage.200.desc
-	picture = GFX_evt_exploding_planet
-	show_sound = event_air_raid_siren
+	picture = GFX_evt_machine_space_battle
+	show_sound = event_space_battle
 	location = FromFromFrom
 	trigger = {
 		is_regular_empire = yes
@@ -345,18 +336,7 @@ country_event = {
 				}
 			}
 		}
-		# notify players
-		# every_playable_country = {
-		# 	limit = {
-		# 		NOT = {
-		# 			is_same_value = root
-		# 		}
-		# 		is_ai = no
-		# 	}
-		# 	country_event = {
-		# 		id = mem_planetophage.205
-		# 	}
-		# }
+
 	}
 	option = {
 		name = mem_planetophage.200.a		# restore it and let it eat your worlds
@@ -389,7 +369,7 @@ country_event = {
 						orbit_location = no
 						orbit_angle_offset = 5
 						orbit_distance_offset = -4
-						size = 18						# make it based on what it sucked, only hostile version counts towards this counts!
+						size = 18						
 						has_ring = no
 						init_effect = {
 							if = {
@@ -460,21 +440,6 @@ country_event = {
 	}
 }
 
-# notify players
-# should i only contact players who seen the thing?
-country_event = {
-	id = mem_planetophage.205
-	is_triggered_only = yes
-	title = mem_planetophage.205.name
-	desc = mem_planetophage.205.desc
-	picture = GFX_evt_exploding_planet
-	show_sound = event_air_raid_siren
-	trigger = {
-	}
-	option = {
-		name = FANTASTIC
-	}
-}
 
 # special project completed
 ship_event = {
@@ -482,8 +447,8 @@ ship_event = {
 	is_triggered_only = yes
 	title = mem_planetophage.210.name
 	desc = mem_planetophage.210.desc
-	picture = GFX_evt_exploding_planet
-	show_sound = event_air_raid_siren
+	picture = GFX_evt_contingency_planet
+	show_sound = event_machinery
 	location = this
 	trigger = {
 	}
@@ -493,9 +458,18 @@ ship_event = {
 				save_event_target_as = mem_planetophagetarget
 			}
 		}
+		event_target:mem_planetophage_country = {
+			every_country = {
+				set_faction_hostility = {
+					set_hostile = no
+					set_neutral = yes
+					target = prev
+				}
+			}
+		}
 	}
 	option = {
-		name = FANTASTIC
+		name = EXCELLENT
 		custom_tooltip = mem_planetophage.210.a.tt
 	}
 	after = {
@@ -509,18 +483,13 @@ ship_event = {
 				}
 			}
 			event_target:mem_planetophage_country = {
-				every_country = {
-					set_faction_hostility = {
-						set_hostile = no
-						set_neutral = yes
-						target = prev
-					}
-				}
+				
 				create_fleet = {
 					name = "Steel Maw MKII"
 					settings = {
 						spawn_debris = no
 						is_boss = yes
+						
 					}
 					effect = {
 						set_owner = event_target:mem_planetophage_country
