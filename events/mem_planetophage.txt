@@ -13,7 +13,7 @@ country_event = {
 	immediate = {
 	}
 	option = {
-		name = WEIRD
+		name = FASCINATING
 		create_fleet = {
 			name = "Steel Maw MKI"
 			settings = {
@@ -43,7 +43,7 @@ country_event = {
 		}
 	}
 	option = {
-		name = WEIRD
+		name = FASCINATING
 		capital_scope = {
 			spawn_system = {
 				initializer = mem_planetophage_system
@@ -53,7 +53,7 @@ country_event = {
 		}
 	}
 	option = {
-		name = WEIRD
+		name = FASCINATING
 		random_owned_ship = {
 			ship_event = {
 				id = mem_planetophage.1
@@ -68,6 +68,26 @@ country_event = {
 		# 	}
 		# }
 	}
+	option = {
+		name = FASCINATING
+		enable_special_project = {
+			name = MEM_PLANETOPHAGE_RESTORE
+			location = capital_scope
+		}
+	}
+	option = {
+		name = FASCINATING
+		capital_scope.solar_system = {
+			random_system_planet = {
+				limit = {
+					has_research_station = yes
+				}
+				research_station = {
+					destroy_fleet = this
+				}
+			}
+		}
+	}
 }
 
 # anomaly event spawn the big un
@@ -79,6 +99,7 @@ ship_event = {
 	desc = mem_planetophage.1.desc
 	picture = GFX_evt_exploding_planet
 	show_sound = event_air_raid_siren
+	location = this
 	is_triggered_only = yes
 	immediate = {
 	}
@@ -87,19 +108,23 @@ ship_event = {
 		custom_tooltip = mem_planetophage.1.a.tt
 		from = {
 			remove_modifier = mem_planetophage_disabled_powergrid
+			save_global_event_target_as = mem_planetophage_planet
 		}
 		hidden_effect = {
-			from = {
-				planet_event = {
+			owner = {
+				country_event = {
 					#shouldnt have done that
 					id = mem_planetophage.5
 					days = 5
 					random = 30
-					scopes = {
-						from = root.owner
-					}
+					# scopes = {
+					# 	from = root.owner
+					# }
 				}
 			}
+			# owner = {
+			# 	save_global_event_target_as = mem_planetophage_awakener
+			# }
 		}
 	}
 	option = {
@@ -108,108 +133,118 @@ ship_event = {
 }
 
 # oh oh someone pulled the lever and reactivated killer machine
-planet_event = {
+country_event = {
 	id = mem_planetophage.5
 	title = mem_planetophage.5.name
 	desc = mem_planetophage.5.desc
 	picture = GFX_evt_exploding_planet
 	show_sound = event_air_raid_siren
+	location = event_target:mem_planetophage_planet
 	is_triggered_only = yes
 	immediate = {
+		event_target:mem_planetophage_planet = {
+			solar_system = {
+				random_ambient_object = {
+					limit = {
+						is_ambient_object_type = mem_planetophage_ambient
+					}
+					destroy_ambient_object = this
+				}
+			}
+		}
 	}
 	option = {
 		name = BATTLESTATIONS
 	}
 	after = {
-		from = {
-			#set_country_flag = guardians_stellarite_encountered
+		hidden_effect = {
 			country_event = {
 				id = story.8
 				days = 15
 			}
-		}
-		root.solar_system = {
-			random_system_planet = {
-				limit = {
-					has_planet_flag = mem_planetophage_broken_planet
-				}
-				create_country = {
-					name = "Steel Maw MKI"
-					type = guardian
-					flag = {
-						icon = {
-							category = "lithoid"
-							file = "lithoid_03.dds"
+			# log = "[This.GetName]"
+			event_target:mem_planetophage_planet = {
+				solar_system = {
+					random_system_planet = {
+						limit = {
+							has_planet_flag = mem_planetophage_broken_planet
 						}
-						background = {
-							category = "backgrounds"
-							file = "00_solid.dds"
+						create_country = {
+							name = "Steel Maw MKI"
+							type = guardian
+							flag = {
+								icon = {
+									category = "lithoid"
+									file = "lithoid_03.dds"
+								}
+								background = {
+									category = "backgrounds"
+									file = "00_solid.dds"
+								}
+								colors = {
+									"black"
+									"black"
+									"null"
+									"null"
+								}
+							}
+							auto_delete = no
 						}
-						colors = {
-							"black"
-							"black"
-							"null"
-							"null"
-						}
-					}
-					auto_delete = no
-				}
-				last_created_country = {
-					save_global_event_target_as = mem_planetophage_country
-					set_country_flag = mem_planetophage_country
-					create_fleet = {
-						name = "Steel Maw MKI"
-						settings = {
-							spawn_debris = no
-							is_boss = yes
-						}
-						effect = {
-							set_owner = event_target:mem_planetophage_country
-							create_ship = {
+						last_created_country = {
+							save_global_event_target_as = mem_planetophage_country
+							set_country_flag = mem_planetophage_country
+							create_fleet = {
 								name = "Steel Maw MKI"
-								design = "NAME_MEM_planetophage"
-								graphical_culture = mem_ancient_01
+								settings = {
+									spawn_debris = no
+									is_boss = yes
+								}
 								effect = {
-									# 	set_ship_flag = stellarite_ship
-									# 	save_global_event_target_as = stellarite
-									# ye i want this complicated :)
-									set_variable = {
-										which = mem_planetophage_ateplanet_counter
-										value = 0
-									}
-									root.solar_system = {
-										every_system_planet = {
-											limit = {
-												is_planet_class = pc_broken
+									set_owner = event_target:mem_planetophage_country
+									create_ship = {
+										name = "Steel Maw MKI"
+										design = "NAME_MEM_planetophage"
+										graphical_culture = mem_ancient_01
+										effect = {
+											# 	set_ship_flag = stellarite_ship
+											# 	save_global_event_target_as = stellarite
+											# ye i want this complicated :)
+											set_variable = {
+												which = mem_planetophage_ateplanet_counter
+												value = 6
 											}
-											prevprev = {
-												mem_planetophage_ateplanetandgetbuffed = {
-													VALUE = 1
-												}
+											mem_planetophage_ateplanetandgetbuffed = {
+												VALUE = 1
 											}
 										}
 									}
+									set_location = prevprev
+									set_fleet_stance = aggressive
+									set_aggro_range_measure_from = self
+									set_aggro_range = 100
+									#mem_planetophage_queue_another_victim_planet = yes
+									fleet_event = {
+										id = mem_planetophage.100
+										days = 10
+									}
 								}
 							}
-							set_location = prevprev
-							set_fleet_stance = aggressive
-							set_aggro_range_measure_from = self
-							set_aggro_range = 100
-							mem_planetophage_queue_another_victim_planet = yes
-							# fleet_event = {
-							# 	id = mem_planetophage.100
-							# 	days = 10
-							# }
 						}
 					}
 				}
 			}
-		}
-		from = {
 			establish_communications_no_message = event_target:mem_planetophage_country
+			event_target:mem_planetophage_planet = {
+				if = {
+					limit = {
+						exists = owner
+					}
+					destroy_colony = yes
+				}
+				remove_planet = yes
+			}
+			clear_global_event_target = mem_planetophage_planet
 		}
-		destroy_colony = yes
-		remove_planet = yes
 	}
 }
 
@@ -229,10 +264,6 @@ planet_event = {
 	is_triggered_only = yes
 	hide_window = yes
 	immediate = {
-		# while = {
-		# 	count = 3
-		# 	mem_planetophage_create_deposit = yes
-		# }
 		solar_system = {
 			random_fleet_in_system = {
 				limit = {
@@ -250,6 +281,14 @@ planet_event = {
 						while = {
 							count = 3
 							mem_planetophage_create_deposit = yes
+						}
+						if = {
+							limit = {
+								has_research_station = yes
+							}
+							research_station = {
+								destroy_fleet = this
+							}
 						}
 					}
 				}
@@ -285,20 +324,15 @@ country_event = {
 	desc = mem_planetophage.200.desc
 	picture = GFX_evt_exploding_planet
 	show_sound = event_air_raid_siren
+	location = FromFromFrom
 	trigger = {
 		is_regular_empire = yes
 		from = {
 			is_guardian_country = yes
 			has_country_flag = mem_planetophage_country
-			NOT = {
-				has_country_flag = mem_planetophage_country_defeated_first_time
-			}
 		}
 	}
 	immediate = {
-		from = {
-			set_country_flag = mem_planetophage_country_defeated_first_time
-		}
 		FromFromFrom = {
 			solar_system = {
 				create_ambient_object = {
@@ -306,28 +340,42 @@ country_event = {
 					use_3d_location = yes
 					location = prev
 				}
+				last_created_ambient_object = {
+					save_event_target_as = mem_planetophage_ambient
+				}
 			}
 		}
 		# notify players
-		every_playable_country = {
-			limit = {
-				NOT = {
-					is_same_value = root
-				}
-				is_ai = no
-			}
-			country_event = {
-				id = mem_planetophage.205
-			}
-		}
+		# every_playable_country = {
+		# 	limit = {
+		# 		NOT = {
+		# 			is_same_value = root
+		# 		}
+		# 		is_ai = no
+		# 	}
+		# 	country_event = {
+		# 		id = mem_planetophage.205
+		# 	}
+		# }
 	}
 	option = {
 		name = mem_planetophage.200.a		# restore it and let it eat your worlds
 		enable_special_project = {
 			name = MEM_PLANETOPHAGE_RESTORE
-			location = FromFromFrom
+			location = event_target:mem_planetophage_ambient
 		}
-		
+		hidden_effect = {
+			from = {
+				set_country_flag = mem_planetophage_country_defeated_first_time
+			}
+		}
+		trigger = {
+			from = {
+				NOT = {
+					has_country_flag = mem_planetophage_country_defeated_first_time
+				}
+			}
+		}
 	}
 	option = {
 		name = mem_planetophage.200.b		# machine world
@@ -337,14 +385,24 @@ country_event = {
 				solar_system = {
 					spawn_planet = {
 						class = pc_machine
-						location = prev						
+						location = prev
 						orbit_location = no
 						orbit_angle_offset = 5
 						orbit_distance_offset = -4
 						size = 18						# make it based on what it sucked, only hostile version counts towards this counts!
 						has_ring = no
 						init_effect = {
-							set_name = "Steel Maw MKI"
+							if = {
+								limit = {
+									event_target:mem_planetophage_country = {
+										has_country_flag = mem_planetophage_country_defeated_first_time
+									}
+								}
+								set_name = "Steel Maw MKII"
+							}
+							else = {
+								set_name = "Steel Maw MKI"
+							}
 							# set_planet_entity = {
 							# 	entity = "gaia_planet"								# ship entity
 							# }
@@ -354,21 +412,51 @@ country_event = {
 							add_modifier = {
 								modifier = mem_planetophage_debris
 							}
+							clear_deposits = yes
+							create_ambient_object = {
+								type = mem_planetophage_ambient
+								use_3d_location = yes
+								location = this
+								scale = 1.1
+							}
 						}
-					}
-					random_ambient_object = {
-						limit = {
-							is_ambient_object_type = mem_planetophage_ambient
-						}
-						destroy_ambient_object = this
 					}
 				}
 			}
+			event_target:mem_planetophage_country = {
+				destroy_country = yes
+			}
+			clear_global_event_target = mem_planetophage_country
 		}
 	}
 	option = {
 		name = mem_planetophage.200.c		# tech and research and resources
-		
+		add_monthly_resource_mult = {
+			resource = alloys
+			value = 12
+		}
+		add_monthly_resource_mult = {
+			resource = engineering_research
+			value = 36
+		}
+		hidden_effect = {
+			event_target:mem_planetophage_country = {
+				destroy_country = yes
+			}
+			clear_global_event_target = mem_planetophage_country
+		}
+	}
+	after = {
+		if = { # ye you can get it double by killing it twice and selling the first one. do i care ? no.
+			limit = {
+				NOT = {
+					has_specimen = mem_planetophage_crust
+				}
+			}
+			give_specimen = {
+				key = mem_planetophage_crust
+			}
+		}
 	}
 }
 
@@ -382,12 +470,10 @@ country_event = {
 	picture = GFX_evt_exploding_planet
 	show_sound = event_air_raid_siren
 	trigger = {
-		
 	}
 	option = {
 		name = FANTASTIC
 	}
-	
 }
 
 # special project completed
@@ -398,54 +484,66 @@ ship_event = {
 	desc = mem_planetophage.210.desc
 	picture = GFX_evt_exploding_planet
 	show_sound = event_air_raid_siren
+	location = this
 	trigger = {
-		
+	}
+	immediate = {
+		owner = {
+			capital_scope = {
+				save_event_target_as = mem_planetophagetarget
+			}
+		}
 	}
 	option = {
 		name = FANTASTIC
+		custom_tooltip = mem_planetophage.210.a.tt
 	}
 	after = {
-		solar_system = {
-			random_ambient_object = {
-				limit = {
-					is_ambient_object_type = mem_planetophage_ambient
-				}
-				destroy_ambient_object = this
-			}
-		}
-		event_target:mem_planetophage_country = {
-			every_country = {
-				set_faction_hostility = {
-					set_hostile = no
-					set_neutral = yes
-					target = prev
+		hidden_effect = {
+			solar_system = {
+				random_ambient_object = {
+					limit = {
+						is_ambient_object_type = mem_planetophage_ambient
+					}
+					destroy_ambient_object = this
 				}
 			}
-		}
-		create_fleet = {
-			name = "Steel Maw MKII"
-			settings = {
-				spawn_debris = no
-				is_boss = yes
-			}
-			effect = {
-				set_owner = event_target:mem_planetophage_country
-				create_ship = {
+			event_target:mem_planetophage_country = {
+				every_country = {
+					set_faction_hostility = {
+						set_hostile = no
+						set_neutral = yes
+						target = prev
+					}
+				}
+				create_fleet = {
 					name = "Steel Maw MKII"
-					design = "NAME_MEM_planetophage"
-					graphical_culture = mem_ancient_01
+					settings = {
+						spawn_debris = no
+						is_boss = yes
+					}
+					effect = {
+						set_owner = event_target:mem_planetophage_country
+						create_ship = {
+							name = "Steel Maw MKII"
+							design = "NAME_MEM_planetophage"
+							graphical_culture = mem_ancient_01
+						}
+						set_location = root
+						set_fleet_stance = aggressive
+						set_aggro_range_measure_from = self
+						set_aggro_range = 100
+						queue_actions = {
+							move_to = event_target:mem_planetophagetarget
+						}
+						#mem_planetophage_queue_another_victim_planet = yes
+						fleet_event = {
+							id = mem_planetophage.100
+							days = 2
+						}
+					}
 				}
-				set_location = root
-				set_fleet_stance = aggressive
-				set_aggro_range_measure_from = self
-				set_aggro_range = 100
-				mem_planetophage_queue_another_victim_planet = yes
-				# fleet_event = {
-				# 	id = mem_planetophage.100
-				# 	days = 10
-				# }
 			}
 		}
-		
 	}
 }
