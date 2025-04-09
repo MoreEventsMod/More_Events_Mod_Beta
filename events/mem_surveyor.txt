@@ -934,10 +934,8 @@ country_event = {
 		FROM = {
 			is_country_type = mem_surveyor_country_green
 		}
-		NOT = {
+		NOR = {
 			has_country_flag = mem_surveyor_diplomacy_engaged
-		}
-		NOT = {
 			has_country_flag = mem_surveyor_attacked_surveyor
 		}
 	}
@@ -1975,12 +1973,44 @@ country_event = {
 		text = mem_surveyor.120.origin.1
 		trigger = {
 			has_origin = origin_mem_ceaseless_gaze
+			NOR = {
+				has_country_flag = mem_surveyor_country_green_sentinel_decision
+				has_country_flag = mem_surveyor_country_green_berserker_decision
+				has_country_flag = mem_surveyor_country_green_nothing_burger
+			}
 		}
 	}
 	desc = {
 		text = mem_surveyor.120.origin.2
 		trigger = {
 			has_origin = origin_mem_ceaseless_gaze
+			NOR = {
+				has_country_flag = mem_surveyor_country_green_sentinel_decision
+				has_country_flag = mem_surveyor_country_green_berserker_decision
+				has_country_flag = mem_surveyor_country_green_nothing_burger
+			}
+		}
+	}
+	desc = {
+		text = mem_surveyor.120.origin.3
+		trigger = {
+			has_origin = origin_mem_ceaseless_gaze
+			OR = {
+				has_country_flag = mem_surveyor_country_green_sentinel_decision
+				has_country_flag = mem_surveyor_country_green_berserker_decision
+				has_country_flag = mem_surveyor_country_green_nothing_burger
+			}
+		}
+	}
+	desc = {
+		text = mem_surveyor.120.origin.4
+		trigger = {
+			has_origin = origin_mem_ceaseless_gaze
+			OR = {
+				has_country_flag = mem_surveyor_country_green_sentinel_decision
+				has_country_flag = mem_surveyor_country_green_berserker_decision
+				has_country_flag = mem_surveyor_country_green_nothing_burger
+			}
 		}
 	}
 	is_triggered_only = yes
@@ -2414,14 +2444,33 @@ country_event = {
 country_event = {
 	id = mem_surveyor.123
 	title = MEM_SURVEYOR_PROBE_HEADER
-	# Picks one of these descs at random	TODO - Add some more
+	# Picks one of these descs at random
 	desc = {
 		trigger = {
-			NOT = {
-				has_country_flag = mem_surveryor_curio_response				
+			NOR = {
+				has_country_flag = mem_surveryor_curio_response		
+				has_country_flag = mem_surveyor_precursor_response		
 			}
 		}
 		text = mem_surveyor.123.desc.1
+	}
+	desc = {
+		trigger = {
+			NOR = {
+				has_country_flag = mem_surveryor_curio_response		
+				has_country_flag = mem_surveyor_precursor_response		
+			}
+		}
+		text = mem_surveyor.123.desc.2
+	}
+	desc = {
+		trigger = {
+			NOR = {
+				has_country_flag = mem_surveryor_curio_response		
+				has_country_flag = mem_surveyor_precursor_response		
+			}
+		}
+		text = mem_surveyor.123.desc.3
 	}
 	# Curio response
 	desc = {
@@ -2429,6 +2478,13 @@ country_event = {
 			has_country_flag = mem_surveryor_curio_response
 		}
 		text = mem_surveyor.123.a.answer
+	}
+	# Precursor insight response
+	desc = {
+		trigger = {
+			has_country_flag = mem_surveyor_precursor_response
+		}
+		text = mem_surveyor.123.b.answer
 	}
 	is_triggered_only = yes
 	diplomatic = yes
@@ -2514,6 +2570,7 @@ country_event = {
 				}
 			}
 			set_country_flag = mem_surveryor_curio_response
+			remove_country_flag = mem_surveyor_precursor_response
 			if = {
 				limit = {
 					any_system = {
@@ -2633,6 +2690,7 @@ country_event = {
 		}
 		hidden_effect = {
 			remove_country_flag = mem_surveryor_curio_response
+			remove_country_flag = mem_surveyor_precursor_response
 			country_event = {
 				id = mem_surveyor.127
 			}
@@ -2642,9 +2700,6 @@ country_event = {
 	# Buy Precursor Insights
 	option = {
 		name = mem_surveyor.123.b
-		custom_tooltip = mem_surveyor.123.b.tt
-		is_dialog_only = yes
-		response_text = mem_surveyor.123.b.answer
 		trigger = {
 			OR = {
 				AND = {
@@ -2695,6 +2750,9 @@ country_event = {
 			}
 		}
 		allow = {
+			NOT = {
+				has_modifier = mem_surveyor_precursor_insight
+			}
 			custom_tooltip = {
 				fail_text = mem_surveyor.123.a.opinion
 				event_target:mem_surveyor_country = {
@@ -2703,34 +2761,33 @@ country_event = {
 						value >= 25
 					}
 				}
-			}
-			custom_tooltip = {
-				fail_text = mem_surveyor_precursor_insight
-				NOT = {
-					has_country_flag = mem_surveyor_precursor_insight
-				}
-			}
+			}			
 		}
 		inline_script = {
 			script = events/resource_cost_with_allow
 			RESOURCE = energy
 			AMOUNT = value:curator_purchase_cost|COST|mem_surveyor_curio_cost|
 		}
-		# This vanilla effect adds one to the player's precursor counter
-		collector_surrenders_artifact = yes
+		add_modifier = {
+			modifier = mem_surveyor_precursor_insight
+			days = 3600
+		}
 		custom_tooltip = opinion5
 		hidden_effect = {
-			set_timed_country_flag = {
-				flag = mem_surveyor_precursor_insight
-				days = 3600
-			}
 			event_target:mem_surveyor_country = {
 				add_trust = {
 					who = root
 					amount = 5
 				}
 			}
+			remove_country_flag = mem_surveryor_curio_response
+			set_country_flag = mem_surveyor_precursor_response
+			country_event = {
+				id = mem_surveyor.123
+			}
 		}
+		# This vanilla effect adds one to the player's precursor counter
+		collector_surrenders_artifact = yes
 	}
 
 	option = {
@@ -2738,6 +2795,7 @@ country_event = {
 		default_hide_option = yes
 		hidden_effect = {
 			remove_country_flag = mem_surveryor_curio_response
+			remove_country_flag = mem_surveyor_precursor_response
 			country_event = {
 				id = mem_surveyor.120
 			}
@@ -2765,13 +2823,13 @@ country_event = {
 	}
 	location = event_target:chosen_planet
 	trigger = {
-		FROM = {
+		exists = event_target:mem_surveyor_country
+		event_target:mem_surveyor_country = {
 			is_country_type = mem_surveyor_country_green
 		}
 		NOT = {
-			has_country_flag = mem_surveyor_diplomacy_engaged
+			has_country_flag = mem_surveyor_attacked_surveyor
 		}
-		has_country_flag = mem_surveyor_attacked_surveyor
 	}
 	immediate = {
 		# Choose a target planet and give it a flag for the two special outcomes
@@ -2874,7 +2932,7 @@ country_event = {
 							NOT = {
 								has_modifier = terraforming_candidate
 							}
-							planet_size > 10
+							planet_size >= 15
 							planet_size <= 25
 						}
 					}
@@ -2892,7 +2950,7 @@ country_event = {
 						NOT = {
 							has_modifier = terraforming_candidate
 						}
-						planet_size > 10
+						planet_size >= 15
 						planet_size <= 25
 					}
 					save_event_target_as = chosen_planet
@@ -3234,8 +3292,10 @@ country_event = {
 country_event = {
 	id = mem_surveyor.125
 	title = MEM_SURVEYOR_PROBE_HEADER
-	# Picks one of these descs at random	TODO - Add some more
+	# Picks one of these descs at random
 	desc = mem_surveyor.125.desc_1
+	desc = mem_surveyor.125.desc_2
+	desc = mem_surveyor.125.desc_3
 	is_triggered_only = yes
 	diplomatic = yes
 	custom_gui = "enclave_curator_window"
@@ -3245,13 +3305,13 @@ country_event = {
 		portrait = event_target:mem_surveyor_country
 	}
 	trigger = {
-		FROM = {
+		exists = event_target:mem_surveyor_country
+		event_target:mem_surveyor_country = {
 			is_country_type = mem_surveyor_country_green
 		}
 		NOT = {
-			has_country_flag = mem_surveyor_diplomacy_engaged
+			has_country_flag = mem_surveyor_attacked_surveyor
 		}
-		has_country_flag = mem_surveyor_attacked_surveyor
 	}
 	immediate = {
 		# Set costs based on empire size
@@ -3309,8 +3369,10 @@ country_event = {
 country_event = {
 	id = mem_surveyor.126
 	title = MEM_SURVEYOR_PROBE_HEADER
-	# Picks one of these descs at random	TODO - Add some more
+	# Picks one of these descs at random
 	desc = mem_surveyor.125.desc_1
+	desc = mem_surveyor.125.desc_2
+	desc = mem_surveyor.125.desc_3
 	is_triggered_only = yes
 	diplomatic = yes
 	custom_gui = "enclave_curator_window"
@@ -3320,13 +3382,13 @@ country_event = {
 		portrait = event_target:mem_surveyor_country
 	}
 	trigger = {
-		FROM = {
+		exists = event_target:mem_surveyor_country
+		event_target:mem_surveyor_country = {
 			is_country_type = mem_surveyor_country_green
 		}
 		NOT = {
-			has_country_flag = mem_surveyor_diplomacy_engaged
+			has_country_flag = mem_surveyor_attacked_surveyor
 		}
-		has_country_flag = mem_surveyor_attacked_surveyor
 	}
 	immediate = {
 		# Set costs based on empire size
@@ -3412,13 +3474,13 @@ country_event = {
 		portrait = event_target:mem_surveyor_country
 	}
 	trigger = {
-		FROM = {
+		exists = event_target:mem_surveyor_country
+		event_target:mem_surveyor_country = {
 			is_country_type = mem_surveyor_country_green
 		}
 		NOT = {
-			has_country_flag = mem_surveyor_diplomacy_engaged
+			has_country_flag = mem_surveyor_attacked_surveyor
 		}
-		has_country_flag = mem_surveyor_attacked_surveyor
 	}
 	immediate = {
 		# Set costs based on empire size
@@ -6019,6 +6081,7 @@ country_event = {
 	diplomatic = yes
 	is_triggered_only = yes
 	custom_gui = "enclave_curator_window"
+	custom_gui_option = "enclave_curator_option"
 	picture_event_data = {
 		portrait = event_target:curators
 		room = enclave_curator_room
@@ -7000,6 +7063,7 @@ country_event = {
 			fleet_event = { id = mem_surveyor.2 }
 		}
 		set_country_flag = mem_surveyor_spotted_probe
+		set_country_flag = mem_surveyor_opened_comms
 		establish_communications_no_message = event_target:mem_surveyor_country
 	}
 }
@@ -7041,6 +7105,18 @@ first_contact_event = {
 	is_triggered_only = yes
 	first_contact = yes
 
+	trigger = {
+		owner = {
+			NOT = {
+				has_origin = origin_mem_ceaseless_gaze
+			}			
+		}
+		
+		contact_country = {
+			is_country_type = mem_surveyor_country_green
+		}
+	}
+
 	immediate = {
 		set_site_progress_locked = yes
 	}
@@ -7066,6 +7142,18 @@ first_contact_event = {
 
 	is_triggered_only = yes
 	first_contact = yes
+
+	trigger = {
+		owner = {
+			NOT = {
+				has_origin = origin_mem_ceaseless_gaze
+			}			
+		}
+		
+		contact_country = {
+			is_country_type = mem_surveyor_country_green
+		}
+	}
 
 	immediate = {
 		set_site_progress_locked = yes
@@ -7333,6 +7421,7 @@ country_event = {
 				save_global_event_target_as = mem_surveyor_robotomite_species
 			}
 		}
+
 		create_country = {
 			name = "Sentinel Probe"
 			type = default
@@ -7355,7 +7444,7 @@ country_event = {
 			}
 			ethos = {
 				ethic = ethic_fanatic_pacifist
-				ethic = ethic_materialist
+				ethic = ethic_xenophile
 			}
 			ignore_initial_colony_error = yes
 			origin = origin_mem_surveyor_sentinel
@@ -7418,14 +7507,14 @@ country_event = {
 					limit = {
 						is_ai = no
 					}
-					save_event_target_as = mem_surveyor_is_plyer_country
+					save_event_target_as = mem_surveyor_is_player_country
 				}
 				if = {
 					limit = {
-						exists = event_target:mem_surveyor_is_plyer_country
+						exists = event_target:mem_surveyor_is_player_country
 					}
 					copy_techs_from = {
-						target = event_target:mem_surveyor_is_plyer_country
+						target = event_target:mem_surveyor_is_player_country
 					}
 				}
 			}
