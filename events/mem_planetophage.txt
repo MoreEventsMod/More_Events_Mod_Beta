@@ -77,7 +77,7 @@ country_event = {
 	}
 }
 
-# anomaly event spawn the big un
+# spawn the big un
 # ROOT = ship scope
 # FROM = planet scope
 ship_event = {
@@ -89,13 +89,20 @@ ship_event = {
 	location = this
 	is_triggered_only = yes
 	immediate = {
+		solar_system = {
+			random_system_planet = {
+				limit = {
+					has_planet_flag = mem_planetophage_broken_planet
+				}
+				save_global_event_target_as = mem_planetophage_planet
+			}
+		}
 	}
 	option = {
 		name = mem_planetophage.1.a		# press button and reactivate grid
 		custom_tooltip = mem_planetophage.1.a.tt
-		from = {
+		event_target:mem_planetophage_planet = {
 			remove_modifier = mem_planetophage_disabled_powergrid
-			save_global_event_target_as = mem_planetophage_planet
 		}
 		hidden_effect = {
 			owner = {
@@ -109,13 +116,58 @@ ship_event = {
 					# }
 				}
 			}
-			# owner = {
-			# 	save_global_event_target_as = mem_planetophage_awakener
-			# }
 		}
 	}
 	option = {
 		name = mem_planetophage.1.b		# dont
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = 3
+			}
+		}
+	}
+}
+
+# anomaly event 
+# ROOT = ship scope
+# FROM = planet scope
+ship_event = {
+	id = mem_planetophage.2
+	title = mem_planetophage.2.name
+	desc = mem_planetophage.2.desc
+	picture = GFX_evt_contingency_planet
+	show_sound = event_machinery
+	location = this
+	is_triggered_only = yes
+	immediate = {
+		from = {
+			#change_pc = pc_machine
+			save_event_target_as = mem_planetophagetarget
+		}
+	}
+	option = {
+		name = mem_planetophage.2.a		# probe the planet?
+		owner = {
+			enable_special_project = {
+				name = MEM_PLANETOPHAGE_REACTIVATE
+				location = event_target:mem_planetophagetarget
+			}
+		}
+	}
+	option = {
+		name = mem_planetophage.2.b		# dont care
+	}
+	after = {
+		from = {
+			change_pc = pc_machine
+			add_modifier = {
+				modifier = mem_planetophage_disabled_powergrid
+			}
+			add_modifier = {
+				modifier = mem_planetophage_debris
+			}
+		}
 	}
 }
 
@@ -265,9 +317,8 @@ planet_event = {
 						clear_deposits = yes
 						while = {
 							count = 3
-						mem_planetophage_create_deposit_noclear = yes
+							mem_planetophage_create_deposit_noclear = yes
 						}
-						
 						if = {
 							limit = {
 								# so auto build can rebuild a minig station
