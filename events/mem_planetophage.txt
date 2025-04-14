@@ -181,6 +181,7 @@ country_event = {
 	location = event_target:mem_planetophage_planet
 	is_triggered_only = yes
 	immediate = {
+		set_country_flag = guardians_mem_planetophage_country_encountered
 	}
 	option = {
 		name = BATTLESTATIONS
@@ -254,7 +255,7 @@ country_event = {
 										}
 									}
 									set_location = prevprev
-									set_fleet_stance = aggressive
+									set_fleet_stance = passive
 									set_aggro_range_measure_from = self
 									set_aggro_range = 100
 									#mem_planetophage_queue_another_victim_planet = yes
@@ -346,6 +347,87 @@ planet_event = {
 				#days = 10
 			}
 		}
+	}
+}
+
+# entered territory with fleet
+fleet_event = {
+	id = mem_planetophage.109
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		owner = {
+			has_country_flag = mem_planetophage_country
+		}
+	}
+	immediate = {
+		solar_system = {
+			if = {
+				limit = {
+					exists = space_owner
+					space_owner = {
+						NOT = {
+							has_country_flag = guardians_mem_planetophage_country_encountered
+						}
+					}
+				}
+				space_owner = {
+					country_event = {
+						id = mem_planetophage.110
+						scopes = {
+							from = root.owner
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+# it Enters Territory
+country_event = {
+	id = mem_planetophage.110
+	title = "mem_planetophage.110.name"
+	
+	desc = {
+		text = "mem_planetophage.110.desc.angry"
+		trigger = {
+			from = {
+				NOT = {
+					has_country_flag = mem_planetophage_country_defeated_first_time
+				}
+			}
+		}
+	}
+	desc = {
+		text = "mem_planetophage.110.desc.neutral"
+		trigger = {
+			from = {
+				has_country_flag = mem_planetophage_country_defeated_first_time
+			}
+		}
+	}
+	picture = GFX_evt_contingency_planet
+	show_sound = event_machinery
+	is_triggered_only = yes
+	trigger = {
+		FROM = {
+			has_country_flag = mem_planetophage_country
+		}
+		NOT = {
+			has_country_flag = guardians_mem_planetophage_country_encountered
+		}
+	}
+	immediate = {
+		country_event = {
+			id = story.8
+			days = 15
+		}
+		set_country_flag = guardians_mem_planetophage_country_encountered
+	}
+	option = {
+		# name = mem_planetophage.110.a
+		name = DISTURBING
 	}
 }
 
@@ -554,7 +636,7 @@ ship_event = {
 							graphical_culture = mem_ancient_01
 						}
 						set_location = root
-						set_fleet_stance = aggressive
+						set_fleet_stance = passive
 						set_aggro_range_measure_from = self
 						set_aggro_range = 100
 						# this moves it to the restorer capital, but not sure if this will confuse people
