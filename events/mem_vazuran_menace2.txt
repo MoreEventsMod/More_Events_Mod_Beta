@@ -5,16 +5,12 @@
 # Coding by Tr33
 #
 ####################################
-
 namespace = mem_vazurans
-
 # Setup Event at Game Start for randomly disabling the Crisis
 event = {
 	id = mem_vazurans.1
 	hide_window = yes
-
 	is_triggered_only = yes
-
 	immediate = {
 		IF = {
 			limit = {
@@ -45,61 +41,631 @@ event = {
 		}
 		IF = {
 			limit = {
-				has_global_flag = mem_vazurans_disabled				
+				has_global_flag = mem_vazurans_disabled
 			}
 			random_list = {
-				80 = {} # nothing happens
+				80 = {
+				}
+				# nothing happens
 				20 = {
 					setup_mem_ruined_vazuran_space = yes
 				}
 			}
 		}
-
 		mem_gamestart_orila_primitive_setup = yes
 	}
 }
 
 # vazurans say hello, starts player mood situation
-
 # raids spawning
-event = {
+situation_event = {
 	id = mem_vazurans.1100
 	hide_window = yes
 	is_triggered_only = yes
-
+	trigger = {
+		# are there less fleets raiding than max possible?
+		check_variable_arithmetic = {
+			which = mem_vazuran_raiding_current_fleets
+			value < mem_vazuran_raiding_max_fleets
+		}
+	}
 	immediate = {
-		random_playable_country = {
+		# if I do this each country has the same chance, however wouldnt it make sense to target larger empires?
+		# random_playable_country = {
+		# 	limit = {
+		# 		NOT = {
+		# 			has_country_flag = mem_vazurans_target_country
+		# 		}
+		# 	}
+		# }
+		# now each system someone controls increases raiding chance
+		reroll_random = yes
+		random_system = {
 			limit = {
-				NOT = {
-					has_country_flag = mem_vazurans_target
+				exists = owner
+				owner = {
+					# TRODO based on situation approach of the empire
+					is_regular_empire = yes
+					NOR = {
+						has_country_flag = mem_vazurans_targeted_country
+					}
 				}
 			}
-			country_event = {
-				id = mem_vazurans.1105
+			owner = {
+				# establis coms if not already, should be handled by intro event of situation start
+				IF = {
+					limit = {
+						NOT = {
+							has_communications = ROOT.owner
+						}
+					}
+					establish_communications_no_message = ROOT.owner
+				}
+				# raid incoming * red alert sound *
+				set_country_flag = mem_vazurans_targeted_country
+				# TRODO this should be on vazuran country scope, not raid target
+				# this on creates the rift
+				country_event = {
+					id = mem_vazurans.1105
+					#days = 13
+					#random = 160
+					scopes = {
+						from = prev
+					}
+				}
+				# this on creates a message or first time event
+				country_event = {
+					id = mem_vazurans.1110
+					#days = 13
+					#random = 160
+					scopes = {
+						from = prev
+					}
+				}
+				# create fleet
+				country_event = {
+					id = mem_vazurans.1120
+					days = 60
+					#random = 160
+					scopes = {
+						from = prev
+					}
+				}
+			}
+		}
+		# active raiding fleets +1
+		change_variable = {
+			which = mem_vazuran_raiding_current_fleets
+			value = 1
+		}
+	}
+}
+
+# damn i hate the old raiding scripts
+# enough to remake the entire thing
+# create ambient object
+country_event = {
+	id = mem_vazurans.1105
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		NOR = {
+			has_country_flag = mem_vazurans_targeted_country
+		}
+	}
+	immediate = {
+		prev = {
+			solar_system = {
+				random_system_planet = {
+					limit = {
+						is_star = yes
+					}
+					THIS = {
+						save_event_target_as = mem_vazurans_target_sun
+					}
+				}
+				create_ambient_object = {
+					type = "mem_vazuran_wormhole_big_object"
+				}
+				random_system_ambient_object = {
+					limit = {
+						is_same_value = last_created_ambient_object
+					}
+					set_location = {
+						target = event_target:mem_vazurans_target_sun
+						distance = 150
+						angle = random
+					}
+					set_ambient_object_flag = mem_vazurans_rift
+					save_event_target_as = mem_vazurans_rift
+				}
 			}
 		}
 	}
 }
 
-# raid target selection, create ambient object, spawn fleet and notify player
-country_event = {
-	id = mem_vazurans.1105
-	hide_window = yes
-	is_triggered_only = yes
-	immediate = {
-		
-	}
-}
-
-# spawn fleet + armies if planet
-
+# logic for notify
 country_event = {
 	id = mem_vazurans.1110
 	hide_window = yes
 	is_triggered_only = yes
 	immediate = {
-		
+		if = {
+			limit = {
+				has_country_flag = mem_vazurans_met
+			}
+			create_message = {
+				type = MESSAGE_MEM_MADE_PRIMITIVE				# TRODO
+				days = 30
+			}
+		}
+		else = {
+			set_country_flag = mem_vazurans_met
+			country_event = {
+				id = mem_vazurans.1115
+				scopes = {
+					from = from
+				}
+			}
+		}
 	}
 }
 
 # notify player first time
+# Notification Event that a Rift is forming
+country_event = {
+	id = mem_vazurans.1115
+	title = mem_vazurans.4.name
+	desc = {
+		# for first encounter
+		text = mem_vazurans.4a.desc
+		trigger = {
+			NOT = {
+				has_ethic = ethic_gestalt_consciousness
+			}
+		}
+	}
+	desc = {
+		# for first encounter
+		text = mem_vazurans.4a.desc.gestalt
+		trigger = {
+			has_ethic = ethic_gestalt_consciousness
+		}
+	}
+	# this will be messages instead
+	# desc = {
+	# 	# after first encounter has happened before
+	# 	text = mem_vazurans.4b.desc
+	# 	trigger = {
+	# 		NOT = {
+	# 			has_country_flag = mem_vazurans_retaliation
+	# 		}
+	# 		has_country_flag = mem_vazurans_met
+	# 	}
+	# }
+	# desc = {
+	# 	# for retaliation encounter
+	# 	text = mem_vazurans.4c.desc
+	# 	trigger = {
+	# 		has_country_flag = mem_vazurans_retaliation
+	# 	}
+	# }
+	picture = GFX_evt_mem_rift
+	location = from	# TRODO check if this works
+	event_chain = mem_vazuran_menace_chain
+	is_triggered_only = yes
+	#response in first encounter
+	option = {
+		name = mem_vazurans.4.a
+		trigger = {
+			NOR = {
+				has_country_flag = mem_vazurans_met
+				has_country_flag = mem_vazurans_retaliation
+			}
+		}
+		capital_scope = {
+			enable_special_project = {
+				name = MEM_VAZURANS_RIFT_INVESTIGATION
+				location = this
+				owner = root
+			}
+		}
+	}
+	#response in later encounter
+	option = {
+		name = mem_vazurans.4.b
+		trigger = {
+			has_country_flag = mem_vazurans_met
+			NOT = {
+				has_country_flag = mem_vazurans_retaliation
+			}
+		}
+	}
+	#response in retaliation encounter
+	option = {
+		name = mem_vazurans.4.c
+		trigger = {
+			has_country_flag = mem_vazurans_retaliation
+		}
+	}
+}
+
+# create a fleet
+# Raiding Fleet spawn
+country_event = {
+	id = mem_vazurans.1120
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		#create_mem_vazuran_country = yes wont need this hopefully
+		from = {
+			if = {
+				limit = {
+					any_system_planet = {
+						has_planet_flag = mem_vazurans_raiding_target
+					}
+				}
+				random_system_ambient_object = {
+					limit = {
+						has_ambient_object_flag = mem_vazurans_rift
+					}
+					create_mem_vazuran_fleet = yes
+					#mem_vazuran_raiding_fleet_spawn = yes
+				}
+			}
+		}
+		last_created_fleet = {
+			# fleet flag for bombarding event
+			set_fleet_flag = mem_vazurans_fleet
+			set_fleet_stance = aggressive
+			set_aggro_range_measure_from = self
+			set_aggro_range = 150
+			fleet_event = {
+				id = mem_vazurans.110
+				days = 1
+			}
+		}
+		event_target:global_event_country = {
+			change_variable = {
+				which = mem_vazuran_menace_raids_variable
+				value = 1
+			}
+		}
+	}
+}
+
+# tells the raiding fleet to move to the target planet to start bombarding
+fleet_event = {
+	id = mem_vazurans.1125
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		queue_actions = {
+			repeat = {
+				find_closest_planet = {
+					trigger = {
+						id = mem_vazurans_action1125.1
+						has_planet_flag = mem_vazurans_raiding_target
+					}
+					found_planet = {
+						move_to = this
+						orbit_planet = this
+					}
+				}
+				wait = {
+					duration = 60
+				}
+				effect = {
+					id = mem_vazurans_action1125.2
+					solar_system = {
+						random_system_planet = {
+							limit = {
+								has_planet_flag = mem_vazurans_raiding_target
+							}
+							# spawn armies
+							planet_event = {
+								id = mem_vazurans.1129
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+# spawn armies 
+planet_event = {
+	id = mem_vazurans.1129
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		set_planet_flag = mem_vazurans_raid_planet
+		while = {
+			count = 10			# TRODO maybe based on game stage?
+			create_army = {
+				owner = event_target:mem_vazurans_country
+				type = xenomorph_army
+			}
+		}
+	}
+}
+# TRODO events for vazuran armies winning or losing ground combat
+# armies raided planet
+# what the hell is this script??
+planet_event = {
+	id = mem_vazurans.1130
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		# check if vazurans won the fight
+		# solar_system = {
+		# 	any_fleet_in_system = {
+		# 		exists = this
+		# 		# exists = owner
+		# 		# owner = {
+		# 		# 	is_same_value = event_target:mem_vazurans_country
+		# 		# }
+		# 		has_fleet_flag = mem_vazurans_fleet
+		# 		orbit = {
+		# 			is_same_value = root
+		# 		}
+		# 	}
+		# }
+	}
+	immediate = {		
+		# alright this is trash
+		# kill more after mid and lategame 
+		# check for galactic resolution 
+		# destroy buildings and create blockers?
+		IF = {
+			limit = {
+				solar_system = {
+					owner = {
+						is_ai = no
+						NOT = {
+							has_country_flag = mem_vazurans_rift_creation_start
+						}
+						has_country_flag = mem_vazurans_retaliation
+					}
+				}
+			}
+			solar_system = {
+				owner = {
+					set_country_flag = mem_vazurans_rift_creation_start
+					country_event = {
+						id = mem_vazurans.50
+						days = 165
+						random = 30
+					}
+				}
+			}
+		}
+		IF = {
+			limit = {
+				solar_system = {
+					owner = {
+						has_country_flag = mem_vazurans_target_1
+					}
+				}
+			}
+			set_timed_global_flag = {
+				flag = mem_vazurans_raid_1_finished
+				days = 720				# 2 years
+			}
+			solar_system = {
+				owner = {
+					remove_country_flag = mem_vazurans_target_1
+				}
+			}
+		}
+		IF = {
+			limit = {
+				solar_system = {
+					owner = {
+						has_country_flag = mem_vazurans_target_2
+					}
+				}
+			}
+			set_timed_global_flag = {
+				flag = mem_vazurans_raid_2_finished
+				days = 720				# 2 years
+			}
+			solar_system = {
+				owner = {
+					remove_country_flag = mem_vazurans_target_2
+				}
+			}
+		}
+		IF = {
+			limit = {
+				solar_system = {
+					owner = {
+						has_country_flag = mem_vazurans_target_3
+					}
+				}
+			}
+			set_timed_global_flag = {
+				flag = mem_vazurans_raid_3_finished
+				days = 720				# 2 years
+			}
+			solar_system = {
+				owner = {
+					remove_country_flag = mem_vazurans_target_3
+				}
+			}
+		}
+		IF = {
+			limit = {
+				solar_system = {
+					owner = {
+						has_country_flag = mem_vazurans_target_4
+					}
+				}
+			}
+			set_timed_global_flag = {
+				flag = mem_vazurans_raid_4_finished
+				days = 720				# 2 years
+			}
+			solar_system = {
+				owner = {
+					remove_country_flag = mem_vazurans_target_4
+				}
+			}
+		}
+		IF = {
+			limit = {
+				solar_system = {
+					owner = {
+						has_country_flag = mem_vazurans_target_5
+					}
+				}
+			}
+			set_timed_global_flag = {
+				flag = mem_vazurans_raid_5_finished
+				days = 720				# 2 years
+			}
+			solar_system = {
+				owner = {
+					remove_country_flag = mem_vazurans_target_5
+				}
+			}
+		}
+		IF = {
+			limit = {
+				solar_system = {
+					owner = {
+						has_country_flag = mem_vazurans_retaliation
+					}
+				}
+			}
+			mem_vazurans_planet_retaliation_effect = yes
+			solar_system = {
+				owner = {
+					remove_country_flag = mem_vazurans_retaliation
+				}
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				is_colony = yes
+				years_passed >= 100
+				habitable_planet = yes
+				NOR = {
+					has_building = building_mem_planetary_shield_generator
+					has_building = building_mem_planetary_shield_generator_heavy
+					has_building = building_mem_planetary_shield_generator_orila
+				}
+				num_pops < 40
+			}
+			random_list = {
+				5 = {
+					owner = {
+						country_event = {
+							id = mem_vazurans.9
+							days = 1
+						}
+					}
+					mem_vazurans_planet_raiding_effect_1 = yes
+				}
+				2 = {
+					modifier = {
+						factor = 0.8
+						has_global_flag = galactic_focus_crisis_vazurans_1
+						owner = {
+							is_galactic_community_member = yes
+						}
+					}
+					owner = {
+						country_event = {
+							id = mem_vazurans.8
+							days = 1
+						}
+					}
+					mem_vazurans_planet_raiding_effect_2 = yes
+				}
+				1 = {
+					modifier = {
+						factor = 0.8
+						has_global_flag = galactic_focus_crisis_vazurans_1
+						owner = {
+							is_galactic_community_member = yes
+						}
+					}
+					owner = {
+						country_event = {
+							id = mem_vazurans.8
+							days = 1
+						}
+					}
+					mem_vazurans_planet_raiding_effect_3 = yes
+				}
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				is_colony = yes
+				years_passed >= 100
+				NOR = {
+					has_building = building_mem_planetary_shield_generator
+					has_building = building_mem_planetary_shield_generator_heavy
+					has_building = building_mem_planetary_shield_generator_orila
+				}
+				num_pops < 40
+			}
+			random_list = {
+				5 = {
+					owner = {
+						country_event = {
+							id = mem_vazurans.9
+							days = 1
+						}
+					}
+					mem_vazurans_planet_raiding_effect_1 = yes
+				}
+				3 = {
+					modifier = {
+						factor = 0.8
+						has_global_flag = galactic_focus_crisis_vazurans_1
+						owner = {
+							is_galactic_community_member = yes
+						}
+					}
+					owner = {
+						country_event = {
+							id = mem_vazurans.8
+							days = 1
+						}
+					}
+					mem_vazurans_planet_raiding_effect_2 = yes
+				}
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				is_colony = yes
+			}
+			owner = {
+				country_event = {
+					id = mem_vazurans.9
+					days = 1
+				}
+			}
+			mem_vazurans_planet_raiding_effect_1 = yes
+		}
+		solar_system = {
+			random_fleet_in_system = {
+				limit = {
+					exists = owner
+					owner = {
+						is_country_type = mem_vazurans
+					}
+				}
+				fleet_event = {
+					id = mem_vazurans.112
+					days = 1
+				}
+			}
+		}
+	}
+}
