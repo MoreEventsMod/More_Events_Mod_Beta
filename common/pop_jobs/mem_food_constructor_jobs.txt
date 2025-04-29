@@ -1,8 +1,15 @@
 mem_food_constructor_dust_gatherer = {
     category = worker
-    is_capped_by_modifier = yes
-    condition_string = WORKER_JOB_TRIGGER
-    icon = mem_dust_gatherer
+	
+	swappable_data = {
+		default = {
+			icon = mem_dust_gatherer
+			condition_string = WORKER_JOB_TRIGGER
+			building_icon = building_food_processing_facility
+		}
+	}
+	
+	tags = { food }
 
 	possible_pre_triggers = {
 		has_owner = yes
@@ -12,6 +19,12 @@ mem_food_constructor_dust_gatherer = {
 	}
 
 	possible_precalc = can_fill_worker_job
+	possible = {
+		hidden_trigger = { exists = owner }
+		owner = {
+			is_gestalt = no
+		}
+	}
     
     resources = {
         category = planet_farmers
@@ -37,33 +50,44 @@ mem_food_constructor_dust_gatherer = {
             food = 9
         }
     }
-
-    weight = { #Copy of vanilla farmer, sans Agrarian Idyll
-		weight = @worker_job_weight
-		modifier = {
-			factor = 1.5
-			OR = {
-				has_trait = trait_robot_harvesters
-				has_trait = trait_agrarian
+	
+	overlord_resources = {
+		category = planet_requisitioned_food
+		produces = {
+			trigger = {
+				planet = {
+					has_planet_flag = has_produce_requisitorium
+				}
 			}
+			food = @requisitorium_food_overlord
+		}
+	}
+
+    weight = {
+		weight = @worker_job_weight
+		mult = value:job_weights_modifier|JOB|farmer|RESOURCE|food|
+		modifier = {
+			factor = 1.1
+			owner = { has_valid_civic = civic_agrarian_idyll }
 		}
 		modifier = {
 			factor = 10
 			is_enslaved = yes
 			can_take_servant_job = no
-		}	
+			NOT = { has_slavery_type = { type = slavery_indentured } }
+		}
 		modifier = {
-			factor = 2
-			OR = {	
+			factor = 3
+			OR = {
 				is_non_sapient_robot = yes
 				is_shackled_robot = yes
 			}
 			can_take_servant_job = no
 			owner = { has_technology = tech_droid_workers }
-		}	
+		}
 		modifier = {
-			factor = 10
-			OR = {	
+			factor = 200
+			OR = {
 				is_non_sapient_robot = yes
 				is_shackled_robot = yes
 			}
@@ -73,32 +97,72 @@ mem_food_constructor_dust_gatherer = {
 		modifier = {
 			factor = 0.25
 			can_take_servant_job = yes
-		}	
-		modifier = {
-			factor = 2
-			has_trait = trait_syncretic_proles
-		}	
-		modifier = {
-			factor = 1.2
-			has_trait = trait_very_strong
 		}
 		modifier = {
-			factor = 1.1
-			has_trait = trait_strong
-		}	
+			factor = value:scripted_modifier_job_weight_mult|MODIFIER|pop_job_amenities_mult|
+			owner = { has_valid_civic = civic_agrarian_idyll }
+		}
+		# low income modifier
 		modifier = {
-			factor = 0.9
-			has_trait = trait_weak
-		}			
+			factor = 3
+			exists = planet
+			planet = {
+				has_available_jobs = farmer
+			}
+			exists = owner
+			owner = {
+				has_monthly_income = {
+					resource = food
+					value < 10
+				}
+			}
+		}
+
+		modifier = {
+			factor = 0.5
+			has_trait = trait_lithoid
+
+			owner = {
+				is_lithoid_empire = yes
+				country_uses_food = no
+				has_monthly_income = {
+					resource = food
+					value >= 0
+				}
+			}
+		}
+		modifier = {
+			factor = 5
+			has_trait = trait_cyborg_creed_of_labor
+		}
+	}
+
+	inline_script = "jobs/automodding_priority_food"
+
+	promotion = {
+		time = @standard_promotion_time
+		effect = {
+			pop_amount_change_category = {
+				CATEGORY = worker
+				AMOUNT = local_pop_amount
+			}
+		}
 	}
 }
 
 # The same thing but for gestalts
 mem_food_constructor_dust_gatherer_gestalt = {
     category = simple_drone
-    is_capped_by_modifier = yes
-    condition_string = DRONE_JOB_TRIGGER
-    icon = mem_dust_gatherer
+	
+    swappable_data = {
+		default = {
+			icon = mem_dust_gatherer
+			condition_string = DRONE_JOB_TRIGGER
+			building_icon = building_food_processing_facility
+		}
+	}
+	
+	tags = { food }
 
 	possible_pre_triggers = {
 		has_owner = yes
@@ -134,22 +198,69 @@ mem_food_constructor_dust_gatherer_gestalt = {
             food = 9
         }
     }
+	
+	overlord_resources = {
+		category = planet_requisitioned_food
+		produces = {
+			trigger = {
+				planet = {
+					has_planet_flag = has_produce_requisitorium
+				}
+			}
+			food = @requisitorium_food_overlord
+		}
+	}
 
     weight = {
 		weight = @simple_drone_job_weight
+		mult = value:job_weights_modifier|JOB|agri_drone|RESOURCE|food|
 		modifier = {
-			factor = 2
-			OR = {
-				has_trait = trait_agrarian
-				has_trait = trait_robot_harvesters
-			}		
-		}	
+			factor = 0.9
+			owner = {
+				has_monthly_income = {
+					resource = food
+					value > 50
+				}
+			}
+		}
+		modifier = {
+			factor = 0.9
+			owner = {
+				is_robot_empire = yes
+			}
+		}
 		modifier = {
 			factor = 1.1
 			exists = owner
 			years_passed < 1
 			owner = { has_valid_civic = civic_machine_assimilator }
 			has_trait = trait_cybernetic
-		}		
+		}
+
+		modifier = {
+			factor = 0.5
+			has_trait = trait_lithoid
+
+			owner = {
+				is_lithoid_empire = yes
+				country_uses_food = no
+				has_monthly_income = {
+					resource = food
+					value >= 0
+				}
+			}
+		}
+	}
+
+	inline_script = "jobs/automodding_priority_food"
+
+	promotion = {
+		time = @standard_promotion_time
+		effect = {
+			pop_amount_change_category = {
+				CATEGORY = simple_drone
+				AMOUNT = local_pop_amount
+			}
+		}
 	}
 }

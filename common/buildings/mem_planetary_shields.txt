@@ -1,7 +1,6 @@
 
 #override for vanilla shield generator
 
-# Increases the time it takes to bombard the planet
 building_planetary_shield_generator = {
 	base_buildtime = @b3_time
 	base_cap_amount = 1
@@ -10,35 +9,51 @@ building_planetary_shield_generator = {
 	can_build = no
 	category = army
 
+	building_sets = {
+		government
+		fortress
+	}
+
+	potential = {
+		owner = { is_wilderness_empire = no } # see 'building_ozone_thickener'
+	}
 	allow = {
 		has_upgraded_capital = yes
-		hidden_trigger = { owner = { is_ai = no } }
-		OR = {
-			NOT = {
-				exists = orbital_defence
-			}
-			AND = {
-				exists = orbital_defence
-				orbital_defence = {
-					exists = starbase
-					starbase = {
-						NOR = {
-							has_starbase_building = ring_orbital_shield_generator
-							is_starbase_building_building = ring_orbital_shield_generator
-						}
+		if = {
+			limit = { exists = orbital_defence }
+			orbital_defence = {
+				exists = starbase
+				starbase = {
+					NOR = {
+						has_starbase_building = ring_orbital_shield_generator
+						is_starbase_building_building = ring_orbital_shield_generator
 					}
 				}
 			}
-		}		
+		}
 	}
 
-	destroy_trigger = {
-		exists = owner
-		owner = { is_ai = yes }
+	prerequisites = {
+		#"tech_planetary_shield_generator"
+	}
+	show_tech_unlock_if = {
+		is_wilderness_empire = no
 	}
 
 	planet_modifier = {
 		planet_orbital_bombardment_damage = -0.5
+	}
+	triggered_planet_modifier = {
+		potential = { has_cosmic_storms_dlc = yes }
+		planet_storm_devastation_mult = -0.5
+	}
+
+	inline_script = {
+		script = cosmic_storms/StormBuildingModifiers
+	}
+
+	inline_script = { # on_built & on_destroy behaviors
+		script = cosmic_storms/PlanetaryShieldOnBuiltDestroy
 	}
 
 	resources = {
@@ -51,133 +66,114 @@ building_planetary_shield_generator = {
 		}
 	}
 
-	# upgrades = {
-	# 	"building_planetary_storm_shield"
-	# }
-
-	prerequisites = {
+	custom_storm_ai_weight = {
+		weight = 5
+		modifier = {
+			factor = 5
+			AND = {
+				exists = owner
+				solar_system = {
+					exists = owner
+					owner = { num_cosmic_storms_encountered >=2 }
+				}
+			}
+		}
 	}
 }
 
 # mem shield generator
 building_mem_planetary_shield_generator = {
 	icon = "building_planetary_shield_generator"
-	base_buildtime = 600	
+	base_buildtime = @b3_time
 	base_cap_amount = 1
 	position_priority = 100
+	can_be_ruined = no
+	category = army
 
-	category = army	
-		
+	building_sets = {
+		government
+		fortress
+	}
+
 	potential = {
-		planet = {
+		owner = { is_wilderness_empire = no } # see 'building_ozone_thickener'
+		planet = { # for other mods that may make asteroids colonizable
 			NOT = {
 				is_planet_class = pc_asteroid
 			}	
 		}
 	}
-	
 	allow = {
 		has_upgraded_capital = yes
 		mem_has_shield_building = no
 	}
 
+	prerequisites = {
+		"tech_planetary_shield_generator"
+	}
+	show_tech_unlock_if = {
+		is_wilderness_empire = no
+	}
+
 	planet_modifier = {
 		planet_orbital_bombardment_damage = -0.5
+	}
+	triggered_planet_modifier = {
+		potential = { has_cosmic_storms_dlc = yes }
+		planet_storm_devastation_mult = -0.5
+	}
+
+	inline_script = {
+		script = cosmic_storms/StormBuildingModifiers
+	}
+
+	inline_script = { # on_built & on_destroy behaviors
+		script = cosmic_storms/PlanetaryShieldOnBuiltDestroy
 	}
 
 	resources = {
 		category = planet_buildings
 		cost = {
-			minerals = 500
-		}			
+			minerals = @b2_minerals
+		}
 		upkeep = {
-			energy = 5
+			energy = @b2_upkeep
 		}
 	}
-
+	
 	upgrades = {
 		building_mem_planetary_shield_generator_heavy
 	}
-
-	##################################################################################################
-	#Storms stuff
-	triggered_planet_modifier = {
-		potential = { has_cosmic_storms_dlc = yes }
-		planet_storm_devastation_mult = -0.5
-	}
-	on_built = {
-		if = {
-			limit = { has_cosmic_storms_dlc = yes }
-			solar_system = {
-				set_star_flag = storm_no_negative_effects
-				remove_modifier = storm_base_modifier
-			}
-		}
-	}
-	on_destroy = {
-		if = {
-			limit = { has_cosmic_storms_dlc = yes }
-			owner = { set_country_flag = shield_on_destroy } #an action when destroyed
-			solar_system = {
-				remove_star_flag = storm_no_negative_effects
-			}
-		}
-	}
-	##################################################################################################
-
-	triggered_planet_modifier = {
-		potential = {
-			exists = owner
-			owner = { is_gestalt = no }
-		}
-		modifier = {
-			job_soldier_add = 1
-		}
-	}
-	triggered_planet_modifier = {
-		potential = {
-			exists = owner
-			owner = { is_gestalt = yes }
-		}
-		modifier = {
-			job_warrior_drone_add = 1
-		}
-	}
-
-	triggered_desc = {
-		trigger = {
-			exists = owner
-			owner = { is_gestalt = yes }
-		}
-		text = job_warrior_drone_effect_desc
-	}
-	triggered_desc = {
-		trigger = {
-			exists = owner
-			owner = { is_gestalt = no }
-		}
-		text = job_soldier_effect_desc
-	}
 	
-	prerequisites = {
-		"tech_planetary_shield_generator"
-	}
-
 	ai_weight = {
 		weight = 10
 		modifier = {
 			factor = 0
-			num_pops <= 29
+			pop_amount <= 1000
 		}
 		modifier = {
 			factor = 10
-			num_pops >= 60
+			pop_amount >= 5000
 		}
 		modifier = {
 			factor = 10
 			num_buildings = {
 				type = building_fortress
 				value > 0
+			}
+		}
+	}
+
+	custom_storm_ai_weight = {
+		weight = 5
+		modifier = {
+			factor = 5
+			AND = {
+				exists = owner
+				solar_system = {
+					exists = owner
+					owner = { num_cosmic_storms_encountered >=2 }
+				}
 			}
 		}
 	}
@@ -192,6 +188,11 @@ building_mem_planetary_shield_generator_heavy = {
 	position_priority = 100
 
 	category = army
+	
+	building_sets = {
+		government
+		fortress
+	}
 
 	allow = {
 		has_upgraded_capital = yes
@@ -204,30 +205,16 @@ building_mem_planetary_shield_generator_heavy = {
 	##################################################################################################
 	#Storms stuff
 	triggered_planet_modifier = {
-		potential = {
-			host_has_dlc = "Cosmic Storms"
-		}
-		modifier = {
-			planet_storm_devastation_mult = -0.6
-		}
+		potential = { has_cosmic_storms_dlc = yes }
+		planet_storm_devastation_mult = -0.6
 	}
-	on_built = {
-		if = {
-			limit = { has_cosmic_storms_dlc = yes }
-			solar_system = {
-				set_star_flag = storm_no_negative_effects
-				remove_modifier = storm_base_modifier
-			}
-		}
+
+	inline_script = {
+		script = cosmic_storms/StormBuildingModifiers
 	}
-	on_destroy = {
-		if = {
-			limit = { has_cosmic_storms_dlc = yes }
-			owner = { set_country_flag = shield_on_destroy } #an action when destroyed
-			solar_system = {
-				remove_star_flag = storm_no_negative_effects
-			}
-		}
+
+	inline_script = { # on_built & on_destroy behaviors
+		script = cosmic_storms/PlanetaryShieldOnBuiltDestroy
 	}
 	##################################################################################################
 
@@ -305,6 +292,11 @@ building_mem_planetary_shield_generator_orila = {
 	position_priority = 100
 
 	category = army
+	
+	building_sets = {
+		government
+		fortress
+	}
 
 	potential = {
 		planet = {
@@ -359,37 +351,16 @@ building_mem_planetary_shield_generator_orila = {
 	##################################################################################################
 	#Storms stuff
 	triggered_planet_modifier = {
-		potential = {
-			host_has_dlc = "Cosmic Storms"
-		}
-		modifier = {
-			planet_storm_devastation_mult = -0.7
-		}
+		potential = { has_cosmic_storms_dlc = yes }
+		planet_storm_devastation_mult = -0.7
 	}
-	on_built = {
-		if = {
-			limit = { has_cosmic_storms_dlc = yes }
-			solar_system = {
-				set_star_flag = storm_no_negative_effects
-				remove_modifier = storm_base_modifier
-			}
-		}
+
+	inline_script = {
+		script = cosmic_storms/StormBuildingModifiers
 	}
-	on_destroy = {
-		if = {
-			limit = { has_cosmic_storms_dlc = yes }
-			owner = { set_country_flag = shield_on_destroy } #an action when destroyed
-			solar_system = {
-				remove_star_flag = storm_no_negative_effects
-			}
-		}
-		owner = {
-			set_country_flag = mem_planetary_shield_generator_orila_can_build
-			change_variable = {
-				which = "mem_orila_shield_generator_country"
-				value = 1
-			}			
-		}
+
+	inline_script = { # on_built & on_destroy behaviors
+		script = cosmic_storms/PlanetaryShieldOnBuiltDestroy
 	}
 	##################################################################################################
 
