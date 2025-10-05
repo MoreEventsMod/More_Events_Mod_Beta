@@ -1,33 +1,67 @@
 # Colony ship jobs, knock-offs from vanilla
 mem_colony_ship_colonist = {
-    category = specialist
-	  building_icon = building_colony_shelter
-    clothes_texture_index = 3
-    icon = colonist
-    is_capped_by_modifier = yes
+    category = worker
+	exempt_from_ai_amenity_prioritization = yes
+    #clothes_texture_index = 3    
+	
+	swappable_data = {
+		default = {
+			icon = colonist
+			condition_string = WORKER_JOB_TRIGGER
+			building_icon = building_colony_shelter
+		}
+	}
+	
+	tags = { amenities }
 
-    possible_pre_triggers = {
-      has_owner = yes
-      is_sapient = yes
-    }
+	possible_pre_triggers = {
+		has_owner = yes
+		is_being_purged = no
+		is_being_assimilated = no
+		is_sapient = yes
+	}
+	
+	possible_precalc = can_fill_worker_job
   
     possible = {
-      owner = {
-        is_primitive = yes
-        has_country_flag = mem_use_custom_primitive_buildings
-      }
+		owner = {
+			is_primitive = yes
+			has_country_flag = mem_use_custom_primitive_buildings
+		}
     }
 
     resources = {
-      category = planet_jobs
-      produces = {
-              food = 2
-              minerals = 2
-              energy = 2
-      }
+		category = planet_jobs
+		produces = {
+			food = 2
+			minerals = 2
+			energy = 2
+		}
     }
     
-    weight = {
-		weight = @worker_job_weight
+	weight = {
+		weight = @colonist_job_weight # Higher prio
+		mult = value:scripted_modifier_job_weight_mult|MODIFIER|pop_job_amenities_mult|
+		modifier = {
+			factor = 0.1
+			can_take_servant_job = yes
+		}
+		modifier = {
+			factor = 0.8
+			is_enslaved = yes
+			has_slavery_type = { type = slavery_indentured }
+		}
+	}
+
+	inline_script = "jobs/automodding_priority_amenities"
+
+	promotion = {
+		time = @standard_promotion_time
+		effect = {
+			pop_amount_change_category = {
+				CATEGORY = worker
+				AMOUNT = local_pop_amount
+			}
+		}
 	}
 }

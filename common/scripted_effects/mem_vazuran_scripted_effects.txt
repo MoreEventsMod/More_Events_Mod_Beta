@@ -637,14 +637,11 @@ mem_vazurans_planet_retaliation_effect = {
 			add_planet_devastation = 40
 			IF = {
 				limit = {
-					num_pops > 10
+					pop_amount > 1000
 				}
 				while = {
 					count = 4
-					random_owned_pop = {
-						kill_pop = yes
-					}
-					mem_vazuran_menace_pop_killcounter = yes
+					mem_vazuran_menace_kill_pop = yes
 				}
 			}
 		}
@@ -652,14 +649,11 @@ mem_vazurans_planet_retaliation_effect = {
 			add_planet_devastation = 50
 			IF = {
 				limit = {
-					num_pops > 10
+					pop_amount > 1000
 				}
 				while = {
 					count = 5
-					random_owned_pop = {
-						kill_pop = yes
-					}
-					mem_vazuran_menace_pop_killcounter = yes
+					mem_vazuran_menace_kill_pop = yes
 				}
 			}
 		}
@@ -675,38 +669,29 @@ mem_vazurans_planet_retaliation_effect = {
 			add_planet_devastation = 80
 			IF = {
 				limit = {
-					num_pops > 70
+					pop_amount > 7000
 				}
 				while = {
 					count = 4
-					random_owned_pop = {
-						kill_pop = yes
-					}
-					mem_vazuran_menace_pop_killcounter = yes
+					mem_vazuran_menace_kill_pop = yes
 				}
 			}
 			IF = {
 				limit = {
-					num_pops > 20
+					pop_amount > 2000
 				}
 				while = {
 					count = 4
-					random_owned_pop = {
-						kill_pop = yes
-					}
-					mem_vazuran_menace_pop_killcounter = yes
+					mem_vazuran_menace_kill_pop = yes
 				}
 			}
 			IF = {
 				limit = {
-					num_pops > 10
+					pop_amount > 1000
 				}
 				while = {
 					count = 4
-					random_owned_pop = {
-						kill_pop = yes
-					}
-					mem_vazuran_menace_pop_killcounter = yes
+					mem_vazuran_menace_kill_pop = yes
 				}
 			}
 		}
@@ -714,38 +699,29 @@ mem_vazurans_planet_retaliation_effect = {
 			add_planet_devastation = 100
 			IF = {
 				limit = {
-					num_pops > 70
+					pop_amount > 7000
 				}
 				while = {
 					count = 5
-					random_owned_pop = {
-						kill_pop = yes
-					}
-					mem_vazuran_menace_pop_killcounter = yes
+					mem_vazuran_menace_kill_pop = yes
 				}
 			}
 			IF = {
 				limit = {
-					num_pops > 20
+					pop_amount > 2000
 				}
 				while = {
 					count = 5
-					random_owned_pop = {
-						kill_pop = yes
-					}
-					mem_vazuran_menace_pop_killcounter = yes
+					mem_vazuran_menace_kill_pop = yes
 				}
 			}
 			IF = {
 				limit = {
-					num_pops > 10
+					pop_amount > 1000
 				}
 				while = {
 					count = 5
-					random_owned_pop = {
-						kill_pop = yes
-					}
-					mem_vazuran_menace_pop_killcounter = yes
+					mem_vazuran_menace_kill_pop = yes
 				}
 			}
 		}
@@ -764,6 +740,60 @@ mem_vazurans_planet_retaliation_effect = {
 			event_chain = "mem_vazuran_menace_chain"
 			counter = "mem_vazuran_menace_homeworlds_razed"
 			amount = 1
+		}
+	}
+}
+
+mem_vazuran_menace_kill_pop = {
+	if = {
+		limit = {
+			any_owned_pop_group = {
+				pop_group_size >= 100
+			}
+		}
+		# how weighted_random_owned_pop_group works: example you have 2 pop groups A with 8000 pops and B with 2000 pops (80% - 20%) A would be drawn 80% of the time and B 20%
+		weighted_random_owned_pop_group = {
+			limit = {
+				pop_group_size >= 100
+			}			
+			kill_single_pop = yes
+		}
+		event_target:global_event_country = {
+			change_variable = {
+				which = mem_vazuran_menace_pops_killed_variable
+				value = 100
+			}
+		}
+		every_country = {
+			limit = {
+				has_event_chain = mem_vazuran_menace_chain
+			}
+			add_event_chain_counter = {
+				event_chain = "mem_vazuran_menace_chain"
+				counter = "mem_vazuran_menace_pops_killed"
+				amount = 100
+			}
+		}		
+	}
+	else = {
+		weighted_random_owned_pop_group = {
+			event_target:global_event_country = {
+				change_variable = {
+					which = mem_vazuran_menace_pops_killed_variable
+					value = prev.trigger:pop_group_size
+				}
+			}
+			every_country = {
+				limit = {
+					has_event_chain = mem_vazuran_menace_chain
+				}
+				add_event_chain_counter = {
+					event_chain = "mem_vazuran_menace_chain"
+					counter = "mem_vazuran_menace_pops_killed"
+					amount = prev.trigger:pop_group_size
+				}
+			}
+			kill_single_pop = yes
 		}
 	}
 }
@@ -810,14 +840,11 @@ mem_vazurans_planet_raiding_effect_1 = {
 				add_planet_devastation = 20
 				IF = {
 					limit = {
-						num_pops > 10
+						pop_amount > 1000
 					}
 					while = {
 						count = 4
-						random_owned_pop = {
-							kill_pop = yes
-						}
-						mem_vazuran_menace_pop_killcounter = yes
+						mem_vazuran_menace_kill_pop = yes
 					}
 				}
 			}
@@ -825,14 +852,11 @@ mem_vazurans_planet_raiding_effect_1 = {
 				add_planet_devastation = 25
 				IF = {
 					limit = {
-						num_pops > 10
+						pop_amount > 1000
 					}
 					while = {
 						count = 5
-						random_owned_pop = {
-							kill_pop = yes
-						}
-						mem_vazuran_menace_pop_killcounter = yes
+						mem_vazuran_menace_kill_pop = yes
 					}
 				}
 			}
@@ -848,38 +872,29 @@ mem_vazurans_planet_raiding_effect_1 = {
 				add_planet_devastation = 40
 				IF = {
 					limit = {
-						num_pops > 70
+						pop_amount > 7000
 					}
 					while = {
 						count = 4
-						random_owned_pop = {
-							kill_pop = yes
-						}
-						mem_vazuran_menace_pop_killcounter = yes
+						mem_vazuran_menace_kill_pop = yes
 					}
 				}
 				IF = {
 					limit = {
-						num_pops > 20
+						pop_amount > 2000
 					}
 					while = {
 						count = 4
-						random_owned_pop = {
-							kill_pop = yes
-						}
-						mem_vazuran_menace_pop_killcounter = yes
+						mem_vazuran_menace_kill_pop = yes
 					}
 				}
 				IF = {
 					limit = {
-						num_pops > 10
+						pop_amount > 1000
 					}
 					while = {
 						count = 4
-						random_owned_pop = {
-							kill_pop = yes
-						}
-						mem_vazuran_menace_pop_killcounter = yes
+						mem_vazuran_menace_kill_pop = yes
 					}
 				}
 			}
@@ -887,38 +902,29 @@ mem_vazurans_planet_raiding_effect_1 = {
 				add_planet_devastation = 50
 				IF = {
 					limit = {
-						num_pops > 70
+						pop_amount > 7000
 					}
 					while = {
 						count = 5
-						random_owned_pop = {
-							kill_pop = yes
-						}
-						mem_vazuran_menace_pop_killcounter = yes
+						mem_vazuran_menace_kill_pop = yes
 					}
 				}
 				IF = {
 					limit = {
-						num_pops > 20
+						pop_amount > 2000
 					}
 					while = {
 						count = 5
-						random_owned_pop = {
-							kill_pop = yes
-						}
-						mem_vazuran_menace_pop_killcounter = yes
+						mem_vazuran_menace_kill_pop = yes
 					}
 				}
 				IF = {
 					limit = {
-						num_pops > 10
+						pop_amount > 1000
 					}
 					while = {
 						count = 5
-						random_owned_pop = {
-							kill_pop = yes
-						}
-						mem_vazuran_menace_pop_killcounter = yes
+						mem_vazuran_menace_kill_pop = yes
 					}
 				}
 			}
@@ -949,13 +955,13 @@ mem_vazurans_planet_raiding_effect_2 = {
 		}
 		add_planet_devastation = 100
 		mem_vazuran_menace_pop_killcounter_colony_destruction = yes
-		every_galaxy_pop = {
+		every_owned_pop_group = {
 			limit = {
 				planet = {
 					is_same_value = root
 				}
 			}
-			kill_pop = yes
+			kill_all_pop = yes
 		}
 		mem_vazuran_menace_colony_destruction_counter = yes
 	}
@@ -973,13 +979,13 @@ mem_vazurans_planet_raiding_effect_3 = {
 		add_deposit = d_city_ruins
 		add_planet_devastation = 100
 		mem_vazuran_menace_pop_killcounter_colony_destruction = yes
-		every_galaxy_pop = {
+		every_owned_pop_group = {
 			limit = {
 				planet = {
 					is_same_value = root
 				}
 			}
-			kill_pop = yes
+			kill_all_pop = yes
 		}
 		change_pc = pc_nuked
 		mem_vazuran_menace_colony_destruction_counter = yes
@@ -1473,30 +1479,11 @@ create_mem_vazuran_fleet = {
 	}
 }
 
-mem_vazuran_menace_pop_killcounter = {
-	event_target:global_event_country = {
-		change_variable = {
-			which = mem_vazuran_menace_pops_killed_variable
-			value = 1
-		}
-	}
-	every_country = {
-		limit = {
-			has_event_chain = mem_vazuran_menace_chain
-		}
-		add_event_chain_counter = {
-			event_chain = "mem_vazuran_menace_chain"
-			counter = "mem_vazuran_menace_pops_killed"
-			amount = 1
-		}
-	}
-}
-
 mem_vazuran_menace_pop_killcounter_colony_destruction = {
 	event_target:global_event_country = {
 		change_variable = {
 			which = mem_vazuran_menace_pops_killed_variable
-			value = prev.trigger:num_pops
+			value = prev.trigger:pop_amount
 		}
 	}
 	every_country = {
@@ -1506,7 +1493,7 @@ mem_vazuran_menace_pop_killcounter_colony_destruction = {
 		add_event_chain_counter = {
 			event_chain = "mem_vazuran_menace_chain"
 			counter = "mem_vazuran_menace_pops_killed"
-			amount = prev.trigger:num_pops
+			amount = prev.trigger:pop_amount
 		}
 	}
 }
