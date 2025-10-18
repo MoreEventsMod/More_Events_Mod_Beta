@@ -12,16 +12,26 @@ event = {
 	hide_window = yes
 	is_triggered_only = yes
 	immediate = {
-		IF = {
+		if = {
 			limit = {
-				any_country = {
-					has_origin = origin_mem_fainthearted
+				any_system = {
+					has_star_flag = precursor_mem_vazurans
 				}
 			}
-			set_global_flag = mem_vazurans_disabled
-			# Nothing happens. Fainthearted Backwater wins over From the Ashes.
+			set_global_flag = mem_vazurans_chosen
 		}
-		ELSE_IF = {
+		# we do this via precursor selection now
+		# TRODO: remove from mod menu
+		# IF = {
+		# 	limit = {
+		# 		any_country = {
+		# 			has_origin = origin_mem_fainthearted
+		# 		}
+		# 	}
+		# 	set_global_flag = mem_vazurans_disabled
+		# 	# Nothing happens. Fainthearted Backwater wins over From the Ashes.
+		# }
+		IF = {
 			limit = {
 				any_country = {
 					has_origin = origin_mem_from_the_ashes
@@ -32,31 +42,58 @@ event = {
 		ELSE = {
 			random_list = {
 				95 = {
-					set_global_flag = mem_vazurans_disabled
+					random_list = {
+						80 = {
+						}
+						# nothing happens
+						20 = {
+							setup_mem_ruined_vazuran_space = yes
+						}
+					}
+					#set_global_flag = mem_vazurans_disabled
 				}
 				5 = {
 					start_mem_vazuran_menace = yes
 				}
 			}
 		}
-		IF = {
-			limit = {
-				has_global_flag = mem_vazurans_disabled
-			}
-			random_list = {
-				80 = {
-				}
-				# nothing happens
-				20 = {
-					setup_mem_ruined_vazuran_space = yes
-				}
-			}
-		}
+		# IF = {
+		# 	limit = {
+		# 		has_global_flag = mem_vazurans_disabled
+		# 	}
+		# 	random_list = {
+		# 		80 = {
+		# 		}
+		# 		# nothing happens
+		# 		20 = {
+		# 			setup_mem_ruined_vazuran_space = yes
+		# 		}
+		# 	}
+		# }
 		mem_gamestart_orila_primitive_setup = yes
+	}
+}
+# someone picked defnder of the galaxy AP - so we dont have to do overwrites
+country_event = {
+	id = mem_vazurans.998
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		NOT = {
+			has_country_flag = mem_vazurans_defender_of_galaxy_logged
+		}
+		has_ascension_perk = ap_defender_of_the_galaxy
+	}
+	immediate = {
+		add_modifier = {
+			modifier = mem_vazurans_defender_of_galaxy
+		}
+		set_country_flag = mem_vazurans_defender_of_galaxy_logged
 	}
 }
 
 # vazurans say hello, starts player mood situation
+# TRODO above
 # raids spawning
 situation_event = {
 	id = mem_vazurans.1100
@@ -113,7 +150,7 @@ situation_event = {
 					#days = 13
 					#random = 160
 					scopes = {
-						from = prev # TRODO check if this works
+						from = prev						# TRODO check if this works
 					}
 				}
 				# this one creates a message or first time event
@@ -134,6 +171,7 @@ situation_event = {
 						from = prev
 					}
 				}
+				
 			}
 		}
 		# active raiding fleets +1
@@ -438,7 +476,7 @@ country_event = {
 					}
 				}
 				remove_army = yes
-			}			
+			}
 			#set_controller = from # TRODO this needs testing, set owner back actual owner
 			# return to rift
 			solar_system = {
@@ -454,7 +492,6 @@ country_event = {
 					}
 				}
 			}
-
 			IF = {
 				limit = {
 					OR = {
@@ -476,8 +513,11 @@ country_event = {
 					# this makes it only  around 15%
 					random_list = {
 						50 = {
-							random_owned_pop = {
-								kill_pop = yes
+							weighted_random_owned_pop_group = {
+								limit = {
+									pop_group_size >= 100
+								}
+								kill_single_pop = yes
 							}
 						}
 						50 = {
@@ -507,10 +547,8 @@ country_event = {
 			else = {
 				add_planet_devastation = 100
 				while = {
-					count = value:perc_of_planet_pop					# 30% maybe too much easily changed
-					random_owned_pop = {
-						kill_pop = yes
-					}
+					count = this.value:perc_of_planet_pop					# 30% maybe too much easily changed
+					kill_single_pop = yes
 				}
 				if = {
 					limit = {
@@ -532,7 +570,6 @@ country_event = {
 					}
 				}
 			}
-			
 		}
 	}
 }
@@ -542,7 +579,6 @@ country_event = {
 # This = country, attack leader
 # From = country, planet owner
 # FromFrom = planet
-
 country_event = {
 	id = mem_vazurans.1130
 	hide_window = yes
@@ -563,7 +599,7 @@ country_event = {
 					}
 				}
 				remove_army = yes
-			}			
+			}
 			#set_controller = from # TRODO this needs testing, set owner back actual owner
 			# return to rift
 			solar_system = {
@@ -579,7 +615,6 @@ country_event = {
 					}
 				}
 			}
-		
 		}
 	}
 }
@@ -588,9 +623,7 @@ country_event = {
 fleet_event = {
 	id = mem_vazurans.1135
 	hide_window = yes
-	
 	is_triggered_only = yes
-
 	immediate = {
 		solar_system = {
 			random_system_ambient_object = {
@@ -605,7 +638,7 @@ fleet_event = {
 			move_to = event_target:mem_vazurans_rift
 			effect = {
 				id = mem_vazurans_action.3
-				delete_fleet  = this
+				delete_fleet = this
 			}
 		}
 		owner = {
@@ -616,5 +649,10 @@ fleet_event = {
 			}
 		}
 	}
-
 }
+
+# TRODO:
+# check if fleet got destroyed
+# 
+# on fisnish situation spawn portal system if later two states
+# 3 states: ruined, fallen, awakened

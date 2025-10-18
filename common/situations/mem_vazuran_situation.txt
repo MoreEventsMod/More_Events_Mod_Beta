@@ -7,15 +7,50 @@ mem_vazuran_raiding = {
 	complete_icon = GFX_situation_outcome_unknown
 	complete_icon_frame = GFX_situation_outcome_frame_green
 	on_start = {
+		# random situation speed, meaning different raiding period
+		random_list = {
+			1 = {
+				set_variable = {
+					which = mem_vazuran_raiding_speed
+					value = 0.5
+				}
+			}
+			1 = {
+				set_variable = {
+					which = mem_vazuran_raiding_speed
+					value = 1
+				}
+			}
+			1 = {
+				set_variable = {
+					which = mem_vazuran_raiding_speed
+					value = 1.5
+				}
+			}
+			1 = {
+				set_variable = {
+					which = mem_vazuran_raiding_speed
+					value = 2
+				}
+			}
+		}
 	}
-	on_abort = {
-	}
+	# no we always finish reading and upon end decide what to do
+	# on_abort = {
+	# 	# ruined state - now you need to jump into their system 
+	# }
+	# abort_trigger = {
+	# 	check_variable = {
+	# 		which = this.mem_vazuran_raiding_max_fleets
+	# 		value <= 0
+	# 	}
+	# }
 	start_value = 0
 	on_monthly = {
 		random_events = {
-			# this one should randomly start raids within empires
-			# 5 = mem_vazurans.1
-			95 = 0
+			
+			20 = mem_vazurans.1100 # this one should randomly start raids within empires
+			80 = 0
 		}
 	}
 	stages = {
@@ -26,11 +61,14 @@ mem_vazuran_raiding = {
 		}
 	}
 	on_progress_complete = {
-		abort_situation = this
+		destroy_situation = this
 	}
 	monthly_progress = {
-		base = 1 # TRODO random progress based on galaxy settings
-
+		base = 0		# random progress based on galaxy settings
+		modifier = {
+			desc = FASCINATING
+			add = this.mem_vazuran_raiding_speed
+		}
 	}
 	approach = {
 		name = INTERESTING
@@ -38,7 +76,10 @@ mem_vazuran_raiding = {
 		icon_background = GFX_situation_approach_bg_yellow
 		on_select = {
 			#custom_tooltip = mem_aevum_empty_appraoch
-		}		
+		}
+		modifier = {
+			country_trade_produces_mult = 0.01 # stop crying log
+		}
 		ai_weight = {
 			base = 1
 		}
