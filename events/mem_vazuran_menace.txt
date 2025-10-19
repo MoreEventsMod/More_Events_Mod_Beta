@@ -152,1642 +152,1642 @@ namespace = mem_vazurans
 # }
 
 # Event only started via options menu to force start crisis
-country_event = {
-	id = mem_vazurans.400
-	hide_window = yes
+# country_event = {
+# 	id = mem_vazurans.400
+# 	hide_window = yes
 
-	is_triggered_only = yes
+# 	is_triggered_only = yes
 
-	immediate = {
-		country_event = { id = mem_vazurans.401 days = 1 random = 0 }
-		country_event = { id = mem_vazurans.402 days = 1 random = 0 }
-		country_event = { id = mem_vazurans.403 days = 1 random = 0 }
-		country_event = { id = mem_vazurans.404 days = 1 random = 0 }
-		country_event = { id = mem_vazurans.405 days = 1 random = 0 }
-	}
-}
+# 	immediate = {
+# 		country_event = { id = mem_vazurans.401 days = 1 random = 0 }
+# 		country_event = { id = mem_vazurans.402 days = 1 random = 0 }
+# 		country_event = { id = mem_vazurans.403 days = 1 random = 0 }
+# 		country_event = { id = mem_vazurans.404 days = 1 random = 0 }
+# 		country_event = { id = mem_vazurans.405 days = 1 random = 0 }
+# 	}
+# }
 
 # Event cycle to start raiding/retaliation fleet 1
-country_event = {
-	id = mem_vazurans.401
-	hide_window = yes
+# country_event = {
+# 	id = mem_vazurans.401
+# 	hide_window = yes
 
-	is_triggered_only = yes
+# 	is_triggered_only = yes
 
-	trigger = {
-		has_global_flag = mem_vazurans_enabled
-		NOR = {
-			has_global_flag = mem_vazurans_disabled
-			has_global_flag = mem_vazurans_finished
-			has_global_flag = mem_vazurans_raid_1_event
-		}
-	}
+# 	trigger = {
+# 		has_global_flag = mem_vazurans_enabled
+# 		NOR = {
+# 			has_global_flag = mem_vazurans_disabled
+# 			has_global_flag = mem_vazurans_finished
+# 			has_global_flag = mem_vazurans_raid_1_event
+# 		}
+# 	}
 	
-	immediate = {
-		IF = {
-			limit = {
-				has_global_flag = mem_vazurans_enabled
-				NOR = {
-					has_global_flag = mem_vazurans_disabled
-					has_global_flag = mem_vazurans_finished
-					has_global_flag = mem_vazurans_raid_1_event
-				}
-			}
-			#restarting the event
-			country_event = { id = mem_vazurans.401 days = 1960 random = 400 }
-			set_timed_global_flag = {
-				flag = mem_vazurans_raid_1_event
-				days = 1750			
-			}
-			IF = { #if there is a retaliation or raid target without target number (should not happen, but better safe than sorry)
-				limit = {
-					NOT = { #makes sure there is no country with that precise target number
-						any_country = {
-							has_country_flag = mem_vazurans_target_1
-						}
-					}
-					any_country = { #makes sure the retaliation target does not have another target number already (checking for same number as above is redundand but allows for faster copy paste)
-						is_country_type = default
-						OR = {
-							has_country_flag = mem_vazurans_retaliation
-							has_country_flag = mem_vazurans_raid
-						}						
-						NOR = {
-							has_country_flag = mem_vazurans_target_1
-							has_country_flag = mem_vazurans_target_2
-							has_country_flag = mem_vazurans_target_3
-							has_country_flag = mem_vazurans_target_4
-							has_country_flag = mem_vazurans_target_5
-						}
-					}
-				}
-				random_country = {
-					limit = {
-						is_country_type = default
-						OR = {
-							has_country_flag = mem_vazurans_retaliation
-							has_country_flag = mem_vazurans_raid
-						}
-						NOR = {
-							has_country_flag = mem_vazurans_target_1
-							has_country_flag = mem_vazurans_target_2
-							has_country_flag = mem_vazurans_target_3
-							has_country_flag = mem_vazurans_target_4
-							has_country_flag = mem_vazurans_target_5
-						}
-					}
-					set_country_flag = mem_vazurans_target_1
-					remove_country_flag = mem_vazurans_raid
-				}
-			}
-			ELSE_IF = {
-				limit = {
-					NOT = {
-						any_country = {
-							has_country_flag = mem_vazurans_target_1
-						}
-					}
-					any_country = {			
-						is_country_type = default
-						NOR = {
-							has_country_flag = mem_vazurans_retaliation
-							has_country_flag = mem_vazurans_raided_empire
-							has_country_flag = mem_vazurans_target_1
-							has_country_flag = mem_vazurans_target_2
-							has_country_flag = mem_vazurans_target_3
-							has_country_flag = mem_vazurans_target_4
-							has_country_flag = mem_vazurans_target_5
-						}
-					}
-				}
-				random_country = {
-					limit = {
-						is_country_type = default
-						NOR = {
-							has_country_flag = mem_vazurans_retaliation
-							has_country_flag = mem_vazurans_raided_empire
-							has_country_flag = mem_vazurans_target_1
-							has_country_flag = mem_vazurans_target_2
-							has_country_flag = mem_vazurans_target_3
-							has_country_flag = mem_vazurans_target_4
-							has_country_flag = mem_vazurans_target_5
-						}
-					}
-					set_country_flag = mem_vazurans_target_1
-				}
-			}
-			IF = {
-				limit = {
-					any_country = {
-						has_country_flag = mem_vazurans_target_1
-						NOT = {
-							has_country_flag = mem_vazurans_raided_empire
-						}
-					}
-				}
-				random_country = {
-					limit = {
-						has_country_flag = mem_vazurans_target_1
-					}
-					random_list = {
-						3 = {
-							set_timed_country_flag = {
-								flag = mem_vazurans_raided_empire
-								years = 16
-							}
-						}
-						2 = {
-							set_timed_country_flag = {
-								flag = mem_vazurans_raided_empire
-								years = 19
-							}
-						}
-						1 = {
-							set_timed_country_flag = {
-								flag = mem_vazurans_raided_empire
-								years = 22
-							}
-						}
-					}				
-				}
-			}
-			IF = {
-				limit = {
-					any_country = {
-						has_country_flag = mem_vazurans_target_1
-					}
-				}
-				random_country = {
-					limit = {
-						has_country_flag = mem_vazurans_target_1
-					}
-					country_event = { id = mem_vazurans.3 days = 100 random = 160 }
-				}
-			}
-		}
-	}
-}
+# 	immediate = {
+# 		IF = {
+# 			limit = {
+# 				has_global_flag = mem_vazurans_enabled
+# 				NOR = {
+# 					has_global_flag = mem_vazurans_disabled
+# 					has_global_flag = mem_vazurans_finished
+# 					has_global_flag = mem_vazurans_raid_1_event
+# 				}
+# 			}
+# 			#restarting the event
+# 			country_event = { id = mem_vazurans.401 days = 1960 random = 400 }
+# 			set_timed_global_flag = {
+# 				flag = mem_vazurans_raid_1_event
+# 				days = 1750			
+# 			}
+# 			IF = { #if there is a retaliation or raid target without target number (should not happen, but better safe than sorry)
+# 				limit = {
+# 					NOT = { #makes sure there is no country with that precise target number
+# 						any_country = {
+# 							has_country_flag = mem_vazurans_target_1
+# 						}
+# 					}
+# 					any_country = { #makes sure the retaliation target does not have another target number already (checking for same number as above is redundand but allows for faster copy paste)
+# 						is_country_type = default
+# 						OR = {
+# 							has_country_flag = mem_vazurans_retaliation
+# 							has_country_flag = mem_vazurans_raid
+# 						}						
+# 						NOR = {
+# 							has_country_flag = mem_vazurans_target_1
+# 							has_country_flag = mem_vazurans_target_2
+# 							has_country_flag = mem_vazurans_target_3
+# 							has_country_flag = mem_vazurans_target_4
+# 							has_country_flag = mem_vazurans_target_5
+# 						}
+# 					}
+# 				}
+# 				random_country = {
+# 					limit = {
+# 						is_country_type = default
+# 						OR = {
+# 							has_country_flag = mem_vazurans_retaliation
+# 							has_country_flag = mem_vazurans_raid
+# 						}
+# 						NOR = {
+# 							has_country_flag = mem_vazurans_target_1
+# 							has_country_flag = mem_vazurans_target_2
+# 							has_country_flag = mem_vazurans_target_3
+# 							has_country_flag = mem_vazurans_target_4
+# 							has_country_flag = mem_vazurans_target_5
+# 						}
+# 					}
+# 					set_country_flag = mem_vazurans_target_1
+# 					remove_country_flag = mem_vazurans_raid
+# 				}
+# 			}
+# 			ELSE_IF = {
+# 				limit = {
+# 					NOT = {
+# 						any_country = {
+# 							has_country_flag = mem_vazurans_target_1
+# 						}
+# 					}
+# 					any_country = {			
+# 						is_country_type = default
+# 						NOR = {
+# 							has_country_flag = mem_vazurans_retaliation
+# 							has_country_flag = mem_vazurans_raided_empire
+# 							has_country_flag = mem_vazurans_target_1
+# 							has_country_flag = mem_vazurans_target_2
+# 							has_country_flag = mem_vazurans_target_3
+# 							has_country_flag = mem_vazurans_target_4
+# 							has_country_flag = mem_vazurans_target_5
+# 						}
+# 					}
+# 				}
+# 				random_country = {
+# 					limit = {
+# 						is_country_type = default
+# 						NOR = {
+# 							has_country_flag = mem_vazurans_retaliation
+# 							has_country_flag = mem_vazurans_raided_empire
+# 							has_country_flag = mem_vazurans_target_1
+# 							has_country_flag = mem_vazurans_target_2
+# 							has_country_flag = mem_vazurans_target_3
+# 							has_country_flag = mem_vazurans_target_4
+# 							has_country_flag = mem_vazurans_target_5
+# 						}
+# 					}
+# 					set_country_flag = mem_vazurans_target_1
+# 				}
+# 			}
+# 			IF = {
+# 				limit = {
+# 					any_country = {
+# 						has_country_flag = mem_vazurans_target_1
+# 						NOT = {
+# 							has_country_flag = mem_vazurans_raided_empire
+# 						}
+# 					}
+# 				}
+# 				random_country = {
+# 					limit = {
+# 						has_country_flag = mem_vazurans_target_1
+# 					}
+# 					random_list = {
+# 						3 = {
+# 							set_timed_country_flag = {
+# 								flag = mem_vazurans_raided_empire
+# 								years = 16
+# 							}
+# 						}
+# 						2 = {
+# 							set_timed_country_flag = {
+# 								flag = mem_vazurans_raided_empire
+# 								years = 19
+# 							}
+# 						}
+# 						1 = {
+# 							set_timed_country_flag = {
+# 								flag = mem_vazurans_raided_empire
+# 								years = 22
+# 							}
+# 						}
+# 					}				
+# 				}
+# 			}
+# 			IF = {
+# 				limit = {
+# 					any_country = {
+# 						has_country_flag = mem_vazurans_target_1
+# 					}
+# 				}
+# 				random_country = {
+# 					limit = {
+# 						has_country_flag = mem_vazurans_target_1
+# 					}
+# 					country_event = { id = mem_vazurans.3 days = 100 random = 160 }
+# 				}
+# 			}
+# 		}
+# 	}
+# }
 
-# Event cycle to start raiding/retaliation fleet 2
-country_event = {
-	id = mem_vazurans.402
-	hide_window = yes
+# # Event cycle to start raiding/retaliation fleet 2
+# country_event = {
+# 	id = mem_vazurans.402
+# 	hide_window = yes
 
-	is_triggered_only = yes
+# 	is_triggered_only = yes
 
-	trigger = {
-		has_global_flag = mem_vazurans_enabled
-		NOR = {
-			has_global_flag = mem_vazurans_disabled
-			has_global_flag = mem_vazurans_finished
-			has_global_flag = mem_vazurans_raid_2_event
-		}
-	}
+# 	trigger = {
+# 		has_global_flag = mem_vazurans_enabled
+# 		NOR = {
+# 			has_global_flag = mem_vazurans_disabled
+# 			has_global_flag = mem_vazurans_finished
+# 			has_global_flag = mem_vazurans_raid_2_event
+# 		}
+# 	}
 	
-	immediate = {
-		IF = {
-			limit = {
-				has_global_flag = mem_vazurans_enabled
-				NOR = {
-					has_global_flag = mem_vazurans_disabled
-					has_global_flag = mem_vazurans_finished
-					has_global_flag = mem_vazurans_raid_2_event
-				}
-			}
-			#restarting the event
-			country_event = { id = mem_vazurans.402 days = 1960 random = 400 }
-			set_timed_global_flag = {
-				flag = mem_vazurans_raid_2_event
-				days = 1750			
-			}
-			IF = { #if there is a retaliation or raid target without target number (should not happen, but better safe than sorry)
-				limit = {
-					NOT = { #makes sure there is no country with that precise target number
-						any_country = {
-							has_country_flag = mem_vazurans_target_2
-						}
-					}
-					any_country = { #makes sure the retaliation target does not have another target number already (checking for same number as above is redundand but allows for faster copy paste)
-						is_country_type = default
-						OR = {
-							has_country_flag = mem_vazurans_retaliation
-							has_country_flag = mem_vazurans_raid
-						}						
-						NOR = {
-							has_country_flag = mem_vazurans_target_1
-							has_country_flag = mem_vazurans_target_2
-							has_country_flag = mem_vazurans_target_3
-							has_country_flag = mem_vazurans_target_4
-							has_country_flag = mem_vazurans_target_5
-						}
-					}
-				}
-				random_country = {
-					limit = {
-						is_country_type = default
-						OR = {
-							has_country_flag = mem_vazurans_retaliation
-							has_country_flag = mem_vazurans_raid
-						}
-						NOR = {
-							has_country_flag = mem_vazurans_target_1
-							has_country_flag = mem_vazurans_target_2
-							has_country_flag = mem_vazurans_target_3
-							has_country_flag = mem_vazurans_target_4
-							has_country_flag = mem_vazurans_target_5
-						}
-					}
-					set_country_flag = mem_vazurans_target_2
-					remove_country_flag = mem_vazurans_raid
-				}
-			}
-			ELSE_IF = {
-				limit = {
-					NOT = {
-						any_country = {
-							has_country_flag = mem_vazurans_target_2
-						}
-					}
-					any_country = {
-						is_country_type = default
-						NOR = {
-							has_country_flag = mem_vazurans_retaliation
-							has_country_flag = mem_vazurans_raided_empire
-							has_country_flag = mem_vazurans_target_1
-							has_country_flag = mem_vazurans_target_2
-							has_country_flag = mem_vazurans_target_3
-							has_country_flag = mem_vazurans_target_4
-							has_country_flag = mem_vazurans_target_5
-						}
-					}
-				}
-				random_country = {
-					limit = {
-						is_country_type = default
-						NOR = {
-							has_country_flag = mem_vazurans_retaliation
-							has_country_flag = mem_vazurans_raided_empire
-							has_country_flag = mem_vazurans_target_1
-							has_country_flag = mem_vazurans_target_2
-							has_country_flag = mem_vazurans_target_3
-							has_country_flag = mem_vazurans_target_4
-							has_country_flag = mem_vazurans_target_5
-						}
-					}
-					set_country_flag = mem_vazurans_target_2
-				}
-			}
-			IF = {
-				limit = {
-					any_country = {
-						has_country_flag = mem_vazurans_target_2
-						NOT = {
-							has_country_flag = mem_vazurans_raided_empire
-						}
-					}
-				}
-				random_country = {
-					limit = {
-						has_country_flag = mem_vazurans_target_2
-					}
-					random_list = {
-						3 = {
-							set_timed_country_flag = {
-								flag = mem_vazurans_raided_empire
-								years = 16
-							}
-						}
-						2 = {
-							set_timed_country_flag = {
-								flag = mem_vazurans_raided_empire
-								years = 19
-							}
-						}
-						1 = {
-							set_timed_country_flag = {
-								flag = mem_vazurans_raided_empire
-								years = 22
-							}
-						}
-					}
-				}
-			}		
-			IF = {
-				limit = {
-					any_country = {
-						has_country_flag = mem_vazurans_target_2
-					}
-				}
-				random_country = {
-					limit = {
-						has_country_flag = mem_vazurans_target_2
-					}
-					country_event = { id = mem_vazurans.3 days = 100 random = 160 }
-				}
-			}
-		}
-	}
-}
+# 	immediate = {
+# 		IF = {
+# 			limit = {
+# 				has_global_flag = mem_vazurans_enabled
+# 				NOR = {
+# 					has_global_flag = mem_vazurans_disabled
+# 					has_global_flag = mem_vazurans_finished
+# 					has_global_flag = mem_vazurans_raid_2_event
+# 				}
+# 			}
+# 			#restarting the event
+# 			country_event = { id = mem_vazurans.402 days = 1960 random = 400 }
+# 			set_timed_global_flag = {
+# 				flag = mem_vazurans_raid_2_event
+# 				days = 1750			
+# 			}
+# 			IF = { #if there is a retaliation or raid target without target number (should not happen, but better safe than sorry)
+# 				limit = {
+# 					NOT = { #makes sure there is no country with that precise target number
+# 						any_country = {
+# 							has_country_flag = mem_vazurans_target_2
+# 						}
+# 					}
+# 					any_country = { #makes sure the retaliation target does not have another target number already (checking for same number as above is redundand but allows for faster copy paste)
+# 						is_country_type = default
+# 						OR = {
+# 							has_country_flag = mem_vazurans_retaliation
+# 							has_country_flag = mem_vazurans_raid
+# 						}						
+# 						NOR = {
+# 							has_country_flag = mem_vazurans_target_1
+# 							has_country_flag = mem_vazurans_target_2
+# 							has_country_flag = mem_vazurans_target_3
+# 							has_country_flag = mem_vazurans_target_4
+# 							has_country_flag = mem_vazurans_target_5
+# 						}
+# 					}
+# 				}
+# 				random_country = {
+# 					limit = {
+# 						is_country_type = default
+# 						OR = {
+# 							has_country_flag = mem_vazurans_retaliation
+# 							has_country_flag = mem_vazurans_raid
+# 						}
+# 						NOR = {
+# 							has_country_flag = mem_vazurans_target_1
+# 							has_country_flag = mem_vazurans_target_2
+# 							has_country_flag = mem_vazurans_target_3
+# 							has_country_flag = mem_vazurans_target_4
+# 							has_country_flag = mem_vazurans_target_5
+# 						}
+# 					}
+# 					set_country_flag = mem_vazurans_target_2
+# 					remove_country_flag = mem_vazurans_raid
+# 				}
+# 			}
+# 			ELSE_IF = {
+# 				limit = {
+# 					NOT = {
+# 						any_country = {
+# 							has_country_flag = mem_vazurans_target_2
+# 						}
+# 					}
+# 					any_country = {
+# 						is_country_type = default
+# 						NOR = {
+# 							has_country_flag = mem_vazurans_retaliation
+# 							has_country_flag = mem_vazurans_raided_empire
+# 							has_country_flag = mem_vazurans_target_1
+# 							has_country_flag = mem_vazurans_target_2
+# 							has_country_flag = mem_vazurans_target_3
+# 							has_country_flag = mem_vazurans_target_4
+# 							has_country_flag = mem_vazurans_target_5
+# 						}
+# 					}
+# 				}
+# 				random_country = {
+# 					limit = {
+# 						is_country_type = default
+# 						NOR = {
+# 							has_country_flag = mem_vazurans_retaliation
+# 							has_country_flag = mem_vazurans_raided_empire
+# 							has_country_flag = mem_vazurans_target_1
+# 							has_country_flag = mem_vazurans_target_2
+# 							has_country_flag = mem_vazurans_target_3
+# 							has_country_flag = mem_vazurans_target_4
+# 							has_country_flag = mem_vazurans_target_5
+# 						}
+# 					}
+# 					set_country_flag = mem_vazurans_target_2
+# 				}
+# 			}
+# 			IF = {
+# 				limit = {
+# 					any_country = {
+# 						has_country_flag = mem_vazurans_target_2
+# 						NOT = {
+# 							has_country_flag = mem_vazurans_raided_empire
+# 						}
+# 					}
+# 				}
+# 				random_country = {
+# 					limit = {
+# 						has_country_flag = mem_vazurans_target_2
+# 					}
+# 					random_list = {
+# 						3 = {
+# 							set_timed_country_flag = {
+# 								flag = mem_vazurans_raided_empire
+# 								years = 16
+# 							}
+# 						}
+# 						2 = {
+# 							set_timed_country_flag = {
+# 								flag = mem_vazurans_raided_empire
+# 								years = 19
+# 							}
+# 						}
+# 						1 = {
+# 							set_timed_country_flag = {
+# 								flag = mem_vazurans_raided_empire
+# 								years = 22
+# 							}
+# 						}
+# 					}
+# 				}
+# 			}		
+# 			IF = {
+# 				limit = {
+# 					any_country = {
+# 						has_country_flag = mem_vazurans_target_2
+# 					}
+# 				}
+# 				random_country = {
+# 					limit = {
+# 						has_country_flag = mem_vazurans_target_2
+# 					}
+# 					country_event = { id = mem_vazurans.3 days = 100 random = 160 }
+# 				}
+# 			}
+# 		}
+# 	}
+# }
 
-# Event cycle to start raiding/retaliation fleet 3
-country_event = {
-	id = mem_vazurans.403
-	hide_window = yes
+# # Event cycle to start raiding/retaliation fleet 3
+# country_event = {
+# 	id = mem_vazurans.403
+# 	hide_window = yes
 
-	is_triggered_only = yes
+# 	is_triggered_only = yes
 
-	trigger = {
-		has_global_flag = mem_vazurans_enabled
-		NOR = {
-			has_global_flag = mem_vazurans_disabled
-			has_global_flag = mem_vazurans_finished
-			has_global_flag = mem_vazurans_raid_3_event
-		}
-	}
+# 	trigger = {
+# 		has_global_flag = mem_vazurans_enabled
+# 		NOR = {
+# 			has_global_flag = mem_vazurans_disabled
+# 			has_global_flag = mem_vazurans_finished
+# 			has_global_flag = mem_vazurans_raid_3_event
+# 		}
+# 	}
 	
-	immediate = {
-		IF = {
-			limit = {
-				has_global_flag = mem_vazurans_enabled
-				NOR = {
-					has_global_flag = mem_vazurans_disabled
-					has_global_flag = mem_vazurans_finished
-					has_global_flag = mem_vazurans_raid_3_event
-				}
-			}
-			#restarting the event
-			country_event = { id = mem_vazurans.403 days = 1960 random = 400 }
-			set_timed_global_flag = {
-				flag = mem_vazurans_raid_3_event
-				days = 1750			
-			}
-			IF = { #if there is a retaliation or raid target without target number (should not happen, but better safe than sorry)
-				limit = {
-					NOT = { #makes sure there is no country with that precise target number
-						any_country = {
-							has_country_flag = mem_vazurans_target_3
-						}
-					}
-					any_country = { #makes sure the retaliation target does not have another target number already (checking for same number as above is redundand but allows for faster copy paste)
-						is_country_type = default
-						OR = {
-							has_country_flag = mem_vazurans_retaliation
-							has_country_flag = mem_vazurans_raid
-						}						
-						NOR = {
-							has_country_flag = mem_vazurans_target_1
-							has_country_flag = mem_vazurans_target_2
-							has_country_flag = mem_vazurans_target_3
-							has_country_flag = mem_vazurans_target_4
-							has_country_flag = mem_vazurans_target_5
-						}
-					}
-				}
-				random_country = {
-					limit = {
-						is_country_type = default
-						OR = {
-							has_country_flag = mem_vazurans_retaliation
-							has_country_flag = mem_vazurans_raid
-						}
-						NOR = {
-							has_country_flag = mem_vazurans_target_1
-							has_country_flag = mem_vazurans_target_2
-							has_country_flag = mem_vazurans_target_3
-							has_country_flag = mem_vazurans_target_4
-							has_country_flag = mem_vazurans_target_5
-						}
-					}
-					set_country_flag = mem_vazurans_target_3
-					remove_country_flag = mem_vazurans_raid
-				}
-			}
-			ELSE_IF = {
-				limit = {
-					NOT = {
-						any_country = {
-							has_country_flag = mem_vazurans_target_3
-						}
-					}
-					any_country = {
-						is_country_type = default
-						NOR = {
-							has_country_flag = mem_vazurans_retaliation
-							has_country_flag = mem_vazurans_raided_empire
-							has_country_flag = mem_vazurans_target_1
-							has_country_flag = mem_vazurans_target_2
-							has_country_flag = mem_vazurans_target_3
-							has_country_flag = mem_vazurans_target_4
-							has_country_flag = mem_vazurans_target_5
-						}
-					}
-				}
-				random_country = {
-					limit = {
-						is_country_type = default
-						NOR = {
-							has_country_flag = mem_vazurans_retaliation
-							has_country_flag = mem_vazurans_raided_empire
-							has_country_flag = mem_vazurans_target_1
-							has_country_flag = mem_vazurans_target_2
-							has_country_flag = mem_vazurans_target_3
-							has_country_flag = mem_vazurans_target_4
-							has_country_flag = mem_vazurans_target_5
-						}
-					}
-					set_country_flag = mem_vazurans_target_3
-				}
-			}
-			IF = {
-				limit = {
-					any_country = {
-						has_country_flag = mem_vazurans_target_3
-						NOT = {
-							has_country_flag = mem_vazurans_raided_empire
-						}
-					}
-				}
-				random_country = {
-					limit = {
-						has_country_flag = mem_vazurans_target_3
-					}
-					random_list = {
-						3 = {
-							set_timed_country_flag = {
-								flag = mem_vazurans_raided_empire
-								years = 16
-							}
-						}
-						2 = {
-							set_timed_country_flag = {
-								flag = mem_vazurans_raided_empire
-								years = 19
-							}
-						}
-						1 = {
-							set_timed_country_flag = {
-								flag = mem_vazurans_raided_empire
-								years = 22
-							}
-						}
-					}
-				}
-			}		
-			IF = {
-				limit = {
-					any_country = {
-						has_country_flag = mem_vazurans_target_3
-					}
-				}
-				random_country = {
-					limit = {
-						has_country_flag = mem_vazurans_target_3
-					}
-					country_event = { id = mem_vazurans.3 days = 100 random = 160 }
-				}
-			}
-		}
-	}
-}
+# 	immediate = {
+# 		IF = {
+# 			limit = {
+# 				has_global_flag = mem_vazurans_enabled
+# 				NOR = {
+# 					has_global_flag = mem_vazurans_disabled
+# 					has_global_flag = mem_vazurans_finished
+# 					has_global_flag = mem_vazurans_raid_3_event
+# 				}
+# 			}
+# 			#restarting the event
+# 			country_event = { id = mem_vazurans.403 days = 1960 random = 400 }
+# 			set_timed_global_flag = {
+# 				flag = mem_vazurans_raid_3_event
+# 				days = 1750			
+# 			}
+# 			IF = { #if there is a retaliation or raid target without target number (should not happen, but better safe than sorry)
+# 				limit = {
+# 					NOT = { #makes sure there is no country with that precise target number
+# 						any_country = {
+# 							has_country_flag = mem_vazurans_target_3
+# 						}
+# 					}
+# 					any_country = { #makes sure the retaliation target does not have another target number already (checking for same number as above is redundand but allows for faster copy paste)
+# 						is_country_type = default
+# 						OR = {
+# 							has_country_flag = mem_vazurans_retaliation
+# 							has_country_flag = mem_vazurans_raid
+# 						}						
+# 						NOR = {
+# 							has_country_flag = mem_vazurans_target_1
+# 							has_country_flag = mem_vazurans_target_2
+# 							has_country_flag = mem_vazurans_target_3
+# 							has_country_flag = mem_vazurans_target_4
+# 							has_country_flag = mem_vazurans_target_5
+# 						}
+# 					}
+# 				}
+# 				random_country = {
+# 					limit = {
+# 						is_country_type = default
+# 						OR = {
+# 							has_country_flag = mem_vazurans_retaliation
+# 							has_country_flag = mem_vazurans_raid
+# 						}
+# 						NOR = {
+# 							has_country_flag = mem_vazurans_target_1
+# 							has_country_flag = mem_vazurans_target_2
+# 							has_country_flag = mem_vazurans_target_3
+# 							has_country_flag = mem_vazurans_target_4
+# 							has_country_flag = mem_vazurans_target_5
+# 						}
+# 					}
+# 					set_country_flag = mem_vazurans_target_3
+# 					remove_country_flag = mem_vazurans_raid
+# 				}
+# 			}
+# 			ELSE_IF = {
+# 				limit = {
+# 					NOT = {
+# 						any_country = {
+# 							has_country_flag = mem_vazurans_target_3
+# 						}
+# 					}
+# 					any_country = {
+# 						is_country_type = default
+# 						NOR = {
+# 							has_country_flag = mem_vazurans_retaliation
+# 							has_country_flag = mem_vazurans_raided_empire
+# 							has_country_flag = mem_vazurans_target_1
+# 							has_country_flag = mem_vazurans_target_2
+# 							has_country_flag = mem_vazurans_target_3
+# 							has_country_flag = mem_vazurans_target_4
+# 							has_country_flag = mem_vazurans_target_5
+# 						}
+# 					}
+# 				}
+# 				random_country = {
+# 					limit = {
+# 						is_country_type = default
+# 						NOR = {
+# 							has_country_flag = mem_vazurans_retaliation
+# 							has_country_flag = mem_vazurans_raided_empire
+# 							has_country_flag = mem_vazurans_target_1
+# 							has_country_flag = mem_vazurans_target_2
+# 							has_country_flag = mem_vazurans_target_3
+# 							has_country_flag = mem_vazurans_target_4
+# 							has_country_flag = mem_vazurans_target_5
+# 						}
+# 					}
+# 					set_country_flag = mem_vazurans_target_3
+# 				}
+# 			}
+# 			IF = {
+# 				limit = {
+# 					any_country = {
+# 						has_country_flag = mem_vazurans_target_3
+# 						NOT = {
+# 							has_country_flag = mem_vazurans_raided_empire
+# 						}
+# 					}
+# 				}
+# 				random_country = {
+# 					limit = {
+# 						has_country_flag = mem_vazurans_target_3
+# 					}
+# 					random_list = {
+# 						3 = {
+# 							set_timed_country_flag = {
+# 								flag = mem_vazurans_raided_empire
+# 								years = 16
+# 							}
+# 						}
+# 						2 = {
+# 							set_timed_country_flag = {
+# 								flag = mem_vazurans_raided_empire
+# 								years = 19
+# 							}
+# 						}
+# 						1 = {
+# 							set_timed_country_flag = {
+# 								flag = mem_vazurans_raided_empire
+# 								years = 22
+# 							}
+# 						}
+# 					}
+# 				}
+# 			}		
+# 			IF = {
+# 				limit = {
+# 					any_country = {
+# 						has_country_flag = mem_vazurans_target_3
+# 					}
+# 				}
+# 				random_country = {
+# 					limit = {
+# 						has_country_flag = mem_vazurans_target_3
+# 					}
+# 					country_event = { id = mem_vazurans.3 days = 100 random = 160 }
+# 				}
+# 			}
+# 		}
+# 	}
+# }
 
-# Event cycle to start raiding/retaliation fleet 4
-country_event = {
-	id = mem_vazurans.404
-	hide_window = yes
+# # Event cycle to start raiding/retaliation fleet 4
+# country_event = {
+# 	id = mem_vazurans.404
+# 	hide_window = yes
 
-	is_triggered_only = yes
+# 	is_triggered_only = yes
 
-	trigger = {
-		has_global_flag = mem_vazurans_enabled
-		NOR = {
-			has_global_flag = mem_vazurans_disabled
-			has_global_flag = mem_vazurans_finished
-			has_global_flag = mem_vazurans_raid_4_event
-		}
-	}
+# 	trigger = {
+# 		has_global_flag = mem_vazurans_enabled
+# 		NOR = {
+# 			has_global_flag = mem_vazurans_disabled
+# 			has_global_flag = mem_vazurans_finished
+# 			has_global_flag = mem_vazurans_raid_4_event
+# 		}
+# 	}
 	
-	immediate = {
-		IF = {
-			limit = {
-				has_global_flag = mem_vazurans_enabled
-				NOR = {
-					has_global_flag = mem_vazurans_disabled
-					has_global_flag = mem_vazurans_finished
-					has_global_flag = mem_vazurans_raid_4_event
-				}
-			}
-			#restarting the event
-			country_event = { id = mem_vazurans.404 days = 1960 random = 400 }
-			set_timed_global_flag = {
-				flag = mem_vazurans_raid_4_event
-				days = 1750			
-			}
-			IF = { #if there is a retaliation or raid target without target number (should not happen, but better safe than sorry)
-				limit = {
-					NOT = { #makes sure there is no country with that precise target number
-						any_country = {
-							has_country_flag = mem_vazurans_target_4
-						}
-					}
-					any_country = { #makes sure the retaliation target does not have another target number already (checking for same number as above is redundand but allows for faster copy paste)
-						is_country_type = default
-						OR = {
-							has_country_flag = mem_vazurans_retaliation
-							has_country_flag = mem_vazurans_raid
-						}						
-						NOR = {
-							has_country_flag = mem_vazurans_target_1
-							has_country_flag = mem_vazurans_target_2
-							has_country_flag = mem_vazurans_target_3
-							has_country_flag = mem_vazurans_target_4
-							has_country_flag = mem_vazurans_target_5
-						}
-					}
-				}
-				random_country = {
-					limit = {
-						is_country_type = default
-						OR = {
-							has_country_flag = mem_vazurans_retaliation
-							has_country_flag = mem_vazurans_raid
-						}
-						NOR = {
-							has_country_flag = mem_vazurans_target_1
-							has_country_flag = mem_vazurans_target_2
-							has_country_flag = mem_vazurans_target_3
-							has_country_flag = mem_vazurans_target_4
-							has_country_flag = mem_vazurans_target_5
-						}
-					}
-					set_country_flag = mem_vazurans_target_4
-					remove_country_flag = mem_vazurans_raid
-				}
-			}
-			ELSE_IF = {
-				limit = {
-					NOT = {
-						any_country = {
-							has_country_flag = mem_vazurans_target_4
-						}
-					}
-					any_country = {
-						is_country_type = default
-						NOR = {
-							has_country_flag = mem_vazurans_retaliation
-							has_country_flag = mem_vazurans_raided_empire
-							has_country_flag = mem_vazurans_target_1
-							has_country_flag = mem_vazurans_target_2
-							has_country_flag = mem_vazurans_target_3
-							has_country_flag = mem_vazurans_target_4
-							has_country_flag = mem_vazurans_target_5
-						}
-					}
-				}
-				random_country = {
-					limit = {
-						is_country_type = default
-						NOR = {
-							has_country_flag = mem_vazurans_retaliation
-							has_country_flag = mem_vazurans_raided_empire
-							has_country_flag = mem_vazurans_target_1
-							has_country_flag = mem_vazurans_target_2
-							has_country_flag = mem_vazurans_target_3
-							has_country_flag = mem_vazurans_target_4
-							has_country_flag = mem_vazurans_target_5
-						}
-					}
-					set_country_flag = mem_vazurans_target_4
-				}
-			}
-			IF = {
-				limit = {
-					any_country = {
-						has_country_flag = mem_vazurans_target_4
-						NOT = {
-							has_country_flag = mem_vazurans_raided_empire
-						}
-					}
-				}
-				random_country = {
-					limit = {
-						has_country_flag = mem_vazurans_target_4
-					}
-					random_list = {
-						3 = {
-							set_timed_country_flag = {
-								flag = mem_vazurans_raided_empire
-								years = 16
-							}
-						}
-						2 = {
-							set_timed_country_flag = {
-								flag = mem_vazurans_raided_empire
-								years = 19
-							}
-						}
-						1 = {
-							set_timed_country_flag = {
-								flag = mem_vazurans_raided_empire
-								years = 22
-							}
-						}
-					}
-				}
-			}		
-			IF = {
-				limit = {
-					any_country = {
-						has_country_flag = mem_vazurans_target_4
-					}
-				}
-				random_country = {
-					limit = {
-						has_country_flag = mem_vazurans_target_4
-					}
-					country_event = { id = mem_vazurans.3 days = 100 random = 160 }
-				}
-			}
-		}
-	}
-}
+# 	immediate = {
+# 		IF = {
+# 			limit = {
+# 				has_global_flag = mem_vazurans_enabled
+# 				NOR = {
+# 					has_global_flag = mem_vazurans_disabled
+# 					has_global_flag = mem_vazurans_finished
+# 					has_global_flag = mem_vazurans_raid_4_event
+# 				}
+# 			}
+# 			#restarting the event
+# 			country_event = { id = mem_vazurans.404 days = 1960 random = 400 }
+# 			set_timed_global_flag = {
+# 				flag = mem_vazurans_raid_4_event
+# 				days = 1750			
+# 			}
+# 			IF = { #if there is a retaliation or raid target without target number (should not happen, but better safe than sorry)
+# 				limit = {
+# 					NOT = { #makes sure there is no country with that precise target number
+# 						any_country = {
+# 							has_country_flag = mem_vazurans_target_4
+# 						}
+# 					}
+# 					any_country = { #makes sure the retaliation target does not have another target number already (checking for same number as above is redundand but allows for faster copy paste)
+# 						is_country_type = default
+# 						OR = {
+# 							has_country_flag = mem_vazurans_retaliation
+# 							has_country_flag = mem_vazurans_raid
+# 						}						
+# 						NOR = {
+# 							has_country_flag = mem_vazurans_target_1
+# 							has_country_flag = mem_vazurans_target_2
+# 							has_country_flag = mem_vazurans_target_3
+# 							has_country_flag = mem_vazurans_target_4
+# 							has_country_flag = mem_vazurans_target_5
+# 						}
+# 					}
+# 				}
+# 				random_country = {
+# 					limit = {
+# 						is_country_type = default
+# 						OR = {
+# 							has_country_flag = mem_vazurans_retaliation
+# 							has_country_flag = mem_vazurans_raid
+# 						}
+# 						NOR = {
+# 							has_country_flag = mem_vazurans_target_1
+# 							has_country_flag = mem_vazurans_target_2
+# 							has_country_flag = mem_vazurans_target_3
+# 							has_country_flag = mem_vazurans_target_4
+# 							has_country_flag = mem_vazurans_target_5
+# 						}
+# 					}
+# 					set_country_flag = mem_vazurans_target_4
+# 					remove_country_flag = mem_vazurans_raid
+# 				}
+# 			}
+# 			ELSE_IF = {
+# 				limit = {
+# 					NOT = {
+# 						any_country = {
+# 							has_country_flag = mem_vazurans_target_4
+# 						}
+# 					}
+# 					any_country = {
+# 						is_country_type = default
+# 						NOR = {
+# 							has_country_flag = mem_vazurans_retaliation
+# 							has_country_flag = mem_vazurans_raided_empire
+# 							has_country_flag = mem_vazurans_target_1
+# 							has_country_flag = mem_vazurans_target_2
+# 							has_country_flag = mem_vazurans_target_3
+# 							has_country_flag = mem_vazurans_target_4
+# 							has_country_flag = mem_vazurans_target_5
+# 						}
+# 					}
+# 				}
+# 				random_country = {
+# 					limit = {
+# 						is_country_type = default
+# 						NOR = {
+# 							has_country_flag = mem_vazurans_retaliation
+# 							has_country_flag = mem_vazurans_raided_empire
+# 							has_country_flag = mem_vazurans_target_1
+# 							has_country_flag = mem_vazurans_target_2
+# 							has_country_flag = mem_vazurans_target_3
+# 							has_country_flag = mem_vazurans_target_4
+# 							has_country_flag = mem_vazurans_target_5
+# 						}
+# 					}
+# 					set_country_flag = mem_vazurans_target_4
+# 				}
+# 			}
+# 			IF = {
+# 				limit = {
+# 					any_country = {
+# 						has_country_flag = mem_vazurans_target_4
+# 						NOT = {
+# 							has_country_flag = mem_vazurans_raided_empire
+# 						}
+# 					}
+# 				}
+# 				random_country = {
+# 					limit = {
+# 						has_country_flag = mem_vazurans_target_4
+# 					}
+# 					random_list = {
+# 						3 = {
+# 							set_timed_country_flag = {
+# 								flag = mem_vazurans_raided_empire
+# 								years = 16
+# 							}
+# 						}
+# 						2 = {
+# 							set_timed_country_flag = {
+# 								flag = mem_vazurans_raided_empire
+# 								years = 19
+# 							}
+# 						}
+# 						1 = {
+# 							set_timed_country_flag = {
+# 								flag = mem_vazurans_raided_empire
+# 								years = 22
+# 							}
+# 						}
+# 					}
+# 				}
+# 			}		
+# 			IF = {
+# 				limit = {
+# 					any_country = {
+# 						has_country_flag = mem_vazurans_target_4
+# 					}
+# 				}
+# 				random_country = {
+# 					limit = {
+# 						has_country_flag = mem_vazurans_target_4
+# 					}
+# 					country_event = { id = mem_vazurans.3 days = 100 random = 160 }
+# 				}
+# 			}
+# 		}
+# 	}
+# }
 
-# Event cycle to start raiding/retaliation fleet 5
-country_event = {
-	id = mem_vazurans.405
-	hide_window = yes
+# # Event cycle to start raiding/retaliation fleet 5
+# country_event = {
+# 	id = mem_vazurans.405
+# 	hide_window = yes
 
-	is_triggered_only = yes
+# 	is_triggered_only = yes
 
-	trigger = {
-		has_global_flag = mem_vazurans_enabled
-		NOR = {
-			has_global_flag = mem_vazurans_disabled
-			has_global_flag = mem_vazurans_finished
-			has_global_flag = mem_vazurans_raid_5_event
-		}
-	}
+# 	trigger = {
+# 		has_global_flag = mem_vazurans_enabled
+# 		NOR = {
+# 			has_global_flag = mem_vazurans_disabled
+# 			has_global_flag = mem_vazurans_finished
+# 			has_global_flag = mem_vazurans_raid_5_event
+# 		}
+# 	}
 	
-	immediate = {
-		IF = {
-			limit = {
-				has_global_flag = mem_vazurans_enabled
-				NOR = {
-					has_global_flag = mem_vazurans_disabled
-					has_global_flag = mem_vazurans_finished
-					has_global_flag = mem_vazurans_raid_5_event
-				}
-			}
-			#restarting the event
-			country_event = { id = mem_vazurans.405 days = 1960 random = 400 }
-			set_timed_global_flag = {
-				flag = mem_vazurans_raid_5_event
-				days = 1750			
-			}
-			IF = { #if there is a retaliation or raid target without target number (should not happen, but better safe than sorry)
-				limit = {
-					NOT = { #makes sure there is no country with that precise target number
-						any_country = {
-							has_country_flag = mem_vazurans_target_5
-						}
-					}
-					any_country = { #makes sure the retaliation target does not have another target number already (checking for same number as above is redundand but allows for faster copy paste)
-						is_country_type = default
-						OR = {
-							has_country_flag = mem_vazurans_retaliation
-							has_country_flag = mem_vazurans_raid
-						}						
-						NOR = {
-							has_country_flag = mem_vazurans_target_1
-							has_country_flag = mem_vazurans_target_2
-							has_country_flag = mem_vazurans_target_3
-							has_country_flag = mem_vazurans_target_4
-							has_country_flag = mem_vazurans_target_5
-						}
-					}
-				}
-				random_country = {
-					limit = {
-						is_country_type = default
-						OR = {
-							has_country_flag = mem_vazurans_retaliation
-							has_country_flag = mem_vazurans_raid
-						}
-						NOR = {
-							has_country_flag = mem_vazurans_target_1
-							has_country_flag = mem_vazurans_target_2
-							has_country_flag = mem_vazurans_target_3
-							has_country_flag = mem_vazurans_target_4
-							has_country_flag = mem_vazurans_target_5
-						}
-					}
-					set_country_flag = mem_vazurans_target_5
-					remove_country_flag = mem_vazurans_raid
-				}
-			}
-			ELSE_IF = {
-				limit = {
-					NOT = {
-						any_country = {
-							has_country_flag = mem_vazurans_target_5
-						}
-					}
-					any_country = {
-						is_country_type = default
-						NOR = {
-							has_country_flag = mem_vazurans_retaliation
-							has_country_flag = mem_vazurans_raided_empire
-							has_country_flag = mem_vazurans_target_1
-							has_country_flag = mem_vazurans_target_2
-							has_country_flag = mem_vazurans_target_3
-							has_country_flag = mem_vazurans_target_4
-							has_country_flag = mem_vazurans_target_5
-						}
-					}
-				}
-				random_country = {
-					limit = {
-						is_country_type = default
-						NOR = {
-							has_country_flag = mem_vazurans_retaliation
-							has_country_flag = mem_vazurans_raided_empire
-							has_country_flag = mem_vazurans_target_1
-							has_country_flag = mem_vazurans_target_2
-							has_country_flag = mem_vazurans_target_3
-							has_country_flag = mem_vazurans_target_4
-							has_country_flag = mem_vazurans_target_5
-						}
-					}
-					set_country_flag = mem_vazurans_target_5
-				}
-			}
-			IF = {
-				limit = {
-					any_country = {
-						has_country_flag = mem_vazurans_target_5
-						NOT = {
-							has_country_flag = mem_vazurans_raided_empire
-						}
-					}
-				}
-				random_country = {
-					limit = {
-						has_country_flag = mem_vazurans_target_5
-					}
-					random_list = {
-						3 = {
-							set_timed_country_flag = {
-								flag = mem_vazurans_raided_empire
-								years = 16
-							}
-						}
-						2 = {
-							set_timed_country_flag = {
-								flag = mem_vazurans_raided_empire
-								years = 19
-							}
-						}
-						1 = {
-							set_timed_country_flag = {
-								flag = mem_vazurans_raided_empire
-								years = 22
-							}
-						}
-					}
-				}
-			}		
-			IF = {
-				limit = {
-					any_country = {
-						has_country_flag = mem_vazurans_target_5
-					}
-				}
-				random_country = {
-					limit = {
-						has_country_flag = mem_vazurans_target_5
-					}
-					country_event = { id = mem_vazurans.3 days = 100 random = 160 }
-				}
-			}
-		}
-	}
-}
+# 	immediate = {
+# 		IF = {
+# 			limit = {
+# 				has_global_flag = mem_vazurans_enabled
+# 				NOR = {
+# 					has_global_flag = mem_vazurans_disabled
+# 					has_global_flag = mem_vazurans_finished
+# 					has_global_flag = mem_vazurans_raid_5_event
+# 				}
+# 			}
+# 			#restarting the event
+# 			country_event = { id = mem_vazurans.405 days = 1960 random = 400 }
+# 			set_timed_global_flag = {
+# 				flag = mem_vazurans_raid_5_event
+# 				days = 1750			
+# 			}
+# 			IF = { #if there is a retaliation or raid target without target number (should not happen, but better safe than sorry)
+# 				limit = {
+# 					NOT = { #makes sure there is no country with that precise target number
+# 						any_country = {
+# 							has_country_flag = mem_vazurans_target_5
+# 						}
+# 					}
+# 					any_country = { #makes sure the retaliation target does not have another target number already (checking for same number as above is redundand but allows for faster copy paste)
+# 						is_country_type = default
+# 						OR = {
+# 							has_country_flag = mem_vazurans_retaliation
+# 							has_country_flag = mem_vazurans_raid
+# 						}						
+# 						NOR = {
+# 							has_country_flag = mem_vazurans_target_1
+# 							has_country_flag = mem_vazurans_target_2
+# 							has_country_flag = mem_vazurans_target_3
+# 							has_country_flag = mem_vazurans_target_4
+# 							has_country_flag = mem_vazurans_target_5
+# 						}
+# 					}
+# 				}
+# 				random_country = {
+# 					limit = {
+# 						is_country_type = default
+# 						OR = {
+# 							has_country_flag = mem_vazurans_retaliation
+# 							has_country_flag = mem_vazurans_raid
+# 						}
+# 						NOR = {
+# 							has_country_flag = mem_vazurans_target_1
+# 							has_country_flag = mem_vazurans_target_2
+# 							has_country_flag = mem_vazurans_target_3
+# 							has_country_flag = mem_vazurans_target_4
+# 							has_country_flag = mem_vazurans_target_5
+# 						}
+# 					}
+# 					set_country_flag = mem_vazurans_target_5
+# 					remove_country_flag = mem_vazurans_raid
+# 				}
+# 			}
+# 			ELSE_IF = {
+# 				limit = {
+# 					NOT = {
+# 						any_country = {
+# 							has_country_flag = mem_vazurans_target_5
+# 						}
+# 					}
+# 					any_country = {
+# 						is_country_type = default
+# 						NOR = {
+# 							has_country_flag = mem_vazurans_retaliation
+# 							has_country_flag = mem_vazurans_raided_empire
+# 							has_country_flag = mem_vazurans_target_1
+# 							has_country_flag = mem_vazurans_target_2
+# 							has_country_flag = mem_vazurans_target_3
+# 							has_country_flag = mem_vazurans_target_4
+# 							has_country_flag = mem_vazurans_target_5
+# 						}
+# 					}
+# 				}
+# 				random_country = {
+# 					limit = {
+# 						is_country_type = default
+# 						NOR = {
+# 							has_country_flag = mem_vazurans_retaliation
+# 							has_country_flag = mem_vazurans_raided_empire
+# 							has_country_flag = mem_vazurans_target_1
+# 							has_country_flag = mem_vazurans_target_2
+# 							has_country_flag = mem_vazurans_target_3
+# 							has_country_flag = mem_vazurans_target_4
+# 							has_country_flag = mem_vazurans_target_5
+# 						}
+# 					}
+# 					set_country_flag = mem_vazurans_target_5
+# 				}
+# 			}
+# 			IF = {
+# 				limit = {
+# 					any_country = {
+# 						has_country_flag = mem_vazurans_target_5
+# 						NOT = {
+# 							has_country_flag = mem_vazurans_raided_empire
+# 						}
+# 					}
+# 				}
+# 				random_country = {
+# 					limit = {
+# 						has_country_flag = mem_vazurans_target_5
+# 					}
+# 					random_list = {
+# 						3 = {
+# 							set_timed_country_flag = {
+# 								flag = mem_vazurans_raided_empire
+# 								years = 16
+# 							}
+# 						}
+# 						2 = {
+# 							set_timed_country_flag = {
+# 								flag = mem_vazurans_raided_empire
+# 								years = 19
+# 							}
+# 						}
+# 						1 = {
+# 							set_timed_country_flag = {
+# 								flag = mem_vazurans_raided_empire
+# 								years = 22
+# 							}
+# 						}
+# 					}
+# 				}
+# 			}		
+# 			IF = {
+# 				limit = {
+# 					any_country = {
+# 						has_country_flag = mem_vazurans_target_5
+# 					}
+# 				}
+# 				random_country = {
+# 					limit = {
+# 						has_country_flag = mem_vazurans_target_5
+# 					}
+# 					country_event = { id = mem_vazurans.3 days = 100 random = 160 }
+# 				}
+# 			}
+# 		}
+# 	}
+# }
 
-# Empire Targeting for Raids
-event = {
-	id = mem_vazurans.2
-	hide_window = yes
+# # Empire Targeting for Raids
+# event = {
+# 	id = mem_vazurans.2
+# 	hide_window = yes
 
-	is_triggered_only = yes
+# 	is_triggered_only = yes
 	
-	trigger = {
-		has_global_flag = mem_vazurans_enabled
-		NOR = {
-			has_global_flag = mem_vazurans_disabled
-			has_global_flag = mem_vazurans_finished
-		}
-		years_passed >= 19
-	}
+# 	trigger = {
+# 		has_global_flag = mem_vazurans_enabled
+# 		NOR = {
+# 			has_global_flag = mem_vazurans_disabled
+# 			has_global_flag = mem_vazurans_finished
+# 		}
+# 		years_passed >= 19
+# 	}
 	
-	immediate = {
-		# Targeting first Raid Target
-		IF = {
-			limit = {
-				NOT = {
-					any_country = {
-						has_country_flag = mem_vazurans_target_1
-					}
-				}
-			}
-			random_country = {
-				limit = {
-					is_country_type = default
-					NOR = {
-						has_country_flag = mem_vazurans_raided_empire #this is a timed flag set when an empire gets attacked
-						has_country_flag = mem_vazurans_target_2
-						has_country_flag = mem_vazurans_target_3
-						has_country_flag = mem_vazurans_target_4
-						has_country_flag = mem_vazurans_target_5
-					}
-					any_owned_planet = {
-						is_colony = yes
-						is_under_colonization = no
-						is_capital = no
-						NOT = {
-							has_planet_flag = mem_vazurans_raided_planet #this is a timed flag set when the planet is raided
-						}
-					}
-				}
-				set_country_flag = mem_vazurans_target_1
-			}
-		}
-		# Targeting second Raid Target
-		IF = {
-			limit = {
-				NOT = {
-					any_country = {
-						has_country_flag = mem_vazurans_target_2
-					}
-				}
-			}
-			random_country = {
-				limit = {
-					is_country_type = default
-					NOR = {
-						has_country_flag = mem_vazurans_raided_empire #this is a timed flag set when an empire gets attacked
-						has_country_flag = mem_vazurans_target_1
-						has_country_flag = mem_vazurans_target_3
-						has_country_flag = mem_vazurans_target_4
-						has_country_flag = mem_vazurans_target_5
-					}
-					any_owned_planet = {
-						is_colony = yes
-						is_under_colonization = no
-						is_capital = no
-						NOT = {
-							has_planet_flag = mem_vazurans_raided_planet #this is a timed flag set when the planet is raided
-						}
-					}
-				}
-				set_country_flag = mem_vazurans_target_2
-			}
-		}
-		# Targeting third Raid Target
-		IF = {
-			limit = {
-				NOT = {
-					any_country = {
-						has_country_flag = mem_vazurans_target_3
-					}
-				}
-			}
-			random_country = {
-				limit = {
-					is_country_type = default
-					NOR = {
-						has_country_flag = mem_vazurans_raided_empire #this is a timed flag set when an empire gets attacked
-						has_country_flag = mem_vazurans_target_1
-						has_country_flag = mem_vazurans_target_2
-						has_country_flag = mem_vazurans_target_4
-						has_country_flag = mem_vazurans_target_5
-					}
-					any_owned_planet = {
-						is_colony = yes
-						is_under_colonization = no
-						is_capital = no
-						NOT = {
-							has_planet_flag = mem_vazurans_raided_planet #this is a timed flag set when the planet is raided
-						}
-					}
-				}
-				set_country_flag = mem_vazurans_target_3
-			}
-		}
-		# Targeting fourth Raid Target
-		IF = {
-			limit = {
-				NOT = {
-					any_country = {
-						has_country_flag = mem_vazurans_target_4
-					}
-				}
-			}
-			random_country = {
-				limit = {
-					is_country_type = default
-					NOR = {
-						has_country_flag = mem_vazurans_raided_empire #this is a timed flag set when an empire gets attacked
-						has_country_flag = mem_vazurans_target_1
-						has_country_flag = mem_vazurans_target_2
-						has_country_flag = mem_vazurans_target_3
-						has_country_flag = mem_vazurans_target_5
-					}
-					any_owned_planet = {
-						is_colony = yes
-						is_under_colonization = no
-						is_capital = no
-						NOT = {
-							has_planet_flag = mem_vazurans_raided_planet #this is a timed flag set when the planet is raided
-						}
-					}
-				}
-				set_country_flag = mem_vazurans_target_4
-			}
-		}
-		# Targeting fifth Raid Target
-		IF = {
-			limit = {
-				NOT = {
-					any_country = {
-						has_country_flag = mem_vazurans_target_5
-					}
-				}
-			}
-			random_country = {
-				limit = {
-					is_country_type = default
-					NOR = {
-						has_country_flag = mem_vazurans_raided_empire #this is a timed flag set when an empire gets attacked
-						has_country_flag = mem_vazurans_target_1
-						has_country_flag = mem_vazurans_target_2
-						has_country_flag = mem_vazurans_target_3
-						has_country_flag = mem_vazurans_target_4
-					}
-					any_owned_planet = {
-						is_colony = yes
-						is_under_colonization = no
-						is_capital = no
-						NOT = {
-							has_planet_flag = mem_vazurans_raided_planet #this is a timed flag set when the planet is raided
-						}
-					}
-				}
-				set_country_flag = mem_vazurans_target_5
-			}
-		}
-		# TODO this is for testing purpose, take out later
-#		random_country = {
-#			limit = {
-#				is_ai = no
-#			}
-#			country_event = { id = mem_vazurans.99 days = 5 }
-#		}
-		#Following events set the vazuran Raids in motion
-		every_country = {
-			limit = {
-				OR = {
-					has_country_flag = mem_vazurans_target_1
-					has_country_flag = mem_vazurans_target_2
-					has_country_flag = mem_vazurans_target_3
-					has_country_flag = mem_vazurans_target_4
-					has_country_flag = mem_vazurans_target_5
-				}
-			}
-			country_event = { id = mem_vazurans.3 days = 25 random = 10 }
-			set_timed_country_flag = {
-				flag = mem_vazurans_raided_empire
-				years = 16
-			}
-		}
-		random_country = {
-			limit = {
-				has_country_flag = mem_vazurans_target_1
-			}
-			save_event_target_as = mem_vazurans_target_1
-		}
-		random_country = {
-			limit = {
-				has_country_flag = mem_vazurans_target_2
-			}
-			save_event_target_as = mem_vazurans_target_2
-		}
-		random_country = {
-			limit = {
-				has_country_flag = mem_vazurans_target_3
-			}
-			save_event_target_as = mem_vazurans_target_3
-		}
-		random_country = {
-			limit = {
-				has_country_flag = mem_vazurans_target_4
-			}
-			save_event_target_as = mem_vazurans_target_4
-		}
-		random_country = {
-			limit = {
-				has_country_flag = mem_vazurans_target_5
-			}
-			save_event_target_as = mem_vazurans_target_5
-		}
-		# TODO Also start a notification message for all not attacked human players from here later
-		every_country = {
-			limit = {
-				is_ai = no
-				NOR = {
-					has_country_flag = mem_vazurans_target_1
-					has_country_flag = mem_vazurans_target_2
-					has_country_flag = mem_vazurans_target_3
-					has_country_flag = mem_vazurans_target_4
-					has_country_flag = mem_vazurans_target_5
-				}
-			}
-			IF = { # checks if the country has direct contact to one of the targeted empires
-				limit = {
-					OR = { 
-						has_communications = event_target:mem_vazurans_target_1
-						has_communications = event_target:mem_vazurans_target_2
-						has_communications = event_target:mem_vazurans_target_3
-						has_communications = event_target:mem_vazurans_target_4
-						has_communications = event_target:mem_vazurans_target_5
-					}
-				}
-				random_list = {
-					1 = {
-						country_event = { id = mem_vazurans.20 days = 55 random = 10 }
-					}
-					1 = {}
-				}
-			}
-			ELSE_IF = { # checks if the country has contact to another country that has contact to one of the targeted empires
-				limit = {
-					NOR = {
-						has_communications = event_target:mem_vazurans_target_1
-						has_communications = event_target:mem_vazurans_target_2
-						has_communications = event_target:mem_vazurans_target_3
-						has_communications = event_target:mem_vazurans_target_4
-						has_communications = event_target:mem_vazurans_target_5
-					}
-					any_country = {
-						has_communications = prev
-						OR = {
-							has_communications = event_target:mem_vazurans_target_1
-							has_communications = event_target:mem_vazurans_target_2
-							has_communications = event_target:mem_vazurans_target_3
-							has_communications = event_target:mem_vazurans_target_4
-							has_communications = event_target:mem_vazurans_target_5
-						}
-					}
-				}
-				random_list = {
-					1 = {
-						country_event = { id = mem_vazurans.21 days = 85 random = 10 }
-					}
-					2 = {}
-				}
-			}
-		}
-	}
-}
+# 	immediate = {
+# 		# Targeting first Raid Target
+# 		IF = {
+# 			limit = {
+# 				NOT = {
+# 					any_country = {
+# 						has_country_flag = mem_vazurans_target_1
+# 					}
+# 				}
+# 			}
+# 			random_country = {
+# 				limit = {
+# 					is_country_type = default
+# 					NOR = {
+# 						has_country_flag = mem_vazurans_raided_empire #this is a timed flag set when an empire gets attacked
+# 						has_country_flag = mem_vazurans_target_2
+# 						has_country_flag = mem_vazurans_target_3
+# 						has_country_flag = mem_vazurans_target_4
+# 						has_country_flag = mem_vazurans_target_5
+# 					}
+# 					any_owned_planet = {
+# 						is_colony = yes
+# 						is_under_colonization = no
+# 						is_capital = no
+# 						NOT = {
+# 							has_planet_flag = mem_vazurans_raided_planet #this is a timed flag set when the planet is raided
+# 						}
+# 					}
+# 				}
+# 				set_country_flag = mem_vazurans_target_1
+# 			}
+# 		}
+# 		# Targeting second Raid Target
+# 		IF = {
+# 			limit = {
+# 				NOT = {
+# 					any_country = {
+# 						has_country_flag = mem_vazurans_target_2
+# 					}
+# 				}
+# 			}
+# 			random_country = {
+# 				limit = {
+# 					is_country_type = default
+# 					NOR = {
+# 						has_country_flag = mem_vazurans_raided_empire #this is a timed flag set when an empire gets attacked
+# 						has_country_flag = mem_vazurans_target_1
+# 						has_country_flag = mem_vazurans_target_3
+# 						has_country_flag = mem_vazurans_target_4
+# 						has_country_flag = mem_vazurans_target_5
+# 					}
+# 					any_owned_planet = {
+# 						is_colony = yes
+# 						is_under_colonization = no
+# 						is_capital = no
+# 						NOT = {
+# 							has_planet_flag = mem_vazurans_raided_planet #this is a timed flag set when the planet is raided
+# 						}
+# 					}
+# 				}
+# 				set_country_flag = mem_vazurans_target_2
+# 			}
+# 		}
+# 		# Targeting third Raid Target
+# 		IF = {
+# 			limit = {
+# 				NOT = {
+# 					any_country = {
+# 						has_country_flag = mem_vazurans_target_3
+# 					}
+# 				}
+# 			}
+# 			random_country = {
+# 				limit = {
+# 					is_country_type = default
+# 					NOR = {
+# 						has_country_flag = mem_vazurans_raided_empire #this is a timed flag set when an empire gets attacked
+# 						has_country_flag = mem_vazurans_target_1
+# 						has_country_flag = mem_vazurans_target_2
+# 						has_country_flag = mem_vazurans_target_4
+# 						has_country_flag = mem_vazurans_target_5
+# 					}
+# 					any_owned_planet = {
+# 						is_colony = yes
+# 						is_under_colonization = no
+# 						is_capital = no
+# 						NOT = {
+# 							has_planet_flag = mem_vazurans_raided_planet #this is a timed flag set when the planet is raided
+# 						}
+# 					}
+# 				}
+# 				set_country_flag = mem_vazurans_target_3
+# 			}
+# 		}
+# 		# Targeting fourth Raid Target
+# 		IF = {
+# 			limit = {
+# 				NOT = {
+# 					any_country = {
+# 						has_country_flag = mem_vazurans_target_4
+# 					}
+# 				}
+# 			}
+# 			random_country = {
+# 				limit = {
+# 					is_country_type = default
+# 					NOR = {
+# 						has_country_flag = mem_vazurans_raided_empire #this is a timed flag set when an empire gets attacked
+# 						has_country_flag = mem_vazurans_target_1
+# 						has_country_flag = mem_vazurans_target_2
+# 						has_country_flag = mem_vazurans_target_3
+# 						has_country_flag = mem_vazurans_target_5
+# 					}
+# 					any_owned_planet = {
+# 						is_colony = yes
+# 						is_under_colonization = no
+# 						is_capital = no
+# 						NOT = {
+# 							has_planet_flag = mem_vazurans_raided_planet #this is a timed flag set when the planet is raided
+# 						}
+# 					}
+# 				}
+# 				set_country_flag = mem_vazurans_target_4
+# 			}
+# 		}
+# 		# Targeting fifth Raid Target
+# 		IF = {
+# 			limit = {
+# 				NOT = {
+# 					any_country = {
+# 						has_country_flag = mem_vazurans_target_5
+# 					}
+# 				}
+# 			}
+# 			random_country = {
+# 				limit = {
+# 					is_country_type = default
+# 					NOR = {
+# 						has_country_flag = mem_vazurans_raided_empire #this is a timed flag set when an empire gets attacked
+# 						has_country_flag = mem_vazurans_target_1
+# 						has_country_flag = mem_vazurans_target_2
+# 						has_country_flag = mem_vazurans_target_3
+# 						has_country_flag = mem_vazurans_target_4
+# 					}
+# 					any_owned_planet = {
+# 						is_colony = yes
+# 						is_under_colonization = no
+# 						is_capital = no
+# 						NOT = {
+# 							has_planet_flag = mem_vazurans_raided_planet #this is a timed flag set when the planet is raided
+# 						}
+# 					}
+# 				}
+# 				set_country_flag = mem_vazurans_target_5
+# 			}
+# 		}
+# 		# TODO this is for testing purpose, take out later
+# #		random_country = {
+# #			limit = {
+# #				is_ai = no
+# #			}
+# #			country_event = { id = mem_vazurans.99 days = 5 }
+# #		}
+# 		#Following events set the vazuran Raids in motion
+# 		every_country = {
+# 			limit = {
+# 				OR = {
+# 					has_country_flag = mem_vazurans_target_1
+# 					has_country_flag = mem_vazurans_target_2
+# 					has_country_flag = mem_vazurans_target_3
+# 					has_country_flag = mem_vazurans_target_4
+# 					has_country_flag = mem_vazurans_target_5
+# 				}
+# 			}
+# 			country_event = { id = mem_vazurans.3 days = 25 random = 10 }
+# 			set_timed_country_flag = {
+# 				flag = mem_vazurans_raided_empire
+# 				years = 16
+# 			}
+# 		}
+# 		random_country = {
+# 			limit = {
+# 				has_country_flag = mem_vazurans_target_1
+# 			}
+# 			save_event_target_as = mem_vazurans_target_1
+# 		}
+# 		random_country = {
+# 			limit = {
+# 				has_country_flag = mem_vazurans_target_2
+# 			}
+# 			save_event_target_as = mem_vazurans_target_2
+# 		}
+# 		random_country = {
+# 			limit = {
+# 				has_country_flag = mem_vazurans_target_3
+# 			}
+# 			save_event_target_as = mem_vazurans_target_3
+# 		}
+# 		random_country = {
+# 			limit = {
+# 				has_country_flag = mem_vazurans_target_4
+# 			}
+# 			save_event_target_as = mem_vazurans_target_4
+# 		}
+# 		random_country = {
+# 			limit = {
+# 				has_country_flag = mem_vazurans_target_5
+# 			}
+# 			save_event_target_as = mem_vazurans_target_5
+# 		}
+# 		# TODO Also start a notification message for all not attacked human players from here later
+# 		every_country = {
+# 			limit = {
+# 				is_ai = no
+# 				NOR = {
+# 					has_country_flag = mem_vazurans_target_1
+# 					has_country_flag = mem_vazurans_target_2
+# 					has_country_flag = mem_vazurans_target_3
+# 					has_country_flag = mem_vazurans_target_4
+# 					has_country_flag = mem_vazurans_target_5
+# 				}
+# 			}
+# 			IF = { # checks if the country has direct contact to one of the targeted empires
+# 				limit = {
+# 					OR = { 
+# 						has_communications = event_target:mem_vazurans_target_1
+# 						has_communications = event_target:mem_vazurans_target_2
+# 						has_communications = event_target:mem_vazurans_target_3
+# 						has_communications = event_target:mem_vazurans_target_4
+# 						has_communications = event_target:mem_vazurans_target_5
+# 					}
+# 				}
+# 				random_list = {
+# 					1 = {
+# 						country_event = { id = mem_vazurans.20 days = 55 random = 10 }
+# 					}
+# 					1 = {}
+# 				}
+# 			}
+# 			ELSE_IF = { # checks if the country has contact to another country that has contact to one of the targeted empires
+# 				limit = {
+# 					NOR = {
+# 						has_communications = event_target:mem_vazurans_target_1
+# 						has_communications = event_target:mem_vazurans_target_2
+# 						has_communications = event_target:mem_vazurans_target_3
+# 						has_communications = event_target:mem_vazurans_target_4
+# 						has_communications = event_target:mem_vazurans_target_5
+# 					}
+# 					any_country = {
+# 						has_communications = prev
+# 						OR = {
+# 							has_communications = event_target:mem_vazurans_target_1
+# 							has_communications = event_target:mem_vazurans_target_2
+# 							has_communications = event_target:mem_vazurans_target_3
+# 							has_communications = event_target:mem_vazurans_target_4
+# 							has_communications = event_target:mem_vazurans_target_5
+# 						}
+# 					}
+# 				}
+# 				random_list = {
+# 					1 = {
+# 						country_event = { id = mem_vazurans.21 days = 85 random = 10 }
+# 					}
+# 					2 = {}
+# 				}
+# 			}
+# 		}
+# 	}
+# }
 
-# Hidden Event to place the Ambient Object ( Dimensional Rift opening ) at the rim of a target system
-country_event = {
-	id = mem_vazurans.3
-	hide_window = yes
+# # Hidden Event to place the Ambient Object ( Dimensional Rift opening ) at the rim of a target system
+# country_event = {
+# 	id = mem_vazurans.3
+# 	hide_window = yes
 	
-	is_triggered_only = yes
+# 	is_triggered_only = yes
 	
-	immediate = {
-		IF = { # check if the empire is target of a retaliation
-			limit = {
-				has_country_flag = mem_vazurans_retaliation
-			}
-			random_owned_planet = {
-				limit = {
-					is_capital = yes
-				}
-				set_timed_planet_flag = {
-					flag = mem_vazurans_raiding_target
-					days = 600
-				}
-				solar_system = {
-					random_system_planet = {
-						limit = {
-							is_star = yes
-						}
-						THIS = {
-							save_event_target_as = mem_vazurans_target_sun
-						}
-					}
-					create_ambient_object = {
-						type = "mem_vazuran_wormhole_big_object"
-					}
-					random_system_ambient_object = {
-						limit = { is_same_value = last_created_ambient_object }
-						set_location = {
-							target = event_target:mem_vazurans_target_sun
-							distance = 150
-							angle = random
-						}
-						set_ambient_object_flag = mem_vazurans_rift
-						save_event_target_as = mem_vazurans_rift
-					}
-				}
-			}
-			# start next event to notify the player
-			country_event = { id = mem_vazurans.4 days = 5 }
-			# start overnext event to open the rift and spawn enemy fleet
-			country_event = { id = mem_vazurans.5 days = 60 random = 30 }
-		}
-		ELSE_IF = { # failsafe check if valid raiding target has been lost in the meantime because of a war or something else - check here and use normal raiding target
-			limit = {
-				any_owned_planet = {
-					is_colony = yes
-					is_under_colonization = no
-					is_capital = no
-					NOT = {
-						has_planet_flag = mem_vazurans_raided_planet
-					}
-				}
-			}
-			IF = {
-				limit = {
-					years_passed < 60
-					any_system_within_border = {
-						NOT = {
-							any_system_planet = {
-								OR = {
-									is_colony = yes
-									is_capital = yes
-								}
-							}
-						}
-					}
-				}
-				random_system_within_border = {
-					limit = {
-						NOT = {
-							any_system_planet = {
-								OR = {
-									is_colony = yes
-									is_capital = yes
-								}
-							}
-						}
-					}
-					random_system_planet = {
-						limit = {
-							is_star = yes
-						}
-						set_timed_planet_flag = {
-							flag = mem_vazurans_raiding_target
-							days = 600
-						}
-						THIS = {
-							save_event_target_as = mem_vazurans_target_sun
-						}
-					}
-					create_ambient_object = { # TODO exchange that later with a custom made one by frog
-						type = "mem_vazuran_wormhole_small_object"
-					}
-					random_system_ambient_object = {
-						limit = { is_same_value = last_created_ambient_object }
-						set_location = {
-							target = event_target:mem_vazurans_target_sun
-							distance = 150
-							angle = random
-						}
-						set_ambient_object_flag = mem_vazurans_rift
-						save_event_target_as = mem_vazurans_rift
-					}
-				}
-			}
-			ELSE_IF = {
-				limit = {
-					years_passed <= 120
-					any_system_within_border = {
-						NOT = {
-							any_system_planet = {
-								OR = {
-									is_colony = yes
-									is_capital = yes
-								}
-							}
-						}
-					}
-				}
-				random_list = {
-					1 = {
-						random_system_within_border = {
-							limit = {
-								NOT = {
-									any_system_planet = {
-										OR = {
-											is_colony = yes
-											is_capital = yes
-										}
-									}
-								}
-							}
-							random_system_planet = {
-								limit = {
-									is_star = yes
-								}
-								set_timed_planet_flag = {
-									flag = mem_vazurans_raiding_target
-									days = 600
-								}
-								THIS = {
-									save_event_target_as = mem_vazurans_target_sun
-								}
-							}
-							create_ambient_object = {
-								type = "mem_vazuran_wormhole_small_object"
-							}
-							random_system_ambient_object = {
-								limit = { is_same_value = last_created_ambient_object }
-								set_location = {
-									target = event_target:mem_vazurans_target_sun
-									distance = 150
-									angle = random
-								}
-								set_ambient_object_flag = mem_vazurans_rift
-								save_event_target_as = mem_vazurans_rift
-							}
-						}
-					}
-					1 = {
-						random_owned_planet = {
-							limit = {
-								is_colony = yes
-								is_under_colonization = no
-								is_capital = no
-								NOT = {
-									has_planet_flag = mem_vazurans_raided_planet
-								}
-							}
-							set_timed_planet_flag = {
-								flag = mem_vazurans_raiding_target
-								days = 600
-							}
-							solar_system = {
-								random_system_planet = {
-									limit = {
-										is_star = yes
-									}
-									THIS = {
-										save_event_target_as = mem_vazurans_target_sun
-									}
-								}
-								create_ambient_object = {
-									type = "mem_vazuran_wormhole_small_object"
-								}
-								random_system_ambient_object = {
-									limit = { is_same_value = last_created_ambient_object }
-									set_location = {
-										target = event_target:mem_vazurans_target_sun
-										distance = 150
-										angle = random
-									}
-									set_ambient_object_flag = mem_vazurans_rift
-									save_event_target_as = mem_vazurans_rift
-								}
-							}
-						}
-					}
-				}
-			}
-			ELSE = {
-				random_owned_planet = {
-					limit = {
-						is_colony = yes
-						is_under_colonization = no
-						is_capital = no
-						NOT = {
-							has_planet_flag = mem_vazurans_raided_planet
-						}
-					}
-					set_timed_planet_flag = {
-						flag = mem_vazurans_raiding_target
-						days = 600
-					}
-					solar_system = {
-						random_system_planet = {
-							limit = {
-								is_star = yes
-							}
-							THIS = {
-								save_event_target_as = mem_vazurans_target_sun
-							}
-						}
-						create_ambient_object = {
-							type = "mem_vazuran_wormhole_small_object"
-						}
-						random_system_ambient_object = {
-							limit = { is_same_value = last_created_ambient_object }
-							set_location = {
-								target = event_target:mem_vazurans_target_sun
-								distance = 150
-								angle = random
-							}
-							set_ambient_object_flag = mem_vazurans_rift
-							save_event_target_as = mem_vazurans_rift
-						}
-					}
-				}
-			}
-			# start next event to notify the player
-			country_event = { id = mem_vazurans.4 days = 5 }
-			# start overnext event to open the rift and spawn enemy fleet
-			country_event = { id = mem_vazurans.5 days = 60 random = 30 }
-		}
-		ELSE = { # failsafe target - if not even the capital is left there is nothing happening anyway
-			random_system_within_border = {	
-				random_system_planet = {
-					limit = {
-						is_star = yes
-					}
-					set_timed_planet_flag = {
-						flag = mem_vazurans_raiding_target
-						days = 600
-					}
-					solar_system = {
-						random_system_planet = {
-							limit = {
-								is_star = yes
-							}
-							THIS = {
-								save_event_target_as = mem_vazurans_target_sun
-							}
-						}
-						create_ambient_object = {
-							type = "mem_vazuran_wormhole_small_object"
-						}
-						random_system_ambient_object = {
-							limit = { is_same_value = last_created_ambient_object }
-							set_location = {
-								target = event_target:mem_vazurans_target_sun
-								distance = 150
-								angle = random
-							}
-							set_ambient_object_flag = mem_vazurans_rift
-							save_event_target_as = mem_vazurans_rift
-						}
-					}
-				}
-			}
-			# start next event to notify the player
-			country_event = { id = mem_vazurans.4 days = 5 }
-			# start overnext event to open the rift and spawn enemy fleet
-			country_event = { id = mem_vazurans.5 days = 60 random = 30 }
-		}
-		last_created_ambient_object = {
-			IF = {
-				limit = {
-					ROOT = {
-						has_country_flag = mem_vazurans_target_1
-					}
-				}
-				set_ambient_object_flag = mem_vazurans_rift_1
-			}
-			IF = {
-				limit = {
-					ROOT = {
-						has_country_flag = mem_vazurans_target_2
-					}
-				}
-				set_ambient_object_flag = mem_vazurans_rift_2
-			}
-			IF = {
-				limit = {
-					ROOT = {
-						has_country_flag = mem_vazurans_target_3
-					}
-				}
-				set_ambient_object_flag = mem_vazurans_rift_3
-			}
-			IF = {
-				limit = {
-					ROOT = {
-						has_country_flag = mem_vazurans_target_4
-					}
-				}
-				set_ambient_object_flag = mem_vazurans_rift_4
-			}
-			IF = {
-				limit = {
-					ROOT = {
-						has_country_flag = mem_vazurans_target_5
-					}
-				}
-				set_ambient_object_flag = mem_vazurans_rift_5
-			}
-		}
-		every_country = {
-			limit = {
-				is_ai = no
-				NOT = {
-					is_same_empire = ROOT
-				}
-			}
-			IF = { # checks if the country has direct contact to one of the targeted empires
-				limit = {
-					has_communications = ROOT
-				}
-				random_list = {
-					1 = {}
-					1 = {
-						country_event = { id = mem_vazurans.20 days = 55 random = 10 }
-					}
-				}
-			}
-			ELSE_IF = { # checks if the country has contact to another country that has contact to one of the targeted empires
-				limit = {
-					any_country = {
-						has_communications = prev
-						is_same_empire = ROOT
-					}
-				}
-				random_list = {
-					2 = {}
-					1 = {
-						country_event = { id = mem_vazurans.21 days = 85 random = 10 }
-					}
-				}				
-			}
-		}
-	}
-}
+# 	immediate = {
+# 		IF = { # check if the empire is target of a retaliation
+# 			limit = {
+# 				has_country_flag = mem_vazurans_retaliation
+# 			}
+# 			random_owned_planet = {
+# 				limit = {
+# 					is_capital = yes
+# 				}
+# 				set_timed_planet_flag = {
+# 					flag = mem_vazurans_raiding_target
+# 					days = 600
+# 				}
+# 				solar_system = {
+# 					random_system_planet = {
+# 						limit = {
+# 							is_star = yes
+# 						}
+# 						THIS = {
+# 							save_event_target_as = mem_vazurans_target_sun
+# 						}
+# 					}
+# 					create_ambient_object = {
+# 						type = "mem_vazuran_wormhole_big_object"
+# 					}
+# 					random_system_ambient_object = {
+# 						limit = { is_same_value = last_created_ambient_object }
+# 						set_location = {
+# 							target = event_target:mem_vazurans_target_sun
+# 							distance = 150
+# 							angle = random
+# 						}
+# 						set_ambient_object_flag = mem_vazurans_rift
+# 						save_event_target_as = mem_vazurans_rift
+# 					}
+# 				}
+# 			}
+# 			# start next event to notify the player
+# 			country_event = { id = mem_vazurans.4 days = 5 }
+# 			# start overnext event to open the rift and spawn enemy fleet
+# 			country_event = { id = mem_vazurans.5 days = 60 random = 30 }
+# 		}
+# 		ELSE_IF = { # failsafe check if valid raiding target has been lost in the meantime because of a war or something else - check here and use normal raiding target
+# 			limit = {
+# 				any_owned_planet = {
+# 					is_colony = yes
+# 					is_under_colonization = no
+# 					is_capital = no
+# 					NOT = {
+# 						has_planet_flag = mem_vazurans_raided_planet
+# 					}
+# 				}
+# 			}
+# 			IF = {
+# 				limit = {
+# 					years_passed < 60
+# 					any_system_within_border = {
+# 						NOT = {
+# 							any_system_planet = {
+# 								OR = {
+# 									is_colony = yes
+# 									is_capital = yes
+# 								}
+# 							}
+# 						}
+# 					}
+# 				}
+# 				random_system_within_border = {
+# 					limit = {
+# 						NOT = {
+# 							any_system_planet = {
+# 								OR = {
+# 									is_colony = yes
+# 									is_capital = yes
+# 								}
+# 							}
+# 						}
+# 					}
+# 					random_system_planet = {
+# 						limit = {
+# 							is_star = yes
+# 						}
+# 						set_timed_planet_flag = {
+# 							flag = mem_vazurans_raiding_target
+# 							days = 600
+# 						}
+# 						THIS = {
+# 							save_event_target_as = mem_vazurans_target_sun
+# 						}
+# 					}
+# 					create_ambient_object = { # TODO exchange that later with a custom made one by frog
+# 						type = "mem_vazuran_wormhole_small_object"
+# 					}
+# 					random_system_ambient_object = {
+# 						limit = { is_same_value = last_created_ambient_object }
+# 						set_location = {
+# 							target = event_target:mem_vazurans_target_sun
+# 							distance = 150
+# 							angle = random
+# 						}
+# 						set_ambient_object_flag = mem_vazurans_rift
+# 						save_event_target_as = mem_vazurans_rift
+# 					}
+# 				}
+# 			}
+# 			ELSE_IF = {
+# 				limit = {
+# 					years_passed <= 120
+# 					any_system_within_border = {
+# 						NOT = {
+# 							any_system_planet = {
+# 								OR = {
+# 									is_colony = yes
+# 									is_capital = yes
+# 								}
+# 							}
+# 						}
+# 					}
+# 				}
+# 				random_list = {
+# 					1 = {
+# 						random_system_within_border = {
+# 							limit = {
+# 								NOT = {
+# 									any_system_planet = {
+# 										OR = {
+# 											is_colony = yes
+# 											is_capital = yes
+# 										}
+# 									}
+# 								}
+# 							}
+# 							random_system_planet = {
+# 								limit = {
+# 									is_star = yes
+# 								}
+# 								set_timed_planet_flag = {
+# 									flag = mem_vazurans_raiding_target
+# 									days = 600
+# 								}
+# 								THIS = {
+# 									save_event_target_as = mem_vazurans_target_sun
+# 								}
+# 							}
+# 							create_ambient_object = {
+# 								type = "mem_vazuran_wormhole_small_object"
+# 							}
+# 							random_system_ambient_object = {
+# 								limit = { is_same_value = last_created_ambient_object }
+# 								set_location = {
+# 									target = event_target:mem_vazurans_target_sun
+# 									distance = 150
+# 									angle = random
+# 								}
+# 								set_ambient_object_flag = mem_vazurans_rift
+# 								save_event_target_as = mem_vazurans_rift
+# 							}
+# 						}
+# 					}
+# 					1 = {
+# 						random_owned_planet = {
+# 							limit = {
+# 								is_colony = yes
+# 								is_under_colonization = no
+# 								is_capital = no
+# 								NOT = {
+# 									has_planet_flag = mem_vazurans_raided_planet
+# 								}
+# 							}
+# 							set_timed_planet_flag = {
+# 								flag = mem_vazurans_raiding_target
+# 								days = 600
+# 							}
+# 							solar_system = {
+# 								random_system_planet = {
+# 									limit = {
+# 										is_star = yes
+# 									}
+# 									THIS = {
+# 										save_event_target_as = mem_vazurans_target_sun
+# 									}
+# 								}
+# 								create_ambient_object = {
+# 									type = "mem_vazuran_wormhole_small_object"
+# 								}
+# 								random_system_ambient_object = {
+# 									limit = { is_same_value = last_created_ambient_object }
+# 									set_location = {
+# 										target = event_target:mem_vazurans_target_sun
+# 										distance = 150
+# 										angle = random
+# 									}
+# 									set_ambient_object_flag = mem_vazurans_rift
+# 									save_event_target_as = mem_vazurans_rift
+# 								}
+# 							}
+# 						}
+# 					}
+# 				}
+# 			}
+# 			ELSE = {
+# 				random_owned_planet = {
+# 					limit = {
+# 						is_colony = yes
+# 						is_under_colonization = no
+# 						is_capital = no
+# 						NOT = {
+# 							has_planet_flag = mem_vazurans_raided_planet
+# 						}
+# 					}
+# 					set_timed_planet_flag = {
+# 						flag = mem_vazurans_raiding_target
+# 						days = 600
+# 					}
+# 					solar_system = {
+# 						random_system_planet = {
+# 							limit = {
+# 								is_star = yes
+# 							}
+# 							THIS = {
+# 								save_event_target_as = mem_vazurans_target_sun
+# 							}
+# 						}
+# 						create_ambient_object = {
+# 							type = "mem_vazuran_wormhole_small_object"
+# 						}
+# 						random_system_ambient_object = {
+# 							limit = { is_same_value = last_created_ambient_object }
+# 							set_location = {
+# 								target = event_target:mem_vazurans_target_sun
+# 								distance = 150
+# 								angle = random
+# 							}
+# 							set_ambient_object_flag = mem_vazurans_rift
+# 							save_event_target_as = mem_vazurans_rift
+# 						}
+# 					}
+# 				}
+# 			}
+# 			# start next event to notify the player
+# 			country_event = { id = mem_vazurans.4 days = 5 }
+# 			# start overnext event to open the rift and spawn enemy fleet
+# 			country_event = { id = mem_vazurans.5 days = 60 random = 30 }
+# 		}
+# 		ELSE = { # failsafe target - if not even the capital is left there is nothing happening anyway
+# 			random_system_within_border = {	
+# 				random_system_planet = {
+# 					limit = {
+# 						is_star = yes
+# 					}
+# 					set_timed_planet_flag = {
+# 						flag = mem_vazurans_raiding_target
+# 						days = 600
+# 					}
+# 					solar_system = {
+# 						random_system_planet = {
+# 							limit = {
+# 								is_star = yes
+# 							}
+# 							THIS = {
+# 								save_event_target_as = mem_vazurans_target_sun
+# 							}
+# 						}
+# 						create_ambient_object = {
+# 							type = "mem_vazuran_wormhole_small_object"
+# 						}
+# 						random_system_ambient_object = {
+# 							limit = { is_same_value = last_created_ambient_object }
+# 							set_location = {
+# 								target = event_target:mem_vazurans_target_sun
+# 								distance = 150
+# 								angle = random
+# 							}
+# 							set_ambient_object_flag = mem_vazurans_rift
+# 							save_event_target_as = mem_vazurans_rift
+# 						}
+# 					}
+# 				}
+# 			}
+# 			# start next event to notify the player
+# 			country_event = { id = mem_vazurans.4 days = 5 }
+# 			# start overnext event to open the rift and spawn enemy fleet
+# 			country_event = { id = mem_vazurans.5 days = 60 random = 30 }
+# 		}
+# 		last_created_ambient_object = {
+# 			IF = {
+# 				limit = {
+# 					ROOT = {
+# 						has_country_flag = mem_vazurans_target_1
+# 					}
+# 				}
+# 				set_ambient_object_flag = mem_vazurans_rift_1
+# 			}
+# 			IF = {
+# 				limit = {
+# 					ROOT = {
+# 						has_country_flag = mem_vazurans_target_2
+# 					}
+# 				}
+# 				set_ambient_object_flag = mem_vazurans_rift_2
+# 			}
+# 			IF = {
+# 				limit = {
+# 					ROOT = {
+# 						has_country_flag = mem_vazurans_target_3
+# 					}
+# 				}
+# 				set_ambient_object_flag = mem_vazurans_rift_3
+# 			}
+# 			IF = {
+# 				limit = {
+# 					ROOT = {
+# 						has_country_flag = mem_vazurans_target_4
+# 					}
+# 				}
+# 				set_ambient_object_flag = mem_vazurans_rift_4
+# 			}
+# 			IF = {
+# 				limit = {
+# 					ROOT = {
+# 						has_country_flag = mem_vazurans_target_5
+# 					}
+# 				}
+# 				set_ambient_object_flag = mem_vazurans_rift_5
+# 			}
+# 		}
+# 		every_country = {
+# 			limit = {
+# 				is_ai = no
+# 				NOT = {
+# 					is_same_empire = ROOT
+# 				}
+# 			}
+# 			IF = { # checks if the country has direct contact to one of the targeted empires
+# 				limit = {
+# 					has_communications = ROOT
+# 				}
+# 				random_list = {
+# 					1 = {}
+# 					1 = {
+# 						country_event = { id = mem_vazurans.20 days = 55 random = 10 }
+# 					}
+# 				}
+# 			}
+# 			ELSE_IF = { # checks if the country has contact to another country that has contact to one of the targeted empires
+# 				limit = {
+# 					any_country = {
+# 						has_communications = prev
+# 						is_same_empire = ROOT
+# 					}
+# 				}
+# 				random_list = {
+# 					2 = {}
+# 					1 = {
+# 						country_event = { id = mem_vazurans.21 days = 85 random = 10 }
+# 					}
+# 				}				
+# 			}
+# 		}
+# 	}
+# }
 
-# Notification Event that a Rift is forming
-country_event = {
-	id = mem_vazurans.4
-	title = mem_vazurans.4.name
-	desc = { # for first encounter
-		text = mem_vazurans.4a.desc
-		trigger = {
-			NOR = { 
-				has_country_flag = mem_vazurans_retaliation 
-				has_country_flag = mem_vazurans_met
-				has_ethic = ethic_gestalt_consciousness
-			}
-		}
-	}
-	desc = { # for first encounter
-		text = mem_vazurans.4a.desc.gestalt
-		trigger = {
-			has_ethic = ethic_gestalt_consciousness
-			NOR = { 
-				has_country_flag = mem_vazurans_retaliation 
-				has_country_flag = mem_vazurans_met
-			}
-		}
-	}
-	desc = { # after first encounter has happened before
-		text = mem_vazurans.4b.desc
-		trigger = {
-			NOT = { 
-				has_country_flag = mem_vazurans_retaliation 
-			}
-			has_country_flag = mem_vazurans_met
-		}
-	}
-	desc = { # for retaliation encounter
-		text = mem_vazurans.4c.desc
-		trigger = { has_country_flag = mem_vazurans_retaliation }
-	}
-	picture = GFX_evt_mem_rift # TODO we will need custom art for a picture of one of those rifts opening
-	location = event_target:mem_vazurans_target_sun
-	event_chain = mem_vazuran_menace_chain
+# # Notification Event that a Rift is forming
+# country_event = {
+# 	id = mem_vazurans.4
+# 	title = mem_vazurans.4.name
+# 	desc = { # for first encounter
+# 		text = mem_vazurans.4a.desc
+# 		trigger = {
+# 			NOR = { 
+# 				has_country_flag = mem_vazurans_retaliation 
+# 				has_country_flag = mem_vazurans_met
+# 				has_ethic = ethic_gestalt_consciousness
+# 			}
+# 		}
+# 	}
+# 	desc = { # for first encounter
+# 		text = mem_vazurans.4a.desc.gestalt
+# 		trigger = {
+# 			has_ethic = ethic_gestalt_consciousness
+# 			NOR = { 
+# 				has_country_flag = mem_vazurans_retaliation 
+# 				has_country_flag = mem_vazurans_met
+# 			}
+# 		}
+# 	}
+# 	desc = { # after first encounter has happened before
+# 		text = mem_vazurans.4b.desc
+# 		trigger = {
+# 			NOT = { 
+# 				has_country_flag = mem_vazurans_retaliation 
+# 			}
+# 			has_country_flag = mem_vazurans_met
+# 		}
+# 	}
+# 	desc = { # for retaliation encounter
+# 		text = mem_vazurans.4c.desc
+# 		trigger = { has_country_flag = mem_vazurans_retaliation }
+# 	}
+# 	picture = GFX_evt_mem_rift # TODO we will need custom art for a picture of one of those rifts opening
+# 	location = event_target:mem_vazurans_target_sun
+# 	event_chain = mem_vazuran_menace_chain
 	
-	is_triggered_only = yes
+# 	is_triggered_only = yes
 	
-	#response in first encounter
-	option = {
-		name = mem_vazurans.4.a
-		trigger = {
-			NOR = {
-				has_country_flag = mem_vazurans_met
-				has_country_flag = mem_vazurans_retaliation
-			}
-		}
-		capital_scope = {
-			enable_special_project = {
-				name = MEM_VAZURANS_RIFT_INVESTIGATION
-				location = this
-				owner = root
-			}
-		}
-	}
+# 	#response in first encounter
+# 	option = {
+# 		name = mem_vazurans.4.a
+# 		trigger = {
+# 			NOR = {
+# 				has_country_flag = mem_vazurans_met
+# 				has_country_flag = mem_vazurans_retaliation
+# 			}
+# 		}
+# 		capital_scope = {
+# 			enable_special_project = {
+# 				name = MEM_VAZURANS_RIFT_INVESTIGATION
+# 				location = this
+# 				owner = root
+# 			}
+# 		}
+# 	}
 	
-	#response in later encounter
-	option = {
-		name = mem_vazurans.4.b
-		trigger = {
-			has_country_flag = mem_vazurans_met
-			NOT = {
-				has_country_flag = mem_vazurans_retaliation
-			}
-		}
-	}
+# 	#response in later encounter
+# 	option = {
+# 		name = mem_vazurans.4.b
+# 		trigger = {
+# 			has_country_flag = mem_vazurans_met
+# 			NOT = {
+# 				has_country_flag = mem_vazurans_retaliation
+# 			}
+# 		}
+# 	}
 	
-	#response in retaliation encounter
-	option = {
-		name = mem_vazurans.4.c
-		trigger = {
-			has_country_flag = mem_vazurans_retaliation
-		}
-	}
-}
+# 	#response in retaliation encounter
+# 	option = {
+# 		name = mem_vazurans.4.c
+# 		trigger = {
+# 			has_country_flag = mem_vazurans_retaliation
+# 		}
+# 	}
+# }
 
-# Rift opens and fleet spawn events get linked
-country_event = {
-	id = mem_vazurans.5
-	title = mem_vazurans.5.name
-	desc = { # for first encounter
-		text = mem_vazurans.5a.desc
-		trigger = {
-			NOR = { 
-				has_country_flag = mem_vazurans_retaliation
-				has_country_flag = mem_vazurans_met
-			}
-		}
-	}
-	desc = { # after first encounter has happened before
-		text = mem_vazurans.5b.desc
-		trigger = {
-			NOT = { 
-				has_country_flag = mem_vazurans_retaliation 
-			}
-			has_country_flag = mem_vazurans_met
-		}
-	}
-	desc = { # for retaliation encounter
-		text = mem_vazurans.5c.desc
-		trigger = { has_country_flag = mem_vazurans_retaliation }
-	}
-	picture = GFX_evt_fleet_evil # TODO we will need custom art for a picture of an opened rifts with ships coming through
-	location = event_target:mem_vazurans_rift
-	event_chain = mem_vazuran_menace_chain
+# # Rift opens and fleet spawn events get linked
+# country_event = {
+# 	id = mem_vazurans.5
+# 	title = mem_vazurans.5.name
+# 	desc = { # for first encounter
+# 		text = mem_vazurans.5a.desc
+# 		trigger = {
+# 			NOR = { 
+# 				has_country_flag = mem_vazurans_retaliation
+# 				has_country_flag = mem_vazurans_met
+# 			}
+# 		}
+# 	}
+# 	desc = { # after first encounter has happened before
+# 		text = mem_vazurans.5b.desc
+# 		trigger = {
+# 			NOT = { 
+# 				has_country_flag = mem_vazurans_retaliation 
+# 			}
+# 			has_country_flag = mem_vazurans_met
+# 		}
+# 	}
+# 	desc = { # for retaliation encounter
+# 		text = mem_vazurans.5c.desc
+# 		trigger = { has_country_flag = mem_vazurans_retaliation }
+# 	}
+# 	picture = GFX_evt_fleet_evil # TODO we will need custom art for a picture of an opened rifts with ships coming through
+# 	location = event_target:mem_vazurans_rift
+# 	event_chain = mem_vazuran_menace_chain
 	
-	is_triggered_only = yes
+# 	is_triggered_only = yes
 	
-	immediate = {
-		IF = { #in case of retaliation strike
-			limit = {
-				has_country_flag = mem_vazurans_retaliation
-			}
-			# Spawn event with diplo screen telling the player to face their wrath
-			country_event = { id = mem_vazurans.7 days = 5 }
-			# Start spawning Retaliation fleet
-			country_event = { id = mem_vazurans.100 days = 2 }
-		}
-		ELSE = { #in case of raiding encounter
-			# Start spawning Raiding fleet
-			country_event = { id = mem_vazurans.101 days = 2 }
-		}
-	}
-	#response in first encounter
-	option = {
-		name = mem_vazurans.5.a
-		trigger = {
-			NOR = {
-				has_country_flag = mem_vazurans_met
-				has_country_flag = mem_vazurans_retaliation
-			}
-		}
-		hidden_effect = {
-			country_event = { id = mem_vazurans.6 }
-		}
-	}
+# 	immediate = {
+# 		IF = { #in case of retaliation strike
+# 			limit = {
+# 				has_country_flag = mem_vazurans_retaliation
+# 			}
+# 			# Spawn event with diplo screen telling the player to face their wrath
+# 			country_event = { id = mem_vazurans.7 days = 5 }
+# 			# Start spawning Retaliation fleet
+# 			country_event = { id = mem_vazurans.100 days = 2 }
+# 		}
+# 		ELSE = { #in case of raiding encounter
+# 			# Start spawning Raiding fleet
+# 			country_event = { id = mem_vazurans.101 days = 2 }
+# 		}
+# 	}
+# 	#response in first encounter
+# 	option = {
+# 		name = mem_vazurans.5.a
+# 		trigger = {
+# 			NOR = {
+# 				has_country_flag = mem_vazurans_met
+# 				has_country_flag = mem_vazurans_retaliation
+# 			}
+# 		}
+# 		hidden_effect = {
+# 			country_event = { id = mem_vazurans.6 }
+# 		}
+# 	}
 	
-	#response in later encounter
-	option = {
-		name = mem_vazurans.5.b
-		trigger = {
-			has_country_flag = mem_vazurans_met
-			NOT = {
-				has_country_flag = mem_vazurans_retaliation
-			}
-		}
-	}
+# 	#response in later encounter
+# 	option = {
+# 		name = mem_vazurans.5.b
+# 		trigger = {
+# 			has_country_flag = mem_vazurans_met
+# 			NOT = {
+# 				has_country_flag = mem_vazurans_retaliation
+# 			}
+# 		}
+# 	}
 	
-	#response in retaliation encounter
-	option = {
-		name = mem_vazurans.5.c
-		trigger = {
-			has_country_flag = mem_vazurans_retaliation
-		}
-	}
-}
+# 	#response in retaliation encounter
+# 	option = {
+# 		name = mem_vazurans.5.c
+# 		trigger = {
+# 			has_country_flag = mem_vazurans_retaliation
+# 		}
+# 	}
+# }
 
 # First Contact message
 country_event = {
@@ -2822,157 +2822,157 @@ country_event = {
 	}
 }
 
-# Reward Event for destroying Vazuran fleets
-country_event = {
-	id = mem_vazurans.70
-	title = mem_vazurans.70.name
-	desc = {
-		text = mem_vazurans.70.desc.a
-		trigger = {
-			NOT = {
-				has_country_flag = mem_vazurans_reward_alloys
-			}
-		}
-	}
-	desc = {
-		text = mem_vazurans.70.desc.b
-		trigger = {
-			has_country_flag = mem_vazurans_reward_alloys
-		}
-	}
-	picture = GFX_evt_debris
-	show_sound = event_radio_chatter
-	#location = from
-	event_chain = mem_vazuran_menace_chain
+# # Reward Event for destroying Vazuran fleets
+# country_event = {
+# 	id = mem_vazurans.70
+# 	title = mem_vazurans.70.name
+# 	desc = {
+# 		text = mem_vazurans.70.desc.a
+# 		trigger = {
+# 			NOT = {
+# 				has_country_flag = mem_vazurans_reward_alloys
+# 			}
+# 		}
+# 	}
+# 	desc = {
+# 		text = mem_vazurans.70.desc.b
+# 		trigger = {
+# 			has_country_flag = mem_vazurans_reward_alloys
+# 		}
+# 	}
+# 	picture = GFX_evt_debris
+# 	show_sound = event_radio_chatter
+# 	#location = from
+# 	event_chain = mem_vazuran_menace_chain
 
-	is_triggered_only = yes
+# 	is_triggered_only = yes
 	
-	immediate = {
-		#could use locked_random_list in option instead, but this way one could add different desc's based on the flags - which will likely be done once we can give some ships to the player
-		random_list = {
-			1 = {
-				modifier = {
-					factor = 0
-					has_technology = tech_mass_drivers_5
-				}
-				set_country_flag = mem_vazurans_reward_mass_driver
-			}
-			1 = {
-				modifier = {
-					factor = 0
-					has_technology = tech_ship_armor_5
-				}
-				set_country_flag = mem_vazurans_reward_armor
-			}
-			1 = {
-				set_country_flag = mem_vazurans_reward_research
-			}
-			1 = {
-				set_country_flag = mem_vazurans_reward_alloys
-			}
-		}
-	}
+# 	immediate = {
+# 		#could use locked_random_list in option instead, but this way one could add different desc's based on the flags - which will likely be done once we can give some ships to the player
+# 		random_list = {
+# 			1 = {
+# 				modifier = {
+# 					factor = 0
+# 					has_technology = tech_mass_drivers_5
+# 				}
+# 				set_country_flag = mem_vazurans_reward_mass_driver
+# 			}
+# 			1 = {
+# 				modifier = {
+# 					factor = 0
+# 					has_technology = tech_ship_armor_5
+# 				}
+# 				set_country_flag = mem_vazurans_reward_armor
+# 			}
+# 			1 = {
+# 				set_country_flag = mem_vazurans_reward_research
+# 			}
+# 			1 = {
+# 				set_country_flag = mem_vazurans_reward_alloys
+# 			}
+# 		}
+# 	}
 
-	after = {
-		if = {
-			limit = {
-				host_has_dlc = "Ancient Relics Story Pack"
-			}
-			small_artifact_reward = yes
-		}
-	}
+# 	after = {
+# 		if = {
+# 			limit = {
+# 				host_has_dlc = "Ancient Relics Story Pack"
+# 			}
+# 			small_artifact_reward = yes
+# 		}
+# 	}
 
-	option = {
-		name = EXCELLENT
-		trigger = {
-			has_country_flag = mem_vazurans_reward_mass_driver
-		}
-		if = {
-			limit = {
-				NOT = {
-					has_tech_option = tech_mass_drivers_5
-				}
-			}
-			add_research_option = tech_mass_drivers_5
-		}
-		add_tech_progress = {
-			tech = tech_mass_drivers_5
-			progress = 0.2
-		}
-		add_monthly_resource_mult = {
-			resource = alloys
-			value = @tier1materialreward
-			min = @tier1materialmin
-			max = @tier1materialmax
-		}
-		hidden_effect = {
-			remove_country_flag = mem_vazurans_reward_mass_driver
-		}
-	}
-	option = {
-		name = EXCELLENT
-		trigger = {
-			has_country_flag = mem_vazurans_reward_armor
-		}
-		if = {
-			limit = {
-				NOT = {
-					has_tech_option = tech_ship_armor_5
-				}
-			}
-			add_research_option = tech_ship_armor_5
-		}
-		add_tech_progress = {
-			tech = tech_ship_armor_5
-			progress = 0.2
-		}
-		add_monthly_resource_mult = {
-			resource = alloys
-			value = @tier1materialreward
-			min = @tier1materialmin
-			max = @tier1materialmax
-		}
-		hidden_effect = {
-			remove_country_flag = mem_vazurans_reward_armor
-		}
-	}
-	option = {
-		name = EXCELLENT
-		trigger = {
-			has_country_flag = mem_vazurans_reward_research
-		}
-		add_monthly_resource_mult = {
-			resource = engineering_research
-			value = @tier3researchreward
-			min = @tier3researchmin
-			max = @tier3researchmax
-		}
-		add_monthly_resource_mult = {
-			resource = alloys
-			value = @tier1materialreward
-			min = @tier1materialmin
-			max = @tier1materialmax
-		}
-		hidden_effect = {
-			remove_country_flag = mem_vazurans_reward_research
-		}
-	}	
-	option = {
-		name = EXCELLENT
-		trigger = {
-			has_country_flag = mem_vazurans_reward_alloys
-		}
-		add_monthly_resource_mult = {
-			resource = alloys
-			value = @tier3materialreward
-			min = @tier3materialmin
-			max = @tier3materialmax
-		}
-		hidden_effect = {
-			remove_country_flag = mem_vazurans_reward_alloys
-		}
-	}	
-}
+# 	option = {
+# 		name = EXCELLENT
+# 		trigger = {
+# 			has_country_flag = mem_vazurans_reward_mass_driver
+# 		}
+# 		if = {
+# 			limit = {
+# 				NOT = {
+# 					has_tech_option = tech_mass_drivers_5
+# 				}
+# 			}
+# 			add_research_option = tech_mass_drivers_5
+# 		}
+# 		add_tech_progress = {
+# 			tech = tech_mass_drivers_5
+# 			progress = 0.2
+# 		}
+# 		add_monthly_resource_mult = {
+# 			resource = alloys
+# 			value = @tier1materialreward
+# 			min = @tier1materialmin
+# 			max = @tier1materialmax
+# 		}
+# 		hidden_effect = {
+# 			remove_country_flag = mem_vazurans_reward_mass_driver
+# 		}
+# 	}
+# 	option = {
+# 		name = EXCELLENT
+# 		trigger = {
+# 			has_country_flag = mem_vazurans_reward_armor
+# 		}
+# 		if = {
+# 			limit = {
+# 				NOT = {
+# 					has_tech_option = tech_ship_armor_5
+# 				}
+# 			}
+# 			add_research_option = tech_ship_armor_5
+# 		}
+# 		add_tech_progress = {
+# 			tech = tech_ship_armor_5
+# 			progress = 0.2
+# 		}
+# 		add_monthly_resource_mult = {
+# 			resource = alloys
+# 			value = @tier1materialreward
+# 			min = @tier1materialmin
+# 			max = @tier1materialmax
+# 		}
+# 		hidden_effect = {
+# 			remove_country_flag = mem_vazurans_reward_armor
+# 		}
+# 	}
+# 	option = {
+# 		name = EXCELLENT
+# 		trigger = {
+# 			has_country_flag = mem_vazurans_reward_research
+# 		}
+# 		add_monthly_resource_mult = {
+# 			resource = engineering_research
+# 			value = @tier3researchreward
+# 			min = @tier3researchmin
+# 			max = @tier3researchmax
+# 		}
+# 		add_monthly_resource_mult = {
+# 			resource = alloys
+# 			value = @tier1materialreward
+# 			min = @tier1materialmin
+# 			max = @tier1materialmax
+# 		}
+# 		hidden_effect = {
+# 			remove_country_flag = mem_vazurans_reward_research
+# 		}
+# 	}	
+# 	option = {
+# 		name = EXCELLENT
+# 		trigger = {
+# 			has_country_flag = mem_vazurans_reward_alloys
+# 		}
+# 		add_monthly_resource_mult = {
+# 			resource = alloys
+# 			value = @tier3materialreward
+# 			min = @tier3materialmin
+# 			max = @tier3materialmax
+# 		}
+# 		hidden_effect = {
+# 			remove_country_flag = mem_vazurans_reward_alloys
+# 		}
+# 	}	
+# }
 
 # Decade pulse event
 event = {
@@ -3322,791 +3322,792 @@ country_event = {
 	}
 }
 
+# this event :(
 # vazuran Raiding or Retaliation fleet has been destroyed
 # This = owner of fleet 1 (combatant)
 # From = owner of fleet 2 (destroyed)
 # FromFrom = fleet 1
 # FromFromFrom = fleet 2
-country_event = {
-	id = mem_vazurans.105
-	hide_window = yes
+# country_event = {
+# 	id = mem_vazurans.105
+# 	hide_window = yes
 	
-	is_triggered_only = yes
+# 	is_triggered_only = yes
 	
-	trigger = {
-		FROMFROMFROM = {
-			has_fleet_flag = mem_vazurans_fleet
-		}
-	}
+# 	trigger = {
+# 		FROMFROMFROM = {
+# 			has_fleet_flag = mem_vazurans_fleet
+# 		}
+# 	}
 	
-	immediate = {
-		# check for 1
-		IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_1
-				}
-				NOT = {
-					any_country = {
-						has_country_flag = mem_vazurans_target_1
-					}
-				}
-				FromFrom.controller = {
-					is_country_type = default
-				}
-			}
-			FromFrom.controller = {
-				mem_vazurans_retaliation_dice_roll = yes
-				#set_country_flag = mem_vazurans_retaliation
-				#set_country_flag = mem_vazurans_target_1
-			}
-		}
-		ELSE_IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_1
-				}
-				any_country = {
-					has_country_flag = mem_vazurans_target_1
-					NOT = {
-						has_country_flag = mem_vazurans_retaliation
-					}
-					is_same_value = FromFrom.controller
-				}
-			}
-			FromFrom.controller = {
-				mem_vazurans_retaliation_dice_roll = yes
-				#set_country_flag = mem_vazurans_retaliation
-			}
-		}
-		ELSE_IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_1
-				}
-				any_country = {
-					has_country_flag = mem_vazurans_target_1
-					NOT = {
-						has_country_flag = mem_vazurans_retaliation
-					}
-					NOT = {
-						is_same_value = FromFrom.controller
-					}
-				}
-			}
-			every_country = {
-				limit = {
-					has_country_flag = mem_vazurans_target_1
-				}
-				remove_country_flag = mem_vazurans_target_1
-			}
-			IF = {
-				limit = {
-					FromFrom.controller = {
-						is_country_type = default
-					}
-				}
-				FromFrom.controller = {
-					mem_vazurans_retaliation_dice_roll = yes
-					#set_country_flag = mem_vazurans_retaliation
-					#set_country_flag = mem_vazurans_target_1
-				}
-			}
-		}
-		ELSE_IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_1
-				}
-				any_country = {
-					has_country_flag = mem_vazurans_target_1
-					has_country_flag = mem_vazurans_retaliation
-					NOT = {
-						is_same_value = FromFrom.controller
-					}
-				}
-			}
-			every_country = {
-				limit = {
-					has_country_flag = mem_vazurans_target_1
-				}
-				remove_country_flag = mem_vazurans_target_1
-				remove_country_flag = mem_vazurans_retaliation
-			}
-			IF = {
-				limit = {
-					FromFrom.controller = {
-						is_country_type = default
-					}
-				}
-				FromFrom.controller = {
-					mem_vazurans_retaliation_dice_roll = yes
-					#set_country_flag = mem_vazurans_retaliation
-					#set_country_flag = mem_vazurans_target_1
-				}
-			}
-		}
-		ELSE_IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_1
-				}
-				any_country = {
-					has_country_flag = mem_vazurans_target_1
-					has_country_flag = mem_vazurans_retaliation
-					is_same_value = FromFrom.controller
-				}
-			}
-			FromFrom.controller = {
-				remove_country_flag = mem_vazurans_retaliation
-				remove_country_flag = mem_vazurans_target_1
-			}
-			IF = {
-				limit = {
-					FromFrom.controller = {
-						is_ai = no
-						NOT = {
-							has_country_flag = mem_vazurans_rift_creation_start
-						}
-					}
-				}
-				FromFrom.controller = {
-					set_country_flag = mem_vazurans_rift_creation_start
-					set_timed_country_flag = {
-						flag = mem_vazurans_retaliation_fleet_destroyed
-						years = 1
-					}
-					country_event = { id = mem_vazurans.50 days = 2}
-				}
-			}
-		}
-		IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_1
-				}
-			}
-			random_ambient_object = {
-				limit = {
-					has_ambient_object_flag = mem_vazurans_rift_1
-				}
-				destroy_ambient_object = THIS
-			}
-		}
-		# check for 2
-		IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_2
-				}
-				NOT = {
-					any_country = {
-						has_country_flag = mem_vazurans_target_2
-					}
-				}
-				FromFrom.controller = {
-					is_country_type = default
-				}
-			}
-			FromFrom.controller = {
-				mem_vazurans_retaliation_dice_roll = yes
-				#set_country_flag = mem_vazurans_retaliation
-				#set_country_flag = mem_vazurans_target_2
-			}
-		}
-		ELSE_IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_2
-				}
-				any_country = {
-					has_country_flag = mem_vazurans_target_2
-					NOT = {
-						has_country_flag = mem_vazurans_retaliation
-					}
-					is_same_value = FromFrom.controller
-				}
-			}
-			FromFrom.controller = {
-				mem_vazurans_retaliation_dice_roll = yes
-				#set_country_flag = mem_vazurans_retaliation
-			}
-		}
-		ELSE_IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_2
-				}
-				any_country = {
-					has_country_flag = mem_vazurans_target_2
-					NOT = {
-						has_country_flag = mem_vazurans_retaliation
-					}
-					NOT = {
-						is_same_value = FromFrom.controller
-					}
-				}
-			}
-			every_country = {
-				limit = {
-					has_country_flag = mem_vazurans_target_2
-				}
-				remove_country_flag = mem_vazurans_target_2
-			}
-			IF = {
-				limit = {
-					FromFrom.controller = {
-						is_country_type = default
-					}
-				}
-				FromFrom.controller = {
-					mem_vazurans_retaliation_dice_roll = yes
-					#set_country_flag = mem_vazurans_retaliation
-					#set_country_flag = mem_vazurans_target_2
-				}
-			}
-		}
-		ELSE_IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_2
-				}
-				any_country = {
-					has_country_flag = mem_vazurans_target_2
-					has_country_flag = mem_vazurans_retaliation
-					NOT = {
-						is_same_value = FromFrom.controller
-					}
-				}
-			}
-			every_country = {
-				limit = {
-					has_country_flag = mem_vazurans_target_2
-				}
-				remove_country_flag = mem_vazurans_target_2
-				remove_country_flag = mem_vazurans_retaliation
-			}
-			IF = {
-				limit = {
-					FromFrom.controller = {
-						is_country_type = default
-					}
-				}
-				FromFrom.controller = {
-					mem_vazurans_retaliation_dice_roll = yes
-					#set_country_flag = mem_vazurans_retaliation
-					#set_country_flag = mem_vazurans_target_2
-				}
-			}
-		}
-		ELSE_IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_2
-				}
-				any_country = {
-					has_country_flag = mem_vazurans_target_2
-					has_country_flag = mem_vazurans_retaliation
-					is_same_value = FromFrom.controller
-				}
-			}
-			FromFrom.controller = {
-				remove_country_flag = mem_vazurans_retaliation
-				remove_country_flag = mem_vazurans_target_2
-			}
-			IF = {
-				limit = {
-					FromFrom.controller = {
-						is_ai = no
-						NOT = {
-							has_country_flag = mem_vazurans_rift_creation_start
-						}
-					}
-				}
-				FromFrom.controller = {
-					set_country_flag = mem_vazurans_rift_creation_start
-					set_timed_country_flag = {
-						flag = mem_vazurans_retaliation_fleet_destroyed
-						years = 1
-					}
-					country_event = { id = mem_vazurans.50 days = 2}
-				}
-			}
-		}
-		IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_2
-				}
-			}
-			random_ambient_object = {
-				limit = {
-					has_ambient_object_flag = mem_vazurans_rift_2
-				}
-				destroy_ambient_object = THIS
-			}
-		}
-		# check for 3
-		IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_3
-				}
-				NOT = {
-					any_country = {
-						has_country_flag = mem_vazurans_target_3
-					}
-				}
-				FromFrom.controller = {
-					is_country_type = default
-				}
-			}
-			FromFrom.controller = {
-				mem_vazurans_retaliation_dice_roll = yes
-				#set_country_flag = mem_vazurans_retaliation
-				#set_country_flag = mem_vazurans_target_3
-			}
-		}
-		ELSE_IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_3
-				}
-				any_country = {
-					has_country_flag = mem_vazurans_target_3
-					NOT = {
-						has_country_flag = mem_vazurans_retaliation
-					}
-					is_same_value = FromFrom.controller
-				}
-			}
-			FromFrom.controller = {
-				mem_vazurans_retaliation_dice_roll = yes
-				#set_country_flag = mem_vazurans_retaliation
-			}
-		}
-		ELSE_IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_3
-				}
-				any_country = {
-					has_country_flag = mem_vazurans_target_3
-					NOT = {
-						has_country_flag = mem_vazurans_retaliation
-					}
-					NOT = {
-						is_same_value = FromFrom.controller
-					}
-				}
-			}
-			every_country = {
-				limit = {
-					has_country_flag = mem_vazurans_target_3
-				}
-				remove_country_flag = mem_vazurans_target_3
-			}
-			IF = {
-				limit = {
-					FromFrom.controller = {
-						is_country_type = default
-					}
-				}
-				FromFrom.controller = {
-					mem_vazurans_retaliation_dice_roll = yes
-					#set_country_flag = mem_vazurans_retaliation
-					#set_country_flag = mem_vazurans_target_3
-				}
-			}
-		}
-		ELSE_IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_3
-				}
-				any_country = {
-					has_country_flag = mem_vazurans_target_3
-					has_country_flag = mem_vazurans_retaliation
-					NOT = {
-						is_same_value = FromFrom.controller
-					}
-				}
-			}
-			every_country = {
-				limit = {
-					has_country_flag = mem_vazurans_target_3
-				}
-				remove_country_flag = mem_vazurans_target_3
-				remove_country_flag = mem_vazurans_retaliation
-			}
-			IF = {
-				limit = {
-					FromFrom.controller = {
-						is_country_type = default
-					}
-				}
-				FromFrom.controller = {
-					mem_vazurans_retaliation_dice_roll = yes
-					#set_country_flag = mem_vazurans_retaliation
-					#set_country_flag = mem_vazurans_target_3
-				}
-			}
-		}
-		ELSE_IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_3
-				}
-				any_country = {
-					has_country_flag = mem_vazurans_target_3
-					has_country_flag = mem_vazurans_retaliation
-					is_same_value = FromFrom.controller
-				}
-			}
-			FromFrom.controller = {
-				remove_country_flag = mem_vazurans_retaliation
-				remove_country_flag = mem_vazurans_target_3
-			}
-			IF = {
-				limit = {
-					FromFrom.controller = {
-						is_ai = no
-						NOT = {
-							has_country_flag = mem_vazurans_rift_creation_start
-						}
-					}
-				}
-				FromFrom.controller = {
-					set_country_flag = mem_vazurans_rift_creation_start
-					set_timed_country_flag = {
-						flag = mem_vazurans_retaliation_fleet_destroyed
-						years = 1
-					}
-					country_event = { id = mem_vazurans.50 days = 2}
-				}
-			}
-		}
-		IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_3
-				}
-			}
-			random_ambient_object = {
-				limit = {
-					has_ambient_object_flag = mem_vazurans_rift_3
-				}
-				destroy_ambient_object = THIS
-			}
-		}
-		# check for 4
-		IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_4
-				}
-				NOT = {
-					any_country = {
-						has_country_flag = mem_vazurans_target_4
-					}
-				}
-				FromFrom.controller = {
-					is_country_type = default
-				}
-			}
-			FromFrom.controller = {
-				mem_vazurans_retaliation_dice_roll = yes
-				#set_country_flag = mem_vazurans_retaliation
-				#set_country_flag = mem_vazurans_target_4
-			}
-		}
-		ELSE_IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_4
-				}
-				any_country = {
-					has_country_flag = mem_vazurans_target_4
-					NOT = {
-						has_country_flag = mem_vazurans_retaliation
-					}
-					is_same_value = FromFrom.controller
-				}
-			}
-			FromFrom.controller = {
-				mem_vazurans_retaliation_dice_roll = yes
-				#set_country_flag = mem_vazurans_retaliation
-			}
-		}
-		ELSE_IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_4
-				}
-				any_country = {
-					has_country_flag = mem_vazurans_target_4
-					NOT = {
-						has_country_flag = mem_vazurans_retaliation
-					}
-					NOT = {
-						is_same_value = FromFrom.controller
-					}
-				}
-			}
-			every_country = {
-				limit = {
-					has_country_flag = mem_vazurans_target_4
-				}
-				remove_country_flag = mem_vazurans_target_4
-			}
-			IF = {
-				limit = {
-					FromFrom.controller = {
-						is_country_type = default
-					}
-				}
-				FromFrom.controller = {
-					mem_vazurans_retaliation_dice_roll = yes
-					#set_country_flag = mem_vazurans_retaliation
-					#set_country_flag = mem_vazurans_target_4
-				}
-			}
-		}
-		ELSE_IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_4
-				}
-				any_country = {
-					has_country_flag = mem_vazurans_target_4
-					has_country_flag = mem_vazurans_retaliation
-					NOT = {
-						is_same_value = FromFrom.controller
-					}
-				}
-			}
-			every_country = {
-				limit = {
-					has_country_flag = mem_vazurans_target_4
-				}
-				remove_country_flag = mem_vazurans_target_4
-				remove_country_flag = mem_vazurans_retaliation
-			}
-			IF = {
-				limit = {
-					FromFrom.controller = {
-						is_country_type = default
-					}
-				}
-				FromFrom.controller = {
-					mem_vazurans_retaliation_dice_roll = yes
-					#set_country_flag = mem_vazurans_retaliation
-					#set_country_flag = mem_vazurans_target_4
-				}
-			}
-		}
-		ELSE_IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_4
-				}
-				any_country = {
-					has_country_flag = mem_vazurans_target_4
-					has_country_flag = mem_vazurans_retaliation
-					is_same_value = FromFrom.controller
-				}
-			}
-			FromFrom.controller = {
-				remove_country_flag = mem_vazurans_retaliation
-				remove_country_flag = mem_vazurans_target_4
-			}
-			IF = {
-				limit = {
-					FromFrom.controller = {
-						is_ai = no
-						NOT = {
-							has_country_flag = mem_vazurans_rift_creation_start
-						}
-					}
-				}
-				FromFrom.controller = {
-					set_country_flag = mem_vazurans_rift_creation_start
-					set_timed_country_flag = {
-						flag = mem_vazurans_retaliation_fleet_destroyed
-						years = 1
-					}
-					country_event = { id = mem_vazurans.50 days = 2}
-				}
-			}
-		}
-		IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_4
-				}
-			}
-			random_ambient_object = {
-				limit = {
-					has_ambient_object_flag = mem_vazurans_rift_4
-				}
-				destroy_ambient_object = THIS
-			}
-		}
-		# check for 5
-		IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_5
-				}
-				NOT = {
-					any_country = {
-						has_country_flag = mem_vazurans_target_5
-					}
-				}
-				FromFrom.controller = {
-					is_country_type = default
-				}
-			}
-			FromFrom.controller = {
-				mem_vazurans_retaliation_dice_roll = yes
-				#set_country_flag = mem_vazurans_retaliation
-				#set_country_flag = mem_vazurans_target_5
-			}
-		}
-		ELSE_IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_5
-				}
-				any_country = {
-					has_country_flag = mem_vazurans_target_5
-					NOT = {
-						has_country_flag = mem_vazurans_retaliation
-					}
-					is_same_value = FromFrom.controller
-				}
-			}
-			FromFrom.controller = {
-				mem_vazurans_retaliation_dice_roll = yes
-				#set_country_flag = mem_vazurans_retaliation
-			}
-		}
-		ELSE_IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_5
-				}
-				any_country = {
-					has_country_flag = mem_vazurans_target_5
-					NOT = {
-						has_country_flag = mem_vazurans_retaliation
-					}
-					NOT = {
-						is_same_value = FromFrom.controller
-					}
-				}
-			}
-			every_country = {
-				limit = {
-					has_country_flag = mem_vazurans_target_5
-				}
-				remove_country_flag = mem_vazurans_target_5
-			}
-			IF = {
-				limit = {
-					FromFrom.controller = {
-						is_country_type = default
-					}
-				}
-				FromFrom.controller = {
-					mem_vazurans_retaliation_dice_roll = yes
-					#set_country_flag = mem_vazurans_retaliation
-					#set_country_flag = mem_vazurans_target_5
-				}
-			}			
-		}
-		ELSE_IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_5
-				}
-				any_country = {
-					has_country_flag = mem_vazurans_target_5
-					has_country_flag = mem_vazurans_retaliation
-					NOT = {
-						is_same_value = FromFrom.controller
-					}
-				}
-			}
-			every_country = {
-				limit = {
-					has_country_flag = mem_vazurans_target_5
-				}
-				remove_country_flag = mem_vazurans_target_5
-				remove_country_flag = mem_vazurans_retaliation
-			}
-			IF = {
-				limit = {
-					FromFrom.controller = {
-						is_country_type = default
-					}
-				}
-				FromFrom.controller = {
-					mem_vazurans_retaliation_dice_roll = yes
-					#set_country_flag = mem_vazurans_retaliation
-					#set_country_flag = mem_vazurans_target_5
-				}
-			}
-		}
-		ELSE_IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_5
-				}
-				any_country = {
-					has_country_flag = mem_vazurans_target_5
-					has_country_flag = mem_vazurans_retaliation
-					is_same_value = FromFrom.controller
-				}
-			}
-			FromFrom.controller = {
-				remove_country_flag = mem_vazurans_retaliation
-				remove_country_flag = mem_vazurans_target_5
-			}
-			IF = {
-				limit = {
-					FromFrom.controller = {
-						is_ai = no
-						NOT = {
-							has_country_flag = mem_vazurans_rift_creation_start
-						}
-					}
-				}
-				FromFrom.controller = {
-					set_country_flag = mem_vazurans_rift_creation_start
-					set_timed_country_flag = {
-						flag = mem_vazurans_retaliation_fleet_destroyed
-						years = 1
-					}
-					country_event = { id = mem_vazurans.50 days = 2}
-				}
-			}
-		}
-		IF = {
-			limit = {
-				FROMFROMFROM ={
-					has_fleet_flag = mem_vazurans_fleet_5
-				}
-			}
-			random_ambient_object = {
-				limit = {
-					has_ambient_object_flag = mem_vazurans_rift_5
-				}
-				destroy_ambient_object = THIS
-			}
-		}
-	}
-}
+# 	immediate = {
+# 		# check for 1
+# 		IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_1
+# 				}
+# 				NOT = {
+# 					any_country = {
+# 						has_country_flag = mem_vazurans_target_1
+# 					}
+# 				}
+# 				FromFrom.controller = {
+# 					is_country_type = default
+# 				}
+# 			}
+# 			FromFrom.controller = {
+# 				mem_vazurans_retaliation_dice_roll = yes
+# 				#set_country_flag = mem_vazurans_retaliation
+# 				#set_country_flag = mem_vazurans_target_1
+# 			}
+# 		}
+# 		ELSE_IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_1
+# 				}
+# 				any_country = {
+# 					has_country_flag = mem_vazurans_target_1
+# 					NOT = {
+# 						has_country_flag = mem_vazurans_retaliation
+# 					}
+# 					is_same_value = FromFrom.controller
+# 				}
+# 			}
+# 			FromFrom.controller = {
+# 				mem_vazurans_retaliation_dice_roll = yes
+# 				#set_country_flag = mem_vazurans_retaliation
+# 			}
+# 		}
+# 		ELSE_IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_1
+# 				}
+# 				any_country = {
+# 					has_country_flag = mem_vazurans_target_1
+# 					NOT = {
+# 						has_country_flag = mem_vazurans_retaliation
+# 					}
+# 					NOT = {
+# 						is_same_value = FromFrom.controller
+# 					}
+# 				}
+# 			}
+# 			every_country = {
+# 				limit = {
+# 					has_country_flag = mem_vazurans_target_1
+# 				}
+# 				remove_country_flag = mem_vazurans_target_1
+# 			}
+# 			IF = {
+# 				limit = {
+# 					FromFrom.controller = {
+# 						is_country_type = default
+# 					}
+# 				}
+# 				FromFrom.controller = {
+# 					mem_vazurans_retaliation_dice_roll = yes
+# 					#set_country_flag = mem_vazurans_retaliation
+# 					#set_country_flag = mem_vazurans_target_1
+# 				}
+# 			}
+# 		}
+# 		ELSE_IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_1
+# 				}
+# 				any_country = {
+# 					has_country_flag = mem_vazurans_target_1
+# 					has_country_flag = mem_vazurans_retaliation
+# 					NOT = {
+# 						is_same_value = FromFrom.controller
+# 					}
+# 				}
+# 			}
+# 			every_country = {
+# 				limit = {
+# 					has_country_flag = mem_vazurans_target_1
+# 				}
+# 				remove_country_flag = mem_vazurans_target_1
+# 				remove_country_flag = mem_vazurans_retaliation
+# 			}
+# 			IF = {
+# 				limit = {
+# 					FromFrom.controller = {
+# 						is_country_type = default
+# 					}
+# 				}
+# 				FromFrom.controller = {
+# 					mem_vazurans_retaliation_dice_roll = yes
+# 					#set_country_flag = mem_vazurans_retaliation
+# 					#set_country_flag = mem_vazurans_target_1
+# 				}
+# 			}
+# 		}
+# 		ELSE_IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_1
+# 				}
+# 				any_country = {
+# 					has_country_flag = mem_vazurans_target_1
+# 					has_country_flag = mem_vazurans_retaliation
+# 					is_same_value = FromFrom.controller
+# 				}
+# 			}
+# 			FromFrom.controller = {
+# 				remove_country_flag = mem_vazurans_retaliation
+# 				remove_country_flag = mem_vazurans_target_1
+# 			}
+# 			IF = {
+# 				limit = {
+# 					FromFrom.controller = {
+# 						is_ai = no
+# 						NOT = {
+# 							has_country_flag = mem_vazurans_rift_creation_start
+# 						}
+# 					}
+# 				}
+# 				FromFrom.controller = {
+# 					set_country_flag = mem_vazurans_rift_creation_start
+# 					set_timed_country_flag = {
+# 						flag = mem_vazurans_retaliation_fleet_destroyed
+# 						years = 1
+# 					}
+# 					country_event = { id = mem_vazurans.50 days = 2}
+# 				}
+# 			}
+# 		}
+# 		IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_1
+# 				}
+# 			}
+# 			random_ambient_object = {
+# 				limit = {
+# 					has_ambient_object_flag = mem_vazurans_rift_1
+# 				}
+# 				destroy_ambient_object = THIS
+# 			}
+# 		}
+# 		# check for 2
+# 		IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_2
+# 				}
+# 				NOT = {
+# 					any_country = {
+# 						has_country_flag = mem_vazurans_target_2
+# 					}
+# 				}
+# 				FromFrom.controller = {
+# 					is_country_type = default
+# 				}
+# 			}
+# 			FromFrom.controller = {
+# 				mem_vazurans_retaliation_dice_roll = yes
+# 				#set_country_flag = mem_vazurans_retaliation
+# 				#set_country_flag = mem_vazurans_target_2
+# 			}
+# 		}
+# 		ELSE_IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_2
+# 				}
+# 				any_country = {
+# 					has_country_flag = mem_vazurans_target_2
+# 					NOT = {
+# 						has_country_flag = mem_vazurans_retaliation
+# 					}
+# 					is_same_value = FromFrom.controller
+# 				}
+# 			}
+# 			FromFrom.controller = {
+# 				mem_vazurans_retaliation_dice_roll = yes
+# 				#set_country_flag = mem_vazurans_retaliation
+# 			}
+# 		}
+# 		ELSE_IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_2
+# 				}
+# 				any_country = {
+# 					has_country_flag = mem_vazurans_target_2
+# 					NOT = {
+# 						has_country_flag = mem_vazurans_retaliation
+# 					}
+# 					NOT = {
+# 						is_same_value = FromFrom.controller
+# 					}
+# 				}
+# 			}
+# 			every_country = {
+# 				limit = {
+# 					has_country_flag = mem_vazurans_target_2
+# 				}
+# 				remove_country_flag = mem_vazurans_target_2
+# 			}
+# 			IF = {
+# 				limit = {
+# 					FromFrom.controller = {
+# 						is_country_type = default
+# 					}
+# 				}
+# 				FromFrom.controller = {
+# 					mem_vazurans_retaliation_dice_roll = yes
+# 					#set_country_flag = mem_vazurans_retaliation
+# 					#set_country_flag = mem_vazurans_target_2
+# 				}
+# 			}
+# 		}
+# 		ELSE_IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_2
+# 				}
+# 				any_country = {
+# 					has_country_flag = mem_vazurans_target_2
+# 					has_country_flag = mem_vazurans_retaliation
+# 					NOT = {
+# 						is_same_value = FromFrom.controller
+# 					}
+# 				}
+# 			}
+# 			every_country = {
+# 				limit = {
+# 					has_country_flag = mem_vazurans_target_2
+# 				}
+# 				remove_country_flag = mem_vazurans_target_2
+# 				remove_country_flag = mem_vazurans_retaliation
+# 			}
+# 			IF = {
+# 				limit = {
+# 					FromFrom.controller = {
+# 						is_country_type = default
+# 					}
+# 				}
+# 				FromFrom.controller = {
+# 					mem_vazurans_retaliation_dice_roll = yes
+# 					#set_country_flag = mem_vazurans_retaliation
+# 					#set_country_flag = mem_vazurans_target_2
+# 				}
+# 			}
+# 		}
+# 		ELSE_IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_2
+# 				}
+# 				any_country = {
+# 					has_country_flag = mem_vazurans_target_2
+# 					has_country_flag = mem_vazurans_retaliation
+# 					is_same_value = FromFrom.controller
+# 				}
+# 			}
+# 			FromFrom.controller = {
+# 				remove_country_flag = mem_vazurans_retaliation
+# 				remove_country_flag = mem_vazurans_target_2
+# 			}
+# 			IF = {
+# 				limit = {
+# 					FromFrom.controller = {
+# 						is_ai = no
+# 						NOT = {
+# 							has_country_flag = mem_vazurans_rift_creation_start
+# 						}
+# 					}
+# 				}
+# 				FromFrom.controller = {
+# 					set_country_flag = mem_vazurans_rift_creation_start
+# 					set_timed_country_flag = {
+# 						flag = mem_vazurans_retaliation_fleet_destroyed
+# 						years = 1
+# 					}
+# 					country_event = { id = mem_vazurans.50 days = 2}
+# 				}
+# 			}
+# 		}
+# 		IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_2
+# 				}
+# 			}
+# 			random_ambient_object = {
+# 				limit = {
+# 					has_ambient_object_flag = mem_vazurans_rift_2
+# 				}
+# 				destroy_ambient_object = THIS
+# 			}
+# 		}
+# 		# check for 3
+# 		IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_3
+# 				}
+# 				NOT = {
+# 					any_country = {
+# 						has_country_flag = mem_vazurans_target_3
+# 					}
+# 				}
+# 				FromFrom.controller = {
+# 					is_country_type = default
+# 				}
+# 			}
+# 			FromFrom.controller = {
+# 				mem_vazurans_retaliation_dice_roll = yes
+# 				#set_country_flag = mem_vazurans_retaliation
+# 				#set_country_flag = mem_vazurans_target_3
+# 			}
+# 		}
+# 		ELSE_IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_3
+# 				}
+# 				any_country = {
+# 					has_country_flag = mem_vazurans_target_3
+# 					NOT = {
+# 						has_country_flag = mem_vazurans_retaliation
+# 					}
+# 					is_same_value = FromFrom.controller
+# 				}
+# 			}
+# 			FromFrom.controller = {
+# 				mem_vazurans_retaliation_dice_roll = yes
+# 				#set_country_flag = mem_vazurans_retaliation
+# 			}
+# 		}
+# 		ELSE_IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_3
+# 				}
+# 				any_country = {
+# 					has_country_flag = mem_vazurans_target_3
+# 					NOT = {
+# 						has_country_flag = mem_vazurans_retaliation
+# 					}
+# 					NOT = {
+# 						is_same_value = FromFrom.controller
+# 					}
+# 				}
+# 			}
+# 			every_country = {
+# 				limit = {
+# 					has_country_flag = mem_vazurans_target_3
+# 				}
+# 				remove_country_flag = mem_vazurans_target_3
+# 			}
+# 			IF = {
+# 				limit = {
+# 					FromFrom.controller = {
+# 						is_country_type = default
+# 					}
+# 				}
+# 				FromFrom.controller = {
+# 					mem_vazurans_retaliation_dice_roll = yes
+# 					#set_country_flag = mem_vazurans_retaliation
+# 					#set_country_flag = mem_vazurans_target_3
+# 				}
+# 			}
+# 		}
+# 		ELSE_IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_3
+# 				}
+# 				any_country = {
+# 					has_country_flag = mem_vazurans_target_3
+# 					has_country_flag = mem_vazurans_retaliation
+# 					NOT = {
+# 						is_same_value = FromFrom.controller
+# 					}
+# 				}
+# 			}
+# 			every_country = {
+# 				limit = {
+# 					has_country_flag = mem_vazurans_target_3
+# 				}
+# 				remove_country_flag = mem_vazurans_target_3
+# 				remove_country_flag = mem_vazurans_retaliation
+# 			}
+# 			IF = {
+# 				limit = {
+# 					FromFrom.controller = {
+# 						is_country_type = default
+# 					}
+# 				}
+# 				FromFrom.controller = {
+# 					mem_vazurans_retaliation_dice_roll = yes
+# 					#set_country_flag = mem_vazurans_retaliation
+# 					#set_country_flag = mem_vazurans_target_3
+# 				}
+# 			}
+# 		}
+# 		ELSE_IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_3
+# 				}
+# 				any_country = {
+# 					has_country_flag = mem_vazurans_target_3
+# 					has_country_flag = mem_vazurans_retaliation
+# 					is_same_value = FromFrom.controller
+# 				}
+# 			}
+# 			FromFrom.controller = {
+# 				remove_country_flag = mem_vazurans_retaliation
+# 				remove_country_flag = mem_vazurans_target_3
+# 			}
+# 			IF = {
+# 				limit = {
+# 					FromFrom.controller = {
+# 						is_ai = no
+# 						NOT = {
+# 							has_country_flag = mem_vazurans_rift_creation_start
+# 						}
+# 					}
+# 				}
+# 				FromFrom.controller = {
+# 					set_country_flag = mem_vazurans_rift_creation_start
+# 					set_timed_country_flag = {
+# 						flag = mem_vazurans_retaliation_fleet_destroyed
+# 						years = 1
+# 					}
+# 					country_event = { id = mem_vazurans.50 days = 2}
+# 				}
+# 			}
+# 		}
+# 		IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_3
+# 				}
+# 			}
+# 			random_ambient_object = {
+# 				limit = {
+# 					has_ambient_object_flag = mem_vazurans_rift_3
+# 				}
+# 				destroy_ambient_object = THIS
+# 			}
+# 		}
+# 		# check for 4
+# 		IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_4
+# 				}
+# 				NOT = {
+# 					any_country = {
+# 						has_country_flag = mem_vazurans_target_4
+# 					}
+# 				}
+# 				FromFrom.controller = {
+# 					is_country_type = default
+# 				}
+# 			}
+# 			FromFrom.controller = {
+# 				mem_vazurans_retaliation_dice_roll = yes
+# 				#set_country_flag = mem_vazurans_retaliation
+# 				#set_country_flag = mem_vazurans_target_4
+# 			}
+# 		}
+# 		ELSE_IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_4
+# 				}
+# 				any_country = {
+# 					has_country_flag = mem_vazurans_target_4
+# 					NOT = {
+# 						has_country_flag = mem_vazurans_retaliation
+# 					}
+# 					is_same_value = FromFrom.controller
+# 				}
+# 			}
+# 			FromFrom.controller = {
+# 				mem_vazurans_retaliation_dice_roll = yes
+# 				#set_country_flag = mem_vazurans_retaliation
+# 			}
+# 		}
+# 		ELSE_IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_4
+# 				}
+# 				any_country = {
+# 					has_country_flag = mem_vazurans_target_4
+# 					NOT = {
+# 						has_country_flag = mem_vazurans_retaliation
+# 					}
+# 					NOT = {
+# 						is_same_value = FromFrom.controller
+# 					}
+# 				}
+# 			}
+# 			every_country = {
+# 				limit = {
+# 					has_country_flag = mem_vazurans_target_4
+# 				}
+# 				remove_country_flag = mem_vazurans_target_4
+# 			}
+# 			IF = {
+# 				limit = {
+# 					FromFrom.controller = {
+# 						is_country_type = default
+# 					}
+# 				}
+# 				FromFrom.controller = {
+# 					mem_vazurans_retaliation_dice_roll = yes
+# 					#set_country_flag = mem_vazurans_retaliation
+# 					#set_country_flag = mem_vazurans_target_4
+# 				}
+# 			}
+# 		}
+# 		ELSE_IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_4
+# 				}
+# 				any_country = {
+# 					has_country_flag = mem_vazurans_target_4
+# 					has_country_flag = mem_vazurans_retaliation
+# 					NOT = {
+# 						is_same_value = FromFrom.controller
+# 					}
+# 				}
+# 			}
+# 			every_country = {
+# 				limit = {
+# 					has_country_flag = mem_vazurans_target_4
+# 				}
+# 				remove_country_flag = mem_vazurans_target_4
+# 				remove_country_flag = mem_vazurans_retaliation
+# 			}
+# 			IF = {
+# 				limit = {
+# 					FromFrom.controller = {
+# 						is_country_type = default
+# 					}
+# 				}
+# 				FromFrom.controller = {
+# 					mem_vazurans_retaliation_dice_roll = yes
+# 					#set_country_flag = mem_vazurans_retaliation
+# 					#set_country_flag = mem_vazurans_target_4
+# 				}
+# 			}
+# 		}
+# 		ELSE_IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_4
+# 				}
+# 				any_country = {
+# 					has_country_flag = mem_vazurans_target_4
+# 					has_country_flag = mem_vazurans_retaliation
+# 					is_same_value = FromFrom.controller
+# 				}
+# 			}
+# 			FromFrom.controller = {
+# 				remove_country_flag = mem_vazurans_retaliation
+# 				remove_country_flag = mem_vazurans_target_4
+# 			}
+# 			IF = {
+# 				limit = {
+# 					FromFrom.controller = {
+# 						is_ai = no
+# 						NOT = {
+# 							has_country_flag = mem_vazurans_rift_creation_start
+# 						}
+# 					}
+# 				}
+# 				FromFrom.controller = {
+# 					set_country_flag = mem_vazurans_rift_creation_start
+# 					set_timed_country_flag = {
+# 						flag = mem_vazurans_retaliation_fleet_destroyed
+# 						years = 1
+# 					}
+# 					country_event = { id = mem_vazurans.50 days = 2}
+# 				}
+# 			}
+# 		}
+# 		IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_4
+# 				}
+# 			}
+# 			random_ambient_object = {
+# 				limit = {
+# 					has_ambient_object_flag = mem_vazurans_rift_4
+# 				}
+# 				destroy_ambient_object = THIS
+# 			}
+# 		}
+# 		# check for 5
+# 		IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_5
+# 				}
+# 				NOT = {
+# 					any_country = {
+# 						has_country_flag = mem_vazurans_target_5
+# 					}
+# 				}
+# 				FromFrom.controller = {
+# 					is_country_type = default
+# 				}
+# 			}
+# 			FromFrom.controller = {
+# 				mem_vazurans_retaliation_dice_roll = yes
+# 				#set_country_flag = mem_vazurans_retaliation
+# 				#set_country_flag = mem_vazurans_target_5
+# 			}
+# 		}
+# 		ELSE_IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_5
+# 				}
+# 				any_country = {
+# 					has_country_flag = mem_vazurans_target_5
+# 					NOT = {
+# 						has_country_flag = mem_vazurans_retaliation
+# 					}
+# 					is_same_value = FromFrom.controller
+# 				}
+# 			}
+# 			FromFrom.controller = {
+# 				mem_vazurans_retaliation_dice_roll = yes
+# 				#set_country_flag = mem_vazurans_retaliation
+# 			}
+# 		}
+# 		ELSE_IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_5
+# 				}
+# 				any_country = {
+# 					has_country_flag = mem_vazurans_target_5
+# 					NOT = {
+# 						has_country_flag = mem_vazurans_retaliation
+# 					}
+# 					NOT = {
+# 						is_same_value = FromFrom.controller
+# 					}
+# 				}
+# 			}
+# 			every_country = {
+# 				limit = {
+# 					has_country_flag = mem_vazurans_target_5
+# 				}
+# 				remove_country_flag = mem_vazurans_target_5
+# 			}
+# 			IF = {
+# 				limit = {
+# 					FromFrom.controller = {
+# 						is_country_type = default
+# 					}
+# 				}
+# 				FromFrom.controller = {
+# 					mem_vazurans_retaliation_dice_roll = yes
+# 					#set_country_flag = mem_vazurans_retaliation
+# 					#set_country_flag = mem_vazurans_target_5
+# 				}
+# 			}			
+# 		}
+# 		ELSE_IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_5
+# 				}
+# 				any_country = {
+# 					has_country_flag = mem_vazurans_target_5
+# 					has_country_flag = mem_vazurans_retaliation
+# 					NOT = {
+# 						is_same_value = FromFrom.controller
+# 					}
+# 				}
+# 			}
+# 			every_country = {
+# 				limit = {
+# 					has_country_flag = mem_vazurans_target_5
+# 				}
+# 				remove_country_flag = mem_vazurans_target_5
+# 				remove_country_flag = mem_vazurans_retaliation
+# 			}
+# 			IF = {
+# 				limit = {
+# 					FromFrom.controller = {
+# 						is_country_type = default
+# 					}
+# 				}
+# 				FromFrom.controller = {
+# 					mem_vazurans_retaliation_dice_roll = yes
+# 					#set_country_flag = mem_vazurans_retaliation
+# 					#set_country_flag = mem_vazurans_target_5
+# 				}
+# 			}
+# 		}
+# 		ELSE_IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_5
+# 				}
+# 				any_country = {
+# 					has_country_flag = mem_vazurans_target_5
+# 					has_country_flag = mem_vazurans_retaliation
+# 					is_same_value = FromFrom.controller
+# 				}
+# 			}
+# 			FromFrom.controller = {
+# 				remove_country_flag = mem_vazurans_retaliation
+# 				remove_country_flag = mem_vazurans_target_5
+# 			}
+# 			IF = {
+# 				limit = {
+# 					FromFrom.controller = {
+# 						is_ai = no
+# 						NOT = {
+# 							has_country_flag = mem_vazurans_rift_creation_start
+# 						}
+# 					}
+# 				}
+# 				FromFrom.controller = {
+# 					set_country_flag = mem_vazurans_rift_creation_start
+# 					set_timed_country_flag = {
+# 						flag = mem_vazurans_retaliation_fleet_destroyed
+# 						years = 1
+# 					}
+# 					country_event = { id = mem_vazurans.50 days = 2}
+# 				}
+# 			}
+# 		}
+# 		IF = {
+# 			limit = {
+# 				FROMFROMFROM ={
+# 					has_fleet_flag = mem_vazurans_fleet_5
+# 				}
+# 			}
+# 			random_ambient_object = {
+# 				limit = {
+# 					has_ambient_object_flag = mem_vazurans_rift_5
+# 				}
+# 				destroy_ambient_object = THIS
+# 			}
+# 		}
+# 	}
+# }
 
 # tells the raiding or retaliation fleet to move to the target planet to start bombarding
 fleet_event = {

@@ -2,7 +2,7 @@
 #
 # Vazuran Menace - Midgame Crisis Rework
 #
-# Coding by Tr33
+# Coding by Tr33 and Malthus
 #
 ####################################
 namespace = mem_vazurans
@@ -18,7 +18,7 @@ event = {
 					has_star_flag = precursor_mem_vazurans
 				}
 			}
-			set_global_flag = mem_vazurans_chosen
+			set_global_flag = mem_vazurans_chosen			# TRODO make this impactful
 		}
 		# we do this via precursor selection now
 		# TRODO: remove from mod menu
@@ -73,6 +73,195 @@ event = {
 		mem_gamestart_orila_primitive_setup = yes
 	}
 }
+
+# Reward Event for destroying Vazuran fleets
+country_event = {
+	id = mem_vazurans.70
+	title = mem_vazurans.70.name
+	desc = {
+		text = mem_vazurans.70.desc.a
+		trigger = {
+			NOT = {
+				has_country_flag = mem_vazurans_reward_alloys
+			}
+		}
+	}
+	desc = {
+		text = mem_vazurans.70.desc.b
+		trigger = {
+			has_country_flag = mem_vazurans_reward_alloys
+		}
+	}
+	picture = GFX_evt_debris
+	show_sound = event_radio_chatter
+	#location = from
+	event_chain = mem_vazuran_menace_chain
+	is_triggered_only = yes
+	immediate = {
+		#could use locked_random_list in option instead, but this way one could add different desc's based on the flags - which will likely be done once we can give some ships to the player
+		random_list = {
+			1 = {
+				modifier = {
+					factor = 0
+					has_technology = tech_mass_drivers_5
+				}
+				set_country_flag = mem_vazurans_reward_mass_driver
+			}
+			1 = {
+				modifier = {
+					factor = 0
+					has_technology = tech_ship_armor_5
+				}
+				set_country_flag = mem_vazurans_reward_armor
+			}
+			1 = {
+				set_country_flag = mem_vazurans_reward_research
+			}
+			1 = {
+				set_country_flag = mem_vazurans_reward_alloys
+			}
+		}
+	}
+	option = {
+		name = EXCELLENT
+		trigger = {
+			has_country_flag = mem_vazurans_reward_mass_driver
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_tech_option = tech_mass_drivers_5
+				}
+			}
+			add_research_option = tech_mass_drivers_5
+		}
+		add_tech_progress = {
+			tech = tech_mass_drivers_5
+			progress = 0.2
+		}
+		hidden_effect = {
+			remove_country_flag = mem_vazurans_reward_mass_driver
+		}
+	}
+	option = {
+		name = EXCELLENT
+		trigger = {
+			has_country_flag = mem_vazurans_reward_armor
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_tech_option = tech_ship_armor_5
+				}
+			}
+			add_research_option = tech_ship_armor_5
+		}
+		add_tech_progress = {
+			tech = tech_ship_armor_5
+			progress = 0.2
+		}
+		hidden_effect = {
+			remove_country_flag = mem_vazurans_reward_armor
+		}
+	}
+	option = {
+		name = EXCELLENT
+		trigger = {
+			has_country_flag = mem_vazurans_reward_research
+		}
+		add_monthly_resource_mult = {
+			resource = engineering_research
+			value = @tier3researchreward
+			min = @tier3researchmin
+			max = @tier3researchmax
+		}
+		hidden_effect = {
+			remove_country_flag = mem_vazurans_reward_research
+		}
+	}
+	option = {
+		name = EXCELLENT
+		trigger = {
+			has_country_flag = mem_vazurans_reward_alloys
+		}
+		add_monthly_resource_mult = {
+			resource = alloys
+			value = @tier3materialreward
+			min = @tier3materialmin
+			max = @tier3materialmax
+		}
+		hidden_effect = {
+			remove_country_flag = mem_vazurans_reward_alloys
+		}
+	}
+	after = {
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = mem_vazurans_reward_alloys
+				}
+			}
+			add_monthly_resource_mult = {
+				resource = alloys
+				value = @tier1materialreward
+				min = @tier1materialmin
+				max = @tier1materialmax
+			}
+		}
+		if = {
+			limit = {
+				host_has_dlc = "Ancient Relics Story Pack"
+			}
+			small_artifact_reward = yes
+		}
+		hidden_effect = {
+			set_country_flag = mem_vazurans_seen_tech			# TRODO tradition trigger here
+		}
+	}
+}
+
+# test event 
+event = {
+	id = mem_vazurans.996
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		event_target:mem_vazurans_country = {
+			random_situation = {
+				limit = {
+					is_situation_type = mem_vazuran_raiding
+				}
+				change_variable = {
+					which = mem_vazuran_raiding_strength
+					value = 5000
+				}
+			}
+		}
+	}
+}
+
+# test event 
+event = {
+	id = mem_vazurans.997
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		start_mem_vazuran_menace = yes
+		no_scope = {
+			# makes system positions originate from galactic core
+			spawn_system = {
+				min_distance >= 550
+				max_distance <= 560
+				min_orientation_angle = 96
+				max_orientation_angle = 102
+				initializer = "mem_vazuran_homesystem"
+				hyperlane = no
+				# is_discovered = yes
+			}
+		}
+	}
+}
+
 # someone picked defnder of the galaxy AP - so we dont have to do overwrites
 country_event = {
 	id = mem_vazurans.998
@@ -92,8 +281,71 @@ country_event = {
 	}
 }
 
-# vazurans say hello, starts player mood situation
-# TRODO above
+# First Contact message
+country_event = {
+	id = mem_vazurans.1099
+	title = mem_vazurans.6.name
+	desc = {
+		text = mem_vazurans.6a.desc
+		trigger = {
+			NOT = {
+				has_origin = origin_mem_from_the_ashes
+			}
+		}
+	}
+	desc = {
+		text = mem_vazurans.6b.desc
+		trigger = {
+			has_origin = origin_mem_from_the_ashes
+		}
+	}
+	event_chain = mem_vazuran_menace_chain
+	is_triggered_only = yes
+	diplomatic = yes
+	immediate = {
+	}
+	picture_event_data = {
+		#portrait = event_target:mem_vazurans_country
+		portrait = mem_Vazu_crisis
+		room = mem_vazuran_1_room
+	}
+	option = {
+		name = mem_vazurans.6.a
+		response_text = mem_vazurans.6.a.response
+	}
+	option = {
+		trigger = {
+			OR = {
+				has_ethic = ethic_pacifist
+				has_ethic = ethic_fanatic_pacifist
+			}
+		}
+		name = mem_vazurans.6.b
+		response_text = mem_vazurans.6.b.response
+	}
+	option = {
+		trigger = {
+			OR = {
+				has_ethic = "ethic_xenophobe"
+				has_ethic = "ethic_fanatic_xenophobe"
+			}
+		}
+		name = mem_vazurans.6.c
+		response_text = mem_vazurans.6.c.response
+	}
+	after = {
+		# choose a stance
+		hidden_effect = {
+			country_event = {
+				id = mem_vazurans.1101
+				days = 60
+				random = 30
+			}
+		}
+	}
+}
+
+# vazurans say hello
 # raids spawning
 situation_event = {
 	id = mem_vazurans.1100
@@ -107,27 +359,55 @@ situation_event = {
 		}
 	}
 	immediate = {
-		# if I do this each country has the same chance, however wouldnt it make sense to target larger empires?
-		# random_playable_country = {
-		# 	limit = {
-		# 		NOT = {
-		# 			has_country_flag = mem_vazurans_target_country
-		# 		}
-		# 	}
-		# }
 		# now each system someone controls increases raiding chance
 		reroll_random = yes
-		random_system = {
-			limit = {
-				exists = owner
-				owner = {
-					# TRODO based on situation approach of the empire
-					is_regular_empire = yes
-					NOR = {
-						has_country_flag = mem_vazurans_targeted_country
+		random_list = {
+			# TRODO better logic based on gamestage?
+			80 = {
+				random_system = {
+					limit = {
+						exists = owner
+						owner = {
+							is_regular_empire = yes
+							is_hostile_to = root.owner
+							NOR = {
+								has_country_flag = mem_vazurans_targeted_country
+							}
+						}
+						NOT = {
+							any_system_ambient_object = {
+								has_ambient_object_flag = mem_vazurans_rift
+							}
+						}
 					}
+					save_event_target_as = mem_vazurans_target_system
 				}
 			}
+			# the once who provoke have higher chance
+			20 = {
+				random_system = {
+					limit = {
+						exists = owner
+						owner = {
+							is_regular_empire = yes
+							is_hostile_to = root.owner
+							has_modifier = mem_vazurans_stance_provoke
+							NOR = {
+								has_country_flag = mem_vazurans_targeted_country
+							}
+						}
+						NOT = {
+							any_system_ambient_object = {
+								has_ambient_object_flag = mem_vazurans_rift
+							}
+						}
+					}
+					save_event_target_as = mem_vazurans_target_system
+				}
+			}
+		}
+
+		event_target:mem_vazurans_target_system = {
 			owner = {
 				# establis coms if not already, should be handled by intro event of situation start
 				IF = {
@@ -141,25 +421,25 @@ situation_event = {
 				# raid incoming * red alert sound *
 				set_timed_country_flag = {
 					flag = mem_vazurans_targeted_country
-					days = 360
+					days = 720
 				}
-				# TRODO this should be on vazuran country scope, not raid target ... hmmm only because controller can switch ... idk
+				# this should be on vazuran country scope, not raid target ... hmmm only because controller can switch ... idk
 				# this one creates the rift
 				country_event = {
 					id = mem_vazurans.1105
 					#days = 13
 					#random = 160
 					scopes = {
-						from = prev						# TRODO check if this works
+						from = event_target:mem_vazurans_target_system
 					}
 				}
-				# this one creates a message or first time event
+				# this one creates a message or first time event				
 				country_event = {
 					id = mem_vazurans.1110
 					#days = 13
 					#random = 160
 					scopes = {
-						from = prev
+						from = event_target:mem_vazurans_target_system
 					}
 				}
 				# this one create fleet
@@ -168,18 +448,64 @@ situation_event = {
 					days = 60
 					#random = 160
 					scopes = {
-						from = prev
+						from = event_target:mem_vazurans_target_system
 					}
 				}
-				
+				# this one removes the rift
+				country_event = {
+					id = mem_vazurans.1106
+					days = 720					# this is also done when the fleets returns, and if we do this too early we break them
+					scopes = {
+						from = event_target:mem_vazurans_target_system
+					}
+				}
+			}
+			root = {
+				# active raiding fleets +1
+				change_variable = {
+					which = mem_vazuran_raiding_current_fleets
+					value = 1
+				}
 			}
 		}
-		# active raiding fleets +1
-		change_variable = {
-			which = mem_vazuran_raiding_current_fleets
-			value = 1
+	}
+}
+
+# Decide how to react to the vazurans
+country_event = {
+	id = mem_vazurans.1101
+	title = mem_vazurans.1101.name
+	desc = mem_vazurans.1101.desc
+	picture = GFX_evt_mem_rift
+	show_sound = event_air_raid_siren
+	is_triggered_only = yes
+	event_chain = mem_vazuran_menace_chain
+	# offense
+	option = {
+		name = mem_vazurans.1101.a
+		add_modifier = {
+			modifier = mem_vazurans_stance_provoke
 		}
 	}
+	# defense
+	option = {
+		name = mem_vazurans.1101.b
+		add_modifier = {
+			modifier = mem_vazurans_stance_bunker_down
+		}
+	}
+	# dont care
+	option = {
+		name = mem_vazurans.1101.c
+	}
+	# tribute
+	option = {
+		name = mem_vazurans.1101.d
+		add_modifier = {
+			modifier = mem_vazurans_stance_tribute
+		}
+	}
+	# TRODO special ancestors response
 }
 
 # damn i hate the old raiding scripts
@@ -190,37 +516,52 @@ country_event = {
 	hide_window = yes
 	is_triggered_only = yes
 	trigger = {
-		NOR = {
-			has_country_flag = mem_vazurans_targeted_country
-		}
+		# NOR = {
+		# 	has_country_flag = mem_vazurans_targeted_country
+		# }
 	}
 	immediate = {
-		prev = {
-			solar_system = {
-				random_system_planet = {
-					limit = {
-						is_star = yes
-					}
-					THIS = {
-						save_event_target_as = mem_vazurans_target_sun
-					}
-				}
-				create_ambient_object = {
-					type = "mem_vazuran_wormhole_big_object"
-				}
-				random_system_ambient_object = {
-					limit = {
-						is_same_value = last_created_ambient_object
-					}
-					set_location = {
-						target = event_target:mem_vazurans_target_sun
-						distance = 150
-						angle = random
-					}
-					set_ambient_object_flag = mem_vazurans_rift
-					save_event_target_as = mem_vazurans_rift
-				}
+		from = {
+			#solar_system = {
+			create_ambient_object = {
+				type = "mem_vazuran_wormhole_big_object"
 			}
+			random_system_ambient_object = {
+				limit = {
+					is_same_value = last_created_ambient_object
+				}
+				set_location = {
+					target = system_star
+					distance = 150
+					angle = random
+				}
+				set_ambient_object_flag = mem_vazurans_rift
+			}
+			#}
+		}
+	}
+}
+
+# delete ambient object
+country_event = {
+	id = mem_vazurans.1106
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		# NOR = {
+		# 	has_country_flag = mem_vazurans_targeted_country
+		# }
+	}
+	immediate = {
+		from = {
+			#solar_system = {
+			random_system_ambient_object = {
+				limit = {
+					has_ambient_object_flag = mem_vazurans_rift
+				}
+				destroy_ambient_object = this
+			}
+			#}
 		}
 	}
 }
@@ -231,21 +572,26 @@ country_event = {
 	hide_window = yes
 	is_triggered_only = yes
 	immediate = {
-		if = {
-			limit = {
-				has_country_flag = mem_vazurans_met
-			}
-			create_message = {
-				type = MESSAGE_MEM_MADE_PRIMITIVE				# TRODO
-				days = 30
-			}
-		}
-		else = {
-			set_country_flag = mem_vazurans_met
-			country_event = {
-				id = mem_vazurans.1115
-				scopes = {
-					from = from
+		from = {
+			owner = {
+				if = {
+					limit = {
+						has_country_flag = mem_vazurans_met
+					}
+					create_message = {
+						type = mem_vazuran_rift_incoming						# TRODO
+						days = 30
+						target = from
+					}
+				}
+				else = {
+					set_country_flag = mem_vazurans_met
+					country_event = {
+						id = mem_vazurans.1115
+						scopes = {
+							from = from
+						}
+					}
 				}
 			}
 		}
@@ -292,43 +638,44 @@ country_event = {
 	# 	}
 	# }
 	picture = GFX_evt_mem_rift
-	location = from	# TRODO check if this works
+	location = from	# check if this works
 	event_chain = mem_vazuran_menace_chain
 	is_triggered_only = yes
 	#response in first encounter
 	option = {
 		name = mem_vazurans.4.a
-		trigger = {
-			NOR = {
-				has_country_flag = mem_vazurans_met
-				has_country_flag = mem_vazurans_retaliation
-			}
-		}
-		capital_scope = {
-			enable_special_project = {
-				name = MEM_VAZURANS_RIFT_INVESTIGATION
-				location = this
-				owner = root
-			}
-		}
+		# trigger = {
+		# 	NOR = {
+		# 		has_country_flag = mem_vazurans_met
+		# 		has_country_flag = mem_vazurans_retaliation
+		# 	}
+		# }
+		# capital_scope = {
+		# 	enable_special_project = {
+		# 		name = MEM_VAZURANS_RIFT_INVESTIGATION
+		# 		location = this
+		# 		owner = root
+		# 	}
+		# }
 	}
-	#response in later encounter
-	option = {
-		name = mem_vazurans.4.b
-		trigger = {
-			has_country_flag = mem_vazurans_met
-			NOT = {
-				has_country_flag = mem_vazurans_retaliation
-			}
-		}
-	}
-	#response in retaliation encounter
-	option = {
-		name = mem_vazurans.4.c
-		trigger = {
-			has_country_flag = mem_vazurans_retaliation
-		}
-	}
+	# TRODO ancestors interaction
+	# #response in later encounter
+	# option = {
+	# 	name = mem_vazurans.4.b
+	# 	trigger = {
+	# 		has_country_flag = mem_vazurans_met
+	# 		NOT = {
+	# 			has_country_flag = mem_vazurans_retaliation
+	# 		}
+	# 	}
+	# }
+	# #response in retaliation encounter
+	# option = {
+	# 	name = mem_vazurans.4.c
+	# 	trigger = {
+	# 		has_country_flag = mem_vazurans_retaliation
+	# 	}
+	# }
 }
 
 # create a fleet
@@ -338,21 +685,19 @@ country_event = {
 	hide_window = yes
 	is_triggered_only = yes
 	immediate = {
-		#create_mem_vazuran_country = yes wont need this hopefully
 		from = {
-			if = {
+			# if = {
+			# 	limit = {
+			# 		any_system_planet = {
+			# 			has_planet_flag = mem_vazurans_raiding_target
+			# 		}
+			# 	}
+			# }
+			random_system_ambient_object = {
 				limit = {
-					any_system_planet = {
-						has_planet_flag = mem_vazurans_raiding_target
-					}
+					has_ambient_object_flag = mem_vazurans_rift
 				}
-				random_system_ambient_object = {
-					limit = {
-						has_ambient_object_flag = mem_vazurans_rift
-					}
-					create_mem_vazuran_fleet = yes
-					#mem_vazuran_raiding_fleet_spawn = yes
-				}
+				create_mem_vazuran_fleet = yes
 			}
 		}
 		last_created_fleet = {
@@ -371,8 +716,25 @@ country_event = {
 						}
 					}
 				}
+				solar_system = {
+					random_system_planet = {
+						limit = {
+							is_colony = yes
+						}
+						set_planet_flag = mem_vazurans_raiding_target
+						prevprev = {
+							fleet_event = {
+								id = mem_vazurans.1125
+								days = 1
+							}
+						}
+					}
+				}
+			}
+			# if there is no colony to raid
+			else = {
 				fleet_event = {
-					id = mem_vazurans.1125
+					id = mem_vazurans.1124
 					days = 1
 				}
 			}
@@ -385,10 +747,43 @@ country_event = {
 			# 	}
 			# }
 		}
-		event_target:global_event_country = {
-			change_variable = {
-				which = mem_vazuran_menace_raids_variable
-				value = 1
+		# event_target:global_event_country = {
+		# 	change_variable = {
+		# 		which = mem_vazuran_menace_raids_variable
+		# 		value = 1
+		# 	}
+		# }
+	}
+}
+
+# tells the raiding fleet to move to the solar sun and wait
+fleet_event = {
+	id = mem_vazurans.1124
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		queue_actions = {
+			repeat = {
+				find_closest_planet = {
+					trigger = {
+						id = mem_vazurans_action1124.1
+						is_star = yes
+					}
+					found_planet = {
+						move_to = this
+						orbit_planet = this
+					}
+				}
+				wait = {
+					duration = 100
+				}
+				# enough raiding, fly back
+				effect = {
+					id = mem_vazurans_action1124.2
+					fleet_event = {
+						id = mem_vazurans.1135
+					}
+				}
 			}
 		}
 	}
@@ -417,6 +812,7 @@ fleet_event = {
 				}
 				effect = {
 					id = mem_vazurans_action1125.2
+					
 					solar_system = {
 						random_system_planet = {
 							limit = {
@@ -442,7 +838,7 @@ planet_event = {
 	immediate = {
 		set_planet_flag = mem_vazurans_raid_planet
 		while = {
-			count = 10			# TRODO maybe based on game stage?
+			count = 5			# TRODO maybe based on game stage?
 			create_army = {
 				owner = event_target:mem_vazurans_country
 				type = xenomorph_army
@@ -461,6 +857,8 @@ country_event = {
 	hide_window = yes
 	is_triggered_only = yes
 	trigger = {
+		has_global_flag = mem_vazuran_raiding
+		is_country_type = mem_vazurans
 		FromFrom = {
 			has_planet_flag = mem_vazurans_raid_planet
 		}
@@ -477,7 +875,7 @@ country_event = {
 				}
 				remove_army = yes
 			}
-			#set_controller = from # TRODO this needs testing, set owner back actual owner
+			# set_controller = from			# this needs testing, set owner back actual owner
 			# return to rift
 			solar_system = {
 				every_fleet_in_system = {
@@ -488,7 +886,7 @@ country_event = {
 					}
 					fleet_event = {
 						id = mem_vazurans.1135
-						days = 1
+						days = 30
 					}
 				}
 			}
@@ -508,20 +906,37 @@ country_event = {
 					}
 				}
 				add_planet_devastation = 40
-				while = {
-					count = value:perc_of_planet_pop					# 30% maybe too much easily changed
-					# this makes it only  around 15%
-					random_list = {
-						50 = {
-							weighted_random_owned_pop_group = {
-								limit = {
-									pop_group_size >= 100
-								}
-								kill_single_pop = yes
-							}
-						}
-						50 = {
-						}
+				# TRODO kill pops and once we generate vauzran homeplanet add them 
+				# 	every_owned_pop_group = {
+				# 	save_event_target_as = kidnapped_pop # Pick the pop
+				# 	ROOT = { # Pick a planet
+				# 		reroll_random = yes
+				# 		random_owned_planet = {
+				# 			save_event_target_as = target_planet
+				# 		}
+				# 	}
+				# 	resettle_pop_group = {
+				# 		POP_GROUP = this
+				# 		PLANET = event_target:target_planet
+				# 		PERCENTAGE = 0.3
+				# 	}
+				# 	event_target:resettled_pop_group = {
+				# 		set_citizenship_type = {
+				# 			country = ROOT
+				# 			type = citizenship_slavery
+				# 		}
+				# 	}
+				# }
+				root = {
+					change_variable = {
+						which = mem_vazurans_stolen_pops
+						value = prev.value:per_100_local_pop_amount						# 1 per 100 , we can later multiply it again
+					}
+				}
+				every_owned_pop_group = {
+					kill_pop_group = {
+						pop_group = THIS
+						percentage = 0.1
 					}
 				}
 				if = {
@@ -547,7 +962,7 @@ country_event = {
 			else = {
 				add_planet_devastation = 100
 				while = {
-					count = this.value:perc_of_planet_pop					# 30% maybe too much easily changed
+					count = 2					# 30% maybe too much easily changed # TRODO
 					kill_single_pop = yes
 				}
 				if = {
@@ -584,6 +999,8 @@ country_event = {
 	hide_window = yes
 	is_triggered_only = yes
 	trigger = {
+		has_global_flag = mem_vazuran_raiding
+		is_country_type = mem_vazurans
 		FromFrom = {
 			has_planet_flag = mem_vazurans_raid_planet
 		}
@@ -600,7 +1017,7 @@ country_event = {
 				}
 				remove_army = yes
 			}
-			#set_controller = from # TRODO this needs testing, set owner back actual owner
+			#set_controller = from			# this needs testing, set owner back actual owner
 			# return to rift
 			solar_system = {
 				every_fleet_in_system = {
@@ -611,7 +1028,7 @@ country_event = {
 					}
 					fleet_event = {
 						id = mem_vazurans.1135
-						days = 1
+						days = 10
 					}
 				}
 			}
@@ -626,33 +1043,275 @@ fleet_event = {
 	is_triggered_only = yes
 	immediate = {
 		solar_system = {
+			every_system_colony = {
+				limit = {
+					controller = {
+						is_same_value = root.owner
+					}
+				}
+				root.owner = {
+					random_situation = {
+						limit = {
+							is_situation_type = mem_vazuran_raiding
+						}
+						# for each pop we get points
+						change_variable = {
+							which = mem_vazuran_raiding_strength
+							value = prevprev.pop_amount
+						}
+						# for each mining/research staion we get points
+						change_variable = {
+							which = mem_vazuran_raiding_strength_temp
+							value = prevprevprev.value:num_orbital_sites
+						}
+						multiply_variable = {
+							which = mem_vazuran_raiding_strength_temp
+							value = @mem_vazurans_points_per_mining_stations
+						}
+						change_variable = {
+							which = mem_vazuran_raiding_strength
+							value = mem_vazuran_raiding_strength_temp
+						}
+						clear_variable = mem_vazuran_raiding_strength_temp
+					}
+				}
+				every_planet_army = {
+					limit = {
+						owner = {
+							is_country_type = mem_vazurans
+						}
+					}
+					remove_army = yes
+				}
+				set_controller = space_owner
+			}
+			root.owner = {
+				random_situation = {
+					limit = {
+						is_situation_type = mem_vazuran_raiding
+					}
+					# let the fleet retreat
+					change_variable = {
+						which = mem_vazuran_raiding_current_fleets
+						value = -1
+					}
+				}
+			}
 			random_system_ambient_object = {
 				limit = {
 					has_ambient_object_flag = mem_vazurans_rift
 				}
 				save_event_target_as = mem_vazurans_rift
 			}
+			every_fleet_in_system = {
+				limit = {
+					owner = {
+						is_country_type = mem_vazurans
+					}
+				}
+				fleet_event = {
+					id = mem_vazurans.1140					# send all fleets back, including armies
+				}
+			}
 		}
+	}
+}
+
+fleet_event = {
+	id = mem_vazurans.1140
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
 		clear_fleet_actions = ROOT
 		queue_actions = {
 			move_to = event_target:mem_vazurans_rift
 			effect = {
 				id = mem_vazurans_action.3
 				delete_fleet = this
-			}
-		}
-		owner = {
-			# one less active raider
-			change_variable = {
-				which = mem_vazuran_raiding_current_fleets
-				value = -1
+				event_target:mem_vazurans_rift = {
+					destroy_ambient_object = this
+				}
 			}
 		}
 	}
 }
 
+# vazuran Raiding fleet has been destroyed
+# This = owner of fleet 1 (combatant)
+# From = owner of fleet 2 (destroyed)
+# FromFrom = fleet 1
+# FromFromFrom = fleet 2
+country_event = {
+	id = mem_vazurans.1145
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		from = {
+			is_country_type = mem_vazurans
+			has_global_flag = mem_vazuran_raiding
+		}
+	}
+	immediate = {
+		#reward event
+		country_event = {
+			id = mem_vazurans.70
+			days = 5
+		}
+	}
+}
+
+# now lets decide wat outcome we had
+situation_event = {
+	id = mem_vazurans.1200
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		remove_global_flag = mem_vazuran_raiding
+		############################## EMPTY VAZURAN HOMESYSTEM ########################################
+		no_scope = {
+			# makes system positions originate from galactic core
+			spawn_system = {
+				min_distance >= 550
+				max_distance <= 560
+				min_orientation_angle = 96
+				max_orientation_angle = 102
+				initializer = "mem_vazuran_homesystem"
+				hyperlane = no
+				# is_discovered = yes
+			}
+		}
+		last_created_system = {
+			spawn_megastructure = {
+				type = mem_vazuran_gateway_nexus
+				orbit_distance = 300
+				orbit_angle = 360				# range of the randomization
+			}
+			random_system_megastructure = {
+				limit = {
+					is_megastructure_type = mem_vazuran_gateway_nexus
+				}
+				save_event_target_as = mem_vazuran_nexus_gate
+				create_ambient_object = {
+					type = "mem_vazuran_wormhole_big_object"
+				}
+				last_created_ambient_object = {
+					set_location = {
+						target = event_target:mem_vazuran_nexus_gate
+						distance = 0
+						angle = random
+					}
+				}
+			}
+			mem_vazurans_create_home_system_defences = yes
+		}
+		############################## FALLEN VAZURANS ########################################
+		if = {
+			limit = {
+				check_variable_arithmetic = {
+					which = mem_vazuran_raiding_strength
+					value <= @mem_vazurans_ruined_state_threshold
+				}
+			}
+			last_created_system = {
+				random_system_planet = {
+					limit = {
+						is_planet_class = pc_mem_vazuran_habitat
+					}
+					# TRODO buildings and shit
+				}
+			}
+			every_playable_country = {
+				limit = {
+					is_hostile_to = prev
+				}
+				country_event = {
+					id = mem_vazurans.1101
+				}
+			}
+		}
+		############################## FALLEN EMPIRE VAZURANS ########################################
+		else_if = {
+			limit = {
+				check_variable_arithmetic = {
+					which = mem_vazuran_raiding_strength
+					value <= @mem_vazurans_fallen_state_threshold
+				}
+			}
+			event_target:mem_vazurans_country = {
+				every_playable_country = {
+					limit = {
+						is_hostile_to = prev
+					}
+					set_faction_hostility = {
+						set_neutral = yes
+						set_friendly = no
+						set_hostile = no
+					}
+				}
+				set_country_type = fallen_empire
+				capital_scope = {
+					solar_system = {
+						mem_vazurans_create_home_system_defences = yes
+					}
+				}
+				# TRODO : portal to homesystem + setup scripted effect
+				# notify players of outcome
+			}
+		}
+		############################## AWAKENED EMPIRE VAZURANS ########################################
+		else = {
+			event_target:mem_vazurans_country = {
+				every_playable_country = {
+					limit = {
+						is_hostile_to = prev
+					}
+					set_faction_hostility = {
+						set_neutral = yes
+						set_friendly = no
+						set_hostile = no
+					}
+				}
+				set_country_type = awakened_fallen_empire
+				capital_scope = {
+					solar_system = {
+						mem_vazurans_create_home_system_defences = yes
+					}
+				}
+				# TRODO : portal to homesystem + setup scripted effect
+				# claim a lot of systems
+				# notify players of outcome
+			}
+		}
+	}
+	after = {
+		destroy_situation = this
+	}
+}
+
+# Notify players that raids are over, special interactions if you paid tribute
+# they didnt have enough points
+country_event = {
+	id = mem_vazurans.1101
+	title = mem_vazurans.1101.name
+	desc = mem_vazurans.1101.desc
+	picture = GFX_evt_mem_rift
+	show_sound = event_air_raid_siren
+	is_triggered_only = yes
+	event_chain = mem_vazuran_menace_chain
+	option = {
+		name = mem_vazurans.1101.a
+		
+	}
+	# TRODO special ancestors response
+	after = {
+		mem_vazurans_remove_stance_modifier = yes
+	}
+}
+
 # TRODO:
-# check if fleet got destroyed
-# 
 # on fisnish situation spawn portal system if later two states
 # 3 states: ruined, fallen, awakened
+# 
+# situation for reinforcements, based on tribute?
+# leaders for planet and fleet
+# tradition for ones who destroy vazurans or paid tribute: engaging with the crisis should be rewarding

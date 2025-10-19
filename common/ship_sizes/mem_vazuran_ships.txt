@@ -23,6 +23,9 @@
 @speed_fast = 120
 @speed_very_fast = 170
 
+@build_block_radius_starbase = 20
+@starbase_formation_priority = 1
+
 # Leviathan
 mem_vazuran_weapon = {
 	formation_priority = @titan_formation_priority
@@ -168,31 +171,81 @@ mem_vazuran_combat_drone = {
 # Defense Fortress
 mem_vazuran_large_military_station = {
 	graphical_culture = {"mem_ancient_02"}
-	max_speed = 6
-	rotation_speed = 10
-	acceleration = 10
+	enable_default_design = no	#if yes, countries will have an auto-generated design at start
+	class = shipclass_starbase
+
+	max_speed = 0.0
+	acceleration = 0.0
+	rotation_speed = 0.0
 	modifier = {
 		ship_evasion_mult = -1
-		ship_weapon_range_mult = 0.5
-		ships_upkeep_mult = -1
+		ship_armor_add = 5000
+		starbase_defense_platform_capacity_add = 3
+		ship_sensor_range_add = 1
+	}
+	ship_modifier = {
+		ship_fire_rate_mult = 0.50
+		ship_weapon_range_mult = 0.20
 	}
 	max_hitpoints = 12000
-	combat_size_multiplier = 20
-	size_multiplier = 8
-	fleet_slot_size = 4
-	section_slots = { 
-		"mid" = { locator = "station" }
+	base_buildtime = 360
+	resources = {
+		category = starbases
+		cost = {
+			trigger = {
+				from = {
+					is_machine_empire = no
+				}
+			}
+			alloys = 100
+		}
+		cost = {
+			trigger = {
+				from = {
+					is_machine_empire = yes
+				}
+			}
+			alloys = 150
+		}
+		upkeep = {
+			energy = 1
+		}
 	}
-	num_target_locators = 0
-	is_space_station = yes
-	build_block_radius = @build_block_radius_military
-	
-	uses_name_prefix = no
-	takes_name_from_ship_design = yes
-		
-	class = shipclass_military_station
-	construction_type = starbase_defenses
+
+	potential_construction = {
+		is_scope_type = planet
+		is_primary_star = yes
+		NOT = {
+			exists = orbital_defence
+		}
+	}
+
+	combat_size_multiplier = 5
+	size_multiplier = 4
+	fleet_slot_size = 2
+	section_slots = {
+		"core" = { locator = "part1" }
+	}
+
 	is_designable = no
+	num_target_locators = 0
+	is_space_station = no
+	can_have_federation_design = no
+	is_civilian = no
+	components_add_to_cost = no
+	can_disable = yes
+	flip_control_on_disable = yes
+	available_to_everyone = yes
+
+	prerequisites = { "tech_starbase_1" }
+
+	required_component_set = "power_core"
+	required_component_set = "sensor_components"
+	required_component_set = "combat_computers"
+
+	build_block_radius = @build_block_radius_starbase
+	formation_priority = @starbase_formation_priority
+	icon_frame = 1
 	icon = ship_size_military_station
 }
 
