@@ -1,5 +1,4 @@
 namespace = mem_surveyor
-
 #####################################################################################################################
 #    Surveyor Probe     #
 #   By ViolentBeetle    # <- i am going to hunt you down for not making an overview at the top - tree
@@ -125,8 +124,6 @@ namespace = mem_surveyor
 # mem_surveyor.1010	|	Setup probe country and destroy old event country
 # mem_surveyor.1015	|	Diplomatic event to notify player, probe returned
 # mem_surveyor.1020	|	Origin player makes decision
-
-
 country_event = {
 	id = mem_surveyor.9999
 	hide_window = yes
@@ -899,14 +896,12 @@ ship_event = {
 	id = mem_surveyor.11
 	hide_window = yes
 	is_triggered_only = yes
-
 	trigger = {
 		from = {
 			has_star_flag = mem_surveyor_curio
 		}
 	}
-
-	immediate = {		
+	immediate = {
 		from = {
 			if = {
 				limit = {
@@ -916,7 +911,7 @@ ship_event = {
 				}
 				set_star_flag = mem_surveyor_curio_marked_@root.FromFrom
 			}
-		}	
+		}
 		fromfrom = {
 			mem_surveyor_end_curio_chain = yes
 		}
@@ -2045,7 +2040,6 @@ country_event = {
 			}
 			save_event_target_as = visited_system
 		}
-
 		# Script reference in leviathans.507
 		# Set costs based on empire size
 		# Base of 250 Energy
@@ -2059,7 +2053,6 @@ country_event = {
 			which = mem_surveyor_insight_cost
 			value = value:edict_size_effect
 		}
-
 		# Set costs based on empire size
 		# Base of 1000 Energy
 		set_variable = {
@@ -2072,7 +2065,6 @@ country_event = {
 			which = mem_surveyor_reevaluation_cost
 			value = value:edict_size_effect
 		}
-
 		if = {
 			limit = {
 				NOT = {
@@ -2085,7 +2077,6 @@ country_event = {
 			}
 		}
 	}
-
 	# About the Probe
 	option = {
 		name = mem_surveyor.120.a
@@ -2095,7 +2086,6 @@ country_event = {
 			}
 		}
 	}
-	
 	# How to earn trust
 	option = {
 		name = mem_surveyor.120.b
@@ -2105,7 +2095,6 @@ country_event = {
 			}
 		}
 	}
-
 	# Galactic Curiosities
 	option = {
 		name = mem_surveyor.120.c
@@ -2115,7 +2104,6 @@ country_event = {
 			}
 		}
 	}
-
 	# Survey Buff
 	option = {
 		name = mem_surveyor.120.d
@@ -2123,9 +2111,14 @@ country_event = {
 			NOT = {
 				has_modifier = mem_surveyor_survey_buff
 			}
+			inline_script = {
+				script = mem_surveyor/resource_allow
+				RESOURCE = energy
+				AMOUNT = value:curator_purchase_cost|COST|mem_surveyor_insight_cost|
+			}
 		}
 		inline_script = {
-			script = events/resource_cost_with_allow
+			script = mem_surveyor/resource_cost
 			RESOURCE = energy
 			AMOUNT = value:curator_purchase_cost|COST|mem_surveyor_insight_cost|
 		}
@@ -2137,7 +2130,10 @@ country_event = {
 		hidden_effect = {
 			set_country_flag = mem_surveyor_insight_obtained
 			# Ask to renew the deal
-			country_event = { id = mem_surveyor.125 days = 3600 }
+			country_event = {
+				id = mem_surveyor.125
+				days = 3600
+			}
 			event_target:mem_surveyor_country = {
 				add_trust = {
 					who = root
@@ -2148,7 +2144,6 @@ country_event = {
 		is_dialog_only = yes
 		response_text = mem_surveyor.120.d.response
 	}
-
 	# Survey Reevaluation
 	option = {
 		name = mem_surveyor.120.e
@@ -2169,37 +2164,59 @@ country_event = {
 					has_country_flag = mem_surveyor_reevaluation
 				}
 			}
+			inline_script = {
+				script = mem_surveyor/resource_allow
+				RESOURCE = energy
+				AMOUNT = value:curator_purchase_cost|COST|mem_surveyor_reevaluation_cost|
+			}
 		}
 		inline_script = {
-			script = events/resource_cost_with_allow
+			script = mem_surveyor/resource_cost
 			RESOURCE = energy
 			AMOUNT = value:curator_purchase_cost|COST|mem_surveyor_reevaluation_cost|
-		}		
+		}
 		hidden_effect = {
 			set_timed_country_flag = {
 				flag = mem_surveyor_reevaluation
 				days = 3600
 			}
-			country_event = { id = mem_surveyor.124 days = 120 random = 60 }
-
+			country_event = {
+				id = mem_surveyor.124
+				days = 120
+				random = 60
+			}
 			# Chance for additional deposits
 			random_list = {
-				80 = { country_event = { id = mem_surveyor.124 days = 720 random = 360 } }
-				20 = {}
+				80 = {
+					country_event = {
+						id = mem_surveyor.124
+						days = 720
+						random = 360
+					}
+				}
+				20 = {
+				}
 			}
-
 			random_list = {
-				50 = { country_event = { id = mem_surveyor.124 days = 1440 random = 360 } }
-				50 = {}
+				50 = {
+					country_event = {
+						id = mem_surveyor.124
+						days = 1440
+						random = 360
+					}
+				}
+				50 = {
+				}
 			}
-			
 			# Ask to renew the deal
-			country_event = { id = mem_surveyor.126 days = 3600 }
+			country_event = {
+				id = mem_surveyor.126
+				days = 3600
+			}
 		}
 		is_dialog_only = yes
 		response_text = mem_surveyor.120.e.response
 	}
-	
 	option = {
 		name = MEM_SURVEYOR_EXIT
 		default_hide_option = yes
@@ -2227,7 +2244,7 @@ country_event = {
 		portrait = event_target:mem_surveyor_country
 	}
 	# Tell us about the mission
-	option = {		
+	option = {
 		name = mem_surveyor.121.a
 		is_dialog_only = yes
 		response_text = mem_surveyor.121.a.answer
@@ -2275,7 +2292,6 @@ country_event = {
 			}
 		}
 	}
-
 	option = {
 		name = BACK
 		default_hide_option = yes
@@ -2283,7 +2299,7 @@ country_event = {
 			country_event = {
 				id = mem_surveyor.120
 			}
-		}		
+		}
 	}
 }
 
@@ -2299,7 +2315,7 @@ country_event = {
 				has_country_flag = mem_surveyor_donated_energy
 				has_country_flag = mem_surveyor_donated_minerals
 				has_country_flag = mem_surveyor_donated_alloys
-			}			
+			}
 		}
 	}
 	desc = mem_surveyor.122.desc.2
@@ -2339,7 +2355,7 @@ country_event = {
 			set_country_flag = mem_surveyor_donated_energy
 		}
 		add_resource = {
-			energy = -2500 
+			energy = -2500
 		}
 	}
 	# Donate Minerals
@@ -2370,7 +2386,7 @@ country_event = {
 			set_country_flag = mem_surveyor_donated_minerals
 		}
 		add_resource = {
-			minerals = -2500 
+			minerals = -2500
 		}
 	}
 	# Donate Alloys
@@ -2384,7 +2400,7 @@ country_event = {
 				NOT = {
 					has_country_flag = mem_surveyor_donated_alloys
 				}
-			}			
+			}
 			resource_stockpile_compare = {
 				resource = alloys
 				value >= 1250
@@ -2401,7 +2417,7 @@ country_event = {
 			set_country_flag = mem_surveyor_donated_alloys
 		}
 		add_resource = {
-			alloys = -1250 
+			alloys = -1250
 		}
 	}
 	# Ask for odd jobs
@@ -2441,7 +2457,7 @@ country_event = {
 			country_event = {
 				id = mem_surveyor.120
 			}
-		}		
+		}
 	}
 }
 
@@ -2453,8 +2469,8 @@ country_event = {
 	desc = {
 		trigger = {
 			NOR = {
-				has_country_flag = mem_surveryor_curio_response		
-				has_country_flag = mem_surveyor_precursor_response		
+				has_country_flag = mem_surveryor_curio_response
+				has_country_flag = mem_surveyor_precursor_response
 			}
 		}
 		text = mem_surveyor.123.desc.1
@@ -2462,8 +2478,8 @@ country_event = {
 	desc = {
 		trigger = {
 			NOR = {
-				has_country_flag = mem_surveryor_curio_response		
-				has_country_flag = mem_surveyor_precursor_response		
+				has_country_flag = mem_surveryor_curio_response
+				has_country_flag = mem_surveyor_precursor_response
 			}
 		}
 		text = mem_surveyor.123.desc.2
@@ -2471,8 +2487,8 @@ country_event = {
 	desc = {
 		trigger = {
 			NOR = {
-				has_country_flag = mem_surveryor_curio_response		
-				has_country_flag = mem_surveyor_precursor_response		
+				has_country_flag = mem_surveryor_curio_response
+				has_country_flag = mem_surveyor_precursor_response
 			}
 		}
 		text = mem_surveyor.123.desc.3
@@ -2499,7 +2515,6 @@ country_event = {
 		room = mem_surveyor_green_room
 		portrait = event_target:mem_surveyor_country
 	}
-
 	immediate = {
 		# Set costs based on empire size
 		# Base of 500 Energy
@@ -2522,7 +2537,6 @@ country_event = {
 			which = mem_surveyor_curio_refund
 			value = -1
 		}
-
 		# I want to have multiple different positive answers for the curio handout so I need a little trick for the scripted loc
 		remove_country_flag = mem_surveyor_curio_pos_1
 		remove_country_flag = mem_surveyor_curio_pos_2
@@ -2539,7 +2553,6 @@ country_event = {
 			}
 		}
 	}
-
 	# Point us to something interesting
 	option = {
 		name = mem_surveyor.123.a
@@ -2560,9 +2573,14 @@ country_event = {
 					has_country_flag = mem_surveyor_curio_soldout
 				}
 			}
+			inline_script = {
+				script = mem_surveyor/resource_allow
+				RESOURCE = energy
+				AMOUNT = value:curator_purchase_cost|COST|mem_surveyor_curio_cost|
+			}
 		}
 		inline_script = {
-			script = events/resource_cost_with_allow
+			script = mem_surveyor/resource_cost
 			RESOURCE = energy
 			AMOUNT = value:curator_purchase_cost|COST|mem_surveyor_curio_cost|
 		}
@@ -2675,18 +2693,17 @@ country_event = {
 						}
 					}
 					set_country_flag = mem_surveyor_curio_soldout
-				}				
+				}
 				add_resource = {
 					energy = 1
-					mult = mem_surveyor_curio_refund 
+					mult = mem_surveyor_curio_refund
 				}
-			}	
+			}
 			country_event = {
 				id = mem_surveyor.123
-			}		
+			}
 		}
 	}
-
 	# WPDR Info
 	option = {
 		name = mem_surveyor.123.c
@@ -2701,7 +2718,6 @@ country_event = {
 			}
 		}
 	}
-
 	# Buy Precursor Insights
 	option = {
 		name = mem_surveyor.123.b
@@ -2766,10 +2782,15 @@ country_event = {
 						value >= 25
 					}
 				}
-			}			
+			}
+			inline_script = {
+				script = mem_surveyor/resource_allow
+				RESOURCE = energy
+				AMOUNT = value:curator_purchase_cost|COST|mem_surveyor_curio_cost|
+			}
 		}
 		inline_script = {
-			script = events/resource_cost_with_allow
+			script = mem_surveyor/resource_cost
 			RESOURCE = energy
 			AMOUNT = value:curator_purchase_cost|COST|mem_surveyor_curio_cost|
 		}
@@ -2794,7 +2815,6 @@ country_event = {
 		# This vanilla effect adds one to the player's precursor counter
 		collector_surrenders_artifact = yes
 	}
-
 	option = {
 		name = BACK
 		default_hide_option = yes
@@ -2804,7 +2824,7 @@ country_event = {
 			country_event = {
 				id = mem_surveyor.120
 			}
-		}		
+		}
 	}
 }
 
@@ -2863,7 +2883,9 @@ country_event = {
 							exotic_gas_candidate = yes
 							rare_crystal_candidate = yes
 							volatile_motes_candidate = yes
-							ROOT = { is_gestalt = no }
+							ROOT = {
+								is_gestalt = no
+							}
 						}
 					}
 					save_event_target_as = chosen_planet
@@ -2890,7 +2912,7 @@ country_event = {
 							NOT = {
 								has_planet_flag = mem_surveyor_reevaluation
 							}
-						}						
+						}
 					}
 					factor = 0
 				}
@@ -2966,122 +2988,176 @@ country_event = {
 					}
 				}
 				locked_random_list = {
-
 					# Energy
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { energy_candidate = no }
+							event_target:chosen_planet = {
+								energy_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_energy_5 }
+						event_target:chosen_planet = {
+							add_deposit = d_energy_5
+						}
 					}
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { energy_candidate = no }
+							event_target:chosen_planet = {
+								energy_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_energy_7 }
+						event_target:chosen_planet = {
+							add_deposit = d_energy_7
+						}
 					}
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { energy_candidate = no }
+							event_target:chosen_planet = {
+								energy_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_energy_9 }
+						event_target:chosen_planet = {
+							add_deposit = d_energy_9
+						}
 					}
-		
 					# Minerals
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { mineral_candidate = no }
+							event_target:chosen_planet = {
+								mineral_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_minerals_5 }
+						event_target:chosen_planet = {
+							add_deposit = d_minerals_5
+						}
 					}
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { mineral_candidate = no }
+							event_target:chosen_planet = {
+								mineral_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_minerals_7 }
+						event_target:chosen_planet = {
+							add_deposit = d_minerals_7
+						}
 					}
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { mineral_candidate = no }
+							event_target:chosen_planet = {
+								mineral_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_minerals_9 }
+						event_target:chosen_planet = {
+							add_deposit = d_minerals_9
+						}
 					}
-		
 					# Physics
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { research_candidate = no }
+							event_target:chosen_planet = {
+								research_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_physics_5 }
+						event_target:chosen_planet = {
+							add_deposit = d_physics_5
+						}
 					}
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { research_candidate = no }
+							event_target:chosen_planet = {
+								research_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_physics_7 }
+						event_target:chosen_planet = {
+							add_deposit = d_physics_7
+						}
 					}
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { research_candidate = no }
+							event_target:chosen_planet = {
+								research_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_physics_9 }
+						event_target:chosen_planet = {
+							add_deposit = d_physics_9
+						}
 					}
-		
 					# Society
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { research_candidate = no }
+							event_target:chosen_planet = {
+								research_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_society_5 }
+						event_target:chosen_planet = {
+							add_deposit = d_society_5
+						}
 					}
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { research_candidate = no }
+							event_target:chosen_planet = {
+								research_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_society_7 }
+						event_target:chosen_planet = {
+							add_deposit = d_society_7
+						}
 					}
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { research_candidate = no }
+							event_target:chosen_planet = {
+								research_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_society_9 }
+						event_target:chosen_planet = {
+							add_deposit = d_society_9
+						}
 					}
-		
 					# Engineering
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { research_candidate = no }
+							event_target:chosen_planet = {
+								research_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_engineering_5 }
+						event_target:chosen_planet = {
+							add_deposit = d_engineering_5
+						}
 					}
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { research_candidate = no }
+							event_target:chosen_planet = {
+								research_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_engineering_7 }
+						event_target:chosen_planet = {
+							add_deposit = d_engineering_7
+						}
 					}
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { research_candidate = no }
+							event_target:chosen_planet = {
+								research_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_engineering_9 }
+						event_target:chosen_planet = {
+							add_deposit = d_engineering_9
+						}
 					}
-					
 					# Had one in my game but it does not seem to be collected, disabling for now
 					# Trade
 					# 10 = {
@@ -3093,97 +3169,141 @@ country_event = {
 					# 10 = {
 					# 	event_target:chosen_planet = { add_deposit = d_trade_value_9 }
 					# }
-		
 					# Alloys
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { alloy_candidate = no }
+							event_target:chosen_planet = {
+								alloy_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_alloys_3 }
+						event_target:chosen_planet = {
+							add_deposit = d_alloys_3
+						}
 					}
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { alloy_candidate = no }
+							event_target:chosen_planet = {
+								alloy_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_alloys_4 }
+						event_target:chosen_planet = {
+							add_deposit = d_alloys_4
+						}
 					}
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { alloy_candidate = no }
+							event_target:chosen_planet = {
+								alloy_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_alloys_5 }
+						event_target:chosen_planet = {
+							add_deposit = d_alloys_5
+						}
 					}
-		
 					# Exotic Gas
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { exotic_gas_candidate = no }
+							event_target:chosen_planet = {
+								exotic_gas_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_exotic_gases_1 }
+						event_target:chosen_planet = {
+							add_deposit = d_exotic_gases_1
+						}
 					}
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { exotic_gas_candidate = no }
+							event_target:chosen_planet = {
+								exotic_gas_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_exotic_gases_2 }
+						event_target:chosen_planet = {
+							add_deposit = d_exotic_gases_2
+						}
 					}
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { exotic_gas_candidate = no }
+							event_target:chosen_planet = {
+								exotic_gas_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_exotic_gases_3 }
+						event_target:chosen_planet = {
+							add_deposit = d_exotic_gases_3
+						}
 					}
-		
 					# Rare Crystals
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { rare_crystal_candidate = no }
+							event_target:chosen_planet = {
+								rare_crystal_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_rare_crystals_1 }
+						event_target:chosen_planet = {
+							add_deposit = d_rare_crystals_1
+						}
 					}
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { rare_crystal_candidate = no }
+							event_target:chosen_planet = {
+								rare_crystal_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_rare_crystals_2 }
+						event_target:chosen_planet = {
+							add_deposit = d_rare_crystals_2
+						}
 					}
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { rare_crystal_candidate = no }
+							event_target:chosen_planet = {
+								rare_crystal_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_rare_crystals_3 }
+						event_target:chosen_planet = {
+							add_deposit = d_rare_crystals_3
+						}
 					}
-		
 					# Volatile Motes
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { volatile_motes_candidate = no }
+							event_target:chosen_planet = {
+								volatile_motes_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_volatile_motes_1 }
+						event_target:chosen_planet = {
+							add_deposit = d_volatile_motes_1
+						}
 					}
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { volatile_motes_candidate = no }
+							event_target:chosen_planet = {
+								volatile_motes_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_volatile_motes_2 }
+						event_target:chosen_planet = {
+							add_deposit = d_volatile_motes_2
+						}
 					}
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = { volatile_motes_candidate = no }
+							event_target:chosen_planet = {
+								volatile_motes_candidate = no
+							}
 						}
-						event_target:chosen_planet = { add_deposit = d_volatile_motes_3 }
+						event_target:chosen_planet = {
+							add_deposit = d_volatile_motes_3
+						}
 					}
 				}
 			}
@@ -3201,7 +3321,6 @@ country_event = {
 					10 = {
 						add_deposit = d_rich_mountain
 					}
-
 					# Agricultural districts
 					10 = {
 						add_deposit = d_fungal_caves
@@ -3209,27 +3328,22 @@ country_event = {
 					10 = {
 						add_deposit = d_black_soil
 					}
-
 					# Energy
 					20 = {
 						add_deposit = d_betharian_deposit
 					}
-					
 					# Motes
 					10 = {
 						add_deposit = d_dust_caverns
 					}
-					
 					# Gasses
 					10 = {
 						add_deposit = d_bubbling_swamp
 					}
-					
 					# Crystals
 					10 = {
 						add_deposit = d_crystalline_caverns
-					}			
-
+					}
 					# Special
 					10 = {
 						add_deposit = d_alien_pets_deposit
@@ -3285,7 +3399,6 @@ country_event = {
 			value = value:edict_size_effect
 		}
 	}
-
 	# Survey Buff
 	option = {
 		name = mem_surveyor.125.a
@@ -3293,9 +3406,14 @@ country_event = {
 			NOT = {
 				has_modifier = mem_surveyor_survey_buff
 			}
+			inline_script = {
+				script = mem_surveyor/resource_allow
+				RESOURCE = energy
+				AMOUNT = value:curator_purchase_cost|COST|mem_surveyor_insight_cost|
+			}
 		}
 		inline_script = {
-			script = events/resource_cost_with_allow
+			script = mem_surveyor/resource_cost
 			RESOURCE = energy
 			AMOUNT = value:curator_purchase_cost|COST|mem_surveyor_insight_cost|
 		}
@@ -3307,7 +3425,10 @@ country_event = {
 		hidden_effect = {
 			set_country_flag = mem_surveyor_insight_obtained
 			# Ask to renew the deal
-			country_event = { id = mem_surveyor.125 days = 3600 }
+			country_event = {
+				id = mem_surveyor.125
+				days = 3600
+			}
 			event_target:mem_surveyor_country = {
 				add_trust = {
 					who = root
@@ -3316,7 +3437,6 @@ country_event = {
 			}
 		}
 	}
-
 	option = {
 		name = mem_surveyor.125.b
 		default_hide_option = yes
@@ -3362,7 +3482,6 @@ country_event = {
 			value = value:edict_size_effect
 		}
 	}
-
 	# Survey Reevaluation
 	option = {
 		name = mem_surveyor.125.a
@@ -3383,35 +3502,57 @@ country_event = {
 					has_country_flag = mem_surveyor_reevaluation
 				}
 			}
+			inline_script = {
+				script = mem_surveyor/resource_allow
+				RESOURCE = energy
+				AMOUNT = value:curator_purchase_cost|COST|mem_surveyor_reevaluation_cost|
+			}
 		}
 		inline_script = {
-			script = events/resource_cost_with_allow
+			script = mem_surveyor/resource_cost
 			RESOURCE = energy
 			AMOUNT = value:curator_purchase_cost|COST|mem_surveyor_reevaluation_cost|
-		}		
+		}
 		hidden_effect = {
 			set_timed_country_flag = {
 				flag = mem_surveyor_reevaluation
 				days = 3600
 			}
-			country_event = { id = mem_surveyor.124 days = 120 random = 60 }
-
+			country_event = {
+				id = mem_surveyor.124
+				days = 120
+				random = 60
+			}
 			# Chance for additional deposits
 			random_list = {
-				80 = { country_event = { id = mem_surveyor.124 days = 720 random = 360 } }
-				20 = {}
+				80 = {
+					country_event = {
+						id = mem_surveyor.124
+						days = 720
+						random = 360
+					}
+				}
+				20 = {
+				}
 			}
-
 			random_list = {
-				50 = { country_event = { id = mem_surveyor.124 days = 1440 random = 360 } }
-				50 = {}
+				50 = {
+					country_event = {
+						id = mem_surveyor.124
+						days = 1440
+						random = 360
+					}
+				}
+				50 = {
+				}
 			}
-			
 			# Ask to renew the deal
-			country_event = { id = mem_surveyor.126 days = 3600 }
+			country_event = {
+				id = mem_surveyor.126
+				days = 3600
+			}
 		}
 	}
-
 	option = {
 		name = mem_surveyor.125.b
 		default_hide_option = yes
@@ -3454,7 +3595,6 @@ country_event = {
 			value = value:edict_size_effect
 		}
 	}
-
 	# Give us the Info
 	option = {
 		name = mem_surveyor.127.a
@@ -3462,9 +3602,14 @@ country_event = {
 			NOT = {
 				has_modifier = mem_wpdr_weakpoint_exploitation
 			}
+			inline_script = {
+				script = mem_surveyor/resource_allow
+				RESOURCE = energy
+				AMOUNT = value:curator_purchase_cost|COST|mem_surveyor_wpdr_info_cost|
+			}
 		}
 		inline_script = {
-			script = events/resource_cost_with_allow
+			script = mem_surveyor/resource_cost
 			RESOURCE = energy
 			AMOUNT = value:curator_purchase_cost|COST|mem_surveyor_wpdr_info_cost|
 		}
@@ -3472,7 +3617,6 @@ country_event = {
 			modifier = mem_wpdr_weakpoint_exploitation
 		}
 	}
-
 	option = {
 		name = BACK
 		default_hide_option = yes
@@ -3480,7 +3624,7 @@ country_event = {
 			country_event = {
 				id = mem_surveyor.123
 			}
-		}		
+		}
 	}
 }
 
@@ -4467,7 +4611,6 @@ event = {
 # 		}
 # 	}
 # }
-
 # Planet constructs outpost after conquest
 planet_event = {
 	id = mem_surveyor.217
@@ -6987,19 +7130,16 @@ country_event = {
 }
 
 ########### cpoied from _2
-
 # Origin event
 country_event = {
-    id = mem_surveyor.500
-    hide_window = yes
-    is_triggered_only = yes
-	
+	id = mem_surveyor.500
+	hide_window = yes
+	is_triggered_only = yes
 	trigger = {
 		has_origin = origin_mem_ceaseless_gaze
 	}
-
 	immediate = {
-		log = "[This.GetName] has Surveyor Origin" 
+		log = "[This.GetName] has Surveyor Origin"
 		set_global_flag = mem_surveyor_origin_happened
 		capital_scope = {
 			random_system = {
@@ -7016,7 +7156,9 @@ country_event = {
 			}
 		}
 		event_target:mem_surveyor_fleet = {
-			fleet_event = { id = mem_surveyor.2 }
+			fleet_event = {
+				id = mem_surveyor.2
+			}
 		}
 		set_country_flag = mem_surveyor_spotted_probe
 		set_country_flag = mem_surveyor_opened_comms
@@ -7028,22 +7170,18 @@ country_event = {
 first_contact_event = {
 	id = mem_surveyor.600
 	hide_window = yes
-	
 	is_triggered_only = yes
 	first_contact = yes
-
 	trigger = {
 		owner = {
 			NOT = {
 				has_origin = origin_mem_ceaseless_gaze
-			}			
+			}
 		}
-		
 		contact_country = {
 			is_country_type = mem_surveyor_country_green
 		}
 	}
-
 	immediate = {
 		set_first_contact_stage = mem_surveyor_stage_1
 	}
@@ -7054,33 +7192,26 @@ first_contact_event = {
 	id = mem_surveyor.601
 	title = mem_surveyor.601.name
 	desc = mem_surveyor.601.desc
-
 	show_sound = event_alien_signal
 	picture = GFX_evt_unidentified_ship
-
 	is_triggered_only = yes
 	first_contact = yes
-
 	trigger = {
 		owner = {
 			NOT = {
 				has_origin = origin_mem_ceaseless_gaze
-			}			
+			}
 		}
-		
 		contact_country = {
 			is_country_type = mem_surveyor_country_green
 		}
 	}
-
 	immediate = {
 		set_site_progress_locked = yes
 	}
-
 	after = {
 		set_site_progress_locked = no
 	}
-
 	option = {
 		name = PROCEED
 		set_first_contact_stage = mem_surveyor_stage_2
@@ -7092,29 +7223,23 @@ first_contact_event = {
 	id = mem_surveyor.602
 	title = mem_surveyor.602.name
 	desc = mem_surveyor.602.desc
-
 	show_sound = event_alien_signal
 	picture = GFX_evt_unidentified_ship
-
 	is_triggered_only = yes
 	first_contact = yes
-
 	trigger = {
 		owner = {
 			NOT = {
 				has_origin = origin_mem_ceaseless_gaze
-			}			
+			}
 		}
-		
 		contact_country = {
 			is_country_type = mem_surveyor_country_green
 		}
 	}
-
 	immediate = {
 		set_site_progress_locked = yes
 	}
-
 	after = {
 		set_site_progress_locked = no
 		finish_first_contact_effect = yes
@@ -7123,19 +7248,23 @@ first_contact_event = {
 				set_country_flag = mem_surveyor_opened_comms
 				set_country_flag = mem_surveyor_solved_fc
 				establish_communications_no_message = root.contact_country
-				country_event = { id = mem_surveyor.303 days = 120 random = 180 }
-				country_event = { id = mem_surveyor.5 }
+				country_event = {
+					id = mem_surveyor.303
+					days = 120
+					random = 180
+				}
+				country_event = {
+					id = mem_surveyor.5
+				}
 			}
 		}
 	}
-
 	option = {
 		name = ON_SCREEN
 	}
 }
 
 ############ new events
-
 # Probe decides to flip but good
 country_event = {
 	id = mem_surveyor.1001
@@ -7377,7 +7506,6 @@ country_event = {
 				save_global_event_target_as = mem_surveyor_robotomite_species
 			}
 		}
-
 		create_country = {
 			name = "Sentinel Probe"
 			type = default
@@ -7413,7 +7541,6 @@ country_event = {
 					modifier = mem_surveyor_probe_bonus
 					days = -1
 				}
-				
 				set_country_type = default
 				add_resource = {
 					alloys = 5000
@@ -7643,7 +7770,7 @@ country_event = {
 	option = {
 		name = mem_surveyor.1015.purifier
 		exclusive_trigger = {
-		 is_homicidal = yes
+			is_homicidal = yes
 		}
 	}
 	after = {
@@ -7673,7 +7800,6 @@ country_event = {
 		random_country = {
 			limit = {
 				is_country_type = mem_surveyor_country_green
-				
 			}
 			save_event_target_as = mem_surveyor_country_green
 		}
@@ -7686,7 +7812,6 @@ country_event = {
 			}
 		}
 	}
-
 	option = {
 		name = mem_surveyor.1020.b
 		hidden_effect = {
@@ -7704,4 +7829,3 @@ country_event = {
 		}
 	}
 }
-

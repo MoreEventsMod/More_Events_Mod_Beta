@@ -1,16 +1,55 @@
 mem_caretaker_drone = {
 	category = complex_drone
-	
 	swappable_data = {
-		default = {			
+		# this one takes care of existing pre-ftls
+		default = {
 			icon = robot_caretaker
 			condition_string = DRONE_JOB_TRIGGER
 			building_icon = building_mem_eden_protocol_seeder_1
 		}
+		# # this one terraforms
+		# swap_type = {
+		# 	trigger = {
+		# 		has_building = building_mem_eden_protocol_terraformer_1
+		# 	}
+		# 	name = mem_environmental_adjuster_drone
+		# 	desc = mem_environmental_adjuster_drone
+		# 	icon = ranger
+		# 	condition_string = DRONE_JOB_TRIGGER
+		# 	building_icon = building_mem_eden_protocol_terraformer_1
+		# 	weight = 5
+		# }
+		# # this one seeds
+		# swap_type = {
+		# 	trigger = {
+		# 		has_building = building_mem_eden_protocol_seeder_1
+		# 	}
+		# 	name = mem_seeder_drone
+		# 	desc = mem_seeder_drone
+		# 	icon = xeno_zoo_animal
+		# 	condition_string = DRONE_JOB_TRIGGER
+		# 	building_icon = building_mem_eden_protocol_seeder_1
+		# 	weight = 10
+		# }
+		# # this one cuddles cyborgs
+		# swap_type = {
+		# 	trigger = {
+		# 		exists = owner
+		# 		owner = {
+		# 			has_valid_civic = civic_machine_assimilator
+		# 		}
+		# 	}
+		# 	name = mem_organic_booster_drone
+		# 	desc = mem_organic_booster_drone
+		# 	icon = xeno_zoo_keeper
+		# 	condition_string = DRONE_JOB_TRIGGER
+		# 	building_icon = building_mem_eden_protocol_seeder_1
+		# 	weight = 20
+		# }
 	}
-	
-	tags = { unity }
-	
+	tags = {
+		unity
+	}
 	possible_pre_triggers = {
 		has_owner = yes
 		is_enslaved = no
@@ -18,112 +57,42 @@ mem_caretaker_drone = {
 		is_being_assimilated = no
 		is_sapient = yes
 	}
-	
 	possible_precalc = can_fill_drone_job
-	
 	possible = {
 		can_think = yes
+		NOT = {
+			has_trait = trait_cybernetic
+		}
 	}
-	
 	resources = {
 		category = planet_bureaucrats
+		# Base game has 4 unity for 4 energy (4.0.x)
 		produces = {
-			unity = 5
+			unity = 6
 		}
-		produces = {
-			trigger = {
-				owner = {
-					has_valid_civic = civic_machine_servitor
-				}
-			}
-			consumer_goods = 2
-		}
+		# Caretaking + seeding costs energy
 		upkeep = {
 			energy = 4
 		}
-		upkeep = {
-			minerals = 2
-			trigger = {
-				owner = {
-					has_valid_civic = civic_machine_servitor
-				}
-			}
-		}
 	}
-	
-	triggered_planet_modifier = {
-		potential = {
-			exists = owner
-		}
-		planet_amenities_no_happiness_add = 100
-		mult = value:scripted_modifier_mult|MODIFIER|pop_job_amenities_mult|
-	}
-	
 	country_modifier = {
-		empire_size_add = -1
-		mem_eden_progress_add = 0.15
+		mem_eden_progress_add = 0.2
+		station_observers_produces_mult = 0.03
 	}
-	
-	triggered_country_modifier = {
+	triggered_planet_modifier = {
 		potential = {
 			owner = {
-				has_country_flag = mem_eden_protocol_empire_size_per_job
+				has_valid_civic = civic_machine_servitor
 			}
 		}
-		empire_size_add = -3
+		planet_pops_consumer_goods_upkeep_mult = -0.03
 	}
-	
-	#triggered_planet_modifier = {
-	#	potential = {
-	#		owner = {
-	#			has_valid_civic = civic_machine_assimilator
-	#		}
-	#	}
-	#	planet_cyborg_jobs_produces_mult = 0.05
-	#}
-	
-	triggered_planet_modifier = {
-		potential = {
-			planet = {
-				has_active_building = building_league_offices
-			}
-		}
-		planet_amenities_no_happiness_add = 100
-		mult = value:scripted_modifier_mult|MODIFIER|pop_job_amenities_mult|
-	}
-	
-	triggered_planet_modifier = {
-		potential = {
-			planet = {
-				has_modifier = planet_artifact_relays_machine
-			}
-		}
-		modifier = {
-			planet_stability_add = 2
-			planet_jobs_simple_drone_produces_mult = 0.01
-		}
-	}
-	
-	triggered_planet_modifier = {
-		potential = {
-			planet = {
-				exists = owner
-				owner = {
-					has_tradition = tr_modularity_4
-				}
-			}
-		}
-		planet_jobs_simple_drone_produces_mult = 0.02
-	}
-		
+	inline_script = "mem_eden_protocol/bureaucrat_output"
 	weight = {
 		weight = @synapse_drone_job_weight
 		mult = value:job_weights_modifier|JOB|coordinator|RESOURCE|unity|
-		
 	}
-
 	inline_script = "jobs/automodding_priority_unity"
-
 	promotion = {
 		time = @standard_promotion_time
 		effect = {
@@ -137,7 +106,6 @@ mem_caretaker_drone = {
 
 mem_seeder_drone = {
 	category = complex_drone
-	
 	swappable_data = {
 		default = {
 			icon = xeno_zoo_animal
@@ -145,7 +113,6 @@ mem_seeder_drone = {
 			building_icon = building_mem_eden_protocol_seeder_1
 		}
 	}
-	
 	possible_pre_triggers = {
 		has_owner = yes
 		is_enslaved = no
@@ -153,75 +120,29 @@ mem_seeder_drone = {
 		is_being_assimilated = no
 		is_sapient = yes
 	}
-	
 	possible_precalc = can_fill_drone_job
-	
 	possible = {
 		can_think = yes
 	}
-	
 	resources = {
 		category = planet_bureaucrats
 		produces = {
-			unity = 6
+			unity = 4
 			society_research = 2
 		}
 		upkeep = {
 			energy = 4
 		}
 	}
-	
-	planet_modifier = {
-		planet_amenities_no_happiness_add = 100
-		
-	}
 	country_modifier = {
-		mem_eden_progress_add = 0.15
-		
+		mem_eden_progress_add = 0.1
 	}
-	
-	triggered_planet_modifier = {
-		potential = {
-			planet = {
-				has_active_building = building_league_offices
-			}
-		}
-		planet_amenities_no_happiness_add = 100
-		mult = value:scripted_modifier_mult|MODIFIER|pop_job_amenities_mult|
-	}
-	
-	triggered_planet_modifier = {
-		potential = {
-			planet = {
-				has_modifier = planet_artifact_relays_machine
-			}
-		}
-		modifier = {
-			planet_stability_add = 2
-			planet_jobs_simple_drone_produces_mult = 0.01
-		}
-	}
-	
-	triggered_planet_modifier = {
-		potential = {
-			planet = {
-				exists = owner
-				owner = {
-					has_tradition = tr_modularity_4
-				}
-			}
-		}
-		planet_jobs_simple_drone_produces_mult = 0.02
-	}
-		
+	inline_script = "mem_eden_protocol/bureaucrat_output"
 	weight = {
 		weight = @synapse_drone_job_weight
 		mult = value:job_weights_modifier|JOB|coordinator|RESOURCE|unity|
-		
 	}
-
 	inline_script = "jobs/automodding_priority_unity"
-
 	promotion = {
 		time = @standard_promotion_time
 		effect = {
@@ -235,7 +156,6 @@ mem_seeder_drone = {
 
 mem_environmental_adjuster_drone = {
 	category = complex_drone
-	
 	swappable_data = {
 		default = {
 			icon = ranger
@@ -243,7 +163,6 @@ mem_environmental_adjuster_drone = {
 			building_icon = building_mem_eden_protocol_terraformer_1
 		}
 	}
-	
 	possible_pre_triggers = {
 		has_owner = yes
 		is_enslaved = no
@@ -251,71 +170,29 @@ mem_environmental_adjuster_drone = {
 		is_being_assimilated = no
 		is_sapient = yes
 	}
-	
 	possible_precalc = can_fill_drone_job
-	
 	possible = {
 		can_think = yes
 	}
-	
 	resources = {
 		category = planet_bureaucrats
 		produces = {
-			unity = 6
+			unity = 4
+			engineering_research = 2
 		}
 		upkeep = {
 			energy = 4
-			society_research = 4
 		}
 	}
-	
-	planet_modifier = { # DA dont get this 
-		planet_amenities_no_happiness_add = 100
-		#mem_eden_progress_add = 0.15
+	country_modifier = {
+		mem_eden_progress_add = 0.1
 	}
-	
-	triggered_planet_modifier = {
-		potential = {
-			planet = {
-				has_active_building = building_league_offices
-			}
-		}
-		planet_amenities_no_happiness_add = 100
-		mult = value:scripted_modifier_mult|MODIFIER|pop_job_amenities_mult|
-	}
-	
-	triggered_planet_modifier = {
-		potential = {
-			planet = {
-				has_modifier = planet_artifact_relays_machine
-			}
-		}
-		modifier = {
-			planet_stability_add = 2
-			planet_jobs_simple_drone_produces_mult = 0.01
-		}
-	}
-	
-	triggered_planet_modifier = {
-		potential = {
-			planet = {
-				exists = owner
-				owner = {
-					has_tradition = tr_modularity_4
-				}
-			}
-		}
-		planet_jobs_simple_drone_produces_mult = 0.02
-	}
-		
+	inline_script = "mem_eden_protocol/bureaucrat_output"
 	weight = {
 		weight = @synapse_drone_job_weight
 		mult = value:job_weights_modifier|JOB|coordinator|RESOURCE|unity|
-		
 	}
-
 	inline_script = "jobs/automodding_priority_unity"
-
 	promotion = {
 		time = @standard_promotion_time
 		effect = {
@@ -329,7 +206,6 @@ mem_environmental_adjuster_drone = {
 
 mem_organic_booster_drone = {
 	category = complex_drone
-	
 	swappable_data = {
 		default = {
 			icon = xeno_zoo_keeper
@@ -337,7 +213,6 @@ mem_organic_booster_drone = {
 			building_icon = building_mem_eden_protocol_da_organicbooster_1
 		}
 	}
-	
 	possible_pre_triggers = {
 		has_owner = yes
 		is_enslaved = no
@@ -345,83 +220,34 @@ mem_organic_booster_drone = {
 		is_being_assimilated = no
 		is_sapient = yes
 	}
-	
 	possible_precalc = can_fill_drone_job
-	
 	possible = {
 		can_think = yes
 		NOT = {
 			has_trait = trait_cybernetic
 		}
 	}
-	
 	resources = {
 		category = planet_bureaucrats
 		produces = {
-			unity = 7
-			food = 1 # switch 1 unity to 1 food, dont know if thats appropiate
+			unity = 6
 		}
 		upkeep = {
 			energy = 4
 		}
-	}	
-	
+	}
 	planet_modifier = {
-		planet_jobs_cyborg_worker_produces_mult = 0.05
-		
+		logistic_growth_mult = 0.05
 	}
-	
-	triggered_country_modifier = {
-		potential = {
-			owner = {
-				has_country_flag = mem_eden_protocol_empire_size_per_job
-			}
-		}
-		empire_size_add = -4
+	country_modifier = {
+		mem_eden_progress_add = 0.1
 	}
-	
-	triggered_planet_modifier = {
-		potential = {
-			planet = {
-				has_active_building = building_league_offices
-			}
-		}
-		planet_amenities_no_happiness_add = 100
-		mult = value:scripted_modifier_mult|MODIFIER|pop_job_amenities_mult|
-	}
-	
-	triggered_planet_modifier = {
-		potential = {
-			planet = {
-				has_modifier = planet_artifact_relays_machine
-			}
-		}
-		modifier = {
-			planet_stability_add = 2
-			planet_jobs_simple_drone_produces_mult = 0.01
-		}
-	}
-	
-	triggered_planet_modifier = {
-		potential = {
-			planet = {
-				exists = owner
-				owner = {
-					has_tradition = tr_modularity_4
-				}
-			}
-		}
-		planet_jobs_simple_drone_produces_mult = 0.02
-	}
-		
+	inline_script = "mem_eden_protocol/bureaucrat_output"
 	weight = {
 		weight = @synapse_drone_job_weight
 		mult = value:job_weights_modifier|JOB|coordinator|RESOURCE|unity|
-		
 	}
-
 	inline_script = "jobs/automodding_priority_unity"
-
 	promotion = {
 		time = @standard_promotion_time
 		effect = {
@@ -432,5 +258,3 @@ mem_organic_booster_drone = {
 		}
 	}
 }
-
-
