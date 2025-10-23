@@ -214,9 +214,7 @@ country_event = {
 			}
 			small_artifact_reward = yes
 		}
-		hidden_effect = {
-			set_country_flag = mem_vazurans_seen_tech			# TRODO tradition trigger here
-		}
+		mem_vazurans_unlock_tradition = yes
 	}
 }
 
@@ -406,7 +404,6 @@ situation_event = {
 				}
 			}
 		}
-
 		event_target:mem_vazurans_target_system = {
 			owner = {
 				# establis coms if not already, should be handled by intro event of situation start
@@ -812,7 +809,6 @@ fleet_event = {
 				}
 				effect = {
 					id = mem_vazurans_action1125.2
-					
 					solar_system = {
 						random_system_planet = {
 							limit = {
@@ -1300,7 +1296,6 @@ country_event = {
 	event_chain = mem_vazuran_menace_chain
 	option = {
 		name = mem_vazurans.1101.a
-		
 	}
 	# TRODO special ancestors response
 	after = {
@@ -1315,3 +1310,80 @@ country_event = {
 # situation for reinforcements, based on tribute?
 # leaders for planet and fleet
 # tradition for ones who destroy vazurans or paid tribute: engaging with the crisis should be rewarding
+###################### TRADITION EVENTS ###################
+# kill pops
+planet_event = {
+	id = mem_vazurans.2000
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		has_building = building_mem_vazuran_worker_exploiter
+	}
+	immediate = {
+		# building can be built by both
+		if = {
+			limit = {
+				owner = {
+					has_policy_flag = slavery_allowed
+				}
+			}
+			every_owned_pop_group = {
+				limit = {
+					is_enslaved = yes
+				}
+				kill_pop_group = {
+					pop_group = THIS
+					percentage = 5
+				}
+			}
+		}
+		planet_event = {
+			id = mem_vazurans.2000
+			days = 1800
+		}
+	}
+}
+
+# Steal pops
+# (Before controller is switched)
+# This = country, leader attacker
+# From = country, planet owner
+# FromFrom = planet
+country_event = {
+	id = mem_vazurans.2005
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		has_tradition = tr_mem_vazurans_4
+		has_policy_flag = slavery_allowed
+		# From = {
+		# 	is_country_type = default
+		# }
+	}
+	immediate = {
+		FROMFROM = {
+			every_owned_pop_group = {
+				save_event_target_as = kidnapped_pop				# Pick the pop
+				ROOT = {
+					# Pick a planet
+					reroll_random = yes
+					random_owned_planet = {
+						save_event_target_as = target_planet
+					}
+				}
+				resettle_pop_group = {
+					POP_GROUP = this
+					PLANET = event_target:target_planet
+					PERCENTAGE = 0.1
+				}
+				# Vanilla does this, but lmao wonky af
+				# event_target:resettled_pop_group = {
+				# 	set_citizenship_type = {
+				# 		country = ROOT
+				# 		type = citizenship_slavery
+				# 	}
+				# }
+			}
+		}
+	}
+}

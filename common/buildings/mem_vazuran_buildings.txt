@@ -5,27 +5,22 @@ mem_building_ancient_palace = {
 	can_build = no
 	can_demolish = yes
 	position_priority = 0
-
 	icon = building_palace
-
 	category = government
-	
 	building_sets = {
 		fallen_empire
+		origin
 	}
-
 	potential = {
 		exists = owner
 		# owner = { is_country_type = mem_vazurans }
 	}
-
 	convert_to = {
 		building_hive_major_capital
 		building_machine_major_capital
 		building_major_capital
 		building_ancient_control_center
 	}
-
 	planet_modifier = {
 		planet_housing_add = 1200
 		planet_amenities_add = 1200
@@ -35,7 +30,6 @@ mem_building_ancient_palace = {
 		job_artisan_add = 600
 		job_foundry_add = 2400
 	}
-
 	resources = {
 		category = planet_buildings
 		cost = {
@@ -45,35 +39,31 @@ mem_building_ancient_palace = {
 			energy = 10
 		}
 	}
-
 	upgrades = {
 	}
 }
+
 # this is weird
 mem_building_fe_stronghold = {
 	base_buildtime = @b2_time
 	can_build = no
 	icon = building_fortress
-
 	category = army
-	
 	building_sets = {
 		fallen_empire
+		fortress
 	}
-
 	potential = {
 		exists = owner
 		# owner = { is_country_type = mem_vazurans }
 	}
-
 	convert_to = {
 		building_fortress
 	}
-
-	planet_modifier = {
-		job_soldier_add = 500
+	inline_script = {
+		script = jobs/soldiers_add
+		AMOUNT = 500
 	}
-
 	resources = {
 		category = planet_buildings
 		cost = {
@@ -81,6 +71,167 @@ mem_building_fe_stronghold = {
 		}
 		upkeep = {
 			energy = 10
+		}
+	}
+}
+
+building_mem_vazuran_core_forge = {
+	can_build = yes
+	base_buildtime = @b2_time
+	empire_limit = 1
+	position_priority = 100
+	category = manufacturing
+	building_sets = {
+		fallen_empire
+		industrial
+		foundry
+		engineering
+	}
+	potential = {
+		exists = owner
+		owner = {
+			is_wilderness_empire = no
+			has_tradition = tr_mem_vazurans_5
+		}
+	}
+	allow = {
+		has_major_upgraded_capital = yes
+		is_special_colony_type = no
+	}
+	destroy_trigger = {
+		exists = owner
+		owner = {
+			is_wilderness_empire = yes
+			NOT = {
+				has_tradition = tr_mem_vazurans_5
+			}
+		}
+	}
+	triggered_country_modifier = {
+		potential = {
+			always = yes
+		}
+		ship_armor_hardening_add = 1
+		mult = value:mem_vazuran_zone_foundry
+	}
+	triggered_desc = {
+		text = zone_mem_vazuran_research_engineering_workforce_tt
+	}
+	inline_script = {
+		script = "jobs/politician_add"
+		AMOUNT = @building_static_jobs_low
+	}
+	inline_script = {
+		script = jobs/foundry_add
+		AMOUNT = @building_static_jobs_high
+	}
+	inline_script = {
+		script = jobs/engineers_add
+		AMOUNT = @building_static_jobs_high
+	}
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b2_minerals
+			volatile_motes = @b2_rare_cost
+		}
+		upkeep = {
+			energy = @b2_upkeep
+			volatile_motes = @b2_rare_upkeep
+		}
+	}
+}
+
+building_mem_vazuran_worker_exploiter = {
+	can_build = yes
+	base_buildtime = @b2_time
+	planet_limit = 1
+	position_priority = 100
+	category = resource
+	building_sets = {
+		fallen_empire
+		mining
+		farming
+		generator
+	}
+	potential = {
+		exists = owner
+		owner = {
+			is_wilderness_empire = no
+			has_tradition = tr_mem_vazurans_2
+		}
+	}
+	allow = {
+	}
+	destroy_trigger = {
+		exists = owner
+		owner = {
+			is_wilderness_empire = yes
+			NOT = {
+				has_tradition = tr_mem_vazurans_2
+			}
+		}
+	}
+	on_built = {
+		hidden_effect = {
+			# kill pops
+			planet_event = {
+				id = mem_vazurans.2000
+				days = 360
+			}
+		}
+	}
+	triggered_desc = {
+		trigger = {
+			owner = {
+				has_policy_flag = slavery_allowed
+			}
+		}
+		text = building_mem_vazuran_worker_exploiter_tt
+	}
+	triggered_planet_modifier = {
+		potential = {
+			owner = {
+				has_policy_flag = slavery_allowed
+			}
+		}
+		pop_slave_bonus_workforce_mult = 0.5
+	}
+	triggered_planet_modifier = {
+		potential = {
+			AND = {
+				owner = {
+					NOT = {
+						has_policy_flag = slavery_allowed
+					}
+					is_gestalt = yes
+				}
+			}
+		}
+		planet_jobs_simple_drone_produces_mult = 0.15
+		pop_amenities_usage_mult = 0.2
+	}
+	triggered_planet_modifier = {
+		potential = {
+			AND = {
+				owner = {
+					NOT = {
+						has_policy_flag = slavery_allowed
+					}
+					is_gestalt = no
+				}
+			}
+		}
+		planet_jobs_worker_produces_mult = 0.15
+		pop_amenities_usage_mult = 0.2
+	}
+	resources = {
+		category = planet_buildings
+		cost = {
+			minerals = @b2_minerals
+		}
+		upkeep = {
+			energy = @b2_upkeep
 		}
 	}
 }
