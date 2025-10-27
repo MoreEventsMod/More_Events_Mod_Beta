@@ -345,6 +345,68 @@ mem_vazurans_unlock_tradition = {
 	}
 }
 
+mem_vazurans_give_raider_points = {
+	hidden_effect = {
+		if = {
+			limit = {
+				exists = event_target:mem_vazurans_country
+			}
+			event_target:mem_vazurans_country = {
+				random_situation = {
+					limit = {
+						is_situation_type = mem_vazuran_raiding
+					}
+					# tracks all, raided resources, lost fleets etc. should be deciding factor for outcome
+					change_variable = {
+						which = mem_vazuran_raiding_strength
+						value = $POINTS$
+					}
+				}
+			}
+		}
+	}
+}
+
+mem_vazurans_yoink_this_system = {
+	if = {
+		limit = {
+			exists = owner
+		}
+		owner = {
+			save_event_target_as = mem_vazuran_ai_to_get_fucked
+		}
+		starbase = {
+			set_owner = event_target:mem_vazurans_country
+		}
+		mem_vazurans_create_home_system_defences = yes
+		while = {
+			count = 3
+			random_system_planet = {
+				create_mem_vazuran_fleet = yes
+			}
+		}
+		event_target:mem_vazurans_country = {
+			declare_war = {
+				target = event_target:mem_vazuran_ai_to_get_fucked
+				attacker_war_goal = wg_fe_cleanse_border_worlds
+			}
+		}
+	}
+	else = {
+		mem_vazurans_create_home_system_defences = yes
+		while = {
+			count = 3
+			random_system_planet = {
+				create_mem_vazuran_fleet = yes
+			}
+		}
+	}
+	spawn_megastructure = {
+		type = mem_vazuran_gateway_endpoint
+		planet = system_star
+	}
+}
+
 #happens in country scope of default empire that has destroyed a raiding fleet
 mem_vazurans_retaliation_dice_roll = {
 	remove_country_flag = mem_vazurans_target_1

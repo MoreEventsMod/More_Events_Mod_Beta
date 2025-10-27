@@ -18,10 +18,10 @@ event = {
 					has_star_flag = precursor_mem_vazurans
 				}
 			}
-			set_global_flag = mem_vazurans_chosen			# TRODO make this impactful
+			set_global_flag = mem_vazurans_chosen			# make this impactful
 		}
 		# we do this via precursor selection now
-		# TRODO: remove from mod menu
+		# remove from mod menu
 		# IF = {
 		# 	limit = {
 		# 		any_country = {
@@ -31,6 +31,12 @@ event = {
 		# 	set_global_flag = mem_vazurans_disabled
 		# 	# Nothing happens. Fainthearted Backwater wins over From the Ashes.
 		# }
+		# TRODO. once ancestors is integrated
+		# Options: someone chose ancestors and / or toggle precursor
+		# Case 1: Ancestors off, Precursor on -> randomlist for active / ruined
+		# Case 2: Ancestors on, Precursor on -> garantueed active
+		# Case 3: Ancestors on, Precursor off -> advanced empire, not active
+		# Case 4: Ancestors off, Precursor off -> nothing completly disabled anything related to vazurans
 		IF = {
 			limit = {
 				any_country = {
@@ -736,16 +742,8 @@ event = {
 	hide_window = yes
 	is_triggered_only = yes
 	immediate = {
-		event_target:mem_vazurans_country = {
-			random_situation = {
-				limit = {
-					is_situation_type = mem_vazuran_raiding
-				}
-				change_variable = {
-					which = mem_vazuran_raiding_strength
-					value = 5000
-				}
-			}
+		mem_vazurans_give_raider_points = {
+			POINTS = 5000
 		}
 	}
 }
@@ -1088,7 +1086,7 @@ country_event = {
 						has_country_flag = mem_vazurans_met
 					}
 					create_message = {
-						type = mem_vazuran_rift_incoming						# TRODO
+						type = mem_vazuran_rift_incoming
 						days = 30
 						target = from
 					}
@@ -1414,37 +1412,17 @@ country_event = {
 					}
 				}
 				add_planet_devastation = 40
-				# TRODO kill pops and once we generate vauzran homeplanet add them 
-				# 	every_owned_pop_group = {
-				# 	save_event_target_as = kidnapped_pop # Pick the pop
-				# 	ROOT = { # Pick a planet
-				# 		reroll_random = yes
-				# 		random_owned_planet = {
-				# 			save_event_target_as = target_planet
-				# 		}
-				# 	}
-				# 	resettle_pop_group = {
-				# 		POP_GROUP = this
-				# 		PLANET = event_target:target_planet
-				# 		PERCENTAGE = 0.3
-				# 	}
-				# 	event_target:resettled_pop_group = {
-				# 		set_citizenship_type = {
-				# 			country = ROOT
-				# 			type = citizenship_slavery
-				# 		}
-				# 	}
-				# }
+				# kill pops and once we generate vauzran homeplanet add them 				
 				root = {
 					change_variable = {
 						which = mem_vazurans_stolen_pops
-						value = prev.value:per_100_local_pop_amount						# 1 per 100 , we can later multiply it again
+						value = prev.value:per_100_local_pop_amount						# TRODO 1 per 100 , we can later multiply it again
 					}
 				}
 				every_owned_pop_group = {
 					kill_pop_group = {
 						pop_group = THIS
-						percentage = 0.1
+						percentage = 0.05
 					}
 				}
 				if = {
@@ -1469,9 +1447,11 @@ country_event = {
 			}
 			else = {
 				add_planet_devastation = 100
-				while = {
-					count = 2					# 30% maybe too much easily changed # TRODO
-					kill_single_pop = yes
+				every_owned_pop_group = {
+					kill_pop_group = {
+						pop_group = THIS
+						percentage = 0.1
+					}
 				}
 				if = {
 					limit = {
@@ -1677,7 +1657,7 @@ situation_event = {
 		remove_global_flag = mem_vazuran_raiding
 		# They get purity and forge fire tradition
 		event_target:mem_vazurans_country = {
-			set_country_flag = bio_purity # government form
+			set_country_flag = bio_purity			# government form
 			add_tradition = tr_mem_vazurans_adopt
 			add_tradition = tr_mem_vazurans_1
 			add_tradition = tr_mem_vazurans_2
@@ -1694,7 +1674,7 @@ situation_event = {
 			add_tradition = tr_purity_optimized_neurology
 			add_ascension_perk = ap_galactic_contender
 		}
-		############################## EMPTY VAZURAN HOMESYSTEM ########################################
+		############################## SHARED CODE / VAZURAN HOMESYSTEM ########################################
 		no_scope = {
 			# makes system positions originate from galactic core
 			spawn_system = {
@@ -1731,7 +1711,7 @@ situation_event = {
 			}
 			mem_vazurans_create_home_system_defences = yes
 		}
-		############################## FALLEN VAZURANS ########################################
+		############################## RUINED/ OLD VAZURANS ########################################
 		if = {
 			limit = {
 				check_variable_arithmetic = {
@@ -1739,20 +1719,22 @@ situation_event = {
 					value <= @mem_vazurans_ruined_state_threshold
 				}
 			}
-			last_created_system = {
-				random_system_planet = {
-					limit = {
-						is_planet_class = pc_mem_vazuran_habitat
-					}
-					# TRODO buildings and shit
-				}
-			}
+			# inside system declaration
+			# last_created_system = {
+			# 	random_system_planet = {
+			# 		limit = {
+			# 			is_planet_class = pc_mem_vazuran_habitat
+			# 		}
+			# 		# buildings and shit
+			# 	}
+			# }
+			# notify countries that raids are over - RUINED outcome
 			every_playable_country = {
 				limit = {
 					is_hostile_to = prev
 				}
 				country_event = {
-					id = mem_vazurans.1101
+					id = mem_vazurans.1205
 				}
 			}
 		}
@@ -1782,8 +1764,22 @@ situation_event = {
 						mem_vazurans_create_home_system_defences = yes
 					}
 				}
-				# TRODO : portal to homesystem + setup scripted effect
-				# notify players of outcome
+				# notify countries that raids are over - FE outcome
+				every_playable_country = {
+					limit = {
+						is_hostile_to = prev
+					}
+					country_event = {
+						id = mem_vazurans.1210
+					}
+				}
+				# yoink a system
+				random_system = {
+					limit = {
+						mem_vazuran_is_yoinkable_system = yes
+					}
+					mem_vazurans_yoink_this_system = yes
+				}
 			}
 		}
 		############################## AWAKENED EMPIRE VAZURANS ########################################
@@ -1805,9 +1801,28 @@ situation_event = {
 						mem_vazurans_create_home_system_defences = yes
 					}
 				}
-				# TRODO : portal to homesystem + setup scripted effect
-				# claim a lot of systems
-				# notify players of outcome
+				# we yoink one system from AIs so that we can garantue at least one portal
+				random_system = {
+					limit = {
+						mem_vazuran_is_yoinkable_system = yes
+					}
+					# we claim this 
+					every_neighbor_system = {
+						add_claims = {
+							who = event_target:mem_vazurans_country
+						}
+					}
+					mem_vazurans_yoink_this_system = yes
+				}
+				# notify countries that raids are over - AE outcome
+				every_playable_country = {
+					limit = {
+						is_hostile_to = prev
+					}
+					country_event = {
+						id = mem_vazurans.1215
+					}
+				}
 			}
 		}
 	}
@@ -1819,15 +1834,51 @@ situation_event = {
 # Notify players that raids are over, special interactions if you paid tribute
 # they didnt have enough points
 country_event = {
-	id = mem_vazurans.1101
-	title = mem_vazurans.1101.name
-	desc = mem_vazurans.1101.desc
-	# picture = GFX_evt_mem_rift
+	id = mem_vazurans.1205
+	title = mem_vazurans.1205.name
+	desc = mem_vazurans.1205.desc
+	picture = GFX_evt_mem_rift
 	show_sound = event_air_raid_siren
 	is_triggered_only = yes
 	event_chain = mem_vazuran_menace_chain
 	option = {
-		name = mem_vazurans.1101.a
+		name = mem_vazurans.1205.a
+	}
+	# TRODO special ancestors response
+	after = {
+		mem_vazurans_remove_stance_modifier = yes
+	}
+}
+
+# FE outcome
+country_event = {
+	id = mem_vazurans.1210
+	title = mem_vazurans.1210.name
+	desc = mem_vazurans.1210.desc
+	picture = GFX_evt_mem_rift
+	show_sound = event_air_raid_siren
+	is_triggered_only = yes
+	event_chain = mem_vazuran_menace_chain
+	option = {
+		name = mem_vazurans.1210.a
+	}
+	# TRODO special ancestors response
+	after = {
+		mem_vazurans_remove_stance_modifier = yes
+	}
+}
+
+# AE outcome
+country_event = {
+	id = mem_vazurans.1215
+	title = mem_vazurans.1215.name
+	desc = mem_vazurans.1215.desc
+	picture = GFX_evt_mem_rift
+	show_sound = event_air_raid_siren
+	is_triggered_only = yes
+	event_chain = mem_vazuran_menace_chain
+	option = {
+		name = mem_vazurans.1215.a
 	}
 	# TRODO special ancestors response
 	after = {
@@ -1836,12 +1887,10 @@ country_event = {
 }
 
 # TRODO:
-# on fisnish situation spawn portal system if later two states
-# 3 states: ruined, fallen, awakened
+# event to ask players for system: reward chance
 # 
 # situation for reinforcements, based on tribute?
 # leaders for planet and fleet
-# tradition for ones who destroy vazurans or paid tribute: engaging with the crisis should be rewarding
 ###################### TRADITION EVENTS ###################
 # kill pops
 planet_event = {
