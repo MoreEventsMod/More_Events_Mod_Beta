@@ -712,15 +712,12 @@ country_event = {
 		append_technology = {
 			TECH = mem_vazuran_xentronium_rounds
 		}
+		add_relic = r_mem_vazuran_orila_brain # TRODO chaplin event
 		hidden_effect = {
 			set_country_flag = mem_ended_vazuran_menace
 			every_country = {
 				limit = {
-					OR = {
-						is_country_type = default
-						is_country_type = fallen_empire
-						is_country_type = awakened_fallen_empire
-					}
+					is_country_type = default
 					NOT = {
 						#should do the same as the above mentioned thing but does not exclude other human players
 						is_same_value = ROOT
@@ -1665,14 +1662,45 @@ situation_event = {
 			add_tradition = tr_mem_vazurans_4
 			add_tradition = tr_mem_vazurans_5
 			add_ascension_perk = ap_engineered_evolution
+			random_situation = {
+				limit = {
+					is_situation_type = genetic_ascension_situation
+				}
+				destroy_situation = this
+			}			
 			set_country_flag = bio_purity
 			add_tradition = tr_purity_adopt
 			add_tradition = tr_purity_exemplary_genetics
 			add_tradition = tr_purity_genotype_regeneration
-			add_tradition = tr_purity_heightened_attributes
-			add_tradition = tr_purity_imperfection_remediation
-			add_tradition = tr_purity_optimized_neurology
+			# add_tradition = tr_purity_heightened_attributes
+			# add_tradition = tr_purity_imperfection_remediation
+			# add_tradition = tr_purity_optimized_neurology
+			set_country_flag = genetic_ascension_stage_1_purity
+			set_country_flag = genetic_ascension_stage_2_purity
+			set_country_flag = genetic_ascension_stage_3_purity
+			add_tradition = tr_purity_stage_1_swap
+			add_tradition = tr_purity_stage_2_swap
+			add_tradition = tr_purity_stage_3_swap
+			add_modifier = {
+				modifier = purity_unlock_level_2
+			}
+
 			add_ascension_perk = ap_galactic_contender
+
+			give_fe_tech = yes
+			give_technology = {
+				tech = tech_mem_vazuran_xentronium_hangar
+			}
+			give_technology = {
+				tech = tech_mem_vazuran_xentronium_armor
+			}
+			give_technology = {
+				tech = tech_mem_vazuran_xentronium_aura
+			}
+			give_technology = {
+				tech = tech_mem_vazuran_xentronium_rounds
+			}
+			
 		}
 		############################## SHARED CODE / VAZURAN HOMESYSTEM ########################################
 		no_scope = {
@@ -1780,6 +1808,10 @@ situation_event = {
 					}
 					mem_vazurans_yoink_this_system = yes
 				}
+				# FE situation for reinforcement and demands
+				start_situation = {
+					type = mem_vazuran_fallen_empires_situation
+				}
 			}
 		}
 		############################## AWAKENED EMPIRE VAZURANS ########################################
@@ -1822,6 +1854,10 @@ situation_event = {
 					country_event = {
 						id = mem_vazurans.1215
 					}
+				}
+				# AE situation for reinforcement and demands
+				start_situation = {
+					type = mem_vazuran_fallen_empires_situation
 				}
 			}
 		}
@@ -1883,6 +1919,35 @@ country_event = {
 	# TRODO special ancestors response
 	after = {
 		mem_vazurans_remove_stance_modifier = yes
+	}
+}
+
+########## vazuran FE/AE situation events #######################
+# create reinforcement fleet
+situation_event = {
+	id = mem_vazurans.1300
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		owner = {
+			is_country_type = fallen_empire
+			is_at_war = no
+			fleet_power < 400000
+			NOT = {
+				has_country_flag = fallen_empire_fleet_spawn
+			}
+		}
+	}
+	immediate = {
+		owner = {
+			set_timed_country_flag = {
+				flag = fallen_empire_fleet_spawn
+				days = 3600
+			}
+			capital_scope = {
+				create_mem_vazuran_garrison_fleet = yes
+			}
+		}
 	}
 }
 
