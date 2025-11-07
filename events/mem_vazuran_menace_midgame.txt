@@ -8,7 +8,6 @@
 namespace = mem_vazurans
 # Setup Event at Game Start for randomly disabling the Crisis
 event = {
-	# TRODO delay this wtf
 	id = mem_vazurans.1
 	hide_window = yes
 	is_triggered_only = yes
@@ -19,20 +18,9 @@ event = {
 					has_star_flag = precursor_mem_vazurans
 				}
 			}
-			set_global_flag = mem_vazurans_chosen			# make this impactful
+			log = "mem_vazurans:chosen"
+			set_global_flag = mem_vazurans_chosen
 		}
-		# we do this via precursor selection now
-		# remove from mod menu
-		# IF = {
-		# 	limit = {
-		# 		any_country = {
-		# 			has_origin = origin_mem_fainthearted
-		# 		}
-		# 	}
-		# 	set_global_flag = mem_vazurans_disabled
-		# 	# Nothing happens. Fainthearted Backwater wins over From the Ashes.
-		# }
-		# TRODO. once ancestors is integrated
 		# Options: someone chose ancestors and / or toggle precursor
 		# Case 1: Ancestors off, Precursor on 	-> randomlist for active / ruined
 		# Case 2: Ancestors on, Precursor on 	-> garantueed active
@@ -41,43 +29,72 @@ event = {
 		IF = {
 			limit = {
 				any_country = {
-					has_origin = origin_mem_from_the_ashes
+					is_mem_runesmith = yes
 				}
 			}
-			start_mem_vazuran_menace = yes
+			if = {
+				limit = {
+					has_global_flag = mem_vazurans_chosen
+				}
+				event_target:global_event_country = {
+					country_event = {
+						id = mem_vazurans.2
+						days = @mem_vazurans_starting_date
+						random = @mem_vazurans_starting_date_random
+					}
+				}
+				log = "mem_vazurans:active"
+			}
+			else = {
+				log = "mem_vazurans:advanced"
+				# TRODO ancestors advanced empire
+			}
 		}
-		ELSE = {
-			random_list = {
-				95 = {
-					random_list = {
-						80 = {
-						}
-						# nothing happens
-						20 = {
-							setup_mem_ruined_vazuran_space = yes
+		else = {
+			if = {
+				limit = {
+					has_global_flag = mem_vazurans_chosen
+				}
+				log = "mem_vazurans:random"
+				random_list = {
+					90 = {
+						random_list = {
+							80 = {
+							}
+							# nothing happens
+							20 = {
+								setup_mem_ruined_vazuran_space = yes
+							}
 						}
 					}
-					#set_global_flag = mem_vazurans_disabled
-				}
-				5 = {
-					start_mem_vazuran_menace = yes
+					10 = {
+						event_target:global_event_country = {
+							country_event = {
+								id = mem_vazurans.2
+								days = @mem_vazurans_starting_date
+								random = @mem_vazurans_starting_date_random
+							}
+						}
+					}
 				}
 			}
+			else = {
+				# nothing happens player choose neither ancestors nor precursor setting		
+				log = "mem_vazurans:inactive"
+			}
 		}
-		# IF = {
-		# 	limit = {
-		# 		has_global_flag = mem_vazurans_disabled
-		# 	}
-		# 	random_list = {
-		# 		80 = {
-		# 		}
-		# 		# nothing happens
-		# 		20 = {
-		# 			setup_mem_ruined_vazuran_space = yes
-		# 		}
-		# 	}
-		# }
 		mem_gamestart_orila_primitive_setup = yes
+	}
+}
+
+country_event = {
+	id = mem_vazurans.2
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		no_scope = {
+			start_mem_vazuran_menace = yes
+		}
 	}
 }
 
@@ -786,14 +803,14 @@ country_event = {
 		text = mem_vazurans.6a.desc
 		trigger = {
 			NOT = {
-				has_origin = origin_mem_from_the_ashes
+				is_mem_runesmith = yes
 			}
 		}
 	}
 	desc = {
 		text = mem_vazurans.6b.desc
 		trigger = {
-			has_origin = origin_mem_from_the_ashes
+			is_mem_runesmith = yes
 		}
 	}
 	event_chain = mem_vazuran_menace_chain
@@ -807,6 +824,9 @@ country_event = {
 		room = mem_vazuran_1_room
 	}
 	option = {
+		trigger = {
+			is_mem_runesmith = no
+		}
 		name = mem_vazurans.6.a
 		response_text = mem_vazurans.6.a.response
 	}
@@ -816,6 +836,7 @@ country_event = {
 				has_ethic = ethic_pacifist
 				has_ethic = ethic_fanatic_pacifist
 			}
+			is_mem_runesmith = no
 		}
 		name = mem_vazurans.6.b
 		response_text = mem_vazurans.6.b.response
@@ -826,24 +847,30 @@ country_event = {
 				has_ethic = "ethic_xenophobe"
 				has_ethic = "ethic_fanatic_xenophobe"
 			}
+			is_mem_runesmith = no
 		}
 		name = mem_vazurans.6.c
 		response_text = mem_vazurans.6.c.response
 	}
 	option = {
-		exclusive_trigger = {
+		trigger = {
 			is_mem_runesmith = yes
 		}
 		name = mem_vazurans.6.d
 		response_text = mem_vazurans.6.d.response
+	}
+	option = {
+		trigger = {
+			is_mem_runesmith = yes
+		}
+		name = mem_vazurans.6.e
+		response_text = mem_vazurans.6.e.response
 	}
 	after = {
 		# choose a stance
 		hidden_effect = {
 			country_event = {
 				id = mem_vazurans.1101
-				days = 60
-				random = 30
 			}
 		}
 		begin_event_chain = {
@@ -875,9 +902,9 @@ situation_event = {
 					limit = {
 						exists = owner
 						owner = {
-							is_regular_empire = yes
-							is_hostile_to = root.owner
-							NOR = {
+							is_country_type = default
+							#is_hostile_to = root.owner
+							NOT = {
 								has_country_flag = mem_vazurans_targeted_country
 							}
 						}
@@ -896,10 +923,10 @@ situation_event = {
 					limit = {
 						exists = owner
 						owner = {
-							is_regular_empire = yes
-							is_hostile_to = root.owner
+							is_country_type = default
+							#is_hostile_to = root.owner
 							has_modifier = mem_vazurans_stance_provoke
-							NOR = {
+							NOT = {
 								has_country_flag = mem_vazurans_targeted_country
 							}
 						}
@@ -913,64 +940,69 @@ situation_event = {
 				}
 			}
 		}
-		event_target:mem_vazurans_target_system = {
-			owner = {
-				# establis coms if not already, should be handled by intro event of situation start
-				IF = {
-					limit = {
-						NOT = {
-							has_communications = ROOT.owner
+		if = {
+			limit = {
+				exists = event_target:mem_vazurans_target_system
+			}
+			event_target:mem_vazurans_target_system = {
+				owner = {
+					# establis coms if not already, should be handled by intro event of situation start
+					IF = {
+						limit = {
+							NOT = {
+								has_communications = ROOT.owner
+							}
+						}
+						establish_communications_no_message = ROOT.owner
+					}
+					# raid incoming * red alert sound *
+					set_timed_country_flag = {
+						flag = mem_vazurans_targeted_country
+						days = 720
+					}
+					# this should be on vazuran country scope, not raid target ... hmmm only because controller can switch ... idk
+					# this one creates the rift
+					country_event = {
+						id = mem_vazurans.1105
+						#days = 13
+						#random = 160
+						scopes = {
+							from = event_target:mem_vazurans_target_system
 						}
 					}
-					establish_communications_no_message = ROOT.owner
-				}
-				# raid incoming * red alert sound *
-				set_timed_country_flag = {
-					flag = mem_vazurans_targeted_country
-					days = 720
-				}
-				# this should be on vazuran country scope, not raid target ... hmmm only because controller can switch ... idk
-				# this one creates the rift
-				country_event = {
-					id = mem_vazurans.1105
-					#days = 13
-					#random = 160
-					scopes = {
-						from = event_target:mem_vazurans_target_system
+					# this one creates a message or first time event				
+					country_event = {
+						id = mem_vazurans.1110
+						#days = 13
+						#random = 160
+						scopes = {
+							from = event_target:mem_vazurans_target_system
+						}
+					}
+					# this one create fleet
+					country_event = {
+						id = mem_vazurans.1120
+						days = 60
+						#random = 160
+						scopes = {
+							from = event_target:mem_vazurans_target_system
+						}
+					}
+					# this one removes the rift
+					country_event = {
+						id = mem_vazurans.1106
+						days = 720						# this is also done when the fleets returns, and if we do this too early we break them
+						scopes = {
+							from = event_target:mem_vazurans_target_system
+						}
 					}
 				}
-				# this one creates a message or first time event				
-				country_event = {
-					id = mem_vazurans.1110
-					#days = 13
-					#random = 160
-					scopes = {
-						from = event_target:mem_vazurans_target_system
+				root = {
+					# active raiding fleets +1
+					change_variable = {
+						which = mem_vazuran_raiding_current_fleets
+						value = 1
 					}
-				}
-				# this one create fleet
-				country_event = {
-					id = mem_vazurans.1120
-					days = 60
-					#random = 160
-					scopes = {
-						from = event_target:mem_vazurans_target_system
-					}
-				}
-				# this one removes the rift
-				country_event = {
-					id = mem_vazurans.1106
-					days = 720					# this is also done when the fleets returns, and if we do this too early we break them
-					scopes = {
-						from = event_target:mem_vazurans_target_system
-					}
-				}
-			}
-			root = {
-				# active raiding fleets +1
-				change_variable = {
-					which = mem_vazuran_raiding_current_fleets
-					value = 1
 				}
 			}
 		}
@@ -986,6 +1018,12 @@ country_event = {
 	show_sound = event_air_raid_siren
 	is_triggered_only = yes
 	event_chain = mem_vazuran_menace_chain
+	diplomatic = yes
+	picture_event_data = {
+		#portrait = event_target:mem_vazurans_country
+		portrait = mem_Vazu_crisis
+		room = mem_vazuran_1_room
+	}
 	# offense
 	option = {
 		name = mem_vazurans.1101.a
@@ -1034,9 +1072,7 @@ country_event = {
 	hide_window = yes
 	is_triggered_only = yes
 	trigger = {
-		# NOR = {
-		# 	has_country_flag = mem_vazurans_targeted_country
-		# }
+		exists = from.owner
 	}
 	immediate = {
 		from = {
@@ -1066,9 +1102,7 @@ country_event = {
 	hide_window = yes
 	is_triggered_only = yes
 	trigger = {
-		# NOR = {
-		# 	has_country_flag = mem_vazurans_targeted_country
-		# }
+		exists = from.owner
 	}
 	immediate = {
 		from = {
@@ -1089,6 +1123,9 @@ country_event = {
 	id = mem_vazurans.1110
 	hide_window = yes
 	is_triggered_only = yes
+	trigger = {
+		exists = from.owner
+	}
 	immediate = {
 		from = {
 			owner = {
@@ -1207,6 +1244,9 @@ country_event = {
 	id = mem_vazurans.1120
 	hide_window = yes
 	is_triggered_only = yes
+	trigger = {
+		exists = from.owner
+	}
 	immediate = {
 		from = {
 			# if = {
@@ -1319,17 +1359,17 @@ fleet_event = {
 	is_triggered_only = yes
 	immediate = {
 		queue_actions = {
-			repeat = {
-				find_closest_planet = {
-					trigger = {
-						id = mem_vazurans_action1125.1
-						has_planet_flag = mem_vazurans_raiding_target
-					}
-					found_planet = {
-						move_to = this
-						orbit_planet = this
-					}
+			find_closest_planet = {
+				trigger = {
+					id = mem_vazurans_action1125.1
+					has_planet_flag = mem_vazurans_raiding_target
 				}
+				found_planet = {
+					move_to = this
+					orbit_planet = this
+				}
+			}
+			repeat = {
 				wait = {
 					duration = 60
 				}
@@ -1347,6 +1387,9 @@ fleet_event = {
 						}
 					}
 				}
+				wait = {
+					duration = 60
+				}
 			}
 		}
 	}
@@ -1359,11 +1402,25 @@ planet_event = {
 	is_triggered_only = yes
 	immediate = {
 		set_planet_flag = mem_vazurans_raid_planet
-		while = {
-			count = 5			# TRODO maybe based on game stage?
-			create_army = {
-				owner = event_target:mem_vazurans_country
-				type = xenomorph_army
+		if = {
+			limit = {
+				mid_game_years_passed >= 1
+			}
+			while = {
+				count = 15
+				create_army = {
+					owner = event_target:mem_vazurans_country
+					type = xenomorph_army
+				}
+			}
+		}
+		else = {
+			while = {
+				count = 5
+				create_army = {
+					owner = event_target:mem_vazurans_country
+					type = xenomorph_army
+				}
 			}
 		}
 	}
@@ -1717,6 +1774,9 @@ situation_event = {
 			give_technology = {
 				tech = tech_mem_vazuran_xentronium_rounds
 			}
+			every_owned_fleet = {
+				set_name = "Garrison Fleet"
+			}
 		}
 		############################## SHARED CODE / VAZURAN HOMESYSTEM ########################################
 		no_scope = {
@@ -1775,7 +1835,7 @@ situation_event = {
 			# notify countries that raids are over - RUINED outcome
 			every_playable_country = {
 				limit = {
-					is_hostile_to = prev
+					mem_vazuran_was_raid_target = yes
 				}
 				country_event = {
 					id = mem_vazurans.1205
@@ -1811,7 +1871,7 @@ situation_event = {
 				# notify countries that raids are over - FE outcome
 				every_playable_country = {
 					limit = {
-						is_hostile_to = prev
+						mem_vazuran_was_raid_target = yes
 					}
 					country_event = {
 						id = mem_vazurans.1210
@@ -1865,7 +1925,7 @@ situation_event = {
 				# notify countries that raids are over - AE outcome
 				every_playable_country = {
 					limit = {
-						is_hostile_to = prev
+						mem_vazuran_was_raid_target = yes
 					}
 					country_event = {
 						id = mem_vazurans.1215
@@ -1874,6 +1934,10 @@ situation_event = {
 				# AE situation for reinforcement and demands
 				start_situation = {
 					type = mem_vazuran_fallen_empires_situation
+				}
+				set_policy = {
+					policy = diplomatic_stance
+					option = diplo_stance_supremacist
 				}
 			}
 		}
@@ -1890,7 +1954,7 @@ country_event = {
 	title = mem_vazurans.1205.name
 	desc = mem_vazurans.1205.desc
 	picture = GFX_evt_mem_rift
-	show_sound = event_air_raid_siren
+	show_sound = event_radio_chatter
 	is_triggered_only = yes
 	event_chain = mem_vazuran_menace_chain
 	option = {
@@ -1913,7 +1977,7 @@ country_event = {
 	title = mem_vazurans.1210.name
 	desc = mem_vazurans.1210.desc
 	picture = GFX_evt_mem_rift
-	show_sound = event_air_raid_siren
+	show_sound = event_radio_chatter
 	is_triggered_only = yes
 	event_chain = mem_vazuran_menace_chain
 	option = {
@@ -1936,7 +2000,7 @@ country_event = {
 	title = mem_vazurans.1215.name
 	desc = mem_vazurans.1215.desc
 	picture = GFX_evt_mem_rift
-	show_sound = event_air_raid_siren
+	show_sound = event_radio_chatter
 	is_triggered_only = yes
 	event_chain = mem_vazuran_menace_chain
 	option = {
@@ -1960,16 +2024,14 @@ country_event = {
 	desc = mem_vazurans.1220.desc
 	picture = GFX_evt_mem_vazuran_system
 	show_sound = event_radio_chatter
-	is_triggered_only = yes	
+	is_triggered_only = yes
 	option = {
 		name = mem_vazurans.1215.a
 		append_technology = {
 			TECH = mem_vazuran_xentronium_armor
 		}
 	}
-	
 }
-
 
 ########## vazuran FE/AE situation events #######################
 # create reinforcement fleet
@@ -1981,7 +2043,7 @@ situation_event = {
 		owner = {
 			is_country_type = fallen_empire
 			is_at_war = no
-			fleet_power < 400000
+			fleet_power < @mem_vazuran_fe_fleet_strenght
 			NOT = {
 				has_country_flag = fallen_empire_fleet_spawn
 			}
@@ -1995,6 +2057,13 @@ situation_event = {
 			}
 			capital_scope = {
 				create_mem_vazuran_garrison_fleet = yes
+				while = {
+					count = 10
+					create_army = {
+						owner = root.owner
+						type = xenomorph_army
+					}
+				}
 			}
 		}
 	}
@@ -2114,7 +2183,7 @@ country_event = {
 				count = 5
 				random_owned_pop_group = {
 					limit = {
-						pop_amount >= 100
+						pop_group_size >= 100
 					}
 					save_event_target_as = kidnapped_pop					# Pick the pop
 					resettle_pop_group = {
@@ -2159,26 +2228,28 @@ country_event = {
 			}
 			while = {
 				count = 5
-				random_owned_pop_group = {
-					limit = {
-						pop_amount >= 100
-						is_enslaved = yes
+				capital_scope = {
+					random_owned_pop_group = {
+						limit = {
+							pop_group_size >= 100
+							is_enslaved = yes
+						}
+						save_event_target_as = kidnapped_pop						# Pick the pop
+						resettle_pop_group = {
+							POP_GROUP = this
+							PLANET = event_target:target_planet
+							AMOUNT = 100
+						}
+						# event_target:kidnapped_pop = {
+						# 	set_citizenship_type = {
+						# 		country = ROOT
+						# 		type = citizenship_slavery
+						# 	}
+						# 	set_slavery_type = {
+						# 		type = slavery_domestic
+						# 	}
+						# }
 					}
-					save_event_target_as = kidnapped_pop					# Pick the pop
-					resettle_pop_group = {
-						POP_GROUP = this
-						PLANET = event_target:target_planet
-						AMOUNT = 100
-					}
-					# event_target:kidnapped_pop = {
-					# 	set_citizenship_type = {
-					# 		country = ROOT
-					# 		type = citizenship_slavery
-					# 	}
-					# 	set_slavery_type = {
-					# 		type = slavery_domestic
-					# 	}
-					# }
 				}
 			}
 		}

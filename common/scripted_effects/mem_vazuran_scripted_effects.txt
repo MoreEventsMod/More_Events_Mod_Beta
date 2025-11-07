@@ -56,6 +56,7 @@ start_mem_vazuran_menace = {
 	create_mem_vazuran_country = yes
 	set_global_flag = mem_vazurans_spawned
 	event_target:mem_vazurans_country = {
+		log = this.id
 		# situation controls all raiding
 		start_situation = {
 			type = mem_vazuran_raiding
@@ -123,6 +124,8 @@ create_mem_vazuran_country = {
 				civic = civic_warrior_culture
 				civic = civic_barbaric_despoilers
 			}
+			room = mem_vazuran_1_room
+			auto_delete = no
 			origin = origin_hegemon			# TRODO custom
 			species = last_created_species
 			# pls let me have this change :)
@@ -156,23 +159,37 @@ create_mem_vazuran_country = {
 			set_graphical_culture = mem_ancient_02
 			save_global_event_target_as = mem_vazurans_country
 		}
-		# Should not attack Enclaves, Guardians, ai empires or the surveyor probe
 		every_country = {
-			# has_country_flag = ne_country for enclaves from new enclaves mod
-			# has_country_flag = mem_vazurans_neutral is for other mods to use for special countries that should not be harmed
 			limit = {
 				OR = {
-					is_country_type = enclave
-					is_country_type = primitive
-					has_country_flag = mem_surveyor_country
-					has_country_flag = ne_country
-					has_country_flag = mem_vazurans_neutral
-					is_guardian_country = yes
-					AND = {
-						has_global_flag = mem_vazurans_neutral
-						is_country_type = default
-						is_ai = yes
-					}
+					is_country_type = default
+					is_country_type = fallen_empire
+				}
+			}
+			event_target:mem_vazurans_country = {
+				set_faction_hostility = {
+					target = prev
+					set_hostile = yes
+					set_neutral = no
+					set_friendly = no
+				}
+			}
+		}
+		# Should not attack Enclaves, Guardians, ai empires or the surveyor probe
+		# has_country_flag = ne_country for enclaves from new enclaves mod
+		# has_country_flag = mem_vazurans_neutral is for other mods to use for special countries that should not be harmed
+		every_country = {
+			limit = {
+				is_country_type = enclave
+				is_country_type = primitive
+				has_country_flag = mem_surveyor_country
+				has_country_flag = ne_country
+				has_country_flag = mem_vazurans_neutral
+				is_guardian_country = yes
+				AND = {
+					has_global_flag = mem_vazurans_neutral
+					is_country_type = default
+					is_ai = yes
 				}
 			}
 			event_target:mem_vazurans_country = {
@@ -188,23 +205,23 @@ create_mem_vazuran_country = {
 }
 
 mem_vazurans_create_home_system_defences = {
-	create_starbase = {
-		size = starbase_citadel
-		owner = event_target:mem_vazurans_country
-		module = "shipyard"
-		module = "shipyard"
-		module = "shipyard"
-		module = "hangar_bay"
-		module = "gun_battery"
-		module = "gun_battery"
-		building = "target_uplink_computer"
-		building = "defense_grid"
-		building = "colossus_yards"
-		building = "titan_yards"
-	}
 	random_system_planet = {
 		limit = {
 			is_star = yes
+		}
+		create_starbase = {
+			size = starbase_citadel
+			owner = event_target:mem_vazurans_country
+			module = "shipyard"
+			module = "shipyard"
+			module = "shipyard"
+			module = "hangar_bay"
+			module = "gun_battery"
+			module = "gun_battery"
+			building = "target_uplink_computer"
+			building = "defense_grid"
+			building = "colossus_yards"
+			building = "titan_yards"
 		}
 		create_fleet = {
 			settings = {
@@ -335,14 +352,17 @@ mem_vazurans_remove_stance_modifier = {
 			has_modifier = mem_vazurans_stance_tribute
 		}
 		remove_modifier = mem_vazurans_stance_tribute
-		random_list = { # chance to obtain tech
-			50 = {} 
+		random_list = {
+			# chance to obtain tech
 			50 = {
-				country_event = {
-					id = mem_wpdr.3
-					days = 30
-				}
 			}
+			# TRODO
+			# 50 = {
+			# 	country_event = {
+			# 		id = mem_wpdr.3
+			# 		days = 30
+			# 	}
+			# }
 		}
 	}
 	end_event_chain = mem_vazuran_menace_chain
