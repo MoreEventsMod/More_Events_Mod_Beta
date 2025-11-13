@@ -5,6 +5,83 @@
 # Coding by Tr33 and Malthus
 #
 ####################################
+
+############################################################################################################
+# Setup Events
+############################################################################################################
+# mem_vazurans.1  	|	setup event at game start (randomly enable or disable Vazuran Crisis)
+# mem_vazurans.2  	|	start Vazuran Menace sequence
+# mem_vazurans.996	|	debug test event – give raider points
+# mem_vazurans.997	|	debug test event – start Vazuran Menace
+# mem_vazurans.998	|	add Defender of the Galaxy perk modifier
+############################################################################################################
+# Story and Information Events
+############################################################################################################
+# mem_vazurans.30  	|	Vazuran Homefleet defeated (information event)
+# mem_vazurans.31  	|	Vazuran Homeworld taken (information event)
+# mem_vazurans.60  	|	discover first active Rift Endpoint
+# mem_vazurans.61  	|	discover first ruined Rift Endpoint
+# mem_vazurans.62  	|	reach ruined Vazuran Homesystem
+# mem_vazurans.63  	|	restore ruined Rift Endpoint
+# mem_vazurans.64  	|	restore ruined Star Throne
+# mem_vazurans.70  	|	reward event for destroying Vazuran fleets
+# mem_vazurans.200	|	find destroyed Vazuran planet
+# mem_vazurans.201	|	finish project on first broken world
+# mem_vazurans.202	|	anomaly complete – variant 1
+# mem_vazurans.203	|	anomaly complete – variant 2
+# mem_vazurans.204	|	anomaly complete – variant 3 
+# mem_vazurans.205	|	anomaly complete – variant 4 
+# mem_vazurans.206	|	anomaly project complete – variant 4
+############################################################################################################
+# Damper Field Chain -somewhat unused
+############################################################################################################
+# mem_vazurans.250	|	setup random damper field anomalies
+# mem_vazurans.251	|	damper field anomaly (planet version)
+# mem_vazurans.252	|	damper field anomaly completed (planet)
+# mem_vazurans.253	|	damper field anomaly (asteroid version)
+# mem_vazurans.254	|	damper field anomaly completed (asteroid)
+# mem_vazurans.255	|	drifting Vazuran wreckage found
+# mem_vazurans.256	|	wreckage investigation completed
+############################################################################################################
+# Endgame and Major Outcomes
+############################################################################################################
+# mem_vazurans.280	|	reach active Vazuran Homesystem
+# mem_vazurans.281	|	defeat Vazuran Homefleet (final victory event)
+# mem_vazurans.282	|	invade Vazuran HQ (Homeworld)
+############################################################################################################
+# Raiding / Rift Situation Events
+############################################################################################################
+# mem_vazurans.1099	|	first contact with Vazurans
+# mem_vazurans.1100	|	periodic Vazuran raid spawn situation
+# mem_vazurans.1101	|	player chooses stance toward Vazurans
+# mem_vazurans.1105	|	create Rift ambient object
+# mem_vazurans.1106	|	delete Rift ambient object
+# mem_vazurans.1110	|	notify of incoming Rift raid
+# mem_vazurans.1115	|	first Rift appearance notification
+# mem_vazurans.1120	|	spawn Vazuran raiding fleet
+# mem_vazurans.1124	|	raiding fleet orbits system (no colony)
+# mem_vazurans.1125	|	raiding fleet attacks colony target
+# mem_vazurans.1129	|	spawn ground armies on raided planet
+# mem_vazurans.1130	|	Vazurans lose ground combat
+# mem_vazurans.1131	|	Vazurans win ground combat
+# mem_vazurans.1135	|	raiding fleet returns to rift
+# mem_vazurans.1140	|	fleet vanishes after returning to rift
+# mem_vazurans.1145	|	reward when raiding fleet destroyed
+############################################################################################################
+# Post-Crisis Resolution and Aftermath Events
+############################################################################################################
+# mem_vazurans.1200	|	resolve raiding situation and create final Vazuran state (fallen / ruined / empir)
+# mem_vazurans.1205	|	info ruined
+# mem_vazurans.1210	|	info FE
+# mem_vazurans.1215	|	info AE
+# mem_vazurans.1300	|	fallen empire reinforcement
+# mem_vazurans.1305	|	fallen empire demand tribute logic
+# mem_vazurans.1310	|	fallen empire demands slaves
+# mem_vazurans.2000	|	tradition event – periodically kills pops on worlds with Vazuran worker exploiters
+# mem_vazurans.2005	|	tradition event – steal pops via resettlement when using slavery policy
+############################################################################################################
+
+
 namespace = mem_vazurans
 # Setup Event at Game Start for randomly disabling the Crisis
 event = {
@@ -48,9 +125,8 @@ event = {
 			else = {
 				log = "mem_vazurans:advanced"
 				country_event = {
-					id = mem_ancestors_grudge.2	
-				}				
-				
+					id = mem_ancestors_grudge.2
+				}
 			}
 		}
 		else = {
@@ -570,6 +646,588 @@ country_event = {
 	}
 }
 
+# A fleet has entered a system
+# Scope = Fleet
+# From = System
+fleet_event = {
+	id = mem_vazurans.200
+	title = mem_vazurans.200.name
+	desc = {
+		# haven't seen anything vazuran related so far
+		text = mem_vazurans.200a.desc
+		trigger = {
+			exists = controller
+			controller = {
+				NOT = {
+					has_country_flag = mem_vazuran_destroyed_planet_found
+				}
+			}
+		}
+	}
+	desc = {
+		# only seen another destroyed planet so far
+		text = mem_vazurans.200b.desc
+		trigger = {
+			exists = controller
+			controller = {
+				NOT = {
+					has_country_flag = mem_vazurans_met
+				}
+				has_country_flag = mem_vazuran_destroyed_planet_found
+			}
+		}
+	}
+	desc = {
+		# already met the vazurans and seen a destroyed planet
+		text = mem_vazurans.200c.desc
+		trigger = {
+			exists = controller
+			controller = {
+				has_country_flag = mem_vazurans_met
+				has_country_flag = mem_vazuran_destroyed_planet_found
+			}
+		}
+	}
+	location = FROM
+	picture = GFX_evt_shattered_planet
+	event_chain = mem_vazuran_menace_chain
+	is_triggered_only = yes
+	trigger = {
+		exists = controller
+		controller = {
+			is_ai = no
+		}
+		From = {
+			NOT = {
+				has_star_flag = mem_orila_primitive_system_destroyed
+			}
+			has_star_flag = mem_vazuran_destroyed_planet_system
+		}
+	}
+	immediate = {
+		From = {
+			remove_star_flag = mem_vazuran_destroyed_planet_system
+		}
+	}
+	option = {
+		name = WORRYING
+		IF = {
+			limit = {
+				controller = {
+					NOT = {
+						has_country_flag = mem_vazuran_destroyed_planet_found
+					}
+				}
+			}
+			solar_system = {
+				random_system_planet = {
+					limit = {
+						has_planet_flag = mem_vazuran_destroyed_planet
+					}
+					enable_special_project = {
+						name = MEM_VAZURANS_BROKEN_PLANET_INVESTIGATION
+						location = this
+						owner = root.controller
+					}
+				}
+			}
+			controller = {
+				set_country_flag = mem_vazuran_destroyed_planet_found
+			}
+		}
+	}
+}
+
+# Finished Project on first broken world
+ship_event = {
+	id = mem_vazurans.201
+	title = mem_vazurans.201.name
+	desc = {
+		text = mem_vazurans.201a.desc
+		trigger = {
+			owner = {
+				NOT = {
+					has_country_flag = mem_vazurans_met
+				}
+			}
+		}
+	}
+	desc = {
+		text = mem_vazurans.201b.desc
+		trigger = {
+			owner = {
+				has_country_flag = mem_vazurans_met
+			}
+		}
+	}
+	picture = GFX_evt_shattered_planet
+	show_sound = event_scanner
+	location = FROM
+	event_chain = mem_vazuran_menace_chain
+	is_triggered_only = yes
+	option = {
+		name = mem_vazurans.201.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+	}
+}
+
+# Finished Anomaly Version 1
+ship_event = {
+	id = mem_vazurans.202
+	title = mem_vazurans.202.name
+	desc = mem_vazurans.202.desc
+	picture = GFX_evt_fleet_from_surface
+	show_sound = event_ship_bridge
+	location = FROM
+	event_chain = mem_vazuran_menace_chain
+	is_triggered_only = yes
+	immediate = {
+		owner = {
+			set_country_flag = mem_vazurans_202
+		}
+		From = {
+			clear_deposits = yes
+		}
+	}
+	option = {
+		name = WORRYING
+		hidden_effect = {
+			From = {
+				add_deposit = d_engineering_4
+			}
+		}
+	}
+}
+
+# Finished Anomaly Version 2
+ship_event = {
+	id = mem_vazurans.203
+	title = mem_vazurans.203.name
+	desc = {
+		text = mem_vazurans.203.desc
+		trigger = {
+			NOT = {
+				owner = {
+					has_ethic = ethic_gestalt_consciousness
+				}
+			}
+		}
+	}
+	desc = {
+		text = mem_vazurans.203.desc.gestalt
+		trigger = {
+			owner = {
+				has_ethic = ethic_gestalt_consciousness
+			}
+		}
+	}
+	picture = GFX_evt_mem_big_asteroid
+	show_sound = event_ship_bridge
+	location = FROM
+	event_chain = mem_vazuran_menace_chain
+	is_triggered_only = yes
+	immediate = {
+		owner = {
+			set_country_flag = mem_vazurans_203
+		}
+		From = {
+			clear_deposits = yes
+		}
+	}
+	option = {
+		name = WORRYING
+		hidden_effect = {
+			From = {
+				add_deposit = d_engineering_4
+			}
+		}
+	}
+}
+
+# Finished Anomaly Version 3
+ship_event = {
+	id = mem_vazurans.204
+	title = mem_vazurans.204.name
+	desc = mem_vazurans.204.desc
+	picture = GFX_evt_mem_apocalypse
+	show_sound = event_ship_bridge
+	location = FROM
+	event_chain = mem_vazuran_menace_chain
+	is_triggered_only = yes
+	specimen = mem_psionic_debris
+	immediate = {
+		owner = {
+			set_country_flag = mem_vazurans_204
+		}
+		From = {
+			clear_deposits = yes
+		}
+	}
+	option = {
+		name = WORRYING
+		leader = {
+			add_trait = {
+				trait = leader_trait_psionic
+			}
+			add_trait = {
+				trait = leader_trait_expertise_psionics
+			}
+		}
+		hidden_effect = {
+			From = {
+				add_deposit = d_society_4
+			}
+		}
+	}
+}
+
+# Finished Anomaly Version 4
+ship_event = {
+	id = mem_vazurans.205
+	title = mem_vazurans.205.name
+	desc = mem_vazurans.205.desc
+	picture = GFX_evt_satellite_in_orbit
+	show_sound = event_ship_bridge
+	location = FROM
+	event_chain = mem_vazuran_menace_chain
+	is_triggered_only = yes
+	option = {
+		name = mem_vazurans.205.a
+		enable_special_project = {
+			name = MEM_VAZURANS_ANOMALY_PLANET_INVESTIGATION
+			location = FROM
+			owner = root.owner
+		}
+	}
+}
+
+# Finished Anomaly Version 4 Project
+ship_event = {
+	id = mem_vazurans.206
+	title = mem_vazurans.206.name
+	desc = mem_vazurans.206.desc
+	picture = GFX_evt_satellite_in_orbit
+	show_sound = event_ship_bridge
+	location = ROOT
+	event_chain = mem_vazuran_menace_chain
+	is_triggered_only = yes
+	specimen = mem_datacore
+	immediate = {
+	}
+	option = {
+		name = mem_vazurans.206.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = @tier2researchreward
+				min = @tier2researchmin
+				max = @tier2researchmax
+			}
+		}
+	}
+}
+
+# Damper field story chain
+country_event = {
+	id = mem_vazurans.250
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		NOR = {
+			has_global_flag = mem_vazurans_disabled
+			has_global_flag = mem_vazurans_finished
+		}
+	}
+	immediate = {
+		random_list = {
+			1 = {
+				random_planet_within_border = {
+					limit = {
+						is_colony = no
+						is_capital = no
+						is_asteroid = no
+					}
+					set_planet_flag = mem_vazurans_damper_field_planet
+				}
+			}
+			1 = {
+				random_planet_within_border = {
+					limit = {
+						is_colony = no
+						is_asteroid = yes
+						has_deposit = no
+					}
+					set_planet_flag = mem_vazurans_damper_field_asteroid
+				}
+			}
+			1 = {
+			}
+		}
+		IF = {
+			limit = {
+				any_planet_within_border = {
+					has_planet_flag = mem_vazurans_damper_field_planet
+				}
+			}
+			random_planet_within_border = {
+				limit = {
+					has_planet_flag = mem_vazurans_damper_field_planet
+				}
+				planet_event = {
+					id = mem_vazurans.251
+				}
+			}
+		}
+		ELSE_IF = {
+			limit = {
+				any_planet_within_border = {
+					has_planet_flag = mem_vazurans_damper_field_asteroid
+				}
+			}
+			random_planet_within_border = {
+				limit = {
+					has_planet_flag = mem_vazurans_damper_field_asteroid
+				}
+				planet_event = {
+					id = mem_vazurans.253
+				}
+			}
+		}
+		ELSE = {
+			country_event = {
+				id = mem_vazurans.255
+			}
+		}
+	}
+}
+
+# Damper field anomaly 1 gets spawned
+planet_event = {
+	id = mem_vazurans.251
+	title = mem_vazurans.251.name
+	desc = {
+		text = mem_vazurans.251.desc
+		trigger = {
+			NOT = {
+				owner = {
+					has_ethic = ethic_gestalt_consciousness
+				}
+			}
+		}
+	}
+	desc = {
+		text = mem_vazurans.251.desc.gestalt
+		trigger = {
+			owner = {
+				has_ethic = ethic_gestalt_consciousness
+			}
+		}
+	}
+	picture = GFX_evt_mining_operations
+	show_sound = event_administrative_work
+	location = ROOT
+	event_chain = mem_vazuran_menace_chain
+	is_triggered_only = yes
+	option = {
+		name = mem_vazurans.251.a
+		add_anomaly = {
+			category = mem_vazurans_category_3
+		}
+	}
+}
+
+# anomaly finished
+ship_event = {
+	id = mem_vazurans.252
+	title = mem_vazurans.252.name
+	desc = {
+		text = mem_vazurans.252.desc
+		trigger = {
+			NOT = {
+				owner = {
+					has_ethic = ethic_gestalt_consciousness
+				}
+			}
+		}
+	}
+	desc = {
+		text = mem_vazurans.252.desc.gestalt
+		trigger = {
+			owner = {
+				has_ethic = ethic_gestalt_consciousness
+			}
+		}
+	}
+	picture = GFX_evt_mem_horror_corridor
+	show_sound = event_ship_bridge
+	location = FROM
+	event_chain = mem_vazuran_menace_chain
+	is_triggered_only = yes
+	option = {
+		name = mem_vazurans.252.a
+	}
+}
+
+# Damper field anomaly 2 gets spawned
+planet_event = {
+	id = mem_vazurans.253
+	title = mem_vazurans.253.name
+	desc = {
+		text = mem_vazurans.253.desc
+		trigger = {
+			NOT = {
+				owner = {
+					has_ethic = ethic_gestalt_consciousness
+				}
+			}
+		}
+	}
+	desc = {
+		text = mem_vazurans.253.desc.gestalt
+		trigger = {
+			owner = {
+				has_ethic = ethic_gestalt_consciousness
+			}
+		}
+	}
+	picture = GFX_evt_mining_station
+	show_sound = event_administrative_work
+	location = ROOT
+	event_chain = mem_vazuran_menace_chain
+	is_triggered_only = yes
+	option = {
+		name = mem_vazurans.253.a
+		add_anomaly = {
+			category = mem_vazurans_category_4
+		}
+	}
+}
+
+# anomaly finished
+ship_event = {
+	id = mem_vazurans.254
+	title = mem_vazurans.254.name
+	desc = {
+		text = mem_vazurans.254.desc
+		trigger = {
+			NOT = {
+				owner = {
+					has_ethic = ethic_gestalt_consciousness
+				}
+			}
+		}
+	}
+	desc = {
+		text = mem_vazurans.254.desc.gestalt
+		trigger = {
+			owner = {
+				has_ethic = ethic_gestalt_consciousness
+			}
+		}
+	}
+	picture = GFX_evt_mining_station
+	show_sound = event_ship_bridge
+	location = FROM
+	event_chain = mem_vazuran_menace_chain
+	is_triggered_only = yes
+	option = {
+		name = mem_vazurans.254.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = 6
+			}
+		}
+	}
+}
+
+# Drifting vazuran wreckage found in deep space
+country_event = {
+	id = mem_vazurans.255
+	title = mem_vazurans.255.name
+	desc = mem_vazurans.255.desc
+	picture = GFX_evt_space_debris
+	show_sound = event_ship_bridge
+	location = event_target:mem_vazurans_wreckage
+	event_chain = mem_vazuran_menace_chain
+	is_triggered_only = yes
+	immediate = {
+		random_system_within_border = {
+			save_event_target_as = mem_vazurans_wreckage_system
+			random_system_planet = {
+				limit = {
+					is_star = yes
+				}
+				create_ambient_object = {
+					type = "mem_vazuran_wreckage_object"
+				}
+				last_created_ambient_object = {
+					set_location = {
+						target = prev
+						distance = 250
+						angle = random
+					}
+					set_ambient_object_flag = mem_vazurans_wreckage
+					save_event_target_as = mem_vazurans_wreckage
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_vazurans.255.a
+		enable_special_project = {
+			name = MEM_VAZURANS_WRECKAGE_INVESTIGATION
+			location = event_target:mem_vazurans_wreckage
+			owner = root
+		}
+	}
+}
+
+# wreckage investigation finished
+ship_event = {
+	id = mem_vazurans.256
+	title = mem_vazurans.256.name
+	desc = {
+		text = mem_vazurans.256.desc
+		trigger = {
+			NOT = {
+				owner = {
+					has_ethic = ethic_gestalt_consciousness
+				}
+			}
+		}
+	}
+	desc = {
+		text = mem_vazurans.256.desc.gestalt
+		trigger = {
+			owner = {
+				has_ethic = ethic_gestalt_consciousness
+			}
+		}
+	}
+	picture = GFX_evt_space_debris
+	show_sound = event_ship_bridge
+	location = FROM
+	event_chain = mem_vazuran_menace_chain
+	is_triggered_only = yes
+	option = {
+		name = mem_vazurans.256.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = 6
+			}
+		}
+	}
+}
+
 # Reaching Vazuran Homesystem
 # A fleet has entered a system
 # Scope = Fleet
@@ -711,7 +1369,7 @@ country_event = {
 			}
 			if = {
 				limit = {
-					is_mem_runesmith = mo
+					is_mem_runesmith = no
 				}
 				country_event = {
 					id = mem_vazurans.31
@@ -731,30 +1389,7 @@ country_event = {
 	}
 	option = {
 		name = mem_vazurans.282.a
-		append_technology = {
-			TECH = mem_vazuran_xentronium_armor
-		}
-		append_technology = {
-			TECH = mem_vazuran_xentronium_rounds
-		}
-		add_relic = r_mem_vazuran_orila_brain		# TRODO chaplin event
-		hidden_effect = {
-			set_country_flag = mem_ended_vazuran_menace
-			every_country = {
-				limit = {
-					is_country_type = default
-					NOT = {
-						#should do the same as the above mentioned thing but does not exclude other human players
-						is_same_value = ROOT
-					}
-					has_communications = ROOT
-				}
-				add_opinion_modifier = {
-					who = ROOT
-					modifier = mem_ended_vazuran_menace
-				}
-			}
-		}
+		give_vazuran_defeat_reward = yes
 	}
 }
 
@@ -912,7 +1547,7 @@ situation_event = {
 		# now each system someone controls increases raiding chance
 		reroll_random = yes
 		random_list = {
-			# TRODO better logic based on gamestage?
+			# better logic based on gamestage?
 			80 = {
 				random_system = {
 					limit = {
@@ -2271,9 +2906,7 @@ country_event = {
 			any_owned_pop_group = {
 				is_enslaved = yes
 			}
-		
 			is_mem_runesmith = no
-		
 		}
 		hidden_effect = {
 			FROM.capital_scope = {

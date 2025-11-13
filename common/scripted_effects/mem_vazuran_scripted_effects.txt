@@ -438,93 +438,37 @@ mem_vazurans_yoink_this_system = {
 	}
 }
 
-#happens in country scope of default empire that has destroyed a raiding fleet
-mem_vazurans_retaliation_dice_roll = {
-	remove_country_flag = mem_vazurans_target_1
-	remove_country_flag = mem_vazurans_target_2
-	remove_country_flag = mem_vazurans_target_3
-	remove_country_flag = mem_vazurans_target_4
-	remove_country_flag = mem_vazurans_target_5
-	#reward event
-	country_event = {
-		id = mem_vazurans.70
-		days = 5
-	}
-	#counts destroyed raiding fleets
-	change_variable = {
-		which = mem_vazuran_fleet_destroyed_counter
-		value = 1
-	}
-	#flags the country for another raid or a retaliation strike with a growing chance dependent on the number of destroyed vazuran fleets
-	random_list = {
-		2 = {
-			modifier = {
-				#to make it less likely that the vazurans keep on endlessly attacking ais instead of visiting the player once in a while
-				factor = 4
-				is_ai = yes
-			}
+give_vazuran_defeat_reward = {
+	# mem_vazurans_chosen
+	if = {
+		limit = {
+			has_global_flag = mem_vazurans_spawned
+		 }
+	
+			append_technology = {
+			TECH = mem_vazuran_xentronium_armor
 		}
-		10 = {
-			modifier = {
-				#to make it less likely that the vazurans keep on endlessly attacking ais instead of visiting the player once in a while
-				factor = 0.5
-				is_ai = yes
-			}
-			set_country_flag = mem_vazurans_raid
+		append_technology = {
+			TECH = mem_vazuran_xentronium_rounds
 		}
-		4 = {
-			modifier = {
-				factor = 0
-				check_variable = {
-					which = "mem_vazuran_fleet_destroyed_counter"
-					value <= 2
-				}
-			}
-			modifier = {
-				factor = 0.5
-				check_variable = {
-					which = "mem_vazuran_fleet_destroyed_counter"
-					value <= 5
-				}
-			}
-			modifier = {
-				factor = 0.5
-				check_variable = {
-					which = "mem_vazuran_fleet_destroyed_counter"
-					value <= 7
-				}
-			}
-			modifier = {
-				factor = 2
-				check_variable = {
-					which = "mem_vazuran_fleet_destroyed_counter"
-					value > 10
-				}
-			}
-			set_country_flag = mem_vazurans_retaliation
-			reroll_random = yes
-			random_list = {
-				60 = {
-					change_variable = {
-						which = mem_vazuran_fleet_destroyed_counter
-						value = -10
+		add_relic = r_mem_vazuran_orila_brain		# TRODO chaplin event
+		hidden_effect = {
+			set_country_flag = mem_ended_vazuran_menace
+			every_country = {
+				limit = {
+					is_country_type = default
+					NOT = {
+						#should do the same as the above mentioned thing but does not exclude other human players
+						is_same_value = ROOT
 					}
+					has_communications = ROOT
 				}
-				30 = {
-					change_variable = {
-						which = mem_vazuran_fleet_destroyed_counter
-						value = -5
-					}
-				}
-				10 = {
-					change_variable = {
-						which = mem_vazuran_fleet_destroyed_counter
-						value = -2
-					}
+				add_opinion_modifier = {
+					who = ROOT
+					modifier = mem_ended_vazuran_menace
 				}
 			}
-		}
-	}
+		}}
 }
 
 create_mem_vazuran_ships = {
