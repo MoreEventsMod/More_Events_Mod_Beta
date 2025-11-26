@@ -18,6 +18,8 @@
 ############################################################################################################
 # mem_vazurans.30  	|	Vazuran Homefleet defeated (information event)
 # mem_vazurans.31  	|	Vazuran Homeworld taken (information event)
+# mem_vazurans.52  	|	special project for rift construction event
+# mem_vazurans.53  	|	special project for rift construction event info
 # mem_vazurans.60  	|	discover first active Rift Endpoint
 # mem_vazurans.61  	|	discover first ruined Rift Endpoint
 # mem_vazurans.62  	|	reach ruined Vazuran Homesystem
@@ -215,6 +217,88 @@ country_event = {
 		name = mem_vazurans_31.a
 	}
 }
+
+# vazuran system spawned
+country_event = {
+	id = mem_vazurans.52
+	hide_window = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		every_country = {
+			limit = {
+				NOT = {
+					has_technology = tech_mem_vazuran_rift_travel
+				}
+			}
+			give_technology = {
+				tech = tech_mem_vazuran_rift_travel
+				message = no
+			}
+		}			
+		country_event = { id = mem_vazurans.53 days = 1 }
+	}
+}
+
+# Dimensional Portal constructed
+country_event = {
+	id = mem_vazurans.53
+	title = mem_vazurans.53.name
+	desc = {
+		trigger = {
+			NOT = {
+				has_ethic = ethic_gestalt_consciousness
+			}
+		}
+		text = mem_vazurans.53.desc
+	}
+	desc = {
+		trigger = {
+			has_ethic = ethic_gestalt_consciousness
+		}
+		text = mem_vazurans.53.desc.gestalt
+	}
+
+	picture = GFX_evt_mem_rift
+	event_chain = mem_vazuran_menace_chain
+
+	is_triggered_only = yes
+
+	immediate = {
+		capital_scope = {
+			solar_system = {
+				set_star_flag = mem_vazuran_portal
+				spawn_megastructure = {
+					type = "mem_vazuran_gateway"
+					orbit_angle = 360
+                	orbit_distance = 200
+				}
+				random_system_megastructure = {
+					limit = {
+						is_megastructure_type = mem_vazuran_gateway
+					}
+					save_event_target_as = mem_vazuran_player_gate
+					create_ambient_object = {
+						type = "mem_vazuran_wormhole_small_object"
+					}
+					last_created_ambient_object = {
+						set_location = {
+							target = event_target:mem_vazuran_player_gate
+							distance = 0
+							angle = random
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = EXCELLENT
+	}
+}
+
 
 # Finding first active Rift Endpoint
 ship_event = {
