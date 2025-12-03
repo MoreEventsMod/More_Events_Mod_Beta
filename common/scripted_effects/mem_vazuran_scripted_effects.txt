@@ -1,6 +1,38 @@
 #sets up the systems around empires and activates the crisis
 start_mem_vazuran_menace = {
-	set_global_flag = mem_vazurans_enabled
+	set_global_flag = mem_vazurans_enabled	
+	create_mem_vazuran_country = yes
+	set_global_flag = mem_vazurans_spawned
+	event_target:mem_vazurans_country = {
+		log = this.id
+		# situation controls all raiding
+		start_situation = {
+			type = mem_vazuran_raiding
+		}
+		random_situation = {
+			limit = {
+				is_situation_type = mem_vazuran_raiding
+			}
+			# max number of fleets that can raid simultaniously
+			set_variable = {
+				which = mem_vazuran_raiding_max_fleets
+				value = @mem_vazurans_max_raiders
+			}
+			# max concurrent number of fleets raiding, could be done in one variable but this is more stable
+			set_variable = {
+				which = mem_vazuran_raiding_current_fleets
+				value = 0
+			}
+			# tracks all, raided resources, lost fleets etc. should be deciding factor for outcome
+			set_variable = {
+				which = mem_vazuran_raiding_strength				# make this impactful
+				value = @mem_vazurans_starting_points
+			}
+		}
+	}
+}
+# create the destroyed worlds systems
+create_mem_vazuran_destroyed_system_chain = {
 	every_country = {
 		limit = {
 			is_country_type = default
@@ -50,35 +82,6 @@ start_mem_vazuran_menace = {
 				}
 			}
 			1 = {
-			}
-		}
-	}
-	create_mem_vazuran_country = yes
-	set_global_flag = mem_vazurans_spawned
-	event_target:mem_vazurans_country = {
-		log = this.id
-		# situation controls all raiding
-		start_situation = {
-			type = mem_vazuran_raiding
-		}
-		random_situation = {
-			limit = {
-				is_situation_type = mem_vazuran_raiding
-			}
-			# max number of fleets that can raid simultaniously
-			set_variable = {
-				which = mem_vazuran_raiding_max_fleets
-				value = @mem_vazurans_max_raiders
-			}
-			# max concurrent number of fleets raiding, could be done in one variable but this is more stable
-			set_variable = {
-				which = mem_vazuran_raiding_current_fleets
-				value = 0
-			}
-			# tracks all, raided resources, lost fleets etc. should be deciding factor for outcome
-			set_variable = {
-				which = mem_vazuran_raiding_strength				# make this impactful
-				value = @mem_vazurans_starting_points
 			}
 		}
 	}
@@ -513,14 +516,17 @@ create_mem_vazuran_ships = {
 	}
 }
 
+# only used for AE reinforcements
 create_mem_vazuran_corvette_stage_fleet = {
 	create_fleet = {
-		name = "Raiders"
+		name = "Automated Reinforcements"
 		settings = {
 			spawn_debris = no
 			is_boss = no
+			can_change_composition = no
+
 		}
-		effect = {
+		effect = {			
 			set_owner = event_target:mem_vazurans_country
 			create_mem_vazuran_ships = {
 				ARTILLERY_DRONES = 4
@@ -688,6 +694,7 @@ create_mem_vazuran_garrison_fleet = {
 		settings = {
 			spawn_debris = no
 			is_boss = no
+			can_change_composition = no
 		}
 		effect = {
 			set_owner = event_target:mem_vazurans_country

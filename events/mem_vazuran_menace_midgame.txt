@@ -119,6 +119,9 @@ event = {
 						random = @mem_vazurans_starting_date_random
 					}
 				}
+				no_scope = {
+					create_mem_vazuran_destroyed_system_chain = yes
+				}
 				log = "mem_vazurans:active"
 			}
 			else = {
@@ -154,6 +157,9 @@ event = {
 								days = @mem_vazurans_starting_date
 								random = @mem_vazurans_starting_date_random
 							}
+						}
+						no_scope = {
+							create_mem_vazuran_destroyed_system_chain = yes
 						}
 					}
 				}
@@ -256,7 +262,40 @@ country_event = {
 # 		}
 # 	}
 # }
-# Dimensional Portal constructed
+# Finishing first Rift investigation
+country_event = {
+	id = mem_vazurans.40
+	title = mem_vazurans.40.name
+	desc = mem_vazurans.40.desc
+	picture = GFX_evt_mem_rift
+	event_chain = mem_vazuran_menace_chain
+	is_triggered_only = yes
+	option = {
+		name = WORRYING
+		trigger = {
+			is_mem_runesmith = no
+		}
+	}
+	option = {
+		name = mem_vazurans.40.a
+		trigger = {
+			is_mem_runesmith = yes
+		}
+	}
+	after = {
+		add_monthly_resource_mult = {
+			resource = physics_research
+			value = @tier3researchreward
+			min = @tier3researchmin
+			max = @tier3researchmax
+		}
+		append_technology = {
+			TECH = wormhole_stabilization
+		}
+	}
+}
+
+# rift constructed
 country_event = {
 	id = mem_vazurans.53
 	title = mem_vazurans.53.name
@@ -1029,7 +1068,7 @@ ship_event = {
 	}
 }
 
-# Damper field story chain
+# Damper field story chain - TRODO
 country_event = {
 	id = mem_vazurans.250
 	hide_window = yes
@@ -1613,9 +1652,6 @@ country_event = {
 				id = mem_vazurans.1101
 			}
 		}
-		begin_event_chain = {
-			event_chain = mem_vazuran_menace_chain
-		}
 	}
 }
 
@@ -1688,25 +1724,10 @@ situation_event = {
 				exists = event_target:mem_vazurans_target_system
 			}
 			event_target:mem_vazurans_target_system = {
-				owner = {
-					# raid incoming * red alert sound *
-					set_timed_country_flag = {
-						flag = mem_vazurans_targeted_country
-						days = 720
-					}
-					# this should be on vazuran country scope, not raid target ... hmmm only because controller can switch ... idk
+				event_target:global_event_country = {
 					# this one creates the rift
 					country_event = {
 						id = mem_vazurans.1105
-						#days = 13
-						#random = 160
-						scopes = {
-							from = event_target:mem_vazurans_target_system
-						}
-					}
-					# this one creates a message or first time event				
-					country_event = {
-						id = mem_vazurans.1110
 						#days = 13
 						#random = 160
 						scopes = {
@@ -1726,6 +1747,22 @@ situation_event = {
 					country_event = {
 						id = mem_vazurans.1106
 						days = 720						# this is also done when the fleets returns, and if we do this too early we break them
+						scopes = {
+							from = event_target:mem_vazurans_target_system
+						}
+					}
+				}
+				owner = {
+					# raid incoming * red alert sound *
+					set_timed_country_flag = {
+						flag = mem_vazurans_targeted_country
+						days = 720
+					}
+					# this one creates a message or first time event				
+					country_event = {
+						id = mem_vazurans.1110
+						#days = 13
+						#random = 160
 						scopes = {
 							from = event_target:mem_vazurans_target_system
 						}
@@ -1764,6 +1801,9 @@ country_event = {
 		add_modifier = {
 			modifier = mem_vazurans_stance_provoke
 		}
+		# trigger = {
+		# 	is_mem_runesmith = yes
+		# }
 	}
 	# defense
 	option = {
@@ -1771,10 +1811,16 @@ country_event = {
 		add_modifier = {
 			modifier = mem_vazurans_stance_bunker_down
 		}
+		trigger = {
+			is_mem_runesmith = no
+		}
 	}
 	# dont care
 	option = {
 		name = mem_vazurans.1101.c
+		trigger = {
+			is_mem_runesmith = no
+		}
 	}
 	# tribute
 	option = {
@@ -1807,16 +1853,17 @@ country_event = {
 		}
 		trigger = {
 			is_diplomatic = yes
+			is_mem_runesmith = no
 		}
 	}
 	option = {
 		name = mem_vazurans.1101.e
-		exclusive_trigger = {
+		trigger = {
 			is_mem_runesmith = yes
 		}
 		add_modifier = {
 			modifier = mem_vazurans_stance_provoke
-			mult = 2
+			mult = 1.2
 		}
 	}
 }
@@ -1904,19 +1951,6 @@ country_event = {
 							from = from
 						}
 					}
-					# establis coms if not already, should be handled by intro event of situation start
-					IF = {
-						limit = {
-							NOT = {
-								has_communications = ROOT.owner
-							}
-						}
-						country_event = {
-							id = mem_vazurans.1099							# info that something happened
-							days = 45
-						}
-						establish_communications_no_message = ROOT.owner
-					}
 				}
 			}
 		}
@@ -1972,19 +2006,6 @@ country_event = {
 		trigger = {
 			is_mem_runesmith = no
 		}
-		# trigger = {
-		# 	NOR = {
-		# 		has_country_flag = mem_vazurans_met
-		# 		has_country_flag = mem_vazurans_retaliation
-		# 	}
-		# }
-		# capital_scope = {
-		# 	enable_special_project = {
-		# 		name = MEM_VAZURANS_RIFT_INVESTIGATION
-		# 		location = this
-		# 		owner = root
-		# 	}
-		# }
 	}
 	option = {
 		name = mem_vazurans.4.b
@@ -1996,6 +2017,37 @@ country_event = {
 		name = mem_vazurans.4.d
 		trigger = {
 			is_mem_runesmith = yes
+		}
+	}
+	after = {
+		begin_event_chain = {
+			event_chain = mem_vazuran_menace_chain
+		}
+		capital_scope = {
+			enable_special_project = {
+				name = MEM_VAZURANS_RIFT_INVESTIGATION
+				location = this
+				owner = root
+			}
+		}
+		hidden_effect = {
+			# establis coms if not already, should be handled by intro event of situation start
+			IF = {
+				limit = {
+					# NOT = {
+					# 	has_communications = ROOT.owner
+					# }
+					NOT = {
+						has_country_flag = mem_vazurans_diplo_met
+					}
+				}
+				country_event = {
+					id = mem_vazurans.1099					# diplo event
+					days = 240
+				}
+				#establish_communications_no_message = ROOT.owner
+				set_country_flag = mem_vazurans_diplo_met
+			}
 		}
 	}
 	# #response in later encounter
@@ -2055,6 +2107,7 @@ country_event = {
 					solar_system = {
 						any_system_planet = {
 							is_colony = yes
+							pop_amount > 100
 						}
 					}
 				}
@@ -2263,12 +2316,17 @@ country_event = {
 						}
 					}
 				}
+				add_modifier = {
+					modifier = mem_vazurans_raided_planet
+					mult = 0.5
+					days = 360
+				}
 				add_planet_devastation = 40
 				# kill pops and once we generate vauzran homeplanet add them 				
 				root = {
 					change_variable = {
 						which = mem_vazurans_stolen_pops
-						value = prev.value:per_100_local_pop_amount						# 1 per 100 , we can later multiply it again
+						value = prev.value:per_100_pop_amount						# 1 per 100 , we can later multiply it again
 					}
 				}
 				every_owned_pop_group = {
@@ -2298,6 +2356,11 @@ country_event = {
 				}
 			}
 			else = {
+				add_modifier = {
+					modifier = mem_vazurans_raided_planet
+					mult = 1
+					days = 360
+				}
 				add_planet_devastation = 100
 				every_owned_pop_group = {
 					kill_pop_group = {
@@ -2383,6 +2446,10 @@ fleet_event = {
 	is_triggered_only = yes
 	immediate = {
 		solar_system = {
+			add_modifier = {
+				modifier = mem_vazurans_raided_system
+				days = 360
+			}
 			every_system_colony = {
 				limit = {
 					controller = {
@@ -2397,7 +2464,7 @@ fleet_event = {
 						# for each pop we get points
 						change_variable = {
 							which = mem_vazuran_raiding_strength
-							value = prevprev.pop_amount
+							value = prevprev.trigger:pop_amount
 						}
 						# for each mining/research staion we get points
 						change_variable = {
@@ -2468,8 +2535,13 @@ fleet_event = {
 			effect = {
 				id = mem_vazurans_action.3
 				delete_fleet = this
-				event_target:mem_vazurans_rift = {
-					destroy_ambient_object = this
+				if = {
+					limit = {
+						exists = event_target:mem_vazurans_rift
+					}
+					event_target:mem_vazurans_rift = {
+						destroy_ambient_object = this
+					}
 				}
 			}
 		}
@@ -2870,7 +2942,7 @@ situation_event = {
 	is_triggered_only = yes
 	trigger = {
 		owner = {
-			is_country_type = fallen_empire
+					
 			is_at_war = no
 			fleet_power < @mem_vazuran_fe_fleet_strenght
 			NOT = {
@@ -2882,7 +2954,7 @@ situation_event = {
 		owner = {
 			set_timed_country_flag = {
 				flag = fallen_empire_fleet_spawn
-				days = 3600
+				days = 1800
 			}
 			capital_scope = {
 				create_mem_vazuran_garrison_fleet = yes
@@ -2893,6 +2965,33 @@ situation_event = {
 						type = xenomorph_army
 					}
 				}
+			}
+		}
+	}
+}
+
+# create reinforcement fleet
+situation_event = {
+	id = mem_vazurans.1301
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		owner = {
+			is_country_type = awakened_fallen_empire
+			NOT = {
+				has_country_flag = fallen_empire_fleet_spawn_mini
+			}
+		}
+	}
+	immediate = {
+		owner = {
+			set_timed_country_flag = {
+				flag = fallen_empire_fleet_spawn_mini
+				days = 360
+			}
+			capital_scope = {
+				create_mem_vazuran_corvette_stage_fleet = yes
+				
 			}
 		}
 	}
