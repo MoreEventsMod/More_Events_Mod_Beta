@@ -780,6 +780,53 @@ country_event = {
 	}
 }
 
+# Retaliation Fleet spawn
+country_event = {
+	id = mem_vazurans.100
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+	
+		capital_scope = {
+			solar_system = {
+				create_ambient_object = {
+					type = "mem_vazuran_wormhole_big_object"
+				}
+				last_created_ambient_object = {
+					set_location = {
+						target = system_star
+						distance = 150
+						angle = random
+					}
+					set_ambient_object_flag = mem_vazurans_rift
+				}
+			}
+			create_mem_vazuran_retaliation_fleet = yes
+			set_planet_flag = mem_vazurans_raiding_target
+			last_created_fleet = {
+				# fleet flag for bombarding event
+				set_fleet_flag = mem_vazurans_fleet
+				set_fleet_stance = aggressive
+				set_aggro_range_measure_from = self
+				set_aggro_range = 150
+				# bomb + spawn armies
+				fleet_event = {
+					id = mem_vazurans.1125
+					days = 1
+				}
+			}
+		}
+		# delete the rift later
+		country_event = {
+			id = mem_vazurans.1106
+			days = 720
+			scopes = {
+				from = root.capital_scope.solar_system
+			}
+		}
+	}
+}
+
 # A fleet has entered a system
 # Scope = Fleet
 # From = System
@@ -1074,10 +1121,11 @@ country_event = {
 	hide_window = yes
 	is_triggered_only = yes
 	trigger = {
-		NOR = {
-			has_global_flag = mem_vazurans_disabled
-			has_global_flag = mem_vazurans_finished
-		}
+		# NOR = {
+		# 	has_global_flag = mem_vazurans_disabled
+		# 	has_global_flag = mem_vazurans_finished
+		# }
+		has_global_flag = mem_vazurans_finished
 	}
 	immediate = {
 		random_list = {
@@ -1801,6 +1849,10 @@ country_event = {
 		add_modifier = {
 			modifier = mem_vazurans_stance_provoke
 		}
+		enable_special_project = {
+			name = MEM_VAZURANS_DAMPER_FIELD_GENERATOR_INVESTIGATION
+			owner = root
+		}
 		# trigger = {
 		# 	is_mem_runesmith = yes
 		# }
@@ -1811,6 +1863,10 @@ country_event = {
 		add_modifier = {
 			modifier = mem_vazurans_stance_bunker_down
 		}
+		enable_special_project = {
+			name = MEM_VAZURANS_DAMPER_FIELD_GENERATOR_INVESTIGATION
+			owner = root
+		}
 		trigger = {
 			is_mem_runesmith = no
 		}
@@ -1820,6 +1876,10 @@ country_event = {
 		name = mem_vazurans.1101.c
 		trigger = {
 			is_mem_runesmith = no
+		}
+		enable_special_project = {
+			name = MEM_VAZURANS_DAMPER_FIELD_GENERATOR_INVESTIGATION
+			owner = root
 		}
 	}
 	# tribute
@@ -1861,6 +1921,10 @@ country_event = {
 		trigger = {
 			is_mem_runesmith = yes
 		}
+		enable_special_project = {
+			name = MEM_VAZURANS_DAMPER_FIELD_GENERATOR_INVESTIGATION
+			owner = root
+		}
 		add_modifier = {
 			modifier = mem_vazurans_stance_provoke
 			mult = 1.2
@@ -1884,10 +1948,7 @@ country_event = {
 			create_ambient_object = {
 				type = "mem_vazuran_wormhole_big_object"
 			}
-			random_system_ambient_object = {
-				limit = {
-					is_same_value = last_created_ambient_object
-				}
+			last_created_ambient_object = {
 				set_location = {
 					target = system_star
 					distance = 150
@@ -2115,6 +2176,7 @@ country_event = {
 					random_system_planet = {
 						limit = {
 							is_colony = yes
+							pop_amount > 100
 						}
 						set_planet_flag = mem_vazurans_raiding_target
 						prevprev = {
@@ -2234,6 +2296,18 @@ planet_event = {
 	is_triggered_only = yes
 	immediate = {
 		set_planet_flag = mem_vazurans_raid_planet
+		if = {
+			limit = {
+				is_capital = yes
+			}
+			while = {
+				count = 15
+				create_army = {
+					owner = event_target:mem_vazurans_country
+					type = xenomorph_army
+				}
+			}
+		}
 		if = {
 			limit = {
 				mid_game_years_passed >= 1
@@ -2409,6 +2483,9 @@ country_event = {
 		}
 	}
 	immediate = {
+		from = {
+			mem_vazurans_unlock_tradition = yes			# yes ground combat wins also gives tradition
+		}
 		FromFrom = {
 			# armies done their job 
 			remove_planet_flag = mem_vazurans_raid_planet
@@ -2736,6 +2813,7 @@ situation_event = {
 				}
 				# make_fallen_empire = yes
 				set_country_type = fallen_empire
+				set_graphical_culture = mem_ancient_02
 				capital_scope = {
 					solar_system = {
 						mem_vazurans_create_home_system_defences = yes
@@ -2777,6 +2855,7 @@ situation_event = {
 					}
 				}
 				set_country_type = awakened_fallen_empire
+				set_graphical_culture = mem_ancient_02
 				capital_scope = {
 					solar_system = {
 						mem_vazurans_create_home_system_defences = yes
@@ -2875,6 +2954,7 @@ country_event = {
 	show_sound = event_radio_chatter
 	is_triggered_only = yes
 	event_chain = mem_vazuran_menace_chain
+	location = event_target:mem_vazurans_yoinked_system
 	option = {
 		trigger = {
 			is_mem_runesmith = no
@@ -2901,6 +2981,7 @@ country_event = {
 	show_sound = event_radio_chatter
 	is_triggered_only = yes
 	event_chain = mem_vazuran_menace_chain
+	location = event_target:mem_vazurans_yoinked_system
 	option = {
 		name = mem_vazurans.1215.a
 		trigger = {
@@ -2942,7 +3023,6 @@ situation_event = {
 	is_triggered_only = yes
 	trigger = {
 		owner = {
-					
 			is_at_war = no
 			fleet_power < @mem_vazuran_fe_fleet_strenght
 			NOT = {
@@ -2991,7 +3071,6 @@ situation_event = {
 			}
 			capital_scope = {
 				create_mem_vazuran_corvette_stage_fleet = yes
-				
 			}
 		}
 	}
