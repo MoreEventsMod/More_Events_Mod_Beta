@@ -62,6 +62,7 @@
 # mem_vazurans.1120	|	spawn Vazuran raiding fleet
 # mem_vazurans.1124	|	raiding fleet orbits system (no colony)
 # mem_vazurans.1125	|	raiding fleet attacks colony target
+# mem_vazurans.1126 |	Fires first message about tith when first raid has waited long enough in system without colony (where the first raid is expected)
 # mem_vazurans.1129	|	spawn ground armies on raided planet
 # mem_vazurans.1130	|	Vazurans lose ground combat
 # mem_vazurans.1131	|	Vazurans win ground combat
@@ -141,6 +142,7 @@ event = {
 				log = "mem_vazurans:random"
 				random_list = {
 					90 = {
+						reroll_random = yes
 						random_list = {
 							80 = {
 							}
@@ -1700,30 +1702,30 @@ country_event = {
 			is_mem_runesmith = no
 		}
 		name = mem_vazurans.6.c
-		#response_text = mem_vazurans.6.c.response
+		response_text = mem_vazurans.6.c.response
 	}
 	option = {
 		trigger = {
 			is_mem_runesmith = yes
 		}
 		name = mem_vazurans.6.d
-		#response_text = mem_vazurans.6.d.response
+		response_text = mem_vazurans.6.d.response
 	}
 	option = {
 		trigger = {
 			is_mem_runesmith = yes
 		}
 		name = mem_vazurans.6.e
-		#response_text = mem_vazurans.6.e.response
+		response_text = mem_vazurans.6.e.response
 	}
-	after = {
-		# choose a stance
-		hidden_effect = {
-			country_event = {
-				id = mem_vazurans.1101
-			}
-		}
-	}
+	# after = {
+	# 	# choose a stance
+	# 	hidden_effect = {
+	# 		country_event = {
+	# 			id = mem_vazurans.1101
+	# 		}
+	# 	}
+	# }
 }
 
 # vazurans say hello
@@ -1865,6 +1867,9 @@ country_event = {
 		#portrait = event_target:mem_vazurans_country
 		portrait = mem_Vazu_crisis
 		room = mem_vazuran_1_room
+	}
+	immediate = {
+		set_country_flag = mem_vazurans_first_tith_message
 	}
 	# offense
 	option = {
@@ -2135,25 +2140,25 @@ country_event = {
 				owner = root
 			}
 		}
-		hidden_effect = {
-			# establis coms if not already, should be handled by intro event of situation start
-			IF = {
-				limit = {
-					# NOT = {
-					# 	has_communications = ROOT.owner
-					# }
-					NOT = {
-						has_country_flag = mem_vazurans_diplo_met
-					}
-				}
-				country_event = {
-					id = mem_vazurans.1099					# diplo event
-					days = 240
-				}
-				#establish_communications_no_message = ROOT.owner
-				set_country_flag = mem_vazurans_diplo_met
-			}
-		}
+		# hidden_effect = {
+		# 	# establis coms if not already, should be handled by intro event of situation start
+		# 	IF = {
+		# 		limit = {
+		# 			# NOT = {
+		# 			# 	has_communications = ROOT.owner
+		# 			# }
+		# 			NOT = {
+		# 				has_country_flag = mem_vazurans_diplo_met
+		# 			}
+		# 		}
+		# 		country_event = {
+		# 			id = mem_vazurans.1099					# diplo event
+		# 			days = 240
+		# 		}
+		# 		#establish_communications_no_message = ROOT.owner
+		# 		set_country_flag = mem_vazurans_diplo_met
+		# 	}
+		# }
 	}
 	# #response in later encounter
 	# option = {
@@ -2254,7 +2259,105 @@ country_event = {
 		# 		value = 1
 		# 	}
 		# }
+		# Fire first diplo event
+		from.owner = {
+			IF = {
+				limit = {
+					NOT = {
+						has_country_flag = mem_vazurans_diplo_met
+					}
+				}
+				country_event = {
+					id = mem_vazurans.1121
+				}
+				#establish_communications_no_message = ROOT.owner
+				#set_country_flag = mem_vazurans_diplo_met
+			}
+		}		
 	}
+}
+
+# Rift opens and fleet spawn events get linked
+country_event = {
+	id = mem_vazurans.1121
+	title = mem_vazurans.5.name
+	desc = { # for first encounter
+		text = mem_vazurans.5a.desc
+		trigger = {
+			NOR = { 
+				# has_country_flag = mem_vazurans_retaliation
+				has_country_flag = mem_vazurans_diplo_met
+			}
+		}
+	}
+	desc = { # after first encounter has happened before
+		text = mem_vazurans.5b.desc
+		trigger = {
+			# NOT = { 
+			# 	has_country_flag = mem_vazurans_retaliation 
+			# }
+			has_country_flag = mem_vazurans_diplo_met
+		}
+	}
+	# desc = { # for retaliation encounter
+	# 	text = mem_vazurans.5c.desc
+	# 	trigger = { has_country_flag = mem_vazurans_retaliation }
+	# }
+	picture = GFX_evt_fleet_evil # TODO we will need custom art for a picture of an opened rifts with ships coming through
+	location = event_target:mem_vazurans_rift
+	event_chain = mem_vazuran_menace_chain
+	
+	is_triggered_only = yes
+
+	immediate = {
+		random_planet_within_border = {
+			limit = {
+				has_planet_flag = mem_vazurans_raiding_target
+			}
+			solar_system = {
+				random_system_ambient_object = {
+					limit = {
+						has_ambient_object_flag = mem_vazurans_rift
+					}
+					save_event_target_as = mem_vazurans_rift
+				}
+			}
+		}
+	}
+
+	#response in first encounter
+	option = {
+		name = mem_vazurans.5.a
+		trigger = {
+			NOR = {
+				has_country_flag = mem_vazurans_diplo_met
+				# has_country_flag = mem_vazurans_retaliation
+			}
+		}
+		hidden_effect = {
+			set_country_flag = mem_vazurans_diplo_met
+			country_event = { id = mem_vazurans.1099 }
+		}
+	}
+	
+	#response in later encounter
+	option = {
+		name = mem_vazurans.5.b
+		trigger = {
+			has_country_flag = mem_vazurans_diplo_met
+			# NOT = {
+			# 	has_country_flag = mem_vazurans_retaliation
+			# }
+		}
+	}
+	
+	#response in retaliation encounter
+	# option = {
+	# 	name = mem_vazurans.5.c
+	# 	trigger = {
+	# 		has_country_flag = mem_vazurans_retaliation
+	# 	}
+	# }
 }
 
 # tells the raiding fleet to move to the solar sun and wait
@@ -2262,6 +2365,9 @@ fleet_event = {
 	id = mem_vazurans.1124
 	hide_window = yes
 	is_triggered_only = yes
+	trigger = {
+		exists = solar_system.owner
+	}
 	immediate = {
 		queue_actions = {
 			repeat = {
@@ -2278,13 +2384,20 @@ fleet_event = {
 				wait = {
 					duration = 100
 				}
-				# enough raiding, fly back
+				# Message about tith fired with step inbetween
 				effect = {
 					id = mem_vazurans_action1124.2
 					fleet_event = {
-						id = mem_vazurans.1135
+						id = mem_vazurans.1126
 					}
 				}
+				# enough raiding, fly back
+				effect = {
+					id = mem_vazurans_action1124.3
+					fleet_event = {
+						id = mem_vazurans.1135
+					}
+				}				
 			}
 		}
 	}
@@ -2328,6 +2441,29 @@ fleet_event = {
 				wait = {
 					duration = 60
 				}
+			}
+		}
+	}
+}
+
+# Fires first message about tith when first raid has waited long enough in system without colony (where the first raid is expected)
+fleet_event = {
+	id = mem_vazurans.1126
+	hide_window = yes
+
+	is_triggered_only = yes
+	trigger = {
+		exists = solar_system.owner
+		solar_system.owner = {
+			NOT = {
+				has_country_flag = mem_vazurans_first_tith_message
+			}
+		}
+	}
+	immediate = {
+		solar_system.owner = {
+			country_event = {
+				id = mem_vazurans.1101
 			}
 		}
 	}
