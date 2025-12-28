@@ -1,36 +1,44 @@
 #sets up the systems around empires and activates the crisis
 start_mem_vazuran_menace = {
-	set_global_flag = mem_vazurans_enabled	
-	create_mem_vazuran_country = yes
-	set_global_flag = mem_vazurans_spawned
-	event_target:mem_vazurans_country = {
-		log = this.id
-		# situation controls all raiding
-		start_situation = {
-			type = mem_vazuran_raiding
+	if = {
+		limit = {
+			NOT = {
+				has_global_flag = mem_vazurans_spawned
+			}
 		}
-		random_situation = {
-			limit = {
-				is_situation_type = mem_vazuran_raiding
+		set_global_flag = mem_vazurans_enabled
+		create_mem_vazuran_country = yes
+		set_global_flag = mem_vazurans_spawned
+		event_target:mem_vazurans_country = {
+			log = this.id
+			# situation controls all raiding
+			start_situation = {
+				type = mem_vazuran_raiding
 			}
-			# max number of fleets that can raid simultaniously
-			set_variable = {
-				which = mem_vazuran_raiding_max_fleets
-				value = value:mem_vazuran_raids_per_country
-			}
-			# max concurrent number of fleets raiding, could be done in one variable but this is more stable
-			set_variable = {
-				which = mem_vazuran_raiding_current_fleets
-				value = 0
-			}
-			# tracks all, raided resources, lost fleets etc. should be deciding factor for outcome
-			set_variable = {
-				which = mem_vazuran_raiding_strength				# make this impactful
-				value = @mem_vazurans_starting_points
+			random_situation = {
+				limit = {
+					is_situation_type = mem_vazuran_raiding
+				}
+				# max number of fleets that can raid simultaniously
+				set_variable = {
+					which = mem_vazuran_raiding_max_fleets
+					value = value:mem_vazuran_raids_per_country
+				}
+				# max concurrent number of fleets raiding, could be done in one variable but this is more stable
+				set_variable = {
+					which = mem_vazuran_raiding_current_fleets
+					value = 0
+				}
+				# tracks all, raided resources, lost fleets etc. should be deciding factor for outcome
+				set_variable = {
+					which = mem_vazuran_raiding_strength					# make this impactful
+					value = @mem_vazurans_starting_points
+				}
 			}
 		}
 	}
 }
+
 # create the destroyed worlds systems
 create_mem_vazuran_destroyed_system_chain = {
 	every_country = {
@@ -365,7 +373,7 @@ mem_vazurans_remove_stance_modifier = {
 		}
 	}
 	if = {
-		limit = { 
+		limit = {
 			has_special_project = MEM_VAZURANS_DAMPER_FIELD_GENERATOR_INVESTIGATION
 		}
 		abort_special_project = {
@@ -373,7 +381,7 @@ mem_vazurans_remove_stance_modifier = {
 		}
 	}
 	if = {
-		limit = { 
+		limit = {
 			has_special_project = MEM_VAZURANS_RIFT_INVESTIGATION
 		}
 		abort_special_project = {
@@ -541,15 +549,17 @@ create_mem_vazuran_corvette_stage_fleet = {
 			spawn_debris = no
 			is_boss = no
 			can_change_composition = no
-
 		}
-		effect = {			
+		effect = {
 			set_owner = event_target:mem_vazurans_country
 			create_mem_vazuran_ships = {
 				ARTILLERY_DRONES = 4
 				BRAWLER_DRONES = 0
 				SUPPORT_SHIP = 0
 				BATTLECRUISER = 0
+			}
+			set_fleet_settings = {
+				can_change_composition = no
 			}
 			set_location = {
 				target = PREV
@@ -721,6 +731,9 @@ create_mem_vazuran_garrison_fleet = {
 				SUPPORT_SHIP = 8
 				BATTLECRUISER = 5
 			}
+			set_fleet_settings = {
+				can_change_composition = no
+			}
 			set_location = {
 				target = PREV
 				distance = 0
@@ -753,6 +766,9 @@ create_mem_vazuran_weapon_fleet = {
 				distance = 0
 				angle = random
 			}
+			set_fleet_settings = {
+				can_change_composition = no
+			}
 			set_formation_scale = 5
 			set_fleet_stance = aggressive
 			set_aggro_range = 500
@@ -764,36 +780,35 @@ create_mem_vazuran_weapon_fleet = {
 	}
 }
 
-create_mem_vazuran_extermination_fleet = {
-	create_fleet = {
-		name = "Planetkiller"
-		settings = {
-			spawn_debris = no
-			is_boss = yes
-		}
-		effect = {
-			set_owner = event_target:mem_vazurans_country
-			create_ship = {
-				name = random
-				design = "NAME_Vazuran_Weapon"
-				graphical_culture = "mem_ancient_02"
-			}
-			set_location = {
-				target = PREV
-				distance = 0
-				angle = random
-			}
-			set_formation_scale = 5
-			set_fleet_stance = aggressive
-			set_aggro_range = 500
-			set_aggro_range_measure_from = self
-		}
-	}
-	last_created_fleet = {
-		set_fleet_flag = mem_vazurans_extermination_fleet
-	}
-}
-
+# create_mem_vazuran_extermination_fleet = {
+# 	create_fleet = {
+# 		name = "Planetkiller"
+# 		settings = {
+# 			spawn_debris = no
+# 			is_boss = yes
+# 		}
+# 		effect = {
+# 			set_owner = event_target:mem_vazurans_country
+# 			create_ship = {
+# 				name = random
+# 				design = "NAME_Vazuran_Weapon"
+# 				graphical_culture = "mem_ancient_02"
+# 			}
+# 			set_location = {
+# 				target = PREV
+# 				distance = 0
+# 				angle = random
+# 			}
+# 			set_formation_scale = 5
+# 			set_fleet_stance = aggressive
+# 			set_aggro_range = 500
+# 			set_aggro_range_measure_from = self
+# 		}
+# 	}
+# 	last_created_fleet = {
+# 		set_fleet_flag = mem_vazurans_extermination_fleet
+# 	}
+# }
 # Retaliation effect (planet scope)
 # mem_vazurans_planet_retaliation_effect = {
 # 	#	add_modifier = {
@@ -965,7 +980,6 @@ create_mem_vazuran_extermination_fleet = {
 # 		}
 # 	}
 # }
-
 # mem_vazuran_menace_kill_pop = {
 # 	if = {
 # 		limit = {
@@ -1019,7 +1033,6 @@ create_mem_vazuran_extermination_fleet = {
 # 		}
 # 	}
 # }
-
 # Raiding effect 1 no colony destruction (planet scope)
 # mem_vazurans_planet_raiding_effect_1 = {
 # 	#	add_modifier = {
@@ -1153,7 +1166,6 @@ create_mem_vazuran_extermination_fleet = {
 # 		}
 # 	}
 # }
-
 # Raiding effect 2 colony destruction (planet scope)
 # mem_vazurans_planet_raiding_effect_2 = {
 # 	IF = {
@@ -1188,7 +1200,6 @@ create_mem_vazuran_extermination_fleet = {
 # 		mem_vazuran_menace_colony_destruction_counter = yes
 # 	}
 # }
-
 # Raiding effect 3 colony destruction nuked (planet scope)
 # mem_vazurans_planet_raiding_effect_3 = {
 # 	IF = {
@@ -1213,7 +1224,6 @@ create_mem_vazuran_extermination_fleet = {
 # 		mem_vazuran_menace_colony_destruction_counter = yes
 # 	}
 # }
-
 mem_vazuran_raiding_fleet_spawn = {
 	IF = {
 		# weakest raiding fleet if not having researched destroyers yet
