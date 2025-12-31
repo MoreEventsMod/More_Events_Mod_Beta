@@ -158,6 +158,12 @@ country_event = {
 	}
 	option = {
 		name = WEIRD
+		event_target:mem_ancestors_grudge_planet = {
+			remove_building = building_mem_ancestors_grudge_forge_0
+		}
+	}
+	option = {
+		name = WEIRD
 		start_situation = {
 			type = situation_mem_ancestors_grudge_crafting
 			target = event_target:mem_ancestors_grudge_planet
@@ -706,6 +712,16 @@ country_event = {
 	}
 	immediate = {
 		save_event_target_as = origin_mem_ancestors_grudge
+		# if = {
+		# 	limit = {
+		# 		is_subterranean_empire = yes
+		# 	 }
+		# 	 capital_scope = {
+		# 		set_planet_entity = {
+		# 			picture = sub
+		# 		}
+		# 	 }
+		# }
 		if = {
 			limit = {
 				has_authority = auth_machine_intelligence
@@ -1231,6 +1247,10 @@ country_event = {
 		event_target:mem_ancestors_grudge_planet = {
 			hidden_effect = {
 				remove_building = building_mem_ancestors_grudge_ruins				# this looks ugly otherwise
+				set_timed_planet_flag = {
+					flag = mem_ancestors_grudge_planet_ignore_missing_forge
+					days = 60
+				}
 			}
 			#add_building = building_mem_ancestors_grudge_forge_0
 			add_building = {
@@ -2140,14 +2160,12 @@ planet_event = {
 	after = {
 		hidden_effect = {
 			validate_planet_buildings_and_districts = yes
-			if = {
-				limit = {
-					NOT = {
-						has_building = building_mem_ancestors_grudge_forge_3
-					}
-				}
-				add_building = building_mem_ancestors_grudge_forge_3
-			}
+			# if = {
+			# 	limit = {
+			# 		has_mem_relicforge = no
+			# 	}
+			# 	add_building = building_mem_ancestors_grudge_forge_3
+			# }
 		}
 	}
 }
@@ -3884,7 +3902,7 @@ fleet_event = {
 			add_relic = r_mem_ancestors_grudge_anvil
 			mem_vazurans_unlock_tradition = yes
 			give_specimen = {
-				key = mem_ancestors_grudge_hammer # this is shown in the tooltips
+				key = mem_ancestors_grudge_hammer				# this is shown in the tooltips
 			}
 		}
 		hidden_effect = {
@@ -3905,6 +3923,22 @@ fleet_event = {
 			}
 		}
 	}
+	# TRODO
+	# after = {
+	# 	hidden_effect = {
+	# 		owner = {
+	# 			if = {
+	# 				limit = {
+	# 					has_origin = origin_mem_ancestors_grudge
+	# 				}
+	# 				country_event = {
+	# 					id = mem_ancestors_grudge_durin.2
+	# 					days = 50
+	# 				}
+	# 			}
+	# 		}
+	# 	}
+	# }
 }
 
 # hive digsite
@@ -5736,6 +5770,1152 @@ country_event = {
 			event_target:event_target:mem_ancestors_grudge_country = {
 				destroy_country = yes
 			}
+		}
+	}
+}
+
+############################################ adopted event chain for durins system ########################################
+namespace = mem_ancestors_grudge_durin
+# Sets country flag for empire starting in Durin´s Forge System
+# event = {
+# 	id = mem_ancestors_grudge_durin.1
+# 	hide_window = yes
+# 	is_triggered_only = yes
+# 	immediate = {
+# 		every_country = {
+# 			limit = {
+# 				any_system_within_border = {
+# 					has_star_flag = mem_ancestors_grudge_durinsforge_system
+# 				}
+# 			}
+# 			set_country_flag = mem_ancestors_grudge_durinsforge_system
+# 			set_country_flag = mem_ancestors_grudge_durinsforge
+# 			country_event = {
+# 				id = mem_ancestors_grudge_durin.2
+# 				days = 5
+# 			}
+# 		}
+# 	}
+# }
+# Fired when home system is surveyed
+country_event = {
+	id = mem_ancestors_grudge_durin.2
+	title = "mem_ancestors_grudge_durin.2.name"
+	desc = "mem_ancestors_grudge_durin.2.desc"
+	picture = GFX_evt_ship_in_orbit
+	show_sound = event_default
+	is_triggered_only = yes
+	option = {
+		name = mem_ancestors_grudge_durin.2.a
+		custom_tooltip = mem_ancestors_grudge_durin.2.a.tt
+		allow = {
+			resource_stockpile_compare = {
+				resource = influence
+				value >= 300
+			}
+		}
+		add_resource = {
+			influence = -300
+		}
+		begin_event_chain = {
+			event_chain = "mem_ancestors_grudge_durin_hall"
+		}
+		hidden_effect = {
+			random_situation = {
+				limit = {
+					is_situation_type = situation_mem_ancestors_grudge_forge_repairs
+				}
+				set_situation_flag = situation_mem_ancestors_grudge_forge_repairs_secondary_hold
+			}
+			capital_scope = {
+				spawn_system = {
+					min_distance = 20
+					max_distance = 60
+					# min_jumps = 1
+					max_jumps = 0
+					initializer = mem_ancestors_grudge_dranirshall_system
+				}
+			}
+			last_created_system = {
+				save_event_target_as = durins_hall_system
+			}
+		}
+		create_point_of_interest = {
+			id = mem_ancestors_grudge_durin_hall.1
+			name = mem_ancestors_grudge_durin_hall.1.name
+			desc = mem_ancestors_grudge_durin_hall.1.desc
+			event_chain = mem_ancestors_grudge_durin_hall
+			location = event_target:durins_hall_system
+		}
+	}
+	option = {
+		name = mem_ancestors_grudge_durin.2.b
+		custom_tooltip = mem_ancestors_grudge_durin.2.b.tt
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 12
+		}
+		hidden_effect = {
+			random_situation = {
+				limit = {
+					is_situation_type = situation_mem_ancestors_grudge_forge_repairs
+				}
+				set_situation_flag = situation_mem_ancestors_grudge_forge_repairs_secondary_hold_not
+			}
+		}
+	}
+}
+
+# Fired when durins hall is visited
+ship_event = {
+	id = mem_ancestors_grudge_durin.3
+	title = "mem_ancestors_grudge_durin.3.name"
+	desc = "mem_ancestors_grudge_durin.3.desc"
+	is_triggered_only = yes
+	show_sound = event_mystic_reveal
+	picture = GFX_evt_fallen_empire
+	fire_only_once = yes
+	location = FROM
+	trigger = {
+		FROM = {
+			# system
+			has_star_flag = mem_ancestors_grudge_durins_hall_system
+		}
+		owner = {
+			# Country
+			has_event_chain = mem_ancestors_grudge_durin_hall
+			NOT = {
+				has_country_flag = mem_ancestors_grudge_durin_has_found_durins_hall
+			}
+		}
+	}
+	immediate = {
+		FROM = {
+			# system
+			random_system_planet = {
+				limit = {
+					has_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum
+				}
+				save_event_target_as = khazad_dum
+			}
+		}
+		owner = {
+			set_country_flag = mem_ancestors_grudge_durin_has_found_durins_hall
+			remove_point_of_interest = mem_ancestors_grudge_durin_hall.1
+		}
+	}
+	option = {
+		name = mem_ancestors_grudge_durin.3.a
+		owner = {
+			hidden_effect = {
+				end_event_chain = "mem_ancestors_grudge_durin_hall"
+			}
+			begin_event_chain = {
+				event_chain = "mem_ancestors_grudge_durin_khazad_dum"
+			}
+			create_point_of_interest = {
+				id = mem_ancestors_grudge_durin_hall.2
+				name = mem_ancestors_grudge_durin_hall.2.name
+				desc = mem_ancestors_grudge_durin_hall.2.desc
+				event_chain = mem_ancestors_grudge_durin_khazad_dum
+				location = event_target:khazad_dum
+			}
+		}
+	}
+}
+
+#Fired when khazad dum is surveyed
+# A country has gained a surveyed status on a planet. Happens after "on_survey_planet" if a science ship surveyed a planet. (Can also happen without a ship through changes in intel levels)
+# Root = Planet
+# From = Country
+# FromFrom = Fleet of the science ship that surveyed it, if any
+planet_event = {
+	id = mem_ancestors_grudge_durin.4
+	title = "mem_ancestors_grudge_durin.4.name"
+	desc = "mem_ancestors_grudge_durin.4.desc"
+	picture = GFX_evt_city_ruins
+	is_triggered_only = yes
+	location = root
+	show_sound = event_ghost_town
+	fire_only_once = yes
+	trigger = {
+		has_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum
+		From = {
+			# Country
+			has_event_chain = mem_ancestors_grudge_durin_khazad_dum
+		}
+	}
+	immediate = {
+		From = {
+			remove_point_of_interest = mem_ancestors_grudge_durin_hall.2
+		}
+	}
+	option = {
+		name = mem_ancestors_grudge_durin.4.a
+		enable_special_project = {
+			name = "MEM_ANCESTORS_GRUDGE_DURIN_KHAZAD_DUM_EXPEDITION_PROJECT"
+			owner = From
+			location = root
+		}
+	}
+}
+
+#Fired when the expedition project is completed
+ship_event = {
+	id = mem_ancestors_grudge_durin.5
+	title = "mem_ancestors_grudge_durin.5.name"
+	desc = "mem_ancestors_grudge_durin.5.desc"
+	picture = GFX_evt_city_ruins
+	location = from
+	show_sound = event_default
+	is_triggered_only = yes
+	fire_only_once = yes
+	immediate = {
+		# FromFromFrom is the planet
+		solar_system = {
+			random_system_planet = {
+				limit = {
+					has_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum
+				}
+				save_event_target_as = khazad_dum
+			}
+		}
+		owner = {
+			create_point_of_interest = {
+				id = mem_ancestors_grudge_durin_hall.3
+				name = mem_ancestors_grudge_durin_hall.3.name
+				desc = mem_ancestors_grudge_durin_hall.3.desc
+				event_chain = mem_ancestors_grudge_durin_khazad_dum
+				location = event_target:khazad_dum
+			}
+			remove_point_of_interest = mem_ancestors_grudge_durin_hall.2
+		}
+	}
+	option = {
+		name = mem_ancestors_grudge_durin.5.a
+		solar_system = {
+			IF = {
+				limit = {
+					OR = {
+						NOT = {
+							exists = owner
+						}
+						owner = {
+							is_same_value = root.owner
+						}
+					}
+				}
+				event_target:khazad_dum = {
+					start_colony = {
+						owner = root.owner
+						species = root.owner.owner_main_species
+					}
+				}
+			}
+		}
+	}
+	# option = {
+	# 	name = mem_ancestors_grudge_durin.5.b
+	# }
+	after = {
+		event_target:khazad_dum = {
+			hidden_effect = {
+				set_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum_get_it
+			}
+			add_modifier = {
+				modifier = "mem_ancestors_grudge_durin_expedition_preparation"
+				days = -1
+			}
+		}
+		hidden_effect = {
+			owner = {
+				abort_special_project = {
+					type = "MEM_ANCESTORS_GRUDGE_DURIN_KHAZAD_DUM_EXPEDITION_PROJECT"
+					location = event_target:khazad_dum
+				}
+			}
+		}
+	}
+}
+
+planet_event = {
+	id = mem_ancestors_grudge_durin.7
+	title = "mem_ancestors_grudge_durin.7.name"
+	desc = "mem_ancestors_grudge_durin.7.desc"
+	location = ROOT
+	show_sound = event_construction
+	picture = GFX_evt_city_ruins
+	fire_only_once = yes
+	pre_triggers = {
+		has_owner = yes
+	}
+	trigger = {
+		has_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum_get_it
+		has_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum
+		owner = {
+			# has_country_flag = mem_ancestors_grudge_durinsforge
+			has_event_chain = mem_ancestors_grudge_durin_khazad_dum
+		}
+		pop_amount > 0
+	}
+	immediate = {
+		remove_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum_get_it
+		owner = {
+			create_point_of_interest = {
+				id = mem_ancestors_grudge_durin_hall.4
+				name = mem_ancestors_grudge_durin_hall.4.name
+				desc = mem_ancestors_grudge_durin_hall.4.desc
+				event_chain = mem_ancestors_grudge_durin_khazad_dum
+				location = ROOT
+			}
+			remove_point_of_interest = mem_ancestors_grudge_durin_hall.3
+		}
+	}
+	option = {
+		name = mem_ancestors_grudge_durin.7.a
+	}
+}
+
+#Last Tileblocker removed. Entrance to the Depth found
+planet_event = {
+	id = mem_ancestors_grudge_durin.8001
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		planet_event = {
+			id = mem_ancestors_grudge_durin.8002
+			days = 1
+		}
+	}
+}
+
+planet_event = {
+	id = mem_ancestors_grudge_durin.8002
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		if = {
+			limit = {
+				NOT = {
+					has_deposit = d_mem_ancestors_grudge_city_ruins
+				}
+			}
+			planet_event = {
+				id = mem_ancestors_grudge_durin.8
+			}
+		}
+	}
+}
+
+planet_event = {
+	id = mem_ancestors_grudge_durin.8
+	title = "mem_ancestors_grudge_durin.8.name"
+	desc = "mem_ancestors_grudge_durin.8.desc"
+	location = ROOT
+	show_sound = event_mystic_reveal
+	picture = GFX_evt_alien_ruins
+	is_triggered_only = yes
+	immediate = {
+		set_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum_mines
+		owner = {
+			remove_point_of_interest = mem_ancestors_grudge_durin_hall.4
+		}
+	}
+	option = {
+		name = mem_ancestors_grudge_durin.8.a
+		add_deposit = d_mem_ancestors_grudge_durin_durins_mines
+		owner = {
+			enable_special_project = {
+				name = "MEM_ANCESTORS_GRUDGE_DURIN_KHAZAD_DUM_DEEPS_EXPEDITION_PROJECT"
+				owner = root.owner
+				location = ROOT
+			}
+		}
+	}
+}
+
+# Expedition leads to Attack
+planet_event = {
+	id = mem_ancestors_grudge_durin.9
+	title = "mem_ancestors_grudge_durin.9.name"
+	desc = "mem_ancestors_grudge_durin.9.desc"
+	show_sound = event_air_raid_siren
+	location = ROOT
+	picture = GFX_evt_ground_combat
+	is_triggered_only = yes
+	trigger = {
+		owner = {
+			# Country
+			has_event_chain = mem_ancestors_grudge_durin_khazad_dum
+		}
+	}
+	immediate = {
+		create_country = {
+			name = "Underground Horrors"
+			type = faction
+			effect = {
+				establish_communications_no_message = root.owner
+			}
+			flag = {
+				icon = {
+					category = "pirate"
+					file = "flag_pirate_10.dds"
+				}
+				background = {
+					category = "backgrounds"
+					file = "new_dawn.dds"
+				}
+				colors = {
+					"red"
+					"black"
+					"null"
+					"null"
+				}
+			}
+		}
+		create_army = {
+			name = "Ancient Horrors"
+			owner = last_created_country
+			type = "mem_ancestors_grudge_durin_ancient_horrors"
+		}
+		create_army = {
+			name = "Ancient Horrors"
+			owner = last_created_country
+			type = "mem_ancestors_grudge_durin_ancient_horrors"
+		}
+		create_army = {
+			name = "Ancient Horrors"
+			owner = last_created_country
+			type = "mem_ancestors_grudge_durin_ancient_horrors"
+		}
+		last_created_country = {
+			save_global_event_target_as = underground_horrors
+		}
+		owner = {
+			set_country_flag = mem_ancestors_grudge_durins_hall_khazad_dum_fight_1
+		}
+	}
+	option = {
+		name = mem_ancestors_grudge_durin.9.a
+		add_modifier = {
+			modifier = "mem_ancestors_grudge_durin_scared_population"
+			days = -1
+		}
+	}
+}
+
+#Lost to Ancient Horrors
+planet_event = {
+	id = mem_ancestors_grudge_durin.10
+	title = "mem_ancestors_grudge_durin.10.name"
+	desc = "mem_ancestors_grudge_durin.10.desc"
+	location = root
+	show_sound = event_ground_battle
+	picture = GFX_evt_ground_combat
+	fire_only_once = yes
+	pre_triggers = {
+		has_owner = yes
+		is_occupied_flag = yes
+	}
+	trigger = {
+		has_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum
+		#Owner of the planet has event chain
+		owner = {
+			# Country
+			has_event_chain = mem_ancestors_grudge_durin_khazad_dum
+		}
+		#Attackers are horrors
+		controller = {
+			is_same_value = event_target:underground_horrors
+		}
+	}
+	immediate = {
+		# if = {
+		# limit = { has_spaceport = yes }
+		# destroy_fleet = spaceport
+		# }
+		planet_event = {
+			id = mem_ancestors_grudge_durin.14			#Start the rolling purge
+			days = 60
+		}
+		owner = {
+			# country
+			country_event = {
+				id = mem_ancestors_grudge_durin.11				# Inform player about what will happen when the horrors are controlling the planet
+				days = 60
+			}
+		}
+	}
+	option = {
+		name = mem_ancestors_grudge_durin.10.a
+	}
+}
+
+# Inform player about what will happen when the horrors are controlling the planet
+country_event = {
+	id = mem_ancestors_grudge_durin.11
+	title = "mem_ancestors_grudge_durin.11.name"
+	desc = "mem_ancestors_grudge_durin.11.desc"
+	is_triggered_only = yes
+	show_sound = event_red_alert
+	picture = GFX_evt_interior_battle
+	option = {
+		name = mem_ancestors_grudge_durin.11.a
+	}
+}
+
+#Defended against Ancient Horrors
+# defend win
+# This = country, planet owner
+# From = country, attack leader
+# FromFrom = planet
+country_event = {
+	id = mem_ancestors_grudge_durin.12
+	title = "mem_ancestors_grudge_durin.12.name"
+	desc = "mem_ancestors_grudge_durin.12.desc"
+	is_triggered_only = yes
+	location = FromFrom
+	show_sound = event_ground_battle
+	picture = GFX_evt_ground_combat
+	trigger = {
+		fromfrom = {
+			#planet
+			has_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum
+			is_occupied_flag = no
+		}
+		has_country_flag = mem_ancestors_grudge_durins_hall_khazad_dum_fight_1
+		has_event_chain = mem_ancestors_grudge_durin_khazad_dum
+		NOT = {
+			has_country_flag = mem_ancestors_grudge_durins_hall_khazad_dum_retaliation
+		}
+	}
+	immediate = {
+		remove_country_flag = mem_ancestors_grudge_durins_hall_khazad_dum_fight_1
+	}
+	option = {
+		name = mem_ancestors_grudge_durin.12.a
+		random_owned_planet = {
+			limit = {
+				has_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum
+			}
+			enable_special_project = {
+				name = "MEM_ANCESTORS_GRUDGE_DURIN_KHAZAD_DUM_DEEPS_RETALIATION_PROJECT"
+				owner = ROOT
+				location = THIS
+			}
+		}
+	}
+}
+
+#Reconquest against Horrors
+planet_event = {
+	id = mem_ancestors_grudge_durin.13
+	title = "mem_ancestors_grudge_durin.13.name"
+	desc = "mem_ancestors_grudge_durin.13.desc"
+	location = root
+	show_sound = event_ground_battle
+	picture = GFX_evt_ground_combat
+	fire_only_once = yes
+	pre_triggers = {
+		has_owner = yes
+		has_ground_combat = no
+		is_occupied_flag = no
+	}
+	trigger = {
+		has_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum
+		owner = {
+			has_event_chain = mem_ancestors_grudge_durin_khazad_dum
+			has_country_flag = mem_ancestors_grudge_durins_hall_khazad_dum_fight_1
+			NOT = {
+				has_country_flag = mem_ancestors_grudge_durins_hall_khazad_dum_retaliation
+			}
+		}
+	}
+	immediate = {
+		owner = {
+			remove_country_flag = mem_ancestors_grudge_durins_hall_khazad_dum_fight_1
+		}
+	}
+	option = {
+		name = mem_ancestors_grudge_durin.13.a
+		enable_special_project = {
+			name = "MEM_ANCESTORS_GRUDGE_DURIN_KHAZAD_DUM_DEEPS_RETALIATION_PROJECT"
+			owner = ROOT.owner
+			location = root
+		}
+	}
+}
+
+# Periodically kill a pop until there is only one left
+# Then give an event to the owner telling them about the pop fortifying their position.
+planet_event = {
+	id = mem_ancestors_grudge_durin.14
+	hide_window = yes
+	is_triggered_only = yes
+	pre_triggers = {
+		is_occupied_flag = yes
+	}
+	trigger = {
+		has_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum
+		owner = {
+			OR = {
+				has_country_flag = mem_ancestors_grudge_durins_hall_khazad_dum_fight_1
+				has_country_flag = mem_ancestors_grudge_durins_hall_khazad_dum_retaliation
+			}
+		}
+	}
+	immediate = {
+		IF = {
+			limit = {
+				pop_amount > 500
+			}
+			weighted_random_owned_pop_group = {
+				kill_single_pop = yes
+			}
+			planet_event = {
+				id = mem_ancestors_grudge_durin.14				#Re fire this event in a month
+				days = 90
+				random = 15
+			}
+		}
+		else = {
+			owner = {
+				country_event = {
+					id = mem_ancestors_grudge_durin.15
+				}
+				# The last pop has fortified their position.
+			}
+		}
+	}
+}
+
+# The last pop has fortified their position.
+country_event = {
+	id = mem_ancestors_grudge_durin.15
+	title = "mem_ancestors_grudge_durin.15.name"
+	desc = "mem_ancestors_grudge_durin.15.desc"
+	is_triggered_only = yes
+	show_sound = event_red_alert
+	picture = GFX_evt_interior_battle
+	option = {
+		name = mem_ancestors_grudge_durin.15.a
+	}
+}
+
+# Assault of the Underground
+planet_event = {
+	id = mem_ancestors_grudge_durin.16
+	title = "mem_ancestors_grudge_durin.16.name"
+	desc = "mem_ancestors_grudge_durin.16.desc"
+	show_sound = event_air_raid_siren
+	location = ROOT
+	picture = GFX_evt_ground_combat
+	is_triggered_only = yes
+	trigger = {
+		owner = {
+			# Country
+			has_event_chain = mem_ancestors_grudge_durin_khazad_dum
+		}
+	}
+	immediate = {
+		owner = {
+			set_country_flag = mem_ancestors_grudge_durins_hall_khazad_dum_retaliation
+		}
+		create_country = {
+			name = "Underground Horrors"
+			type = faction
+			effect = {
+				establish_communications_no_message = root.owner
+			}
+			flag = {
+				icon = {
+					category = "pirate"
+					file = "flag_pirate_10.dds"
+				}
+				background = {
+					category = "backgrounds"
+					file = "new_dawn.dds"
+				}
+				colors = {
+					"red"
+					"black"
+					"null"
+					"null"
+				}
+			}
+		}
+		create_army = {
+			name = "Ancient Horrors"
+			owner = last_created_country
+			type = "mem_ancestors_grudge_durin_ancient_horrors"
+		}
+		create_army = {
+			name = "Ancient Horrors"
+			owner = last_created_country
+			type = "mem_ancestors_grudge_durin_ancient_horrors"
+		}
+		create_army = {
+			name = "Ancient Horrors"
+			owner = last_created_country
+			type = "mem_ancestors_grudge_durin_ancient_horrors"
+		}
+		create_army = {
+			name = "Ancient Horrors"
+			owner = last_created_country
+			type = "mem_ancestors_grudge_durin_ancient_horrors"
+		}
+		create_army = {
+			name = "Ancient Horrors"
+			owner = last_created_country
+			type = "mem_ancestors_grudge_durin_ancient_horrors"
+		}
+		create_army = {
+			name = "Ancient Horrors"
+			owner = last_created_country
+			type = "mem_ancestors_grudge_durin_ancient_horrors"
+		}
+		last_created_country = {
+			save_global_event_target_as = underground_horrors
+		}
+	}
+	option = {
+		name = mem_ancestors_grudge_durin.16.a
+	}
+}
+
+#Defended against Ancient Horrors
+# defend win
+# This = country, planet owner
+# From = country, attack leader
+# FromFrom = planet
+country_event = {
+	id = mem_ancestors_grudge_durin.17
+	title = "mem_ancestors_grudge_durin.17.name"
+	desc = "mem_ancestors_grudge_durin.17.desc"
+	is_triggered_only = yes
+	location = FromFrom
+	show_sound = event_ground_battle
+	picture = GFX_evt_ground_combat
+	trigger = {
+		fromfrom = {
+			#planet
+			has_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum
+			is_occupied_flag = no
+		}
+		has_event_chain = mem_ancestors_grudge_durin_khazad_dum
+		has_country_flag = mem_ancestors_grudge_durins_hall_khazad_dum_retaliation
+	}
+	immediate = {
+		remove_country_flag = mem_ancestors_grudge_durins_hall_khazad_dum_retaliation
+	}
+	option = {
+		name = mem_ancestors_grudge_durin.17.a
+		random_owned_planet = {
+			limit = {
+				has_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum
+			}
+			remove_modifier = "mem_ancestors_grudge_durin_scared_population"
+			add_modifier = {
+				modifier = "mem_ancestors_grudge_durin_underground_secured"
+				days = -1
+			}
+		}
+		end_event_chain = "mem_ancestors_grudge_durin_khazad_dum"
+		hidden_effect = {
+			country_event = {
+				id = mem_ancestors_grudge_durin.181
+				days = 1000
+				random = 500
+			}
+		}
+	}
+}
+
+#Reconquest against Horrors
+planet_event = {
+	id = mem_ancestors_grudge_durin.18
+	title = "mem_ancestors_grudge_durin.17.name"
+	desc = "mem_ancestors_grudge_durin.17.desc"
+	location = root
+	show_sound = event_ground_battle
+	picture = GFX_evt_ground_combat
+	fire_only_once = yes
+	pre_triggers = {
+		has_owner = yes
+		has_ground_combat = no
+		is_occupied_flag = no
+	}
+	trigger = {
+		has_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum
+		owner = {
+			has_event_chain = mem_ancestors_grudge_durin_khazad_dum
+			has_country_flag = mem_ancestors_grudge_durins_hall_khazad_dum_retaliation
+		}
+	}
+	immediate = {
+		owner = {
+			remove_country_flag = mem_ancestors_grudge_durins_hall_khazad_dum_retaliation
+		}
+	}
+	option = {
+		name = mem_ancestors_grudge_durin.17.a
+		save_event_target_as = mem_ancestors_grudge_durin_khazad_dum
+		remove_modifier = "mem_ancestors_grudge_durin_scared_population"
+		owner = {
+			end_event_chain = "mem_ancestors_grudge_durin_khazad_dum"
+		}
+		hidden_effect = {
+			owner = {
+				country_event = {
+					id = mem_ancestors_grudge_durin.181
+					days = 1000
+					random = 500
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = mem_ancestors_grudge_durin.181
+	title = "mem_ancestors_grudge_durin.181.name"
+	desc = "mem_ancestors_grudge_durin.181.desc"
+	location = event_target:mem_ancestors_grudge_durin_khazad_dum_planet
+	is_triggered_only = yes
+	show_sound = event_mystic_reveal
+	picture = GFX_evt_physics_research
+	immediate = {
+		random_owned_planet = {
+			limit = {
+				has_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum
+			}
+			save_event_target_as = mem_ancestors_grudge_durin_khazad_dum_planet
+		}
+	}
+	option = {
+		name = mem_ancestors_grudge_durin.181.a
+		begin_event_chain = {
+			event_chain = "mem_ancestors_grudge_durin_khazad_dum_rebuilding"
+		}
+		random_owned_planet = {
+			limit = {
+				has_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum
+			}
+			save_event_target_as = mem_ancestors_grudge_durin_khazad_dum_planet
+			enable_special_project = {
+				name = "MEM_ANCESTORS_GRUDGE_DURIN_KHAZAD_DUM_RESTORATION_PROJECT"
+				owner = ROOT
+				location = THIS
+			}
+		}
+	}
+}
+
+# Atmospheric Renewer repaired
+planet_event = {
+	id = mem_ancestors_grudge_durin.19
+	title = "mem_ancestors_grudge_durin.19.name"
+	desc = "mem_ancestors_grudge_durin.19.desc"
+	location = ROOT
+	show_sound = event_construction
+	picture = GFX_evt_physics_research
+	is_triggered_only = yes
+	trigger = {
+		owner = {
+			# Country
+			has_event_chain = mem_ancestors_grudge_durin_khazad_dum_rebuilding
+		}
+	}
+	option = {
+		name = mem_ancestors_grudge_durin.19.a
+		hidden_effect = {
+			planet_event = {
+				id = mem_ancestors_grudge_durin.20
+				days = 1800
+				random = 60
+			}
+		}
+	}
+}
+
+# Atmosphere Restored
+planet_event = {
+	id = mem_ancestors_grudge_durin.20
+	title = "mem_ancestors_grudge_durin.20.name"
+	desc = "mem_ancestors_grudge_durin.20.desc"
+	location = ROOT
+	show_sound = event_cityscape
+	picture = GFX_evt_news_room
+	is_triggered_only = yes
+	trigger = {
+		owner = {
+			# Country
+			has_event_chain = mem_ancestors_grudge_durin_khazad_dum_rebuilding
+		}
+	}
+	immediate = {
+		if = {
+			limit = {
+				owner = {
+					home_planet = {
+						is_planet_class = pc_continental
+					}
+				}
+			}
+			change_pc = pc_continental
+		}
+		if = {
+			limit = {
+				owner = {
+					home_planet = {
+						is_planet_class = pc_desert
+					}
+				}
+			}
+			change_pc = pc_desert
+		}
+		if = {
+			limit = {
+				owner = {
+					home_planet = {
+						is_planet_class = pc_tropical
+					}
+				}
+			}
+			change_pc = pc_tropical
+		}
+		if = {
+			limit = {
+				owner = {
+					home_planet = {
+						is_planet_class = pc_arid
+					}
+				}
+			}
+			change_pc = pc_arid
+		}
+		if = {
+			limit = {
+				owner = {
+					home_planet = {
+						is_planet_class = pc_ocean
+					}
+				}
+			}
+			change_pc = pc_ocean
+		}
+		if = {
+			limit = {
+				owner = {
+					home_planet = {
+						is_planet_class = pc_tundra
+					}
+				}
+			}
+			change_pc = pc_tundra
+		}
+		if = {
+			limit = {
+				owner = {
+					home_planet = {
+						is_planet_class = pc_arctic
+					}
+				}
+			}
+			change_pc = pc_arctic
+		}
+		if = {
+			limit = {
+				owner = {
+					home_planet = {
+						is_planet_class = pc_savannah
+					}
+				}
+			}
+			change_pc = pc_savannah
+		}
+		if = {
+			limit = {
+				owner = {
+					home_planet = {
+						is_planet_class = pc_alpine
+					}
+				}
+			}
+			change_pc = pc_alpine
+		}
+		if = {
+			limit = {
+				owner = {
+					home_planet = {
+						NOR = {
+							is_planet_class = pc_arctic
+							is_planet_class = pc_tundra
+							is_planet_class = pc_ocean
+							is_planet_class = pc_arid
+							is_planet_class = pc_tropical
+							is_planet_class = pc_desert
+							is_planet_class = pc_continental
+							is_planet_class = pc_savannah
+							is_planet_class = pc_alpine
+						}
+					}
+				}
+			}
+			change_pc = pc_gaia
+		}
+	}
+	option = {
+		name = mem_ancestors_grudge_durin.20.a
+		owner = {
+			random_owned_planet = {
+				limit = {
+					has_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum
+				}
+				remove_modifier = "irradiated_planet"
+				remove_modifier = "mem_ancestors_grudge_durin_expedition_preparation"
+				set_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum_restored
+			}
+		}
+		hidden_effect = {
+			planet_event = {
+				id = mem_ancestors_grudge_durin.21
+				days = 1800
+				random = 150
+			}
+		}
+	}
+}
+
+# Living metal storage found and project to study it and a possible restoration of the ring
+planet_event = {
+	id = mem_ancestors_grudge_durin.21
+	title = "mem_ancestors_grudge_durin.21.name"
+	desc = "mem_ancestors_grudge_durin.21.desc"
+	location = ROOT
+	show_sound = event_mystic_reveal
+	picture = GFX_evt_news_room
+	is_triggered_only = yes
+	trigger = {
+		has_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum_restored
+		owner = {
+			# Country
+			has_event_chain = mem_ancestors_grudge_durin_khazad_dum_rebuilding
+		}
+	}
+	option = {
+		name = mem_ancestors_grudge_durin.21.a
+		owner = {
+			random_owned_planet = {
+				limit = {
+					has_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum
+				}
+				enable_special_project = {
+					name = "MEM_ANCESTORS_GRUDGE_DURIN_KHAZAD_DUM_RING_RECONSTRUCTION_PROJECT"
+					owner = ROOT
+					location = THIS
+				}
+			}
+		}
+	}
+}
+
+# Ring restoration Project complete
+planet_event = {
+	id = mem_ancestors_grudge_durin.22
+	title = "mem_ancestors_grudge_durin.22.name"
+	desc = "mem_ancestors_grudge_durin.22.desc"
+	location = ROOT
+	show_sound = event_construction
+	picture = GFX_evt_space_station
+	is_triggered_only = yes
+	trigger = {
+		has_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum_restored
+		owner = {
+			# Country
+			has_event_chain = mem_ancestors_grudge_durin_khazad_dum_rebuilding
+		}
+	}
+	option = {
+		name = mem_ancestors_grudge_durin.22.a
+		owner = {
+			random_owned_planet = {
+				limit = {
+					has_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum
+				}
+				set_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum_ring_restoration
+				add_modifier = {
+					modifier = "mem_ancestors_grudge_durin_ringworld_reconstruction"
+					days = -1
+				}
+			}
+		}
+		hidden_effect = {
+			planet_event = {
+				id = mem_ancestors_grudge_durin.23
+				days = 3600
+				random = 300
+			}
+		}
+	}
+}
+
+# Ringworld restored
+planet_event = {
+	id = mem_ancestors_grudge_durin.23
+	title = "mem_ancestors_grudge_durin.23.name"
+	desc = "mem_ancestors_grudge_durin.23.desc"
+	location = ROOT
+	show_sound = event_celebration
+	picture = GFX_evt_ringworld
+	is_triggered_only = yes
+	trigger = {
+		has_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum_ring_restoration
+		owner = {
+			# Country
+			has_event_chain = mem_ancestors_grudge_durin_khazad_dum_rebuilding
+		}
+	}
+	immediate = {
+	}
+	option = {
+		name = mem_ancestors_grudge_durin.23.a
+		remove_modifier = "mem_ancestors_grudge_durin_ringworld_reconstruction"
+		remove_modifier = "wasteland_orbital_debris"
+		solar_system = {
+			every_system_ambient_object = {
+				limit = {
+					is_ambient_object_type = mem_ancestors_grudge_destroyed_ring_01_object
+				}
+				destroy_ambient_object = this
+			}
+		}
+		add_modifier = {
+			modifier = "mem_ancestors_grudge_durin_ringworld_restored"
+			days = -1
+		}
+		owner = {
+			add_modifier = {
+				modifier = "mem_ancestors_grudge_durin_ringworld_reconstructed"
+				days = 3600
+			}
+			random_owned_planet = {
+				limit = {
+					has_planet_flag = mem_ancestors_grudge_durins_hall_khazad_dum_ring_restoration
+				}
+				create_ambient_object = {
+					type = mem_ancestors_grudge_intact_ring_01_object
+					location = THIS
+				}
+				last_created_ambient_object = {
+					set_location = {
+						target = PREV
+						distance = 0
+						angle = 0
+					}
+				}
+			}
+			end_event_chain = "mem_ancestors_grudge_durin_khazad_dum_rebuilding"
 		}
 	}
 }
