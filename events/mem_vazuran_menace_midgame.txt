@@ -799,6 +799,28 @@ country_event = {
 			small_artifact_reward = yes
 		}
 		mem_vazurans_unlock_tradition = yes
+		hidden_effect = {
+			if = {
+				limit = {
+					exists = event_target:mem_vazurans_country
+				}
+				event_target:mem_vazurans_country = {
+					random_situation = {
+						limit = {
+							is_situation_type = mem_vazuran_raiding
+						}
+						subtract_variable = {
+							which = mem_vazuran_raiding_max_fleets
+							value = -1
+						}
+						subtract_variable = {
+							which = mem_vazuran_raiding_strength
+							value = 3000
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -1773,7 +1795,8 @@ situation_event = {
 						owner = {
 							is_country_type = default
 							#is_hostile_to = root.owner
-							NOT = {
+							NOR = {
+								has_modifier = mem_vazurans_stance_tribute
 								has_country_flag = mem_vazurans_targeted_country
 							}
 						}
@@ -1799,7 +1822,8 @@ situation_event = {
 								has_modifier = mem_vazurans_stance_provoke
 								is_mem_runesmith = yes
 							}
-							NOT = {
+							NOR = {
+								has_modifier = mem_vazurans_stance_tribute
 								has_country_flag = mem_vazurans_targeted_country
 							}
 						}
@@ -3269,9 +3293,22 @@ situation_event = {
 	trigger = {
 		owner = {
 			is_at_war = no
-			fleet_power < @mem_vazuran_fe_fleet_strenght
 			NOT = {
 				has_country_flag = fallen_empire_fleet_spawn
+			}
+		}
+		OR = {
+			AND = {
+				end_game_years_passed > 1
+				owner = {
+					fleet_power < @mem_vazuran_fe_fleet_strenght
+				}
+			}
+			AND = {
+				end_game_years_passed < 1
+				owner = {
+					fleet_power < @mem_vazuran_fe_fleet_strenght_midgame
+				}
 			}
 		}
 	}
