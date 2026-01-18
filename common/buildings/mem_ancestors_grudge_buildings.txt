@@ -29,27 +29,9 @@ building_mem_ancestors_grudge_ruins = {
 	planet_modifier = {
 		planet_housing_add = 100
 	}
-	triggered_planet_modifier = {
-		potential = {
-			exists = owner
-			owner = {
-				is_regular_empire = yes
-			}
-		}
-		modifier = {
-			job_miner_add = 100
-		}
-	}
-	triggered_planet_modifier = {
-		potential = {
-			exists = owner
-			owner = {
-				is_gestalt = yes
-			}
-		}
-		modifier = {
-			job_mining_drone_add = 100
-		}
+	inline_script = {
+		script = jobs/miners_add
+		AMOUNT = 100
 	}
 	# triggered_desc = {
 	# 	trigger = {
@@ -69,6 +51,137 @@ building_mem_ancestors_grudge_ruins = {
 	# 	}
 	# 	text = job_miner_effect_desc
 	# }
+	# upgrades = {
+	# 	building_mem_ancestors_grudge_ruins_1
+	# }
+}
+
+# ruins for lift
+building_mem_ancestors_grudge_durin_spacelife_ruined = {
+	#base_buildtime = @b2_time
+	icon = building_mem_ancestors_grudge_ruins
+	can_build = no
+	# base_cap_amount = 1
+	can_be_disabled = no
+	can_be_ruined = no
+	can_demolish = no
+	category = resource
+	resources = {
+		category = megastructures
+		# cost = {
+		# 	minerals = 900
+		# }
+	}
+	building_sets = {
+		government
+		urban
+	}
+	# on_built = {
+	# 	solar_system = {
+	# 		spawn_megastructure = {
+	# 			type = mem_ancestors_grudge_spacelift_ruined
+	# 			owner = root
+	# 			planet = root
+	# 			coords_from = root
+	# 			init_effect = {
+	# 				set_megastructure_flag = mem_ancestors_grudge_spacelift@root
+	# 				# set_name = # TRODO
+	# 			}
+	# 			#graphical_culture = event_target:arc_welders_empire
+	# 		}
+	# 	}
+	# }
+	triggered_desc = {
+		trigger = {
+			has_deposit = d_mem_ancestors_grudge_city_ruins
+		}
+		text = building_mem_ancestors_grudge_durin_spacelife_ruined_search_ruins
+	}
+		triggered_desc = {
+		trigger = {
+			NOT = {
+				has_deposit = d_mem_ancestors_grudge_city_ruins
+			}
+			
+		}
+		text = building_mem_ancestors_grudge_durin_spacelife_ruined_search_ruins_done
+	}
+	# upgrades = {
+	# 	building_mem_ancestors_grudge_durin_spacelife_1
+	# }
+}
+
+# life tier 1
+building_mem_ancestors_grudge_durin_spacelife_1 = {
+	base_buildtime = 1800
+	icon = holding_orbital_assembly_complex
+	base_cap_amount = 1
+	empire_limit = 13
+	can_build = yes
+	# can_be_disabled = no
+	can_be_ruined = no
+	can_demolish = yes
+	category = government
+	resources = {
+		category = megastructures
+		cost = {
+			trigger = {
+				owner = {
+					country_uses_bio_ships = yes
+				}
+			}
+			food = 200
+			minerals = 100
+			alloys = 10
+			multiplier = trigger:planet_size
+		}
+		cost = {
+			trigger = {
+				owner = {
+					country_uses_bio_ships = no
+				}
+			}
+			minerals = 200
+			alloys = 25
+			multiplier = trigger:planet_size
+		}
+		upkeep = {
+			energy = 0.5
+			multiplier = trigger:planet_size
+		}
+	}
+	prerequisites = {
+		tech_mem_ancestors_grudge_durin_spacelife
+	}
+	building_sets = {
+		government
+		urban
+	}
+	planet_modifier = {
+		planetary_ascension_effect_mult = 0.2
+		planetary_ascension_cost_mult = -0.2
+		planet_max_districts_mult = 0.1
+		planet_max_districts_add = 2
+	}
+	destroy_trigger = {
+		NOT = {
+			exists = owner
+		}
+	}
+	on_destroy = {
+		solar_system = {
+			random_megastructure = {
+				limit = {
+					is_megastructure_type = mem_ancestors_grudge_spacelift
+					has_megastructure_flag = mem_ancestors_grudge_spacelift@root
+				}
+				upgrade_megastructure_to = mem_ancestors_grudge_spacelift_ruined
+			}
+		}
+	}
+	on_built = {
+		mem_ancestors_grudge_durin_built_ring = yes
+	}
 	# upgrades = {
 	# 	building_mem_ancestors_grudge_ruins_1
 	# }
@@ -124,7 +237,6 @@ building_mem_ancestors_grudge_ruins = {
 @mem_forge_tier2 = 2
 @mem_forge_tier3 = 3
 @mem_forge_tier4 = 4
-
 # ruins of the forge
 building_mem_ancestors_grudge_forge_0 = {
 	base_buildtime = @b2_time
@@ -140,9 +252,8 @@ building_mem_ancestors_grudge_forge_0 = {
 		cost = {
 			minerals = 900
 			#minor_artifacts = 100
-		}		
-	}	
-
+		}
+	}
 	building_sets = {
 		industrial
 		foundry
@@ -308,11 +419,20 @@ building_mem_ancestors_grudge_forge_3 = {
 			has_planet_flag = building_mem_ancestors_grudge_forge_3
 		}
 		custom_tooltip = {
-				fail_text = decision_arcology_project_requirements
-				free_district_slots < 1
-				num_districts = { type = district_farming value < 1 }
-				num_districts = { type = district_mining value < 1 }
-				num_districts = { type = district_generator value < 1 }
+			fail_text = decision_arcology_project_requirements
+			free_district_slots < 1
+			num_districts = {
+				type = district_farming
+				value < 1
+			}
+			num_districts = {
+				type = district_mining
+				value < 1
+			}
+			num_districts = {
+				type = district_generator
+				value < 1
+			}
 		}
 		# num_uncleared_blockers < 2
 		#has_planet_flag = building_mem_ancestors_grudge_forge_1

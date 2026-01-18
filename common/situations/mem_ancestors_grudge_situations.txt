@@ -533,3 +533,207 @@ situation_mem_ancestors_grudge_crafting = {
 	}
 	#abort_trigger = {}
 }
+
+situation_mem_ancestors_grudge_durin_ratmen_invasion = {
+	picture = GFX_evt_in_the_dark
+	complete_icon_frame = GFX_situation_outcome_frame_green
+	complete_icon = GFX_situation_outcome_ascension
+	fail_icon = GFX_situation_outcome_revolt
+	fail_icon_frame = GFX_situation_outcome_frame_red
+	initial_progress = 36
+	progress_direction = bidirectional	#monodirectional/bidirectional (defaults to monodirectional)
+	complete_category = positive	#Only for progress_direction = bidirectional - only affects progress towards completetion (right)
+	fail_category = negative
+	category = negative
+	on_start = {
+		if = {
+			limit = {
+				host_has_dlc = "Toxoids Species Pack"
+			}
+			create_species = {
+				name = "Ratmen"
+				plural = "Ratmen"
+				adjective = "vermin"
+				class = TOX
+				portrait = tox2
+				homeworld = root.target
+				traits = {
+					trait = trait_cave_dweller
+					trait = trait_industrious
+					trait = trait_organic
+					trait = trait_fleeting
+				}
+			}
+		}
+		else = {
+			create_species = {
+				name = "Ratmen"
+				plural = "Ratmen"
+				adjective = "vermin"
+				class = MAM
+				portrait = mam_rat
+				homeworld = root.target
+				traits = {
+					trait = trait_cave_dweller
+					trait = trait_industrious
+					trait = trait_organic
+					trait = trait_fleeting
+				}
+			}
+		}
+		create_country = {
+			name = "13th Under Empire"
+			type = faction
+			effect = {
+				establish_communications_no_message = root.owner
+				save_global_event_target_as = mem_ratmen
+			}
+			room = mem_ratmen_2_room
+			species = last_created_species
+			authority = auth_oligarchic
+			ethos = {
+				ethic = ethic_militarist
+				ethic = ethic_materialist
+				ethic = ethic_authoritarian
+			}
+			origin = origin_subterranean
+			civics = {
+				civic = civic_cutthroat_politics
+				civic = civic_slaver_guilds
+				civic = civic_barbaric_despoilers
+			}
+			auto_delete = no
+			flag = {
+				icon = {
+					category = "mem"
+					file = "mem_ratmen.dds"
+				}
+				background = {
+					category = "backgrounds"
+					file = "new_dawn.dds"
+				}
+				colors = {
+					"green"
+					"green"
+					"null"
+					"null"
+				}
+			}
+		}
+		target = {
+			mem_ancestors_grudge_durin_spawn_ratmen = {
+				COUNT = 48
+			}
+		}
+		situation_event = {
+			id = mem_ancestors_grudge_durin.45			# ratmen say hello
+			days = 3
+		}
+	}
+	on_progress_complete = {
+		add_500_unity_per_year_passed = yes
+		hidden_effect = {
+			situation_event = {
+				id = mem_ancestors_grudge_durin.65				# cleared the path
+			}
+		}
+	}
+	on_fail = {
+		owner = {
+			add_modifier = {
+				modifier = humiliated
+				days = 1800
+			}
+		}
+		hidden_effect = {
+			situation_event = {
+				id = mem_ancestors_grudge_durin.66				# space rats!
+			}
+		}
+	}
+	on_monthly = {
+		events = {
+			# event for random event logic
+			# reinforcement
+			mem_ancestors_grudge_durin.50
+		}
+		# random_events = {
+		# 	200 = 0
+		# 	50 = mem_vazurans.1300			# Fallen Empire gets some fleet back 
+		# }
+	}
+	stages = {
+		situation_mem_ancestors_grudge_durin_ratmen_invasion_stage1 = {
+			icon = GFX_situation_stage_1
+			icon_background = GFX_situation_stage_frame_red
+			end = 24
+			target_modifier = {
+				planet_combat_width_add = 5
+			}
+		}
+		situation_mem_ancestors_grudge_durin_ratmen_invasion_stage2 = {
+			icon = GFX_situation_stage_2
+			icon_background = GFX_situation_stage_frame_red
+			end = 48
+			target_modifier = {
+				planet_combat_width_add = 1
+			}
+		}
+		situation_mem_ancestors_grudge_durin_ratmen_invasion_stage3 = {
+			icon = GFX_situation_stage_3
+			icon_background = GFX_situation_stage_frame_gray
+			end = 72
+			target_modifier = {
+				planet_combat_width_add = -3
+			}
+		}
+	}
+	monthly_progress = {
+		base = 0
+		# if you kill enough and the frontline gets thinner , the swarm looses momentum
+		modifier = {
+			desc = situation_mem_ancestors_grudge_durin_ratmen_invasion_progress_good
+			add = 2
+			NOT = {
+				target = {
+					controller = {
+						is_same_value = event_target:mem_ratmen
+					}
+				}
+			}
+		}
+		modifier = {
+			desc = situation_mem_ancestors_grudge_durin_ratmen_invasion_progress_mid
+			target = {
+				has_ground_combat = yes
+			}
+			add = -0.5
+		}
+		modifier = {
+			desc = situation_mem_ancestors_grudge_durin_ratmen_invasion_progress_bad
+			add = -2
+			AND = {
+				target = {
+					has_ground_combat = no
+					controller = {
+						is_same_value = event_target:mem_ratmen
+					}
+				}
+			}
+		}
+	}
+	approach = {
+		name = situation_mem_ancestors_grudge_durin_ratmen_invasion_approach
+		icon = GFX_situation_approach_sword
+		icon_background = GFX_situation_approach_bg_red
+		default = yes
+		on_select = {
+			custom_tooltip = deficit_approach_do_nothing_tooltip
+		}
+	}
+	# abort_trigger = {
+	# 	NOT = {
+	# 		exists = event_target:save_global_event_target_as
+	# 	}
+	# }
+}
