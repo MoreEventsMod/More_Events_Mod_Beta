@@ -1,0 +1,588 @@
+mem_mortis_system_initializer = {
+	name = "Myco"
+	class = "sc_g"
+	asteroid_belt = {
+		type = rocky_asteroid_belt
+		radius = 90
+	}
+	asteroid_belt = {
+		type = rocky_asteroid_belt
+		radius = 125
+	}
+	planet = {
+		name = "Myco"
+		class = "pc_g_star"
+		orbit_distance = 0
+		orbit_angle = 0
+		size = 23
+		has_ring = no
+		init_effect = {
+			save_global_event_target_as = mem_mortis_star
+		}
+	}
+	usage = misc_system_init
+	usage_odds = {
+		base = 5
+		# modifier = {
+		# 	has_leviathans = yes
+		# 	add = @spawn_system_extreme
+		# }
+		modifier = {
+			factor = 0
+			is_fe_cluster = yes
+		}
+		modifier = {
+			factor = 0
+			has_star_flag = empire_cluster
+		}
+		modifier = {
+			factor = 0
+			is_bottleneck_system = yes
+		}
+	}
+	max_instances = 1
+	spawn_chance = 100
+	init_effect = {
+		root = {
+			mem_mortis_setup_spore_system = yes
+		}
+		if = {
+			limit = {
+				host_has_dlc = "Necroids Species Pack"
+				host_has_dlc = "Aquatics Species Pack"
+			}
+			create_country = {
+				name = "Deserters"
+				name_list = "FUN2"
+				type = paragon_event_country
+				ignore_initial_colony_error = yes
+				auto_delete = no
+				species = random
+				flag = {
+					icon = {
+						category = "pirate"
+						file = "pirate_12.dds"
+					}
+					background = {
+						category = "backgrounds"
+						file = "00_solid.dds"
+					}
+					colors = {
+						"black"
+						"purple"
+						"null"
+						"null"
+					}
+				}
+				effect = {
+					set_country_flag = mem_mortis_create_pirate_country
+					save_global_event_target_as = mem_mortis_create_pirate_country
+					create_species = {
+						name = "NAME_Unknown"
+						class = PARAGON
+						portrait = GFX_mem_mortis_arrfish
+						namelist = "PRT1"
+						traits = {
+							trait = trait_decadent
+							trait = trait_talented
+							trait = trait_thrifty
+							#trait = trait_weak
+							#trait = trait_plantoid_budding
+						}
+						effect = {
+							save_event_target_as = mem_mortis_species
+						}
+					}
+					create_leader = {
+						species = event_target:mem_mortis_species
+						event_leader = yes
+						class = commander
+						tier = leader_tier_renowned
+						name = "NAME_mem_mortis_arrfish"
+						skill = 1
+						randomize_traits = no
+						skip_background_generation = yes
+						background_ethic = ethic_fanatic_militarist
+						custom_catch_phrase = mem_mortis_arrfish_catchphrase
+						custom_description = mem_mortis_arrfish_backstory
+						can_manually_change_location = yes
+						gender = male
+						set_age = 26
+						immortal = yes
+						effect = {
+							save_global_event_target_as = mem_mortis_arrfish
+							#set_leader_flag = legendary_leader
+							set_leader_flag = mem_mortis_arrfish
+							change_leader_portrait = GFX_mem_mortis_arrfish
+							#set_owner = root
+							#exile_leader_as = mem_mortis_arrfish
+						}
+					}
+					event_target:mem_mortis_arrfish = {
+						add_skill = 6
+						remove_all_traits = yes
+						add_trait = {
+							trait = leader_trait_void_hunter_2
+						}
+						add_trait = {
+							trait = leader_trait_shipbreaker
+						}
+						add_trait = {
+							trait = subclass_commander_admiral
+						}
+						add_trait = {
+							trait = leader_trait_shipbreaker
+						}
+						add_trait = {
+							trait = leader_trait_mem_mortis_arrfish
+						}
+						add_trait = {
+							trait = leader_trait_crusader
+						}
+						add_trait = {
+							trait = leader_trait_substance_abuser_2
+						}
+					}
+				}
+			}
+			create_fleet = {
+				name = "Deserter Fleet"
+				settings = {
+					spawn_debris = no
+					uses_naval_capacity = no
+				}
+				effect = {
+					# add_modifier = {
+					# 	modifier = mem_mortis_unkillable
+					# 	days = 7200
+					# }
+					save_global_event_target_as = mem_mortis_arrfish_fleet
+					set_owner = last_created_country
+					assign_leader = last_created_leader
+					while = {
+						count = 1
+						create_ship = {
+							fleet_cache_recalc = no
+							design = NAME_mem_ue_battleship
+							effect = {
+								set_disabled = yes
+							}
+						}
+					}
+					# while = {
+					# 	count = 23
+					# 	create_ship = {
+					# 		fleet_cache_recalc = no
+					# 		design = NAME_Mining_Corps
+					# 	}
+					# }
+					set_location = {
+						target = root.star
+						distance = 50
+						angle = random
+					}
+				}
+			}
+			create_country = {
+				name = "Infected Leviathan"
+				name_list = "FUN2"
+				type = guardian
+				contact_rule = on_action_only
+				ignore_initial_colony_error = yes
+				auto_delete = no
+				species = random
+				flag = {
+					icon = {
+						category = "toxoid"
+						file = "toxoid_05.dds"
+					}
+					background = {
+						category = "backgrounds"
+						file = "00_solid.dds"
+					}
+					colors = {
+						"black"
+						"purple"
+						"null"
+						"null"
+					}
+				}
+				effect = {
+					set_faction_hostility = {
+						target = event_target:mem_mortis_create_spore_country
+						set_hostile = no
+						set_neutral = yes
+						set_friendly = no
+					}
+					every_country = {
+						establish_communications_no_message = prev
+					}
+				}
+			}
+			create_fleet = {
+				name = "Infected Leviathan"
+				settings = {
+					spawn_debris = no
+					uses_naval_capacity = no
+				}
+				effect = {
+					set_owner = last_created_country
+					set_fleet_flag = mem_mortis_zombie_dragon
+					save_event_target_as = mem_mortis_zombie_dragon
+					while = {
+						count = 1
+						create_ship = {
+							fleet_cache_recalc = no
+							design = NAME_Reanimated_Sky_Dragon
+							name = "Alduin"
+						}
+					}
+					
+					set_aggro_range_measure_from = self
+					set_aggro_range = 500
+					set_location = {
+						target = root.star
+						distance = 50
+						angle = random
+					}
+					# set_fleet_stance = aggressive
+				}
+			}
+		}
+	}
+	planet = {
+		name = "Ossia"
+		class = "pc_barren"
+		orbit_distance = 30
+		orbit_angle = 240
+		size = 24
+		has_ring = yes
+	}
+	planet = {
+		name = "Cytonox"
+		class = "pc_infested"
+		orbit_distance = 50
+		orbit_angle = 120
+		size = 22
+		has_ring = no
+		init_effect = {
+			mem_mortis_make_spore_planet = yes
+		}
+		moon = {
+			name = "Denticle"
+			class = "pc_infested"
+			orbit_distance = 10
+			orbit_angle = {
+				min = 0
+				max = 270
+			}
+			size = 8
+			has_ring = no
+		}
+		moon = {
+			name = "Virex"
+			class = "pc_toxic"
+			orbit_distance = 10
+			orbit_angle = {
+				min = 0
+				max = 180
+			}
+			size = 8
+			has_ring = no
+		}
+		moon = {
+			name = "Lumen"
+			class = "pc_shrouded"
+			orbit_distance = 15
+			orbit_angle = {
+				min = 90
+				max = 360
+			}
+			init_effect = {
+				clear_deposits = yes
+				add_deposit = d_zro_deposit_5
+			}
+			size = 2
+			has_ring = no
+		}
+	}
+	planet = {
+		name = "Morvex"
+		class = "pc_gas_giant"
+		orbit_distance = 35
+		orbit_angle = {
+			min = 0
+			max = 360
+		}
+		size = 25
+		has_ring = no
+		moon = {
+			name = "Cadavera"
+			class = "pc_gas_giant"
+			orbit_distance = 10
+			orbit_angle = {
+				min = 0
+				max = 360
+			}
+			size = 6
+			has_ring = no
+		}
+		moon = {
+			name = "Spindel"
+			class = "pc_gas_giant"
+			orbit_distance = 10
+			orbit_angle = {
+				min = 90
+				max = 270
+			}
+			size = 4
+			has_ring = no
+		}
+		moon = {
+			name = "Gravewake"
+			class = "pc_infested"
+			orbit_distance = 10
+			orbit_angle = {
+				min = 90
+				max = 270
+			}
+			size = 7
+			has_ring = no
+			init_effect = {
+				# generate_very_early_pre_ftls_on_planet = yes
+				mem_mortis_make_spore_planet = yes
+			}
+		}
+	}
+	planet = {
+		name = "Echo"
+		class = "pc_infested"
+		orbit_distance = 25
+		orbit_angle = {
+			min = 180
+			max = 360
+		}
+		size = 25
+		has_ring = yes
+		init_effect = {
+			mem_mortis_make_spore_planet = yes
+		}
+	}
+	planet = {
+		name = "Terminus"
+		class = "pc_barren"
+		orbit_distance = 60
+		orbit_angle = random
+		size = 24
+		has_ring = yes
+		init_effect = {
+			add_deposit = mem_mortis_foundation
+		}
+	}
+}
+
+mem_mortis_system_foundation_initializer = {
+	name = "Midgard"
+	class = "sc_black_hole"
+	planet = {
+		name = "Midgard"
+		class = pc_black_hole
+		orbit_distance = 0
+		orbit_angle = 0
+		size = 1
+		has_ring = no
+		init_effect = {
+			save_global_event_target_as = mem_mortis_system_foundation_initializer_star
+		}
+		moon = {
+			name = "Nordri"
+			class = "pc_ocean"
+			orbit_distance = 30
+			orbit_angle = 90
+			size = {
+				min = 12
+				max = 15
+			}
+			has_ring = no
+			init_effect = {
+				save_event_target_as = mem_mortis_system_foundation_initializer_planet_1
+			}
+		}
+		moon = {
+			name = "Vestri"
+			class = "pc_ocean"
+			orbit_distance = 0
+			orbit_angle = 90
+			size = {
+				min = 12
+				max = 15
+			}
+			has_ring = no
+			init_effect = {
+				save_event_target_as = mem_mortis_system_foundation_initializer_planet_4
+			}
+		}
+		moon = {
+			name = "Sudri"
+			class = "pc_ocean"
+			orbit_distance = 0
+			orbit_angle = 90
+			size = {
+				min = 12
+				max = 15
+			}
+			has_ring = no
+			init_effect = {
+				save_event_target_as = mem_mortis_system_foundation_initializer_planet_2
+			}
+		}
+		moon = {
+			name = "Austri"
+			class = "pc_ocean"
+			orbit_distance = 0
+			orbit_angle = 90
+			size = {
+				min = 12
+				max = 15
+			}
+			has_ring = no
+			init_effect = {
+				save_event_target_as = mem_mortis_system_foundation_initializer_planet_3
+			}
+		}
+		
+	}
+	usage = misc_system_init
+	usage_odds = {
+		base = 0
+	}
+	max_instances = 1
+	spawn_chance = 100
+	init_effect = {
+		spawn_megastructure = {
+			type = mem_mortis_archive_0
+			planet = system_star
+			#orbit_angle = random
+			orbit_distance = 0
+		}
+		create_country = {
+			name = "Jörmungandr"
+			name_list = "FUN2"
+			type = guardian
+			ignore_initial_colony_error = yes
+			auto_delete = no
+			contact_rule = on_action_only
+			species = random
+			flag = {
+				icon = {
+					category = "zoological"
+					file = "flag_zoological_5.dds"
+				}
+				background = {
+					category = "backgrounds"
+					file = "00_solid.dds"
+				}
+				colors = {
+					"black"
+					"purple"
+					"null"
+					"null"
+				}
+			}
+			effect = {
+				every_country = {
+					establish_communications_no_message = prev
+				}
+			}
+		}
+		create_fleet = {
+			name = "Jörmungandr"
+			settings = {
+				spawn_debris = no
+				uses_naval_capacity = no
+			}
+			effect = {
+				set_owner = last_created_country
+				set_fleet_flag = mem_mortis_guardian_kaiju
+				save_event_target_as = mem_mortis_guardian_kaiju
+				while = {
+					count = 1
+					create_ship = {
+						fleet_cache_recalc = no
+						design = NAME_Behemoth_04
+						name = "Jörmungandr"
+					}
+				}
+				# set_fleet_stance = aggressive
+				set_aggro_range_measure_from = self
+				set_aggro_range = 500
+				set_location = {
+					target = event_target:mem_mortis_system_foundation_initializer_star
+					distance = 50
+					angle = random
+				}
+				queue_actions = {
+					repeat = {
+						find_closest_planet = {
+							trigger = {
+								id = mem_Jörmungandr.home.1
+								is_same_value = event_target:mem_mortis_system_foundation_initializer_planet_4
+							}
+							found_planet = {
+								move_to = this
+								orbit_planet = this
+								wait = {
+									duration = 30
+									random = 20
+								}
+							}
+						}
+						find_closest_planet = {
+							trigger = {
+								id = mem_Jörmungandr.home.2
+								is_same_value = event_target:mem_mortis_system_foundation_initializer_planet_2
+							}
+							found_planet = {
+								move_to = this
+								orbit_planet = this
+								wait = {
+									duration = 30
+									random = 20
+								}
+							}
+						}
+						find_closest_planet = {
+							trigger = {
+								id = mem_Jörmungandr.home.3
+								is_same_value = event_target:mem_mortis_system_foundation_initializer_planet_3
+							}
+							found_planet = {
+								move_to = this
+								orbit_planet = this
+								wait = {
+									duration = 30
+									random = 20
+								}
+							}
+						}
+						find_closest_planet = {
+							trigger = {
+								id = mem_Jörmungandr.home.4
+								is_same_value = event_target:mem_mortis_system_foundation_initializer_planet_1
+							}
+							found_planet = {
+								move_to = this
+								orbit_planet = this
+								wait = {
+									duration = 30
+									random = 20
+								}
+							}
+						}
+					}
+				}
+				# set_fleet_stance = aggressive
+			}
+		}
+	}
+}
