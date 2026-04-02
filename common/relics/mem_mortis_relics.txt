@@ -1,0 +1,117 @@
+@activation_cost = 3000
+@triumph_duration = 3600
+@triumph_duration_short = 1800
+@triumph_duration_veryshort = 900
+# TRODO ethical necromancy + per planet zombies
+r_mem_mortis_undead_scale = {
+	activation_duration = 0
+	portrait = "GFX_mem_mortis_undead_scale"
+	sound = "relic_activation_miniature_galaxy"
+	resources = {
+		category = relics
+		# Activation cost
+		cost = {
+			unity = 3000
+		}
+	}
+	ai_weight = {
+		weight = 20
+	}
+	can_be_stolen = yes
+	triggered_country_modifier = {
+		potential = {
+			always = yes
+		}
+		planet_farmers_exotic_gases_produces_add = 0.1
+		planet_farmers_food_produces_add = 0.5
+		planet_farmers_minerals_upkeep_add = 0.5
+	}
+	score = 500
+	active_effect = {
+		hidden_effect = {
+			if = {
+				limit = {
+					owner_main_species = {
+						is_robotic = no
+					}
+				}
+				every_owned_planet = {
+					create_zombie_pop_group = {
+						SIZE = prev.value:country_mem_assigned_farmers
+					}
+					# im getting tired. zombies can be stuck as specialists
+					# weighted_random_owned_pop_group = {
+					# 	limit = {
+					# 		NOT = {
+					# 			has_trait = trait_hive_mind
+					# 		}
+					# 		NOT = {
+					# 			has_trait = trait_zombie
+					# 		}
+					# 		is_robot_pop_group = no
+					# 	}
+					# 	save_event_target_as = old_pop_group
+					# 	species = {
+					# 		save_event_target_as = old_species
+					# 	}
+					# }
+					# if = {
+					# 	limit = {
+					# 		NOT = {
+					# 			any_galaxy_species = {
+					# 				has_species_flag = zombie_species_of_species@event_target:old_species
+					# 			}
+					# 		}
+					# 	}
+					# 	event_target:old_species = {
+					# 		modify_species = {
+					# 			species = this
+					# 			add_trait = trait_zombie
+					# 			remove_trait = trait_nerve_stapled
+					# 			remove_trait = trait_syncretic_proles
+					# 			effect = {
+					# 				set_species_flag = zombie_species_of_species@event_target:old_species
+					# 				save_event_target_as = target_species
+					# 			}
+					# 		}
+					# 	}
+					# }
+					# else = {
+					# 	random_galaxy_species = {
+					# 		limit = {
+					# 			has_species_flag = zombie_species_of_species@event_target:old_species
+					# 		}
+					# 		save_event_target_as = target_species
+					# 	}
+					# }
+					# create_pop_group = {
+					# 	pop_group = event_target:old_pop_group
+					# 	species = event_target:target_species
+					# 	category = civilian
+					# 	size = owner.value:country_mem_assigned_farmers
+					# }
+				}
+			}
+			else = {
+				add_monthly_resource_mult = {
+					resource = exotic_gases
+					value = 12
+				}
+			}
+		}
+		custom_tooltip = r_mem_mortis_undead_scale_effect
+		add_modifier = {
+			modifier = "relic_activation_cooldown"
+			days = @triumph_duration
+		}
+	}
+	# Possible check for activation
+	possible = {
+		custom_tooltip = {
+			fail_text = "requires_relic_no_cooldown"
+			NOT = {
+				has_modifier = relic_activation_cooldown
+			}
+		}
+	}
+}

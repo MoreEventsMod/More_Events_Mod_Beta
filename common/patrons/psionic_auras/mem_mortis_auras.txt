@@ -1,0 +1,180 @@
+mem_mortis_aura = {
+	intensity_level = {
+		end = 1000
+		owner_fleet_modifier = {
+			modifier = {
+				ship_cloaking_strength_add = 1
+				ship_hull_mult = 0.5
+				ship_hull_regen_add_static = 1
+			}
+		}
+		# owner_planet_modifier = {
+		# 	modifier = {
+		# 		planet_researchers_upkeep_mult = -0.15
+		# 		station_researchers_produces_mult = 0.4
+		# 	}
+		# }
+		neutral_fleet_modifier = {
+			modifier = {
+				ship_evasion_add = -5
+				ship_weapon_range_mult = -0.05
+			}
+		}
+		# neutral_planet_modifier = {
+		# 	modifier = {
+		# 		station_researchers_produces_mult = 0.2
+		# 	}
+		# }
+		rival_fleet_modifier = {
+			modifier = {
+				# ship_fire_rate_mult = -1.25
+				# ship_shield_mult = -2
+				# ship_evasion_mult = -0.5
+				ship_evasion_add = -5
+				ship_weapon_range_mult = -0.05
+			}
+		}
+		rival_planet_modifier = {
+			modifier = {
+				planet_stability_add = -10
+			}
+		}
+		ai_weight_coefficient = -3.33
+	}
+	intensity_level = {
+		end = 2000
+		owner_fleet_modifier = {
+			modifier = {
+				ship_cloaking_strength_add = 2
+				ship_hull_mult = 1
+				ship_hull_regen_add_static = 2
+			}
+		}
+		neutral_fleet_modifier = {
+			modifier = {
+				ship_evasion_add = -10
+				ship_weapon_range_mult = -0.1
+			}
+		}
+		rival_fleet_modifier = {
+			modifier = {
+				ship_evasion_add = -10
+				ship_weapon_range_mult = -0.1
+			}
+		}
+		rival_planet_modifier = {
+			modifier = {
+				planet_stability_add = -20
+			}
+		}
+		ai_weight_coefficient = -3.33
+	}
+	on_start = {
+		setup_aura_clashing = yes
+		check_psionic_suppression_eligibility = yes
+		set_aura_intensity = 300
+		on_psionic_aura_spawned = {
+			TYPE = mem_mortis_aura
+			# NO_IMMUNE = no
+		}
+		# # Exiled Aura has only one level
+		# spawn_psionic_aura_object = {
+		# 	TYPE = end_aura
+		# 	LEVEL = 2
+		# }
+		# spawn_psionic_aura_object = {
+		# 	TYPE = end_aura
+		# 	LEVEL = 3
+		# }
+	}
+	on_monthly = {
+		setup_aura_clashing_monthly = yes
+	}
+	on_gain_level = {
+		#spread_aura_endlessly = yes
+		add_psionic_aura_level_visual = {
+			TYPE = mem_mortis_aura
+		}
+	}
+	on_lose_level = {
+		remove_psionic_aura_level_visual = yes
+	}
+	on_progress_complete = {
+		#custom_tooltip = try_spread_aura_tt
+		set_aura_intensity = 1100
+		owner = {
+			add_modifier = {
+				modifier = mem_mortis_psi_power_modifier_unique
+			}
+			change_variable = {
+				which = mem_mortis_create_spore_country_psi_power
+				value = 3
+			}
+			mem_mortis_update_psi_power = yes
+		}
+		# random_neighbor_system = {
+		# 	limit = {
+		# 		has_psionic_aura = no
+		# 		is_psionic_aura_suppressed = no
+		# 	}
+		# 	spawn_psionic_aura = {
+		# 		owner = root.aura_owner
+		# 		type = mem_mortis_aura
+		# 		update_type = yes
+		# 	}
+		# }
+		# every_system_colony = {
+		# 	limit = {
+		# 		owner = {
+		# 			OR = {
+		# 				is_country_type = default
+		# 				is_country_type = primitive
+		# 			}
+		# 		}
+		# 	}
+		# 	owner = {
+		# 		set_faction_hostility = {
+		# 			target = event_target:mem_mortis_create_spore_country
+		# 			set_hostile = yes
+		# 			set_neutral = no
+		# 			set_friendly = no
+		# 		}
+		# 	}
+		# 	mem_mortis_create_zombies = {
+		# 		KILL_COUNT = 8
+		# 		ZOMBIE_COUNT = 800
+		# 		OWNER = event_target:mem_mortis_create_spore_country
+		# 	}
+		# }
+	}
+	on_vanish = {
+		on_psionic_aura_vanishing = yes
+	}
+	on_type_change = {
+		update_psionic_aura_visuals = {
+			TYPE = mem_mortis_aura
+		}
+	}
+	increase_trigger = {
+		mem_mortis_second_awakened = yes
+		# has_psionic_aura = yes
+		# aura_owner = { has_country_flag = exiled_aura_should_expand }
+	}
+	monthly_increase = {
+		base = 10
+	}
+	inline_script = "shroud/psionic_aura_daily_decrease"
+	#inline_script = "shroud/psionic_aura_monthly_decrease"
+	aura_galaxy_texture = "gfx/map/psionic_auras/composer_aura.dds"
+	aura_hyperlane_texture = "gfx/map/psionic_auras/composer_aura_hyperlane.dds"
+	monthly_decrease = {
+		base = 0
+		modifier = {
+			subtract = @aura_clashing_loser_decrease
+			any_neighbor_system = {
+				has_star_flag = aura_clash_winning_against_@root
+			}
+			desc = BLANK_STRING
+		}
+	}
+}

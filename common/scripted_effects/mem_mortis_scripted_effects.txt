@@ -1,0 +1,288 @@
+mem_mortis_spawn_spore_ships = {
+	while = {
+		count = $COUNT$
+		create_ship = {
+			fleet_cache_recalc = no
+			design = NAME_mem_mortis_spores
+			effect = {
+				set_name = MEM_MORTIS_SPORE
+			}
+		}
+	}
+}
+
+mem_mortis_create_spore_country = {
+	optimize_memory
+	if = {
+		limit = {
+			NOT = {
+				exists = event_target:mem_mortis_create_spore_country
+			}
+		}
+		create_species = {
+			name = "Necrofungus"
+			plural = "Necrofungi"
+			class = FUN
+			portrait = fun11
+			traits = {
+				# trait = trait_erudite
+				# trait = trait_natural_physicists
+				# trait = trait_venerable
+				# trait = trait_slow_breeders
+				# trait = trait_weak
+			}
+			#extra_trait_points = 3
+		}
+		create_country = {
+			name = "Fungal Chorus"
+			name_list = "FUN2"
+			type = mem_mortis_type
+			ignore_initial_colony_error = yes
+			# authority = auth_hive_mind
+			# civics = {
+			# 	civic = civic_warrior_culture
+			# 	civic = civic_barbaric_despoilers
+			# }
+			# room = mem_vazuran_1_room
+			auto_delete = no
+			graphical_culture = swarm_01
+			# origin = origin_mem_ancestors_grudge_advanced_start
+			species = last_created_species
+			# ethos = {
+			# 	ethic = ethic_militarist
+			# 	ethic = ethic_fanatic_authoritarian
+			# }
+			flag = {
+				icon = {
+					category = "plantoid"
+					file = "plantoid_02.dds"
+				}
+				background = {
+					category = "backgrounds"
+					file = "00_solid.dds"
+				}
+				colors = {
+					"black"
+					"dark_green"
+					"null"
+					"null"
+				}
+			}
+			effect = {
+				set_country_flag = mem_mortis_create_spore_country
+				save_global_event_target_as = mem_mortis_create_spore_country
+			}
+		}
+		every_country = {
+			limit = {
+				NOR = {
+					# is_country_type = default
+					is_fauna_country = yes
+					is_same_value = event_target:mem_mortis_create_spore_country
+				}
+			}
+			set_faction_hostility = {
+				target = event_target:mem_mortis_create_spore_country
+				set_hostile = yes
+				set_neutral = no
+				set_friendly = no
+			}
+		}
+		every_playable_country = {
+			remove_communications = event_target:mem_mortis_create_spore_country
+		}
+		# Should not attack Enclaves, Guardians, ai empires or the surveyor probe
+		# has_country_flag = ne_country for enclaves from new enclaves mod
+		# has_country_flag = mem_vazurans_neutral is for other mods to use for special countries that should not be harmed
+		# every_country = {
+		# 	limit = {
+		# 		OR = {
+		# 			is_country_type = enclave
+		# 			is_country_type = primitive
+		# 			has_country_flag = mem_surveyor_country
+		# 			has_country_flag = ne_country
+		# 			has_country_flag = mem_vazurans_neutral
+		# 			is_guardian_country = yes
+		# 			# AND = {
+		# 			# 	has_global_flag = mem_vazurans_neutral
+		# 			# 	is_country_type = default
+		# 			# 	is_ai = yes
+		# 			# }
+		# 		}
+		# 	}
+		# 	event_target:mem_vazurans_country = {
+		# 		set_faction_hostility = {
+		# 			target = prev
+		# 			set_hostile = no
+		# 			set_neutral = yes
+		# 			set_friendly = no
+		# 		}
+		# 	}
+		# }
+	}
+}
+
+# planet scope
+mem_mortis_make_spore_planet = {
+	# create_ambient_object = {
+	# 	type = mem_mortis_01_entity_ambient
+	# 	location = this
+	# }
+	# last_created_ambient_object = {
+	# 	set_location = {
+	# 		target = PREV
+	# 		distance = 0
+	# 		angle = 0
+	# 	}
+	# 	set_ambient_object_flag = mem_mortis_01_entity_ambient@prev
+	# }
+	# change_pc = pc_infested
+	if = {
+		limit = {
+			is_artificial = no
+		}
+		change_pc = pc_tropical
+		set_planet_entity = {
+			entity = mem_mortis_wooden_planet_entity
+			picture = pc_infested
+		}
+	}
+	add_modifier = {
+		modifier = mem_mortis_shroomed_planet
+	}
+	if = {
+		limit = {
+			exists = event_target:mem_mortis_create_spore_country
+		}
+		event_target:mem_mortis_create_spore_country = {
+			change_variable = {
+				which = mem_mortis_create_spore_country_psi_power
+				value = 1
+			}
+			mem_mortis_update_psi_power = yes
+		}
+		if = {
+			limit = {
+				host_has_dlc = "Shadows of the Shroud"
+			}
+			solar_system = {
+				spawn_psionic_aura = {
+					owner = root.owner
+					type = mem_mortis_aura
+					update_type = yes
+				}
+			}
+		}
+	}
+}
+
+mem_mortis_update_psi_power = {
+	remove_modifier = mem_mortis_psi_power_modifier
+	add_modifier = {
+		modifier = mem_mortis_psi_power_modifier
+		mult = mem_mortis_create_spore_country_psi_power
+	}
+}
+
+mem_mortis_setup_spore_system = {
+	mem_mortis_create_spore_country = yes
+	#last_created_system = {
+	# system_star = {
+	# 	save_global_event_target_as = mem_mortis_star
+	# }
+	event_target:mem_mortis_create_spore_country = {
+		while = {
+			count = 3
+			create_fleet = {
+				name = "NAME_mem_mortis_guards"
+				settings = {
+					spawn_debris = no
+					uses_naval_capacity = no
+				}
+				effect = {
+					set_fleet_flag = mem_mortis_guard_fleet
+					set_owner = event_target:mem_mortis_create_spore_country
+					# set_fleet_bombardment_stance = mem_mortis_fungi_bombardment
+					mem_mortis_spawn_spore_ships = {
+						COUNT = 60
+					}
+					set_location = {
+						target = event_target:mem_mortis_star
+						distance = 100
+						angle = random
+					}
+				}
+			}
+			mem_mortis_create_hunter_fleet = {
+				LOCATION = event_target:mem_mortis_star
+			}
+		}
+		# country_event = {
+		# 	id = mem_mortis.111
+		# }
+		# start_situation = {
+		# 	type = mem_mortis_ascension_situation
+		# }
+		country_event = {
+			id = mem_mortis.113
+			days = 14400
+		}
+	}
+	#}
+}
+
+mem_mortis_create_hunter_fleet = {
+	if = {
+		limit = {
+			exists = event_target:mem_mortis_create_spore_country
+		}
+		create_fleet = {
+			name = "NAME_mem_mortis_hunter"
+			settings = {
+				spawn_debris = no
+				uses_naval_capacity = no
+			}
+			effect = {
+				set_owner = event_target:mem_mortis_create_spore_country
+				# set_fleet_bombardment_stance = mem_mortis_fungi_bombardment
+				mem_mortis_spawn_spore_ships = {
+					COUNT = 20
+				}
+				set_location = {
+					target = $LOCATION$
+					distance = 100
+					angle = random
+				}
+			}
+		}
+	}
+}
+
+mem_mortis_create_zombies = {
+	create_zombie_pop_group = {
+		SIZE = $ZOMBIE_COUNT$
+	}
+	while = {
+		count = $KILL_COUNT$
+		# create_army = {
+		# 	owner = $OWNER$
+		# 	type = undead_army
+		# 	species = $OWNER$.owner_main_species
+		# }
+		random_owned_pop_group = {
+			limit = {
+				mem_mortis_can_be_shroomed_group = yes
+			}
+			kill_single_pop = yes
+		}
+	}
+}
+
+
+spawn_from_location_mem_mortis = {
+	event_target:mem_mortis_create_spore_country = {
+		mem_mortis_create_hunter_fleet = {
+			LOCATION = $LOCATION$
+		}
+	}
+}
