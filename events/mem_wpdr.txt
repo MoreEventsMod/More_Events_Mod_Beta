@@ -1,56 +1,62 @@
 # Weapon Platform Deployment Rig
 # By Violent Beetle
-
 namespace = mem_wpdr
 @max_support_ships = 15
 # Rig's spawning loop
-country_event = {
+# This has been on my script profiler for years, ideally this could be an onhit weapon
+fleet_event = {
 	id = mem_wpdr.1
 	hide_window = yes
 	is_triggered_only = yes
-
 	trigger = {
 		NOT = {
 			has_global_flag = mem_wpdr_ship_disabled
 		}
-	}
-
-	immediate = {
-		random_owned_fleet = {
-			IF = {
-				limit = {
-					OR = {
-						count_owned_ship = {
-							limit = {
-								is_ship_size = mem_wpdr_tiny_ship
-							}
-							count < @max_support_ships
-						}
-						is_in_combat = yes
-					}
-				}
-				mem_wpdr_create_random_platform = yes
+		is_in_combat = yes
+		count_owned_ship = {
+			limit = {
+				is_ship_size = mem_wpdr_tiny_ship
 			}
-			ELSE_IF = {
-				limit = {
-					count_owned_ship = {
-						limit = {
-							is_ship_size = mem_wpdr_tiny_ship
-						}
-						count > @max_support_ships
-					}
-				}
-				random_owned_ship = {
-					limit = {
-						is_ship_size = mem_wpdr_tiny_ship
-					}
-					destroy_ship = this
-				}
-			}
+			count < @max_support_ships
 		}
-		country_event = {
+	}
+	immediate = {
+		# IF = {
+		# 	limit = {
+		# 		OR = {
+		# 			count_owned_ship = {
+		# 				limit = {
+		# 					is_ship_size = mem_wpdr_tiny_ship
+		# 				}
+		# 				count < @max_support_ships
+		# 			}
+		# 			#is_in_combat = yes
+		# 		}
+		# 	}
+		while = {
+			count = 3
+			mem_wpdr_create_random_platform = yes
+		}
+		#}
+		# ELSE_IF = {
+		# 	limit = {
+		# 		count_owned_ship = {
+		# 			limit = {
+		# 				is_ship_size = mem_wpdr_tiny_ship
+		# 			}
+		# 			count > @max_support_ships
+		# 		}
+		# 	}
+		# 	random_owned_ship = {
+		# 		limit = {
+		# 			is_ship_size = mem_wpdr_tiny_ship
+		# 		}
+		# 		destroy_ship = this
+		# 	}
+		# }
+		fleet_event = {
 			id = mem_wpdr.1
-			days = 3
+			days = 15
 		}
 	}
 }
@@ -60,11 +66,9 @@ ship_event = {
 	id = mem_wpdr.2
 	hide_window = yes
 	is_triggered_only = yes
-
 	trigger = {
 		is_ship_size = mem_wpdr_capital_ship
 	}
-
 	immediate = {
 		save_event_target_as = capital_ship
 		set_global_flag = mem_wpdr_ship_disabled
@@ -89,13 +93,10 @@ country_event = {
 	id = mem_wpdr.3
 	title = mem_wpdr.3.name
 	desc = mem_wpdr.3.desc
-
 	is_triggered_only = yes
-
 	location = FROM
 	show_sound = event_ship_explosion
 	picture = GFX_evt_mem_space_battle
-
 	option = {
 		name = mem_wpdr.3.a
 		enable_special_project = {
@@ -111,21 +112,18 @@ ship_event = {
 	id = mem_wpdr.4
 	title = mem_wpdr.4.name
 	desc = mem_wpdr.4.desc
-
 	is_triggered_only = yes
-
 	location = event_target:capital_ship
 	picture = GFX_evt_mem_spaceship_wreck
 	show_sound = event_default
-
 	option = {
 		name = mem_wpdr.4.a
 		destroy_ship = event_target:capital_ship
-		owner = { 
+		owner = {
 			add_relic = r_mem_wpdr_production_matrix
 			set_timed_country_flag = {
 				flag = killed_guardian
-				days = 7200 # 20 year
+				days = 7200				# 20 year
 			}
 		}
 	}
@@ -136,13 +134,10 @@ ship_event = {
 	id = mem_wpdr.5
 	title = mem_wpdr.5.name
 	desc = mem_wpdr.5.desc
-
 	is_triggered_only = yes
-
 	location = FROM
 	picture = GFX_evt_unidentified_ship
 	show_sound = event_default
-
 	trigger = {
 		from = {
 			has_star_flag = mem_wpdr_system
@@ -159,7 +154,6 @@ ship_event = {
 			}
 		}
 	}
-
 	immediate = {
 		owner = {
 			set_country_flag = mem_wpdr_met_the_thing
@@ -171,15 +165,16 @@ ship_event = {
 			}
 		}
 	}
-
 	after = {
 		hidden_effect = {
 			owner = {
-				country_event = { id = story.8 days = 15 }
+				country_event = {
+					id = story.8
+					days = 15
+				}
 			}
 		}
 	}
-
 	option = {
 		name = mem_wpdr.5.a
 	}
