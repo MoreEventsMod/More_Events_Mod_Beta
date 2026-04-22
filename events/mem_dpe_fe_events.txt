@@ -11,6 +11,70 @@ namespace = mem_fe
 @tier3researchreward = 18
 @tier3researchmin = 120
 
+#yearly check before start
+country_event = {
+	id = mem_fe.0
+	hide_window = yes
+
+	is_triggered_only = yes
+	trigger = {
+		is_country_type = default
+		NOT = { has_country_flag = mem_has_had_terminally_ill_ruler }
+		NOT = { has_global_flag = dynamic_political_events_active }
+		NOT = { end_game_years_passed >= 0 }
+		OR = {
+			has_authority = auth_imperial
+			has_authority = auth_dictatorial
+		}
+		NOR = {
+			has_ethic = ethic_fanatic_xenophobe
+			has_ethic = ethic_gestalt_consciousness
+			has_ascension_perk = ap_the_flesh_is_weak
+			has_ascension_perk = ap_synthetic_evolution
+		}
+		exists = ruler
+		ruler = {			
+			is_immortal = no
+			NOR = {
+				has_trait = leader_trait_chosen
+				has_trait = leader_trait_eater_chosen
+				has_trait = leader_trait_whisperers_chosen
+				has_trait = leader_trait_instrument_chosen
+				has_trait = leader_trait_composer_chosen
+				has_trait = leader_trait_cyborg
+				has_trait = leader_trait_synthetic
+				has_trait = leader_trait_legendary_leader
+				has_leader_flag = mem_neochadamus
+			}
+		}
+		any_neighbor_country = {
+			is_country_type = fallen_empire
+			OR = { #has to be a Vanilla FE 
+				has_ethic = ethic_fanatic_materialist
+				has_ethic = ethic_fanatic_spiritualist
+				has_ethic = ethic_fanatic_xenophile
+				has_ethic = ethic_fanatic_xenophobe
+				has_authority = auth_machine_intelligence
+			}
+		}
+		NOT = { any_neighbor_country = { is_country_type = awakened_fallen_empire } }
+	}
+
+	immediate = {
+		random_list = {
+			#nothing happens
+			95 = {}
+			#event fires
+			3 = {
+				country_event = { id = mem_fe.1 days = 1 random = 350 }
+			}
+			#event blocked
+			2 = {
+				set_country_flag = mem_has_had_terminally_ill_ruler
+			}
+		}
+	}
+}
 
 #Terminally ill ruler
 country_event = {
@@ -19,7 +83,7 @@ country_event = {
 	desc = mem_fe.1.desc
 	picture = GFX_evt_throne_room
 	
-	mean_time_to_happen = { years = 120 }
+	is_triggered_only = yes
 	
 	trigger = {
 		is_country_type = default
@@ -37,7 +101,8 @@ country_event = {
 			has_ascension_perk = ap_synthetic_evolution
 		}
 		exists = ruler
-		ruler = {
+		ruler = {			
+			is_immortal = no
 			NOR = {
 				has_trait = leader_trait_chosen
 				has_trait = leader_trait_eater_chosen
