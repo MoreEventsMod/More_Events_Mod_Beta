@@ -1,0 +1,212 @@
+# BIG FUCKING TRODO
+
+
+
+#Root = country
+#This = planet
+can_terraform_planet = {
+    custom_tooltip = {
+        fail_text = terraform_fail_no_presapient_protection_or_no_presapients
+        NAND = {
+            AND = {
+                exists = root
+                root = { has_policy_flag = pre_sapients_protect }
+            }
+            any_owned_species = {
+                is_sapient = no
+                NOT = { has_trait = trait_nascent_stage }
+            }
+        }
+    }
+    inline_script = {
+        script = mem_forgotten_empires/toggled_code
+        code = "
+			custom_tooltip = {
+				fail_text = requires_actor_not_devouring_swarm_lithoid
+				root = { is_lithoid_devouring_swarm = no }
+			}
+		"
+        toggle = @[ 1 - has_bug_branch ]
+    }
+    if = {
+        limit = {
+            root = { is_wilderness_empire = no }
+        }
+        this = {
+            NOT = { has_planet_flag = legendary_leader_planet }
+        }
+    }
+    custom_tooltip = {
+        fail_text = requires_not_relentless_industrialists_situation
+        NOT = {
+            any_targeting_situation = {
+                is_situation_type = relentless_industrialists_situation
+            }
+        }
+    }
+    custom_tooltip = {
+        fail_text = terraform_fail_is_metal_planet
+        NOT = {
+            has_modifier = metal_planet
+        }
+    }
+	custom_tooltip = {
+		fail_text = COLONIZATION_IMPOSSIBLE_DEFENDED_PLANET
+		NOT = { has_planet_flag = planet_defended_forbid_colonization }
+	}
+	custom_tooltip = {
+		fail_text = "COLONIZATION_IMPOSSIBLE_SMEEGIBB_PLANET"
+		NOT = { has_planet_flag = cannot_colonize_smeegibb_shelter }
+	}
+    custom_tooltip = {
+        fail_text = "COLONIZATION_IMPOSSIBLE_WILDERNESS_TECH"
+        OR = {
+            NAND = {
+                root = {
+                    is_wilderness_empire = yes
+                    NOT = { has_technology = tech_terrestrial_sculpting }
+                }
+                OR = {
+                    AND = {
+                        root = { has_country_flag = started_wet }
+                        is_wet = no
+                    }
+                    AND = {
+                        root = { has_country_flag = started_dry }
+                        is_dry = no
+                    }
+                    AND = {
+                        root = { has_country_flag = started_cold }
+                        is_cold = no
+                    }
+                }
+            }
+            is_planet_class = pc_gaia
+        }
+    }
+    # Forgotten Empires
+    custom_tooltip = {
+        fail_text = mem_scfe_cant_terraform_special_planet
+        NAND = {
+            root = { is_wilderness_empire = no }
+            has_planet_flag = cant_terraform_planet
+        }
+        # TODO handle Wilderness empire
+    }
+    # Planetary Diversity Ascension Worlds
+    inline_script = {
+        script = mem_forgotten_empires/toggled_code
+        code = "
+			pd_can_terraform_planet = yes
+		"
+        toggle = @has_planetary_diversity_ascension_worlds
+    }
+}
+
+# this = system
+# root = country
+system_blocks_sensors = {
+    OR = {
+        AND = {
+            OR = {
+                has_modifier = space_storm
+                has_modifier = zroni_storm
+                has_modifier = queen_scorn_storm
+                has_star_flag = storm_system
+            }
+            # Sensor Expansion
+            inline_script = {
+                script = mem_forgotten_empires/toggled_code
+                code = "
+            			ROOT = { NOT = { has_technology = tech_ariphaos_sensors_storm } }
+                    "
+                toggle = @ariphaos_sensors_installed
+            }
+        }
+        AND = {
+            is_inside_nebula = yes
+            # Sensor Expansion
+            inline_script = {
+                script = mem_forgotten_empires/toggled_code
+                code = "
+        			ROOT = { NOT = { has_technology = tech_ariphaos_sensors_nebula } }
+                "
+                toggle = @ariphaos_sensors_installed
+            }
+
+        }
+        AND = {
+            OR = {
+                has_star_flag = lcluster
+                has_star_flag = sealed_system
+                # Sensor Expansion
+                inline_script = {
+                    script = mem_forgotten_empires/toggled_code
+                    code = "
+                        has_star_flag = surveillance_supercomputer_system
+                    "
+                    toggle = @ariphaos_sensors_installed
+                }
+            }
+            # Sensor Expansion
+            inline_script = {
+                script = mem_forgotten_empires/toggled_code
+                code = "
+        			ROOT = { NOT = { has_technology = tech_ariphaos_sensors_sealed } }
+                "
+                toggle = @ariphaos_sensors_installed
+            }
+        }
+        # Forgotten Empires
+        AND = {
+            exists = owner
+            owner = {
+                has_relic = r_mem_scfe_invisibility_rune
+                has_modifier = mem_scfe_invisibility_rune
+            }
+            NOT = { root = { is_same_empire = prev.owner } }
+        }
+        # Ancient Empire
+        inline_script = {
+            script = mem_forgotten_empires/toggled_code
+            code = "
+        		has_star_flag = ag_no_sensor_system
+            "
+            toggle = @ag_null_edict_length
+        }
+        # Sensor Expansion
+        inline_script = {
+            script = mem_forgotten_empires/toggled_code
+            code = "
+                AND = {
+                    OR = {
+                        is_star_class = sc_binary_2
+                        is_star_class = sc_neutron_star
+                    }
+                    ROOT = { NOT = { has_technology = tech_sensors_4 } }
+                }
+                AND = {
+                    OR = {
+                        is_star_class = sc_binary_1
+                        is_star_class = sc_pulsar
+                    }
+                    ROOT = { NOT = { has_technology = tech_ariphaos_sensors_pulsar } }
+                }
+                AND = {
+                    has_natural_wormhole = yes
+                    ROOT = { NOT = { has_technology = tech_ariphaos_sensors_wormhole } }
+                }
+                AND = {
+                    ag_is_black_hole_class = yes
+                    ROOT = { NOT = { has_technology = tech_ariphaos_sensors_black_hole } }
+                }
+                AND = {
+                    exists = starbase
+                    starbase = { has_starbase_building = ariphaos_sensors_jammer_starbase }
+                    ROOT = { NOT = { has_technology = tech_ariphaos_sensors_jammed } }
+                }
+            "
+            toggle = @ariphaos_sensors_installed
+        }
+    }
+}
