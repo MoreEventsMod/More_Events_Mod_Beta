@@ -1,0 +1,586 @@
+# Stellaris Modjam 2020 - Caretaker
+# AlphaAsh, NHunter, Rough, GwenBlanketKnight
+### remove mem_caretaker hub [planet scope]
+mem_caretaker_hub_clean_up = {
+	# remove_deposit = d_mem_caretaker_hub
+	remove_planet_flag = mem_caretaker_origin_reminded_to_build_mem_caretaker_hub
+}
+
+# Given a species, create a mod with trait_personal_mem_caretaker and apply to all pops, leaders
+# and armies that have the original species and the same owner as the scope object.
+# Scope: Something that has a species and an owner
+create_pci_species_mod = {
+	species = {
+		create_species = {
+			is_mod = yes
+			name = this
+			plural = this
+			class = this
+			portrait = this
+			traits = this
+			homeworld = this
+			traits = {
+				ideal_planet_class = this
+				trait = trait_personal_mem_caretaker
+			}
+		}
+		save_event_target_as = changing_species
+	}
+	owner = {
+		every_owned_pop_group = {
+			limit = {
+				is_exact_same_species = event_target:changing_species
+			}
+			change_species = last_created_species
+		}
+		every_owned_leader = {
+			limit = {
+				is_exact_same_species = event_target:changing_species
+			}
+			change_species = last_created_species
+		}
+		every_pool_leader = {
+			limit = {
+				is_exact_same_species = event_target:changing_species
+			}
+			change_species = last_created_species
+		}
+		every_owned_army = {
+			limit = {
+				exists = species
+				is_exact_same_species = event_target:changing_species
+			}
+			change_species = last_created_species
+		}
+		every_owned_ship = {
+			limit = {
+				is_ship_class = shipclass_colonizer
+				is_exact_same_species = event_target:changing_species
+			}
+			change_species = last_created_species
+		}
+	}
+}
+
+### setups seceded Caretaker technologies [empire scope]
+# PARENT_EMPIRE = empire from which Caretaker is seceding
+mem_caretaker_seceded_empire_setup_technology = {
+	# give all technology that source country has and ensure the Caretaker has other key techs even if parent country didn't
+	copy_techs_from = {
+		target = $PARENT_EMPIRE$
+	}
+	# starbase sizes
+	if = {
+		limit = {
+			NOT = {
+				has_technology = tech_starbase_3
+			}
+		}
+		give_technology = {
+			tech = tech_starbase_3
+			message = no
+		}
+	}
+	if = {
+		limit = {
+			NOT = {
+				has_technology = tech_starbase_4
+			}
+		}
+		give_technology = {
+			tech = tech_starbase_4
+			message = no
+		}
+	}
+	if = {
+		limit = {
+			NOT = {
+				has_technology = tech_starbase_5
+			}
+		}
+		give_technology = {
+			tech = tech_starbase_5
+			message = no
+		}
+	}
+	# strategic resources
+	if = {
+		limit = {
+			NOT = {
+				has_technology = tech_mine_rare_crystals
+			}
+		}
+		give_technology = {
+			tech = tech_mine_rare_crystals
+			message = no
+		}
+	}
+	if = {
+		limit = {
+			NOT = {
+				has_technology = tech_mine_exotic_gases
+			}
+		}
+		give_technology = {
+			tech = tech_mine_exotic_gases
+			message = no
+		}
+	}
+	if = {
+		limit = {
+			NOT = {
+				has_technology = tech_mine_volatile_motes
+			}
+		}
+		give_technology = {
+			tech = tech_mine_volatile_motes
+			message = no
+		}
+	}
+	if = {
+		limit = {
+			NOT = {
+				has_technology = tech_rare_crystals
+			}
+		}
+		give_technology = {
+			tech = tech_rare_crystals
+			message = no
+		}
+	}
+	if = {
+		limit = {
+			NOT = {
+				has_technology = tech_exotic_gases
+			}
+		}
+		give_technology = {
+			tech = tech_exotic_gases
+			message = no
+		}
+	}
+	if = {
+		limit = {
+			NOT = {
+				has_technology = tech_volatile_motes
+			}
+		}
+		give_technology = {
+			tech = tech_volatile_motes
+			message = no
+		}
+	}
+	# organic paradise
+	if = {
+		limit = {
+			NOT = {
+				has_technology = tech_paradise_dome
+			}
+		}
+		give_technology = {
+			tech = tech_paradise_dome
+			message = no
+		}
+	}
+}
+
+### setups initial population for seceded Caretaker [planet scope]
+# MEM_CARETAKER_SPECIES = species of Caretaker drones
+# PARENT_EMPIRE_SPECIES = species of the empire Caretaker secedes from
+# <!!!> this effect should run before 'mem_caretaker_seceded_empire_setup_capital' to avoid ruined buildins
+mem_caretaker_seceded_empire_setup_initial_population = {
+	# kill all robots - we'll recreate them as $MEM_CARETAKER_SPECIES$ drones
+	every_owned_pop_group = {
+		limit = {
+			OR = {
+				has_trait = trait_machine_unit
+				has_trait = trait_mechanical
+			}
+		}
+		kill_all_pop = yes
+	}
+	# remove extra biological pops
+	while = {
+		limit = {
+			pop_amount > 400
+		}
+		kill_single_pop = yes
+	}
+	# if we don't have enough bio pops, add them
+	while = {
+		limit = {
+			pop_amount < 400
+		}
+		create_pop = {
+			species = $PARENT_EMPIRE_SPECIES$
+		}
+	}
+	# add RS drones
+	while = {
+		count = 70
+		create_pop = {
+			species = $MEM_CARETAKER_SPECIES$
+		}
+	}
+}
+
+### setups a planet for seceded Caretaker [planet scope]
+mem_caretaker_seceded_empire_setup_capital = {
+	# grow planet if it is too small
+	while = {
+		limit = {
+			planet_size < 20
+		}
+		change_planet_size = 1
+	}
+	add_building = building_machine_assembly_plant
+	add_building = building_organic_sanctuary
+	add_building = building_organic_sanctuary
+}
+
+### setups the starbase for the seceded Caretaker's capital [starbase scope]
+mem_caretaker_seceded_empire_setup_starbase = {
+	# since people might be playing with NSC / Starbases Extended, make sure that we're not downgrading starbase
+	if = {
+		limit = {
+			has_starbase_size < starbase_citadel
+		}
+		set_starbase_size = starbase_citadel
+		# setup citadel
+		set_starbase_module = {
+			slot = 1
+			module = shipyard
+		}
+		set_starbase_module = {
+			slot = 2
+			module = shipyard
+		}
+		set_starbase_module = {
+			slot = 3
+			module = shipyard
+		}
+		set_starbase_module = {
+			slot = 4
+			module = shipyard
+		}
+		set_starbase_building = {
+			slot = 1
+			building = crew_quarters
+		}
+	}
+	# make sure all necessary components are there
+	else = {
+		if = {
+			limit = {
+				NOT = {
+					has_starbase_module = shipyard
+				}
+			}
+			set_starbase_module = {
+				slot = 1
+				module = shipyard
+			}
+			set_starbase_module = {
+				slot = 2
+				module = shipyard
+			}
+		}
+	}
+}
+
+### removes mem_caretaker deposits/modifiers and 'takes away' some pops [planet scope]
+mem_caretaker_secession_planets_clean_up = {
+	if = {
+		limit = {
+			mem_caretaker_presence_on_planet = yes
+		}
+		mem_caretaker_hub_clean_up = yes
+		if = {
+			limit = {
+				pop_amount > 1000
+			}
+			while = {
+				count = 5
+				kill_single_pop = yes
+			}
+		}
+		else_if = {
+			limit = {
+				pop_amount > 800
+			}
+			while = {
+				count = 4
+				kill_single_pop = yes
+			}
+		}
+		else_if = {
+			limit = {
+				pop_amount > 600
+			}
+			while = {
+				count = 3
+				kill_single_pop = yes
+			}
+		}
+		else_if = {
+			limit = {
+				pop_amount > 400
+			}
+			while = {
+				count = 2
+				kill_single_pop = yes
+			}
+		}
+		else = {
+			kill_single_pop = yes
+		}
+	}
+}
+
+mem_caretaker_change_mood = {
+	hidden_effect = {
+		if = {
+			limit = {
+				any_situation = {
+					is_situation_type = mem_caretaker_mood_situation
+				}
+			}
+			random_situation = {
+				limit = {
+					is_situation_type = mem_caretaker_mood_situation
+				}
+				set_variable = {
+					which = mem_caretaker_mood_situation_value
+					value = $VALUE$
+				}
+				# if negative, continue
+				if = {
+					limit = {
+						check_variable_arithmetic = {
+							which = mem_caretaker_mood_situation_value
+							value < 0
+						}
+					}
+					add_situation_progress = $VALUE$
+				}
+				# if would increase by more than 120
+				# decrease it to excatly 120
+				# else add
+				else = {
+					export_trigger_value_to_variable = {
+						trigger = situation_progress
+						variable = situation_progress
+					}
+					set_variable = {
+						which = situation_progress_future
+						value = mem_caretaker_mood_situation_value
+					}
+					change_variable = {
+						which = situation_progress_future
+						value = situation_progress
+					}
+					if = {
+						limit = {
+							check_variable_arithmetic = {
+								which = situation_progress_future
+								value > 120
+							}
+						}
+						change_variable = {
+							which = situation_progress_future
+							value = -120
+						}
+						multiply_variable = {
+							value = -1
+							which = situation_progress_future
+						}
+						change_variable = {
+							which = mem_caretaker_mood_situation_value
+							value = situation_progress_future
+						}
+						add_situation_progress = mem_caretaker_mood_situation_value
+					}
+					else = {
+						add_situation_progress = $VALUE$
+					}
+					clear_variable = situation_progress_future
+					clear_variable = situation_progress
+				}
+			}
+		}
+	}
+	if = {
+		limit = {
+			any_situation = {
+				is_situation_type = mem_caretaker_mood_situation
+			}
+		}
+		add_resource = {
+			mem_caretaker_mood = $VALUE$
+		}
+		add_resource = {
+			influence = $VALUE$
+			mult = -4
+		}
+		# add_monthly_resource_mult = {
+		# 	resource = unity
+		# 	value = $VALUE$
+		# 	mult = 0.3
+		# }
+	}
+	else = {
+		add_monthly_resource_mult = {
+			resource = unity
+			value = $VALUE$
+			mult = 0.3
+		}
+	}
+}
+
+mem_caretaker_rename_megastructure = {
+	if = {
+		limit = {
+			from = {
+				has_country_flag = mem_caretaker_reformed_mem_monitor_order
+			}
+		}
+		set_name = "Eye of the Watch"
+	}
+}
+
+mem_caretaker_clenup_after_breakup = {
+	remove_modifier = mem_caretaker_overclocked_cloning_vats
+	if = {
+		limit = {
+			has_special_project = MEM_CARETAKER_FIXING_KILLER_GLITCH
+		}
+		abort_special_project = {
+			type = MEM_CARETAKER_FIXING_KILLER_GLITCH
+		}
+	}
+	if = {
+		limit = {
+			has_special_project = MEM_CARETAKER_ANCIENT_VAULT_EXPLORE
+		}
+		abort_special_project = {
+			type = MEM_CARETAKER_ANCIENT_VAULT_EXPLORE
+		}
+		clear_global_event_target = mem_caretaker_vault_explorer@root
+	}
+	if = {
+		limit = {
+			has_special_project = MEM_CARETAKER_ANCIENT_VAULT_DATA_ANALYSIS
+		}
+		abort_special_project = {
+			type = MEM_CARETAKER_ANCIENT_VAULT_DATA_ANALYSIS
+		}
+		clear_global_event_target = mem_caretaker_vault_explorer@root
+	}
+	if = {
+		limit = {
+			has_special_project = MEM_CARETAKER_PERSONAL_CARE_PROJECT
+		}
+		abort_special_project = {
+			type = MEM_CARETAKER_PERSONAL_CARE_PROJECT
+		}
+		clear_global_event_target = mem_caretaker_vault_explorer@root
+	}
+}
+
+mem_caretaker_create_mem_caretaker_robots_species = {
+	# get robotic species for the Caretaker
+	create_species = {
+		is_mod = yes
+		name = "NAME_MEM_CARETAKER_SPECIES"
+		plural = "NAME_MEM_CARETAKER_SPECIES_PLURAL"
+		namelist = this
+		class = MACHINE
+		portrait = default_robot
+		traits = {
+			trait = trait_machine_unit
+			trait = trait_robot_mem_caretaker_directives
+			trait = trait_robot_efficient_processors
+			trait = trait_robot_bulky
+		}
+		effect = {
+			# select robot portrait
+			ROOT.owner = {
+				switch = {
+					trigger = is_species_class
+					HUM = {
+						PREV = {
+							change_species_characteristics = {
+								portrait = "sd_hum_robot"
+							}
+						}
+					}
+					MAM = {
+						PREV = {
+							change_species_characteristics = {
+								portrait = "sd_mam_robot"
+							}
+						}
+					}
+					REP = {
+						PREV = {
+							change_species_characteristics = {
+								portrait = "sd_rep_robot"
+							}
+						}
+					}
+					AVI = {
+						PREV = {
+							change_species_characteristics = {
+								portrait = "sd_avi_robot"
+							}
+						}
+					}
+					ART = {
+						PREV = {
+							change_species_characteristics = {
+								portrait = "sd_art_robot"
+							}
+						}
+					}
+					MOL = {
+						PREV = {
+							change_species_characteristics = {
+								portrait = "sd_mol_robot"
+							}
+						}
+					}
+					FUN = {
+						PREV = {
+							change_species_characteristics = {
+								portrait = "sd_fun_robot"
+							}
+						}
+					}
+					PLANT = {
+						PREV = {
+							change_species_characteristics = {
+								portrait = "sd_pla_robot"
+							}
+						}
+					}
+					LITHOID = {
+						PREV = {
+							change_species_characteristics = {
+								portrait = "lith_machine"
+							}
+						}
+					}
+					NECROID = {
+						PREV = {
+							change_species_characteristics = {
+								portrait = "nec_machine"
+							}
+						}
+					}
+					
+				}
+			}
+			save_global_event_target_as = mem_caretaker_robotic_species@root
+		}
+	}
+}

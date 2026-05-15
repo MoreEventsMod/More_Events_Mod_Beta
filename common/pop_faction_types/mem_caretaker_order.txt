@@ -1,0 +1,303 @@
+# Stellaris Modjam 2020 - Caretaker
+# AlphaAsh, NHunter, Rough, GwenBlanketKnight
+
+##############################
+# Order Faction
+##############################
+
+mem_monitororder = {
+	election_header = "GFX_faction_header_yellow"
+	guiding_ethic = ethic_materialist
+
+	unique = yes
+	support_multiplier = 1
+
+	resources = {
+		category = pop_factions
+		produces = {
+			unity = @faction_base_output
+		}
+	}
+
+	extortion_resource = {
+		category = pop_factions
+		produces = {
+			trigger = {
+				owner = {
+					NOR = {
+						has_civic = civic_crowdsourcing
+						has_civic = civic_corporate_crowdsourcing
+					}
+				}
+			}
+			physics_research = @faction_base_output
+			mult = @faction_extortion_research_ratio
+		}
+		produces = {
+			trigger = {
+				owner = {
+					OR = {
+						has_civic = civic_crowdsourcing
+						has_civic = civic_corporate_crowdsourcing
+					}
+				}
+			}
+			physics_research = @faction_major_output
+			engineering_research = @faction_minor_output
+			mult = @faction_extortion_crowdsourcing_ratio
+		}
+	}
+
+	is_potential = {
+		years_passed > 5
+		# NOT = { has_ethic = ethic_gestalt_consciousness }
+		mem_caretaker_tech_access = yes
+		
+		# count_owned_pops = {
+		# 	count >= 2
+		# 	limit = {
+		# 		or = {
+		# 			has_job = mem_high_monitor
+		# 			has_job = mem_monitor
+		# 		}
+		# 	}
+		# }
+	}
+
+	parameters = {
+		empire = {
+			type = country
+			valid_objects = {
+				is_same_value = root
+			}
+		}
+	}
+
+	can_join_pre_triggers = {
+		is_enslaved = no
+		is_being_purged = no
+	}
+
+	can_join_faction = {
+		can_think = yes
+		is_robotic_species = no
+		
+		not = { has_ethic = ethic_spiritualist }
+	}
+
+	attraction = {
+		base = 110
+	
+		modifier = {
+			factor = 0
+			NOT = { is_same_species = owner_species }
+		}
+	}
+
+	leader = {
+		base = 100
+		modifier = {
+			factor = 2.0
+			leader_class = official
+		}
+	
+		modifier = {
+			factor = 0.1
+			leader_class = scientist
+		}
+		modifier = {
+			factor = 0
+			or = {
+				is_event_leader = yes
+				NOT = { is_same_species = owner_species }
+				species = { has_trait = "trait_mechanical" }
+			}
+		}
+	}
+	
+	demand = {
+		title = "PROSPERITY_NOT_AGGRESSOR"
+		unfulfilled_title = "PROSPERITY_AGGRESSOR"
+		desc = "PROSPERITY_NOT_AGGRESSOR_DESC"
+
+		unfulfilled_effect = -10
+		fulfilled_effect = 0.001
+
+		potential = {
+			exists = owner
+			owner = {
+				num_communications > 2
+				
+				pop_amount_percentage = {
+					percentage > 0.09
+					limit = { pop_has_ethic = ethic_pacifist }
+				}
+			}
+		}
+
+		trigger = {
+			owner = {
+				NOR = {
+					has_country_flag = entered_war_as_attacker
+					any_war = { is_war_participant = { who = prev side = attackers } }
+				}
+			}
+		}
+	}
+	
+	demand = {
+		title = "SUPREMACIST_ISOLATIONIST_NO_FEDERATION"
+		unfulfilled_title = "SUPREMACIST_ISOLATIONIST_FEDERATION"
+		desc = "SUPREMACIST_ISOLATIONIST_NO_FEDERATION_DESC"
+
+		unfulfilled_effect = -5
+		fulfilled_effect = 0.001
+
+		potential = {
+			exists = owner
+			owner = {
+				num_communications > 0
+			}
+		}
+
+		trigger = {
+			owner = {
+				has_federation = no
+			}
+		}
+	}
+
+	demand = {
+		title = "ISOLATIONIST_MOVEMENT_RESTRICTED"
+		unfulfilled_title = "ISOLATIONIST_MOVEMENT_UNRESTRICTED"
+		desc = "ISOLATIONIST_MOVEMENT_RESTRICTED_DESC"
+
+		unfulfilled_effect = -5
+		fulfilled_effect = 5
+
+		potential = {
+			exists = owner
+			owner = { not = { has_valid_civic = civic_mem_love_the_alien }} 
+			owner = {
+				num_communications > 2
+			}
+		}
+
+		trigger = {
+			owner = {
+				NOR = {
+					any_relation = {
+						has_communications = root.owner
+						OR = {
+							has_diplo_migration_treaty = root.owner
+							root = {
+								owner = {
+									has_diplo_migration_treaty = prevprev
+								}
+							}
+						}
+					}
+					has_policy_flag = refugees_allowed
+				}
+			}
+		}
+	}
+
+	demand = {
+		title = "ISOLATIONIST_DIPLO_STANCE"
+		unfulfilled_title = "ISOLATIONIST_DIPLO_STANCE"
+		desc = "ISOLATIONIST_DIPLO_STANCE_DESC"
+
+		fulfilled_effect = 10
+		unfulfilled_effect = -5
+
+		potential = {
+			exists = owner
+			owner = {
+				is_homicidal = no
+				is_country_type = default
+				is_megacorp = no
+			}
+		}
+
+		trigger = {
+			owner = {
+				has_policy_flag = diplo_stance_isolationist
+			}
+		}
+	}
+	
+	demand = { # "TRADITIONALIST_NO_ROBOT_RIGHTS"
+		title = "TRADITIONALIST_NO_ROBOT_RIGHTS"
+		unfulfilled_title = "TRADITIONALIST_ROBOT_RIGHTS"
+		desc = "TRADITIONALIST_NO_ROBOT_RIGHTS_DESC"
+
+		unfulfilled_effect = -5
+		fulfilled_effect = 10
+
+		potential = {
+			exists = owner
+			owner = { can_set_ai_policy = yes }
+			owner = { not = { has_valid_civic = civic_mem_drone_culture }}
+		}
+
+		trigger = {
+			owner = {
+				NOT = { has_policy_flag = ai_full_rights }
+			}
+		}
+	}
+
+	on_create = {
+		pop_faction_event = { id = factions.1 }
+	}
+
+	on_destroy = {
+		if = {
+			limit = {
+				has_modifier = mem_caretaker_promoted_mem_monitororder
+			}
+			remove_modifier = mem_caretaker_promoted_mem_monitororder
+		}
+	}
+
+	actions = {
+		promote_faction = {
+			title = "PROMOTE_FACTION"
+			description = "PROMOTE_FACTION_DESC"
+			potential = {
+				exists = owner
+				parameter:empire = {
+					NOT = { has_modifier = mem_caretaker_promoted_mem_monitororder }
+				}
+			}
+			effect = {
+				parameter:empire = {
+					add_modifier = { modifier = mem_caretaker_promoted_mem_monitororder days = -1 }
+				}
+			}
+
+			ai_weight = {
+				base = 0
+			}
+		}
+		cancel_promote_faction = {
+			title = "CANCEL_PROMOTE_FACTION"
+			description = "CANCEL_PROMOTE_FACTION_DESC"
+			potential = {
+				exists = owner
+				parameter:empire = {
+					has_modifier = mem_caretaker_promoted_mem_monitororder
+				}
+			}
+			effect = {
+				parameter:empire = {
+					remove_modifier = mem_caretaker_promoted_mem_monitororder
+				}
+			}
+			ai_weight = {
+				base = 0
+			}
+		}
+	}
+}

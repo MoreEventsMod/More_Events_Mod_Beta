@@ -1,0 +1,97 @@
+# biological: can mod traits + spawn pops with sterile trait
+# machine: upkeep reduction robots + 
+r_memcaretaker_core = {
+	activation_duration = @triumph_duration
+	portrait = GFX_relic_mem_caretaker
+	sound = "relic_activation_isolated_contingency_core"
+	resources = {
+		category = relics
+		# Activation cost
+		cost = {
+			unity = @activation_cost
+			unity = 3000
+		}
+	}
+	ai_weight = {
+		weight = 100
+	}
+	triggered_country_modifier = {
+		potential = {
+			has_completed_genetic_situation = no
+		}
+		planet_entertainers_unity_produces_add = 1
+	}
+	triggered_country_modifier = {
+		potential = {
+			has_completed_genetic_situation = yes
+		}
+		bonus_pop_growth = 0.5
+		planet_entertainers_unity_produces_add = 0.5
+	}
+	score = 5000
+	active_effect = {
+		custom_tooltip = r_memcaretaker_core_tt
+		custom_tooltip = relic_triumph_cooldown
+		hidden_effect = {
+			add_modifier = {
+				modifier = "relic_activation_cooldown"
+				days = @triumph_duration
+			}
+			if = {
+				limit = {
+					owner_main_species = {
+						NOR = {
+							is_robotic_species = yes
+							is_machine_species = yes
+						}
+					}
+					has_completed_genetic_situation = no
+				}
+				owner_main_species = {
+					modify_species = {
+						species = this
+						add_trait = trait_common_sterility
+						remove_trait = trait_sterility_cured
+					}
+					last_created_species = {
+						save_event_target_as = r_memcaretaker_core_species
+					}
+				}
+			}
+			else = {
+				owner_main_species = {
+					save_event_target_as = r_memcaretaker_core_species
+				}
+			}
+			ordered_owned_planet = {
+				limit = {
+					free_housing > 0
+				}
+				position = 0
+				order_by = trigger:free_housing
+				while = {
+					limit = {
+						free_housing > 0
+					}
+					while = {
+						count = 20
+						create_pop = {
+							species = event_target:r_memcaretaker_core_species
+						}
+					}
+					# create_pop_group = {
+					# 	species = event_target:r_memcaretaker_core_species
+					# 	size = 2000
+					# }
+				}
+			}
+		}
+	}
+	# Possible check for activation
+	possible = {
+		inline_script = {
+			script = relics/activation_checks
+			RELIC = r_memcaretaker_core
+		}
+	}
+}

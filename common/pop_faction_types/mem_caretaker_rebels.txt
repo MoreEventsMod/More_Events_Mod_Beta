@@ -1,0 +1,484 @@
+# Stellaris Modjam 2020 - Caretaker
+# AlphaAsh, NHunter, Rough, GwenBlanketKnight
+##############################
+# Independence Movement
+##############################
+independencemovement = {
+	election_header = "GFX_faction_header_yellow"
+	guiding_ethic = ethic_xenophile
+	unique = yes
+	support_multiplier = 1
+	resources = {
+		category = pop_factions
+		produces = {
+			unity = @faction_base_output
+		}
+	}
+	extortion_resource = {
+		category = pop_factions
+		produces = {
+			trigger = {
+				owner = {
+					NOR = {
+						has_civic = civic_crowdsourcing
+						has_civic = civic_corporate_crowdsourcing
+					}
+				}
+			}
+			physics_research = @faction_base_output
+			mult = @faction_extortion_research_ratio
+		}
+		produces = {
+			trigger = {
+				owner = {
+					OR = {
+						has_civic = civic_crowdsourcing
+						has_civic = civic_corporate_crowdsourcing
+					}
+				}
+			}
+			physics_research = @faction_major_output
+			engineering_research = @faction_minor_output
+			mult = @faction_extortion_crowdsourcing_ratio
+		}
+	}
+	is_potential = {
+		years_passed > 25
+		# NOT = {
+		# 	has_ethic = ethic_gestalt_consciousness
+		# }
+		mem_caretaker_tech_access = yes
+		not = {
+			has_valid_civic = civic_mem_love_the_alien
+		}
+		# pop_amount_percentage = {
+		# 	percentage > 0.09
+		# 	limit = {
+		# 		OR = {
+		# 			pop_has_ethic = ethic_pacifist
+		# 			has_ethic = ethic_xenophile
+		# 		}
+		# 	}
+		# }
+	}
+	parameters = {
+		empire = {
+			type = country
+			valid_objects = {
+				is_same_value = root
+			}
+		}
+	}
+	can_join_pre_triggers = {
+		is_being_purged = no
+	}
+	can_join_faction = {
+		is_shackled_robot = no
+		NOT = {
+			has_trait = trait_mechanical
+		}
+		NOT = {
+			has_trait = trait_nerve_stapled
+		}
+		OR = {
+			has_ethic = ethic_xenophile
+			has_ethic = ethic_spiritualist
+			has_ethic = ethic_egalitarian
+		}
+		# NOR = {
+		# 	has_job = mem_monitor
+		# 	has_job = mem_high_monitor
+		# 	has_job = mem_caretaker_ward
+		# }
+	}
+	attraction = {
+		base = 120
+		modifier = {
+			factor = 0.8
+			is_same_species = owner_species
+		}
+		modifier = {
+			factor = 1.3
+			NOT = {
+				is_same_species = owner_species
+			}
+		}
+		modifier = {
+			factor = 1.2
+			is_enslaved = yes
+		}
+	}
+	leader = {
+		base = 100
+		modifier = {
+			factor = 1.2
+			leader_class = scientist
+		}
+		modifier = {
+			factor = 5
+			NOT = {
+				is_same_species = owner_species
+			}
+		}
+		modifier = {
+			factor = 0
+			or = {
+				is_event_leader = yes
+				leader_class = official
+				leader_class = commander
+			}
+		}
+	}
+	demand = {
+		title = "XENOIST_NO_SLAVES"
+		unfulfilled_title = "XENOIST_SLAVES"
+		desc = "XENOIST_NO_SLAVES_DESC"
+		unfulfilled_effect = -10
+		fulfilled_effect = 0.001
+		potential = {
+			exists = owner
+			owner = {
+				any_owned_pop_group = {
+					NOR = {
+						is_same_species = root.owner
+						is_robot_pop = yes
+						is_sapient = no
+					}
+				}
+			}
+		}
+		trigger = {
+			owner = {
+				NOT = {
+					#has_policy_flag = slavery_allowed
+					any_owned_pop_group = {
+						has_citizenship_type = {
+							country = prev
+							type = citizenship_slavery
+						}
+					}
+				}
+			}
+		}
+	}
+	demand = {
+		title = "XENOIST_NO_PURGE"
+		unfulfilled_title = "XENOIST_PURGE"
+		desc = "XENOIST_NO_PURGE_DESC"
+		unfulfilled_effect = -10
+		fulfilled_effect = 0.001
+		potential = {
+			exists = owner
+		}
+		trigger = {
+			owner = {
+				NOR = {
+					has_policy_flag = purge_displacement_only
+					has_policy_flag = purge_allowed
+				}
+			}
+		}
+	}
+	demand = {
+		title = "XENOIST_MULTICULTURALISM"
+		unfulfilled_title = "XENOIST_NO_MULTICULTURALISM"
+		desc = "XENOIST_MULTICULTURALISM_DESC"
+		fulfilled_effect = 10
+		unfulfilled_effect = -0.001
+		potential = {
+			exists = owner
+			owner = {
+				num_communications > 3
+				any_owned_pop_group = {
+					NOR = {
+						is_same_species = root.owner
+						has_trait = trait_mechanical
+						has_trait = trait_machine_unit
+						has_trait = trait_hive_mind
+					}
+				}
+			}
+		}
+		trigger = {
+			owner = {
+				num_species > 3
+			}
+		}
+	}
+	demand = {
+		title = "XENOIST_REFUGEES_WELCOME"
+		unfulfilled_title = "XENOIST_REFUGEES_UNWELCOME"
+		desc = "XENOIST_REFUGEES_WELCOME_DESC"
+		fulfilled_effect = 10
+		unfulfilled_effect = -5
+		potential = {
+			exists = owner
+			owner = {
+				any_relation = {
+					has_communications = root.owner
+					is_country_type = default
+				}
+			}
+		}
+		trigger = {
+			owner = {
+				has_policy_flag = refugees_allowed
+			}
+		}
+	}
+	demand = {
+		title = "XENOIST_CELEBRATE_DIVERSITY"
+		unfulfilled_title = "XENOIST_NO_CELEBRATE_DIVERSITY"
+		desc = "XENOIST_CELEBRATE_DIVERSITY_DESC"
+		fulfilled_effect = 5
+		unfulfilled_effect = -0.001
+		potential = {
+			exists = owner
+			owner = {
+				has_modifier = celebrate_diversity
+			}
+		}
+		trigger = {
+			owner = {
+				has_modifier = celebrate_diversity
+			}
+		}
+	}
+	demand = {
+		title = "TECHNOLOGIST_ROBOTS_ALLOWED"
+		unfulfilled_title = "TECHNOLOGIST_ROBOTS_BANNED"
+		desc = "TECHNOLOGIST_ROBOTS_ALLOWED_DESC"
+		fulfilled_effect = 5
+		unfulfilled_effect = -10
+		potential = {
+			exists = owner
+			owner = {
+				not = {
+					has_valid_civic = civic_mem_drone_culture
+				}
+			}
+		}
+		trigger = {
+			owner = {
+				NOR = {
+					has_policy_flag = robots_outlawed
+					has_policy_flag = ai_outlawed
+				}
+			}
+		}
+	}
+	demand = {
+		title = "PROGRESSIVE_FREE_MOVEMENT"
+		unfulfilled_title = "PROGRESSIVE_NO_FREE_MOVEMENT"
+		desc = "PROGRESSIVE_FREE_MOVEMENT_DESC"
+		fulfilled_effect = 10
+		unfulfilled_effect = -5
+		potential = {
+			exists = owner
+			owner = {
+				has_encountered_other_species = yes
+			}
+		}
+		trigger = {
+			owner = {
+				NOR = {
+					any_owned_pop_group = {
+						#has_migration_control = yes
+						is_sapient = yes
+						is_enslaved = no
+						is_being_purged = no
+						is_shackled_robot = no
+						is_robot_pop = no
+					}
+					has_policy_flag = resettlement_allowed
+				}
+			}
+		}
+	}
+	demand = {
+		title = "COOPERATIVE_DIPLO_STANCE"
+		unfulfilled_title = "COOPERATIVE_DIPLO_STANCE"
+		desc = "COOPERATIVE_DIPLO_STANCE_DESC"
+		fulfilled_effect = 5
+		unfulfilled_effect = -0.001
+		potential = {
+			exists = owner
+			owner = {
+				is_homicidal = no
+				is_country_type = default
+				has_policy_flag = diplo_stance_cooperative
+			}
+		}
+		trigger = {
+			owner = {
+				has_policy_flag = diplo_stance_cooperative
+			}
+		}
+	}
+	on_create = {
+		pop_faction_event = {
+			id = factions.1
+		}
+	}
+	on_destroy = {
+		if = {
+			limit = {
+				has_modifier = mem_caretaker_promoted_independencemovement
+			}
+			remove_modifier = mem_caretaker_promoted_independencemovement
+			mem_caretaker_change_mood = {
+				VALUE = 4
+			}
+		}
+		if = {
+			limit = {
+				has_modifier = mem_caretaker_suppressed_independencemovement
+			}
+			remove_modifier = mem_caretaker_suppressed_independencemovement
+			mem_caretaker_change_mood = {
+				VALUE = -4
+			}
+		}
+	}
+	actions = {
+		promote_faction = {
+			title = "PROMOTE_FACTION"
+			description = "PROMOTE_FACTION_DESC"
+			potential = {
+				exists = owner
+				parameter:empire = {
+					NOR = {
+						has_modifier = mem_caretaker_suppressed_independencemovement
+						has_modifier = mem_caretaker_promoted_independencemovement
+					}
+				}
+			}
+			effect = {
+				parameter:empire = {
+					add_modifier = {
+						modifier = mem_caretaker_promoted_independencemovement
+						days = -1
+					}
+					# custom_tooltip = mem_caretaker_mood_worsened_tooltip
+					# hidden_effect = {
+					# 	change_variable = {
+					# 		which = mem_caretaker_mood
+					# 		value = -5
+					# 	}
+					# }
+					mem_caretaker_change_mood = {
+						VALUE = -5
+					}
+				}
+			}
+			ai_weight = {
+				base = 0
+			}
+		}
+		cancel_promote_faction = {
+			title = "CANCEL_PROMOTE_FACTION"
+			description = "CANCEL_PROMOTE_FACTION_DESC"
+			potential = {
+				exists = owner
+				parameter:empire = {
+					has_modifier = mem_caretaker_promoted_independencemovement
+				}
+			}
+			effect = {
+				parameter:empire = {
+					remove_modifier = mem_caretaker_promoted_independencemovement
+					# custom_tooltip = mem_caretaker_mood_improved_tooltip
+					# hidden_effect = {
+					# 	change_variable = {
+					# 		which = mem_caretaker_mood
+					# 		value = 4
+					# 	}
+					# }
+					mem_caretaker_change_mood = {
+						VALUE = 4
+					}
+				}
+			}
+			ai_weight = {
+				base = 0
+			}
+		}
+		suppress_faction = {
+			title = "SUPPRESS_FACTION"
+			description = "SUPPRESS_FACTION_DESC"
+			potential = {
+				exists = owner
+				parameter:empire = {
+					NOR = {
+						has_modifier = mem_caretaker_suppressed_independencemovement
+						has_modifier = mem_caretaker_promoted_independencemovement
+					}
+				}
+			}
+			effect = {
+				parameter:empire = {
+					add_modifier = {
+						modifier = mem_caretaker_suppressed_independencemovement
+						days = -1
+					}
+					# custom_tooltip = mem_caretaker_mood_improved_tooltip
+					hidden_effect = {
+						# change_variable = {
+						# 	which = mem_caretaker_mood
+						# 	value = 4
+						# }
+						every_pop_faction = {
+							limit = {
+								is_pop_faction_type = independencemovement
+							}
+							add_modifier = {
+								modifier = suppressed_faction
+								days = -1
+							}
+						}
+					}
+					mem_caretaker_change_mood = {
+						VALUE = 4
+					}
+				}
+			}
+			ai_weight = {
+				base = 0
+			}
+		}
+		cancel_suppress_faction = {
+			title = "CANCEL_SUPPRESS_FACTION"
+			description = "CANCEL_SUPPRESS_FACTION_DESC"
+			potential = {
+				exists = owner
+				parameter:empire = {
+					has_modifier = mem_caretaker_suppressed_independencemovement
+				}
+			}
+			effect = {
+				parameter:empire = {
+					remove_modifier = mem_caretaker_suppressed_independencemovement
+					#custom_tooltip = mem_caretaker_mood_worsened_tooltip
+					hidden_effect = {
+						# change_variable = {
+						# 	which = mem_caretaker_mood
+						# 	value = -5
+						# }
+						every_pop_faction = {
+							limit = {
+								is_pop_faction_type = independencemovement
+							}
+							remove_modifier = suppressed_faction
+						}
+					}
+					mem_caretaker_change_mood = {
+						VALUE = -5
+					}
+				}
+			}
+			ai_weight = {
+				base = 0
+			}
+		}
+	}
+}

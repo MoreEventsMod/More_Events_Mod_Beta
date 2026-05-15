@@ -1,0 +1,518 @@
+mem_caretaker_mood_situation = {
+	picture = {
+		trigger = {
+			OR = {
+				current_stage = mem_caretaker_mood_stage_1
+			}
+		}
+		picture = GFX_evt_mem_caretaker_angry
+	}
+	picture = {
+		trigger = {
+			OR = {
+				current_stage = mem_caretaker_mood_stage_2
+				current_stage = mem_caretaker_mood_stage_3
+			}
+		}
+		picture = GFX_evt_mem_caretaker_annoyed
+	}
+	picture = {
+		trigger = {
+			OR = {
+				current_stage = mem_caretaker_mood_stage_4
+			}
+		}
+		picture = GFX_evt_mem_caretaker_content
+	}
+	picture = {
+		trigger = {
+			OR = {
+				current_stage = mem_caretaker_mood_stage_5
+				current_stage = mem_caretaker_mood_stage_6
+			}
+		}
+		picture = GFX_evt_mem_caretaker_pleased
+	}
+	picture = GFX_evt_mem_caretaker_content
+	complete_icon_frame = GFX_situation_outcome_frame_blue
+	complete_icon = GFX_situation_outcome_unknown
+	fail_icon_frame = GFX_situation_outcome_frame_red
+	fail_icon = GFX_situation_outcome_negative
+	on_progress_complete = {
+		custom_tooltip = situation_unknown_outcome_approach
+		hidden_effect = {
+			# can i block it from finishing?
+		}
+	}
+	on_fail = {
+		custom_tooltip = situation_unknown_outcome_approach
+		destroy_situation = this
+		hidden_effect = {
+			owner = {
+				country_event = {
+					id = mem_caretaker_origin_event.4000
+					days = 1
+				}
+			}
+		}
+	}
+	# abort_trigger = {
+	# 	owner = {
+	# 		has_country_flag = mem_caretaker_secession
+	# 	}
+	# }
+	triggered_modifier = {
+		potential = {
+			owner = {
+				has_valid_civic = civic_mem_protected
+				is_at_war = no
+			}
+		}
+		pop_happiness = 0.1
+	}
+	on_start = {
+		set_variable = {
+			which = situation_progress_future
+			value = 0
+		}
+	}
+	#start_value = 60
+	initial_progress = 60
+	stages = {
+		mem_caretaker_mood_stage_1 = {
+			# angry
+			icon = GFX_situation_stage_4
+			icon_background = GFX_situation_stage_frame_red
+			end = 15
+			modifier = {
+				planet_amenities_mult = -0.5
+			}
+			on_first_enter = {
+				owner = {
+					country_event = {
+						id = mem_caretaker_origin_event.3000
+						days = 0
+					}
+				}
+			}
+		}
+		mem_caretaker_mood_stage_2 = {
+			# very annoyed
+			icon = GFX_situation_stage_3
+			icon_background = GFX_situation_stage_frame_red
+			end = 30
+			modifier = {
+				planet_amenities_mult = -0.2
+			}
+			on_first_enter = {
+				owner = {
+					country_event = {
+						id = mem_caretaker_origin_event.3000
+						days = 0
+					}
+				}
+			}
+		}
+		mem_caretaker_mood_stage_3 = {
+			# annoyed
+			icon = GFX_situation_stage_2
+			icon_background = GFX_situation_stage_frame_red
+			end = 50
+			modifier = {
+				planet_amenities_mult = -0.1
+			}
+			on_first_enter = {
+				owner = {
+					country_event = {
+						id = mem_caretaker_origin_event.3000
+						days = 0
+					}
+				}
+			}
+		}
+		mem_caretaker_mood_stage_4 = {
+			# slightly annoyed
+			icon = GFX_situation_stage_1
+			icon_background = GFX_situation_stage_frame_gray
+			end = 75
+			modifier = {
+				planet_amenities_mult = 0.01
+			}
+		}
+		mem_caretaker_mood_stage_5 = {
+			# content
+			icon = GFX_situation_stage_2
+			icon_background = GFX_situation_stage_frame_green
+			end = 100
+			# custom_tooltip = stage_unknown_effects
+			modifier = {
+				planet_amenities_mult = 0.1
+			}
+			on_first_enter = {
+				owner = {
+					country_event = {
+						id = mem_caretaker_origin_event.3
+						days = 60
+					}
+				}
+			}
+		}
+		mem_caretaker_mood_stage_6 = {
+			# pleased
+			icon = GFX_situation_stage_3
+			icon_background = GFX_situation_stage_frame_green
+			# set_situation_locked  lock on 49 
+			end = 125
+			modifier = {
+				planet_amenities_mult = 0.15
+				planet_stability_add = 5
+				# fake_pop_growth_mod = 0.2
+				bonus_pop_growth = 1
+			}
+			# grant tech for mega and combat computers
+			on_first_enter = {
+				owner = {
+					country_event = {
+						id = mem_caretaker_origin_event.5
+						days = 60
+					}
+				}
+			}
+		}
+	}
+	approach = {
+		name = situation_mem_caretaker_mood_appraoch_basic
+		icon = GFX_situation_approach_discurage_conversation
+		icon_background = GFX_situation_approach_bg_green
+		default = yes
+		triggered_modifier = {
+			potential = {
+				mem_caretaker_takes_request = yes
+			}
+			planet_stability_add = 2
+		}
+		# triggered_modifier = {
+		# 	potential = {
+		# 		NOT = {
+		# 			has_situation_flag = lackadaisical
+		# 		}
+		# 	}
+		# 	modifier = {
+		# 		planet_stability_add = 5
+		# 	}
+		# }
+		ai_weight = 1
+	}
+	approach = {
+		name = situation_mem_caretaker_mood_appraoch_pops
+		icon = GFX_situation_approach_pop
+		icon_background = GFX_situation_approach_bg_yellow
+		allow = {
+			mem_caretaker_takes_request = yes
+		}
+		on_select = {
+			custom_tooltip = approach_outcome_tooltip_mem_caretaker
+		}
+		resources = {
+			category = situations
+			# test this
+			upkeep = {
+				influence = 1
+				#mult = owner.trigger:num_owned_planets
+			}
+		}
+		modifier = {
+			# fake_pop_growth_mod = 1.5
+			 # bonus_pop_growth = 0.75
+			planet_resettlement_unemployed_mult = 0.5
+		}
+		ai_weight = 5
+	}
+	# mem_caretaker didnt give you shit when you look good, i feel like ihave to respect that
+	approach = {
+		name = situation_mem_caretaker_mood_appraoch_minerals
+		icon = GFX_situation_approach_minerals
+		icon_background = GFX_situation_approach_bg_yellow
+		potential = {
+			OR = {
+				owner = {
+					resource_income_compare = {
+						resource = minerals
+						value < 10
+					}
+				}
+				current_situation_approach = situation_mem_caretaker_mood_appraoch_minerals
+			}
+		}
+		allow = {
+			mem_caretaker_takes_request = yes
+			# custom_tooltip = {
+			# 	fail_text = too_late_to_change_approach
+			# 	OR = {
+			# 		NOT = {
+			# 			has_situation_flag = path_locked
+			# 		}
+			# 		current_situation_approach = situation_snow_hostile
+			# 	}
+			# }
+		}
+		on_select = {
+			custom_tooltip = approach_outcome_tooltip
+		}
+		resources = {
+			category = situations
+			# test this
+			produces = {
+				minerals = 15
+				mult = owner.trigger:num_owned_planets
+			}
+			upkeep = {
+				influence = 1
+				#mult = owner.trigger:num_owned_planets
+			}
+		}
+	}
+	approach = {
+		name = situation_mem_caretaker_mood_appraoch_food
+		icon = GFX_situation_approach_digestion
+		icon_background = GFX_situation_approach_bg_yellow
+		potential = {
+			OR = {
+				owner = {
+					country_uses_food = yes
+					resource_income_compare = {
+						resource = food
+						value < 10
+					}
+				}
+				current_situation_approach = situation_mem_caretaker_mood_appraoch_food
+			}
+		}
+		allow = {
+			mem_caretaker_takes_request = yes
+		}
+		on_select = {
+			custom_tooltip = approach_outcome_tooltip
+		}
+		resources = {
+			category = situations
+			# test this
+			produces = {
+				food = 10
+				mult = owner.trigger:num_owned_planets
+			}
+			upkeep = {
+				influence = 1
+				#mult = owner.trigger:num_owned_planets
+			}
+		}
+	}
+	approach = {
+		name = situation_mem_caretaker_mood_appraoch_cg
+		icon = GFX_situation_approach_research
+		icon_background = GFX_situation_approach_bg_yellow
+		potential = {
+			OR = {
+				current_situation_approach = situation_mem_caretaker_mood_appraoch_cg
+				owner = {
+					resource_income_compare = {
+						resource = consumer_goods
+						value < 10
+					}
+				}
+			}
+		}
+		allow = {
+			mem_caretaker_takes_request = yes
+		}
+		on_select = {
+			custom_tooltip = approach_outcome_tooltip
+		}
+		resources = {
+			category = situations
+			# test this
+			produces = {
+				consumer_goods = 10
+				mult = owner.trigger:num_owned_planets
+			}
+			upkeep = {
+				influence = 1
+				#mult = owner.trigger:num_owned_planets
+			}
+		}
+	}
+	approach = {
+		name = situation_mem_caretaker_mood_appraoch_alloys
+		icon = GFX_situation_approach_alloys
+		icon_background = GFX_situation_approach_bg_yellow
+		potential = {
+			OR = {
+				owner = {
+					resource_income_compare = {
+						resource = alloys
+						value < 10
+					}
+					has_valid_civic = civic_mem_care_crusade
+				}
+				current_situation_approach = situation_mem_caretaker_mood_appraoch_alloys
+			}
+		}
+		allow = {
+			mem_caretaker_takes_request = yes
+		}
+		on_select = {
+			custom_tooltip = approach_outcome_tooltip
+		}
+		resources = {
+			category = situations
+			# test this
+			produces = {
+				trigger = {
+					owner = {
+						NOT = {
+							has_valid_civic = civic_mem_care_crusade
+						}
+					}
+				}
+				alloys = 2
+				mult = owner.trigger:controlled_systems
+			}
+			produces = {
+				trigger = {
+					owner = {
+						has_valid_civic = civic_mem_care_crusade
+					}
+				}
+				alloys = 6
+				mult = owner.trigger:controlled_systems
+			}
+			upkeep = {
+				trigger = {
+					owner = {
+						NOT = {
+							has_valid_civic = civic_mem_care_crusade
+						}
+					}
+				}
+				influence = 1
+				#mult = owner.trigger:controlled_systems
+			}
+		}
+	}
+	on_monthly = {
+		events = {
+			mem_caretaker_origin_event.20301
+		}
+		random_events = {
+			120 = 0
+			20 = mem_caretaker_origin_event.20300
+		}
+	}
+	monthly_progress = {
+		base = 0
+		modifier = {
+			add = value:mem_caretaker_migration_treaties
+			# you cant make him angry with this, but disappoint him
+			NOR = {
+				current_stage = mem_caretaker_mood_stage_1
+				current_stage = mem_caretaker_mood_stage_2
+				check_variable_arithmetic = {
+					which = value:mem_caretaker_migration_treaties
+					value > 0
+				}
+				owner = {
+					has_valid_civic = civic_mem_love_the_alien
+				}
+			}
+			desc = situation_mem_caretaker_mood_migration_treaties
+		}
+		modifier = {
+			add = 0.1
+			# passive increase
+			NOR = {
+				current_stage = mem_caretaker_mood_stage_6
+				current_stage = mem_caretaker_mood_stage_5
+			}
+			current_situation_approach = situation_mem_caretaker_mood_appraoch_basic
+			desc = situation_mem_caretaker_mood_passive
+		}
+		modifier = {
+			add = -0.2
+			# passive increase
+			# NOT = {
+			# 	current_stage = mem_caretaker_mood_stage_6
+			# }
+			NOT = {
+				current_situation_approach = situation_mem_caretaker_mood_appraoch_basic
+			}
+			desc = situation_mem_caretaker_mood_requesting_aid
+		}
+		# Punish pops harder than resources?
+		# modifier = {
+		# 	add = -0.1
+		# 	# passive increase
+		# 	NOT = {
+		# 		current_stage = mem_caretaker_mood_stage_6
+		# 	}
+		# 	current_situation_approach = situation_mem_caretaker_mood_appraoch_pops
+		# 	desc = situation_mem_caretaker_mood_pops
+		# }
+		modifier = {
+			add = -0.4
+			# passive increase, trickle it down slowly
+			current_stage = mem_caretaker_mood_stage_6
+			desc = situation_mem_caretaker_mood_love_us
+		}
+		modifier = {
+			desc = situation_mem_caretaker_mood_natural_design
+			add = 0.1
+			owner = {
+				has_valid_civic = civic_natural_design
+			}
+			NOT = {
+				current_stage = mem_caretaker_mood_stage_6
+			}
+		}
+		modifier = {
+			desc = situation_mem_caretaker_mood_inwards_perfection
+			add = 0.1
+			owner = {
+				has_valid_civic = civic_inwards_perfection
+			}
+			NOT = {
+				current_stage = mem_caretaker_mood_stage_6
+			}
+		}
+		modifier = {
+			desc = situation_mem_caretaker_mood_straying_from_the_path
+			add = -0.4
+			owner = {
+				any_situation = {
+					OR = {
+						is_situation_type = situation_breach_shroud
+						is_situation_type = genetic_ascension_situation
+						is_situation_type = situation_digitization
+					}
+				}
+			}
+		}
+		# modifier = {
+		# 	add = 5
+		# 	desc = situation_snow_very_hostile_tt
+		# 	current_situation_approach = situation_snow_hostile
+		# 	has_situation_flag = very_hostile
+		# }
+	}
+	# abort_trigger = {
+	# 	OR = {
+	# 		NOT = {
+	# 			exists = target.owner
+	# 		}
+	# 		target.owner = {
+	# 			NOT = {
+	# 				is_same_value = root.owner
+	# 			}
+	# 		}
+	# 	}
+	# }
+}

@@ -1,0 +1,7127 @@
+# Stellaris Modjam 2020 - Caretaker
+# Writer/Scripter NHunter
+# Reviewer/Editor AphaAsh
+namespace = mem_caretaker_origin_event
+# country flags index:
+#
+# - mem_caretaker_killer_glitch                         : A random flag added at the game start for disappeared pops event chain
+# - mem_caretaker_killer_glitch_persists                : Shows that the player either chose to ingore the glitch or project to fix it failed
+#
+# - mem_caretaker_abandoned_vault                       : A random flag added at the game start for the abandoned vault event 'chain'
+# - mem_caretaker_downshifters                          : A random flag added at the game start for the downshifters event 'chain'
+#
+# - mem_caretaker_hubs_on_colonies_explained            : Shows that the player was shown a message saying that the Caretaker hubs must be established on colonies
+# - mem_caretaker_no_hub_angry_letter_shown             : Shows that the played was shown an angry message from the Caretaker for not building Hubs on colonies
+#
+# - mem_caretaker_pop_creation_cooldown                 : Shows that a decision to request a pop from the Caretaker has been recently used
+# - mem_caretaker_resource_request_cooldown             : Shows that a decision to request resources from the Caretaker has been recently used
+# - mem_caretaker_gift_cooldown                         : Shows that the Caretaker has recently given a gift to the empire
+#
+# - mem_caretaker_break_up                              : Generic flag to show that empire no longer hosts the Caretaker
+# - mem_caretaker_secession                             : The Caretaker decided to part ways with the empire it oversaw
+# - mem_caretaker_secession_granted                     : The Caretaker's request for secession has been granted
+# - mem_caretaker_secession_denied_politely             : The Caretaker's request for secession has been denied politely
+# - mem_caretaker_secession_denied                      : The Caretaker's request for secession has been denied
+# - mem_caretaker_experiment_scrapped                   : The Caretaker has proclaimed that species have failed it and must be assimilated/eradicated
+# - mem_caretaker_destoryed                             : The Caretaker has been dealt with (used by faction status check event loop)
+# - mem_caretaker_awful_truth_learned                   : Knows what the Caretaker has done to the species
+# - mem_caretaker_delayed_psi_cure                      : Used to stop watchman event
+#
+# - mem_caretaker_personal_care_rolled_out				: Primary species has been upgraded with Personal Care Interfaces
+# - mem_caretaker_interface_traits_removed				: PCI and First mem_monitor traits removed due to break up
+# planet flag index:
+#
+# - mem_caretaker_origin_reminded_to_build_mem_caretaker_hub: This flag shows that the played was given a notification about the colony not having a Caretaker hub after 1 year
+# - mem_caretaker_core_planet_take_over_attempt         : Shows that the Caretaker is in process of trying to take over the core planet
+# - mem_caretaker_core_planet_take_over_success         : Shows that the Caretaker successfully managed to take over the core planet
+# - mem_caretaker_core_planet_take_over_failed          : Shows that the Caretaker failed to take over the core planet
+# - mem_caretaker_hub_planet_take_over_attempt          : Shows that the Caretaker is in process of trying to take over a hub planet
+# - mem_caretaker_hub_planet_take_over_success          : Shows that the Caretaker successfully managed to take over a hub planet
+# - mem_caretaker_hub_planet_take_over_failed           : Shows that the Caretaker failed to take over a hub planet
+#
+# - mem_caretaker_hub_hack_preserved                    : It was decided to preserve the changes to the Caretaker Hub made by the hacker
+############################################################################################################
+# Setup / Initialization Events
+############################################################################################################
+# mem_caretaker_origin_event.1      | Game start setup / rolls event chains / initializes mem_caretaker systems
+# mem_caretaker_origin_event.3      | Civic selection event (player chooses mem_caretaker-related civic)
+# mem_caretaker_origin_event.4      | Care Crusade civic picked → mood increase
+# mem_caretaker_origin_event.5      | Caretaker very happy → gives tech reward
+############################################################################################################
+# Planet Ownership / Deposit Handling
+############################################################################################################
+# mem_caretaker_origin_event.10     | Remove mem_caretaker deposits if non-mem_caretaker takes colony
+# mem_caretaker_origin_event.20     | Caretaker empire takes colony → manage hub construction / cleanup
+# mem_caretaker_origin_event.50     | Colony becomes ownerless → cleanup mem_caretaker stuff
+############################################################################################################
+# Mood System / Ascension Perks
+############################################################################################################
+# mem_caretaker_origin_event.501    | Checks ascension perks → triggers mood reactions
+# mem_caretaker_origin_event.502    | Checks traditions → triggers mood reactions
+############################################################################################################
+# Negative Reactions (Angry Events)
+############################################################################################################
+# mem_caretaker_origin_event.510    | Angry about Xeno-Compatibility
+# mem_caretaker_origin_event.511    | Angry about Nihilistic Acquisition
+# mem_caretaker_origin_event.512    | Angry about The Flesh Is Weak
+# mem_caretaker_origin_event.513    | Angry about Mind Over Matter
+# mem_caretaker_origin_event.514    | Angry about Engineered Evolution
+# mem_caretaker_origin_event.515    | Angry about Synthetic Evolution
+# mem_caretaker_origin_event.516    | Angry about Transcendence
+# mem_caretaker_origin_event.517    | Angry about Evolutionary Mastery
+############################################################################################################
+# Positive Reactions (Praise Events)
+############################################################################################################
+# mem_caretaker_origin_event.520    | Praise for Eternal Vigilance
+# mem_caretaker_origin_event.521    | Praise for One Vision
+# mem_caretaker_origin_event.522    | Praise for Enigmatic Engineering
+# mem_caretaker_origin_event.523    | Praise for Defender of the Galaxy
+# mem_caretaker_origin_event.524    | Praise for Personal Care (special follow-up event)
+# mem_caretaker_origin_event.525    | Praise for mem_monitor Directive
+############################################################################################################
+# Caretaker Hub / Colony Management
+############################################################################################################
+# mem_caretaker_origin_event.1100   | Intro event explaining mem_caretaker hubs / policy choice
+# mem_caretaker_origin_event.1110   | Gate check for new colony → schedule hub reminder
+# mem_caretaker_origin_event.1111   | Colony check → remind to build hub
+# mem_caretaker_origin_event.1120   | No hub after time → mood penalty
+# mem_caretaker_origin_event.1121   | Explanation event about missing hubs penalty
+############################################################################################################
+# Building Interaction Events
+############################################################################################################
+# mem_caretaker_origin_event.1200   | Built/upgraded mem_monitor station → happier
+# mem_caretaker_origin_event.1210   | Removed mem_monitor station → angrier
+# mem_caretaker_origin_event.1220   | Built medical/cloning buildings → angrier (+ rare follow-up event)
+# mem_caretaker_origin_event.1230   | Removed medical/cloning buildings → happier
+############################################################################################################
+# Technology Reaction Events
+############################################################################################################
+# mem_caretaker_origin_event.1300   | Basic bio/health tech → angrier
+# mem_caretaker_origin_event.1310   | Advanced gene tech → angrier
+# mem_caretaker_origin_event.1320   | Robot/synthetic tech (non-drone civic) → angrier
+############################################################################################################
+# Glitch Event Chain
+############################################################################################################
+# mem_caretaker_origin_event.2000   | Glitch chain gate / periodic check
+# mem_caretaker_origin_event.2001   | Select target planet for disappearing pops
+# mem_caretaker_origin_event.2010   | Kill xeno pop
+# mem_caretaker_origin_event.2011   | Replace xeno with native pop
+# mem_caretaker_origin_event.2012   | Notify player of strange replacement
+# mem_caretaker_origin_event.2020   | Kill native pop
+# mem_caretaker_origin_event.2021   | Notify player of missing natives
+# mem_caretaker_origin_event.2030   | Caretaker contacts player about glitch (decision point)
+# mem_caretaker_origin_event.2031   | Determine success/failure of fix
+# mem_caretaker_origin_event.2032   | Glitch fixed successfully (reward)
+# mem_caretaker_origin_event.2033   | Glitch fix failed (negative outcome / continues chain)
+# mem_caretaker_origin_event.2100   | Repeating glitch trigger → selects planet and schedules pop kill
+# mem_caretaker_origin_event.2101   | Glitch event → kills random non-robot pop on planet
+############################################################################################################
+# Abandoned Vault Event Chain
+############################################################################################################
+# mem_caretaker_origin_event.2500   | Gate event → delays and schedules vault discovery
+# mem_caretaker_origin_event.2501   | Vault discovered → player chooses to investigate or ignore
+# mem_caretaker_origin_event.2502   | Caretaker reacts to investigation decision
+# mem_caretaker_origin_event.2503   | Entered the vault / initial exploration
+# mem_caretaker_origin_event.2504   | Attempt to download vault data → mem_caretaker reacts
+# mem_caretaker_origin_event.2505   | Data analysis completed → rewards + follow-up
+# mem_caretaker_origin_event.2506   | Caretaker explains vault data / lore event
+############################################################################################################
+# Hacked Hub Event Chain
+############################################################################################################
+# mem_caretaker_origin_event.2608   | Caretaker notices third hack (variant A)
+# mem_caretaker_origin_event.2609   | Caretaker notices third hack (variant B)
+# mem_caretaker_origin_event.2610   | Hacker discovered / confrontation event
+############################################################################################################
+# Downshifters Event Chain
+############################################################################################################
+# mem_caretaker_origin_event.2700   | Gate event → schedules downshifter chain
+# mem_caretaker_origin_event.2703   | Free settlers situation → multiple resolution options
+# mem_caretaker_origin_event.2704   | Attempt to convince settlers fails (branch event)
+# mem_caretaker_origin_event.2710   | Force settlers to return (follow-up)
+# mem_caretaker_origin_event.2712   | Caretaker gone → settlers revealed / outcome
+############################################################################################################
+# Hidden Building Events
+############################################################################################################
+# mem_caretaker_origin_event.20800  | event from cloning vats (mem_caretaker “ate a building” variant)
+# mem_caretaker_origin_event.20900  | event from medical buildings (mem_caretaker “ate a building” variant)
+############################################################################################################
+# Secession / Endgame Chain
+############################################################################################################
+# mem_caretaker_origin_event.3010   | Caretaker offers another chance (diplomatic event)
+# mem_caretaker_origin_event.3011   | Caretaker decides to break away regardless
+# mem_caretaker_origin_event.3100   | Creates independent Caretaker empire (secession outcome)
+############################################################################################################
+# Diplomatic Requests (Post-Secession Interaction)
+############################################################################################################
+# mem_caretaker_origin_event.3200   | Caretaker asks for pops to join its empire (resettlement request)
+# mem_caretaker_origin_event.3201   | Caretaker asks for energy + alloys
+# mem_caretaker_origin_event.3202   | Caretaker asks for food
+# mem_caretaker_origin_event.3203   | Caretaker pays back food with energy + minerals
+# mem_caretaker_origin_event.3250   | Caretaker forcibly steals pops
+# mem_caretaker_origin_event.3251   | Caretaker steals energy + minerals
+# mem_caretaker_origin_event.3252   | Caretaker steals a fleet
+############################################################################################################
+# Exterminatus Mode – Start
+############################################################################################################
+# mem_caretaker_origin_event.4000   | Caretaker goes rogue / exterminatus mode begins
+# mem_caretaker_origin_event.4001   | Warning event → imminent attack on core world
+# mem_caretaker_origin_event.4002   | Spawns robotic armies on core planet (initial invasion)
+############################################################################################################
+# Core World Battle Outcomes
+############################################################################################################
+# mem_caretaker_origin_event.4010   | Player wins defense of core world (Caretaker assault fails)
+# mem_caretaker_origin_event.4020   | Caretaker wins → captures core world and begins purge
+# mem_caretaker_origin_event.4030   | Player retakes core world from Caretaker
+# mem_caretaker_origin_event.4040   | Third party liberates a Caretaker-occupied world
+############################################################################################################
+# Exterminatus Expansion (Hub Worlds)
+############################################################################################################
+# mem_caretaker_origin_event.4100   | Triggers attacks on all hub worlds
+# mem_caretaker_origin_event.4101   | Spawns robotic armies on hub planets
+# mem_caretaker_origin_event.4102   | Tracks occupation progress / destroys faction when defeated
+############################################################################################################
+# Hub World Battle Outcomes
+############################################################################################################
+# mem_caretaker_origin_event.4110   | Player wins defense of hub world
+# mem_caretaker_origin_event.4120   | Caretaker wins → captures hub world and purges pops
+# mem_caretaker_origin_event.4130   | Player retakes hub world
+############################################################################################################
+# Destroyed Core Investigation Chain
+############################################################################################################
+# mem_caretaker_origin_event.4200   | Start investigation of destroyed Caretaker core (phase 1)
+# mem_caretaker_origin_event.4201   | Continue investigation (phase 2)
+# mem_caretaker_origin_event.4202   | Final investigation phase (phase 3)
+# mem_caretaker_origin_event.4203   | Reveal “awful truth” + choose path (cure, ignore, etc.)
+############################################################################################################
+# Cure Paths / Follow-up Systems
+############################################################################################################
+# mem_caretaker_origin_event.4204   | Psionic cure delay watcher (wait for shroud access)
+# mem_caretaker_origin_event.4205   | Psionic cure project becomes available
+# mem_caretaker_origin_event.4300   | Sterility cured via biological ascension
+# mem_caretaker_origin_event.4310   | Sterility cured via psionic ascension
+# mem_caretaker_origin_event.4320   | Contact Xenophile Fallen Empire for cure
+# mem_caretaker_origin_event.4321   | Fallen Empire delivers cure
+# mem_caretaker_origin_event.4322   | Establish communications with Fallen Empire
+# mem_caretaker_origin_event.4323   | Notification of new communications
+# mem_caretaker_origin_event.4324   | Fallen Empire offers cure after contact
+# mem_caretaker_origin_event.4330   | Removes sterility trait and applies cured version to species
+## ##################################################### ##
+##        Additional empire set up on game start         ##
+## ##################################################### ##
+### on game start : on homeworld : remove slums tile blocker and give pop
+country_event = {
+	id = mem_caretaker_origin_event.1
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+	}
+	immediate = {
+		# capital_scope = {
+		# 	# add modifier to show that we're about to start
+		# 	add_modifier = {
+		# 		modifier = pm_mem_caretaker_core_restarting
+		# 		days = -1
+		# 	}
+		# 	# save current planet as target for mem_caretaker core updates
+		# 	save_global_event_target_as = mem_caretaker_core_planet@root
+		# }
+		# base mem_caretaker mood = country_level variable
+		# set_variable = {
+		# 	which = mem_caretaker_mood
+		# 	value = 0
+		# }
+		# # keep track of the number of migration treaties
+		# set_variable = {
+		# 	which = migration_treaties
+		# 	value = 0
+		# }
+		set_country_flag = suppress_vanilla_factions
+		# roll for the glitch event chain
+		random_list = {
+			50 = {
+			}
+			50 = {
+				set_country_flag = mem_caretaker_killer_glitch
+				country_event = {
+					id = mem_caretaker_origin_event.2000
+					days = 18000
+				}
+				# 50 years
+			}
+		}
+		# roll for the abandoned vault event 'chain'
+		random_list = {
+			50 = {
+			}
+			50 = {
+				set_country_flag = mem_caretaker_abandoned_vault
+				# this event chain is triggered at mid-game so no need to explicitly call an event on delay here
+			}
+		}
+		# roll for the hacked Caretaker hub event 'chain'
+		random_list = {
+			50 = {
+			}
+			50 = {
+				set_country_flag = mem_caretaker_hacked_hub
+				country_event = {
+					id = mem_caretaker_origin_event.2600
+					days = 11000
+				}
+				# ~30 years
+			}
+		}
+		# roll for the downshifters event 'chain'
+		random_list = {
+			50 = {
+			}
+			50 = {
+				set_country_flag = mem_caretaker_downshifters
+				country_event = {
+					id = mem_caretaker_origin_event.2700
+					days = 9000
+				}
+				# ~25 years
+			}
+		}
+		# start mood 
+		start_situation = {
+			type = mem_caretaker_mood_situation
+			target = root
+		}
+		# give bonus techs etc from civics
+		# tooltip
+		# give_technology = {
+		# 	message = no
+		# 	tech = tech_planetary_unification
+		# }
+		# country_event = {
+		# 	id = mem_caretaker_origin_event.21000
+		# }
+		set_policy = {
+			policy = mem_caretaker_policy
+			option = mem_caretaker_policy_ignore
+		}
+		country_event = {
+			id = mem_caretaker_origin_event.1100
+			days = 30
+		}
+		capital_scope = {
+			while = {
+				count = 4
+				create_pop = {
+					species = ROOT
+				}
+			}
+			add_zone = {
+				district = 0
+				zone = zone_mem_caretaker_ward
+				zone_slot = 1
+				replace = yes
+			}
+			add_building = {
+				district = district_city
+				zone = zone_mem_caretaker_ward
+				building = building_mem_caretaker_outreach
+			}
+			add_building = {
+				district = district_city
+				zone = zone_mem_caretaker_ward
+				building = building_mem_monitor_station_1
+			}
+			while = {
+				count = 2
+				add_district = district_city
+			}
+			while = {
+				count = 3
+				add_building = building_research_lab_1
+			}
+			remove_building = building_medical_1
+			remove_building = building_precinct_house
+			solar_system = {
+				starbase = {
+					set_starbase_building = {
+						slot = 1
+						building = mem_caretaker_node
+					}
+				}
+			}
+		}
+		#	if = {
+		#		limit = { has_civic = civic_mem_care_crusade }
+		#		give_technology = { message = no tech = tech_centralized_command }
+		#	}
+		# event with civic choice
+		# if = {
+		# 	limit = {
+		# 		has_civic = civic_mem_love_the_alien
+		# 	}
+		# 	give_technology = {
+		# 		message = no
+		# 		tech = tech_neural_implants
+		# 	}
+		# }
+		### add the Caretaker Core with a 1 day delay to avoid other mods deleting it at the game start
+		# country_event = {
+		# 	id = mem_caretaker_origin_event.2
+		# 	days = 1
+		# }
+	}
+}
+
+### Pick a civic event
+# 
+country_event = {
+	id = mem_caretaker_origin_event.3
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.3.name
+	desc = mem_caretaker_origin_event.3.desc
+	picture = GFX_evt_mem_caretaker_pleased
+	trigger = {
+		has_origin = origin_mem_caretaker
+	}
+	option = {
+		name = mem_caretaker_origin_event.3.option.b
+		hidden_effect = {
+			force_add_civic = civic_memmonitor_cult
+		}
+		custom_tooltip = mem_caretaker_origin_event.3.option.b.tt
+	}
+	option = {
+		name = mem_caretaker_origin_event.3.option.a
+		trigger = {
+			OR = {
+				is_militarist = yes
+				is_xenophobe = yes
+			}
+		}
+		hidden_effect = {
+			force_add_civic = civic_mem_care_crusade
+		}
+		custom_tooltip = mem_caretaker_origin_event.3.option.a.tt
+		give_technology = {
+			tech = tech_centralized_command
+		}
+		# mem_caretaker_change_mood = {
+		# 	VALUE = 4
+		# }
+	}
+	option = {
+		name = mem_caretaker_origin_event.3.option.c
+		trigger = {
+			OR = {
+				is_egalitarian = yes
+				is_xenophile = yes
+			}
+		}
+		hidden_effect = {
+			force_add_civic = civic_mem_one_big_family
+		}
+		give_technology = {
+			tech = tech_resort_colonies
+			message = no
+		}
+		custom_tooltip = mem_caretaker_origin_event.3.option.c.tt
+	}
+	option = {
+		name = mem_caretaker_origin_event.3.option.d
+		trigger = {
+			OR = {
+				is_pacifist = yes
+				is_xenophile = yes
+			}
+		}
+		hidden_effect = {
+			force_add_civic = civic_mem_protected
+		}
+		custom_tooltip = mem_caretaker_origin_event.3.option.d.tt
+	}
+	option = {
+		name = mem_caretaker_origin_event.3.option.e
+		trigger = {
+			is_materialist = yes
+		}
+		give_technology = {
+			tech = tech_robotic_workers
+		}
+		custom_tooltip = mem_caretaker_origin_event.3.option.e.tt
+		hidden_effect = {
+			force_add_civic = civic_mem_drone_culture
+			create_species = {
+				name = "Caretaker Drone"
+				plural = "Caretaker Drones"
+				class = MACHINE
+				# portrait = random
+				homeworld = root.capital_scope
+				traits = {
+					trait = trait_mechanical
+					trait = trait_robot_mem_caretaker_directives
+				}
+				# sapient = yes/no, determines if species is sapient (default: yes)
+				is_mod = no
+				immortal = no
+				gender = not_set
+				namelist = root
+				effect = {
+					save_event_target_as = mem_caretaker_drones
+				}
+			}
+			capital_scope = {
+				create_pop = {
+					species = event_target:mem_caretaker_drones
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.3.option.f
+		trigger = {
+			OR = {
+				is_authoritarian = yes
+				is_xenophobe = yes
+			}
+		}
+		hidden_effect = {
+			force_add_civic = civic_mem_love_the_alien
+		}
+		custom_tooltip = mem_caretaker_origin_event.3.option.f.tt
+		give_technology = {
+			message = no
+			tech = tech_neural_implants
+		}
+	}
+	after = {
+		custom_tooltip = mem_caretaker_origin_event.3.unlock_councilor_tt
+	}
+}
+
+# Care crusade civic - on action
+country_event = {
+	id = mem_caretaker_origin_event.4
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_valid_civic = civic_mem_care_crusade
+	}
+	immediate = {
+		mem_caretaker_change_mood = {
+			VALUE = 12
+		}
+	}
+}
+
+# you made him very happy, get tech
+country_event = {
+	id = mem_caretaker_origin_event.5
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.5.name
+	desc = mem_caretaker_origin_event.5.desc
+	picture = GFX_evt_mem_caretaker_pleased
+	trigger = {
+		has_origin = origin_mem_caretaker
+	}
+	option = {
+		name = mem_caretaker_origin_event.5.option.a
+		add_research_option = tech_mem_caretaker_observatory
+		give_technology = {
+			tech = mem_caretaker_tech_combat_computers
+		}
+	}
+}
+
+## ##################################################### ##
+## Managing Caretaker deposits when planet change owners ##
+## ##################################################### ##
+## if colony with mem_caretaker deposit changes owner, remove it
+planet_event = {
+	id = mem_caretaker_origin_event.10
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		mem_caretaker_presence_on_planet = yes
+		FROM = {
+			NOT = {
+				has_origin = origin_mem_caretaker
+			}
+		}
+	}
+	immediate = {
+		mem_caretaker_hub_clean_up = yes
+		remove_modifier = mem_caretaker_hacked_hub_1
+		remove_modifier = mem_caretaker_hacked_hub_2
+		remove_modifier = mem_caretaker_hacked_hub_3a
+		remove_modifier = mem_caretaker_hacked_hub_3b
+		remove_deposit = d_mem_caretaker_free_settlements
+		remove_modifier = pm_mem_caretaker_free_settler_discord
+	}
+}
+
+### empire with mem_caretaker origin takes over a colony of someone else : schedule mem_caretaker hub construction events
+planet_event = {
+	id = mem_caretaker_origin_event.20
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		FROM = {
+			has_origin = origin_mem_caretaker
+		}
+	}
+	immediate = {
+		# country has active mem_caretaker
+		if = {
+			limit = {
+				FROM = {
+					mem_caretaker_tech_access = yes
+				}
+			}
+			# planet doesn't have mem_caretaker core -> schedule event for checking if the core was built
+			if = {
+				limit = {
+					NOT = {
+						has_building = building_mem_caretaker_outreach
+					}
+				}
+				planet_event = {
+					id = mem_caretaker_origin_event.1110
+					days = 360
+				}
+				planet_event = {
+					id = mem_caretaker_origin_event.1120
+					days = 720
+				}
+			}
+			remove_deposit = d_mem_caretaker_free_settlements
+			remove_modifier = pm_mem_caretaker_free_settler_discord
+		}
+		# country doesn't have active mem_caretaker anymore
+		else = {
+			mem_caretaker_hub_clean_up = yes
+			remove_deposit = d_mem_caretaker_free_settlements
+			remove_modifier = pm_mem_caretaker_free_settler_discord
+		}
+		# break event chain from another country's mem_caretaker : hacked hub
+		if = {
+			limit = {
+				or = {
+					has_modifier = mem_caretaker_hacked_hub_1
+					has_modifier = mem_caretaker_hacked_hub_2
+					has_modifier = mem_caretaker_hacked_hub_3a
+					has_modifier = mem_caretaker_hacked_hub_3b
+				}
+				NOT = {
+					has_planet_flag = mem_caretaker_hub_hack_preserved
+				}
+				exists = event_target:mem_caretaker_hacked_hub_planet@root
+				NOT = {
+					is_planet = event_target:mem_caretaker_hacked_hub_planet@root
+				}
+			}
+			remove_modifier = mem_caretaker_hacked_hub_1
+			remove_modifier = mem_caretaker_hacked_hub_2
+			remove_modifier = mem_caretaker_hacked_hub_3a
+			remove_modifier = mem_caretaker_hacked_hub_3b
+		}
+	}
+}
+
+### if colony with a mem_caretaker deposit for some reason falls ownerless
+planet_event = {
+	id = mem_caretaker_origin_event.50
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		mem_caretaker_presence_on_planet = yes
+	}
+	immediate = {
+		mem_caretaker_hub_clean_up = yes
+		remove_modifier = mem_caretaker_hacked_hub_1
+		remove_modifier = mem_caretaker_hacked_hub_2
+		remove_modifier = mem_caretaker_hacked_hub_3a
+		remove_modifier = mem_caretaker_hacked_hub_3b
+		remove_deposit = d_mem_caretaker_free_settlements
+		remove_modifier = pm_mem_caretaker_free_settler_discord
+	}
+}
+
+## ##################################################### ##
+##               Updating mem_caretaker's mood               ##
+## ##################################################### ##
+# on AP picked, new mood update
+country_event = {
+	id = mem_caretaker_origin_event.501
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		NOT = {
+			has_country_flag = mem_caretaker_break_up
+		}
+	}
+	immediate = {
+		### update mood if empire took 'Xeno-Compatilibility' AP
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = mem_caretaker_ap_xenocompatilibility_logged
+				}
+				has_ascension_perk = ap_xeno_compatibility
+			}
+			set_country_flag = mem_caretaker_ap_xenocompatilibility_logged
+			country_event = {
+				id = mem_caretaker_origin_event.510
+				days = 2
+				random = 3
+			}
+		}
+		### update mood if empire took 'Nihilistic Acquisition' AP
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = mem_caretaker_ap_nihilistic_acquisition_logged
+				}
+				has_ascension_perk = ap_nihilistic_acquisition
+			}
+			set_country_flag = mem_caretaker_ap_nihilistic_acquisition_logged
+			country_event = {
+				id = mem_caretaker_origin_event.511
+				days = 2
+				random = 3
+			}
+		}
+		### update mood if empire took 'The Flesh Is Weak' AP
+		# cyborg we love to see it
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = mem_caretaker_ap_flesh_is_weak_logged
+				}
+				has_ascension_perk = ap_the_flesh_is_weak
+			}
+			set_country_flag = mem_caretaker_ap_flesh_is_weak_logged
+			country_event = {
+				id = mem_caretaker_origin_event.512
+				days = 2
+				random = 3
+			}
+		}
+		### update mood if empire took 'Mind Over Matter' AP
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = mem_caretaker_ap_mind_over_matter_logged
+				}
+				has_ascension_perk = ap_mind_over_matter
+			}
+			set_country_flag = mem_caretaker_ap_mind_over_matter_logged
+			country_event = {
+				id = mem_caretaker_origin_event.513
+				days = 2
+				random = 3
+			}
+		}
+		### update mood if empire took 'Engineered Evolution' AP
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = mem_caretaker_ap_engineered_evolution_logged
+				}
+				has_ascension_perk = ap_engineered_evolution
+			}
+			set_country_flag = mem_caretaker_ap_engineered_evolution_logged
+			country_event = {
+				id = mem_caretaker_origin_event.514
+				days = 2
+				random = 3
+			}
+		}
+		### update mood if empire took 'Synthetic Evolution' AP
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = mem_caretaker_ap_synthetic_evolution_logged
+				}
+				has_ascension_perk = ap_synthetic_evolution
+			}
+			set_country_flag = mem_caretaker_ap_synthetic_evolution_logged
+			country_event = {
+				id = mem_caretaker_origin_event.515
+				days = 2
+				random = 3
+			}
+		}
+		### update mood if empire took 'Eternal Vigilance' AP
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = mem_caretaker_ap_eternal_vigilance_logged
+				}
+				has_ascension_perk = ap_eternal_vigilance
+			}
+			set_country_flag = mem_caretaker_ap_eternal_vigilance_logged
+			country_event = {
+				id = mem_caretaker_origin_event.520
+				days = 2
+				random = 3
+			}
+		}
+		### update mood if empire took 'One Vision' AP
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = mem_caretaker_ap_one_vision_logged
+				}
+				has_ascension_perk = ap_one_vision
+			}
+			set_country_flag = mem_caretaker_ap_one_vision_logged
+			country_event = {
+				id = mem_caretaker_origin_event.521
+				days = 2
+				random = 3
+			}
+		}
+		### update mood if empire took 'Enigmatic Engineering' AP
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = mem_caretaker_ap_enigmatic_engineering_logged
+				}
+				has_ascension_perk = ap_enigmatic_engineering
+			}
+			set_country_flag = mem_caretaker_ap_enigmatic_engineering_logged
+			country_event = {
+				id = mem_caretaker_origin_event.522
+				days = 2
+				random = 3
+			}
+		}
+		### update mood if empire took 'Defender of the Galaxy' AP
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = mem_caretaker_ap_defender_of_the_galaxy_logged
+				}
+				has_ascension_perk = ap_defender_of_the_galaxy
+			}
+			set_country_flag = mem_caretaker_ap_defender_of_the_galaxy_logged
+			country_event = {
+				id = mem_caretaker_origin_event.523
+				days = 2
+				random = 3
+			}
+		}
+		# find ways to have this still around
+		# ### update mood if empire took 'Personal Care' AP
+		# if = {
+		# 	limit = {
+		# 		NOT = {
+		# 			has_country_flag = mem_caretaker_ap_personal_care_logged
+		# 		}
+		# 		has_ascension_perk = ap_mem_caretaker_personal_care
+		# 	}
+		# 	set_country_flag = mem_caretaker_ap_personal_care_logged
+		# 	change_variable = {
+		# 		which = mem_caretaker_mood
+		# 		value = 20				# FIXME
+		# 	}
+		# 	country_event = {
+		# 		id = mem_caretaker_origin_event.524
+		# 		days = 2
+		# 		random = 3
+		# 	}
+		# }
+		# ### update mood if empire took 'mem_monitor Directive' AP
+		# if = {
+		# 	limit = {
+		# 		NOT = {
+		# 			has_country_flag = mem_caretaker_ap_mem_monitor_directive_logged
+		# 		}
+		# 		has_ascension_perk = ap_mem_caretaker_mem_monitor_control
+		# 	}
+		# 	set_country_flag = mem_caretaker_ap_mem_monitor_directive_logged
+		# 	change_variable = {
+		# 		which = mem_caretaker_mood
+		# 		value = 60				# FIXME
+		# 	}
+		# 	country_event = {
+		# 		id = mem_caretaker_origin_event.525
+		# 		days = 2
+		# 		random = 3
+		# 	}
+		# }
+	}
+}
+
+# on actions for traditions picks
+country_event = {
+	id = mem_caretaker_origin_event.502
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		NOT = {
+			has_country_flag = mem_caretaker_break_up
+		}
+	}
+	immediate = {
+		### update mood if empire took 'Expansion : A new life' tradition
+		# This doesnt give pops anymore
+		# if = {
+		# 	limit = {
+		# 		NOT = {
+		# 			has_country_flag = mem_caretaker_tr_a_new_life_logged
+		# 		}
+		# 		has_tradition = tr_expansion_a_new_life
+		# 	}
+		# 	set_country_flag = mem_caretaker_tr_a_new_life_logged
+		# 	change_variable = {
+		# 		which = mem_caretaker_mood
+		# 		value = -2				# FIXME
+		# 	}
+		# }
+		### update mood if empire took 'Synthetic Evolution' AP
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = mem_caretaker_ap_synthetic_evolution_logged_tradition
+				}
+				OR = {
+					any_situation = {
+						is_situation_type = situation_digitization
+					}
+					has_tradition = tr_synthetics_maintenance_protocols
+				}
+			}
+			set_country_flag = mem_caretaker_ap_synthetic_evolution_logged_tradition
+			country_event = {
+				id = mem_caretaker_origin_event.515
+				days = 2
+				random = 3
+			}
+		}
+		### update mood if empire took 'Transcendence' AP
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = mem_caretaker_ap_transcendence_logged
+				}
+				OR = {
+					has_tradition = tr_psionics_breach_shroud
+					has_tradition = tr_psionics_shroud_finish
+				}
+			}
+			set_country_flag = mem_caretaker_ap_transcendence_logged
+			country_event = {
+				id = mem_caretaker_origin_event.516
+				days = 2
+				random = 3
+			}
+		}
+		### update mood if empire took 'Evolutionary Mastery' AP
+		if = {
+			limit = {
+				NOT = {
+					has_country_flag = mem_caretaker_ap_evolutionary_master_logged
+				}
+				OR = {
+					any_situation = {
+						is_situation_type = genetic_ascension_situation
+					}
+					has_tradition = tr_genetics_efficient_cloning					# non dlc tradition lol
+					has_tradition = tr_cloning_stage_1_swap
+					has_tradition = tr_purity_stage_3_swap
+					has_tradition = tr_mutation_stage_2_swap
+				}
+			}
+			set_country_flag = mem_caretaker_ap_evolutionary_master_logged
+			country_event = {
+				id = mem_caretaker_origin_event.517
+				days = 2
+				random = 3
+			}
+		}
+	}
+}
+
+# mem_caretaker is gone, what do we do with our order
+country_event = {
+	id = mem_caretaker_origin_event.509
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.509.name
+	desc = mem_caretaker_origin_event.509.desc
+	picture = GFX_evt_announcement
+	trigger = {
+		has_origin = origin_mem_caretaker
+	}
+	immediate = {
+		random_owned_megastructure = {
+			limit = {
+				OR = {
+					is_megastructure_type = mem_caretaker_observatory_0
+					is_megastructure_type = mem_caretaker_observatory_1
+					is_megastructure_type = mem_caretaker_observatory_2
+					is_megastructure_type = mem_caretaker_observatory_3
+					is_megastructure_type = mem_caretaker_observatory_4
+				}
+			}
+			save_event_target_as = mem_caretaker_observatory
+		}
+		# random_pop_faction = {
+		# 	limit = {
+		# 		is_pop_faction_type = mem_monitororder
+		# 	}
+		# 	save_event_target_as = mem_caretaker_order_faction
+		# }
+		# random_pop_faction = {
+		# 	limit = {
+		# 		is_pop_faction_type = independencemovement
+		# 	}
+		# 	save_event_target_as = mem_caretaker_rebel_faction
+		# }
+	}
+	# abolish it
+	option = {
+		name = mem_caretaker_origin_event.509.option.a
+		custom_tooltip = mem_caretaker_origin_event.509.option.a.tt
+		trigger = {
+			is_authoritarian = no
+		}
+		add_modifier = {
+			modifier = mem_caretaker_free_from_oppression
+			days = 7200
+		}
+		hidden_effect = {
+			remove_country_flag = suppress_vanilla_factions
+			set_country_flag = mem_caretaker_break_up			# just to make sure
+		}
+	}
+	# abolish it
+	option = {
+		name = mem_caretaker_origin_event.509.option.c
+		custom_tooltip = mem_caretaker_origin_event.509.option.a.tt
+		trigger = {
+			is_authoritarian = yes
+		}
+		add_modifier = {
+			modifier = mem_caretaker_free_from_oppression
+			days = 7200
+		}
+		hidden_effect = {
+			remove_country_flag = suppress_vanilla_factions
+		}
+	}
+	# reform it
+	option = {
+		name = mem_caretaker_origin_event.509.option.b
+		custom_tooltip = mem_caretaker_origin_event.509.option.b.tt
+		hidden_effect = {
+			set_country_flag = mem_caretaker_reformed_mem_monitor_order
+		}
+		add_modifier = {
+			modifier = mem_caretaker_unwelcome_changes
+			days = 3600
+		}
+		if = {
+			limit = {
+				exists = event_target:mem_caretaker_observatory
+			}
+			event_target:mem_caretaker_observatory = {
+				set_name = "Eye of the Watch"
+			}
+		}
+	}
+	after = {
+		hidden_effect = {
+			set_country_flag = mem_caretaker_break_up			# just to make sure
+		}
+	}
+}
+
+## ##################################################### ##
+##      Strongly-worded letters for taking 'bad' AP      ##
+## ##################################################### ##
+### Angry message from the Caretaker for taking 'Xeno-Compatilibility' AP
+country_event = {
+	id = mem_caretaker_origin_event.510
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.510.name
+	desc = mem_caretaker_origin_event.510.desc
+	picture = GFX_evt_mem_caretaker_annoyed
+	trigger = {
+		is_ai = no
+		has_origin = origin_mem_caretaker
+	}
+	option = {
+		name = mem_caretaker_origin_event.510.option.a
+		mem_caretaker_change_mood = {
+			VALUE = 4
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.510.option.b
+		mem_caretaker_change_mood = {
+			VALUE = -7
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.510.option.c
+		trigger = {
+			OR = {
+				has_ethic = ethic_xenophile
+				has_ethic = ethic_fanatic_xenophile
+			}
+		}
+		mem_caretaker_change_mood = {
+			VALUE = -7
+		}
+	}
+	# option = {
+	#     name = mem_caretaker_origin_event.510.option.d
+	#     hidden_effect = {
+	#         change_variable = {
+	#             which = mem_caretaker_mood
+	#             value = -2 # FIXME?
+	#         }
+	#     }
+	# }
+}
+
+### Angry message from the Caretaker for taking 'Nihilistic Acquisition' AP
+country_event = {
+	id = mem_caretaker_origin_event.511
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.511.name
+	desc = mem_caretaker_origin_event.511.desc
+	picture = GFX_evt_mem_caretaker_annoyed
+	trigger = {
+		is_ai = no
+		has_origin = origin_mem_caretaker
+	}
+	option = {
+		name = mem_caretaker_origin_event.511.option.a
+		mem_caretaker_change_mood = {
+			VALUE = -7
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.511.option.b
+		mem_caretaker_change_mood = {
+			VALUE = -10
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.511.option.c
+		trigger = {
+			OR = {
+				has_ethic = ethic_authoritarian
+				has_ethic = ethic_fanatic_authoritarian
+			}
+		}
+		mem_caretaker_change_mood = {
+			VALUE = -9
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.511.option.d
+		trigger = {
+			OR = {
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
+		mem_caretaker_change_mood = {
+			VALUE = -10
+		}
+	}
+}
+
+### Angry message from the Caretaker for taking 'The Flesh Is Weak' AP
+# new option to explain why you did this in faith of coming closer
+country_event = {
+	id = mem_caretaker_origin_event.512
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.512.name
+	desc = mem_caretaker_origin_event.512.desc
+	picture = GFX_evt_mem_caretaker_annoyed
+	trigger = {
+		is_ai = no
+		has_origin = origin_mem_caretaker
+	}
+	option = {
+		name = mem_caretaker_origin_event.512.option.a
+		mem_caretaker_change_mood = {
+			VALUE = -24
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.512.option.b
+		mem_caretaker_change_mood = {
+			VALUE = -27
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.512.option.c
+		trigger = {
+			OR = {
+				has_ethic = ethic_materialist
+				has_ethic = ethic_fanatic_materialist
+			}
+		}
+		mem_caretaker_change_mood = {
+			VALUE = -27
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.512.option.d
+		trigger = {
+			has_origin = origin_mem_caretaker
+		}
+		mem_caretaker_change_mood = {
+			VALUE = 20
+		}
+		hidden_effect = {
+			country_event = {
+				id = mem_caretaker_origin_event.524
+				days = 2
+				random = 3
+			}
+		}
+	}
+}
+
+### Angry message from the Caretaker for taking 'Mind Over Matter' AP
+country_event = {
+	id = mem_caretaker_origin_event.513
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.513.name
+	desc = mem_caretaker_origin_event.513.desc
+	picture = GFX_evt_mem_caretaker_annoyed
+	trigger = {
+		is_ai = no
+		has_origin = origin_mem_caretaker
+	}
+	option = {
+		name = mem_caretaker_origin_event.513.option.a
+		mem_caretaker_change_mood = {
+			VALUE = -24
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.513.option.b
+		mem_caretaker_change_mood = {
+			VALUE = -27
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.513.option.c
+		trigger = {
+			OR = {
+				has_ethic = ethic_spiritualist
+				has_ethic = ethic_fanatic_spiritualist
+			}
+		}
+		mem_caretaker_change_mood = {
+			VALUE = -28
+		}
+	}
+}
+
+### Angry message from the Caretaker for taking 'Engineered Evolusion' AP
+country_event = {
+	id = mem_caretaker_origin_event.514
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.514.name
+	desc = mem_caretaker_origin_event.514.desc
+	picture = GFX_evt_mem_caretaker_annoyed
+	trigger = {
+		is_ai = no
+		has_origin = origin_mem_caretaker
+	}
+	option = {
+		name = mem_caretaker_origin_event.514.option.a
+		mem_caretaker_change_mood = {
+			VALUE = -24
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.514.option.b
+		mem_caretaker_change_mood = {
+			VALUE = -27
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.514.option.c
+		trigger = {
+			OR = {
+				has_ethic = ethic_materialist
+				has_ethic = ethic_fanatic_materialist
+			}
+		}
+		mem_caretaker_change_mood = {
+			VALUE = -28
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.514.option.d
+		trigger = {
+			OR = {
+				has_ethic = ethic_xenophile
+				has_ethic = ethic_fanatic_xenophile
+			}
+		}
+		mem_caretaker_change_mood = {
+			VALUE = -27
+		}
+	}
+}
+
+### Angry message from the Caretaker for taking 'Synthetic Evolution' AP
+# this is shown double 
+country_event = {
+	id = mem_caretaker_origin_event.515
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.515.name
+	desc = mem_caretaker_origin_event.515.desc
+	picture = GFX_evt_mem_caretaker_annoyed
+	trigger = {
+		is_ai = no
+		has_origin = origin_mem_caretaker
+	}
+	option = {
+		name = mem_caretaker_origin_event.515.option.a
+		trigger = {
+			NOT = {
+				has_country_flag = mem_caretaker_ap_synthetic_evolution_logged
+			}
+		}
+		mem_caretaker_change_mood = {
+			VALUE = -26
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.515.option.b
+		trigger = {
+			NOT = {
+				has_country_flag = mem_caretaker_ap_synthetic_evolution_logged
+			}
+		}
+		mem_caretaker_change_mood = {
+			VALUE = -27
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.515.option.c
+		trigger = {
+			NOT = {
+				has_country_flag = mem_caretaker_ap_synthetic_evolution_logged
+			}
+			OR = {
+				has_ethic = ethic_materialist
+				has_ethic = ethic_fanatic_materialist
+			}
+		}
+		mem_caretaker_change_mood = {
+			VALUE = -28
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.515.option.d
+		trigger = {
+			has_country_flag = mem_caretaker_ap_synthetic_evolution_logged
+		}
+		mem_caretaker_change_mood = {
+			VALUE = -250
+		}
+	}
+}
+
+### Angry message from the Caretaker for taking 'Transcendence' AP
+country_event = {
+	id = mem_caretaker_origin_event.516
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.516.name
+	desc = mem_caretaker_origin_event.516.desc
+	picture = GFX_evt_mem_caretaker_annoyed
+	trigger = {
+		is_ai = no
+		has_origin = origin_mem_caretaker
+	}
+	option = {
+		name = mem_caretaker_origin_event.516.option.a
+		mem_caretaker_change_mood = {
+			VALUE = -251
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.516.option.b
+		mem_caretaker_change_mood = {
+			VALUE = -252
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.516.option.c
+		trigger = {
+			OR = {
+				has_ethic = ethic_spiritualist
+				has_ethic = ethic_fanatic_spiritualist
+			}
+		}
+		mem_caretaker_change_mood = {
+			VALUE = -253
+		}
+	}
+}
+
+### Angry message from the Caretaker for taking 'Evolutionary Mastery' AP
+country_event = {
+	id = mem_caretaker_origin_event.517
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.517.name
+	desc = mem_caretaker_origin_event.517.desc
+	picture = GFX_evt_mem_caretaker_annoyed
+	trigger = {
+		is_ai = no
+		has_origin = origin_mem_caretaker
+	}
+	option = {
+		name = mem_caretaker_origin_event.517.option.a
+		mem_caretaker_change_mood = {
+			VALUE = -251
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.517.option.b
+		mem_caretaker_change_mood = {
+			VALUE = -252
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.517.option.c
+		trigger = {
+			OR = {
+				has_ethic = ethic_materialist
+				has_ethic = ethic_fanatic_materialist
+			}
+		}
+		mem_caretaker_change_mood = {
+			VALUE = -253
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.517.option.d
+		trigger = {
+			OR = {
+				has_ethic = ethic_xenophile
+				has_ethic = ethic_fanatic_xenophile
+			}
+		}
+		mem_caretaker_change_mood = {
+			VALUE = -252
+		}
+	}
+}
+
+## ##################################################### ##
+##        Caretaker praises for taking 'good' APs        ##
+## ##################################################### ##
+### Praise from the Caretaker for taking 'Eternal Vigilance' AP
+country_event = {
+	id = mem_caretaker_origin_event.520
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.520.name
+	desc = mem_caretaker_origin_event.520.desc
+	picture = GFX_evt_mem_caretaker_pleased
+	trigger = {
+		is_ai = no
+		has_origin = origin_mem_caretaker
+	}
+	option = {
+		name = mem_caretaker_origin_event.520.option.a
+		mem_caretaker_change_mood = {
+			VALUE = 5
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.520.option.b
+		trigger = {
+			OR = {
+				has_ethic = ethic_pacifist
+				has_ethic = ethic_fanatic_pacifist
+			}
+		}
+		mem_caretaker_change_mood = {
+			VALUE = 6
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.520.option.c
+		trigger = {
+			OR = {
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
+		mem_caretaker_change_mood = {
+			VALUE = 6
+		}
+	}
+}
+
+### Praise from the Caretaker for taking 'One Vision' AP
+country_event = {
+	id = mem_caretaker_origin_event.521
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.521.name
+	desc = mem_caretaker_origin_event.521.desc
+	picture = GFX_evt_mem_caretaker_pleased
+	trigger = {
+		is_ai = no
+		has_origin = origin_mem_caretaker
+	}
+	option = {
+		name = mem_caretaker_origin_event.521.option.a
+		mem_caretaker_change_mood = {
+			VALUE = 8
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.521.option.b
+		trigger = {
+			OR = {
+				has_ethic = ethic_authoritarian
+				has_ethic = ethic_fanatic_authoritarian
+			}
+		}
+		mem_caretaker_change_mood = {
+			VALUE = 9
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.521.option.c
+		trigger = {
+			OR = {
+				has_ethic = ethic_spiritualist
+				has_ethic = ethic_fanatic_spiritualist
+			}
+		}
+		mem_caretaker_change_mood = {
+			VALUE = 8
+		}
+	}
+}
+
+### Praise from the Caretaker for taking 'Enigmatic Engineering' AP
+country_event = {
+	id = mem_caretaker_origin_event.522
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.522.name
+	desc = mem_caretaker_origin_event.522.desc
+	picture = GFX_evt_mem_caretaker_pleased
+	trigger = {
+		is_ai = no
+		has_origin = origin_mem_caretaker
+	}
+	option = {
+		name = mem_caretaker_origin_event.522.option.a
+		mem_caretaker_change_mood = {
+			VALUE = 5
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.522.option.b
+		trigger = {
+			OR = {
+				has_ethic = ethic_materialist
+				has_ethic = ethic_fanatic_materialist
+			}
+		}
+		mem_caretaker_change_mood = {
+			VALUE = 5
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.522.option.c
+		trigger = {
+			OR = {
+				has_ethic = ethic_xenophobe
+				has_ethic = ethic_fanatic_xenophobe
+			}
+		}
+		mem_caretaker_change_mood = {
+			VALUE = 6
+		}
+	}
+}
+
+### Praise from the Caretaker for taking 'Defender of the Galaxy' AP
+country_event = {
+	id = mem_caretaker_origin_event.523
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.523.name
+	desc = mem_caretaker_origin_event.523.desc
+	picture = GFX_evt_mem_caretaker_pleased
+	trigger = {
+		is_ai = no
+		has_origin = origin_mem_caretaker
+	}
+	option = {
+		name = mem_caretaker_origin_event.523.option.a
+		mem_caretaker_change_mood = {
+			VALUE = 8
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.523.option.b
+		trigger = {
+			OR = {
+				has_ethic = ethic_militarist
+				has_ethic = ethic_fanatic_militarist
+			}
+		}
+		mem_caretaker_change_mood = {
+			VALUE = 9
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.523.option.c
+		trigger = {
+			OR = {
+				has_ethic = ethic_xenophile
+				has_ethic = ethic_fanatic_xenophile
+			}
+		}
+		mem_caretaker_change_mood = {
+			VALUE = 9
+		}
+	}
+}
+
+### Praise from the Caretaker for taking 'Personal Care' choice while ascending
+country_event = {
+	id = mem_caretaker_origin_event.524
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.524.name
+	desc = mem_caretaker_origin_event.524.desc
+	picture = GFX_evt_mem_caretaker_pleased
+	trigger = {
+		is_ai = no
+		has_origin = origin_mem_caretaker
+	}
+	option = {
+		name = mem_caretaker_origin_event.524.option.a
+		country_event = {
+			id = mem_caretaker_origin_event.23000
+		}
+	}
+}
+
+### Praise from the Caretaker for taking 'mem_monitor Directive' AP
+country_event = {
+	id = mem_caretaker_origin_event.525
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.525.name
+	desc = mem_caretaker_origin_event.525.desc
+	picture = GFX_evt_mem_caretaker_pleased
+	trigger = {
+		is_ai = no
+		has_origin = origin_mem_caretaker
+	}
+	option = {
+		name = mem_caretaker_origin_event.525.option.a
+	}
+}
+
+## ##################################################### ##
+##             Caretaker hubs on colonies                ##
+## ##################################################### ##
+### Done via policy unlock, remind user
+country_event = {
+	id = mem_caretaker_origin_event.1100
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.1100.name
+	desc = mem_caretaker_origin_event.1100.desc
+	picture = GFX_evt_mem_caretaker_content
+	#	trigger = {
+	# owner = {
+	# 	has_origin = origin_mem_caretaker
+	# 	NOR = {
+	# 		has_country_flag = mem_caretaker_break_up
+	# 		has_country_flag = mem_caretaker_secession
+	# 		has_country_flag = mem_caretaker_experiment_scrapped
+	# 	}
+	# }
+	# NOT = {
+	# }
+	# has_country_flag = mem_caretaker_hubs_on_colonies_explained
+	#}
+	# immediate = {
+	# 	owner = {
+	# 		set_country_flag = mem_caretaker_hubs_on_colonies_explained
+	# 	}
+	# }
+	option = {
+		name = mem_caretaker_origin_event.1100.option.a
+	}
+	option = {
+		name = mem_caretaker_origin_event.1100.option.b
+		set_policy = {
+			policy = mem_caretaker_policy
+			option = mem_caretaker_policy_assemble
+		}
+	}
+}
+
+### Gate event for checking that the new colony doesn't have a Caretaker hub yet.
+###  - if the colonization process hasn't finished yet, retry check later (on_action triggers appear to be borked as discovered by Ash)
+###  - if colonization is finished, call actual checking event in 360 days
+planet_event = {
+	id = mem_caretaker_origin_event.1110
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			NOT = {
+				has_country_flag = mem_caretaker_break_up
+			}
+		}
+		mem_caretaker_presence_on_planet = no
+		NOT = {
+			has_planet_flag = mem_caretaker_origin_reminded_to_build_mem_caretaker_hub
+		}
+	}
+	immediate = {
+		if = {
+			limit = {
+				is_colony = yes
+				pop_amount > 0
+				NOT = {
+					owner = {
+						has_policy_flag = mem_caretaker_policy_autobuild
+					}
+				}
+			}
+			log = "Colony has been established; Remind to build a Caretaker hub in 360 days."
+			planet_event = {
+				id = mem_caretaker_origin_event.1111
+				days = 360
+			}
+		}
+		else_if = {
+			limit = {
+				is_colony = yes
+				pop_amount > 0
+				owner = {
+					has_policy_flag = mem_caretaker_policy_autobuild
+				}
+			}
+			add_building = building_mem_caretaker_outreach
+		}
+		else = {
+			log = "Colonization is still in progress, try later..."
+			planet_event = {
+				id = mem_caretaker_origin_event.1110
+				days = 180
+			}
+		}
+	}
+}
+
+### Check whether a new colony has a Caretaker hub yet (called 1 year or so after colonization is actually finished)
+planet_event = {
+	id = mem_caretaker_origin_event.1111
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.1110.name
+	desc = mem_caretaker_origin_event.1110.desc
+	picture = GFX_evt_mem_caretaker_content
+	trigger = {
+		is_colony = yes
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			NOT = {
+				has_country_flag = mem_caretaker_break_up
+			}
+		}
+		mem_caretaker_presence_on_planet = no
+	}
+	immediate = {
+		set_planet_flag = mem_caretaker_origin_reminded_to_build_mem_caretaker_hub
+		# Give time for flag to settle
+		planet_event = {
+			id = mem_caretaker_origin_event.1120
+			days = 360
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.1110.option.a
+	}
+	option = {
+		name = mem_caretaker_origin_event.1110.option.b
+		trigger = {
+			owner = {
+				has_country_flag = mem_caretaker_break_up
+			}
+		}
+		owner = {
+			mem_caretaker_change_mood = {
+				VALUE = -2
+			}
+		}
+	}
+}
+
+### Check if colony has a Caretaker Hub after 2 years, if not - worsen Caretaker's mood
+### - if this is the first time it happens, show a notification window explaining what's going on
+planet_event = {
+	id = mem_caretaker_origin_event.1120
+	is_triggered_only = yes
+	hide_window = yes
+	pre_triggers = {
+		has_owner = yes
+		is_homeworld = no
+		is_capital = no
+		is_occupied_flag = no
+	}
+	trigger = {
+		is_colony = yes
+		owner = {
+			has_origin = origin_mem_caretaker
+			NOT = {
+				has_country_flag = mem_caretaker_break_up
+			}
+		}
+		mem_caretaker_presence_on_planet = no
+		has_planet_flag = mem_caretaker_origin_reminded_to_build_mem_caretaker_hub
+	}
+	immediate = {
+		owner = {
+			mem_caretaker_change_mood = {
+				VALUE = -2
+			}
+		}
+		# explain what's going on
+		if = {
+			limit = {
+				owner = {
+					NOT = {
+						has_country_flag = mem_caretaker_no_hub_angry_letter_shown
+					}
+				}
+			}
+			planet_event = {
+				id = mem_caretaker_origin_event.1121
+				days = 1
+			}
+		}
+	}
+}
+
+### Explain that Caretaker gets angry if you don't build hubs on colonies
+planet_event = {
+	id = mem_caretaker_origin_event.1121
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.1121.name
+	desc = mem_caretaker_origin_event.1121.desc
+	picture = GFX_evt_mem_caretaker_annoyed
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			NOT = {
+				has_country_flag = mem_caretaker_break_up
+			}
+		}
+	}
+	immediate = {
+		owner = {
+			set_country_flag = mem_caretaker_no_hub_angry_letter_shown
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.1121.option.b
+	}
+	option = {
+		name = mem_caretaker_origin_event.1121.option.b
+		trigger = {
+			owner = {
+				has_country_flag = mem_caretaker_experiment_scrapped
+			}
+		}
+		owner = {
+			mem_caretaker_change_mood = {
+				VALUE = -2
+			}
+		}
+	}
+}
+
+## ##################################################### ##
+##  Caretaker's reactions to doing stuff with buildings  ##
+## ##################################################### ##
+### built building_mem_monitor_station_1 -  happier
+### upgraded to building_mem_monitor_station_2 or building_mem_monitor_station_3 - happier
+planet_event = {
+	id = mem_caretaker_origin_event.1200
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			NOT = {
+				has_country_flag = mem_caretaker_break_up
+			}
+		}
+		OR = {
+			last_building_changed = building_mem_monitor_station_1
+			last_building_changed = building_mem_monitor_station_2
+			last_building_changed = building_mem_monitor_station_3
+			last_building_changed = building_mem_caretaker_outreach
+		}
+	}
+	### cumulatively adds +1 mood point every time you build or upgrade mem_monitor station -- change?
+	immediate = {
+		owner = {
+			mem_caretaker_change_mood = {
+				VALUE = 4
+			}
+		}
+	}
+}
+
+### built building_clinic - angrier
+### upgraded to building_hospital or built building_clone_vats - angrier
+planet_event = {
+	id = mem_caretaker_origin_event.1220
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		OR = {
+			last_building_changed = building_medical_1
+			last_building_changed = building_medical_2
+			last_building_changed = building_clone_vats
+			last_building_changed = building_genomic_facility
+		}
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			NOT = {
+				has_country_flag = mem_caretaker_break_up
+			}
+		}
+	}
+	immediate = {
+		if = {
+			limit = {
+				OR = {
+					last_building_changed = building_medical_1
+					last_building_changed = building_medical_2
+					last_building_changed = building_genomic_facility
+				}
+			}
+			owner = {
+				mem_caretaker_change_mood = {
+					VALUE = -4
+				}
+			}
+			if = {
+				limit = {
+					owner = {
+						not = {
+							has_country_flag = mem_caretaker_ate_a_building
+						}
+					}
+				}
+				random_list = {
+					97 = {
+					}
+					3 = {
+						owner = {
+							set_country_flag = mem_caretaker_ate_a_building
+						}
+						planet_event = {
+							id = mem_caretaker_origin_event.20900
+							days = 90
+							random = 1000
+						}
+					}
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				last_building_changed = building_clone_vats
+			}
+			owner = {
+				mem_caretaker_change_mood = {
+					VALUE = -8
+				}
+			}
+			if = {
+				limit = {
+					owner = {
+						not = {
+							has_country_flag = mem_caretaker_ate_a_building
+						}
+					}
+				}
+				random_list = {
+					97 = {
+					}
+					3 = {
+						owner = {
+							set_country_flag = mem_caretaker_ate_a_building
+						}
+						planet_event = {
+							id = mem_caretaker_origin_event.20800
+							days = 90
+							random = 1000
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+### demolished or replaced building_mem_monitor_station_1, building_mem_monitor_station_2 or building_mem_monitor_station_3 - angrier
+planet_event = {
+	id = mem_caretaker_origin_event.1210
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			NOT = {
+				has_country_flag = mem_caretaker_break_up
+			}
+		}
+	}
+	immediate = {
+		if = {
+			limit = {
+				last_building_changed = building_mem_monitor_station_1
+			}
+			owner = {
+				mem_caretaker_change_mood = {
+					VALUE = -4
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				last_building_changed = building_mem_monitor_station_2
+			}
+			owner = {
+				mem_caretaker_change_mood = {
+					VALUE = -4
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				last_building_changed = building_mem_monitor_station_3
+			}
+			owner = {
+				mem_caretaker_change_mood = {
+					VALUE = -8
+				}
+			}
+		}
+	}
+}
+
+### demolished or replaced building_clinic, building_hospital or building_clone_vats - happier
+planet_event = {
+	id = mem_caretaker_origin_event.1230
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			NOT = {
+				has_country_flag = mem_caretaker_break_up
+			}
+		}
+	}
+	immediate = {
+		if = {
+			limit = {
+				last_building_changed = building_medical_1
+			}
+			owner = {
+				mem_caretaker_change_mood = {
+					VALUE = 2
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				OR = {
+					last_building_changed = building_medical_2
+					last_building_changed = building_clone_vats
+				}
+			}
+			owner = {
+				mem_caretaker_change_mood = {
+					VALUE = 4
+				}
+			}
+		}
+	}
+}
+
+## ##################################################### ##
+##    Caretaker's reactions to technologies researched   ##
+## ##################################################### ##
+### increased tech_genome_mapping, tech_cloning, tech_frontier_health, tech_frontier_hospital - angrier
+country_event = {
+	id = mem_caretaker_origin_event.1300
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		OR = {
+			last_increased_tech = tech_genome_mapping
+			last_increased_tech = tech_cloning
+			last_increased_tech = tech_frontier_health
+			last_increased_tech = tech_frontier_hospital
+		}
+	}
+	immediate = {
+		mem_caretaker_change_mood = {
+			VALUE = -6
+		}
+	}
+}
+
+### increased tech_gene_tailoring, tech_glandular_acclimation, tech_gene_expressions or tech_genetic_resequencing - angrier
+country_event = {
+	id = mem_caretaker_origin_event.1310
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		OR = {
+			last_increased_tech = tech_gene_tailoring
+			last_increased_tech = tech_glandular_acclimation
+			last_increased_tech = tech_gene_expressions
+			#last_increased_tech = tech_genetic_resequencing
+		}
+	}
+	immediate = {
+		mem_caretaker_change_mood = {
+			VALUE = -10
+		}
+	}
+}
+
+### increased tech_droid_workers, tech_synthetic_workers or tech_synthetic_leaders - angrier
+country_event = {
+	id = mem_caretaker_origin_event.1320
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		not = {
+			has_valid_civic = civic_mem_drone_culture
+		}
+		OR = {
+			last_increased_tech = tech_droid_workers
+			last_increased_tech = tech_synthetic_workers
+			last_increased_tech = tech_synthetic_leaders
+		}
+	}
+	immediate = {
+		mem_caretaker_change_mood = {
+			VALUE = -8
+		}
+	}
+}
+
+## ##################################################### ##
+##                The Glitch event chain                 ##
+## ##################################################### ##
+### Gatekeeped event
+country_event = {
+	id = mem_caretaker_origin_event.2000
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_killer_glitch
+		NOT = {
+			has_country_flag = mem_caretaker_break_up
+		}
+	}
+	immediate = {
+		# if mem_caretaker is not if good mood, roll for event chain to start
+		if = {
+			limit = {
+				mem_caretaker_mood_is_not_good_check = yes
+			}
+			random_list = {
+				75 = {
+					country_event = {
+						id = mem_caretaker_origin_event.2000
+						days = 180
+					}
+				}
+				25 = {
+					country_event = {
+						id = mem_caretaker_origin_event.2001
+						days = 10
+						random = 5
+					}
+				}
+			}
+		}
+		# if not, try again later
+		else = {
+			country_event = {
+				id = mem_caretaker_origin_event.2000
+				days = 180
+			}
+		}
+	}
+}
+
+### Trigger event for missing pop
+country_event = {
+	id = mem_caretaker_origin_event.2001
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_killer_glitch
+		NOT = {
+			has_country_flag = mem_caretaker_break_up
+		}
+	}
+	immediate = {
+		# if there is a xeno pop somewhere in the empire, fire disappearing pop event on that planet
+		if = {
+			limit = {
+				any_owned_species = {
+					NOR = {
+						is_same_species = root
+						is_robotic_species = yes
+						has_citizenship_type = {
+							type = citizenship_purge
+						}
+						has_citizenship_type = {
+							type = citizenship_assimilation
+						}
+					}
+				}
+			}
+			random_owned_planet = {
+				limit = {
+					mem_caretaker_presence_on_planet = yes
+					pop_amount > 100
+					any_owned_pop_group = {
+						NOT = {
+							is_same_species = root
+						}
+						is_robot_pop = no
+						is_being_assimilated = no
+						is_being_purged = no
+					}
+				}
+				# call disappearing xeno pop event
+				planet_event = {
+					id = mem_caretaker_origin_event.2010
+					days = 30
+				}
+			}
+		}
+		# otherwise target random owned planet
+		else = {
+			random_owned_planet = {
+				limit = {
+					mem_caretaker_presence_on_planet = yes
+					pop_amount > 100
+				}
+				# call disappearing pop event
+				planet_event = {
+					id = mem_caretaker_origin_event.2020
+					days = 30
+				}
+			}
+		}
+	}
+}
+
+### Disappearing xeno pop
+planet_event = {
+	id = mem_caretaker_origin_event.2010
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_killer_glitch
+			NOT = {
+				has_country_flag = mem_caretaker_break_up
+			}
+		}
+	}
+	immediate = {
+		random_owned_pop_group = {
+			limit = {
+				NOT = {
+					is_same_species = owner
+				}
+				is_robot_pop = no
+				is_being_assimilated = no
+				is_being_purged = no
+			}
+			kill_single_pop = yes
+		}
+		# trigger replace-with-native pop event
+		planet_event = {
+			id = mem_caretaker_origin_event.2011
+			days = 30
+		}
+	}
+}
+
+### Replace killed xeno pop with a native one
+planet_event = {
+	id = mem_caretaker_origin_event.2011
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_killer_glitch
+			NOT = {
+				has_country_flag = mem_caretaker_break_up
+			}
+		}
+	}
+	immediate = {
+		create_pop = {
+			species = owner
+		}
+		# schedule notification about strange occurence on targeted planet
+		planet_event = {
+			id = mem_caretaker_origin_event.2012
+			days = 30
+		}
+	}
+}
+
+### Notification about strange occurence (xeno replacement)
+planet_event = {
+	id = mem_caretaker_origin_event.2012
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2012.name
+	desc = mem_caretaker_origin_event.2012.desc
+	picture = GFX_evt_dark_alley
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_killer_glitch
+			NOT = {
+				has_country_flag = mem_caretaker_break_up
+			}
+		}
+	}
+	immediate = {
+		# schedule mem_caretaker contact
+		planet_event = {
+			id = mem_caretaker_origin_event.2030
+			days = 30
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2012.option.a
+	}
+	option = {
+		name = mem_caretaker_origin_event.2012.option.b
+		trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_authoritarian
+					has_ethic = ethic_fanatic_authoritarian
+				}
+			}
+		}
+	}
+}
+
+### Disappearing native pop
+planet_event = {
+	id = mem_caretaker_origin_event.2020
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_killer_glitch
+			NOT = {
+				has_country_flag = mem_caretaker_break_up
+			}
+		}
+	}
+	immediate = {
+		random_owned_pop_group = {
+			limit = {
+				is_robot_pop = no
+			}
+			kill_single_pop = yes
+		}
+		# schedule notification about strange occurence on targeted planet
+		planet_event = {
+			id = mem_caretaker_origin_event.2021
+			days = 30
+		}
+	}
+}
+
+### Notification about strange occurence (natives missing)
+planet_event = {
+	id = mem_caretaker_origin_event.2021
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2021.name
+	desc = mem_caretaker_origin_event.2021.desc
+	picture = GFX_evt_alien_propaganda
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_killer_glitch
+			NOT = {
+				has_country_flag = mem_caretaker_break_up
+			}
+		}
+	}
+	immediate = {
+		# schedule mem_caretaker contact
+		planet_event = {
+			id = mem_caretaker_origin_event.2030
+			days = 30
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2021.option.a
+	}
+	option = {
+		name = mem_caretaker_origin_event.2021.option.b
+		trigger = {
+			owner = {
+				OR = {
+					has_ethic = ethic_authoritarian
+					has_ethic = ethic_fanatic_authoritarian
+				}
+			}
+		}
+	}
+}
+
+### The Caretaker contacts about the glitch
+planet_event = {
+	id = mem_caretaker_origin_event.2030
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2030.name
+	desc = mem_caretaker_origin_event.2030.desc
+	picture = GFX_evt_mem_caretaker_malfunctioning
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_killer_glitch
+			NOT = {
+				has_country_flag = mem_caretaker_break_up
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2030.option.a
+		custom_tooltip = mem_caretaker_origin_event.2030.option.a.tooltip
+		hidden_effect = {
+			owner = {
+				capital_scope = {
+					enable_special_project = {
+						name = MEM_CARETAKER_FIXING_KILLER_GLITCH
+						location = this
+						owner = root.owner
+					}
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2030.option.b
+		custom_tooltip = mem_caretaker_origin_event.2030.option.b.tooltip
+		hidden_effect = {
+			owner = {
+				set_country_flag = mem_caretaker_killer_glitch_persists
+				# trigger the repeating 'pop killed' event
+				country_event = {
+					id = mem_caretaker_origin_event.2100
+					days = 3240
+					random = 2160
+				}
+			}
+		}
+	}
+}
+
+### Decide whether the glitch was fixed successfully
+country_event = {
+	id = mem_caretaker_origin_event.2031
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_killer_glitch
+		NOT = {
+			has_country_flag = mem_caretaker_break_up
+		}
+	}
+	immediate = {
+		random_list = {
+			# success
+			90 = {
+				country_event = {
+					id = mem_caretaker_origin_event.2032
+					days = 0
+				}
+			}
+			# failure
+			10 = {
+				country_event = {
+					id = mem_caretaker_origin_event.2033
+					days = 0
+				}
+			}
+		}
+	}
+}
+
+### Glitch was fixed successfully
+country_event = {
+	id = mem_caretaker_origin_event.2032
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2032.name
+	desc = mem_caretaker_origin_event.2032.desc
+	picture = GFX_evt_mem_caretaker_pleased
+	option = {
+		name = mem_caretaker_origin_event.2032.option.a
+		custom_tooltip = mem_caretaker_origin_event.2032.option.a.tooltip
+		mem_caretaker_change_mood = {
+			VALUE = 10
+		}
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 3
+		}
+		add_monthly_resource_mult = {
+			resource = engineering_research
+			value = 3
+		}
+		hidden_effect = {
+			remove_country_flag = mem_caretaker_killer_glitch
+			remove_country_flag = mem_caretaker_killer_glitch_persists
+		}
+	}
+}
+
+### Failed to fix the glitch
+country_event = {
+	id = mem_caretaker_origin_event.2033
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2033.name
+	desc = mem_caretaker_origin_event.2033.desc
+	picture = GFX_evt_mem_caretaker_malfunctioning
+	option = {
+		name = mem_caretaker_origin_event.2033.option.a
+		custom_tooltip = mem_caretaker_origin_event.2033.option.a.tooltip
+		hidden_effect = {
+			set_country_flag = mem_caretaker_killer_glitch_persists
+			add_modifier = {
+				modifier = mem_caretaker_overclocked_cloning_vats
+				days = -1
+			}
+			add_monthly_resource_mult = {
+				resource = physics_research
+				value = 6
+				min = 5000
+			}
+			add_monthly_resource_mult = {
+				resource = unity
+				value = 6
+				min = 5000
+			}
+			# trigger the repeating 'pop killed' event
+			country_event = {
+				id = mem_caretaker_origin_event.2100
+				days = 3240
+				random = 2160
+			}
+		}
+		mem_caretaker_change_mood = {
+			VALUE = 10
+		}
+	}
+}
+
+### Killer glitch strikes again - choose planet
+country_event = {
+	id = mem_caretaker_origin_event.2100
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_killer_glitch_persists
+		NOT = {
+			has_country_flag = mem_caretaker_break_up
+		}
+	}
+	immediate = {
+		random_owned_planet = {
+			limit = {
+				pop_amount > 100
+				any_owned_pop_group = {
+					is_robot_pop = no
+				}
+			}
+			planet_event = {
+				id = mem_caretaker_origin_event.2101
+				days = 1
+			}
+		}
+		# reschedule the event for next glitch
+		country_event = {
+			id = mem_caretaker_origin_event.2100
+			days = 3240
+			random = 2160
+		}
+	}
+}
+
+### Killer glitch strikes again - kill pop
+planet_event = {
+	id = mem_caretaker_origin_event.2101
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2101.name
+	desc = mem_caretaker_origin_event.2101.desc
+	picture = GFX_evt_mem_caretaker_malfunctioning
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_killer_glitch_persists
+			NOT = {
+				has_country_flag = mem_caretaker_break_up
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2101.option.a
+		custom_tooltip = mem_caretaker_origin_event.2101.option.a.tooltip
+		hidden_effect = {
+			random_owned_pop_group = {
+				limit = {
+					is_robot_pop = no
+				}
+				kill_single_pop = yes
+			}
+		}
+	}
+}
+
+## ##################################################### ##
+##           The Abandoned Vault event chain             ##
+## ##################################################### ##
+### Gate event for the abandoned vault event chain
+country_event = {
+	id = mem_caretaker_origin_event.2500
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_abandoned_vault
+		NOT = {
+			has_country_flag = mem_caretaker_break_up
+		}
+	}
+	immediate = {
+		capital_scope = {
+			# randomly delay the event again so that it doesn't coinside with other events triggered at mid-game
+			planet_event = {
+				id = mem_caretaker_origin_event.2501
+				days = 360
+				random = 1440
+			}
+		}
+	}
+}
+
+### Actual kick-off of the event chain
+planet_event = {
+	id = mem_caretaker_origin_event.2501
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2501.name
+	desc = mem_caretaker_origin_event.2501.desc
+	picture = GFX_evt_busy_spaceport
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_abandoned_vault
+			NOR = {
+				has_country_flag = mem_caretaker_break_up
+				has_country_flag = mem_caretaker_secession
+				has_country_flag = mem_caretaker_experiment_scrapped
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2501.option.a
+		hidden_effect = {
+			planet_event = {
+				id = mem_caretaker_origin_event.2502
+				days = 1
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2501.option.b
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = 3
+			}
+			mem_caretaker_change_mood = {
+				VALUE = 1
+			}
+		}
+	}
+}
+
+### Caretaker reacts to an empire deciding to investigate the abandoned vault
+planet_event = {
+	id = mem_caretaker_origin_event.2502
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2502.name
+	desc = mem_caretaker_origin_event.2502.desc
+	picture = GFX_evt_mem_caretaker_annoyed
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_abandoned_vault
+			NOR = {
+				has_country_flag = mem_caretaker_break_up
+				has_country_flag = mem_caretaker_secession
+				has_country_flag = mem_caretaker_experiment_scrapped
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2502.option.a
+		custom_tooltip = mem_caretaker_origin_event.2502.option.a.tooltip
+		hidden_effect = {
+			owner = {
+				# issue special project to open the ancient vault
+				save_global_event_target_as = mem_caretaker_vault_explorer@root
+				capital_scope = {
+					enable_special_project = {
+						name = MEM_CARETAKER_ANCIENT_VAULT_EXPLORE
+						location = this
+						owner = event_target:mem_caretaker_vault_explorer@root
+					}
+				}
+			}
+		}
+		owner = {
+			mem_caretaker_change_mood = {
+				VALUE = -2
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2502.option.b
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = 3
+			}
+			mem_caretaker_change_mood = {
+				VALUE = 1
+			}
+		}
+	}
+}
+
+### Gained entrance to the ancient Caretaker vault
+country_event = {
+	id = mem_caretaker_origin_event.2503
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2503.name
+	desc = mem_caretaker_origin_event.2503.desc
+	picture = GFX_evt_derelict_interior
+	trigger = {
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_abandoned_vault
+			NOR = {
+				has_country_flag = mem_caretaker_break_up
+				has_country_flag = mem_caretaker_secession
+				has_country_flag = mem_caretaker_experiment_scrapped
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2503.option.a
+		hidden_effect = {
+			country_event = {
+				id = mem_caretaker_origin_event.2504
+				days = -1
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2503.option.b
+		add_monthly_resource_mult = {
+			resource = engineering_research
+			value = 3
+		}
+		mem_caretaker_change_mood = {
+			VALUE = 1
+		}
+	}
+}
+
+### Caretaker reacts to our attempt to download the data from the ancient databanks
+country_event = {
+	id = mem_caretaker_origin_event.2504
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2504.name
+	desc = mem_caretaker_origin_event.2504.desc
+	picture = GFX_evt_mem_caretaker_annoyed
+	trigger = {
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_abandoned_vault
+			NOR = {
+				has_country_flag = mem_caretaker_break_up
+				has_country_flag = mem_caretaker_secession
+				has_country_flag = mem_caretaker_experiment_scrapped
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2504.option.a
+		owner = {
+			mem_caretaker_change_mood = {
+				VALUE = -2
+			}
+			# issue special project to open the ancient vault
+			capital_scope = {
+				enable_special_project = {
+					name = MEM_CARETAKER_ANCIENT_VAULT_DATA_ANALYSIS
+					location = this
+					owner = event_target:mem_caretaker_vault_explorer@root
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2504.option.b
+		owner = {
+			add_monthly_resource_mult = {
+				resource = engineering_research
+				value = 3
+			}
+			mem_caretaker_change_mood = {
+				VALUE = 1
+			}
+		}
+	}
+}
+
+### Ancient data analysis complete
+country_event = {
+	id = mem_caretaker_origin_event.2505
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2505.name
+	desc = mem_caretaker_origin_event.2505.desc
+	picture = GFX_evt_circuitry_modification
+	trigger = {
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_abandoned_vault
+			NOR = {
+				has_country_flag = mem_caretaker_break_up
+				has_country_flag = mem_caretaker_secession
+				has_country_flag = mem_caretaker_experiment_scrapped
+			}
+		}
+	}
+	immediate = {
+		clear_global_event_target = mem_caretaker_vault_explorer@root
+	}
+	option = {
+		name = mem_caretaker_origin_event.2504.option.a
+		add_monthly_resource_mult = {
+			resource = physics_research
+			value = 3
+		}
+		add_monthly_resource_mult = {
+			resource = society_research
+			value = 3
+		}
+		add_monthly_resource_mult = {
+			resource = engineering_research
+			value = 3
+		}
+		hidden_effect = {
+			country_event = {
+				id = mem_caretaker_origin_event.2506
+				days = 1
+			}
+		}
+	}
+}
+
+### Caretaker explains the purpose of the data
+country_event = {
+	id = mem_caretaker_origin_event.2506
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2506.name
+	desc = mem_caretaker_origin_event.2506.desc
+	picture = GFX_evt_mem_caretaker_content
+	trigger = {
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_abandoned_vault
+			NOR = {
+				has_country_flag = mem_caretaker_break_up
+				has_country_flag = mem_caretaker_secession
+				has_country_flag = mem_caretaker_experiment_scrapped
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2506.option.a
+		mem_caretaker_change_mood = {
+			VALUE = 7
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2506.option.b
+		mem_caretaker_change_mood = {
+			VALUE = -3
+		}
+	}
+}
+
+## ##################################################### ##
+##         The hacked Caretaker hub event chain          ##
+## ##################################################### ##
+### Determine the target planet
+country_event = {
+	id = mem_caretaker_origin_event.2600
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_hacked_hub
+		NOR = {
+			has_country_flag = mem_caretaker_break_up
+			has_country_flag = mem_caretaker_secession
+			has_country_flag = mem_caretaker_experiment_scrapped
+		}
+	}
+	immediate = {
+		# find a planet to run the event chain on
+		if = {
+			limit = {
+				any_owned_planet = {
+					is_capital = no
+					pop_amount > 2000
+					has_building = building_mem_caretaker_outreach
+				}
+			}
+			random_owned_planet = {
+				limit = {
+					is_capital = no
+					pop_amount > 2000
+					has_building = building_mem_caretaker_outreach
+				}
+				save_global_event_target_as = mem_caretaker_hacked_hub_planet@root
+				planet_event = {
+					id = mem_caretaker_origin_event.2601
+					days = 0
+				}
+			}
+		}
+		# or try again in a year
+		else = {
+			country_event = {
+				id = mem_caretaker_origin_event.2600
+				days = 360
+			}
+		}
+	}
+}
+
+### Caretaker Hub hacked for the first time : quietly add a modifier, then notify about it after a month
+planet_event = {
+	id = mem_caretaker_origin_event.2601
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_building = building_mem_caretaker_outreach
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_hacked_hub
+			NOR = {
+				has_country_flag = mem_caretaker_break_up
+				has_country_flag = mem_caretaker_secession
+				has_country_flag = mem_caretaker_experiment_scrapped
+			}
+		}
+	}
+	immediate = {
+		add_modifier = {
+			modifier = mem_caretaker_hacked_hub_1
+			days = -1
+		}
+		planet_event = {
+			id = mem_caretaker_origin_event.2602
+			days = 30
+		}
+	}
+}
+
+### Caretaker notices the hack
+planet_event = {
+	id = mem_caretaker_origin_event.2602
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2602.name
+	desc = mem_caretaker_origin_event.2602.desc
+	picture = GFX_evt_mem_caretaker_content
+	trigger = {
+		has_modifier = mem_caretaker_hacked_hub_1
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_hacked_hub
+			NOR = {
+				has_country_flag = mem_caretaker_break_up
+				has_country_flag = mem_caretaker_secession
+				has_country_flag = mem_caretaker_experiment_scrapped
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2602.option.a
+		hidden_effect = {
+			planet_event = {
+				id = mem_caretaker_origin_event.2603
+				days = 60
+			}
+		}
+	}
+}
+
+### Remove hacked hub modifier (1)
+planet_event = {
+	id = mem_caretaker_origin_event.2603
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2603.name
+	desc = mem_caretaker_origin_event.2603.desc
+	picture = GFX_evt_mem_caretaker_content
+	trigger = {
+		has_modifier = mem_caretaker_hacked_hub_1
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_hacked_hub
+			NOR = {
+				has_country_flag = mem_caretaker_break_up
+				has_country_flag = mem_caretaker_secession
+				has_country_flag = mem_caretaker_experiment_scrapped
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2603.option.a
+		hidden_effect = {
+			remove_modifier = mem_caretaker_hacked_hub_1
+			# setup next hacker attack
+			planet_event = {
+				id = mem_caretaker_origin_event.2604
+				days = 180
+			}
+		}
+	}
+}
+
+### Caretaker hub is hacked again
+planet_event = {
+	id = mem_caretaker_origin_event.2604
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_building = building_mem_caretaker_outreach
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_hacked_hub
+			NOR = {
+				has_country_flag = mem_caretaker_break_up
+				has_country_flag = mem_caretaker_secession
+				has_country_flag = mem_caretaker_experiment_scrapped
+			}
+		}
+	}
+	immediate = {
+		add_modifier = {
+			modifier = mem_caretaker_hacked_hub_2
+			days = -1
+		}
+		planet_event = {
+			id = mem_caretaker_origin_event.2605
+			days = 30
+		}
+	}
+}
+
+### Caretaker notices that the hub has been hacked again
+planet_event = {
+	id = mem_caretaker_origin_event.2605
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2605.name
+	desc = mem_caretaker_origin_event.2605.desc
+	picture = GFX_evt_mem_caretaker_annoyed
+	trigger = {
+		has_modifier = mem_caretaker_hacked_hub_2
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_hacked_hub
+			NOR = {
+				has_country_flag = mem_caretaker_break_up
+				has_country_flag = mem_caretaker_secession
+				has_country_flag = mem_caretaker_experiment_scrapped
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2605.option.a
+		hidden_effect = {
+			planet_event = {
+				id = mem_caretaker_origin_event.2606
+				days = 30
+			}
+		}
+	}
+}
+
+### Remove hacked hub modifier (2)
+planet_event = {
+	id = mem_caretaker_origin_event.2606
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2606.name
+	desc = mem_caretaker_origin_event.2606.desc
+	picture = GFX_evt_mem_caretaker_content
+	trigger = {
+		has_modifier = mem_caretaker_hacked_hub_2
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_hacked_hub
+			NOR = {
+				has_country_flag = mem_caretaker_break_up
+				has_country_flag = mem_caretaker_secession
+				has_country_flag = mem_caretaker_experiment_scrapped
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2606.option.a
+		hidden_effect = {
+			remove_modifier = mem_caretaker_hacked_hub_2
+			# setup next hacker attack
+			planet_event = {
+				id = mem_caretaker_origin_event.2607
+				days = 540
+			}
+		}
+	}
+}
+
+### Hacker attacks for the third time
+planet_event = {
+	id = mem_caretaker_origin_event.2607
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_building = building_mem_caretaker_outreach
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_hacked_hub
+			NOR = {
+				has_country_flag = mem_caretaker_break_up
+				has_country_flag = mem_caretaker_secession
+				has_country_flag = mem_caretaker_experiment_scrapped
+			}
+		}
+	}
+	immediate = {
+		random_list = {
+			66 = {
+				add_modifier = {
+					modifier = mem_caretaker_hacked_hub_3a
+					days = -1
+				}
+				planet_event = {
+					id = mem_caretaker_origin_event.2608
+					days = 15
+				}
+			}
+			33 = {
+				add_modifier = {
+					modifier = mem_caretaker_hacked_hub_3b
+					days = -1
+				}
+				planet_event = {
+					id = mem_caretaker_origin_event.2609
+					days = 15
+				}
+			}
+		}
+	}
+}
+
+### Caretaker notices the third hack (science version)
+planet_event = {
+	id = mem_caretaker_origin_event.2608
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2608.name
+	desc = mem_caretaker_origin_event.2608.desc
+	picture = GFX_evt_mem_caretaker_annoyed
+	trigger = {
+		has_modifier = mem_caretaker_hacked_hub_3a
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_hacked_hub
+			NOR = {
+				has_country_flag = mem_caretaker_break_up
+				has_country_flag = mem_caretaker_secession
+				has_country_flag = mem_caretaker_experiment_scrapped
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2608.option.a
+		hidden_effect = {
+			planet_event = {
+				id = mem_caretaker_origin_event.2610
+				days = 60
+			}
+		}
+		owner = {
+			mem_caretaker_change_mood = {
+				VALUE = 3
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2608.option.b
+		hidden_effect = {
+			planet_event = {
+				id = mem_caretaker_origin_event.2610
+				days = 120
+			}
+		}
+		owner = {
+			mem_caretaker_change_mood = {
+				VALUE = -2
+			}
+		}
+	}
+}
+
+### Caretaker notices the third hack (pop growth version)
+planet_event = {
+	id = mem_caretaker_origin_event.2609
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2609.name
+	desc = mem_caretaker_origin_event.2609.desc
+	picture = GFX_evt_mem_caretaker_annoyed
+	trigger = {
+		has_modifier = mem_caretaker_hacked_hub_3b
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_hacked_hub
+			NOR = {
+				has_country_flag = mem_caretaker_break_up
+				has_country_flag = mem_caretaker_secession
+				has_country_flag = mem_caretaker_experiment_scrapped
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2609.option.a
+		hidden_effect = {
+			planet_event = {
+				id = mem_caretaker_origin_event.2610
+				days = 60
+			}
+			owner = {
+				mem_caretaker_change_mood = {
+					VALUE = 3
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2609.option.b
+		hidden_effect = {
+			planet_event = {
+				id = mem_caretaker_origin_event.2610
+				days = 120
+			}
+		}
+		owner = {
+			mem_caretaker_change_mood = {
+				VALUE = -2
+			}
+		}
+	}
+}
+
+### Hacker is caught
+planet_event = {
+	id = mem_caretaker_origin_event.2610
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2610.name
+	desc = mem_caretaker_origin_event.2610.desc
+	picture = GFX_evt_mem_caretaker_content
+	trigger = {
+		OR = {
+			has_modifier = mem_caretaker_hacked_hub_3a
+			has_modifier = mem_caretaker_hacked_hub_3b
+		}
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_hacked_hub
+			NOR = {
+				has_country_flag = mem_caretaker_break_up
+				has_country_flag = mem_caretaker_secession
+				has_country_flag = mem_caretaker_experiment_scrapped
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2610.option.a
+		custom_tooltip = mem_caretaker_origin_event.2610.option.a.tooltip
+		hidden_effect = {
+			remove_modifier = mem_caretaker_hacked_hub_3a
+			remove_modifier = mem_caretaker_hacked_hub_3b
+		}
+		owner = {
+			mem_caretaker_change_mood = {
+				VALUE = 3
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2610.option.b
+		custom_tooltip = mem_caretaker_origin_event.2610.option.b.tooltip
+		hidden_effect = {
+			remove_modifier = mem_caretaker_hacked_hub_3a
+			remove_modifier = mem_caretaker_hacked_hub_3b
+			owner = {
+				mem_caretaker_change_mood = {
+					VALUE = -3
+				}
+				# create a scientist
+				create_leader = {
+					class = scientist
+					species = this
+					name = random
+					skill = 4
+				}
+				last_created_leader = {
+					add_trait = {
+						trait = leader_trait_spark_of_genius
+					}
+					add_trait = {
+						trait = leader_trait_expertise_computing
+					}
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2610.option.c
+		custom_tooltip = mem_caretaker_origin_event.2610.option.c.tooltip
+		hidden_effect = {
+			set_planet_flag = mem_caretaker_hub_hack_preserved
+		}
+		owner = {
+			mem_caretaker_change_mood = {
+				VALUE = -7
+			}
+		}
+	}
+}
+
+## ##################################################### ##
+##                Downshifters event chain               ##
+## ##################################################### ##
+### Gate event
+country_event = {
+	id = mem_caretaker_origin_event.2700
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_downshifters
+		not = {
+			has_country_flag = mem_caretaker_downshifted_planet_found
+		}
+	}
+	immediate = {
+		# event runs on a colony
+		if = {
+			limit = {
+				not = {
+					has_country_flag = mem_caretaker_downshifted_planet_found
+				}
+				any_owned_planet = {
+					is_homeworld = no
+					pop_amount > 1000
+					NOR = {
+						is_planet_class = pc_city
+						is_planet_class = pc_relic
+					}
+				}
+			}
+			random_owned_planet = {
+				limit = {
+					is_homeworld = no
+					pop_amount > 1000
+					NOR = {
+						is_planet_class = pc_city
+						is_planet_class = pc_relic
+					}
+				}
+				owner = {
+					set_country_flag = mem_caretaker_downshifted_planet_found
+				}
+				planet_event = {
+					id = mem_caretaker_origin_event.2701
+					days = 30
+				}
+			}
+		}
+		# try again later
+		else = {
+			if = {
+				limit = {
+					not = {
+						has_country_flag = mem_caretaker_downshifted_planet_found
+					}
+				}
+				country_event = {
+					id = mem_caretaker_origin_event.2700
+					days = 360
+				}
+			}
+		}
+	}
+}
+
+### Downshifters' settlement discovered
+planet_event = {
+	id = mem_caretaker_origin_event.2701
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2701.name
+	desc = mem_caretaker_origin_event.2701.desc
+	picture = GFX_evt_satellite_in_orbit
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_downshifters
+		}
+		pop_amount > 100
+	}
+	option = {
+		name = mem_caretaker_origin_event.2701.option.a
+		hidden_effect = {
+			planet_event = {
+				id = mem_caretaker_origin_event.2702
+				days = 30
+			}
+		}
+	}
+}
+
+### Detailed scans of the settlement are made
+planet_event = {
+	id = mem_caretaker_origin_event.2702
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2702.name
+	desc = mem_caretaker_origin_event.2702.desc
+	picture = GFX_evt_satellite_in_orbit
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_downshifters
+		}
+		pop_amount > 100
+	}
+	option = {
+		name = mem_caretaker_origin_event.2702.option.a
+		hidden_effect = {
+			planet_event = {
+				id = mem_caretaker_origin_event.2703
+				days = 5
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.2702.option.b
+		add_deposit = d_mem_caretaker_free_settlements
+		owner = {
+			if = {
+				limit = {
+					NOR = {
+						has_country_flag = mem_caretaker_break_up
+						has_country_flag = mem_caretaker_secession
+						has_country_flag = mem_caretaker_experiment_scrapped
+					}
+				}
+				mem_caretaker_change_mood = {
+					VALUE = -1
+				}
+			}
+		}
+	}
+}
+
+### People of the free settlements approached
+planet_event = {
+	id = mem_caretaker_origin_event.2703
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2703.name
+	desc = mem_caretaker_origin_event.2703.desc
+	picture = GFX_evt_busy_spaceport
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_downshifters
+		}
+		pop_amount > 100
+	}
+	# force free settlers to rejoin the empire
+	option = {
+		name = mem_caretaker_origin_event.2703.option.a
+		custom_tooltip = mem_caretaker_origin_event.2703.option.a.tooltip
+		trigger = {
+			owner = {
+				NOR = {
+					has_country_flag = mem_caretaker_break_up
+					has_country_flag = mem_caretaker_secession
+					has_country_flag = mem_caretaker_experiment_scrapped
+				}
+			}
+		}
+		hidden_effect = {
+			planet_event = {
+				id = mem_caretaker_origin_event.2710
+				days = 1
+			}
+		}
+		owner = {
+			mem_caretaker_change_mood = {
+				VALUE = 1
+			}
+		}
+	}
+	# mem_caretaker is gone, free settlers don't need to hide anymore
+	option = {
+		name = mem_caretaker_origin_event.2703.option.b
+		custom_tooltip = mem_caretaker_origin_event.2703.option.b.tooltip
+		trigger = {
+			owner = {
+				OR = {
+					has_country_flag = mem_caretaker_break_up
+					has_country_flag = mem_caretaker_secession
+					has_country_flag = mem_caretaker_experiment_scrapped
+				}
+			}
+		}
+		hidden_effect = {
+			planet_event = {
+				id = mem_caretaker_origin_event.2712
+				days = 1
+			}
+		}
+	}
+	# try convincing them to return on their own
+	option = {
+		name = mem_caretaker_origin_event.2703.option.c
+		trigger = {
+			owner = {
+				NOR = {
+					has_country_flag = mem_caretaker_break_up
+					has_country_flag = mem_caretaker_secession
+					has_country_flag = mem_caretaker_experiment_scrapped
+				}
+			}
+		}
+		hidden_effect = {
+			planet_event = {
+				id = mem_caretaker_origin_event.2704
+				days = 0
+			}
+		}
+	}
+	# let the free settlers be
+	option = {
+		name = mem_caretaker_origin_event.2703.option.d
+		#hidden_effect = {
+		add_deposit = d_mem_caretaker_free_settlements
+		owner = {
+			if = {
+				limit = {
+					NOR = {
+						has_country_flag = mem_caretaker_break_up
+						has_country_flag = mem_caretaker_secession
+						has_country_flag = mem_caretaker_experiment_scrapped
+					}
+				}
+				mem_caretaker_change_mood = {
+					VALUE = -1
+				}
+			}
+		}
+		#}
+	}
+}
+
+### Convincing free settlers to return to the country on their own fails
+planet_event = {
+	id = mem_caretaker_origin_event.2704
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2704.name
+	desc = mem_caretaker_origin_event.2704.desc
+	picture = GFX_evt_busy_spaceport
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_downshifters
+		}
+		pop_amount > 100
+	}
+	# force free settlers to rejoin the empire
+	option = {
+		name = mem_caretaker_origin_event.2704.option.a
+		custom_tooltip = mem_caretaker_origin_event.2704.option.a.tooltip
+		hidden_effect = {
+			planet_event = {
+				id = mem_caretaker_origin_event.2710
+				days = 1
+			}
+		}
+		owner = {
+			mem_caretaker_change_mood = {
+				VALUE = 1
+			}
+		}
+	}
+	# let the free settlers be
+	option = {
+		name = mem_caretaker_origin_event.2704.option.b
+		add_deposit = d_mem_caretaker_free_settlements
+		owner = {
+			mem_caretaker_change_mood = {
+				VALUE = -1
+			}
+		}
+	}
+}
+
+### Integration of free settlers back into the empire (Caretaker active)
+planet_event = {
+	id = mem_caretaker_origin_event.2710
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_downshifters
+		}
+		pop_amount > 100
+	}
+	immediate = {
+		while = {
+			count = 2
+			create_pop = {
+				species = owner
+			}
+			add_modifier = {
+				modifier = mem_caretaker_unhappy_settler
+				days = 9060				# 25 years 2 months
+			}
+		}
+		planet_event = {
+			id = mem_caretaker_origin_event.2711
+			days = 60
+		}
+	}
+}
+
+### Former free settlers are causing issues
+planet_event = {
+	id = mem_caretaker_origin_event.2711
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.2711.name
+	desc = mem_caretaker_origin_event.2711.desc
+	picture = GFX_evt_burning_settlement
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_downshifters
+		}
+	}
+	# force free settlers to rejoin the empire
+	option = {
+		name = mem_caretaker_origin_event.2711.option.a
+		add_modifier = {
+			modifier = pm_mem_caretaker_free_settler_discord
+			days = 9000
+		}
+	}
+}
+
+### Integration of free settlers back into the empire (Caretaker inactive)
+planet_event = {
+	id = mem_caretaker_origin_event.2712
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_downshifters
+		}
+		pop_amount > 100
+	}
+	immediate = {
+		while = {
+			count = 2
+			create_pop = {
+				species = owner
+			}
+		}
+	}
+}
+
+## ##################################################### ##
+##          Caretaker secedes into a RS empire           ##
+## ##################################################### ##
+### Gate event
+country_event = {
+	id = mem_caretaker_origin_event.3000
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+	}
+	immediate = {
+		random_list = {
+			50 = {
+				country_event = {
+					id = mem_caretaker_origin_event.3001
+					days = 1080
+				}
+			}
+			50 = {
+			}
+		}
+	}
+}
+
+### Checking that conditions for peaceful separation are met
+country_event = {
+	id = mem_caretaker_origin_event.3001
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		NOR = {
+			has_country_flag = mem_caretaker_break_up
+			has_country_flag = mem_caretaker_secession
+			has_country_flag = mem_caretaker_experiment_scrapped
+			has_country_flag = mem_caretaker_already_secceeding
+		}
+	}
+	immediate = {
+		# check if empire has robotic workers tech, if it doesn't - wait 5 years before trying again
+		# check if the Caretaker is not content with the current state of the empire, if it is - try again in 5 years
+		# check if there are any ward planets with sufficient population, if not - wait 5 years before trying again
+		if = {
+			limit = {
+				NOT = {
+					OR = {
+						NOT = {
+							any_owned_planet = {
+								pop_amount > 2000
+								solar_system = {
+									NOT = {
+										is_same_value = root.capital_scope.solar_system
+									}
+								}
+							}
+						}
+						AND = {
+							mem_caretaker_mood_is_not_bad_check = yes
+							NOT = {
+								has_technology = tech_robotic_workers
+							}
+						}
+					}
+				}
+			}
+			set_country_flag = mem_caretaker_already_secceeding
+			country_event = {
+				id = mem_caretaker_origin_event.3002
+				days = 180
+				random = 900
+			}
+		}
+		# else = {
+		# 	random_list = {
+		# 		# Caretaker asks for secession
+		# 		20 = {
+		# 			country_event = {
+		# 				id = mem_caretaker_origin_event.3002
+		# 				days = 0
+		# 			}
+		# 		}
+		# 		# ...or decides to wait another year
+		# 		80 = {
+		# 			country_event = {
+		# 				id = mem_caretaker_origin_event.3001
+		# 				days = 360
+		# 			}
+		# 		}
+		# 	}
+		# }
+	}
+}
+
+### prepare diplo event data for secession request
+country_event = {
+	id = mem_caretaker_origin_event.3002
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		NOR = {
+			has_country_flag = mem_caretaker_break_up
+			has_country_flag = mem_caretaker_secession
+			has_country_flag = mem_caretaker_experiment_scrapped
+		}
+	}
+	immediate = {
+		mem_caretaker_create_mem_caretaker_robots_species = yes
+		# select a target planet
+		random_owned_planet = {
+			limit = {
+				pop_amount > 2000
+				solar_system = {
+					any_system_planet = {
+						is_colony = yes
+						NOT = {
+							is_same_value = PREVPREV
+						}
+					}
+				}
+			}
+			save_global_event_target_as = mem_caretaker_secession_target_planet@root
+		}
+		# call the diplo event
+		event_target:mem_caretaker_secession_target_planet@root = {
+			planet_event = {
+				id = mem_caretaker_origin_event.3003
+				days = 0
+			}
+		}
+	}
+}
+
+### Actual request for secession
+planet_event = {
+	id = mem_caretaker_origin_event.3003
+	is_triggered_only = yes
+	diplomatic = yes
+	title = mem_caretaker_origin_event.3003.name
+	desc = mem_caretaker_origin_event.3003.desc
+	picture_event_data = {
+		portrait = event_target:mem_caretaker_robotic_species@root.owner
+		planet_background = root.owner
+		graphical_culture = root.owner
+		city_level = root.owner
+		room = root.owner
+	}
+	immediate = {
+		owner = {
+			remove_country_flag = mem_caretaker_secession_granted
+			remove_country_flag = mem_caretaker_secession_denied
+			remove_country_flag = mem_caretaker_secession_denied_politely
+		}
+	}
+	# allow the Caretaker to secede onto the ward world
+	option = {
+		name = mem_caretaker_origin_event.3003.option.a
+		custom_tooltip = mem_caretaker_origin_event.3003.option.a.tooltip
+		hidden_effect = {
+			# create the Caretaker country
+			owner = {
+				set_country_flag = mem_caretaker_secession
+				set_country_flag = mem_caretaker_secession_granted
+				country_event = {
+					id = mem_caretaker_origin_event.3100
+					days = 0
+				}
+			}
+		}
+	}
+	# tell the Caretaker 'no' politely
+	option = {
+		name = mem_caretaker_origin_event.3003.option.b
+		custom_tooltip = mem_caretaker_origin_event.3003.option.b.tooltip
+		hidden_effect = {
+			owner = {
+				set_country_flag = mem_caretaker_secession_denied_politely
+				# call event that decides what the Caretaker will do next
+				country_event = {
+					id = mem_caretaker_origin_event.3004
+					days = 1
+				}
+			}
+		}
+	}
+	# tell the Caretaker 'no' forcefully
+	option = {
+		name = mem_caretaker_origin_event.3003.option.c
+		custom_tooltip = mem_caretaker_origin_event.3003.option.c.tooltip
+		hidden_effect = {
+			owner = {
+				set_country_flag = mem_caretaker_secession_denied
+				# call event that decides what the Caretaker will do next
+				country_event = {
+					id = mem_caretaker_origin_event.3004
+					days = 1
+				}
+			}
+		}
+		owner = {
+			mem_caretaker_change_mood = {
+				VALUE = -5
+			}
+		}
+	}
+}
+
+### Caretaker has been denied secession
+country_event = {
+	id = mem_caretaker_origin_event.3004
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		OR = {
+			has_country_flag = mem_caretaker_secession_denied_politely
+			has_country_flag = mem_caretaker_secession_denied
+		}
+	}
+	immediate = {
+		# if secession request has been denied politely, the Caretaker will be more forgiving
+		if = {
+			limit = {
+				has_country_flag = mem_caretaker_secession_denied_politely
+			}
+			# if mood is relatively good, Caretaker will almost certainly give the empire another chance
+			if = {
+				limit = {
+					mem_caretaker_mood_is_slighly_annoyed = yes
+				}
+				random_list = {
+					# no secession, but will try again in 10 years
+					90 = {
+						country_event = {
+							id = mem_caretaker_origin_event.3010
+							days = 0
+						}
+					}
+					# break away immediate
+					10 = {
+						set_country_flag = mem_caretaker_secession
+						event_target:mem_caretaker_secession_target_planet@root = {
+							planet_event = {
+								id = mem_caretaker_origin_event.3011
+								days = 0
+							}
+						}
+					}
+				}
+			}
+			# if the mood is rather bad, it is more likely to break away by force
+			else_if = {
+				limit = {
+					mem_caretaker_mood_is_very_annoyed = yes
+				}
+				random_list = {
+					# no secession, but will try again in 5 years
+					50 = {
+						country_event = {
+							id = mem_caretaker_origin_event.3010
+							days = 0
+						}
+					}
+					# break away immediate
+					50 = {
+						set_country_flag = mem_caretaker_secession
+						event_target:mem_caretaker_secession_target_planet@root = {
+							planet_event = {
+								id = mem_caretaker_origin_event.3011
+								days = 0
+							}
+						}
+					}
+				}
+			}
+			# otherwise, there is a decent chance it will break away by force
+			else = {
+				random_list = {
+					# no secession, but will try again in 10 years
+					75 = {
+						country_event = {
+							id = mem_caretaker_origin_event.3010
+							days = 0
+						}
+					}
+					# break away immediate
+					25 = {
+						set_country_flag = mem_caretaker_secession
+						event_target:mem_caretaker_secession_target_planet@root = {
+							planet_event = {
+								id = mem_caretaker_origin_event.3011
+								days = 0
+							}
+						}
+					}
+				}
+			}
+		}
+		# if secession has been denied harshly, the Caretaker will be more likely to break away anyway
+		if = {
+			limit = {
+				has_country_flag = mem_caretaker_secession_denied
+			}
+			# if mood is really bad, the Caretaker is almost guaranteed to break away by force
+			if = {
+				limit = {
+					mem_caretaker_mood_is_very_annoyed = yes
+				}
+				random_list = {
+					# no secession, but will try again in 5 years
+					15 = {
+						country_event = {
+							id = mem_caretaker_origin_event.3010
+							days = 0
+						}
+					}
+					# break away immediate
+					85 = {
+						set_country_flag = mem_caretaker_secession
+						event_target:mem_caretaker_secession_target_planet@root = {
+							planet_event = {
+								id = mem_caretaker_origin_event.3011
+								days = 0
+							}
+						}
+					}
+				}
+			}
+			# if Caretaker somehow is still in a relatively 'not bad' mood, the chance of break away by force is not that high
+			else_if = {
+				limit = {
+					mem_caretaker_mood_is_slighly_annoyed = yes
+				}
+				random_list = {
+					# no secession, but will try again in 10 years
+					60 = {
+						country_event = {
+							id = mem_caretaker_origin_event.3010
+							days = 0
+						}
+					}
+					# break away immediate
+					40 = {
+						set_country_flag = mem_caretaker_secession
+						event_target:mem_caretaker_secession_target_planet@root = {
+							planet_event = {
+								id = mem_caretaker_origin_event.3011
+								days = 0
+							}
+						}
+					}
+				}
+			}
+			# otherwise Caretaker is likely to break away, but not too likely
+			else = {
+				random_list = {
+					# no secession, but will try again in 10 years
+					35 = {
+						country_event = {
+							id = mem_caretaker_origin_event.3010
+							days = 0
+						}
+					}
+					# break away immediate
+					65 = {
+						set_country_flag = mem_caretaker_secession
+						event_target:mem_caretaker_secession_target_planet@root = {
+							planet_event = {
+								id = mem_caretaker_origin_event.3011
+								days = 0
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+### Caretaker says that it is willing to give you another chance
+country_event = {
+	id = mem_caretaker_origin_event.3010
+	is_triggered_only = yes
+	diplomatic = yes
+	title = mem_caretaker_origin_event.3010.name
+	desc = mem_caretaker_origin_event.3010.desc
+	picture_event_data = {
+		portrait = event_target:mem_caretaker_robotic_species@root
+		planet_background = root
+		graphical_culture = root
+		city_level = root
+		room = root
+	}
+	option = {
+		name = mem_caretaker_origin_event.3010.option.a
+	}
+}
+
+### Caretaker is going to break away regardless of your permission
+planet_event = {
+	id = mem_caretaker_origin_event.3011
+	is_triggered_only = yes
+	diplomatic = yes
+	title = mem_caretaker_origin_event.3011.name
+	desc = mem_caretaker_origin_event.3011.desc
+	picture_event_data = {
+		portrait = event_target:mem_caretaker_robotic_species@root.owner
+		planet_background = root.owner
+		graphical_culture = root.owner
+		city_level = root.owner
+		room = root.owner
+	}
+	immediate = {
+		owner = {
+			mem_caretaker_clenup_after_breakup = yes
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.3011.option.a
+	}
+	# TRODO empire swap
+	# option = {
+	# 	name = mem_caretaker_origin_event.3011.option.b
+	# 	trigger = {
+	# 		host_has_dlc = "Synthetic Dawn Story Pack"
+	# 	}
+	# }
+	after = {
+		owner = {
+			random_situation = {
+				limit = {
+					is_situation_type = mem_caretaker_mood_situation
+				}
+				destroy_situation = this
+			}
+			hidden_effect = {
+				country_event = {
+					id = mem_caretaker_origin_event.509
+					days = 5
+				}
+			}
+			hidden_effect = {
+				country_event = {
+					id = mem_caretaker_origin_event.3100
+					days = 10
+				}
+			}
+		}
+	}
+}
+
+### Creating the Caretaker country
+country_event = {
+	id = mem_caretaker_origin_event.3100
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_secession
+	}
+	immediate = {
+		# create country
+		create_country = {
+			type = default
+			name = "NAME_MEM_CARETAKER_EMPIRE"
+			species = event_target:mem_caretaker_robotic_species@root
+			ignore_initial_colony_error = yes
+			day_zero_contact = no
+			ethos = {
+				ethic = ethic_gestalt_consciousness
+			}
+			authority = auth_machine_intelligence
+			civics = {
+				civic = civic_machine_servitor
+				civic = civic_machine_introspective
+			}
+			origin = origin_separatists
+			flag = {
+				icon = {
+					category = "mem"
+					file = "mem_caretaker_emblem.dds"
+				}
+				background = {
+					category = "backgrounds"
+					file = "00_solid.dds"
+				}
+				colors = {
+					"black"
+					"black"
+					"null"
+					"null"
+				}
+			}
+			effect = {
+				set_country_flag = mem_caretaker_seceded_country
+				# setup 'initial' technology for the seceded Caretaker
+				mem_caretaker_seceded_empire_setup_technology = {
+					PARENT_EMPIRE = ROOT
+				}
+				# give the Caretaker empire starting resources
+				add_resource = {
+					minerals = 15000
+					energy = 15000
+					food = 15000
+					alloys = 15000
+					consumer_goods = 15000
+					influence = 1000
+					rare_crystals = 500
+					exotic_gases = 500
+					volatile_motes = 500
+				}
+				# add empire-level modifier to help the Caretaker
+				add_modifier = {
+					modifier = mem_caretaker_country_boost
+					days = -1
+				}
+				save_global_event_target_as = mem_caretaker_secession_empire
+			}
+		}
+		# create fleet
+		create_fleet_from_naval_cap = 0.2
+		last_created_fleet = {
+			set_owner = event_target:mem_caretaker_secession_empire
+		}
+		# mem_caretaker capital
+		event_target:mem_caretaker_secession_target_planet@root = {
+			set_owner = event_target:mem_caretaker_secession_empire
+			set_capital = yes
+			mem_caretaker_seceded_empire_setup_initial_population = {
+				PARENT_EMPIRE_SPECIES = ROOT
+				MEM_CARETAKER_SPECIES = event_target:mem_caretaker_robotic_species@root
+			}
+			mem_caretaker_seceded_empire_setup_capital = yes
+			# update starbase
+			solar_system = {
+				starbase = {
+					set_owner = event_target:mem_caretaker_secession_empire
+					mem_caretaker_seceded_empire_setup_starbase = yes
+				}
+			}
+		}
+		# set truce and forced open borders between the Caretaker empire and the empire it was spawned from
+		event_target:mem_caretaker_secession_empire = {
+			set_truce = {
+				target = ROOT
+				type = war
+			}
+			set_closed_borders = {
+				who = ROOT
+				status = no
+				forced = 10				# 10 years
+			}
+			# opinion modifiers
+			if = {
+				limit = {
+					ROOT = {
+						has_country_flag = mem_caretaker_secession_granted
+					}
+				}
+				add_opinion_modifier = {
+					who = ROOT
+					modifier = mem_caretaker_secession_request_granted
+				}
+			}
+			else_if = {
+				limit = {
+					ROOT = {
+						OR = {
+							has_country_flag = mem_caretaker_secession_denied
+							has_country_flag = mem_caretaker_secession_denied_politely
+						}
+					}
+				}
+				add_opinion_modifier = {
+					who = ROOT
+					modifier = mem_caretaker_secession_request_denied
+				}
+				ROOT = {
+					add_opinion_modifier = {
+						who = PREV
+						modifier = mem_caretaker_seceded_against_our_wishes
+					}
+				}
+			}
+		}
+		# clean up event targets
+		clear_global_event_target = mem_caretaker_robotic_species@root
+		clear_global_event_target = mem_caretaker_secession_target_planet@root
+		# Caretaker takes some pops, hubs/core are removed
+		every_owned_planet = {
+			mem_caretaker_secession_planets_clean_up = yes
+		}
+		### Setup further diplomacy with the new Caretaker country
+		if = {
+			limit = {
+				OR = {
+					has_country_flag = mem_caretaker_secession_granted
+					has_country_flag = mem_caretaker_secession_denied_politely
+				}
+			}
+			# Caretaker asks for alloys and energy
+			random_list = {
+				80 = {
+					country_event = {
+						id = mem_caretaker_origin_event.3201
+						days = 720
+						random = 720
+					}
+				}
+				20 = {
+				}
+			}
+			# Caretaker asks for more pops
+			random_list = {
+				80 = {
+					country_event = {
+						id = mem_caretaker_origin_event.3200
+						days = 1440
+						random = 720
+					}
+				}
+				20 = {
+				}
+			}
+			# Caretaker asks for food
+			random_list = {
+				80 = {
+					country_event = {
+						id = mem_caretaker_origin_event.3202
+						days = 2160
+						random = 720
+					}
+				}
+				20 = {
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				has_country_flag = mem_caretaker_secession_denied
+			}
+			# pop stealing #1
+			random_list = {
+				70 = {
+					country_event = {
+						id = mem_caretaker_origin_event.3250
+						days = 720
+						random = 720
+					}
+				}
+				30 = {
+				}
+			}
+			# mem_caretaker steals a fleet
+			random_list = {
+				40 = {
+					country_event = {
+						id = mem_caretaker_origin_event.3252
+						days = 1440
+						random = 720
+					}
+				}
+				60 = {
+				}
+			}
+			# mem_caretaker steals resources
+			random_list = {
+				70 = {
+					country_event = {
+						id = mem_caretaker_origin_event.3251
+						days = 2160
+						random = 720
+					}
+				}
+				30 = {
+				}
+			}
+			# pop stealing #2
+			random_list = {
+				70 = {
+					country_event = {
+						id = mem_caretaker_origin_event.3250
+						days = 3600
+						random = 720
+					}
+				}
+				30 = {
+				}
+			}
+		}
+	}
+}
+
+### Diplomatic event : the Caretaker asks you to give it several pops from your empire that want to live under its care
+country_event = {
+	id = mem_caretaker_origin_event.3200
+	is_triggered_only = yes
+	diplomatic = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_secession
+		any_playable_country = {
+			has_country_flag = mem_caretaker_seceded_country
+		}
+	}
+	title = mem_caretaker_origin_event.3200.name
+	desc = mem_caretaker_origin_event.3200.desc
+	picture_event_data = {
+		portrait = event_target:mem_caretaker_secession_empire
+		planet_background = event_target:mem_caretaker_secession_empire
+		graphical_culture = event_target:mem_caretaker_secession_empire
+		city_level = event_target:mem_caretaker_secession_empire
+		room = event_target:mem_caretaker_secession_empire
+	}
+	# allow pops to resettle to the Caretaker country
+	option = {
+		name = mem_caretaker_origin_event.3200.option.a
+		custom_tooltip = mem_caretaker_origin_event.3200.option.a.tooltip
+		hidden_effect = {
+			event_target:mem_caretaker_secession_empire = {
+				capital_scope = {
+					save_event_target_as = resettlement_target_planet
+				}
+				add_opinion_modifier = {
+					who = ROOT
+					modifier = mem_caretaker_diplo_request_granted
+				}
+			}
+			while = {
+				count = 3
+				random_owned_pop_group = {
+					resettle_pop_group = {
+						#group = THIS
+						POP_GROUP = this
+						PLANET = event_target:resettlement_target_planet
+					}
+				}
+			}
+		}
+	}
+	# do not allow pops to resettle to the Caretaker country
+	option = {
+		name = mem_caretaker_origin_event.3200.option.b
+		custom_tooltip = mem_caretaker_origin_event.3200.option.b.tooltip
+		hidden_effect = {
+			event_target:mem_caretaker_secession_empire = {
+				add_opinion_modifier = {
+					who = ROOT
+					modifier = mem_caretaker_diplo_request_denied
+				}
+			}
+		}
+	}
+}
+
+### Diplomatic event : the Caretaker asks for additional resources (energy and alloys)
+country_event = {
+	id = mem_caretaker_origin_event.3201
+	is_triggered_only = yes
+	diplomatic = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_secession
+		any_playable_country = {
+			has_country_flag = mem_caretaker_seceded_country
+		}
+	}
+	title = mem_caretaker_origin_event.3201.name
+	desc = mem_caretaker_origin_event.3201.desc
+	picture_event_data = {
+		portrait = event_target:mem_caretaker_secession_empire
+		planet_background = event_target:mem_caretaker_secession_empire
+		graphical_culture = event_target:mem_caretaker_secession_empire
+		city_level = event_target:mem_caretaker_secession_empire
+		room = event_target:mem_caretaker_secession_empire
+	}
+	# empire has resources and is willing to give them to the seceded Caretaker
+	option = {
+		name = mem_caretaker_origin_event.3201.option.a
+		custom_tooltip = mem_caretaker_origin_event.3201.option.a.tooltip
+		trigger = {
+			has_resource = {
+				type = alloys
+				amount > 1000
+			}
+			has_resource = {
+				type = energy
+				amount > 1000
+			}
+		}
+		hidden_effect = {
+			# take resources from empire's stockpile
+			add_resource = {
+				alloys = -1000
+				energy = -1000
+			}
+			# ...and give them to the Caretaker RS + improve Caretaker's opinion
+			event_target:mem_caretaker_secession_empire = {
+				add_resource = {
+					alloys = 1000
+					energy = 1000
+				}
+				add_opinion_modifier = {
+					who = ROOT
+					modifier = mem_caretaker_diplo_request_granted
+				}
+			}
+		}
+	}
+	# empire doesn't have resources
+	option = {
+		name = mem_caretaker_origin_event.3201.option.b
+		trigger = {
+			NAND = {
+				has_resource = {
+					type = alloys
+					amount > 1000
+				}
+				has_resource = {
+					type = energy
+					amount > 1000
+				}
+			}
+		}
+	}
+	# empire doesn't want to share
+	option = {
+		name = mem_caretaker_origin_event.3201.option.c
+		custom_tooltip = mem_caretaker_origin_event.3201.option.c.tooltip
+		hidden_effect = {
+			event_target:mem_caretaker_secession_empire = {
+				add_opinion_modifier = {
+					who = ROOT
+					modifier = mem_caretaker_diplo_request_denied
+				}
+			}
+		}
+	}
+}
+
+### Diplomatic event : the Caretaker asks for additional resources (food)
+country_event = {
+	id = mem_caretaker_origin_event.3202
+	is_triggered_only = yes
+	diplomatic = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_secession
+		any_playable_country = {
+			has_country_flag = mem_caretaker_seceded_country
+		}
+	}
+	title = mem_caretaker_origin_event.3202.name
+	desc = mem_caretaker_origin_event.3202.desc
+	picture_event_data = {
+		portrait = event_target:mem_caretaker_secession_empire
+		planet_background = event_target:mem_caretaker_secession_empire
+		graphical_culture = event_target:mem_caretaker_secession_empire
+		city_level = event_target:mem_caretaker_secession_empire
+		room = event_target:mem_caretaker_secession_empire
+	}
+	# empire has resources and is willing to give them to the seceded Caretaker
+	option = {
+		name = mem_caretaker_origin_event.3202.option.a
+		custom_tooltip = mem_caretaker_origin_event.3202.option.a.tooltip
+		trigger = {
+			has_resource = {
+				type = food
+				amount > 5000
+			}
+		}
+		hidden_effect = {
+			# take resources from empire's stockpile
+			add_resource = {
+				food = -5000
+			}
+			# ...and give them to the Caretaker RS + improve Caretaker's opinion
+			event_target:mem_caretaker_secession_empire = {
+				add_resource = {
+					food = 5000
+				}
+				add_opinion_modifier = {
+					who = ROOT
+					modifier = mem_caretaker_diplo_request_granted
+				}
+			}
+			# schedule Caretaker paying back for the food
+			country_event = {
+				id = mem_caretaker_origin_event.3203
+				days = 120
+			}
+		}
+	}
+	# empire doesn't have resources
+	option = {
+		name = mem_caretaker_origin_event.3202.option.b
+		trigger = {
+			NOT = {
+				has_resource = {
+					type = food
+					amount > 5000
+				}
+			}
+		}
+	}
+	# empire doesn't want to share
+	option = {
+		name = mem_caretaker_origin_event.3202.option.c
+		custom_tooltip = mem_caretaker_origin_event.3202.option.c.tooltip
+		hidden_effect = {
+			event_target:mem_caretaker_secession_empire = {
+				add_opinion_modifier = {
+					who = ROOT
+					modifier = mem_caretaker_diplo_request_denied
+				}
+			}
+		}
+	}
+}
+
+### Diplomatic event : the Caretaker pays back for the food it was given
+country_event = {
+	id = mem_caretaker_origin_event.3203
+	is_triggered_only = yes
+	diplomatic = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_secession
+		any_playable_country = {
+			has_country_flag = mem_caretaker_seceded_country
+		}
+	}
+	title = mem_caretaker_origin_event.3203.name
+	desc = mem_caretaker_origin_event.3203.desc
+	picture_event_data = {
+		portrait = event_target:mem_caretaker_secession_empire
+		planet_background = event_target:mem_caretaker_secession_empire
+		graphical_culture = event_target:mem_caretaker_secession_empire
+		city_level = event_target:mem_caretaker_secession_empire
+		room = event_target:mem_caretaker_secession_empire
+	}
+	option = {
+		name = mem_caretaker_origin_event.3203.option.a
+		#custom_tooltip = mem_caretaker_origin_event.3203.option.a.tooltip
+		#hidden_effect = {
+		add_resource = {
+			energy = 5000
+			minerals = 5000
+		}
+		#}
+	}
+}
+
+### Caretaker that seceded forcefully steals pops
+country_event = {
+	id = mem_caretaker_origin_event.3250
+	is_triggered_only = yes
+	picture = GFX_evt_burning_settlement
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_secession
+		any_playable_country = {
+			has_country_flag = mem_caretaker_seceded_country
+		}
+	}
+	title = mem_caretaker_origin_event.3250.name
+	desc = mem_caretaker_origin_event.3250.desc
+	option = {
+		name = mem_caretaker_origin_event.3250.option.a
+		custom_tooltip = mem_caretaker_origin_event.3250.option.a.tooltip
+		hidden_effect = {
+			event_target:mem_caretaker_secession_empire = {
+				capital_scope = {
+					save_event_target_as = resettlement_target_planet
+				}
+			}
+			while = {
+				count = 3
+				random_owned_pop_group = {
+					resettle_pop_group = {
+						POP_GROUP = this
+						PLANET = event_target:resettlement_target_planet
+					}
+				}
+			}
+			add_opinion_modifier = {
+				who = event_target:mem_caretaker_secession_empire
+				modifier = mem_caretaker_pops_stolen
+			}
+		}
+	}
+}
+
+### Caretaker steals resources
+country_event = {
+	id = mem_caretaker_origin_event.3251
+	is_triggered_only = yes
+	picture = GFX_evt_ship_offloading_cargo
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_secession
+		any_playable_country = {
+			has_country_flag = mem_caretaker_seceded_country
+		}
+		has_resource = {
+			type = energy
+			amount > 5000
+		}
+		has_resource = {
+			type = minerals
+			amount > 5000
+		}
+	}
+	title = mem_caretaker_origin_event.3251.name
+	desc = mem_caretaker_origin_event.3251.desc
+	option = {
+		name = mem_caretaker_origin_event.3251.option.a
+		custom_tooltip = mem_caretaker_origin_event.3251.option.a.tooltip
+		hidden_effect = {
+			add_resource = {
+				energy = -5000
+				minerals = -5000
+			}
+			event_target:mem_caretaker_secession_empire = {
+				add_resource = {
+					energy = 5000
+					minerals = 5000
+				}
+			}
+			add_opinion_modifier = {
+				who = event_target:mem_caretaker_secession_empire
+				modifier = mem_caretaker_resources_stolen
+			}
+		}
+	}
+}
+
+### Caretaker steals a fleet
+country_event = {
+	id = mem_caretaker_origin_event.3252
+	is_triggered_only = yes
+	picture = GFX_evt_fleet_neutral
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_secession
+		any_playable_country = {
+			has_country_flag = mem_caretaker_seceded_country
+		}
+		num_fleets > 1
+		is_at_war = no
+	}
+	title = mem_caretaker_origin_event.3252.name
+	desc = mem_caretaker_origin_event.3252.desc
+	option = {
+		name = mem_caretaker_origin_event.3252.option.a
+		custom_tooltip = mem_caretaker_origin_event.3252.option.a.tooltip
+		hidden_effect = {
+			random_owned_fleet = {
+				set_owner = event_target:mem_caretaker_secession_empire
+				order_forced_return = yes
+			}
+			add_opinion_modifier = {
+				who = event_target:mem_caretaker_secession_empire
+				modifier = mem_caretaker_resources_stolen
+			}
+		}
+	}
+}
+
+## ##################################################### ##
+##         Caretaker goes into exterminatus mode         ##
+## ##################################################### ##
+### Primary notification event
+country_event = {
+	id = mem_caretaker_origin_event.4000
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.4000.name
+	desc = mem_caretaker_origin_event.4000.desc
+	picture = GFX_evt_mem_caretaker_angry
+	trigger = {
+		has_origin = origin_mem_caretaker
+	}
+	immediate = {
+		mem_caretaker_clenup_after_breakup = yes
+		# capital_scope = {
+		# 	planet_event = {
+		# 		id = mem_caretaker_origin_event.4001
+		# 		days = 10
+		# 		random = 20
+		# 	}
+		# }
+		ordered_owned_planet = {
+			position = 0
+			order_by = trigger:num_armies
+			inverse = yes
+			limit = {
+				is_colony = yes
+				exists = owner
+				pop_amount > 100
+				mem_caretaker_presence_on_planet = yes
+			}
+			planet_event = {
+				id = mem_caretaker_origin_event.4001
+				days = 10
+				random = 20
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.4000.option.a
+	}
+	option = {
+		name = mem_caretaker_origin_event.4000.option.b
+	}
+	option = {
+		name = mem_caretaker_origin_event.4000.option.c
+		trigger = {
+			is_pacifist = yes
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.4000.option.d
+		trigger = {
+			is_militarist = yes
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.4000.option.e
+		trigger = {
+			is_materialist = yes
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.4000.option.f
+		trigger = {
+			is_spiritualist = yes
+		}
+	}
+	after = {
+		hidden_effect = {
+			country_event = {
+				id = mem_caretaker_origin_event.509
+				days = 10
+			}
+		}
+	}
+}
+
+### Notificaiton that brown matter is about to hit rotary air cooling device
+planet_event = {
+	id = mem_caretaker_origin_event.4001
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.4001.name
+	desc = mem_caretaker_origin_event.4001.desc
+	picture = GFX_evt_ground_combat
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+		}
+	}
+	immediate = {
+		owner = {
+			# set_country_flag = mem_caretaker_break_up
+			set_country_flag = mem_caretaker_experiment_scrapped
+		}
+		planet_event = {
+			id = mem_caretaker_origin_event.4002
+			days = 5
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.4001.option.a
+		hidden_effect = {
+			owner = {
+				country_event = {
+					id = mem_caretaker_origin_event.25000
+					days = 2
+				}
+			}
+		}
+	}
+}
+
+### Spawn robotic armies invading the planet hosting the Caretaker core
+planet_event = {
+	id = mem_caretaker_origin_event.4002
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			# has_country_flag = mem_caretaker_experiment_scrapped
+		}
+		mem_caretaker_presence_on_planet = yes		# should be fine
+	}
+	immediate = {
+		mem_caretaker_create_mem_caretaker_robots_species = yes
+		set_planet_flag = mem_caretaker_core_planet_take_over_attempt
+		# create Caretaker faction
+		create_country = {
+			name = "NAME_MEM_CARETAKER_COUNTRY"
+			type = mem_caretaker_faction_special
+			species = last_created_species
+			flag = {
+				icon = {
+					category = "mem"
+					file = "mem_caretaker_emblem.dds"
+				}
+				background = {
+					category = "backgrounds"
+					file = "00_solid.dds"
+				}
+				colors = {
+					"black"
+					"black"
+					"null"
+					"null"
+				}
+			}
+			auto_delete = no
+			ignore_initial_colony_error = yes
+			origin = origin_separatists
+			civics = {
+				civic = civic_machine_terminator
+				civic = civic_machine_warbots
+			}
+			contact_rule = on_action_only
+			authority = auth_machine_intelligence
+			ethos = {
+				ethic = ethic_gestalt_consciousness
+			}
+			effect = {
+				establish_communications_no_message = ROOT.owner
+				set_country_flag = mem_caretaker_faction
+				# set_variable = {
+				# 	which = planets_under_occupation
+				# 	value = 1
+				# }
+				save_global_event_target_as = mem_caretaker_exterminatus_faction@root.owner
+				# copy_techs_from = {
+				# 	target = root.owner
+				# }
+			}
+		}
+		# event_target:mem_caretaker_country = {
+		# 	declare_war = {
+		# 		target = root
+		# 		attacker_war_goal = wg_cleansing
+		# 		name = "Vengeance of the Caretaker"
+		# 	}
+		# }
+		# spawn armies : base armies
+		while = {
+			count = 30
+			create_army = {
+				name = "NAME_MEM_CARETAKER_SMALL_ARMY"
+				owner = event_target:mem_caretaker_exterminatus_faction@root.owner
+				type = robotic_occupation_army
+			}
+		}
+		# spawn armies : extra armies from mem_monitor stations
+		if = {
+			limit = {
+				has_building = building_mem_monitor_station_3
+			}
+			while = {
+				count = 12
+				create_army = {
+					name = "NAME_MEM_CARETAKER_SMALL_ARMY"
+					owner = event_target:mem_caretaker_exterminatus_faction@root.owner
+					type = robotic_occupation_army
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				has_building = building_mem_monitor_station_2
+			}
+			while = {
+				count = 9
+				create_army = {
+					name = "NAME_MEM_CARETAKER_SMALL_ARMY"
+					owner = event_target:mem_caretaker_exterminatus_faction@root.owner
+					type = robotic_occupation_army
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				has_building = building_mem_monitor_station_1
+			}
+			while = {
+				count = 6
+				create_army = {
+					name = "NAME_MEM_CARETAKER_SMALL_ARMY"
+					owner = event_target:mem_caretaker_exterminatus_faction@root.owner
+					type = robotic_occupation_army
+				}
+			}
+		}
+	}
+}
+
+### Caretaker armies lose on initial assault : core planet
+country_event = {
+	id = mem_caretaker_origin_event.4010
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.4010.name
+	desc = mem_caretaker_origin_event.4010.desc
+	picture = GFX_evt_victorious_army
+	location = FROMFROM
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_break_up
+		has_country_flag = mem_caretaker_experiment_scrapped
+		FROM = {
+			is_country_type = mem_caretaker_faction_special
+		}
+	}
+	immediate = {
+		# event_target:mem_caretaker_exterminatus_faction@root = {
+		# 	change_variable = {
+		# 		which = planets_under_occupation
+		# 		value = -1
+		# 	}
+		# }
+		FROMFROM = {
+			remove_planet_flag = mem_caretaker_core_planet_take_over_attempt
+			set_planet_flag = mem_caretaker_core_planet_take_over_failed
+			remove_modifier = pm_mem_caretaker_free_settler_discord
+			if = {
+				limit = {
+					has_deposit = d_mem_caretaker_free_settlements
+				}
+				create_pop = {
+					species = owner
+				}
+				create_pop = {
+					species = owner
+				}
+			}
+		}
+		# schedule event to study the destroyed Caretaker core
+		root = {
+			set_country_flag = mem_caretaker_destoryed
+			country_event = {
+				id = mem_caretaker_origin_event.4200
+				days = 3
+			}
+		}
+		from = {
+			destroy_country = yes
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.4010.option.a
+	}
+	option = {
+		name = mem_caretaker_origin_event.4010.option.b
+		trigger = {
+			is_militarist = yes
+		}
+	}
+	after = {
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 6
+			min = 5000
+		}
+	}
+}
+
+### Caretaker armies win on initial assault : core planet
+country_event = {
+	id = mem_caretaker_origin_event.4020
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.4020.name
+	desc = mem_caretaker_origin_event.4020.desc
+	picture = GFX_evt_organic_oppression
+	location = FROMFROM
+	trigger = {
+		has_origin = origin_mem_caretaker
+		# has_country_flag = mem_caretaker_break_up
+		has_country_flag = mem_caretaker_experiment_scrapped
+		FROM = {
+			is_country_type = mem_caretaker_faction_special
+			#has_country_flag = mem_caretaker_faction
+		}
+	}
+	immediate = {
+		FROMFROM = {
+			remove_planet_flag = mem_caretaker_core_planet_take_over_attempt
+			set_planet_flag = mem_caretaker_core_planet_take_over_success
+			set_owner = event_target:mem_caretaker_exterminatus_faction@root
+			# set_controller = root
+			remove_deposit = d_mem_caretaker_free_settlements
+			remove_modifier = pm_mem_caretaker_free_settler_discord
+			# Caretaker starts purging pops on the planet it takes over
+			# every_owned_pop_group = {
+			# 	# unemploy_pop = yes
+			# 	set_pop_group_flag = event_purge
+			# }
+		}
+		from = {
+			destroy_country = yes
+		}
+		every_owned_planet = {
+			limit = {
+				mem_caretaker_presence_on_planet = yes
+			}
+			random_list = {
+				30 = {
+				}
+				30 = {
+					planet_event = {
+						id = mem_caretaker_origin_event.4021
+						days = 10
+						random = 30
+					}
+				}
+				30 = {
+					planet_event = {
+						id = mem_caretaker_origin_event.4021
+						days = 60
+						random = 180
+					}
+				}
+			}
+		}
+		mem_caretaker_create_mem_caretaker_robots_species = yes
+		# create Caretaker faction
+		create_country = {
+			name = "NAME_MEM_CARETAKER_COUNTRY"
+			type = default
+			species = last_created_species
+			flag = {
+				icon = {
+					category = "mem"
+					file = "mem_caretaker_emblem.dds"
+				}
+				background = {
+					category = "backgrounds"
+					file = "00_solid.dds"
+				}
+				colors = {
+					"black"
+					"black"
+					"null"
+					"null"
+				}
+			}
+			auto_delete = no
+			ignore_initial_colony_error = yes
+			origin = origin_separatists
+			civics = {
+				civic = civic_machine_terminator
+				civic = civic_machine_warbots
+			}
+			# contact_rule = on_action_only
+			authority = auth_machine_intelligence
+			ethos = {
+				ethic = ethic_gestalt_consciousness
+			}
+			effect = {
+				establish_communications_no_message = ROOT
+				set_country_flag = mem_caretaker_faction
+				# set_variable = {
+				# 	which = planets_under_occupation
+				# 	value = 1
+				# }
+				save_global_event_target_as = mem_caretaker_exterminatus_faction@root
+				save_event_target_as = mem_caretaker_country
+				copy_techs_from = {
+					target = root
+				}
+			}
+		}
+		event_target:mem_caretaker_country = {
+			declare_war = {
+				target = root
+				attacker_war_goal = wg_cleansing
+				name = "Vengeance of the Caretaker"
+			}
+			while = {
+				count = 30
+				create_army = {
+					owner = event_target:mem_caretaker_country
+					type = robotic_occupation_army
+				}
+			}
+		}
+		fromfrom = {
+			set_owner = event_target:mem_caretaker_country
+			validate_and_repair_planet_buildings_and_districts = yes
+			while = {
+				count = 50
+				create_army = {
+					owner = event_target:mem_caretaker_country
+					type = care_defensive_protocols
+				}
+			}
+		}
+		owner = {
+			create_fleet_from_naval_cap = 0.5
+			last_created_fleet = {
+				set_location = root.fromfrom
+				set_owner = event_target:mem_caretaker_country
+			}
+		}
+		FROMFROM = {
+			solar_system = {
+				starbase = {
+					set_owner = event_target:mem_caretaker_country
+				}
+			}
+			set_owner = event_target:mem_caretaker_country
+			create_pop_group = {
+				size = 2300
+				species = event_target:mem_caretaker_country.owner_main_species
+			}
+		}
+		country_event = {
+			id = mem_caretaker_origin_event.4100
+			days = 90
+		}
+		# schedule Caretaker trying to take over hub worlds
+	}
+	option = {
+		name = mem_caretaker_origin_event.4020.option.a
+	}
+}
+
+### Spawn robotic armies invading the random planets
+planet_event = {
+	id = mem_caretaker_origin_event.4021
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		exists = owner
+		exists = event_target:mem_caretaker_exterminatus_faction@root.owner
+		owner = {
+			has_origin = origin_mem_caretaker
+		}
+		mem_caretaker_presence_on_planet = yes		# should be fine
+	}
+	immediate = {
+		# spawn armies : base armies
+		while = {
+			count = 10
+			create_army = {
+				name = "NAME_MEM_CARETAKER_SMALL_ARMY"
+				owner = event_target:mem_caretaker_exterminatus_faction@root.owner
+				type = robotic_occupation_army
+			}
+		}
+		# spawn armies : extra armies from mem_monitor stations
+		if = {
+			limit = {
+				has_building = building_mem_monitor_station_3
+			}
+			while = {
+				count = 12
+				create_army = {
+					name = "NAME_MEM_CARETAKER_SMALL_ARMY"
+					owner = event_target:mem_caretaker_exterminatus_faction@root.owner
+					type = robotic_occupation_army
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				has_building = building_mem_monitor_station_2
+			}
+			while = {
+				count = 9
+				create_army = {
+					name = "NAME_MEM_CARETAKER_SMALL_ARMY"
+					owner = event_target:mem_caretaker_exterminatus_faction@root.owner
+					type = robotic_occupation_army
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				has_building = building_mem_monitor_station_1
+			}
+			while = {
+				count = 6
+				create_army = {
+					name = "NAME_MEM_CARETAKER_SMALL_ARMY"
+					owner = event_target:mem_caretaker_exterminatus_faction@root.owner
+					type = robotic_occupation_army
+				}
+			}
+		}
+	}
+}
+
+### Core world is taken back from the Caretaker
+country_event = {
+	id = mem_caretaker_origin_event.4030
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.4030.name
+	desc = mem_caretaker_origin_event.4030.desc
+	picture = GFX_evt_victorious_army
+	location = FROMFROM
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_break_up
+		has_country_flag = mem_caretaker_experiment_scrapped
+		from = {
+			has_country_flag = mem_caretaker_faction
+		}
+		FROMFROM = {
+			has_planet_flag = mem_caretaker_core_planet_take_over_success
+		}
+	}
+	immediate = {
+		# event_target:mem_caretaker_exterminatus_faction@root = {
+		# 	change_variable = {
+		# 		which = planets_under_occupation
+		# 		value = -1
+		# 	}
+		# }
+		FROMFROM = {
+			remove_planet_flag = mem_caretaker_core_planet_take_over_success
+			set_owner = ROOT
+			every_owned_pop_group = {
+				remove_pop_group_flag = event_purge
+				# unemploy_pop = yes
+			}
+			every_owned_pop_group = {
+				remove_modifier = "pop_recently_conquered"
+				add_modifier = {
+					modifier = "pop_liberation_fever"
+					days = 3600
+				}
+			}
+		}
+		# schedule event to study the destroyed Caretaker core
+		root = {
+			set_country_flag = mem_caretaker_destoryed
+			country_event = {
+				id = mem_caretaker_origin_event.4200
+				days = 3
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.4030.option.a
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 6
+			min = 5000
+		}
+	}
+	after = {
+		from = {
+			destroy_country = yes
+		}
+		add_relic = r_memcaretaker_core
+	}
+}
+
+### A planet occupied by the Caretaker is liberated by someone who isn't the previous host-country of the Caretaker
+country_event = {
+	id = mem_caretaker_origin_event.4040
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		NOR = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_break_up
+			has_country_flag = mem_caretaker_experiment_scrapped
+		}
+		FROMFROM = {
+			exists = event_target:mem_caretaker_exterminatus_faction@root
+			controller = {
+				is_same_value = event_target:mem_caretaker_exterminatus_faction@root
+			}
+			OR = {
+				has_planet_flag = mem_caretaker_core_planet_take_over_success
+				has_planet_flag = mem_caretaker_hub_planet_take_over_success
+			}
+		}
+	}
+	immediate = {
+		# event_target:mem_caretaker_exterminatus_faction@root = {
+		# 	change_variable = {
+		# 		which = planets_under_occupation
+		# 		value = -1
+		# 	}
+		# }
+		FROMFROM = {
+			remove_planet_flag = mem_caretaker_core_planet_take_over_success
+			set_owner = ROOT
+			every_owned_pop_group = {
+				remove_pop_group_flag = event_purge
+				# unemploy_pop = yes
+			}
+			every_owned_pop_group = {
+				remove_modifier = "pop_recently_conquered"
+				add_modifier = {
+					modifier = "pop_liberation_fever"
+					days = 1800
+				}
+			}
+		}
+	}
+}
+
+### Notification that brown matter is about to hit rotary air cooling device again
+country_event = {
+	id = mem_caretaker_origin_event.4100
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.4100.name
+	desc = mem_caretaker_origin_event.4100.desc
+	picture = GFX_evt_ground_combat
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_break_up
+		has_country_flag = mem_caretaker_experiment_scrapped
+		any_owned_planet = {
+			mem_caretaker_presence_on_planet = yes
+		}
+	}
+	immediate = {
+		# schedule Caretaker attack on every owned planet that still has hub
+		every_owned_planet = {
+			limit = {
+				NOR = {
+					has_planet_flag = mem_caretaker_core_planet_take_over_failed
+					has_planet_flag = mem_caretaker_core_planet_take_over_success
+				}
+				mem_caretaker_presence_on_planet = yes
+			}
+			planet_event = {
+				id = mem_caretaker_origin_event.4101
+				days = 1
+			}
+		}
+		# begin looping event to mem_monitor Caretaker faction planet occupation progress
+		# country_event = {
+		# 	id = mem_caretaker_origin_event.4102
+		# 	days = 30
+		# }
+	}
+	option = {
+		name = mem_caretaker_origin_event.4100.option.a
+	}
+}
+
+### Spawn robotic armies invading the planet hosting the Caretaker hubs
+planet_event = {
+	id = mem_caretaker_origin_event.4101
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			has_country_flag = mem_caretaker_experiment_scrapped
+		}
+		has_building = building_mem_caretaker_outreach
+	}
+	immediate = {
+		# mem_caretaker faction should still exist so we don't need to create a new one
+		set_planet_flag = mem_caretaker_hub_planet_take_over_attempt
+		# event_target:mem_caretaker_exterminatus_faction@root.owner = {
+		# 	change_variable = {
+		# 		which = planets_under_occupation
+		# 		value = 1
+		# 	}
+		# }
+		# spawn armies : base armies
+		if = {
+			limit = {
+				pop_amount > 8000
+			}
+			while = {
+				count = 12
+				create_army = {
+					name = "NAME_MEM_CARETAKER_SMALL_ARMY"
+					owner = event_target:mem_caretaker_exterminatus_faction@root.owner
+					type = robotic_occupation_army
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				pop_amount > 4000
+			}
+			while = {
+				count = 9
+				create_army = {
+					name = "NAME_MEM_CARETAKER_SMALL_ARMY"
+					owner = event_target:mem_caretaker_exterminatus_faction@root.owner
+					type = robotic_occupation_army
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				pop_amount > 1000
+			}
+			while = {
+				count = 6
+				create_army = {
+					name = "NAME_MEM_CARETAKER_SMALL_ARMY"
+					owner = event_target:mem_caretaker_exterminatus_faction@root.owner
+					type = robotic_occupation_army
+				}
+			}
+		}
+		else = {
+			while = {
+				count = 3
+				create_army = {
+					name = "NAME_MEM_CARETAKER_SMALL_ARMY"
+					owner = event_target:mem_caretaker_exterminatus_faction@root.owner
+					type = robotic_occupation_army
+				}
+			}
+		}
+		# spawn armies : extra armies from mem_monitor stations
+		if = {
+			limit = {
+				has_building = building_mem_monitor_station_3
+			}
+			while = {
+				count = 3
+				create_army = {
+					name = "NAME_MEM_CARETAKER_SMALL_ARMY"
+					owner = event_target:mem_caretaker_exterminatus_faction@root.owner
+					type = robotic_occupation_army
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				has_building = building_mem_monitor_station_2
+			}
+			while = {
+				count = 2
+				create_army = {
+					name = "NAME_MEM_CARETAKER_SMALL_ARMY"
+					owner = event_target:mem_caretaker_exterminatus_faction@root.owner
+					type = robotic_occupation_army
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				has_building = building_mem_monitor_station_1
+			}
+			create_army = {
+				name = "NAME_MEM_CARETAKER_SMALL_ARMY"
+				owner = event_target:mem_caretaker_exterminatus_faction@root.owner
+				type = robotic_occupation_army
+			}
+		}
+	}
+}
+
+### Keep track on how many planets Caretaker has under occupation so that the faction can be destroyed when it's done for
+# use previous host-country as scope for event to have access to correct @root in global event target
+# country_event = {
+# 	id = mem_caretaker_origin_event.4102
+# 	is_triggered_only = yes
+# 	hide_window = yes
+# 	trigger = {
+# 		has_origin = origin_mem_caretaker
+# 		has_country_flag = mem_caretaker_break_up
+# 		has_country_flag = mem_caretaker_experiment_scrapped
+# 		NOT = {
+# 			has_country_flag = mem_caretaker_destoryed
+# 		}
+# 		exists = event_target:mem_caretaker_exterminatus_faction@root
+# 	}
+# 	immediate = {
+# 		# switch to the Caretaker faction
+# 		event_target:mem_caretaker_exterminatus_faction@root = {
+# 			if = {
+# 				limit = {
+# 					check_variable = {
+# 						which = planets_under_occupation
+# 						value < 1
+# 					}
+# 				}
+# 				root = {
+# 					set_country_flag = mem_caretaker_destoryed
+# 				}
+# 				# clear_global_event_target = mem_caretaker_core_planet@root
+# 				clear_global_event_target = mem_caretaker_exterminatus_faction@root
+# 				destroy_country = yes
+# 			}
+# 			else = {
+# 				root = {
+# 					# loop event
+# 					country_event = {
+# 						id = mem_caretaker_origin_event.4102
+# 						days = 30
+# 					}
+# 				}
+# 			}
+# 		}
+# 	}
+# }
+### Caretaker armies lose on initial assault : hub planet
+# country_event = {
+# 	id = mem_caretaker_origin_event.4110
+# 	is_triggered_only = yes
+# 	title = mem_caretaker_origin_event.4110.name
+# 	desc = mem_caretaker_origin_event.4110.desc
+# 	picture = GFX_evt_victorious_army
+# 	location = FROMFROM
+# 	trigger = {
+# 		has_origin = origin_mem_caretaker
+# 		has_country_flag = mem_caretaker_break_up
+# 		has_country_flag = mem_caretaker_experiment_scrapped
+# 		exists = event_target:mem_caretaker_exterminatus_faction@root
+# 		FROM = {
+# 			is_same_value = event_target:mem_caretaker_exterminatus_faction@root
+# 		}
+# 		FROMFROM = {
+# 			has_planet_flag = mem_caretaker_hub_planet_take_over_attempt
+# 		}
+# 	}
+# 	immediate = {
+# 		event_target:mem_caretaker_exterminatus_faction@root = {
+# 			change_variable = {
+# 				which = planets_under_occupation
+# 				value = -1
+# 			}
+# 		}
+# 		FROMFROM = {
+# 			remove_planet_flag = mem_caretaker_hub_planet_take_over_attempt
+# 			set_planet_flag = mem_caretaker_hub_planet_take_over_failed
+# 			mem_caretaker_hub_clean_up = yes
+# 			remove_modifier = pm_mem_caretaker_free_settler_discord
+# 			if = {
+# 				limit = {
+# 					has_deposit = d_mem_caretaker_free_settlements
+# 				}
+# 				create_pop = {
+# 					species = owner
+# 				}
+# 				create_pop = {
+# 					species = owner
+# 				}
+# 			}
+# 		}
+# 	}
+# 	option = {
+# 		name = mem_caretaker_origin_event.4110.option.a
+# 	}
+# 	option = {
+# 		name = mem_caretaker_origin_event.4110.option.b
+# 		trigger = {
+# 			OR = {
+# 				has_ethic = ethic_militarist
+# 				has_ethic = ethic_fanatic_militarist
+# 			}
+# 		}
+# 	}
+# }
+### Caretaker armies win on initial assualt : hub planet
+# country_event = {
+# 	id = mem_caretaker_origin_event.4120
+# 	is_triggered_only = yes
+# 	title = mem_caretaker_origin_event.4120.name
+# 	desc = mem_caretaker_origin_event.4120.desc
+# 	picture = GFX_evt_organic_oppression
+# 	location = FROMFROM
+# 	trigger = {
+# 		has_origin = origin_mem_caretaker
+# 		has_country_flag = mem_caretaker_break_up
+# 		has_country_flag = mem_caretaker_experiment_scrapped
+# 		exists = event_target:mem_caretaker_exterminatus_faction@root
+# 		FROM = {
+# 			is_same_value = event_target:mem_caretaker_exterminatus_faction@root
+# 		}
+# 		FROMFROM = {
+# 			has_planet_flag = mem_caretaker_hub_planet_take_over_attempt
+# 		}
+# 	}
+# 	immediate = {
+# 		FROMFROM = {
+# 			remove_planet_flag = mem_caretaker_hub_planet_take_over_attempt
+# 			set_planet_flag = mem_caretaker_hub_planet_take_over_success
+# 			mem_caretaker_hub_clean_up = yes
+# 			remove_deposit = d_mem_caretaker_free_settlements
+# 			remove_modifier = pm_mem_caretaker_free_settler_discord
+# 			# Caretaker starts purging pops on the planet it takes over
+# 			every_owned_pop_group = {
+# 				set_pop_group_flag = event_purge
+# 				# unemploy_pop = yes
+# 			}
+# 		}
+# 	}
+# 	option = {
+# 		name = mem_caretaker_origin_event.4120.option.a
+# 	}
+# }
+# ### Hub world is taken back from the Caretaker
+# country_event = {
+# 	id = mem_caretaker_origin_event.4130
+# 	is_triggered_only = yes
+# 	title = mem_caretaker_origin_event.4130.name
+# 	desc = mem_caretaker_origin_event.4130.desc
+# 	picture = GFX_evt_victorious_army
+# 	location = FROMFROM
+# 	trigger = {
+# 		has_origin = origin_mem_caretaker
+# 		has_country_flag = mem_caretaker_break_up
+# 		has_country_flag = mem_caretaker_experiment_scrapped
+# 		FROMFROM = {
+# 			exists = event_target:mem_caretaker_exterminatus_faction@root
+# 			controller = {
+# 				is_same_value = event_target:mem_caretaker_exterminatus_faction@root
+# 			}
+# 			has_planet_flag = mem_caretaker_hub_planet_take_over_success
+# 		}
+# 	}
+# 	immediate = {
+# 		FROM = {
+# 			change_variable = {
+# 				which = planets_under_occupation
+# 				value = -1
+# 			}
+# 		}
+# 		FROMFROM = {
+# 			remove_planet_flag = mem_caretaker_hub_planet_take_over_success
+# 			set_owner = ROOT
+# 			every_owned_pop_group = {
+# 				remove_pop_group_flag = event_purge
+# 				# unemploy_pop = yes
+# 			}
+# 			every_owned_pop_group = {
+# 				remove_modifier = "pop_recently_conquered"
+# 				add_modifier = {
+# 					modifier = "pop_liberation_fever"
+# 					days = 3600
+# 				}
+# 			}
+# 		}
+# 	}
+# 	option = {
+# 		name = mem_caretaker_origin_event.4130.option.a
+# 	}
+# }
+### Create special project to study destroyed Caretaker Core - phase 1
+country_event = {
+	id = mem_caretaker_origin_event.4200
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.4200.name
+	desc = mem_caretaker_origin_event.4200.desc
+	picture = GFX_evt_generator_powerup
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_destoryed
+		has_country_flag = mem_caretaker_experiment_scrapped
+	}
+	option = {
+		name = mem_caretaker_origin_event.4200.option.a
+		custom_tooltip = mem_caretaker_origin_event.4200.option.a.tooltip
+		hidden_effect = {
+			save_global_event_target_as = mem_caretaker_in_search_for_awful_truth@root
+			capital_scope = {
+				enable_special_project = {
+					name = MEM_CARETAKER_EXTRACT_DATABANKS
+					location = this
+					owner = event_target:mem_caretaker_in_search_for_awful_truth@root
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.4200.option.b
+		custom_tooltip = mem_caretaker_origin_event.4200.option.b.tooltip
+		hidden_effect = {
+			# give country-level unity production modifier and some influence
+			add_modifier = {
+				modifier = mem_caretaker_destroyed_databanks
+				days = -1
+			}
+			add_resource = {
+				influence = 250
+			}
+		}
+	}
+}
+
+### Create a special project to study destroyed Caretaker Core - phase 2
+country_event = {
+	id = mem_caretaker_origin_event.4201
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.4201.name
+	desc = mem_caretaker_origin_event.4201.desc
+	picture = GFX_evt_sapient_AI
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_destoryed
+		has_country_flag = mem_caretaker_experiment_scrapped
+	}
+	option = {
+		name = mem_caretaker_origin_event.4201.option.a
+		custom_tooltip = mem_caretaker_origin_event.4201.option.a.tooltip
+		hidden_effect = {
+			capital_scope = {
+				enable_special_project = {
+					name = MEM_CARETAKER_DECRYPT_DATABANKS
+					location = this
+					owner = event_target:mem_caretaker_in_search_for_awful_truth@root
+				}
+			}
+		}
+	}
+}
+
+### Create special project to study destroyed Caretaker Core - phase 3
+country_event = {
+	id = mem_caretaker_origin_event.4202
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.4202.name
+	desc = mem_caretaker_origin_event.4202.desc
+	picture = GFX_evt_sapient_AI
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_destoryed
+		has_country_flag = mem_caretaker_experiment_scrapped
+	}
+	option = {
+		name = mem_caretaker_origin_event.4202.option.a
+		custom_tooltip = mem_caretaker_origin_event.4202.option.a.tooltip
+		hidden_effect = {
+			capital_scope = {
+				enable_special_project = {
+					name = MEM_CARETAKER_ANALYSE_DATABANKS
+					location = this
+					owner = event_target:mem_caretaker_in_search_for_awful_truth@root
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.4202.option.b
+		custom_tooltip = mem_caretaker_origin_event.4202.option.b.tooltip
+		hidden_effect = {
+			# give country-level unity production modifier and some influence
+			add_modifier = {
+				modifier = mem_caretaker_destroyed_databanks
+				days = -1
+			}
+			add_resource = {
+				influence = 250
+			}
+		}
+	}
+}
+
+### The awful truth
+country_event = {
+	id = mem_caretaker_origin_event.4203
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.4203.name
+	desc = mem_caretaker_origin_event.4203.desc
+	picture = GFX_evt_circuitry_modification
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_destoryed
+		has_country_flag = mem_caretaker_experiment_scrapped
+	}
+	immediate = {
+		set_country_flag = mem_caretaker_awful_truth_learned
+		clear_global_event_target = mem_caretaker_in_search_for_awful_truth@root
+		save_global_event_target_as = mem_caretaker_searching_for_cure@root
+	}
+	# biological ascension complete : can cure themselves
+	option = {
+		name = mem_caretaker_origin_event.4203.option.a
+		trigger = {
+			has_genetic_ascension = yes
+		}
+		add_modifier = {
+			modifier = mem_caretaker_knows_awful_truth
+			days = -1
+		}
+		capital_scope = {
+			enable_special_project = {
+				name = MEM_CARETAKER_BIO_ASCENSION_CURE
+				location = this
+				owner = event_target:mem_caretaker_searching_for_cure@root
+			}
+		}
+	}
+	# psionic ascension complete and has access to the shroud : can pray to 'Gods' for cure
+	option = {
+		name = mem_caretaker_origin_event.4203.option.b
+		trigger = {
+			has_psionic_ascension = yes
+			has_country_flag = shroud_intro
+		}
+		add_modifier = {
+			modifier = mem_caretaker_knows_awful_truth
+			days = -1
+		}
+		capital_scope = {
+			enable_special_project = {
+				name = MEM_CARETAKER_PSI_ASCENSION_CURE
+				location = this
+				owner = event_target:mem_caretaker_searching_for_cure@root
+			}
+		}
+	}
+	# psionic ascension without access to the shroud : launch a watcher event to issue special project later
+	option = {
+		name = mem_caretaker_origin_event.4203.option.c
+		custom_tooltip = mem_caretaker_origin_event.4203.option.c.tooltip
+		trigger = {
+			has_psionic_ascension = yes
+			has_country_flag = shroud_intro
+		}
+		add_modifier = {
+			modifier = mem_caretaker_knows_awful_truth
+			days = -1
+		}
+		hidden_effect = {
+			country_event = {
+				id = mem_caretaker_origin_event.4204
+				days = 60
+			}
+		}
+	}
+	# synthetic ascension with mind uploading project completed : doesn't need to do anything
+	option = {
+		name = mem_caretaker_origin_event.4203.option.d
+		trigger = {
+			has_synthetic_ascension = yes
+			has_country_flag = synthetic_empire
+		}
+		add_modifier = {
+			modifier = mem_caretaker_knows_awful_truth
+			days = -1
+		}
+	}
+	# synthetic ascension, but mind uploading project not completed : doesn't really need to do anything either
+	option = {
+		name = mem_caretaker_origin_event.4203.option.e
+		trigger = {
+			has_synthetic_ascension = yes
+			NOT = {
+				has_country_flag = synthetic_empire
+			}
+		}
+		add_modifier = {
+			modifier = mem_caretaker_knows_awful_truth
+			days = -1
+		}
+	}
+	# is not a fanatic purifier AND there is a Xenophile FE in the galaxy AND communications have been established : ask them for cure
+	option = {
+		name = mem_caretaker_origin_event.4203.option.f
+		custom_tooltip = mem_caretaker_origin_event.4203.option.f.tooltip
+		trigger = {
+			NOT = {
+				is_homicidal = yes
+			}
+			any_country = {
+				is_fallen_empire_xenophile = yes
+				has_communications = root
+			}
+		}
+		hidden_effect = {
+			random_country = {
+				limit = {
+					is_fallen_empire_xenophile = yes
+					has_communications = root
+				}
+				save_global_event_target_as = mem_caretaker_xenophile_fe@root
+			}
+			country_event = {
+				id = mem_caretaker_origin_event.4320
+				days = 1
+			}
+		}
+		add_modifier = {
+			modifier = mem_caretaker_knows_awful_truth
+			days = -1
+		}
+	}
+	# is not a fanatic purifier AND there is a Xenophile FE in the galaxy AND communications have not been established : ask them for cure
+	option = {
+		name = mem_caretaker_origin_event.4203.option.g
+		custom_tooltip = mem_caretaker_origin_event.4203.option.g.tooltip
+		trigger = {
+			NOT = {
+				is_homicidal = yes
+			}
+			any_country = {
+				is_fallen_empire_xenophile = yes
+				NOT = {
+					has_communications = root
+				}
+			}
+		}
+		hidden_effect = {
+			random_country = {
+				limit = {
+					is_fallen_empire_xenophile = yes
+					NOT = {
+						has_communications = root
+					}
+				}
+				save_global_event_target_as = mem_caretaker_xenophile_fe@root
+			}
+			ROOT = {
+				set_country_flag = mem_caretaker_seeking_xenophile_fe
+				country_event = {
+					id = mem_caretaker_origin_event.4322
+					days = 30
+					random = 30
+				}
+			}
+		}
+		add_modifier = {
+			modifier = mem_caretaker_knows_awful_truth
+			days = -1
+		}
+	}
+	# keep the infertility trait for much larger unity bonus
+	option = {
+		name = mem_caretaker_origin_event.4203.option.h
+		#custom_tooltip = mem_caretaker_origin_event.4203.option.h.tooltip
+		#hidden_effect = {
+		add_modifier = {
+			modifier = mem_caretaker_fortitude
+			days = -1
+		}
+		add_resource = {
+			influence = 250
+		}
+		#}
+	}
+}
+
+### Gatekeeper event for psionic ascension cure (waiting for the empire to breach the shroud)
+country_event = {
+	id = mem_caretaker_origin_event.4204
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_awful_truth_learned
+		NOT = {
+			has_country_flag = mem_caretaker_delayed_psi_cure
+		}
+	}
+	immediate = {
+		# if the shroud is breached - issue the special project
+		if = {
+			limit = {
+				has_country_flag = shroud_intro
+			}
+			set_country_flag = mem_caretaker_delayed_psi_cure
+			country_event = {
+				id = mem_caretaker_origin_event.4205
+				days = -1
+			}
+		}
+		# otherwise - wait longer
+		else = {
+			country_event = {
+				id = mem_caretaker_origin_event.4204
+				days = 60
+			}
+		}
+	}
+}
+
+### Late issuing of the special project to find cure to sterility in the shroud
+country_event = {
+	id = mem_caretaker_origin_event.4205
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.4205.name
+	desc = mem_caretaker_origin_event.4205.desc
+	picture = GFX_evt_psionics
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_awful_truth_learned
+		has_country_flag = shroud_intro
+	}
+	option = {
+		name = mem_caretaker_origin_event.4205.option.a
+		hidden_effect = {
+			save_global_event_target_as = mem_caretaker_searching_for_cure@root
+			capital_scope = {
+				enable_special_project = {
+					name = MEM_CARETAKER_PSI_ASCENSION_CURE
+					location = this
+					owner = event_target:mem_caretaker_searching_for_cure@root
+				}
+			}
+		}
+	}
+}
+
+### sterility cured : bio ascension
+country_event = {
+	id = mem_caretaker_origin_event.4300
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.4300.name
+	desc = mem_caretaker_origin_event.4300.desc
+	picture = GFX_evt_circuitry_modification
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_awful_truth_learned
+	}
+	immediate = {
+	}
+	option = {
+		name = mem_caretaker_origin_event.4300.option.a
+		trigger = {
+			owner_main_species = {
+				has_trait = trait_common_sterility
+			}
+		}
+		custom_tooltip = mem_caretaker_origin_event.4300.option.a
+		hidden_effect = {
+			country_event = {
+				id = mem_caretaker_origin_event.4330
+				days = 0
+			}
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.4300.option.b
+		trigger = {
+			NOT = {
+				owner_main_species = {
+					has_trait = trait_common_sterility
+				}
+			}
+		}
+		custom_tooltip = mem_caretaker_origin_event.4300.option.a
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 12
+		}
+		add_monthly_resource_mult = {
+			resource = society_research
+			value = 12
+		}
+	}
+}
+
+### sterility cured : psi ascension
+country_event = {
+	id = mem_caretaker_origin_event.4310
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.4310.name
+	desc = mem_caretaker_origin_event.4310.desc
+	picture = GFX_evt_psionics
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_awful_truth_learned
+	}
+	immediate = {
+		country_event = {
+			id = mem_caretaker_origin_event.4330
+			days = 0
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.4310.option.a
+		custom_tooltip = mem_caretaker_origin_event.4310.option.a
+	}
+}
+
+### Contact Xenophile FE
+country_event = {
+	id = mem_caretaker_origin_event.4320
+	is_triggered_only = yes
+	diplomatic = yes
+	title = mem_caretaker_origin_event.4320.name
+	desc = mem_caretaker_origin_event.4320.desc
+	picture_event_data = {
+		portrait = event_target:mem_caretaker_xenophile_fe@root
+		planet_background = event_target:mem_caretaker_xenophile_fe@root
+		graphical_culture = event_target:mem_caretaker_xenophile_fe@root
+		city_level = event_target:mem_caretaker_xenophile_fe@root
+		room = event_target:mem_caretaker_xenophile_fe@root
+	}
+	option = {
+		name = mem_caretaker_origin_event.4320.option.a
+		hidden_effect = {
+			# call cure delivered event
+			country_event = {
+				id = mem_caretaker_origin_event.4321
+				days = 180
+			}
+		}
+	}
+}
+
+### Xenophile FE delivers the cure
+country_event = {
+	id = mem_caretaker_origin_event.4321
+	is_triggered_only = yes
+	diplomatic = yes
+	title = mem_caretaker_origin_event.4321.name
+	desc = mem_caretaker_origin_event.4321.desc
+	picture_event_data = {
+		portrait = event_target:mem_caretaker_xenophile_fe@root
+		planet_background = event_target:mem_caretaker_xenophile_fe@root
+		graphical_culture = event_target:mem_caretaker_xenophile_fe@root
+		city_level = event_target:mem_caretaker_xenophile_fe@root
+		room = event_target:mem_caretaker_xenophile_fe@root
+	}
+	option = {
+		name = mem_caretaker_origin_event.4321.option.a
+		custom_tooltip = mem_caretaker_origin_event.4321.option.a.tooltip
+		hidden_effect = {
+			# remove sterility trait from pops
+			country_event = {
+				id = mem_caretaker_origin_event.4330
+				days = 0
+			}
+		}
+	}
+	after = {
+		clear_global_event_target = mem_caretaker_xenophile_fe@root
+	}
+}
+
+### Xenophile FE establishes communications
+country_event = {
+	id = mem_caretaker_origin_event.4322
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_seeking_xenophile_fe
+	}
+	immediate = {
+		event_target:mem_caretaker_xenophile_fe@root = {
+			establish_communications_no_message = ROOT
+		}
+		ROOT = {
+			country_event = {
+				id = mem_caretaker_origin_event.4323
+				days = 1
+			}
+		}
+	}
+}
+
+### Notification about the communications
+country_event = {
+	id = mem_caretaker_origin_event.4323
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.4323.name
+	desc = mem_caretaker_origin_event.4323.desc
+	picture = GFX_evt_fallen_empire
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_seeking_xenophile_fe
+	}
+	option = {
+		name = mem_caretaker_origin_event.4323.option.a
+		hidden_effect = {
+			country_event = {
+				id = mem_caretaker_origin_event.4324
+				days = 0
+			}
+		}
+	}
+}
+
+### Contact from FE about cure
+country_event = {
+	id = mem_caretaker_origin_event.4324
+	is_triggered_only = yes
+	diplomatic = yes
+	title = mem_caretaker_origin_event.4324.name
+	desc = mem_caretaker_origin_event.4324.desc
+	picture_event_data = {
+		portrait = event_target:mem_caretaker_xenophile_fe@root
+		planet_background = event_target:mem_caretaker_xenophile_fe@root
+		graphical_culture = event_target:mem_caretaker_xenophile_fe@root
+		city_level = event_target:mem_caretaker_xenophile_fe@root
+		room = event_target:mem_caretaker_xenophile_fe@root
+	}
+	option = {
+		name = mem_caretaker_origin_event.4324.option.a
+		hidden_effect = {
+			# call cure delivered event
+			country_event = {
+				id = mem_caretaker_origin_event.4321
+				days = 180
+			}
+		}
+	}
+}
+
+### Modify species : swap 'common sterility' trait for 'cured sterility' trait
+country_event = {
+	id = mem_caretaker_origin_event.4330
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_awful_truth_learned
+	}
+	immediate = {
+		# main species
+		every_owned_pop_group = {
+			limit = {
+				is_same_species = root
+			}
+			modify_species = {
+				remove_trait = trait_common_sterility
+				add_trait = trait_sterility_cured
+			}
+			species = {
+				save_event_target_as = sterility_cured_main_species
+			}
+		}
+		change_dominant_species = {
+			species = event_target:sterility_cured_main_species
+		}
+		# species from other mem_caretaker empire if any exist
+		while = {
+			limit = {
+				any_owned_pop_group = {
+					is_sapient = yes
+					is_being_purged = no
+					is_being_assimilated = no
+					has_trait = trait_common_sterility
+				}
+			}
+			random_owned_pop_group = {
+				limit = {
+					is_sapient = yes
+					is_being_purged = no
+					is_being_assimilated = no
+					species = {
+						has_trait = trait_common_sterility
+					}
+				}
+				modify_species = {
+					remove_trait = trait_common_sterility
+					add_trait = trait_sterility_cured
+				}
+			}
+		}
+	}
+}
+
+
+# Stellaris Modjam 2020 - Caretaker
+# AlphaAsh, NHunter, Rough, GwenBlanketKnight
+namespace = mem_caretaker_origin_event
+country_event = {
+	id = mem_caretaker_origin_event.666
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.666.name
+	desc = mem_caretaker_origin_event.666.desc
+	picture = GFX_evt_mem_caretaker_annoyed
+	option = {
+		name = mem_caretaker_origin_event.666.option.a
+		destroy_country = yes		# hehe
+	}
+	option = {
+		name = FASCINATING
+		mem_caretaker_change_mood = {
+			VALUE = -20
+		}
+	}
+	option = {
+		name = FASCINATING
+		mem_caretaker_change_mood = {
+			VALUE = 40
+		}
+	}
+	option = {
+		name = FASCINATING
+		mem_caretaker_change_mood = {
+			VALUE = -200
+		}
+	}
+	option = {
+		name = FASCINATING
+		mem_caretaker_change_mood = {
+			VALUE = 200
+		}
+	}
+	option = {
+		name = FASCINATING
+		random_owned_leader = {
+			add_trait = {
+				trait = leader_trait_personal_mem_caretaker
+			}
+		}
+	}
+	option = {
+		name = FASCINATING
+		add_relic = r_memcaretaker_core
+	}
+	option = {
+		name = FASCINATING
+		set_country_flag = mem_caretaker_reformed_mem_monitor_order
+	}
+	option = {
+		name = FASCINATING
+		give_technology = {
+			tech = tech_mem_caretaker_observatory
+		}
+		give_technology = {
+			tech = mem_caretaker_tech_combat_computers
+		}
+	}
+}
+# Stellaris Modjam 2020 - Caretaker
+# Writer/Scripter AlphaAsh
+# Reviewer/Editor NHunter
+namespace = mem_caretaker_origin_event
+############################################################################################################
+# Caretaker Gifts & Events Chain
+############################################################################################################
+# mem_caretaker_origin_event.20300   | Periodic mem_caretaker gift trigger (resources or pops)
+# mem_caretaker_origin_event.20400   | Pop gift granted on planet
+# mem_caretaker_origin_event.20500   | Resource gift granted (food/minerals/alloys/consumer goods)
+# mem_caretaker_origin_event.20800   | Caretaker removes Clone Vats (quirk event)
+# mem_caretaker_origin_event.20900   | Caretaker removes Medical building (quirk event)
+############################################################################################################
+# Caretaker Personal Care Ascension Chain
+############################################################################################################
+# mem_caretaker_origin_event.23000   | Personal Care ascension perk taken → starts special project
+# mem_caretaker_origin_event.23100   | Personal Care project completed → species modified + leaders updated
+# mem_caretaker_origin_event.25000   | Break-up cleanup → removes Personal Care traits from species/leaders
+# mem_caretaker_origin_event.26000   | Ensures new leaders receive Personal Care traits
+## ##################################################### ##
+##            Caretaker gifts generation                 ##
+## ##################################################### ##
+### Gateway for gifts of pop or resources
+situation_event = {
+	id = mem_caretaker_origin_event.20300
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		owner = {
+			has_origin = origin_mem_caretaker
+			NOT = {
+				has_country_flag = mem_caretaker_resource_gift_cooldown
+			}
+			mem_caretaker_mood_is_not_bad_check = yes
+		}
+	}
+	immediate = {
+		owner = {
+			# Chance of gift if Caretaker is not in a bad mood
+			owner = {
+				set_timed_country_flag = {
+					flag = mem_caretaker_resource_gift_cooldown
+					days = 1800
+				}
+			}
+			if = {
+				limit = {
+					mem_caretaker_mood_is_not_bad_check = yes
+				}
+				random_list = {
+					48 = {
+						owner = {
+							remove_country_flag = mem_caretaker_resource_gift_cooldown
+						}
+					}
+					1 = {
+						if = {
+							limit = {
+								country_uses_food = yes
+							}
+							set_country_flag = mem_caretaker_gifting_food
+							country_event = {
+								id = mem_caretaker_origin_event.20500
+								days = 10
+							}
+						}
+					}
+					1 = {
+						set_country_flag = mem_caretaker_gifting_minerals
+						country_event = {
+							id = mem_caretaker_origin_event.20500
+							days = 15
+						}
+					}
+					1 = {
+						set_country_flag = mem_caretaker_gifting_alloys
+						country_event = {
+							id = mem_caretaker_origin_event.20500
+							days = 20
+						}
+					}
+					1 = {
+						if = {
+							limit = {
+								country_uses_consumer_goods = yes
+							}
+							set_country_flag = mem_caretaker_gifting_goods
+							country_event = {
+								id = mem_caretaker_origin_event.20500
+								days = 25
+							}
+						}
+					}
+					1 = {
+						random_owned_planet = {
+							if = {
+								limit = {
+									mem_caretaker_presence_on_planet = yes
+									is_homeworld = yes
+								}
+								planet_event = {
+									id = mem_caretaker_origin_event.20400
+									days = 90
+								}
+							}
+						}
+					}
+					1 = {
+						random_owned_planet = {
+							if = {
+								limit = {
+									mem_caretaker_presence_on_planet = yes
+									is_homeworld = yes
+								}
+								owner = {
+									remove_country_flag = mem_caretaker_resource_gift_cooldown
+									set_timed_country_flag = {
+										flag = mem_caretaker_resource_gift_cooldown
+										days = 3600
+									}
+								}
+								planet_event = {
+									id = mem_caretaker_origin_event.20400
+									days = 90
+								}
+							}
+						}
+					}
+					1 = {
+						random_owned_planet = {
+							if = {
+								limit = {
+									has_building = building_mem_caretaker_outreach
+								}
+								planet_event = {
+									id = mem_caretaker_origin_event.20400
+									days = 90
+								}
+							}
+						}
+					}
+					1 = {
+						random_owned_planet = {
+							if = {
+								limit = {
+									has_building = building_mem_caretaker_outreach
+								}
+								planet_event = {
+									id = mem_caretaker_origin_event.20400
+									days = 180
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+situation_event = {
+	id = mem_caretaker_origin_event.20301
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		current_situation_approach = situation_mem_caretaker_mood_appraoch_pops
+	}
+	immediate = {
+		owner = {
+			change_variable = {
+				which = situation_mem_caretaker_mood_appraoch_pops
+				value = 1
+			}
+			if = {
+				limit = {
+					check_variable_arithmetic = {
+						which = situation_mem_caretaker_mood_appraoch_pops
+						value = 12
+					}
+				}
+				set_variable = {
+					which = situation_mem_caretaker_mood_appraoch_pops
+					value = 0
+				}
+				set_variable = {
+					which = situation_mem_caretaker_mood_appraoch_pops_created
+					value = owner.value:memcaretaker_given_pops
+				}
+				capital_scope = {
+					create_pop_group = {
+						species = owner_main_species
+						size = owner.situation_mem_caretaker_mood_appraoch_pops_created
+						category = civilian
+					}
+				}
+				
+				create_message = {
+					type = MEM_CARETAKER_CREATED_POPS
+					target = capital_scope
+					localization = MESSAGE_MEM_CARETAKER_CREATED_POPS_DESC
+					variable = {
+						type = variable
+						localization = CREATED_POPS
+						varname = situation_mem_caretaker_mood_appraoch_pops_created
+						scope = this
+					}
+					variable = {
+						type = name
+						localization = PLANET
+						scope = capital_scope 
+					}
+					days = 30
+				}
+				clear_variable = situation_mem_caretaker_mood_appraoch_pops_created
+			}
+		}
+	}
+}
+
+### Pop gift given
+planet_event = {
+	id = mem_caretaker_origin_event.20400
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.20400.name
+	desc = mem_caretaker_origin_event.20400.desc
+	picture = GFX_evt_mem_caretaker_pleased
+	location = ROOT
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.20400.option.a
+		custom_tooltip = mem_caretaker_origin_event.20400.option.a.tooltip
+		hidden_effect = {
+			create_pop = {
+				species = owner
+			}
+		}
+	}
+}
+
+### Resource gift given
+country_event = {
+	id = mem_caretaker_origin_event.20500
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.20500.name
+	desc = mem_caretaker_origin_event.20500.desc
+	picture = GFX_evt_mem_caretaker_pleased
+	trigger = {
+		has_origin = origin_mem_caretaker
+	}
+	option = {
+		name = mem_caretaker_origin_event.20500.option.food
+		trigger = {
+			has_country_flag = mem_caretaker_gifting_food
+		}
+		add_monthly_resource_mult = {
+			resource = food
+			value = 3
+			min = 500
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.20500.option.minerals
+		#custom_tooltip = mem_caretaker_origin_event.20500.option.minerals.tooltip
+		trigger = {
+			has_country_flag = mem_caretaker_gifting_minerals
+		}
+		add_monthly_resource_mult = {
+			resource = minerals
+			value = 3
+			min = 500
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.20500.option.alloys
+		#custom_tooltip = mem_caretaker_origin_event.20500.option.alloys.tooltip
+		trigger = {
+			has_country_flag = mem_caretaker_gifting_alloys
+		}
+		add_monthly_resource_mult = {
+			resource = alloys
+			value = 3
+			min = 250
+		}
+	}
+	option = {
+		name = mem_caretaker_origin_event.20500.option.goods
+		#custom_tooltip = mem_caretaker_origin_event.20500.option.goods.tooltip
+		trigger = {
+			has_country_flag = mem_caretaker_gifting_goods
+		}
+		add_monthly_resource_mult = {
+			resource = consumer_goods
+			value = 3
+			min = 500
+		}
+	}
+	# Grateful but no need
+	option = {
+		name = mem_caretaker_origin_event.20500.option.b
+		#custom_tooltip = mem_caretaker_origin_event.20500.option.b.tooltip
+		mem_caretaker_change_mood = {
+			VALUE = 1
+		}
+	}
+	# Dismissive
+	option = {
+		name = mem_caretaker_origin_event.20500.option.c
+		#custom_tooltip = mem_caretaker_origin_event.20500.option.c.tooltip
+		mem_caretaker_change_mood = {
+			VALUE = -1
+		}
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 1
+			min = 500
+		}
+	}
+	after = {
+		hidden_effect = {
+			remove_country_flag = mem_caretaker_gifting_alloys
+			remove_country_flag = mem_caretaker_gifting_food
+			remove_country_flag = mem_caretaker_gifting_goods
+			remove_country_flag = mem_caretaker_gifting_minerals
+		}
+	}
+}
+
+## ##################################################### ##
+##            Ascension Handling                         ##
+## ##################################################### ##
+# Personal Care AP taken
+country_event = {
+	id = mem_caretaker_origin_event.23000
+	title = "mem_caretaker_origin_event.23000.name"
+	desc = "mem_caretaker_origin_event.23000.desc"
+	picture = GFX_evt_mem_caretaker_pleased
+	show_sound = event_laboratory_sound
+	trackable = yes
+	is_triggered_only = yes
+	option = {
+		name = "mem_caretaker_origin_event.23000.a"
+		hidden_effect = {
+			save_event_target_as = mem_caretaker_personal_care_owner
+		}
+		capital_scope = {
+			enable_special_project = {
+				name = "MEM_CARETAKER_PERSONAL_CARE_PROJECT"
+				location = this
+				owner = root
+			}
+		}
+	}
+}
+
+# PCI project complete
+country_event = {
+	id = mem_caretaker_origin_event.23100
+	title = "mem_caretaker_origin_event.23100.name"
+	desc = "mem_caretaker_origin_event.23100.desc"
+	picture = GFX_evt_mem_caretaker_pleased
+	show_sound = event_the_flesh_is_weak
+	is_triggered_only = yes
+	immediate = {
+		set_country_flag = mem_caretaker_personal_care_rolled_out
+		if = {
+			limit = {
+				any_owned_pop_group = {
+					is_exact_same_species = root
+				}
+			}
+			random_owned_pop_group = {
+				limit = {
+					is_exact_same_species = root
+				}
+				create_pci_species_mod = yes
+				species = {
+					save_event_target_as = new_main_species
+				}
+			}
+		}
+		else = {
+			random_owned_pop_group = {
+				limit = {
+					is_same_species = root
+				}
+				create_pci_species_mod = yes
+				species = {
+					save_event_target_as = new_main_species
+				}
+			}
+		}
+		change_dominant_species = {
+			species = event_target:new_main_species
+		}
+		every_owned_leader = {
+			limit = {
+				species = {
+					has_trait = trait_personal_mem_caretaker
+				}
+			}
+			if = {
+				limit = {
+					not = {
+						is_ruler = yes
+					}
+				}
+				add_trait = {
+					trait = leader_trait_personal_mem_caretaker
+				}
+			}
+		}
+		every_pool_leader = {
+			limit = {
+				species = {
+					has_trait = trait_personal_mem_caretaker
+				}
+			}
+			if = {
+				limit = {
+					not = {
+						is_ruler = yes
+					}
+				}
+				add_trait = {
+					trait = leader_trait_personal_mem_caretaker
+				}
+			}
+		}
+	}
+	option = {
+		name = "mem_caretaker_origin_event.23100.a"
+	}
+}
+
+### Modify species : remove PCIs and First mem_monitor traits
+country_event = {
+	id = mem_caretaker_origin_event.25000
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		has_country_flag = mem_caretaker_personal_care_rolled_out
+		has_country_flag = mem_caretaker_break_up
+		not = {
+			has_country_flag = mem_caretaker_interface_traits_removed
+		}
+	}
+	immediate = {
+		set_country_flag = mem_caretaker_interface_traits_removed
+		remove_country_flag = mem_caretaker_personal_care_rolled_out
+		random_owned_pop_group = {
+			limit = {
+				is_same_species = root
+			}
+			species = {
+				modify_species = {
+					remove_trait = trait_personal_mem_caretaker
+				}
+				save_event_target_as = pci_removed_main_species
+			}
+		}
+		change_dominant_species = {
+			species = event_target:pci_removed_main_species
+			change_all = yes
+		}
+		every_owned_leader = {
+			limit = {
+				species = {
+					has_trait = trait_personal_mem_caretaker
+				}
+			}
+			if = {
+				limit = {
+					not = {
+						not = {
+							is_ruler = yes
+						}
+					}
+				}
+				remove_trait = leader_trait_personal_mem_caretaker
+			}
+		}
+		every_pool_leader = {
+			limit = {
+				species = {
+					has_trait = trait_personal_mem_caretaker
+				}
+			}
+			remove_trait = leader_trait_personal_mem_caretaker
+		}
+		# species from other mem_caretaker empire if any exist
+		while = {
+			limit = {
+				any_owned_pop_group = {
+					is_sapient = yes
+					is_being_purged = no
+					is_being_assimilated = no
+					species = {
+						has_trait = trait_personal_mem_caretaker
+					}
+				}
+			}
+			random_owned_pop_group = {
+				limit = {
+					is_sapient = yes
+					is_being_purged = no
+					is_being_assimilated = no
+					species = {
+						has_trait = trait_personal_mem_caretaker
+					}
+				}
+				species = {
+					modify_species = {
+						remove_trait = trait_personal_mem_caretaker
+					}
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	#New leaders get PCI Trait
+	id = mem_caretaker_origin_event.26000
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		has_origin = origin_mem_caretaker
+		# has_country_flag = mem_caretaker_personal_care_rolled_out
+		not = {
+			has_country_flag = mem_caretaker_break_up
+		}
+		not = {
+			has_country_flag = mem_caretaker_interface_traits_removed
+		}
+	}
+	immediate = {
+		# log = "Leader Pool PCIs"
+		every_pool_leader = {
+			limit = {
+				species = {
+					has_trait = trait_personal_mem_caretaker
+				}
+			}
+			# log = "This Leader here sir"
+			add_trait = {
+				trait = leader_trait_personal_mem_caretaker
+			}
+		}
+	}
+}
+
+## ##################################################### ##
+##            Civics Handling                            ##
+## ##################################################### ##
+# change modifier
+# planet_event = {
+# 	id = mem_caretaker_origin_event.27000
+# 	hide_window = yes
+# 	is_triggered_only = yes
+# 	trigger = {
+# 		exists = from
+# 		from = {
+# 			has_origin = origin_mem_caretaker
+# 			has_valid_civic = civic_mem_one_big_family
+# 		}
+# 	}
+# 	immediate = {
+# 		FromFrom = {
+# 			set_pop_flag = pop_mem_caretaker_naturalborn
+# 			add_modifier = {
+# 				modifier = pop_natural_born
+# 				days = -1
+# 			}
+# 		}
+# 	}
+# }
+## ##################################################### ##
+##            Caretaker Quirkiness                       ##
+## ##################################################### ##
+planet_event = {
+	id = mem_caretaker_origin_event.20800
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.20800.name
+	desc = mem_caretaker_origin_event.20800.desc
+	picture = GFX_evt_derelict_interior
+	location = ROOT
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			NOT = {
+				has_country_flag = mem_caretaker_break_up
+			}
+		}
+		mem_caretaker_presence_on_planet = yes
+		pop_amount > 0
+		has_building = building_clone_vats
+	}
+	option = {
+		name = mem_caretaker_origin_event.20800.option.a
+	}
+	option = {
+		name = mem_caretaker_origin_event.20800.option.b
+	}
+	option = {
+		name = mem_caretaker_origin_event.20800.option.c
+	}
+	after = {
+		remove_building = building_clone_vats
+	}
+}
+
+planet_event = {
+	id = mem_caretaker_origin_event.20900
+	is_triggered_only = yes
+	title = mem_caretaker_origin_event.20900.name
+	desc = mem_caretaker_origin_event.20900.desc
+	picture = GFX_evt_derelict_interior
+	location = ROOT
+	trigger = {
+		exists = owner
+		owner = {
+			has_origin = origin_mem_caretaker
+			NOT = {
+				has_country_flag = mem_caretaker_break_up
+			}
+		}
+		mem_caretaker_presence_on_planet = yes
+		pop_amount > 0
+		has_building = building_medical_1
+	}
+	after = {
+		remove_building = building_medical_1
+	}
+	option = {
+		name = mem_caretaker_origin_event.20900.option.a
+	}
+	option = {
+		name = mem_caretaker_origin_event.20900.option.b
+	}
+	option = {
+		name = mem_caretaker_origin_event.20900.option.c
+	}
+}
