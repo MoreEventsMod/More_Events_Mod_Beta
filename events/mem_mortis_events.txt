@@ -219,6 +219,40 @@ country_event = {
 				# is_discovered = yes
 			}
 		}
+		# create_fleet = {
+		# 	name = "Jörmungandr"
+		# 	settings = {
+		# 		spawn_debris = no
+		# 		uses_naval_capacity = no
+		# 	}
+		# 	effect = {
+		# 		set_owner = root
+		# 		set_fleet_flag = mem_mortis_guardian_kaiju
+		# 		save_event_target_as = mem_mortis_guardian_kaiju
+		# 		while = {
+		# 			count = 1
+		# 			create_ship = {
+		# 				fleet_cache_recalc = no
+		# 				design = NAME_Behemoth_04
+		# 				name = "Jörmungandr"
+		# 			}
+		# 		}
+		# 		add_modifier = {
+		# 			modifier = mem_mortis_behemoth
+		# 		}
+		# 		set_aggro_range_measure_from = self
+		# 		set_aggro_range = 500
+		# 		set_location = {
+		# 			target = event_target:mem_mortis_system_foundation_initializer_star
+		# 			distance = 50
+		# 			angle = random
+		# 		}
+		# 	}
+		# }
+		add_modifier = {
+			modifier = mem_mortis_pirate_insight
+			multiplier = 4
+		}
 	}
 	option = {
 		name = FASCINATING
@@ -232,6 +266,20 @@ country_event = {
 					orbit_distance = 0
 				}
 			}
+		}
+	}
+	option = {
+		name = FASCINATING
+		set_country_flag = mem_mortis_letmetestthis
+		capital_scope = {
+			add_deposit = d_mem_mortis_bio
+			add_deposit = d_mem_mortis_synth
+			add_deposit = d_mem_mortis_cyber
+			add_deposit = d_mem_mortis_psionic
+			add_building = building_mem_mortis_bio
+			add_building = building_mem_mortis_synth
+			add_building = building_mem_mortis_cyber
+			add_building = building_mem_mortis_psionic
 		}
 	}
 }
@@ -983,6 +1031,54 @@ leader_event = {
 	}
 }
 
+# Entered system for first time 
+# Scope = Ship
+# From = System
+# FromFrom = Country
+ship_event = {
+	id = mem_mortis.614
+	title = mem_mortis.614.name
+	desc = mem_mortis.614.desc
+	show_sound = ui_kaiju_thermoclastic_roar
+	location = from
+	is_triggered_only = yes
+	trigger = {
+		owner = {
+			is_ai = no
+		}
+		
+		from = {
+			has_star_flag = mem_mortis_system_foundation_initializer
+		}
+		solar_system = {
+			any_fleet_in_system = {
+			has_fleet_flag = mem_mortis_guardian_kaiju
+		}
+		}
+		
+	}
+	immediate = {
+	}
+	#diplomatic = yes
+	picture = GFX_evt_mem_jormun
+	option = {
+		name = mem_mortis.614.a
+	}
+	option = {
+		name = FASCINATING
+		trigger = {
+			owner = {
+				has_ascension_perk = ap_behemoths
+			}
+		}
+		this.owner = {
+			add_resource = {
+				feral_insight = 2500
+			}
+		}
+	}
+}
+
 # defeated world serpent
 # This = owner of fleet 1 (combatant)
 # From = owner of fleet 2 (destroyed)
@@ -1004,5 +1100,58 @@ country_event = {
 		# country_event = {
 		# 	id = mem_mortis.601
 		# }
+	}
+}
+
+### behemoth roar immitate
+fleet_event = {
+	id = mem_mortis.620
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+	}
+	immediate = {
+		solar_system = {
+			every_fleet_in_system = {
+				limit = {
+					NOT = {
+						is_same_value = root
+					}
+				}
+				add_modifier = {
+					modifier = mem_mortis_behemoth_roar
+					days = 60
+				}
+				add_modifier = {
+					modifier = mem_mortis_behemoth_roar_stun
+					days = 10
+				}
+				owner = {
+					set_timed_country_flag = {
+						flag = mem_mortis_behemoth_roar_target
+						days = 30
+					}
+				}
+			}
+		}
+	}
+	after = {
+		fleet_event = {
+			id = mem_mortis.620
+			days = 360
+			random = 360
+		}
+		every_playable_country = {
+			limit = {
+				is_ai = no
+				has_country_flag = mem_mortis_behemoth_roar_target
+			}
+			create_message = {
+				type = mem_mortis_roar
+				localization = mem_mortis_roar_desc
+				target = root
+				days = 30
+			}
+		}
 	}
 }
