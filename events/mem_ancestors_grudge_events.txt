@@ -780,9 +780,9 @@ country_event = {
 		# 		is_subterranean_empire = yes
 		# 	 }
 		# 	 capital_scope = {
-				# set_planet_entity = {
-				# 	picture = pc_mem_subterranean_city
-				# }
+		# set_planet_entity = {
+		# 	picture = pc_mem_subterranean_city
+		# }
 		# 	 }
 		# 	 set_city_graphical_culture = ai_01
 		# }
@@ -6772,14 +6772,18 @@ leader_event = {
 		# 	owner = {
 		# 		is_same_value = root
 		# 	}
-		# }
-		#has_deposit = d_mem_ancestors_grudge_dranir_depot_core
+		# }	
 	}
-	immediate = {
+	after = {
 		# clone kin
 		if = {
 			limit = {
 				exists = event_target:d_mem_ancestors_grudge_dranir_mass_graves_core
+			}
+			enable_special_project = {
+				name = MEM_ANCESTORS_GRUDGE_DRANIR_GRAVE
+				location = event_target:d_mem_ancestors_grudge_dranir_mass_graves_core
+				owner = root.owner
 			}
 		}
 		# greed/logistics kin
@@ -6787,17 +6791,32 @@ leader_event = {
 			limit = {
 				exists = event_target:d_mem_ancestors_grudge_dranir_depot_core
 			}
+			enable_special_project = {
+				name = MEM_ANCESTORS_GRUDGE_DRANIR_DEPOT
+				location = event_target:d_mem_ancestors_grudge_dranir_depot_core
+				owner = root.owner
+			}
 		}
 		# scp kin
 		if = {
 			limit = {
 				exists = event_target:d_mem_blood_forest_core
 			}
+			enable_special_project = {
+				name = MEM_ANCESTORS_GRUDGE_DRANIR_FLESH
+				location = event_target:d_mem_blood_forest_core
+				owner = root.owner
+			}
 		}
 		# salvage kin
 		if = {
 			limit = {
 				exists = event_target:d_mem_ancestors_grudge_dranir_junk_core
+			}
+			enable_special_project = {
+				name = MEM_ANCESTORS_GRUDGE_DRANIR_JUNK
+				location = event_target:d_mem_ancestors_grudge_dranir_junk_core
+				owner = root.owner
 			}
 		}
 		# # robot kin
@@ -6824,5 +6843,39 @@ leader_event = {
 	}
 	option = {
 		name = OK
+	}
+}
+
+# uncover stuff
+starbase_event = {
+	id = mem_ancestors_grudge_dranir.125
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		has_starbase_building = voidlure_mem_ancestors_grudge_dranir_drg_crew
+	}
+	immediate = {
+		solar_system = {
+			while = {
+				count = 1
+				random_system_planet = {
+					limit = {
+						can_have_mineral_deposits = yes
+						NOT = {
+							has_deposit_for = shipclass_research_station
+						}
+					}
+					mem_planetophage_create_deposit_noclear = yes
+				}
+			}
+		}
+		starbase_event = {
+			id = mem_ancestors_grudge_dranir.125
+			days = @voidlure_mem_ancestors_grudge_dranir_drg_crew_cd			# this needs to be synced with ...
+		}
+		set_timed_starbase_flag = {
+			flag = capture_cooldown_for_mem_ancestors_grudge_dranir_drg_crew
+			days = @voidlure_mem_ancestors_grudge_dranir_drg_crew_cd			# ... this
+		}
 	}
 }
