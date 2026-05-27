@@ -51,6 +51,21 @@ fleet_event = {
 			add_deposit = d_mem_ASP_a_bedroom_planet_blocker
 		}
 	}
+	option = {
+		name = "mem_ASPmod.11.option.b"
+		trigger = {
+			owner = {
+				OR = {
+					is_xenophobe = yes
+					is_hive_empire = yes
+				}
+			}
+		}
+		medium_artifact_reward = yes
+		from.planet = {
+			add_deposit = d_mem_ASP_a_bedroom_planet_blocker
+		}
+	}
 }
 
 namespace = mem_ASPmod
@@ -627,6 +642,16 @@ fleet_event = {
 		from = {
 			set_site_progress_locked = yes
 		}
+		owner = {
+			random_neighbor_country = {
+				limit = {
+					owner_main_species = {
+						is_machine_species = yes
+					}
+				}
+				save_event_target_as = mem_ASPmod_44_xenophobetarget
+			}
+		}
 	}
 	after = {
 		from = {
@@ -635,14 +660,6 @@ fleet_event = {
 	}
 	option = {
 		name = FASCINATING
-		trigger = {
-			owner = {
-				OR = {
-					has_ethic = ethic_xenophobe
-					has_ethic = ethic_fanatic_xenophobe
-				}
-			}
-		}
 		small_artifact_reward = yes
 		owner = {
 			add_monthly_resource_mult = {
@@ -657,10 +674,7 @@ fleet_event = {
 		name = "mem_ASPmod.44.option.a"
 		trigger = {
 			owner = {
-				OR = {
-					is_gestalt = yes
-					is_machine_empire = yes
-				}
+				is_gestalt = yes
 			}
 		}
 		small_artifact_reward = yes
@@ -674,8 +688,9 @@ fleet_event = {
 		}
 	}
 	option = {
-		name = "mem_ASPmod.44.option.b"
+		name = "mem_ASPmod.44.option.c"
 		trigger = {
+			exists = event_target:mem_ASPmod_44_xenophobetarget
 			owner = {
 				OR = {
 					has_ethic = ethic_xenophobe
@@ -683,19 +698,8 @@ fleet_event = {
 				}
 			}
 		}
-		allow = {
-			owner = {
-				resource_stockpile_compare = {
-					resource = minerals
-					value >= 200
-				}
-			}
-		}
 		small_artifact_reward = yes
 		owner = {
-			add_resource = {
-				minerals = -200
-			}
 			add_monthly_resource_mult = {
 				resource = society_research
 				value = @tier2researchreward
@@ -711,7 +715,7 @@ fleet_event = {
 		}
 	}
 	option = {
-		name = "mem_ASPmod.44.option.c"
+		name = "mem_ASPmod.44.option.b"
 		trigger = {
 			owner = {
 				OR = {
@@ -735,7 +739,7 @@ fleet_event = {
 		}
 		from.planet = {
 			add_modifier = {
-				modifier = mem_ASP_middle_xenophile_bonus
+				modifier = mem_ASP_middle_xenophile_bonus				
 				days = 3600
 			}
 		}
@@ -774,68 +778,6 @@ fleet_event = {
 			}
 		}
 	}
-	# option = {
-	# 	name = "mem_ASPmod.44.option.f"
-	# 	custom_tooltip = "mem_ASPmod.44.option.f.tooltip"
-	# 	trigger = {
-	# 		owner = {
-	# 			NOR = {
-	# 				has_ethic = ethic_xenophile
-	# 				has_ethic = ethic_fanatic_xenophile
-	# 				has_ethic = ethic_gestalt_consciousness
-	# 			}
-	# 		}
-	# 	}
-	# 	small_artifact_reward = yes
-	# 	owner = {
-	# 		add_monthly_resource_mult = {
-	# 			resource = society_research
-	# 			value = @tier2researchreward
-	# 			min = @tier2researchreward
-	# 			max = @tier2researchreward
-	# 		}
-	# 		add_resource = {
-	# 			influence = 200
-	# 		}
-	# 		add_modifier = {
-	# 			modifier = mem_ASP_big_xenophile_bonus
-	# 			days = 3600
-	# 		}
-	# 	}
-	# 	hidden_effect = {
-	# 		owner = {
-	# 			while = {
-	# 				count = 20
-	# 				weighted_random_owned_pop_group = {
-	# 					limit = {
-	# 						NOR = {
-	# 							pop_group_has_ethic = ethic_xenophile
-	# 							pop_group_has_trait = trait_mechanical
-	# 						}
-	# 					}
-	# 					if = {
-	# 						limit = {
-	# 							pop_group_has_ethic = ethic_xenophobe
-	# 						}
-	# 						pop_remove_ethic = {
-	# 							ethic = ethic_xenophobe
-	# 						}
-	# 					}
-	# 					pop_group_transfer_ethic = {
-	# 						POP_GROUP = this
-	# 						ETHOS = ethic_xenophile
-	# 						PERCENTAGE = 0.1
-	# 					}
-	# 				}
-	# 			}
-	# 			pop_group_transfer_ethic = {
-	# 				POP_GROUP = this
-	# 				ETHOS = ethic_xenophile
-	# 				PERCENTAGE = 0.1
-	# 			}
-	# 		}
-	# 	}
-	# }
 	option = {
 		name = "mem_ASPmod.44.option.g"
 		small_artifact_reward = yes
@@ -1104,10 +1046,11 @@ ship_event = {
 		#excuted right after the option is selected
 		hidden_effect = {
 			event_target:mem_ASP_site_beyond_earth_purity_planet_2 = {
+				
+				change_pc = pc_city
 				create_colony = {
 					owner = prev.owner
 				}
-				change_pc = pc_city
 				if = {
 					limit = {
 						has_global_flag = mem_asp_beyond_earth_purity_story_human_unlocked
@@ -1150,25 +1093,25 @@ ship_event = {
 					}
 					count = 7
 				}
-				if = {
-					limit = {
-						root.owner = {
-							has_authority = auth_machine_intelligence
-						}
-					}
-					add_building = building_machine_capital
-				}
-				if = {
-					limit = {
-						root.owner = {
-							has_authority = auth_hive_mind
-						}
-					}
-					add_building = building_hive_capital
-				}
-				else = {
-					add_building = building_capital
-				}
+				# if = {
+				# 	limit = {
+				# 		root.owner = {
+				# 			has_authority = auth_machine_intelligence
+				# 		}
+				# 	}
+				# 	add_building = building_machine_capital
+				# }
+				# if = {
+				# 	limit = {
+				# 		root.owner = {
+				# 			has_authority = auth_hive_mind
+				# 		}
+				# 	}
+				# 	add_building = building_hive_capital
+				# }
+				# else = {
+				# 	add_building = building_capital
+				# }
 				add_district = district_arcology_housing
 				add_modifier = {
 					modifier = mem_aspmod_promised_land
