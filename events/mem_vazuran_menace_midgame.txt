@@ -1641,7 +1641,6 @@ country_event = {
 		give_evolutionary_predator_situation_progress = {
 			PROGRESS = value:mem_evopred_extra_large_progress
 		}
-		
 	}
 	after = {
 		give_vazuran_defeat_reward = yes
@@ -3064,6 +3063,41 @@ situation_event = {
 			}
 			clear_variable = mem_vazurans_stolen_pops
 		}
+		# return all fleets to the portal
+		owner = {
+			every_owned_fleet = {
+				limit = {
+					has_fleet_flag = mem_vazurans_fleet
+				}
+				fleet_event = {
+					id = mem_vazurans.1135
+				}
+			}
+		}
+		# FE do this, idk
+		owner = {
+			add_global_ship_design = NAME_Vazuran_Combat_Drone
+			add_global_ship_design = NAME_Vazuran_Control_Drone
+			add_global_ship_design = NAME_Vazuran_Cruiser
+			add_global_ship_design = NAME_Vazuran_Escort
+		}
+		# create leaders
+		owner = {
+			create_leader = {
+				class = official
+				species = owner_main_species
+				name = random
+				skill = 10
+				leader_age_min = 25
+				leader_age_max = 45
+			}
+			capital_scope = {
+				assign_leader = last_created_leader
+			}
+			ruler = {
+				add_skill = 9
+			}
+		}
 		############################## RUINED/ OLD VAZURANS ########################################
 		if = {
 			limit = {
@@ -3176,6 +3210,12 @@ situation_event = {
 						target = prev
 					}
 				}
+				set_country_code_flags = {
+					colonizer = yes
+				}
+				add_awakened_fallen_empire_resources = yes
+				# add_awakened_fallen_empire_fleet = yes
+				set_country_flag = sleepers_awake_first_sleeper
 				set_country_type = awakened_fallen_empire
 				set_graphical_culture = mem_ancient_02
 				capital_scope = {
@@ -3385,6 +3425,7 @@ situation_event = {
 			NOT = {
 				has_country_flag = fallen_empire_fleet_spawn_mini
 			}
+			num_fleets < @mem_vazuran_fe_fleet_strength_num
 		}
 	}
 	immediate = {
@@ -3395,6 +3436,13 @@ situation_event = {
 			}
 			capital_scope = {
 				create_mem_vazuran_corvette_stage_fleet = yes
+				while = {
+					count = 5
+					create_army = {
+						owner = root.owner
+						type = xenomorph_army
+					}
+				}
 			}
 		}
 	}
