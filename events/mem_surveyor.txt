@@ -2880,55 +2880,69 @@ country_event = {
 	}
 	immediate = {
 		# Choose a target planet and give it a flag for the two special outcomes
-		random_list = {
-			# Add a normal deposite somewhere
-			# can happen unlimited
-			85 = {
-				random_planet_within_border = {
-					limit = {
-						habitable_planet = no
-						is_artificial = no
-						NOR = {
-							is_planet_class = pc_ringworld_habitable_damaged
-							is_planet_class = pc_ringworld_tech_damaged
-							is_planet_class = pc_ringworld_tech
-							is_planet_class = pc_ringworld_seam
-							is_planet_class = pc_ringworld_seam_damaged
-							is_planet_class = pc_astral_scar
-						}
-						# check that the random list won't come up empty
-						OR = {
-							energy_candidate = yes
-							mineral_candidate = yes
-							
-							physics_candidate = yes
-							society_candidate = yes
-							engineering_candidate = yes
-							alloy_candidate = yes
-							exotic_gas_candidate = yes
-							rare_crystal_candidate = yes
-							volatile_motes_candidate = yes
-							ROOT = {
-								is_gestalt = no
+		if = {
+			limit = {
+				is_nomadic = no
+			}
+			random_list = {
+				# Add a normal deposite somewhere
+				# can happen unlimited
+				85 = {
+					random_planet_within_border = {
+						limit = {
+							habitable_planet = no
+							is_artificial = no
+							NOR = {
+								is_planet_class = pc_ringworld_habitable_damaged
+								is_planet_class = pc_ringworld_tech_damaged
+								is_planet_class = pc_ringworld_tech
+								is_planet_class = pc_ringworld_seam
+								is_planet_class = pc_ringworld_seam_damaged
+								is_planet_class = pc_astral_scar
+							}
+							# check that the random list won't come up empty
+							OR = {
+								energy_candidate = yes
+								mineral_candidate = yes
+								physics_candidate = yes
+								society_candidate = yes
+								engineering_candidate = yes
+								alloy_candidate = yes
+								exotic_gas_candidate = yes
+								rare_crystal_candidate = yes
+								volatile_motes_candidate = yes
 							}
 						}
+						save_event_target_as = chosen_planet
 					}
-					save_event_target_as = chosen_planet
 				}
-			}
-			# Add a planetary feature somewhere
-			# each planet can only get one additional feature
-			10 = {
-				modifier = {
-					check_variable = {
-						which = mem_surveyor_reevaluation_planet
-						value = 3
+				# Add a planetary feature somewhere
+				# each planet can only get one additional feature
+				10 = {
+					modifier = {
+						check_variable = {
+							which = mem_surveyor_reevaluation_planet
+							value = 3
+						}
+						add = 5
 					}
-					add = 5
-				}
-				modifier = {
-					NOT = {
-						any_planet_within_border = {
+					modifier = {
+						NOT = {
+							any_planet_within_border = {
+								OR = {
+									is_colonizable = yes
+									is_colony = yes
+								}
+								is_artificial = no
+								NOT = {
+									has_carrier_flag = mem_surveyor_reevaluation
+								}
+							}
+						}
+						factor = 0
+					}
+					random_planet_within_border = {
+						limit = {
 							OR = {
 								is_colonizable = yes
 								is_colony = yes
@@ -2938,36 +2952,40 @@ country_event = {
 								has_carrier_flag = mem_surveyor_reevaluation
 							}
 						}
+						save_event_target_as = chosen_planet
+						set_carrier_flag = mem_surveyor_reevaluation
 					}
-					factor = 0
 				}
-				random_planet_within_border = {
-					limit = {
-						OR = {
-							is_colonizable = yes
-							is_colony = yes
+				# Add terraforming modifier to applicable planet
+				5 = {
+					modifier = {
+						check_variable = {
+							which = mem_surveyor_reevaluation_planet
+							value = 3
 						}
-						is_artificial = no
+						factor = 0
+					}
+					modifier = {
 						NOT = {
-							has_carrier_flag = mem_surveyor_reevaluation
+							any_planet_within_border = {
+								OR = {
+									is_planet_class = pc_barren
+									is_planet_class = pc_barren_cold
+								}
+								NOT = {
+									has_modifier = terraforming_candidate
+								}
+								planet_size >= 15
+								planet_size <= 25
+							}
 						}
 					}
-					save_event_target_as = chosen_planet
-					set_carrier_flag = mem_surveyor_reevaluation
-				}
-			}
-			# Add terraforming modifier to applicable planet
-			5 = {
-				modifier = {
-					check_variable = {
+					change_variable = {
 						which = mem_surveyor_reevaluation_planet
-						value = 3
+						value = 1
 					}
-					factor = 0
-				}
-				modifier = {
-					NOT = {
-						any_planet_within_border = {
+					random_planet_within_border = {
+						limit = {
 							OR = {
 								is_planet_class = pc_barren
 								is_planet_class = pc_barren_cold
@@ -2978,26 +2996,71 @@ country_event = {
 							planet_size >= 15
 							planet_size <= 25
 						}
+						save_event_target_as = chosen_planet
+						set_carrier_flag = mem_surveyor_reevaluation
 					}
 				}
-				change_variable = {
-					which = mem_surveyor_reevaluation_planet
-					value = 1
-				}
-				random_planet_within_border = {
-					limit = {
-						OR = {
-							is_planet_class = pc_barren
-							is_planet_class = pc_barren_cold
+			}
+		}
+		else = {
+			random_owned_nonprimary_starbase = {
+				limit = {
+					is_waystation_starbase = yes
+					solar_system = {
+						any_system_planet = {
+							habitable_planet = no
+							is_artificial = no
+							NOR = {
+								is_planet_class = pc_ringworld_habitable_damaged
+								is_planet_class = pc_ringworld_tech_damaged
+								is_planet_class = pc_ringworld_tech
+								is_planet_class = pc_ringworld_seam
+								is_planet_class = pc_ringworld_seam_damaged
+								is_planet_class = pc_astral_scar
+							}
+							# check that the random list won't come up empty
+							OR = {
+								energy_candidate = yes
+								mineral_candidate = yes						
+								physics_candidate = yes
+								society_candidate = yes
+								engineering_candidate = yes
+								alloy_candidate = yes
+								exotic_gas_candidate = yes
+								rare_crystal_candidate = yes
+								volatile_motes_candidate = yes
+							}
 						}
-						NOT = {
-							has_modifier = terraforming_candidate
-						}
-						planet_size >= 15
-						planet_size <= 25
 					}
-					save_event_target_as = chosen_planet
-					set_carrier_flag = mem_surveyor_reevaluation
+				}
+				solar_system = {
+					random_system_planet = {
+						limit = {
+							habitable_planet = no
+							is_artificial = no
+							NOR = {
+								is_planet_class = pc_ringworld_habitable_damaged
+								is_planet_class = pc_ringworld_tech_damaged
+								is_planet_class = pc_ringworld_tech
+								is_planet_class = pc_ringworld_seam
+								is_planet_class = pc_ringworld_seam_damaged
+								is_planet_class = pc_astral_scar
+							}
+							# check that the random list won't come up empty
+							OR = {
+								energy_candidate = yes
+								mineral_candidate = yes						
+								physics_candidate = yes
+								society_candidate = yes
+								engineering_candidate = yes
+								alloy_candidate = yes
+								exotic_gas_candidate = yes
+								rare_crystal_candidate = yes
+								volatile_motes_candidate = yes
+							}
+						}
+						save_event_target_as = chosen_planet
+					}
 				}
 			}
 		}
@@ -3085,11 +3148,8 @@ country_event = {
 					10 = {
 						modifier = {
 							factor = 0
-							event_target:chosen_planet = {
-								
-							physics_candidate = no
-							society_candidate = no
-							engineering_candidate = no
+							event_target:chosen_planet = {								
+								physics_candidate = no
 							}
 						}
 						event_target:chosen_planet = {
@@ -3101,8 +3161,6 @@ country_event = {
 							factor = 0
 							event_target:chosen_planet = {
 								physics_candidate = no
-							society_candidate = no
-							engineering_candidate = no
 							}
 						}
 						event_target:chosen_planet = {
@@ -3114,8 +3172,6 @@ country_event = {
 							factor = 0
 							event_target:chosen_planet = {
 								physics_candidate = no
-							society_candidate = no
-							engineering_candidate = no
 							}
 						}
 						event_target:chosen_planet = {
@@ -3127,9 +3183,7 @@ country_event = {
 						modifier = {
 							factor = 0
 							event_target:chosen_planet = {
-								physics_candidate = no
-							society_candidate = no
-							engineering_candidate = no
+								society_candidate = no
 							}
 						}
 						event_target:chosen_planet = {
@@ -3140,9 +3194,7 @@ country_event = {
 						modifier = {
 							factor = 0
 							event_target:chosen_planet = {
-								physics_candidate = no
-							society_candidate = no
-							engineering_candidate = no
+								society_candidate = no
 							}
 						}
 						event_target:chosen_planet = {
@@ -3153,9 +3205,7 @@ country_event = {
 						modifier = {
 							factor = 0
 							event_target:chosen_planet = {
-								physics_candidate = no
-							society_candidate = no
-							engineering_candidate = no
+								society_candidate = no
 							}
 						}
 						event_target:chosen_planet = {
@@ -3167,9 +3217,8 @@ country_event = {
 						modifier = {
 							factor = 0
 							event_target:chosen_planet = {
-								physics_candidate = no
-							society_candidate = no
-							engineering_candidate = no
+								engineering_candidate = no
+							
 							}
 						}
 						event_target:chosen_planet = {
@@ -3180,9 +3229,7 @@ country_event = {
 						modifier = {
 							factor = 0
 							event_target:chosen_planet = {
-								physics_candidate = no
-							society_candidate = no
-							engineering_candidate = no
+								engineering_candidate = no
 							}
 						}
 						event_target:chosen_planet = {
@@ -3193,9 +3240,7 @@ country_event = {
 						modifier = {
 							factor = 0
 							event_target:chosen_planet = {
-								physics_candidate = no
-							society_candidate = no
-							engineering_candidate = no
+								engineering_candidate = no
 							}
 						}
 						event_target:chosen_planet = {
