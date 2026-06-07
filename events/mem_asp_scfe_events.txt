@@ -999,11 +999,13 @@ fleet_event = {
 		name = FASCINATING
 		#custom_tooltip = mem_asp.73.a.tooltip
 		hidden_effect = {
-			every_megastructure = {
-				limit = {
-					is_megastructure_type = mem_ASP_site_beyond_earth_purity_gateway
+			solar_system = {
+				every_megastructure = {
+					limit = {
+						is_megastructure_type = mem_ASP_site_beyond_earth_purity_gateway
+					}
+					activate_gateway = this
 				}
-				activate_gateway = this
 			}
 			from.planet = {
 				solar_system = {
@@ -1035,20 +1037,12 @@ fleet_event = {
 	}
 	option = {
 		name = mem_asp.74.a
-		custom_tooltip = mem_asp.74.a.tooltip
-		trigger = {
+		allow = {
 			owner = {
 				OR = {
 					has_policy_flag = interference_active
 					has_policy_flag = interference_aggressive
 				}
-			}
-		}
-		event_target:mem_ASP_site_beyond_earth_purity_planet_2 = {
-			enable_special_project = {
-				name = mem_ASP_BEYOND_EARTH_PURITY_PROJECT
-				location = this
-				owner = root.owner
 			}
 		}
 	}
@@ -1068,58 +1062,29 @@ fleet_event = {
 	}
 }
 
-#mem_ASP_BEYOND_EARTH_PURITY_PROJECT
-ship_event = {
+#
+fleet_event = {
+	archaeology = yes
 	id = mem_asp.75
 	title = "mem_asp.75.name"
 	desc = "mem_asp.75.desc"
-	picture = GFX_evt_ground_combat
+	picture = GFX_evt_alien_city
+	show_sound = event_pre_ftl_civilization
 	is_triggered_only = yes
-	immediate = {	
+	after = {
+		from = {
+			set_site_progress_locked = no
+		}
+	}
+	immediate = {
+		from = {
+			set_site_progress_locked = yes
+		}
 		#excuted right after the option is selected
 		hidden_effect = {
 			event_target:mem_ASP_site_beyond_earth_purity_planet_2 = {
-				change_pc = pc_relic
-				# create_colony = {
-				# 	owner = prev.owner
-				# }
-				
-				if = {
-					limit = {
-						has_global_flag = mem_asp_beyond_earth_purity_story_human_unlocked
-					}
-					create_species = {
-						class = "HUM"
-						portrait = "human"
-						name = "PRESCRIPTED_species_name_humans2"
-						plural = "PRESCRIPTED_species_plural_humans2"
-						adjective = "PRESCRIPTED_species_adjective_humans2"
-						namelist = "HUMAN2"
-						traits = {
-							trait = "trait_pc_continental_preference"
-							trait = "trait_organic"
-							trait = "trait_adaptive"
-							trait = "trait_nomadic"
-							trait = "trait_wasteful"
-						}
-					}
-					else = {
-						create_species = {
-							class = random_non_machine
-							portrait = random
-							name = random
-							traits = {
-								trait = "trait_pc_continental_preference"
-								trait = "trait_adaptive"
-								trait = "trait_nomadic"
-								trait = "trait_wasteful"
-							}
-							effect = {
-								mem_add_proper_species_trait = yes
-							}
-						}
-					}
-				}
+				change_pc = pc_relic				
+				create_late_pre_ftl_empire = yes
 				while = {
 					create_pop_group = {
 						size = 100
@@ -1127,165 +1092,106 @@ ship_event = {
 					}
 					count = 7
 				}
-				create_pre_ftl_empire = yes
 				last_created_country = {
-					set_pre_ftl_age = early_space_age					
+					set_pre_ftl_age = early_space_age
+					set_country_flag = early_space_age
 				}
-				set_owner = last_created_country
-				add_pre_ftl_buildings = yes
-				# if = {
-				# 	limit = {
-				# 		root.owner = {
-				# 			has_authority = auth_machine_intelligence
-				# 		}
-				# 	}
-				# 	add_building = building_machine_capital
-				# }
-				# if = {
-				# 	limit = {
-				# 		root.owner = {
-				# 			has_authority = auth_hive_mind
-				# 		}
-				# 	}
-				# 	add_building = building_hive_capital
-				# }
-				# else = {
-				# 	add_building = building_capital
-				# }
-				add_district = district_city
+				set_owner = last_created_country				
+				carrier_event = {
+					id = mem_asp.78
+					days = 3600
+				}
 				add_modifier = {
 					modifier = mem_aspmod_promised_land
 					days = -1
 				}
+				add_deposit = d_mem_scfe_proto_city
 				while = {
 					add_deposit = d_ruined_arcology
 					count = 15
 				}
 			}
 		}
+		from.owner = {
+			establish_contact = {
+				who = root.owner
+			}
+		}
 	}
 	option = {
 		name = mem_asp.75.a
-		custom_tooltip = mem_asp.75.a.tooltip
-		owner = {
-			add_resource = {
-				influence = 500
-			}
-		}
 		from = {
 			destroy_archaeological_site = this
 		}
 	}
 	option = {
 		name = mem_asp.75.b
-		custom_tooltip = mem_asp.75.a.tooltip
-		custom_tooltip = mem_asp.75.c.tooltip
 	}
 }
 
-#mem_ASP_BEYOND_EARTH_PURITY_PROJECT_2
-ship_event = {
+fleet_event = {
 	id = mem_asp.76
 	title = "mem_asp.76.name"
 	desc = "mem_asp.76.desc"
-	picture = GFX_evt_relic_world_building
+	picture = GFX_evt_astral_rift_genesis_3
+	show_sound = event_pre_ftl_civilization
+	archaeology = yes
 	is_triggered_only = yes
+	immediate = {
+		from = {
+			set_site_progress_locked = yes
+		}
+	}
 	after = {
-		#excuted right after the option is selected
-		hidden_effect = {
-			event_target:mem_ASP_site_beyond_earth_purity_planet_2 = {
-				change_pc = pc_city
-				create_colony = {
-					owner = prev.owner
-				}
-				if = {
-					limit = {
-						has_global_flag = mem_asp_beyond_earth_purity_story_human_unlocked
-					}
-					create_species = {
-						class = "HUM"
-						portrait = "human"
-						name = "PRESCRIPTED_species_name_humans2"
-						plural = "PRESCRIPTED_species_plural_humans2"
-						adjective = "PRESCRIPTED_species_adjective_humans2"
-						namelist = "HUMAN2"
-						traits = {
-							trait = "trait_pc_continental_preference"
-							trait = "trait_organic"
-							trait = "trait_adaptive"
-							trait = "trait_nomadic"
-							trait = "trait_wasteful"
-						}
-					}
-					else = {
-						create_species = {
-							class = random_non_machine
-							portrait = random
-							name = random
-							traits = {
-								trait = "trait_pc_continental_preference"
-								trait = "trait_adaptive"
-								trait = "trait_nomadic"
-								trait = "trait_wasteful"
-							}
-							effect = {
-								mem_add_proper_species_trait = yes
-							}
-						}
-					}
-				}
-				while = {
-					create_pop_group = {
-						size = 100
-						species = last_created
-					}
-					count = 7
-				}
-				if = {
-					limit = {
-						root.owner = {
-							has_authority = auth_machine_intelligence
-						}
-					}
-					add_building = building_machine_capital
-				}
-				if = {
-					limit = {
-						root.owner = {
-							has_authority = auth_hive_mind
-						}
-					}
-					add_building = building_hive_capital
-				}
-				else = {
-					add_building = building_capital
-				}
-				add_district = district_arcology_housing
-				add_modifier = {
-					modifier = mem_aspmod_promised_land
-					days = -1
-				}
-				while = {
-					add_deposit = d_ruined_arcology
-					count = 15
-				}
-			}
+		from = {
+			set_site_progress_locked = no
 		}
 	}
 	option = {
 		name = mem_asp.76.a
-		custom_tooltip = mem_asp.75.a.tooltip
-		owner = {
-			add_resource = {
-				influence = 250
+		trigger = {
+			owner = {
+				OR = {
+					is_xenophile = yes
+					is_egalitarian = yes
+					is_pacifist = yes
+				}
 			}
 		}
-		destroy_archaeological_site = from
 	}
 	option = {
 		name = mem_asp.76.b
-		custom_tooltip = mem_asp.75.a.tooltip
-		custom_tooltip = mem_asp.75.c.tooltip
+		trigger = {
+			owner = {
+				OR = {
+					is_materialist = yes
+					is_megacorp = yes
+					is_pacifist = yes
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_asp.76.c
+		trigger = {
+			owner = {
+				is_xenophobe = yes
+			}
+		}
+	}
+	option = {
+		name = mem_asp.76.d
+	}
+	option = {
+		name = mem_asp.76.e
+		exclusive_trigger = {
+			owner = {
+				is_homicidal = yes
+			}
+		}
+		from = {
+			destroy_archaeological_site = this
+		}
 	}
 }
 
@@ -1312,6 +1218,33 @@ fleet_event = {
 		name = mem_asp.77.a
 		owner = {
 			add_relic = r_mem_aspmod_the_replicator
+		}
+	}
+}
+
+carrier_event = {
+	id = mem_asp.78
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		exists = owner
+		owner = {
+			is_country_type = primitive
+		}
+	}
+	immediate = {
+		remove_deposit = d_mem_scfe_proto_city
+		save_deposits = yes
+		clear_deposits = yes
+		restore_saved_deposits = yes
+		change_pc = pc_city
+		relic_world_conversion_effect = {
+			DISTRICT = district_arcology_housing
+			VARIABLE = num_housing_districts
+		}
+		set_planet_entity = {
+			entity = "city_planet_entity"
+			graphical_culture = owner
 		}
 	}
 }
@@ -1366,31 +1299,6 @@ event = {
 	}
 	immediate = {
 		set_global_flag = mem_asp_kessler_syndrome_story_human_unlocked
-	}
-}
-
-namespace = mem_asp_on_action
-country_event = {
-	id = mem_asp_on_action.1
-	hide_window = yes
-	is_triggered_only = yes
-	trigger = {
-		has_special_project = mem_ASP_BEYOND_EARTH_PURITY_PROJECT
-		from = {
-			any_system_planet = {
-				is_same_value = event_target:mem_ASP_site_beyond_earth_purity_planet_2
-			}
-		}
-	}
-	immediate = {
-		abort_special_project = {
-			type = mem_ASP_BEYOND_EARTH_PURITY_PROJECT
-		}
-		enable_special_project = {
-			name = mem_ASP_BEYOND_EARTH_PURITY_PROJECT
-			location = event_target:mem_ASP_site_beyond_earth_purity_planet_2
-			owner = fromfrom
-		}
 	}
 }
 
