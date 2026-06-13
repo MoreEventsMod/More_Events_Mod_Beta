@@ -489,15 +489,11 @@ fleet_event = {
 		owner = {
 			add_monthly_resource_mult = {
 				resource = society_research
-				value = 480
-				min = 1000
-				max = 3000
+				value = 3
 			}
 			add_monthly_resource_mult = {
 				resource = physics_research
-				value = 180
-				min = 1200
-				max = 3500
+				value = 3
 			}
 		}
 	}
@@ -919,13 +915,20 @@ fleet_event = {
 	id = mem_asp.72
 	title = "mem_asp.72.name"
 	desc = "mem_asp.72.desc"
-	picture = GFX_evt_mem_asp_gate
+	picture = GFX_evt_l-gateway
 	show_sound = event_mystic_reveal
 	archaeology = yes
 	is_triggered_only = yes
 	immediate = {
 		from = {
 			set_site_progress_locked = yes
+			solar_system = {
+				spawn_megastructure = {
+					type = mem_asp_beyond_earth_purity_site_gateway
+					planet = event_target:mem_asp_beyond_earth_purity_site_planet
+					orbit_distance = 0
+				}
+			}
 		}
 	}
 	after = {
@@ -936,22 +939,6 @@ fleet_event = {
 	option = {
 		name = mem_asp.72.a
 		medium_artifact_reward = yes
-		from = {
-			solar_system = {
-				spawn_megastructure = {
-					type = mem_asp_beyond_earth_purity_site_gateway
-					planet = event_target:mem_asp_beyond_earth_purity_site_planet
-					orbit_distance = 0
-				}
-				hidden_effect = {
-					spawn_system = {
-						initializer = mem_asp_beyond_earth_purity_site_system_2
-						hyperlane = no
-						max_distance = 20
-					}
-				}
-			}
-		}
 	}
 	option = {
 		name = mem_asp.72.b
@@ -986,6 +973,19 @@ fleet_event = {
 	archaeology = yes
 	is_triggered_only = yes
 	immediate = {
+		hidden_effect = {
+			from = {
+				solar_system = {
+					hidden_effect = {
+						spawn_system = {
+							initializer = mem_asp_beyond_earth_purity_site_system_2
+							hyperlane = no
+							max_distance = 20
+						}
+					}
+				}
+			}
+		}
 		from = {
 			set_site_progress_locked = yes
 		}
@@ -1039,17 +1039,18 @@ fleet_event = {
 		name = mem_asp.74.a
 		allow = {
 			owner = {
-				OR = {
-					has_policy_flag = interference_active
-					has_policy_flag = interference_aggressive
+				NOT = {
+					has_policy_flag = interference_not_allowed
 				}
 			}
 		}
 	}
 	option = {
 		name = mem_asp.74.b
-		destroy_archaeological_site = from
 		from = {
+			destroy_archaeological_site = this
+		}
+		from.planet = {
 			add_deposit = d_physics_25
 			add_deposit = d_society_25
 		}
@@ -1075,6 +1076,9 @@ fleet_event = {
 		from = {
 			set_site_progress_locked = no
 		}
+		event_target:mem_asp_beyond_earth_purity_site_planet_2.owner = {
+			set_awareness = 100
+		}
 	}
 	immediate = {
 		from = {
@@ -1084,19 +1088,12 @@ fleet_event = {
 		hidden_effect = {
 			event_target:mem_asp_beyond_earth_purity_site_planet_2 = {
 				change_pc = pc_relic
-				create_late_pre_ftl_empire = yes
-				while = {
-					create_pop_group = {
-						size = 100
-						species = last_created_species
-					}
-					count = 7
+				reroll_deposits = yes
+				generate_late_pre_ftls_on_planet = yes
+				create_pop_group = {
+					size = 700
+					species = last_created_species
 				}
-				last_created_country = {
-					set_pre_ftl_age = early_space_age
-					set_country_flag = early_space_age
-				}
-				set_owner = last_created_country
 				carrier_event = {
 					id = mem_asp.778
 					days = 3600
@@ -1120,56 +1117,64 @@ fleet_event = {
 	}
 	option = {
 		name = mem_asp.75.a
-		from = {
-			destroy_archaeological_site = this
-		}
+		# from = {
+		# 	destroy_archaeological_site = this
+		# }
 	}
 	option = {
 		name = mem_asp.75.b
+		owner = {
+			country_event = {
+				id = mem_asp.76
+			}
+		}
 	}
 }
 
-fleet_event = {
+country_event = {
 	id = mem_asp.76
 	title = "mem_asp.76.name"
 	desc = "mem_asp.76.desc"
 	picture = GFX_evt_astral_rift_genesis_3
 	show_sound = event_pre_ftl_civilization
-	archaeology = yes
+	diplomatic = yes
 	is_triggered_only = yes
-	immediate = {
-		from = {
-			set_site_progress_locked = yes
-		}
-	}
-	after = {
-		from = {
-			set_site_progress_locked = no
-		}
-	}
-	option = {
-		name = mem_asp.76.a
-		trigger = {
-			owner = {
-				OR = {
-					is_xenophile = yes
-					is_egalitarian = yes
-					is_pacifist = yes
-				}
-			}
-		}
+	picture_event_data = {
+		room = no_video_feed_room
 	}
 	option = {
 		name = mem_asp.76.b
-		trigger = {
-			owner = {
-				OR = {
-					is_materialist = yes
-					is_megacorp = yes
-					is_pacifist = yes
-				}
-			}
+		response_text = mem_asp.76.b.response
+		is_dialog_only = yes
+		# trigger = {
+		# 	owner = {
+		# 		OR = {
+		# 			is_materialist = yes
+		# 			is_megacorp = yes
+		# 			is_pacifist = yes
+		# 		}
+		# 	}
+		# }
+	}
+	option = {
+		name = mem_asp.76.a
+		# response_text = mem_asp.76.a.response
+		# is_dialog_only = yes
+		# hidden_effect = {
+		# 	set_country_flag = mem_asp_76_end
+		# }
+		country_event = {
+			id = mem_asp.77
 		}
+		# trigger = {
+		# 	owner = {
+		# 		OR = {
+		# 			is_xenophile = yes
+		# 			is_egalitarian = yes
+		# 			is_pacifist = yes
+		# 		}
+		# 	}
+		# }
 	}
 	option = {
 		name = mem_asp.76.c
@@ -1178,10 +1183,20 @@ fleet_event = {
 				is_xenophobe = yes
 			}
 		}
+		hidden_effect = {
+			event_target:mem_asp_beyond_earth_purity_site_planet_2.owner = {
+				set_faction_hostility = {
+					target = root
+					set_hostile = yes
+					set_neutral = no
+					set_friendly = no
+				}
+			}
+		}
 	}
-	option = {
-		name = mem_asp.76.d
-	}
+	# option = {
+	# 	name = mem_asp.76.d
+	# }
 	option = {
 		name = mem_asp.76.e
 		exclusive_trigger = {
@@ -1189,35 +1204,67 @@ fleet_event = {
 				is_homicidal = yes
 			}
 		}
-		from = {
-			destroy_archaeological_site = this
+		hidden_effect = {
+			event_target:mem_asp_beyond_earth_purity_site_planet_2.owner = {
+				set_faction_hostility = {
+					target = root
+					set_hostile = yes
+					set_neutral = no
+					set_friendly = no
+				}
+			}
+		}
+	}
+	option = {
+		name = END_TRANSMISSION
+		exclusive_trigger = {
+			owner = {
+				has_country_flag = mem_asp_76_end
+			}
 		}
 	}
 }
 
 #the replicator
-fleet_event = {
+country_event = {
 	id = mem_asp.77
 	title = "mem_asp.77.name"
 	desc = "mem_asp.77.desc"
 	picture = GFX_evt_analyzing_artifacts
 	show_sound = relic_activation_cybrex_war_forge
-	archaeology = yes
+	diplomatic = yes
 	is_triggered_only = yes
-	immediate = {
-		from = {
-			set_site_progress_locked = yes
-		}
-	}
-	after = {
-		from = {
-			set_site_progress_locked = no
-		}
+	picture_event_data = {
+		room = no_video_feed_room
 	}
 	option = {
 		name = mem_asp.77.a
 		owner = {
 			add_relic = r_mem_aspmod_the_replicator
+		}
+		hidden_effect = {
+			event_target:mem_asp_beyond_earth_purity_site_planet_2 = {
+				set_carrier_flag = mem_asp_beyond_earth_purity_site_planet_2_was_left_in_peace
+			}
+		}
+	}
+	option = {
+		name = mem_asp.77.b
+		trigger = {
+			OR = {
+				has_policy_flag = first_contact_attack_allowed
+				has_policy_flag = interference_aggressive
+			}
+		}
+		hidden_effect = {
+			event_target:mem_asp_beyond_earth_purity_site_planet_2.owner = {
+				set_faction_hostility = {
+					target = root
+					set_hostile = yes
+					set_neutral = no
+					set_friendly = no
+				}
+			}
 		}
 	}
 }
@@ -1246,6 +1293,51 @@ carrier_event = {
 			entity = "city_planet_entity"
 			graphical_culture = owner
 		}
+	}
+}
+
+# when you invade them after promising peace
+carrier_event = {
+	id = mem_asp.779
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		has_carrier_flag = mem_asp_beyond_earth_purity_site_planet_2_was_left_in_peace
+		exists = owner
+		owner = {
+			is_country_type = primitive
+		}
+		
+	}
+	immediate = {
+		every_planet_army = {
+			remove_army = yes
+		}
+		change_pc = pc_shielded
+		add_deposit = d_physics_25
+		add_deposit = d_society_25
+		from = {
+			country_event = {
+				id = mem_asp.780
+			}
+		}
+	}
+	after = {
+		every_planet_army = {
+			remove_army = yes
+		}
+	}
+}
+
+country_event = {
+	id = mem_asp.780
+	title = "mem_asp.780.name"
+	desc = "mem_asp.780.desc"
+	picture = GFX_evt_shielded_planet
+	show_sound = colossus_shield_beam
+	is_triggered_only = yes
+	option = {
+		name = FASCINATING
 	}
 }
 
