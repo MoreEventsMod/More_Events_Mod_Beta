@@ -1381,7 +1381,6 @@ ship_event = {
 	picture = GFX_evt_unidentified_ship
 	is_triggered_only = yes
 	immediate = {
-		
 		from = {
 			create_archaeological_site = mem_asp_ancient_probe_site
 		}
@@ -1445,8 +1444,46 @@ fleet_event = {
 	}
 	option = {
 		name = mem_asp.80.a
+		trigger = {
+			owner = {
+				is_nomadic = no
+			}
+		}
 		owner = {
 			capital_scope = {
+				create_archaeological_site = mem_asp_epilogue_site
+				hidden_effect = {
+					solar_system = {
+						create_ambient_object = {
+							type = mem_asp_site_epilogue_sphere_object							#모성 궤도에 갑자기 거대한 구가 나타났습니다.
+							use_3d_location = yes
+							entity_offset = {
+								min = 5
+								max = 5
+							}
+							entity_offset_height = {
+								min = 5
+								max = 5
+							}
+							location = prev
+						}
+					}
+					last_created_ambient_object = {
+						set_ambient_object_flag = mem_asp_site_epilogue_sphere_object
+					}
+				}
+			}
+		}
+	}
+	option = {
+		name = mem_asp.80.b
+		trigger = {
+			owner = {
+				is_nomadic = yes
+			}
+		}
+		owner = {
+			capital_scope.solar_system.star = {
 				create_archaeological_site = mem_asp_epilogue_site
 				hidden_effect = {
 					solar_system = {
@@ -1752,6 +1789,7 @@ country_event = {
 	}
 	picture = GFX_evt_clocks
 	is_triggered_only = yes
+	specimen = mem_scfe_vault
 	immediate = {
 		random_owned_planet = {
 			limit = {
@@ -2386,6 +2424,11 @@ fleet_event = {
 		}
 	}
 	after = {
+		owner = {
+			give_specimen = {
+				key = hyperfertile_soil
+			}
+		}
 		from = {
 			set_site_progress_locked = no
 		}
@@ -2517,24 +2560,20 @@ fleet_event = {
 		name = mem_asp.62.a
 		owner = {
 			add_monthly_resource_mult = {
-				resource = unity
-				value = 12
-			}
-			add_monthly_resource_mult = {
 				resource = society_research
-				value = 12
+				value = 3
 			}
 		}
 		from.planet = {
-			#random_moon = {
-			#create_archaeological_site = mem_asp_awakened_moon_site
-			#}
+			random_moon = {
+				create_archaeological_site = mem_asp_awakened_moon_site
+			}
 		}
-		custom_tooltip = mem_asp.62.a.tooltip
+		# custom_tooltip = mem_asp.62.a.tooltip
 		hidden_effect = {
 			from.planet = {
 				remove_deposit = d_mem_asp_plants_coverd_city
-				add_deposit = d_mem_asp_plants_coverd_city_2
+				# add_deposit = d_mem_asp_plants_coverd_city_2
 			}
 		}
 	}
@@ -2581,34 +2620,254 @@ fleet_event = {
 		}
 	}
 	after = {
+	}
+	option = {
+		name = mem_asp.64.a
 		from = {
 			set_site_progress_locked = no
 		}
 	}
 	option = {
-		name = mem_asp.64.a
-		owner = {
-			add_relic = r_mem_aspmod_deadspace_marker
-		}
-	}
-	option = {
 		name = mem_asp.64.b
+		from = {
+			destroy_archaeological_site = this
+		}
 		owner = {
 			add_monthly_resource_mult = {
 				resource = unity
-				value = 12
-			}
-			add_monthly_resource_mult = {
-				resource = society_research
-				value = 12
-			}
-			add_resource = {
-				influence = 200
+				value = 6
 			}
 		}
 	}
 }
 
+fleet_event = {
+	id = mem_asp.641
+	title = "mem_asp.641.name"
+	desc = "mem_asp.641.desc"
+	picture = GFX_evt_big_landing_ship
+	show_sound = planet_killer_hit_layer_1
+	archaeology = yes
+	is_triggered_only = yes
+	immediate = {
+		from = {
+			set_site_progress_locked = yes
+		}
+	}
+	after = {
+		from = {
+			set_site_progress_locked = no
+		}
+	}
+	option = {
+		name = mem_asp.641.a
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = 6
+			}
+		}
+	}
+	option = {
+		name = mem_asp.641.b
+		owner = {
+			add_monthly_resource_mult = {
+				resource = society_research
+				value = 6
+			}
+			add_resource = {
+				influence = 200
+			}
+		}
+		from = {
+			destroy_archaeological_site = this
+		}
+	}
+	option = {
+		name = mem_asp.641.c
+		owner = {
+			add_relic = r_mem_aspmod_deadspace_marker
+		}
+	}
+	option = {
+		name = mem_asp.641.d
+		trigger = {
+			owner = {
+				has_psionic_ascension = yes
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = 6
+			}
+			add_monthly_resource_mult = {
+				resource = sr_zro
+				value = 6
+			}
+			add_relic = r_mem_aspmod_deadspace_marker
+		}
+	}
+	option = {
+		name = mem_asp.641.e
+		trigger = {
+			owner = {
+				mem_asp_is_necro_dude = yes
+			}
+		}
+		owner = {
+			add_monthly_resource_mult = {
+				resource = unity
+				value = 12
+			}
+			add_relic = r_mem_aspmod_deadspace_marker
+		}
+	}
+}
+
+carrier_event = {
+	id = mem_asp.642
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		if = {
+			limit = {
+				# they dont have biomass
+				NAND = {
+					owner = {
+						OR = {
+							owner_is_machine_intelligence = yes
+							is_individual_machine = yes
+						}
+					}
+					is_artificial = yes
+				}
+			}
+			# set_timed_carrier_flag = {
+			# 	flag = mem_scfe_xenomorph_country_invade_planet
+			# 	years = 5
+			# }
+			#set_carrier_flag = mem_scfe_xenomorph_country_invade_planet
+			owner = {
+				if = {
+					limit = {
+						NOT = {
+							is_same_empire = event_target:r_mem_aspmod_deadspace_marker_activator
+						}
+					}
+					add_opinion_modifier = {
+						who = event_target:r_mem_aspmod_deadspace_marker_activator
+						modifier = mem_scfe_activated_black_marker
+					}
+				}
+			}
+			while = {
+				count = value:mem_per_300_local_pop_amount
+				create_army = {
+					type = mem_scfe_necromorph_army
+					owner = event_target:mem_scfe_xenomorph_country
+					name = mem_scfe_necromorph_army_name
+				}
+			}
+		}
+	}
+}
+
+# fired from on_army_killed_in_combat and on_army_killed_no_combat
+# This = army owner country
+# From = army
+# FromFrom = opponent / planet (respectively)
+country_event = {
+	id = mem_asp.643
+	hide_window = yes
+	is_triggered_only = yes
+	trigger = {
+		From = {
+			army_type = mem_scfe_necromorph_army
+		}
+	}
+	immediate = {
+		# From.planet = {
+		# 	clear_planet_purge_type = yes
+		# }
+		if = {
+			limit = {
+				exists = event_target:r_mem_aspmod_deadspace_marker_activator
+			}
+			event_target:r_mem_aspmod_deadspace_marker_activator = {
+				mem_asp_black_marker_dead_armies_count = yes
+			}
+		}
+	}
+}
+
+# country_event = {
+# 	id = mem_asp.643
+# 	hide_window = yes
+# 	is_triggered_only = yes
+# 	trigger = {
+# 		#has_country_flag = mem_scfe_xenomorph_country
+# 		FROMFROM = {
+# 			planet = {
+# 				has_carrier_flag = mem_scfe_xenomorph_country_invade_planet
+# 			}
+# 		}
+# 	}
+# 	immediate = {
+# 		FROMFROM = {
+# 			set_carrier_flag = mem_scfe_xenomorph_country_won
+# 			remove_carrier_flag = mem_scfe_xenomorph_country_invade_planet
+# 			mem_start_event_purging = yes
+# 		}
+# 	}
+# }
+# # Liberated from Mutants
+# country_event = {
+# 	id = colony.114
+# 	title = "colony.114.name"
+# 	desc = "colony.114.desc"
+# 	picture = GFX_evt_victorious_army
+# 	show_sound = event_ground_battle
+# 	location = FROMFROM
+# 	is_triggered_only = yes
+# 	trigger = {
+# 		has_country_flag = terraforming_mutants_invade_country
+# 		FROMFROM = { planet = { has_carrier_flag = terraforming_mutants_won } }
+# 	}
+# 	immediate = {
+# 		remove_country_flag = terraforming_mutants_invade_country
+# 		FROMFROM = {
+# 			set_carrier_flag = terraforming_mutants_defeated
+# 			remove_carrier_flag = terraforming_mutants_won
+# 			set_owner = ROOT
+# 			clear_planet_purge_type = yes
+# 			create_pop_group = {
+# 				species = owner.species
+# 				category = civilian
+# 				effect = {
+# 					save_event_target_as = non_purge_pop_group
+# 				}
+# 			}
+# 			every_owned_pop_group = {
+# 				limit = {
+# 					has_pop_group_flag = event_purge
+# 					NOT = { is_same_value = event_target:non_purge_pop_group }
+# 				}
+# 				transfer_pop_amount = {
+# 					source = this
+# 					target = event_target:non_purge_pop_group
+# 					percentage = 1
+# 				}
+# 			}
+# 			every_owned_pop_group = {
+# 				remove_modifier = "pop_recently_conquered"
+# 				add_modifier = {
+# 					modifier = "pop_liberation_fever"
+# 					days = 3600
+# 				}
+# 			}
+# 		}
+# 	}
 namespace = mem_asp
 #geocentrism #https://gall.dcinside.com/mgallery/board/view?id=stellaris&no=8943
 #geocentric
