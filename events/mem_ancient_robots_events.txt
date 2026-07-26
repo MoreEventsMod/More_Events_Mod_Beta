@@ -333,7 +333,7 @@ country_event = {
 	desc = mem_ancient_robots.211.desc
 	picture = GFX_evt_mem_victory
 	show_sound = event_ground_battle
-	location = capital_scope
+	location = fromfrom
 	event_chain = mem_ancient_robots_chain
 	
 	is_triggered_only = yes
@@ -358,6 +358,54 @@ country_event = {
 			name = MEM_SIEGE_PROJECT
 			location = fromfrom
 			owner = fromfrom.owner
+		}
+	}
+}
+
+#monthly pulse country fallback clear event if robots were defeated any other way than ground combat and owner has control of the planet again
+country_event = {
+	id = mem_ancient_robots.2112
+	title = mem_ancient_robots.211.name
+	desc = mem_ancient_robots.211.desc
+	picture = GFX_evt_mem_victory
+	show_sound = event_ground_battle
+	location = event_target:mem_ancient_robots_planet
+	event_chain = mem_ancient_robots_chain
+
+	is_triggered_only = yes
+
+	trigger = {
+		has_event_chain = mem_ancient_robots_chain
+		any_owned_colony = {
+			has_carrier_flag = mem_super_robot_attack
+			has_ground_combat = no
+			controller = {
+				is_same_value = owner
+			}
+		}		
+		NOT = {
+			has_global_flag = mem_ancient_robot_cancel
+		}
+	}
+
+	immediate = {
+		random_owned_colony = {
+			limit = {
+				has_carrier_flag = mem_super_robot_attack
+			}
+			remove_carrier_flag = mem_super_robot_attack
+			save_event_target_as = mem_ancient_robots_planet
+		}
+		
+	}
+
+	option = {
+		name = mem_ancient_robots.211.a
+		# Set up special project to lay siege to the AI
+		enable_special_project = {
+			name = MEM_SIEGE_PROJECT
+			location = event_target:mem_ancient_robots_planet
+			owner = root
 		}
 	}
 }
@@ -742,17 +790,17 @@ carrier_event = {
 	event_chain = mem_ancient_robots_chain
     
 	is_triggered_only = yes
-	fire_only_once = yes
+	#fire_only_once = yes
 	
-	trigger = {
-		owner = {
-			has_country_flag = mem_ancient_robot_quest_owner
-		}
-		has_carrier_flag = mem_super_robot_attack
-		NOT = {
-			has_global_flag = mem_ancient_robot_cancel
-		}
-	}
+	# trigger = {
+	# 	owner = {
+	# 		has_country_flag = mem_ancient_robot_quest_owner
+	# 	}
+	# 	has_carrier_flag = mem_super_robot_attack
+	# 	NOT = {
+	# 		has_global_flag = mem_ancient_robot_cancel
+	# 	}
+	# }
 	option = {
 		name = mem_ancient_robots.225.a	
 	}
@@ -786,13 +834,13 @@ carrier_event = {
 				kill_single_pop = yes
 			}
             carrier_event = {
-                id = mem_ancient_robots.226 #Refire this event after a few months month
+                id = mem_ancient_robots.226 #Refire this event after a few months
                 days = 105
 				random = 30
             }
 		}
 		ELSE = {
-			carrier_event = { id = mem_ancient_robots.225 } # The last pop has fortified their position.
+			carrier_event = { id = mem_ancient_robots.225 } # The last few pops have fortified their position.
 		}
     }
 }
