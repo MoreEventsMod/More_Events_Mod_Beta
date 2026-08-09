@@ -73,14 +73,13 @@ fleet_event = {
 				limit = {
 					NOR = {
 						has_technology = tech_genome_mapping
-						AND = {
-							is_machine_empire = yes
-							NOT = {
-								has_valid_civic = civic_machine_assimilator
-							}
-						}
-						is_mechanical_empire = yes
 					}
+					# OR = {
+					# 	is_machine_empire = no
+					# 	has_civic = civic_machine_assimilator
+					# 	has_civic = civic_machine_servitor
+					# 	has_civic = civic_machine_guided_sapience
+					# }
 				}
 				give_technology = {
 					tech = tech_genome_mapping
@@ -88,16 +87,17 @@ fleet_event = {
 			}
 			ELSE_IF = {
 				limit = {
-					NOR = {
+					NOT = {
 						has_technology = tech_cloning
-						AND = {
-							is_machine_empire = yes
-							NOT = {
-								has_valid_civic = civic_machine_assimilator
-							}
-						}
-						is_mechanical_empire = yes
 					}
+					# OR = {
+					# 	AND = {
+					# 		is_machine_empire = no
+					# 		has_civic = civic_machine_assimilator
+					# 	}
+					# 	is_wilderness_empire = no
+					# 	is_natural_design_empire = no
+					# }
 				}
 				add_research_option = tech_cloning
 				add_tech_progress = {
@@ -138,9 +138,7 @@ fleet_event = {
 		}
 		trigger = {
 			owner = {
-				
-					is_homicidal = no
-				
+				is_homicidal = no
 			}
 		}
 	}
@@ -184,11 +182,20 @@ country_event = {
 	desc = mem_voggo.5.desc
 	is_triggered_only = yes
 	diplomatic = yes
+	picture = GFX_leader_recruitment_bg_renowned
+	event_window_type = leader_recruit
+	notification_event_icon = "GFX_message_leader_recruitment_mem_voggo"	
 	picture_event_data = {
 		portrait = event_target:lord_voggo
 		room = mem_gilded_purple_room
 	}
 	immediate = {
+		event_target:global_event_country = {
+			set_variable = {
+				which = mem_voggo_clones
+				value = 1
+			}
+		}
 		mem_voggo_create_og_voggo_species = yes
 		# TODO - this one also needs catchphrase background story and so on as a special leader - do this when the special portrait is in the works
 		create_saved_leader = {
@@ -198,17 +205,33 @@ country_event = {
 			CLASS = official
 			species = last_created_species
 			# cwtools shows an error for tier, but it works - ignore
-			tier = leader_tier_renowned
-			skill = 4
+			tier = leader_tier_legendary
+			skill = 8
 			can_manually_change_location = yes
 			gender = male
 			set_age = 1044
 			immortal = yes
 			traits = {
 				trait = leader_trait_mem_voggo_trait
+				trait = subclass_official_governor
 			}
 			effect = {
-				set_leader_flag = renowned_leader
+				if = {
+					limit = {
+						root = {
+							country_uses_consumer_goods = no
+						}
+					}
+					add_trait = {
+						trait = leader_trait_lavish_lifestyle
+					}
+				}
+				else = {
+					add_trait = {
+						trait = leader_trait_excessive
+					}
+				}
+				set_leader_flag = leader_tier_legendary
 				save_event_target_as = lord_voggo
 				save_global_event_target_as = lord_voggo_original
 			}
@@ -216,10 +239,11 @@ country_event = {
 	}
 	option = {
 		name = mem_voggo.5.a
-		custom_tooltip = mem_voggo.5.a.tooltip
+		# custom_tooltip = mem_voggo.5.a.tooltip
 		activate_saved_leader = {
 			key = mem_voggo_the_guy
 		}
+		tag = hire_leader
 		ai_chance = {
 			factor = 100
 			modifier = {
@@ -230,6 +254,7 @@ country_event = {
 	}
 	option = {
 		name = mem_voggo.5.b
+		tag = dismiss_leader
 		add_resource = {
 			influence = 250
 		}
@@ -260,11 +285,26 @@ country_event = {
 	after = {
 		hidden_effect = {
 			event_target:lord_voggo = {
-			
+				leader_event = {
+					id = mem_voggo.100
+					days = 3600
+				}
 			}
 		}
 	}
 }
+
+country_event = {
+	id = mem_voggo.6
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		capital_scope = {
+			create_archaeological_site = mem_voggo_site
+		}
+	}
+}
+
 # voggo wants to clone again
 leader_event = {
 	id = mem_voggo.100
@@ -293,7 +333,7 @@ leader_event = {
 		}
 	}
 	# double so one shows the trait when selecting , other for debug
-	option = {		
+	option = {
 		name = mem_voggo.100.b
 		owner = {
 			add_resource = {
@@ -302,6 +342,7 @@ leader_event = {
 		}
 	}
 }
+
 # this = situation 
 # you finished researching clone voggo tech
 situation_event = {
@@ -331,7 +372,7 @@ situation_event = {
 		}
 	}
 }
-# TODO randomizer with traits
+
 # recuit for voggo clones 
 country_event = {
 	id = mem_voggo.115
@@ -339,17 +380,21 @@ country_event = {
 	desc = mem_voggo.115.desc
 	is_triggered_only = yes
 	diplomatic = yes
-
 	picture = GFX_leader_recruitment_bg_renowned
 	auto_opens = no
 	event_window_type = leader_recruit
-	notification_event_icon = "GFX_message_leader_recruitment_ulastar"
-
+	notification_event_icon = "GFX_message_leader_recruitment_mem_voggo"	
 	picture_event_data = {
 		portrait = event_target:lord_voggo
 		room = mem_gilded_purple_room
 	}
 	immediate = {
+		event_target:global_event_country = {
+			change_variable = {
+				which = mem_voggo_clones
+				value = 1
+			}
+		}
 		mem_voggo_create_og_voggo_species = yes
 		# TODO - this one also needs catchphrase background story and so on as a special leader - do this when the special portrait is in the works
 		create_saved_leader = {
@@ -363,23 +408,54 @@ country_event = {
 			skill = 4
 			can_manually_change_location = yes
 			gender = male
-			set_age = 1044
-			immortal = yes
+			set_age = 0
+			# immortal = yes # on purpose
 			traits = {
-				trait = leader_trait_mem_voggo_trait
+				# trait = leader_trait_mem_voggo_trait
 			}
 			effect = {
 				set_leader_flag = renowned_leader
 				save_event_target_as = lord_voggo
+				random_list = {
+					# TRODO add mutation factor, set names and portraits
+					95 = {
+						add_trait = {
+							trait = leader_trait_mem_voggo_base_clone_trait
+						}
+					}
+					1 = {
+						add_trait = {
+							trait = leader_trait_mem_voggo_crippled_clone_trait
+						}
+					}
+					1 = {
+						add_trait = {
+							trait = leader_trait_mem_voggo_mutant_clone_trait
+						}
+					}
+					1 = {
+						add_trait = {
+							trait = leader_trait_mem_voggo_vampire_clone_trait
+						}
+					}
+					1 = {
+						add_trait = {
+							trait = leader_trait_mem_voggo_shiny_clone_trait
+						}
+					}
+				}
 			}
 		}
 	}
 	option = {
-		name = mem_voggo.115.a
-		custom_tooltip = mem_voggo.115.a.tooltip
-		activate_saved_leader = {
-			key = mem_voggo_the_guy
+		name = HIRE
+		# custom_tooltip = mem_voggo.115.a.tooltip
+		hidden_effect = {
+			activate_saved_leader = {
+				key = mem_voggo_the_guy
+			}
 		}
+		tag = hire_leader
 		ai_chance = {
 			factor = 100
 			modifier = {
@@ -389,10 +465,11 @@ country_event = {
 		}
 	}
 	option = {
-		name = mem_voggo.115.b
+		name = DISMISS
 		add_resource = {
-			influence = 250
+			influence = 50
 		}
+		tag = dismiss_leader
 		ai_chance = {
 			factor = 10
 			modifier = {
@@ -401,20 +478,20 @@ country_event = {
 			}
 		}
 	}
-	option = {
-		name = mem_voggo.115.c
-		is_dialog_only = yes
-		response_text = mem_voggo.115.c.responce
-		ai_chance = {
-			factor = 0
-		}
-	}
-	option = {
-		name = mem_voggo.115.d
-		is_dialog_only = yes
-		response_text = mem_voggo.115.d.responce
-		ai_chance = {
-			factor = 0
-		}
-	}
+	# option = {
+	# 	name = mem_voggo.115.c
+	# 	is_dialog_only = yes
+	# 	response_text = mem_voggo.115.c.responce
+	# 	ai_chance = {
+	# 		factor = 0
+	# 	}
+	# }
+	# option = {
+	# 	name = mem_voggo.115.d
+	# 	is_dialog_only = yes
+	# 	response_text = mem_voggo.115.d.responce
+	# 	ai_chance = {
+	# 		factor = 0
+	# 	}
+	# }
 }
