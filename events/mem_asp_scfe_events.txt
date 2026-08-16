@@ -11719,32 +11719,13 @@ ship_event = {
 	is_triggered_only = yes
 	option = {
 		name = INTRIGUING
-		owner = {
-			add_monthly_resource_mult = {
-				resource = unity
-				value = 1
-			}
-		}
+		
 		from = {
-			#create_archaeological_site = mem_scfe_war_torn_site
-		}
-		hidden_effect = {
-			owner = {
-				save_global_event_target_as = mem_scfe_war_torn_owner
+			create_archaeological_site = mem_scfe_war_torn_site
+			hidden_effect = {
+				save_global_event_target_as = mem_scfe_war_torn_site_planet
 			}
 		}
-	}
-}
-
-country_event = {
-	id = mem_scfe_war_torn.2
-	title = mem_scfe_war_torn.2.name
-	desc = mem_scfe_war_torn.2.desc
-	picture = GFX_evt_alien_ruins
-	show_sound = event_ship_bridge
-	is_triggered_only = yes
-	option = {
-		name = INTERESTING
 	}
 }
 
@@ -11756,14 +11737,10 @@ country_event = {
 	show_sound = event_ship_bridge
 	is_triggered_only = yes
 	option = {
-		name = CURIOUS
+		name = FASCINATING
 		add_modifier = {
 			modifier = mem_scfe_clone_prowess
 			days = -1
-		}
-		hidden_effect = {
-			set_country_flag = war_torn_done
-			clear_global_event_target = mem_scfe_war_torn_owner
 		}
 	}
 }
@@ -11869,23 +11846,9 @@ fleet_event = {
 				NOT = {
 					has_origin = origin_clone_army
 				}
-				has_technology = tech_gene_banks
 			}
 		}
 		text = mem_scfe_war_torn_site.3.desc_2
-	}
-	desc = {
-		trigger = {
-			owner = {
-				NOT = {
-					has_origin = origin_clone_army
-				}
-				NOT = {
-					has_technology = tech_gene_banks
-				}
-			}
-		}
-		text = mem_scfe_war_torn_site.3.desc_3
 	}
 	picture = GFX_evt_ground_combat
 	show_sound = event_ground_battle
@@ -11940,9 +11903,6 @@ fleet_event = {
 				min = @tier2researchmin
 				max = @tier2researchmax
 			}
-			country_event = {
-				id = mem_scfe_war_torn.2
-			}
 		}
 	}
 	after = {
@@ -11950,72 +11910,41 @@ fleet_event = {
 			set_site_progress_locked = no
 		}
 		hidden_effect = {
-			closest_system = {
-				min_steps = 1
-				max_steps = 15
-				limit = {
-					mem_scfe_is_valid_system = yes
-					OR = {
-						has_owner = no
-						AND = {
-							exists = space_owner
-							space_owner = {
-								is_same_empire = event_target:mem_scfe_war_torn_owner
-							}
-						}
-					}
-					any_system_planet = {
-						uninhabitable_regular_planet = yes
-						has_anomaly = no
-						has_owner = no
-						NOT = {
-							has_carrier_flag = has_megastructure
-						}
-					}
+			owner = {
+				country_event = {
+					id = mem_scfe_war_torn_lore.1
+					days = 5
 				}
-				random_system_planet = {
-					limit = {
-						uninhabitable_regular_planet = yes
-						has_anomaly = no
-						has_owner = no
-						NOT = {
-							has_carrier_flag = has_megastructure
-						}
-					}
-					enable_special_project = {
-						name = SCFE_WAR_TORN_PROJECT_1
-						location = this
-						owner = root
-					}
-				}
-			}
-		}
-		owner = {
-			country_event = {
-				id = war_torn_lore.1
-				days = 5
 			}
 		}
 	}
 }
 
-namespace = war_torn_lore
+namespace = mem_scfe_war_torn_lore
 country_event = {
-	id = war_torn_lore.1
+	id = mem_scfe_war_torn_lore.1
 	title = mem_scfe_war_torn_lore.1.name
-	desc = {
-		trigger = {
-			has_origin = origin_clone_army
-		}
-		text = mem_scfe_war_torn_lore.1.desc_c
-	}
-	desc = {
-		trigger = {
-			NOT = {
-				has_origin = origin_clone_army
+	desc = mem_scfe_war_torn_lore.1.desc
+	location = event_target:mem_war_torn_project_planet
+	immediate = {
+		closest_system = {
+			min_steps = 1
+			max_steps = 15
+			limit = {
+				mem_scfe_is_valid_system = yes				
+				any_system_planet = {
+					uninhabitable_regular_planet = yes
+					has_anomaly = no
+				}
+			}
+			random_system_planet = {
+				limit = {
+					uninhabitable_regular_planet = yes
+					has_anomaly = no
+				}
+				save_event_target_as = mem_war_torn_project_planet
 			}
 		}
-		text = mem_scfe_war_torn_lore.1.desc
 	}
 	picture = GFX_evt_ground_combat
 	show_sound = event_ground_battle
@@ -12023,6 +11952,26 @@ country_event = {
 	is_triggered_only = yes
 	option = {
 		name = INTERESTING
+		if = {
+			limit = {
+				exists = event_target:mem_war_torn_project_planet
+			}
+			enable_special_project = {
+				name = SCFE_WAR_TORN_PROJECT_1
+				location = event_target:mem_war_torn_project_planet
+				owner = root
+			}
+		}
+		else = {
+			enable_special_project = {
+				name = SCFE_WAR_TORN_PROJECT_1
+				location = event_target:mem_scfe_war_torn_site_planet.solar_system.star
+				owner = root
+			}
+		}
+		hidden_effect = {
+			clear_global_event_target = mem_scfe_war_torn_site_planet
+		}
 	}
 }
 
