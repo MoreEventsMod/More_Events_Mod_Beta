@@ -49,7 +49,6 @@ namespace = mem_aevum
 # mem_aevum.119   	|	leader event, relic on cooldown? aevum can remove it
 # mem_aevum.113   	|	logic for leader events
 # mem_aevum.114   	|	leader event, random leader had argument and got forcefully aged by aevum
-# mem_aevum.111   	|	on leader fired, check if it was aevum, then what?, not active
 # mem_aevum.112   	|	on relic gained and activated, add age to all with hoursglass trait
 # mem_aevum.200   	|	on aged, new powers
 # mem_aevum.201   	|	on aged, final tier
@@ -161,20 +160,7 @@ country_event = {
 				}
 			}
 		}
-		#event_target:mem_aevum_primitive_rewind_world = {
-		#	remove_carrier_flag = mem_aevum_first_timer
-		#}
 	}
-	#diplomatic = yes
-	#picture_event_data = {
-	#	portrait = GFX_mem_aevum_time_lord
-	#	room = pre_ftl_victorian_room
-	#	planet_background = pc_continental
-	#}
-	#
-	after = {
-	}
-	#found weird signal
 }
 
 country_event = {
@@ -333,7 +319,6 @@ ship_event = {
 		# }
 		from = {
 			has_carrier_flag = mem_aevum_first_timer
-			#has_carrier_flag = mem_aevum_primitive_rewind_world
 		}
 	}
 	immediate = {
@@ -425,15 +410,11 @@ ship_event = {
 	option = {
 		# do his bidding make a light show in orbit
 		name = mem_aevum.1.d
-		#response_text = mem_aevum.1.d.response
-		#is_dialog_only = yes
-		#hidden_effect = {
 		enable_special_project = {
 			name = mem_aevum_make_lightshow
 			owner = owner
 			location = from
 		}
-		#}
 	}
 	option = {
 		# hell nah invade him
@@ -443,16 +424,12 @@ ship_event = {
 				has_policy_flag = interference_aggressive
 			}
 		}
-		#response_text = mem_aevum.1.d.response
-		#is_dialog_only = yes
-		#hidden_effect = {
 		owner = {
 			begin_event_chain = {
 				event_chain = mem_aevum_invade_thisguy
 				target = event_target:mem_aevum_primitive_rewind_world
 			}
 		}
-		#}
 	}
 	option = {
 		# purge!
@@ -475,14 +452,11 @@ ship_event = {
 	option = {
 		# ai ez cheat
 		name = mem_aevum.1.e
-		exclusive_trigger = {		
+		exclusive_trigger = {
 			owner = {
 				is_ai = yes
 			}
 		}
-		#response_text = mem_aevum.1.d.response
-		#is_dialog_only = yes
-		#hidden_effect = {
 		owner = {
 			country_event = {
 				id = mem_aevum.11
@@ -507,7 +481,6 @@ ship_event = {
 		ai_chance = {
 			factor = 100
 		}
-		#}
 	}
 	after = {
 		hidden_effect = {
@@ -778,7 +751,6 @@ country_event = {
 		portrait = GFX_mem_aevum_time_lord_stage3
 		room = pre_ftl_victorian_room
 		planet_background = pc_continental
-		#graphical_culture = prim
 	}
 	option = {
 		# oh no
@@ -802,13 +774,10 @@ country_event = {
 			}
 			mem_aevum_endallevents = yes
 		}
-		hidden_effect = {
-			#set_variable = {
-			#	which = mem_aevum_death_age
-			#	value = mem_aevum_aevum_start_age
-			#}
-			set_global_flag = mem_aevum_time_lorddied
-			set_global_flag = mem_aevum_stage1
+	}
+	after = {
+		event_target:mem_aevum_primitive_rewind_world.solar_system = {
+			remove_modifier = mem_aevum_ship_frozen
 		}
 	}
 }
@@ -972,16 +941,8 @@ situation_event = {
 			}
 		}
 		owner = {
-			# add_tech_progress = {
-			# 	tech = tech_mine_zro
-			# 	progress = 0.1
-			# }
 			add_research_option = tech_mine_zro
 			add_research_option = tech_mine_dark_matter
-			# add_tech_progress = {
-			# 	tech = tech_mine_dark_matter
-			# 	progress = 0.1
-			# }
 			add_resource = {
 				influence = -100
 			}
@@ -1008,10 +969,6 @@ situation_event = {
 				NOT = {
 					has_country_flag = mem_aevum_askedtoomuch2
 				}
-			}
-		}
-		allow = {
-			owner = {
 				OR = {
 					is_lithoid = yes
 					is_machine_empire = yes
@@ -1072,10 +1029,6 @@ country_event = {
 	title = mem_aevum.11.name
 	desc = mem_aevum.11.desc
 	show_sound = event_celebration
-	#location = event_target:mem_aevum_primitive_rewind_world
-	trigger = {
-		#has_event_chain = mem_aevum_buildtemple
-	}
 	is_triggered_only = yes
 	event_window_type = leader_recruit
 	picture_event_data = {
@@ -1085,75 +1038,38 @@ country_event = {
 	picture = GFX_leader_recruitment_bg_mem_aevum_timelord
 	immediate = {
 		hidden_effect = {
-			#mem_aevum_endallevents = yes
-			create_country = {
-				name = "NAME_Unknown"
-				type = global_event
-				#auto_delete = yes
-				flag = {
-					icon = {
-						category = "special"
-						file = "unknown.dds"
-					}
-					background = {
-						category = "backgrounds"
-						file = "00_solid.dds"
-					}
-					colors = {
-						"red"
-						"red"
-						"null"
-						"null"
-					}
-				}
-				effect = {
-					save_event_target_as = mem_aevum_country
+			create_species = {
+				name = NAME_Vorkun
+				class = REP
+				portrait = rep11
+				traits = {
+					trait = trait_decadent
+					trait = trait_talented
+					trait = trait_thrifty
 				}
 			}
-			event_target:mem_aevum_country = {
-				create_species = {
-					name = "NAME_Unknown"
-					class = PARAGON
-					portrait = GFX_mem_aevum_time_lord_stage2
-					namelist = "PRT1"
-					traits = {
-						trait = trait_decadent
-						trait = trait_talented
-						trait = trait_thrifty
-						#trait = trait_weak
-						#trait = trait_plantoid_budding
-					}
-					effect = {
-						save_event_target_as = mem_aevum_species
-					}
-				}
-				create_leader = {
-					species = event_target:mem_aevum_species
-					event_leader = yes
-					class = scientist
-					tier = leader_tier_legendary
-					name = "NAME_mem_aevum_time_lord"
-					skill = 1
-					randomize_traits = no
-					skip_background_generation = yes
-					background_ethic = ethic_authoritarian
-					custom_catch_phrase = mem_aevum_time_lord_catchphrase
-					custom_description = mem_aevum_time_lord_backstory
-					can_manually_change_location = yes
-					gender = male
-					set_age = 137
-					immortal = yes
-					effect = {
-						save_global_event_target_as = mem_aevum_time_lord
-						#set_leader_flag = legendary_leader
-						set_leader_flag = mem_aevum_time_lord
-						#set_owner = root
-						#exile_leader_as = mem_aevum_time_lord
-					}
-				}
-				event_target:mem_aevum_time_lord = {
-					add_skill = 6
-					remove_all_traits = yes
+			create_saved_leader = {
+				key = mem_aevum
+				species = last_created_species
+				event_leader = yes
+				class = scientist
+				tier = leader_tier_legendary
+				name = "NAME_mem_aevum_time_lord"
+				skill = 4
+				randomize_traits = no
+				skip_background_generation = yes
+				background_ethic = ethic_authoritarian
+				custom_catch_phrase = mem_aevum_time_lord_catchphrase
+				custom_description = mem_aevum_time_lord_backstory
+				can_manually_change_location = yes
+				gender = male
+				set_age = 1
+				immortal = yes
+				effect = {
+					save_global_event_target_as = mem_aevum_time_lord
+					set_leader_flag = mem_aevum_time_lord
+					add_skill_without_trait_selection = 2
+					# remove_all_traits = yes
 					add_trait = {
 						trait = leader_trait_mem_aevum_legendary_timeskipper
 					}
@@ -1175,16 +1091,16 @@ country_event = {
 								is_variable_set = mem_aevum_aevum_start_age
 							}
 						}
-						while = {
-							count = root.mem_aevum_aevum_start_age
-							add_age = 1
-						}
+						set_age = mem_aevum_aevum_start_age
+					}
+					else = {
+						set_age = 276
 					}
 					root = {
 						clear_variable = mem_aevum_aevum_start_age
 					}
+					mem_aevum_setportrait = yes
 				}
-				mem_aevum_setportrait = yes
 			}
 		}
 	}
@@ -1343,10 +1259,7 @@ country_event = {
 	option = {
 		# become more liek us
 		trigger = {
-			or = {
-				has_civic = civic_machine_assimilator
-				has_tradition = tr_cybernetics_adopt
-			}
+			has_cybernetic_ascension = yes
 			event_target:mem_aevum_time_lord = {
 				NOT = {
 					has_trait = leader_trait_cyborg
@@ -1408,8 +1321,8 @@ country_event = {
 				random = 500
 			}
 		}
-		event_target:mem_aevum_time_lord = {
-			set_owner = root
+		activate_saved_leader = {
+			key = mem_aevum
 		}
 		add_relic = r_mem_aevum_houglass
 		ai_chance = {
@@ -1421,10 +1334,8 @@ country_event = {
 		sound = event_airlock
 		name = DISMISS
 		tag = dismiss_leader
-		#add_relic = r_mem_aevum_houglass
 		hidden_effect = {
 			event_target:mem_aevum_time_lord = {
-				save_global_event_target_as = mem_aevum_time_lord
 				kill_leader = {
 					show_notification = no
 				}
@@ -1438,15 +1349,7 @@ country_event = {
 		}
 	}
 	after = {
-		#	mem_aevum_endallevents = yes
-		#	remove_country_flag = mem_aevum_claimed1
-		#	remove_country_flag = mem_aevum_claimed2
-		#	remove_country_flag = mem_aevum_claimed3
 		hidden_effect = {
-			event_target:mem_aevum_country = {
-				destroy_country = yes
-				set_global_flag = mem_aevum_stage1
-			}
 			remove_country_flag = mem_aevum_askedtoomuch2
 		}
 	}
@@ -1568,7 +1471,6 @@ country_event = {
 				counter = mem_aevum_decoded_messages4
 				amount = 1
 			}
-			#end_event_chain = mem_aevum_decoded_messages_chain
 		}
 	}
 }
@@ -1588,78 +1490,6 @@ country_event = {
 		portrait = event_target:mem_aevum_killhim
 	}
 	immediate = {
-		hidden_effect = {
-			create_country = {
-				name = "NAME_Unknown"
-				type = global_event
-				auto_delete = yes
-				flag = {
-					icon = {
-						category = "special"
-						file = "unknown.dds"
-					}
-					background = {
-						category = "backgrounds"
-						file = "00_solid.dds"
-					}
-					colors = {
-						"red"
-						"red"
-						"null"
-						"null"
-					}
-				}
-				effect = {
-					save_event_target_as = mem_aevum_country
-				}
-			}
-			event_target:mem_aevum_country = {
-				create_species = {
-					name = "NAME_Unknown"
-					class = PARAGON
-					portrait = GFX_mem_aevum_time_lord_hologram
-					namelist = "PRT1"
-					traits = {
-						trait = trait_decadent
-						trait = trait_talented
-						trait = trait_thrifty
-						#trait = trait_weak
-						#trait = trait_plantoid_budding
-					}
-					effect = {
-						save_event_target_as = mem_aevum_species
-					}
-				}
-				create_leader = {
-					species = event_target:mem_aevum_species
-					event_leader = yes
-					class = scientist
-					name = "NAME_mem_aevum_time_lord_hologram"
-					skill = 1
-					randomize_traits = no
-					skip_background_generation = yes
-					background_ethic = ethic_authoritarian
-					custom_catch_phrase = mem_aevum_time_lord_catchphrase
-					custom_description = mem_aevum_time_lord_backstory
-					can_manually_change_location = yes
-					traits = {
-					}
-					gender = male
-					set_age = 137
-					immortal = yes
-					effect = {
-						save_event_target_as = mem_aevum_killhim
-						#set_leader_flag = mem_aevum_killhim
-						#set_leader_flag = mem_aevum_time_lord
-						#set_owner = root
-						#exile_leader_as = mem_aevum_time_lord
-					}
-				}
-				last_created_leader = {
-					add_skill_without_trait_selection = 7
-				}
-			}
-		}
 	}
 	option = {
 		name = mem_aevum.16.a
@@ -1667,14 +1497,6 @@ country_event = {
 		add_monthly_resource_mult = {
 			resource = physics_research
 			value = 4
-		}
-		#end_event_chain = mem_aevum_decoded_messages_chain
-		hidden_effect = {
-			event_target:mem_aevum_killhim = {
-				kill_leader = {
-					show_notification = no
-				}
-			}
 		}
 	}
 	option = {
@@ -1684,13 +1506,16 @@ country_event = {
 			country_event = {
 				id = mem_aevum.18
 			}
+		}
+	}
+	after = {
+		hidden_effect = {
 			event_target:mem_aevum_killhim = {
 				kill_leader = {
 					show_notification = no
 				}
 			}
 		}
-		#end_event_chain = mem_aevum_decoded_messages_chain
 	}
 }
 
@@ -1709,76 +1534,36 @@ country_event = {
 		portrait = event_target:mem_aevum_killhim
 	}
 	immediate = {
-		hidden_effect = {
-			create_country = {
-				name = "NAME_Unknown"
-				type = global_event
-				auto_delete = yes
-				flag = {
-					icon = {
-						category = "special"
-						file = "unknown.dds"
-					}
-					background = {
-						category = "backgrounds"
-						file = "00_solid.dds"
-					}
-					colors = {
-						"red"
-						"red"
-						"null"
-						"null"
-					}
-				}
-				effect = {
-					save_event_target_as = mem_aevum_country
-				}
+		create_species = {
+			name = NAME_Vorkun
+			class = REP
+			portrait = rep11
+			traits = {
+				trait = trait_decadent
+				trait = trait_talented
+				trait = trait_thrifty
 			}
-			event_target:mem_aevum_country = {
-				create_species = {
-					name = "NAME_Unknown"
-					class = PARAGON
-					portrait = GFX_mem_aevum_time_lord_hologram
-					namelist = "PRT1"
-					traits = {
-						trait = trait_decadent
-						trait = trait_talented
-						trait = trait_thrifty
-						#trait = trait_weak
-						#trait = trait_plantoid_budding
-					}
-					effect = {
-						save_event_target_as = mem_aevum_species
-					}
-				}
-				create_leader = {
-					species = event_target:mem_aevum_species
-					event_leader = yes
-					class = scientist
-					name = "NAME_mem_aevum_time_lord_hologram"
-					skill = 1
-					randomize_traits = no
-					skip_background_generation = yes
-					background_ethic = ethic_authoritarian
-					custom_catch_phrase = mem_aevum_time_lord_catchphrase
-					custom_description = mem_aevum_time_lord_backstory
-					can_manually_change_location = yes
-					traits = {
-					}
-					gender = male
-					set_age = 137
-					immortal = yes
-					effect = {
-						save_event_target_as = mem_aevum_killhim
-						#set_leader_flag = mem_aevum_killhim
-						#set_leader_flag = mem_aevum_time_lord
-						#set_owner = root
-						#exile_leader_as = mem_aevum_time_lord
-					}
-				}
-				last_created_leader = {
-					add_skill_without_trait_selection = 7
-				}
+		}
+		create_saved_leader = {
+			key = mem_aevum_hologram
+			species = last_created_species
+			event_leader = yes
+			class = scientist
+			tier = leader_tier_legendary
+			name = "NAME_mem_aevum_time_lord"
+			skill = 1
+			randomize_traits = no
+			skip_background_generation = yes
+			background_ethic = ethic_authoritarian
+			custom_catch_phrase = mem_aevum_time_lord_catchphrase
+			custom_description = mem_aevum_time_lord_backstory
+			can_manually_change_location = yes
+			gender = male
+			set_age = 137
+			immortal = yes
+			effect = {
+				save_global_event_target_as = mem_aevum_killhim
+				change_leader_portrait = GFX_mem_aevum_time_lord_hologram
 			}
 		}
 	}
@@ -1798,17 +1583,7 @@ country_event = {
 			resource = physics_research
 			value = 4
 		}
-		hidden_effect = {
-			event_target:mem_aevum_killhim = {
-				kill_leader = {
-					show_notification = no
-				}
-			}
-		}
 	}
-	#option = {
-	#	name = mem_aevum.16.b
-	#}
 }
 
 country_event = {
@@ -1826,78 +1601,6 @@ country_event = {
 		portrait = event_target:mem_aevum_killhim
 	}
 	immediate = {
-		hidden_effect = {
-			create_country = {
-				name = "NAME_Unknown"
-				type = global_event
-				auto_delete = yes
-				flag = {
-					icon = {
-						category = "special"
-						file = "unknown.dds"
-					}
-					background = {
-						category = "backgrounds"
-						file = "00_solid.dds"
-					}
-					colors = {
-						"red"
-						"red"
-						"null"
-						"null"
-					}
-				}
-				effect = {
-					save_event_target_as = mem_aevum_country
-				}
-			}
-			event_target:mem_aevum_country = {
-				create_species = {
-					name = "NAME_Unknown"
-					class = PARAGON
-					portrait = GFX_mem_aevum_time_lord_hologram
-					namelist = "PRT1"
-					traits = {
-						trait = trait_decadent
-						trait = trait_talented
-						trait = trait_thrifty
-						#trait = trait_weak
-						#trait = trait_plantoid_budding
-					}
-					effect = {
-						save_event_target_as = mem_aevum_species
-					}
-				}
-				create_leader = {
-					species = event_target:mem_aevum_species
-					event_leader = yes
-					class = scientist
-					name = "NAME_mem_aevum_time_lord_hologram"
-					skill = 1
-					randomize_traits = no
-					skip_background_generation = yes
-					background_ethic = ethic_authoritarian
-					custom_catch_phrase = mem_aevum_time_lord_catchphrase
-					custom_description = mem_aevum_time_lord_backstory
-					can_manually_change_location = yes
-					traits = {
-					}
-					gender = male
-					set_age = 137
-					immortal = yes
-					effect = {
-						save_event_target_as = mem_aevum_killhim
-						#set_leader_flag = mem_aevum_killhim
-						#set_leader_flag = mem_aevum_time_lord
-						#set_owner = root
-						#exile_leader_as = mem_aevum_time_lord
-					}
-				}
-				last_created_leader = {
-					add_skill_without_trait_selection = 7
-				}
-			}
-		}
 	}
 	option = {
 		name = mem_aevum.14.a
@@ -1914,13 +1617,6 @@ country_event = {
 		add_monthly_resource_mult = {
 			resource = physics_research
 			value = 4
-		}
-		hidden_effect = {
-			event_target:mem_aevum_killhim = {
-				kill_leader = {
-					show_notification = no
-				}
-			}
 		}
 	}
 	#option = {
@@ -1943,78 +1639,6 @@ country_event = {
 		portrait = event_target:mem_aevum_killhim
 	}
 	immediate = {
-		hidden_effect = {
-			create_country = {
-				name = "NAME_Unknown"
-				type = global_event
-				auto_delete = yes
-				flag = {
-					icon = {
-						category = "special"
-						file = "unknown.dds"
-					}
-					background = {
-						category = "backgrounds"
-						file = "00_solid.dds"
-					}
-					colors = {
-						"red"
-						"red"
-						"null"
-						"null"
-					}
-				}
-				effect = {
-					save_event_target_as = mem_aevum_country
-				}
-			}
-			event_target:mem_aevum_country = {
-				create_species = {
-					name = "NAME_Unknown"
-					class = PARAGON
-					portrait = GFX_mem_aevum_time_lord_hologram
-					namelist = "PRT1"
-					traits = {
-						trait = trait_decadent
-						trait = trait_talented
-						trait = trait_thrifty
-						#trait = trait_weak
-						#trait = trait_plantoid_budding
-					}
-					effect = {
-						save_event_target_as = mem_aevum_species
-					}
-				}
-				create_leader = {
-					species = event_target:mem_aevum_species
-					event_leader = yes
-					class = scientist
-					name = "NAME_mem_aevum_time_lord_hologram"
-					skill = 1
-					randomize_traits = no
-					skip_background_generation = yes
-					background_ethic = ethic_authoritarian
-					custom_catch_phrase = mem_aevum_time_lord_catchphrase
-					custom_description = mem_aevum_time_lord_backstory
-					can_manually_change_location = yes
-					traits = {
-					}
-					gender = male
-					set_age = 137
-					immortal = yes
-					effect = {
-						save_event_target_as = mem_aevum_killhim
-						#set_leader_flag = mem_aevum_killhim
-						#set_leader_flag = mem_aevum_time_lord
-						#set_owner = root
-						#exile_leader_as = mem_aevum_time_lord
-					}
-				}
-				last_created_leader = {
-					add_skill_without_trait_selection = 7
-				}
-			}
-		}
 	}
 	option = {
 		name = mem_aevum.15.a
@@ -2031,13 +1655,6 @@ country_event = {
 		add_monthly_resource_mult = {
 			resource = physics_research
 			value = 4
-		}
-		hidden_effect = {
-			event_target:mem_aevum_killhim = {
-				kill_leader = {
-					show_notification = no
-				}
-			}
 		}
 	}
 }
@@ -2180,7 +1797,7 @@ country_event = {
 							is_councilor = no
 						}
 					}
-					save_event_target_as = mem_aevum_future_leader
+					save_global_event_target_as = mem_aevum_future_leader
 					set_leader_flag = mem_aevum_has_to_go
 				}
 			}
@@ -2240,6 +1857,7 @@ country_event = {
 			}
 			last_created_leader = {
 				set_owner = root
+				save_global_event_target_as = mem_aevum_future_leader_clone
 			}
 		}
 	}
@@ -2269,34 +1887,18 @@ country_event = {
 	is_triggered_only = yes
 	fire_only_once = yes
 	trigger = {
-		any_owned_leader = {
-			AND = {
-				is_ruler = no
-				leader_class = scientist
-			}
-		}
+		exists = event_target:mem_aevum_future_leader_clone
 	}
 	event_window_type = leader_story
 	event_picture_background = "GFX_leader_recruitment_bg_renowned"
 	picture_event_data = {
-		portrait = event_target:mem_aevum_future_leader2
-	}
-	immediate = {
-		random_owned_leader = {
-			limit = {
-				is_ruler = no
-				#is_councilor = no
-				leader_class = scientist
-				has_leader_flag = mem_aevum_has_to_go
-			}
-			save_event_target_as = mem_aevum_future_leader2
-		}
+		portrait = event_target:mem_aevum_future_leader
 	}
 	option = {
 		name = mem_aevum.20.a
 		custom_tooltip = mem_aevum.20.tt
 		hidden_effect = {
-			event_target:mem_aevum_future_leader2 = {
+			event_target:mem_aevum_future_leader = {
 				kill_leader = {
 					show_notification = no
 				}
@@ -2349,12 +1951,8 @@ event = {
 	#location = from.capital_scope
 	trigger = {
 		exists = event_target:mem_aevum_time_lord
-		#has_any_megastructure = yes
 		has_global_flag = mem_aevum_system_spawned
 		exists = event_target:mem_aevum_time_lord.owner
-		#NOT = {
-		#	has_global_flag = mem_aevum_time_lorddiedfr
-		#}
 	}
 	is_triggered_only = yes
 	immediate = {
@@ -2363,7 +1961,6 @@ event = {
 				limit = {
 					check_variable_arithmetic = {
 						which = trigger:leader_age
-						#mult = 100				
 						value >= 3
 					}
 				}
@@ -2371,15 +1968,6 @@ event = {
 				mem_aevum_setportrait = yes
 			}
 			else = {
-				#set_global_flag = mem_aevum_time_lorddiedfr
-				#root = {
-				#	country_event = {
-				#		id = mem_aevum.106
-				#		scopes = {
-				#			from = event_target:mem_aevum_time_lord
-				#		}
-				#	}
-				#}
 				kill_leader = {
 					show_notification = yes
 				}
@@ -2905,156 +2493,6 @@ leader_event = {
 	}
 }
 
-# return timelord, unused but cant bring myself to delete it
-# he comes back after dead and you can recruit him again
-country_event = {
-	id = mem_aevum.110
-	title = "mem_aevum.110.name"
-	desc = "mem_aevum.110.desc"
-	picture = GFX_evt_ringworld
-	show_sound = event_conversation
-	location = from.capital_scope
-	trigger = {
-		exists = event_target:mem_aevum_time_lord
-		#has_any_megastructure = yes
-		has_global_flag = mem_aevum_system_spawned
-	}
-	is_triggered_only = yes
-	event_window_type = leader_story
-	event_picture_background = "GFX_leader_recruitment_bg_mem_aevum_timelord"
-	picture_event_data = {
-		portrait = event_target:mem_aevum_time_lord
-	}
-	# returns leader
-	option = {
-		name = mem_aevum.110.a
-		ai_chance = {
-			factor = 10
-		}
-		#mem_aevum_time_lord_exile
-		hidden_effect = {
-			create_country = {
-				name = "NAME_Unknown"
-				type = global_event
-				auto_delete = yes
-				flag = {
-					icon = {
-						category = "special"
-						file = "unknown.dds"
-					}
-					background = {
-						category = "backgrounds"
-						file = "00_solid.dds"
-					}
-					colors = {
-						"red"
-						"red"
-						"null"
-						"null"
-					}
-				}
-				effect = {
-					save_event_target_as = mem_aevum_country
-				}
-			}
-			event_target:mem_aevum_country = {
-				create_species = {
-					name = "NAME_Unknown"
-					class = PARAGON
-					portrait = GFX_mem_aevum_time_lord
-					namelist = "PRT1"
-					traits = {
-						trait = trait_decadent
-						trait = trait_talented
-						trait = trait_thrifty
-						#trait = trait_weak
-						#trait = trait_plantoid_budding
-					}
-					effect = {
-						save_event_target_as = mem_aevum_species
-					}
-				}
-				create_leader = {
-					species = event_target:mem_aevum_species
-					event_leader = yes
-					class = scientist
-					tier = leader_tier_legendary
-					name = "NAME_mem_aevum_time_lord"
-					skill = 1
-					randomize_traits = no
-					skip_background_generation = yes
-					background_ethic = ethic_authoritarian
-					custom_catch_phrase = mem_aevum_time_lord_catchphrase
-					custom_description = mem_aevum_time_lord_backstory
-					can_manually_change_location = yes
-					#traits = {
-					#	trait = leader_trait_mem_aevum_legendary_timeskipper
-					#trait = leader_trait_xeno_cataloger
-					#trait = leader_trait_educator
-					#	trait = leader_trait_lavish_lifestyle_2
-					#	trait = leader_trait_adaptable
-					#	trait = subclass_scientist_councilor
-					#}
-					gender = male
-					set_age = 137
-					immortal = yes
-					effect = {
-						save_global_event_target_as = mem_aevum_time_lord
-						#set_leader_flag = legendary_leader
-						set_leader_flag = mem_aevum_time_lord
-						set_owner = root
-						exile_leader_as = mem_aevum_time_lord
-					}
-				}
-				last_created_leader = {
-					add_skill_without_trait_selection = 6
-					#set_variable = {
-					#	which = mem_aevum_leader_lifespan
-					##	value = 137
-					#}
-					remove_all_traits = yes
-					add_trait = {
-						trait = leader_trait_mem_aevum_legendary_timeskipper
-					}
-					add_trait = {
-						trait = leader_trait_mem_aevum_legendary_houtglasskeeper
-					}
-					add_trait = {
-						trait = leader_trait_lavish_lifestyle_2
-					}
-					add_trait = {
-						trait = leader_trait_adaptable
-					}
-					add_trait = {
-						trait = subclass_scientist_governor
-					}
-					set_owner = root
-				}
-			}
-		}
-		last_created_leader = {
-			set_owner = root
-		}
-		remove_global_flag = mem_aevum_time_lorddied
-	}
-}
-
-# check if aevum was fired, unused
-country_event = {
-	id = mem_aevum.111
-	hide_window = yes
-	trigger = {
-		has_global_flag = mem_aevum_system_spawned
-		from = {
-			has_trait = leader_trait_mem_aevum_legendary_timeskipper
-		}
-	}
-	is_triggered_only = yes
-	immediate = {
-		set_global_flag = mem_aevum_time_lorddiedfr
-	}
-}
-
 # give aevum age
 country_event = {
 	id = mem_aevum.112
@@ -3070,7 +2508,7 @@ country_event = {
 			limit = {
 				has_trait = leader_trait_mem_aevum_legendary_houtglasskeeper
 			}
-			add_age = 50
+			add_age = 100
 			hidden_effect = {
 				mem_aevum_setportrait = yes
 			}
@@ -3105,12 +2543,6 @@ leader_event = {
 			has_trait = leader_trait_mem_aevum_legendary_timeskipper
 		}
 		name = FASCINATING
-		owner = {
-			add_monthly_resource_mult = {
-				resource = unity
-				value = 6
-			}
-		}
 	}
 	# double so one shows the trait when selecting , other for debug
 	option = {
@@ -3120,6 +2552,9 @@ leader_event = {
 			}
 		}
 		name = DISTURBING
+	}
+	after = {
+		add_skill_without_trait_selection = 1
 		owner = {
 			add_monthly_resource_mult = {
 				resource = unity
@@ -3137,7 +2572,6 @@ leader_event = {
 	picture = GFX_evt_zro_2
 	show_sound = event_default
 	is_triggered_only = yes
-	#fire_only_once = yes
 	event_window_type = leader_story
 	event_picture_background = "GFX_leader_recruitment_bg_mem_aevum_timelord"
 	picture_event_data = {
@@ -3150,12 +2584,6 @@ leader_event = {
 			has_trait = leader_trait_mem_aevum_legendary_timeskipper
 		}
 		name = DISTURBING
-		owner = {
-			add_monthly_resource_mult = {
-				resource = unity
-				value = 36
-			}
-		}
 	}
 	option = {
 		trigger = {
@@ -3164,10 +2592,13 @@ leader_event = {
 			}
 		}
 		name = DISTURBING
+	}
+	after = {
+		add_skill_without_trait_selection = 2
 		owner = {
 			add_monthly_resource_mult = {
 				resource = unity
-				value = 36
+				value = 12
 			}
 		}
 	}
@@ -3677,76 +3108,36 @@ country_event = {
 		portrait = event_target:mem_aevum_killhim
 	}
 	immediate = {
-		hidden_effect = {
-			create_country = {
-				name = "NAME_Unknown"
-				type = global_event
-				auto_delete = yes
-				flag = {
-					icon = {
-						category = "special"
-						file = "unknown.dds"
-					}
-					background = {
-						category = "backgrounds"
-						file = "00_solid.dds"
-					}
-					colors = {
-						"red"
-						"red"
-						"null"
-						"null"
-					}
-				}
-				effect = {
-					save_event_target_as = mem_aevum_country
-				}
+		create_species = {
+			name = NAME_Vorkun
+			class = REP
+			portrait = rep11
+			traits = {
+				trait = trait_decadent
+				trait = trait_talented
+				trait = trait_thrifty
 			}
-			event_target:mem_aevum_country = {
-				create_species = {
-					name = "NAME_Unknown"
-					class = PARAGON
-					portrait = GFX_mem_aevum_time_lord_hologram
-					namelist = "PRT1"
-					traits = {
-						trait = trait_decadent
-						trait = trait_talented
-						trait = trait_thrifty
-						#trait = trait_weak
-						#trait = trait_plantoid_budding
-					}
-					effect = {
-						save_event_target_as = mem_aevum_species
-					}
-				}
-				create_leader = {
-					species = event_target:mem_aevum_species
-					event_leader = yes
-					class = scientist
-					name = "NAME_mem_aevum_time_lord_hologram"
-					skill = 1
-					randomize_traits = no
-					skip_background_generation = yes
-					background_ethic = ethic_authoritarian
-					custom_catch_phrase = mem_aevum_time_lord_catchphrase
-					custom_description = mem_aevum_time_lord_backstory
-					can_manually_change_location = yes
-					traits = {
-					}
-					gender = male
-					set_age = 137
-					immortal = yes
-					effect = {
-						save_event_target_as = mem_aevum_killhim
-						#set_leader_flag = mem_aevum_killhim
-						#set_leader_flag = mem_aevum_time_lord
-						#set_owner = root
-						#exile_leader_as = mem_aevum_time_lord
-					}
-				}
-				last_created_leader = {
-					add_skill_without_trait_selection = 7
-				}
+		}
+		create_saved_leader = {
+			key = mem_aevum_hologram
+			species = last_created_species
+			event_leader = yes
+			class = scientist
+			tier = leader_tier_legendary
+			name = "NAME_mem_aevum_time_lord"
+			skill = 1
+			randomize_traits = no
+			skip_background_generation = yes
+			background_ethic = ethic_authoritarian
+			custom_catch_phrase = mem_aevum_time_lord_catchphrase
+			custom_description = mem_aevum_time_lord_backstory
+			can_manually_change_location = yes
+			gender = male
+			set_age = 137
+			immortal = yes
+			effect = {
+				save_event_target_as = mem_aevum_killhim
+				change_leader_portrait = GFX_mem_aevum_time_lord_hologram
 			}
 		}
 	}
@@ -3754,6 +3145,15 @@ country_event = {
 		name = mem_aevum.320.a		#tragic
 		add_relic = r_mem_aevum_houglass
 		mem_aevum_give_beard = yes
+	}
+	after = {
+		hidden_effect = {
+			event_target:mem_aevum_killhim = {
+				kill_leader = {
+					show_notification = no
+				}
+			}
+		}
 	}
 }
 
