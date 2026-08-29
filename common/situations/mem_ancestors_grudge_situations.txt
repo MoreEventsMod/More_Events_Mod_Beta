@@ -1,7 +1,7 @@
 situation_mem_ancestors_grudge_forge_repairs = {
 	#this is for repairing the forge
 	picture = GFX_evt_city_planet_2
-	situation_log_category = empire_concerns 
+	situation_log_category = empire_concerns
 	complete_icon_frame = GFX_situation_outcome_frame_green
 	complete_icon = GFX_situation_outcome_ascension
 	category = positive
@@ -337,12 +337,12 @@ situation_mem_ancestors_grudge_forge_repairs = {
 			country_minerals_produces_mult = -0.2
 			country_energy_produces_mult = -0.25
 		}
-		resources = {
-			category = situations
-			upkeep = {
-				unity = 20
-			}
-		}
+		# resources = {
+		# 	category = situations
+		# 	upkeep = {
+		# 		unity = 20
+		# 	}
+		# }
 	}
 	approach = {
 		name = approach_mem_ancestors_grudge_forge_repairs_debug
@@ -403,16 +403,12 @@ situation_mem_ancestors_grudge_forge_repairs = {
 
 situation_mem_ancestors_grudge_crafting = {
 	#this is for crafting relics
-	situation_log_category = empire_concerns 
+	situation_log_category = empire_concerns
 	picture = GFX_mem_ancestors_grudge_relicsmith
 	complete_icon_frame = GFX_situation_outcome_frame_green
 	complete_icon = GFX_situation_outcome_ascension
 	category = positive
 	on_start = {
-		mem_ancestors_grudge_roll_quality_min = yes
-		mem_ancestors_grudge_roll_quality_max = yes
-		mem_ancestors_grudge_roll_purity_min = yes
-		mem_ancestors_grudge_roll_purity_max = yes
 	}
 	on_progress_complete = {
 		# final choice
@@ -439,7 +435,7 @@ situation_mem_ancestors_grudge_crafting = {
 		text = situation_mem_ancestors_grudge_forge_repairs_deficit_minor_artifacts
 		trigger = {
 			owner = {
-				has_deficit = minor_artifacts
+				has_deficits = yes
 			}
 		}
 	}
@@ -469,14 +465,14 @@ situation_mem_ancestors_grudge_crafting = {
 			add = owner.value:mem_smith_job_number
 		}
 		modifier = {
-			factor = 0.01
+			factor = 0
 			current_situation_approach = situation_mem_ancestors_grudge_crafting_1
 			desc = string_current_approach
 		}
 		modifier = {
 			factor = 0
 			owner = {
-				has_deficit = minor_artifacts
+				has_deficits = yes
 			}
 			desc = situation_mem_ancestors_grudge_crafting_no_ma
 		}
@@ -490,50 +486,190 @@ situation_mem_ancestors_grudge_crafting = {
 			upkeep = {
 				influence = 1
 			}
+			cost = {
+				influence = 100
+			}
+		}
+		on_select = {
+			hidden_effect = {
+				situation_event = {
+					id = mem_ancestors_grudge.402
+				}
+				set_situation_flag = can_choose_material
+			}
 		}
 		ai_weight = 0
 	}
 	approach = {
-		name = situation_mem_ancestors_grudge_crafting_repairs_2
-		icon = GFX_situation_approach_energy_credits
+		name = mem_ancestors_grudge_crafting_plasteel
+		icon = GFX_situation_approach_alloys
 		icon_background = GFX_situation_approach_bg_green
 		resources = {
 			category = situations
-			upkeep = {
-				trigger = {
-					host_has_dlc = "Ancient Relics Story Pack"
-				}
-				minor_artifacts = 5
-			}
-			upkeep = {
-				trigger = {
-					NOT = {
-						host_has_dlc = "Ancient Relics Story Pack"
-					}
-				}
-				alloys = 20
-			}
+		}
+		modifier = {
+			planet_mem_relic_smiths_minerals_upkeep_add = 0.5
+			planet_mem_rune_smiths_minerals_upkeep_add = 0.5
 		}
 		triggered_modifier = {
 			potential = {
-				current_stage = situation_mem_ancestors_grudge_crafting_stage0
+				always = yes
 			}
-			planet_mem_relic_smiths_produces_mult = -0.15
+			mem_ancestors_grudge_rune_power = 1
+			mem_ancestors_grudge_material = 1
 		}
-		triggered_modifier = {
-			potential = {
-				current_stage = situation_mem_ancestors_grudge_crafting_stage1
+		potential = {
+			always = yes
+		}
+		allow = {
+			OR = {
+				current_situation_approach = situation_mem_ancestors_grudge_crafting_1				# for the tooltip
+				current_situation_approach = mem_ancestors_grudge_crafting_plasteel
+				hidden_trigger = {
+					has_situation_flag = can_choose_material
+				}
 			}
-			planet_mem_rune_smiths_produces_mult = -0.15
 		}
-		# modifier = {
-		# 	planet_mem_rune_smiths_produces_mult = -0.2
-		# 	planet_mem_relic_smiths_produces_mult = -0.2
-		# }
+		on_select = {
+			hidden_effect = {
+				remove_situation_flag = can_choose_material
+			}
+		}
 		default = yes
 		ai_weight = 20
 	}
-	#abort_trigger = {}
+	inline_script = {
+		script = mem_ancestors_grudge/materials_approaches
+		MODIFIER = "modifier = {
+		planet_mem_relic_smiths_alloys_upkeep_add = 0.5
+		planet_mem_rune_smiths_alloys_upkeep_add = 0.5
+	}"
+		MATERIAL = durasteel
+		RARITY = 2
+		PURITY = -1
+		RUNE_SLOTS = 1
+	}
+	inline_script = {
+		script = mem_ancestors_grudge/materials_approaches
+		MODIFIER = "triggered_modifier = {
+		potential = {
+			owner = {
+				country_uses_consumer_goods = yes
+			}
+		}
+		planet_mem_relic_smiths_consumer_goods_upkeep_add = 0.5
+		planet_mem_rune_smiths_energy_upkeep_add = 1.5
+	}
+	triggered_modifier = {
+		potential = {
+			owner = {
+				country_uses_consumer_goods = no
+			}
+		}
+		planet_mem_relic_smiths_energy_upkeep_add = 1.5
+		planet_mem_rune_smiths_alloys_upkeep_add = 0.25
+	}"
+		MATERIAL = mithril
+		RARITY = -2
+		PURITY = 2
+		RUNE_SLOTS = 2
+	}
+	inline_script = {
+		script = mem_ancestors_grudge/materials_approaches
+		MODIFIER = "modifier = {	
+	planet_mem_relic_smiths_food_upkeep_add = 3
+	planet_mem_rune_smiths_exotic_gases_upkeep_add = 0.5}"
+		MATERIAL = carbonite
+		RARITY = 0
+		PURITY = -2
+		RUNE_SLOTS = 3
+	}
+	inline_script = {
+		script = mem_ancestors_grudge/materials_approaches
+		MODIFIER = "triggered_modifier = {
+potential = {
+	always = yes
+}
+planet_mem_relic_smiths_alloys_upkeep_add = 1.5
+planet_mem_rune_smiths_rare_crystals_upkeep_add = 0.5
+planet_mem_rune_smiths_volatile_motes_upkeep_add = 0.5
+}"
+		MATERIAL = adamantium
+		RARITY = -4
+		PURITY = -1
+		RUNE_SLOTS = 4
+	}
+	inline_script = {
+		script = mem_ancestors_grudge/materials_approaches
+		MODIFIER = "triggered_modifier = {
+	potential = {
+		always = yes
+	}
+	planet_mem_relic_smiths_sr_zro_upkeep_add = 0.5
+	planet_mem_rune_smiths_energy_upkeep_add = 2
+}"
+		MATERIAL = zronite
+		RARITY = -5
+		PURITY = 4
+		RUNE_SLOTS = 5
+	}
+	inline_script = {
+		script = mem_ancestors_grudge/materials_approaches
+		MODIFIER = "triggered_modifier = {
+potential = {
+	always = yes
+}
+planet_mem_relic_smiths_nanites_upkeep_add = 0.3
+planet_mem_rune_smiths_exotic_gases_upkeep_add = 1
+}"
+		MATERIAL = nano_carbite
+		RARITY = 2
+		PURITY = 2
+		RUNE_SLOTS = 5
+	}
+	inline_script = {
+		script = mem_ancestors_grudge/materials_approaches
+		MODIFIER = "		triggered_modifier = {
+potential = {
+	always = yes
+}
+planet_mem_relic_smiths_sr_zro_upkeep_add = 1
+planet_mem_rune_smiths_astral_threads_upkeep_add = 1
+}"
+		MATERIAL = astral_fiber
+		RARITY = 8
+		PURITY = -4
+		RUNE_SLOTS = 6
+	}
+	inline_script = {
+		script = mem_ancestors_grudge/materials_approaches
+		MODIFIER = "triggered_modifier = {
+potential = {
+	always = yes
+}
+planet_mem_relic_smiths_volatile_motes_upkeep_add = 0.7
+planet_mem_relic_smiths_rare_crystals_upkeep_add = 0.7
+planet_mem_rune_smiths_alloys_upkeep_add = 1
+}"
+		MATERIAL = neutronium
+		RARITY = -4
+		PURITY = -4
+		RUNE_SLOTS = 6
+	}
+	inline_script = {
+		script = mem_ancestors_grudge/materials_approaches
+		MODIFIER = "triggered_modifier = {
+potential = {
+	always = yes
+}
+planet_mem_relic_smiths_sr_living_metal_upkeep_add = 0.7
+planet_mem_rune_smiths_sr_dark_matter_upkeep_add = 0.5
+}"
+		MATERIAL = xentronium
+		RARITY = -2
+		PURITY = -1
+		RUNE_SLOTS = 7
+	}
 }
 
 situation_mem_ancestors_grudge_dranir_ratmen_invasion = {
@@ -639,7 +775,6 @@ situation_mem_ancestors_grudge_dranir_ratmen_invasion = {
 		owner = {
 			add_500_unity_per_year_passed = yes
 		}
-		
 		hidden_effect = {
 			situation_event = {
 				id = mem_ancestors_grudge_dranir.65				# cleared the path
