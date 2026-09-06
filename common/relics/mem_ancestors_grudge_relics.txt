@@ -1,4 +1,3 @@
-
 r_mem_ancestors_grudge_sword = {
 	portrait = "GFX_r_mem_ancestors_grudge_sword"
 	sound = "relic_activation_blade_of_the_huntress"
@@ -89,21 +88,34 @@ r_mem_ancestors_grudge_anvil = {
 		# cost = {
 		# 	society_research = 42					
 		# }
+		produces = {
+			trigger = {
+				has_origin = origin_mem_ancestors_grudge_hive
+			}
+			unity = 20
+			physics_research = 20
+			society_research = 20
+			engineering_research = 20
+			mult = value:mem_ancestors_grudge_hoarder_building
+		}
 	}
 	ai_weight = {
 		weight = 0
 	}
 	can_be_stolen = no
 	score = 0
-	triggered_country_modifier = {
-		potential = {
-			always = yes
-		}
-		custom_tooltip = r_mem_ancestors_grudge_anvil_effect_tt
-	}
+	# triggered_country_modifier = {
+	# 	potential = {
+	# 		always = yes
+	# 	}
+	# 	custom_tooltip = r_mem_ancestors_grudge_anvil_effect_tt
+	# }
 	triggered_country_modifier = {
 		potential = {
 			is_gestalt = no
+			NOT = {
+				has_origin = origin_mem_ancestors_grudge_hive
+			}
 		}
 		pop_mem_ancestors_grudge_relicsmith_bonus_workforce_mult = 0.01
 		pop_mem_ancestors_grudge_runesmith_bonus_workforce_mult = 0.01
@@ -113,6 +125,9 @@ r_mem_ancestors_grudge_anvil = {
 	triggered_country_modifier = {
 		potential = {
 			is_gestalt = yes
+			NOT = {
+				has_origin = origin_mem_ancestors_grudge_hive
+			}
 		}
 		pop_mem_ancestors_grudge_relicsmith_drone_bonus_workforce_mult = 0.01
 		pop_mem_ancestors_grudge_runesmith_drone_bonus_workforce_mult = 0.01
@@ -120,7 +135,16 @@ r_mem_ancestors_grudge_anvil = {
 		mult = mem_ancestors_grudge_activated_relics_counter
 	}
 	active_effect = {
-		custom_tooltip = r_mem_ancestors_grudge_anvil_effect_tt_active
+		if = {
+			limit = {
+				has_origin = origin_mem_ancestors_grudge_hive
+			}
+			custom_tooltip = r_mem_ancestors_grudge_anvil_effect_tt_active_hive
+		}
+		else = {
+			custom_tooltip = r_mem_ancestors_grudge_anvil_effect_tt_active
+		}
+		
 	}
 	# Possible check for activation
 	possible = {
@@ -154,6 +178,8 @@ r_mem_ancestors_grudge_modern_art = {
 		}
 		custom_tooltip = r_mem_ancestors_grudge_cube_effect_tt_passive
 	}
+	
+
 	triggered_country_modifier = {
 		potential = {
 			always = yes
@@ -161,16 +187,40 @@ r_mem_ancestors_grudge_modern_art = {
 		country_unity_produces_mult = -0.01
 	}
 	active_effect = {
-		custom_tooltip = r_mem_ancestors_grudge_cube_effect_tt_active
+		if = {
+			limit= {
+				has_ancrel = yes
+			}
+			custom_tooltip = r_mem_ancestors_grudge_cube_effect_tt_active
+		}
+		else = {
+			custom_tooltip = r_mem_ancestors_grudge_cube_effect_tt_active_too_poor_for_ancrel
+		}
 		hidden_effect = {
 			set_variable = {
 				which = mem_ancestors_grudge_ma_amount
 				value = 0
 			}
-			export_resource_stockpile_to_variable = {
-				resource = minor_artifacts
-				variable = mem_ancestors_grudge_ma_amount
+			if = {
+				limit= {
+					has_ancrel = yes
+				}
+				export_resource_stockpile_to_variable = {
+					resource = minor_artifacts
+					variable = mem_ancestors_grudge_ma_amount
+				}
 			}
+			else = {
+				export_resource_stockpile_to_variable = {
+					resource = trade
+					variable = mem_ancestors_grudge_ma_amount
+				}
+				multiply_variable = {
+					which = mem_ancestors_grudge_ma_amount
+					value = 0.1
+				}
+			}
+			
 			if = {
 				limit = {
 					mid_game_years_passed >= 0
@@ -193,9 +243,21 @@ r_mem_ancestors_grudge_modern_art = {
 				limit = {
 					is_variable_set = mem_ancestors_grudge_ma_amount
 				}
-				add_resource = {
-					minor_artifacts = -1
-					mult = mem_ancestors_grudge_ma_amount
+				
+				if = {
+					limit= {
+						has_ancrel = yes
+					}
+					add_resource = {
+						minor_artifacts = -1
+						mult = mem_ancestors_grudge_ma_amount
+					}
+				}
+				else = {
+					add_resource = {
+						trade = -1
+						mult = mem_ancestors_grudge_ma_amount
+					}
 				}
 				add_resource = {
 					unity = 10
