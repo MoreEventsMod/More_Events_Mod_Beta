@@ -207,25 +207,25 @@ country_event = {
 }
 
 # Information event about Vazuran Homefleet defeated
-country_event = {
-	id = mem_vazurans.30
-	title = mem_vazurans.30.name
-	desc = mem_vazurans.30a.desc
-	picture = GFX_evt_smugglers_in_bar
-	event_chain = mem_vazuran_menace_chain
-	is_triggered_only = yes
-	immediate = {
-		random_country = {
-			limit = {
-				has_country_flag = mem_vazuran_victor
-			}
-			save_event_target_as = mem_vazuran_victor
-		}
-	}
-	option = {
-		name = EXCELLENT
-	}
-}
+# country_event = {
+# 	id = mem_vazurans.30
+# 	title = mem_vazurans.30.name
+# 	desc = mem_vazurans.30a.desc
+# 	picture = GFX_evt_smugglers_in_bar
+# 	event_chain = mem_vazuran_menace_chain
+# 	is_triggered_only = yes
+# 	immediate = {
+# 		random_country = {
+# 			limit = {
+# 				has_country_flag = mem_vazuran_victor
+# 			}
+# 			save_event_target_as = mem_vazuran_victor
+# 		}
+# 	}
+# 	option = {
+# 		name = EXCELLENT
+# 	}
+# }
 
 # Information event about Vazuran Homeworld taken
 country_event = {
@@ -845,7 +845,11 @@ country_event = {
 				}
 			}
 			create_mem_vazuran_retaliation_fleet = yes
-			set_carrier_flag = mem_vazurans_raiding_target
+			# set_carrier_flag = mem_vazurans_raiding_target
+			set_timed_carrier_flag = {
+				flag = mem_vazurans_raiding_target
+				days = 720
+			}
 			last_created_fleet = {
 				# fleet flag for bombarding event
 				set_fleet_flag = mem_vazurans_fleet
@@ -1528,30 +1532,40 @@ country_event = {
 	immediate = {
 		set_country_flag = mem_vazuran_victor
 		# set_global_flag = mem_vazurans_finished
-		random_system = {
-			limit = {
-				has_star_flag = mem_vazuran_homesystem
-			}
-			starbase = {
-				set_owner = root
-			}
-		}
-		every_country = {
-			limit = {
-				is_ai = no
-				NOT = {
-					has_country_flag = mem_vazuran_victor
-				}
-			}
-			country_event = {
-				id = mem_vazurans.30
-				days = 15
-				random = 10
-			}
-		}
+		# random_system = {
+		# 	limit = {
+		# 		has_star_flag = mem_vazuran_homesystem
+		# 	}
+		# 	starbase = {
+		# 		set_owner = root
+		# 	}
+		# }
+		# every_country = {
+		# 	limit = {
+		# 		is_ai = no
+		# 		NOT = {
+		# 			has_country_flag = mem_vazuran_victor
+		# 		}
+		# 	}
+		# 	country_event = {
+		# 		id = mem_vazurans.30
+		# 		days = 15
+		# 		random = 10
+		# 	}
+		# }
 	}
 	option = {
 		name = mem_vazurans.281
+	}
+	after = {
+		add_monthly_resource_mult = {
+			resource = unity
+			value = 3
+		}
+		add_modifier = {
+			modifier = mem_vazurans_defeated_fleet
+			days = 3600
+		}
 	}
 }
 
@@ -1674,9 +1688,9 @@ country_event = {
 		give_technology = {
 			tech = tech_mem_vazuran_xentronium_aura
 		}
-		give_technology = {
-			tech = tech_mem_vazuran_xentronium_rounds
-		}
+		# give_technology = {
+		# 	tech = tech_mem_vazuran_xentronium_rounds
+		# }
 	}
 	option = {
 		name = FASCINATING
@@ -1832,6 +1846,10 @@ situation_event = {
 								has_ambient_object_flag = mem_vazurans_rift
 							}
 						}
+						# we dont fly into heavily defended targets
+						starbase = {
+							has_starbase_size <= starbase_starhold
+						}
 					}
 					save_event_target_as = mem_vazurans_target_system
 				}
@@ -1858,6 +1876,10 @@ situation_event = {
 							any_system_ambient_object = {
 								has_ambient_object_flag = mem_vazurans_rift
 							}
+						}
+						# we dont fly into heavily defended targets
+						starbase = {
+							has_starbase_size <= starbase_starhold
 						}
 					}
 					save_event_target_as = mem_vazurans_target_system
@@ -2332,6 +2354,7 @@ country_event = {
 				solar_system = {
 					random_system_planet = {
 						limit = {
+							# should not target ark ships
 							is_colony = yes
 							owner = {
 								is_country_type = default
@@ -2339,7 +2362,11 @@ country_event = {
 							}
 							pop_amount > 100
 						}
-						set_carrier_flag = mem_vazurans_raiding_target
+						# set_carrier_flag = mem_vazurans_raiding_target
+						set_timed_carrier_flag = {
+							flag = mem_vazurans_raiding_target
+							days = 720
+						}
 						prevprev = {
 							fleet_event = {
 								id = mem_vazurans.1125
@@ -2495,6 +2522,20 @@ fleet_event = {
 				wait = {
 					duration = 180
 				}
+				effect = {
+					id = mem_vazurans_action1124.5
+					solar_system = {
+						every_system_planet = {
+							limit = {
+								is_valid_harvest_target = yes
+							}
+							add_modifier = {
+								modifier = harvested_resources_mining
+								days = 1000
+							}
+						}
+					}
+				}
 				# Message about tith fired with step inbetween
 				effect = {
 					id = mem_vazurans_action1124.2
@@ -2529,34 +2570,187 @@ fleet_event = {
 				found_planet = {
 					move_to = this
 					orbit_planet = this
+					effect = {
+						id = mem_vazurans_action1125.11
+						save_event_target_as = mem_vazurans_raiding_target
+					}
 				}
 			}
 			repeat = {
 				wait = {
-					duration = 60
+					duration = 45
 				}
 				effect = {
 					id = mem_vazurans_action1125.2
-					solar_system = {
-						random_system_planet = {
-							limit = {
-								has_carrier_flag = mem_vazurans_raiding_target
+					# solar_system = {
+					# 	any_system_planet = {
+					# 		limit = {
+					# 			has_carrier_flag = mem_vazurans_raiding_target
+					# 		}
+					# 	}
+					# }
+					if = {
+						limit = {
+							event_target:mem_vazurans_raiding_target = {
+								AND = {
+									owner = {
+										is_hostile_to = root.owner
+									}
+									# its a timed flag, so when that runs out we depart
+									has_carrier_flag = mem_vazurans_raiding_target
+									planet_devastation < 90
+									is_colony = yes
+								}
 							}
-							# spawn armies
-							carrier_event = {
-								id = mem_vazurans.1129
+						}
+						event_target:mem_vazurans_raiding_target = {
+							if = {
+								limit = {
+									check_modifier_value = {
+										modifier = planet_orbital_bombardment_damage
+										value >= 1
+									}
+								}
+								add_planet_devastation = 5
+								steal_planet_output = {
+									planet = this
+									who = FROM
+									resource = all
+									percentage = 0.2
+									mode = steal
+									notification_mode = both
+								}
+								every_owned_pop_group = {
+									kill_pop_group = {
+										pop_group = THIS
+										percentage = 5
+									}
+								}
+							}
+							else_if = {
+								limit = {
+									check_modifier_value = {
+										modifier = planet_orbital_bombardment_damage
+										value >= 0.8
+									}
+								}
+								add_planet_devastation = 4
+								steal_planet_output = {
+									planet = this
+									who = FROM
+									resource = all
+									percentage = 0.16
+									mode = steal
+									notification_mode = both
+								}
+								every_owned_pop_group = {
+									kill_pop_group = {
+										pop_group = THIS
+										percentage = 4
+									}
+								}
+							}
+							else_if = {
+								limit = {
+									check_modifier_value = {
+										modifier = planet_orbital_bombardment_damage
+										value >= 0.4
+									}
+								}
+								add_planet_devastation = 3
+								steal_planet_output = {
+									planet = this
+									who = FROM
+									resource = all
+									percentage = 0.12
+									mode = steal
+									notification_mode = both
+								}
+								every_owned_pop_group = {
+									kill_pop_group = {
+										pop_group = THIS
+										percentage = 3
+									}
+								}
+							}
+							else_if = {
+								limit = {
+									check_modifier_value = {
+										modifier = planet_orbital_bombardment_damage
+										value >= 0.2
+									}
+								}
+								add_planet_devastation = 3
+								steal_planet_output = {
+									planet = this
+									who = FROM
+									resource = all
+									percentage = 0.08
+									mode = steal
+									notification_mode = both
+								}
+								every_owned_pop_group = {
+									kill_pop_group = {
+										pop_group = THIS
+										percentage = 2
+									}
+								}
+							}
+							else = {
+								add_planet_devastation = 2
+								steal_planet_output = {
+									planet = this
+									who = FROM
+									resource = all
+									percentage = 0.04
+									mode = steal
+									notification_mode = both
+								}
+								every_owned_pop_group = {
+									kill_pop_group = {
+										pop_group = THIS
+										percentage = 1
+									}
+								}
+							}
+							# add_planet_devastation 
+						}
+					}
+					else = {
+						solar_system = {
+							every_fleet_in_system = {
+								limit = {
+									owner = {
+										is_country_type = mem_vazurans
+									}
+								}
+								fleet_event = {
+									id = mem_vazurans.1135
+									days = 10
+								}
 							}
 						}
 					}
-				}
-				wait = {
-					duration = 60
 				}
 			}
 		}
 	}
 }
 
+# effect = {
+# 	id = mem_vazurans_action1125.2
+# 	solar_system = {
+# 		random_system_planet = {
+# 			limit = {
+# 				has_carrier_flag = mem_vazurans_raiding_target
+# 			}
+# 			# spawn armies
+# 			carrier_event = {
+# 				id = mem_vazurans.1129
+# 			}
+# 		}
+# 	}
+# }	
 # Fires first message about tith when first raid has waited long enough in system without colony (where the first raid is expected)
 fleet_event = {
 	id = mem_vazurans.1126
@@ -2580,251 +2774,248 @@ fleet_event = {
 }
 
 # spawn armies 
-carrier_event = {
-	id = mem_vazurans.1129
-	hide_window = yes
-	is_triggered_only = yes
-	immediate = {
-		set_carrier_flag = mem_vazurans_raid_planet
-		if = {
-			limit = {
-				is_capital = yes
-			}
-			add_planet_devastation = 30
-			while = {
-				count = 3
-				add_blocker = {
-					type = d_mem_vazuran_bomb_crater
-				}
-			}
-			while = {
-				count = 5
-				create_army = {
-					owner = event_target:mem_vazurans_country
-					type = xenomorph_army
-				}
-			}
-		}
-		if = {
-			limit = {
-				end_game_years_passed >= 1
-			}
-			while = {
-				count = 15
-				create_army = {
-					owner = event_target:mem_vazurans_country
-					type = xenomorph_army
-				}
-			}
-		}
-		else_if = {
-			limit = {
-				mid_game_years_passed >= 1
-			}
-			while = {
-				count = 10
-				create_army = {
-					owner = event_target:mem_vazurans_country
-					type = xenomorph_army
-				}
-			}
-		}
-		else = {
-			while = {
-				count = 5
-				create_army = {
-					owner = event_target:mem_vazurans_country
-					type = xenomorph_army
-				}
-			}
-		}
-	}
-}
-
+# carrier_event = {
+# 	id = mem_vazurans.1129
+# 	hide_window = yes
+# 	is_triggered_only = yes
+# 	immediate = {
+# 		set_carrier_flag = mem_vazurans_raid_planet
+# 		if = {
+# 			limit = {
+# 				is_capital = yes
+# 			}
+# 			add_planet_devastation = 30
+# 			while = {
+# 				count = 3
+# 				add_blocker = {
+# 					type = d_mem_vazuran_bomb_crater
+# 				}
+# 			}
+# 			while = {
+# 				count = 5
+# 				create_army = {
+# 					owner = event_target:mem_vazurans_country
+# 					type = xenomorph_army
+# 				}
+# 			}
+# 		}
+# 		if = {
+# 			limit = {
+# 				end_game_years_passed >= 1
+# 			}
+# 			while = {
+# 				count = 15
+# 				create_army = {
+# 					owner = event_target:mem_vazurans_country
+# 					type = xenomorph_army
+# 				}
+# 			}
+# 		}
+# 		else_if = {
+# 			limit = {
+# 				mid_game_years_passed >= 1
+# 			}
+# 			while = {
+# 				count = 10
+# 				create_army = {
+# 					owner = event_target:mem_vazurans_country
+# 					type = xenomorph_army
+# 				}
+# 			}
+# 		}
+# 		else = {
+# 			while = {
+# 				count = 5
+# 				create_army = {
+# 					owner = event_target:mem_vazurans_country
+# 					type = xenomorph_army
+# 				}
+# 			}
+# 		}
+# 	}
+# }
 # vazuran ground combat won 
 # Triggers country_event for the attacker upon victory (before controller is switched)
 # This = country, lead attacker
 # From = country, planet owner
 # FromFrom = planet
-country_event = {
-	id = mem_vazurans.1131
-	hide_window = yes
-	is_triggered_only = yes
-	trigger = {
-		has_global_flag = mem_vazuran_raiding
-		is_country_type = mem_vazurans
-		FromFrom = {
-			has_carrier_flag = mem_vazurans_raid_planet
-		}
-	}
-	immediate = {
-		FromFrom = {
-			# armies done their job 
-			remove_carrier_flag = mem_vazurans_raid_planet
-			every_planet_army = {
-				limit = {
-					owner = {
-						is_country_type = mem_vazurans
-					}
-				}
-				remove_army = yes
-			}
-			# set_controller = from			# this needs testing, set owner back actual owner
-			# return to rift
-			solar_system = {
-				every_fleet_in_system = {
-					limit = {
-						owner = {
-							is_country_type = mem_vazurans
-						}
-					}
-					fleet_event = {
-						id = mem_vazurans.1135
-						days = 30
-					}
-				}
-			}
-			IF = {
-				limit = {
-					OR = {
-						AND = {
-							has_global_flag = galactic_focus_crisis_vazurans_1
-							owner = {
-								is_galactic_community_member = yes
-							}
-						}
-						check_modifier_value = {
-							modifier = planet_orbital_bombardment_damage
-							value <= 0.5
-						}
-					}
-				}
-				add_modifier = {
-					modifier = mem_vazurans_raided_planet
-					mult = 0.5
-					days = 360
-				}
-				add_planet_devastation = 40
-				# kill pops and once we generate vauzran homeplanet add them 				
-				root = {
-					change_variable = {
-						which = mem_vazurans_stolen_pops
-						value = prev.value:per_100_pop_amount						# 1 per 100 , we can later multiply it again
-					}
-				}
-				every_owned_pop_group = {
-					kill_pop_group = {
-						pop_group = THIS
-						percentage = 0.05
-					}
-				}
-				if = {
-					limit = {
-						habitable_structure = yes
-					}
-					while = {
-						count = 3
-						add_deposit = d_mem_vazuran_ruined_section
-					}
-				}
-				else = {
-					while = {
-						count = 2
-						add_deposit = d_mem_vazuran_bomb_crater
-					}
-					while = {
-						count = 1
-						add_deposit = d_city_ruins
-					}
-				}
-			}
-			else = {
-				add_modifier = {
-					modifier = mem_vazurans_raided_planet
-					mult = 1
-					days = 360
-				}
-				add_planet_devastation = 100
-				every_owned_pop_group = {
-					kill_pop_group = {
-						pop_group = THIS
-						percentage = 0.1
-					}
-				}
-				if = {
-					limit = {
-						habitable_structure = yes
-					}
-					while = {
-						count = 5
-						add_deposit = d_mem_vazuran_ruined_section
-					}
-				}
-				else = {
-					while = {
-						count = 2
-						add_deposit = d_mem_vazuran_bomb_crater
-					}
-					while = {
-						count = 2
-						add_deposit = d_city_ruins
-					}
-				}
-			}
-		}
-	}
-}
-
+# country_event = {
+# 	id = mem_vazurans.1131
+# 	hide_window = yes
+# 	is_triggered_only = yes
+# 	trigger = {
+# 		has_global_flag = mem_vazuran_raiding
+# 		is_country_type = mem_vazurans
+# 		FromFrom = {
+# 			has_carrier_flag = mem_vazurans_raid_planet
+# 		}
+# 	}
+# 	immediate = {
+# 		FromFrom = {
+# 			# armies done their job 
+# 			remove_carrier_flag = mem_vazurans_raid_planet
+# 			every_planet_army = {
+# 				limit = {
+# 					owner = {
+# 						is_country_type = mem_vazurans
+# 					}
+# 				}
+# 				remove_army = yes
+# 			}
+# 			# set_controller = from			# this needs testing, set owner back actual owner
+# 			# return to rift
+# 			solar_system = {
+# 				every_fleet_in_system = {
+# 					limit = {
+# 						owner = {
+# 							is_country_type = mem_vazurans
+# 						}
+# 					}
+# 					fleet_event = {
+# 						id = mem_vazurans.1135
+# 						days = 30
+# 					}
+# 				}
+# 			}
+# 			IF = {
+# 				limit = {
+# 					OR = {
+# 						AND = {
+# 							has_global_flag = galactic_focus_crisis_vazurans_1
+# 							owner = {
+# 								is_galactic_community_member = yes
+# 							}
+# 						}
+# 						check_modifier_value = {
+# 							modifier = planet_orbital_bombardment_damage
+# 							value <= 0.5
+# 						}
+# 					}
+# 				}
+# 				add_modifier = {
+# 					modifier = mem_vazurans_raided_planet
+# 					mult = 0.5
+# 					days = 360
+# 				}
+# 				add_planet_devastation = 40
+# 				# kill pops and once we generate vauzran homeplanet add them 				
+# 				root = {
+# 					change_variable = {
+# 						which = mem_vazurans_stolen_pops
+# 						value = prev.value:per_100_pop_amount						# 1 per 100 , we can later multiply it again
+# 					}
+# 				}
+# 				every_owned_pop_group = {
+# 					kill_pop_group = {
+# 						pop_group = THIS
+# 						percentage = 0.05
+# 					}
+# 				}
+# 				if = {
+# 					limit = {
+# 						habitable_structure = yes
+# 					}
+# 					while = {
+# 						count = 3
+# 						add_deposit = d_mem_vazuran_ruined_section
+# 					}
+# 				}
+# 				else = {
+# 					while = {
+# 						count = 2
+# 						add_deposit = d_mem_vazuran_bomb_crater
+# 					}
+# 					while = {
+# 						count = 1
+# 						add_deposit = d_city_ruins
+# 					}
+# 				}
+# 			}
+# 			else = {
+# 				add_modifier = {
+# 					modifier = mem_vazurans_raided_planet
+# 					mult = 1
+# 					days = 360
+# 				}
+# 				add_planet_devastation = 100
+# 				every_owned_pop_group = {
+# 					kill_pop_group = {
+# 						pop_group = THIS
+# 						percentage = 0.1
+# 					}
+# 				}
+# 				if = {
+# 					limit = {
+# 						habitable_structure = yes
+# 					}
+# 					while = {
+# 						count = 5
+# 						add_deposit = d_mem_vazuran_ruined_section
+# 					}
+# 				}
+# 				else = {
+# 					while = {
+# 						count = 2
+# 						add_deposit = d_mem_vazuran_bomb_crater
+# 					}
+# 					while = {
+# 						count = 2
+# 						add_deposit = d_city_ruins
+# 					}
+# 				}
+# 			}
+# 		}
+# 	}
+# }
 # vazurans lost ground combat
 # Triggers country_event for the attacker upon defeat
 # This = country, attack leader
 # From = country, planet owner
 # FromFrom = planet
-country_event = {
-	id = mem_vazurans.1130
-	hide_window = yes
-	is_triggered_only = yes
-	trigger = {
-		has_global_flag = mem_vazuran_raiding
-		is_country_type = mem_vazurans
-		FromFrom = {
-			has_carrier_flag = mem_vazurans_raid_planet
-		}
-	}
-	immediate = {
-		from = {
-			mem_vazurans_unlock_tradition = yes			# yes ground combat wins also gives tradition
-		}
-		FromFrom = {
-			# armies done their job 
-			remove_carrier_flag = mem_vazurans_raid_planet
-			every_planet_army = {
-				limit = {
-					owner = {
-						is_country_type = mem_vazurans
-					}
-				}
-				remove_army = yes
-			}
-			#set_controller = from			# this needs testing, set owner back actual owner
-			# return to rift
-			solar_system = {
-				every_fleet_in_system = {
-					limit = {
-						owner = {
-							is_country_type = mem_vazurans
-						}
-					}
-					fleet_event = {
-						id = mem_vazurans.1135
-						days = 10
-					}
-				}
-			}
-		}
-	}
-}
-
+# country_event = {
+# 	id = mem_vazurans.1130
+# 	hide_window = yes
+# 	is_triggered_only = yes
+# 	trigger = {
+# 		has_global_flag = mem_vazuran_raiding
+# 		is_country_type = mem_vazurans
+# 		FromFrom = {
+# 			has_carrier_flag = mem_vazurans_raid_planet
+# 		}
+# 	}
+# 	immediate = {
+# 		from = {
+# 			mem_vazurans_unlock_tradition = yes			# yes ground combat wins also gives tradition
+# 		}
+# 		FromFrom = {
+# 			# armies done their job 
+# 			remove_carrier_flag = mem_vazurans_raid_planet
+# 			every_planet_army = {
+# 				limit = {
+# 					owner = {
+# 						is_country_type = mem_vazurans
+# 					}
+# 				}
+# 				remove_army = yes
+# 			}
+# 			#set_controller = from			# this needs testing, set owner back actual owner
+# 			# return to rift
+# 			solar_system = {
+# 				every_fleet_in_system = {
+# 					limit = {
+# 						owner = {
+# 							is_country_type = mem_vazurans
+# 						}
+# 					}
+# 					fleet_event = {
+# 						id = mem_vazurans.1135
+# 						days = 10
+# 					}
+# 				}
+# 			}
+# 		}
+# 	}
+# }
 # sending raiding fleet home to the rift and let them vanish
 fleet_event = {
 	id = mem_vazurans.1135
@@ -2882,16 +3073,7 @@ fleet_event = {
 						clear_variable = mem_vazuran_raiding_strength_temp
 					}
 				}
-				# TRODO
-				# every_planet_army = {
-				# 	limit = {
-				# 		owner = {
-				# 			is_country_type = mem_vazurans
-				# 		}
-				# 	}
-				# 	remove_army = yes
-				# }
-				set_controller = space_owner
+				# set_controller = space_owner
 			}
 			root.owner = {
 				random_situation = {
@@ -3048,9 +3230,9 @@ situation_event = {
 			give_technology = {
 				tech = tech_mem_vazuran_xentronium_aura
 			}
-			give_technology = {
-				tech = tech_mem_vazuran_xentronium_rounds
-			}
+			# give_technology = {
+			# 	tech = tech_mem_vazuran_xentronium_rounds
+			# }
 			every_owned_fleet = {
 				set_name = "Garrison Fleet"
 			}
@@ -3795,6 +3977,9 @@ carrier_event = {
 			id = mem_vazurans.2000
 			days = 1800
 		}
+		carrier_event = {
+			id = nomads.5005
+		}
 	}
 }
 
@@ -3803,40 +3988,80 @@ carrier_event = {
 # This = country, leader attacker
 # From = country, planet owner
 # FromFrom = planet
-country_event = {
+# country_event = {
+# 	id = mem_vazurans.2005
+# 	hide_window = yes
+# 	is_triggered_only = yes
+# 	trigger = {
+# 		has_tradition = tr_mem_vazurans_4
+# 		has_policy_flag = slavery_allowed
+# 		# From = {
+# 		# 	is_country_type = default
+# 		# }
+# 	}
+# 	immediate = {
+# 		FROMFROM = {
+# 			every_owned_pop_group = {
+# 				save_event_target_as = kidnapped_pop				# Pick the pop
+# 				ROOT = {
+# 					# Pick a planet
+# 					reroll_random = yes
+# 					random_owned_planet = {
+# 						save_event_target_as = target_planet
+# 					}
+# 				}
+# 				resettle_pop_group = {
+# 					POP_GROUP = this
+# 					PLANET = event_target:target_planet
+# 					PERCENTAGE = 0.1
+# 				}
+# 				# Vanilla does this, but lmao wonky af
+# 				# event_target:resettled_pop_group = {
+# 				# 	set_citizenship_type = {
+# 				# 		country = ROOT
+# 				# 		type = citizenship_slavery
+# 				# 	}
+# 				# }
+# 			}
+# 		}
+# 	}
+# }
+#Reavers plunder resources while bombing a planet - FROM = Bombarder
+carrier_event = {
 	id = mem_vazurans.2005
 	hide_window = yes
 	is_triggered_only = yes
 	trigger = {
-		has_tradition = tr_mem_vazurans_4
-		has_policy_flag = slavery_allowed
-		# From = {
-		# 	is_country_type = default
-		# }
+		NOT = {
+			has_carrier_flag = recently_plundered
+		}
+		has_orbital_bombardment_stance = mem_vazurans_plundering
+		planet_devastation <= 90
 	}
 	immediate = {
-		FROMFROM = {
-			every_owned_pop_group = {
-				save_event_target_as = kidnapped_pop				# Pick the pop
-				ROOT = {
-					# Pick a planet
-					reroll_random = yes
-					random_owned_planet = {
-						save_event_target_as = target_planet
-					}
+		# log = "booty plundered"
+		set_timed_carrier_flag = {
+			flag = recently_plundered
+			days = 30
+		}
+		random_list = {
+			2.5 = {
+				#No Booty
+				#  Increased by armies on the planet
+				modifier = {
+					factor = trigger:num_armies
 				}
-				resettle_pop_group = {
-					POP_GROUP = this
-					PLANET = event_target:target_planet
-					PERCENTAGE = 0.1
+			}
+			50 = {
+				#Steal 20% of a month of prod
+				steal_planet_output = {
+					planet = this
+					who = FROM
+					resource = all
+					percentage = 0.2
+					mode = steal
+					notification_mode = both
 				}
-				# Vanilla does this, but lmao wonky af
-				# event_target:resettled_pop_group = {
-				# 	set_citizenship_type = {
-				# 		country = ROOT
-				# 		type = citizenship_slavery
-				# 	}
-				# }
 			}
 		}
 	}
